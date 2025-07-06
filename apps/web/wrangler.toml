@@ -1,0 +1,8 @@
+name = "down-under-chauffeur"
+compatibility_date = "2025-04-03"
+
+[assets]
+not_found_handling = "single-page-application"
+
+[vars]
+VITE_SERVER_URL = "https://down-under-chauffeur-server.davannarts.workers.dev"

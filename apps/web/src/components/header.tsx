@@ -1,31 +1,25 @@
 import { Link } from "@tanstack/react-router";
 
-import { ModeToggle } from "./mode-toggle";
-import UserMenu from "./user-menu";
+import { UserMenu } from "./user-menu";
+import logo from "@/assets/logo.webp";
+import { cn } from "@/lib/utils";
+import { MARKETING_ROUTES } from "@/features/marketing/marketing-routes";
 
-export default function Header() {
-  const links = [
-    { to: "/", label: "Home" },
-      { to: "/dashboard", label: "Dashboard" },
-  ];
+type HeaderProps = {
+  className?: string;
+}
 
+export default function Header({ className, ...props }: HeaderProps) {
   return (
-    <div>
-      <div className="flex flex-row items-center justify-between px-2 py-1">
+    <div className={cn("bg-secondary-background", className)} {...props}>
+      <div className="flex flex-row items-center justify-between p-4">
+        <div>
+          <img src={logo} alt="logo" className="rounded-xl h-12 w-20" />
+        </div>
         <nav className="flex gap-4 text-lg">
-          {links.map(({ to, label }) => {
-            return (
-              <Link
-                key={to}
-                to={to}
-              >
-                {label}
-              </Link>
-            );
-          })}
+          <NavLinks />
         </nav>
         <div className="flex items-center gap-2">
-          <ModeToggle />
           <UserMenu />
         </div>
       </div>
@@ -33,3 +27,21 @@ export default function Header() {
     </div>
   );
 }
+
+function NavLinks() {
+  const links = MARKETING_ROUTES.map(({ path, label }) => {
+    return (
+      <Link
+        key={path}
+        to={path}
+        activeProps={{ className: "text-primary" }}
+        className="text-sm font-medium"
+      >
+        {label}
+      </Link>
+    );
+  });
+
+  return <div className="flex items-center gap-4">{links}</div>;
+}
+

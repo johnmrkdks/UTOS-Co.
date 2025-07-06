@@ -1,0 +1,16 @@
+name = "down-under-chauffeur-server"
+main = "src/index.ts"
+compatibility_date = "2025-06-15"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+NODE_ENV = "production"
+CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "down-under-chauffeur-test-db"
+database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+migrations_dir = "./src/db/migrations"
+
+

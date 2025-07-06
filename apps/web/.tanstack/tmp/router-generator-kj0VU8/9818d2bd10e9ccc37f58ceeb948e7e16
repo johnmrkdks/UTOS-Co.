@@ -1,0 +1,16 @@
+import Home from '@/features/marketing/home';
+import { requireAdmin } from '@/utils/auth';
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/dashboard/_layout/')({
+  component: RouteComponent,
+  beforeLoad: requireAdmin
+})
+
+function RouteComponent() {
+  return (
+		<main className="min-h-screen bg-[url(/images/car1.png)] bg-center bg-cover bg-no-repeat">
+      <Home className="bg-white/60" />
+    </main>
+	)
+}

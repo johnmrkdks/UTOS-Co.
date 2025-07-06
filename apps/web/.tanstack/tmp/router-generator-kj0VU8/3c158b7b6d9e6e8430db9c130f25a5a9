@@ -1,0 +1,30 @@
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar";
+import { authClient } from "@/lib/auth-client";
+import { requireAdmin } from "@/utils/auth";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/dashboard/_layout")({
+  component: RouteComponent,
+  beforeLoad: requireAdmin,
+});
+
+function RouteComponent() {
+  const { data: session, isPending } = authClient.useSession();
+
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <SidebarProvider>
+      <DashboardSidebar />
+      <SidebarInset>
+        <header>
+          <SidebarTrigger className="-ml-1" />
+        </header>
+        <Outlet />
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
