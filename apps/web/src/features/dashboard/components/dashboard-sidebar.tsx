@@ -11,9 +11,10 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar";
 import type { RouteConfig } from "@/types/route-config";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { DASHBOARD_ROUTES, DASHBOARD_SUB_ROUTES } from "../dashboard-routes";
 import { DashboardCompanyLogo } from "./dashboard-company";
+import { cn } from "@/lib/utils";
 
 type LinkProps = {
 	title: string;
@@ -35,28 +36,48 @@ const links: LinkProps[] = [
 ];
 
 export function DashboardSidebar() {
+	const { pathname } = useLocation();
+
+	const isActive = (path: string) => {
+		return pathname === path;
+	};
+
 	return (
 		<Sidebar className="bg-soft-beige">
 			<SidebarHeader>
 				<DashboardCompanyLogo />
 			</SidebarHeader>
 			<SidebarContent>
-				{/* We create a SidebarGroup for each parent. */}
 				{links.map((item) => (
 					<SidebarGroup key={item.title}>
 						<SidebarGroupLabel>{item.title}</SidebarGroupLabel>
 						<SidebarGroupContent>
 							<SidebarMenu>
-								{item.items?.map((item) => (
-									<SidebarMenuItem key={item.label}>
-										<SidebarMenuButton asChild isActive={item.isActive}>
-											<Link to={item.path}>
-												{item.icon && <item.icon className="mr-2 h-5 w-5" />}{" "}
-												{item.label}
-											</Link>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								))}
+								{item.items?.map((route) => {
+									const active = isActive(route.path);
+
+									return (
+										<SidebarMenuItem key={route.label}>
+											<SidebarMenuButton asChild isActive={active}>
+												<Link to={route.path}>
+													{route.icon && (
+														<route.icon
+															className={cn(
+																"mr-2 h-5 w-5",
+																active && "text-primary",
+															)}
+														/>
+													)}
+													<span
+														className={cn("truncate", active && "text-primary")}
+													>
+														{route.label}
+													</span>
+												</Link>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									);
+								})}
 							</SidebarMenu>
 						</SidebarGroupContent>
 					</SidebarGroup>
