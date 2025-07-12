@@ -1,14 +1,14 @@
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
+	Sidebar,
+	SidebarContent,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarRail,
 } from "@/components/ui/sidebar";
 import type { RouteConfig } from "@/types/route-config";
 import { Link } from "@tanstack/react-router";
@@ -36,10 +36,10 @@ const links: LinkProps[] = [
 
 export function DashboardSidebar() {
 	return (
-		<Sidebar>
+		<Sidebar className="bg-soft-beige">
 			<SidebarHeader>
-        <DashboardCompanyLogo />
-      </SidebarHeader>
+				<DashboardCompanyLogo />
+			</SidebarHeader>
 			<SidebarContent>
 				{/* We create a SidebarGroup for each parent. */}
 				{links.map((item) => (

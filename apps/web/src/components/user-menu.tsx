@@ -1,10 +1,10 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -29,7 +29,7 @@ export function UserMenu() {
 				<Button
 					variant="secondary"
 					size="lg"
-					className="rounded-xl shadow-none"
+					className="rounded-xl shadow-none bg-background"
 					asChild
 				>
 					<Link to="/sign-in">Sign In</Link>
@@ -38,17 +38,17 @@ export function UserMenu() {
 		);
 	}
 
-  function handleLogout() {
-    authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          navigate({
-            to: "/",
-          });
-        },
-      },
-    });
-  }
+	function handleLogout() {
+		authClient.signOut({
+			fetchOptions: {
+				onSuccess: () => {
+					navigate({
+						to: "/",
+					});
+				},
+			},
+		});
+	}
 
 	return (
 		<div className="flex items-center gap-4">

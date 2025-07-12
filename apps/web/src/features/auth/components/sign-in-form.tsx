@@ -9,117 +9,119 @@ import { toast } from "sonner";
 import z from "zod/v4";
 
 export default function SignInForm() {
-  const navigate = useNavigate({
-    from: "/",
-  });
-  const { isPending } = authClient.useSession();
+	const navigate = useNavigate({
+		from: "/",
+	});
+	const { isPending } = authClient.useSession();
 
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
-        {
-          email: value.email,
-          password: value.password,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign in successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message);
-          },
-        },
-      );
-    },
-    validators: {
-      onSubmit: z.object({
-        email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
-      }),
-    },
-  });
+	const form = useForm({
+		defaultValues: {
+			email: "",
+			password: "",
+		},
+		onSubmit: async ({ value }) => {
+			await authClient.signIn.email(
+				{
+					email: value.email,
+					password: value.password,
+				},
+				{
+					onSuccess: () => {
+						navigate({
+							to: "/dashboard",
+						});
+						toast.success("Sign in successful");
+					},
+					onError: (error) => {
+						toast.error(error.error.message);
+					},
+				},
+			);
+		},
+		validators: {
+			onSubmit: z.object({
+				email: z.email("Invalid email address"),
+				password: z.string().min(8, "Password must be at least 8 characters"),
+			}),
+		},
+	});
 
-  if (isPending) {
-    return <Loader />;
-  }
+	if (isPending) {
+		return <Loader />;
+	}
 
-  return (
-    <div className="mx-auto w-full max-w-md">
-      <h1 className="mb-6 text-center text-3xl font-bold">Sign In</h1>
+	return (
+		<div className="mx-auto w-full max-w-md">
+			<h1 className="mb-6 text-center text-3xl font-bold">Sign In</h1>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <div>
-          <form.Field name="email">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Email</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="email"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					void form.handleSubmit();
+				}}
+				className="space-y-4"
+			>
+				<div>
+					<form.Field name="email">
+						{(field) => (
+							<div className="space-y-2">
+								<Label htmlFor={field.name}>Email</Label>
+								<Input
+									id={field.name}
+									name={field.name}
+									type="email"
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									className="bg-background"
+									onChange={(e) => field.handleChange(e.target.value)}
+								/>
+								{field.state.meta.errors.map((error) => (
+									<p key={error?.message} className="text-red-500">
+										{error?.message}
+									</p>
+								))}
+							</div>
+						)}
+					</form.Field>
+				</div>
 
-        <div>
-          <form.Field name="password">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Password</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
+				<div>
+					<form.Field name="password">
+						{(field) => (
+							<div className="space-y-2">
+								<Label htmlFor={field.name}>Password</Label>
+								<Input
+									id={field.name}
+									name={field.name}
+									type="password"
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									className="bg-background"
+									onChange={(e) => field.handleChange(e.target.value)}
+								/>
+								{field.state.meta.errors.map((error) => (
+									<p key={error?.message} className="text-red-500">
+										{error?.message}
+									</p>
+								))}
+							</div>
+						)}
+					</form.Field>
+				</div>
 
-        <form.Subscribe>
-          {(state) => (
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
-            >
-              {state.isSubmitting ? "Signing in..." : "Sign in"}
-            </Button>
-          )}
-        </form.Subscribe>
-      </form>
-    </div>
-  );
+				<form.Subscribe>
+					{(state) => (
+						<Button
+							type="submit"
+							className="w-full"
+							disabled={!state.canSubmit || state.isSubmitting}
+						>
+							{state.isSubmitting ? "Signing in..." : "Sign in"}
+						</Button>
+					)}
+				</form.Subscribe>
+			</form>
+		</div>
+	);
 }

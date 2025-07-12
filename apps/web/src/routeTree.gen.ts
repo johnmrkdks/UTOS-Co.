@@ -22,6 +22,11 @@ import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout/index'
+import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
+import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
+import { Route as DashboardLayoutPackagesIndexRouteImport } from './routes/dashboard/_layout/packages/index'
+import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboard/_layout/inbox/index'
+import { Route as DashboardLayoutBoardIndexRouteImport } from './routes/dashboard/_layout/board/index'
 
 const DashboardRouteImport = createFileRoute('/dashboard')()
 
@@ -83,6 +88,36 @@ const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
+const DashboardLayoutSettingsIndexRoute =
+  DashboardLayoutSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutReportIndexRoute =
+  DashboardLayoutReportIndexRouteImport.update({
+    id: '/report/',
+    path: '/report/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutPackagesIndexRoute =
+  DashboardLayoutPackagesIndexRouteImport.update({
+    id: '/packages/',
+    path: '/packages/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutInboxIndexRoute =
+  DashboardLayoutInboxIndexRouteImport.update({
+    id: '/inbox/',
+    path: '/inbox/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutBoardIndexRoute =
+  DashboardLayoutBoardIndexRouteImport.update({
+    id: '/board/',
+    path: '/board/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
@@ -95,6 +130,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
+  '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
+  '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/report': typeof DashboardLayoutReportIndexRoute
+  '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
@@ -106,6 +146,11 @@ export interface FileRoutesByTo {
   '/services': typeof MarketingServicesRoute
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
+  '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/report': typeof DashboardLayoutReportIndexRoute
+  '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -121,6 +166,11 @@ export interface FileRoutesById {
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
+  '/dashboard/_layout/board/': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/_layout/inbox/': typeof DashboardLayoutInboxIndexRoute
+  '/dashboard/_layout/packages/': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/_layout/report/': typeof DashboardLayoutReportIndexRoute
+  '/dashboard/_layout/settings/': typeof DashboardLayoutSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -135,6 +185,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/'
     | '/dashboard/'
+    | '/dashboard/board'
+    | '/dashboard/inbox'
+    | '/dashboard/packages'
+    | '/dashboard/report'
+    | '/dashboard/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -146,6 +201,11 @@ export interface FileRouteTypes {
     | '/services'
     | '/dashboard'
     | '/'
+    | '/dashboard/board'
+    | '/dashboard/inbox'
+    | '/dashboard/packages'
+    | '/dashboard/report'
+    | '/dashboard/settings'
   id:
     | '__root__'
     | '/_marketing'
@@ -160,6 +220,11 @@ export interface FileRouteTypes {
     | '/dashboard/_layout'
     | '/_marketing/'
     | '/dashboard/_layout/'
+    | '/dashboard/_layout/board/'
+    | '/dashboard/_layout/inbox/'
+    | '/dashboard/_layout/packages/'
+    | '/dashboard/_layout/report/'
+    | '/dashboard/_layout/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -255,6 +320,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/settings/': {
+      id: '/dashboard/_layout/settings/'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardLayoutSettingsIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/report/': {
+      id: '/dashboard/_layout/report/'
+      path: '/report'
+      fullPath: '/dashboard/report'
+      preLoaderRoute: typeof DashboardLayoutReportIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/packages/': {
+      id: '/dashboard/_layout/packages/'
+      path: '/packages'
+      fullPath: '/dashboard/packages'
+      preLoaderRoute: typeof DashboardLayoutPackagesIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/inbox/': {
+      id: '/dashboard/_layout/inbox/'
+      path: '/inbox'
+      fullPath: '/dashboard/inbox'
+      preLoaderRoute: typeof DashboardLayoutInboxIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/board/': {
+      id: '/dashboard/_layout/board/'
+      path: '/board'
+      fullPath: '/dashboard/board'
+      preLoaderRoute: typeof DashboardLayoutBoardIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
   }
 }
 
@@ -282,10 +382,20 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 
 interface DashboardLayoutRouteChildren {
   DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
+  DashboardLayoutBoardIndexRoute: typeof DashboardLayoutBoardIndexRoute
+  DashboardLayoutInboxIndexRoute: typeof DashboardLayoutInboxIndexRoute
+  DashboardLayoutPackagesIndexRoute: typeof DashboardLayoutPackagesIndexRoute
+  DashboardLayoutReportIndexRoute: typeof DashboardLayoutReportIndexRoute
+  DashboardLayoutSettingsIndexRoute: typeof DashboardLayoutSettingsIndexRoute
 }
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
+  DashboardLayoutBoardIndexRoute: DashboardLayoutBoardIndexRoute,
+  DashboardLayoutInboxIndexRoute: DashboardLayoutInboxIndexRoute,
+  DashboardLayoutPackagesIndexRoute: DashboardLayoutPackagesIndexRoute,
+  DashboardLayoutReportIndexRoute: DashboardLayoutReportIndexRoute,
+  DashboardLayoutSettingsIndexRoute: DashboardLayoutSettingsIndexRoute,
 }
 
 const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(
