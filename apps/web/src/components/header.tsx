@@ -11,7 +11,7 @@ type HeaderProps = {
 
 export default function Header({ className, ...props }: HeaderProps) {
 	return (
-		<div className={cn("bg-secondary-background", className)} {...props}>
+		<div className={cn("bg-beige", className)} {...props}>
 			<div className="flex flex-row items-center justify-between p-4">
 				<div>
 					<img src={logo} alt="logo" className="h-12 w-20 rounded-xl" />
