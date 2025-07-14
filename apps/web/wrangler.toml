@@ -5,4 +5,5 @@ compatibility_date = "2025-04-03"
 not_found_handling = "single-page-application"
 
 [vars]
+NODE_ENV = "production"
 VITE_SERVER_URL = "https://down-under-chauffeur-server.davannarts.workers.dev"
