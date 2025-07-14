@@ -2,6 +2,7 @@ import { Logo } from "@/components/logo";
 import SignUpForm from "@/features/auth/components/sign-up-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import placeholder from "@/assets/placeholder.svg";
+import { SydneyImageCover } from "@/features/auth/components/sydney-image-cover";
 
 export const Route = createFileRoute("/_auth/sign-up")({
 	component: RouteComponent,
@@ -30,11 +31,10 @@ function RouteComponent() {
 			</div>
 
 			<div className="bg-muted relative hidden lg:block">
-				<img
-					src={placeholder}
-					alt="nice"
-					className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-				/>
+				<div className="absolute top-4 left-4 text-black text-lg font-bold z-10">
+					Down Under Chauffeurs
+				</div>
+				<SydneyImageCover className="absolute inset-0 h-full w-full object-cover" />
 			</div>
 		</div>
 	);

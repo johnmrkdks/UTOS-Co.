@@ -3,10 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { useForm } from "@tanstack/react-form";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import z from "zod/v4";
+import { z } from "zod";
+import { signInSchema } from "../schema/sign-in-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { InputPassword } from "@/components/input-password";
+import { SignInWithOAuth } from "./sign-in-with-oauth";
+
+type FormValues = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
 	const navigate = useNavigate({
@@ -15,34 +29,10 @@ export default function SignInForm() {
 	const { isPending } = authClient.useSession();
 
 	const form = useForm({
+		resolver: zodResolver(signInSchema),
 		defaultValues: {
 			email: "",
 			password: "",
-		},
-		onSubmit: async ({ value }) => {
-			await authClient.signIn.email(
-				{
-					email: value.email,
-					password: value.password,
-				},
-				{
-					onSuccess: () => {
-						navigate({
-							to: "/dashboard",
-						});
-						toast.success("Sign in successful");
-					},
-					onError: (error) => {
-						toast.error(error.error.message);
-					},
-				},
-			);
-		},
-		validators: {
-			onSubmit: z.object({
-				email: z.email("Invalid email address"),
-				password: z.string().min(8, "Password must be at least 8 characters"),
-			}),
 		},
 	});
 
@@ -50,78 +40,82 @@ export default function SignInForm() {
 		return <Loader />;
 	}
 
+	const onSubmit = async (data: FormValues) => {
+		await authClient.signIn.email(
+			{
+				email: data.email,
+				password: data.password,
+			},
+			{
+				onSuccess: () => {
+					navigate({
+						to: "/dashboard",
+					});
+					toast.success("Sign in successful");
+				},
+				onError: (error) => {
+					toast.error(error.error.message);
+				},
+			},
+		);
+	};
+
 	return (
-		<div className="mx-auto w-full max-w-md">
-			<h1 className="mb-6 text-center text-3xl font-bold">Sign In</h1>
+		<div className="flex flex-col gap-4 mx-auto w-full max-w-md">
+			<h1 className="text-center text-3xl font-bold">Sign In</h1>
 
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					void form.handleSubmit();
-				}}
-				className="space-y-4"
-			>
-				<div>
-					<form.Field name="email">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Email</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									type="email"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									className="bg-background"
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
-										{error?.message}
-									</p>
-								))}
-							</div>
-						)}
-					</form.Field>
-				</div>
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+					<div>
+						<FormField
+							name="email"
+							render={({ field }) => (
+								<FormItem className="space-y-2">
+									<FormLabel>Email</FormLabel>
+									<FormControl>
+										<Input
+											{...field}
+											className="bg-background"
+											placeholder="your@email.com"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
 
-				<div>
-					<form.Field name="password">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Password</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									type="password"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									className="bg-background"
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
-										{error?.message}
-									</p>
-								))}
-							</div>
-						)}
-					</form.Field>
-				</div>
+					<div>
+						<FormField
+							name="password"
+							render={({ field }) => (
+								<FormItem className="space-y-2">
+									<FormLabel>Password</FormLabel>
+									<FormControl>
+										<InputPassword {...field} className="bg-background" />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
 
-				<form.Subscribe>
-					{(state) => (
-						<Button
-							type="submit"
-							className="w-full"
-							disabled={!state.canSubmit || state.isSubmitting}
-						>
-							{state.isSubmitting ? "Signing in..." : "Sign in"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</form>
+					<Button
+						type="submit"
+						className="w-full"
+						disabled={!form.formState.isValid}
+					>
+						{false ? "Signing in..." : "Sign in"}
+					</Button>
+				</form>
+			</Form>
+
+			<div className="flex flex-col gap-2 text-center">
+				<h2 className="text-center text-xs text-muted-foreground font-medium">
+					Or sign in with
+				</h2>
+				<SignInWithOAuth />
+			</div>
 		</div>
 	);
 }

@@ -13,7 +13,7 @@ import {
 import type { RouteConfig } from "@/types/route-config";
 import { Link, useLocation } from "@tanstack/react-router";
 import { DASHBOARD_ROUTES, DASHBOARD_SUB_ROUTES } from "../dashboard-routes";
-import { DashboardCompanyLogo } from "./dashboard-company";
+import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
 import { cn } from "@/lib/utils";
 
 type LinkProps = {

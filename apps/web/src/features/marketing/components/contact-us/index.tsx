@@ -8,9 +8,12 @@ type ContactUsProps = {
 
 export function ContactUs({ className, ...props }: ContactUsProps) {
 	return (
-		<div {...props} className={cn("bg-background flex gap-12 border rounded-2xl")}>
+		<div
+			{...props}
+			className={cn("w-fit bg-background flex gap-12 border rounded-2xl")}
+		>
 			<ContactUsForm className="w-80 p-6" />
-			<ContactUsMap className="h-full w-96 rounded-xl" />
+			<ContactUsMap className="h-96 w-96 rounded-xl" />
 		</div>
 	);
 }

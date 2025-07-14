@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 
 import { UserMenu } from "./user-menu";
-import logo from "@/assets/logo.webp";
 import { cn } from "@/lib/utils";
 import { MARKETING_ROUTES } from "@/features/marketing/marketing-routes";
+import { Logo } from "./logo";
 
 type HeaderProps = {
 	className?: string;
@@ -13,9 +13,9 @@ export default function Header({ className, ...props }: HeaderProps) {
 	return (
 		<div className={cn("bg-beige", className)} {...props}>
 			<div className="flex flex-row items-center justify-between p-4">
-				<div>
-					<img src={logo} alt="logo" className="h-12 w-20 rounded-xl" />
-				</div>
+				<Link to="/" className="flex items-center gap-2 font-medium">
+					<Logo />
+				</Link>
 				<nav className="flex gap-4 text-lg">
 					<NavLinks />
 				</nav>
