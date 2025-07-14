@@ -24,9 +24,9 @@ function RouteComponent() {
 	return (
 		<SidebarProvider>
 			<DashboardSidebar />
-			<SidebarInset>
-				<DashboardNavbar />
-				<div className="h-full bg-beige p-4">
+			<SidebarInset className="relative overflow-hidden">
+				<DashboardNavbar className="sticky top-0 z-10" />
+				<div className="h-full bg-beige p-4 overflow-auto">
 					<Outlet />
 				</div>
 			</SidebarInset>
