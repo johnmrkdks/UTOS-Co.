@@ -8,12 +8,6 @@ export const user = sqliteTable("user", {
   image: text("image"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-
-  // Admin plugin fields
-  role: text("role").default("user"),
-  banned: integer("banned", { mode: "boolean" }).default(false),
-  banReason: text("ban_reason"),
-  banExpires: integer("ban_expires", { mode: "timestamp" }),
 });
 
 export const session = sqliteTable("session", {
@@ -27,7 +21,6 @@ export const session = sqliteTable("session", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
-  impersonatedBy: text("impersonated_by"),
 });
 
 export const account = sqliteTable("account", {

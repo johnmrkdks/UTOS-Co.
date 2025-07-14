@@ -3,8 +3,8 @@
 
 {
   "$schema": "https://better-t-stack.dev/schema.json",
-  "version": "2.23.1",
-  "createdAt": "2025-07-06T02:17:07.199Z",
+  "version": "2.25.7",
+  "createdAt": "2025-07-14T03:54:57.046Z",
   "database": "sqlite",
   "orm": "drizzle",
   "backend": "hono",
@@ -13,12 +13,13 @@
     "tanstack-router"
   ],
   "addons": [
-    "biome"
+    "biome",
+    "turborepo"
   ],
   "examples": [],
   "auth": true,
-  "packageManager": "pnpm",
+  "packageManager": "bun",
   "dbSetup": "d1",
-  "api": "none",
+  "api": "trpc",
   "webDeploy": "workers"
 }
