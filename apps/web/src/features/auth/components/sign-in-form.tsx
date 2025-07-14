@@ -47,7 +47,9 @@ export default function SignInForm() {
 				password: data.password,
 			},
 			{
-				onSuccess: () => {
+				onSuccess: (data) => {
+					console.log(data);
+
 					navigate({
 						to: "/dashboard",
 					});
@@ -103,9 +105,9 @@ export default function SignInForm() {
 					<Button
 						type="submit"
 						className="w-full"
-						disabled={!form.formState.isValid}
+						disabled={!form.formState.isValid || isPending}
 					>
-						{false ? "Signing in..." : "Sign in"}
+						{isPending ? "Signing in..." : "Sign in"}
 					</Button>
 				</form>
 			</Form>

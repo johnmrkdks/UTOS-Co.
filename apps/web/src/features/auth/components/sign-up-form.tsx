@@ -129,9 +129,9 @@ export default function SignUpForm() {
 					<Button
 						type="submit"
 						className="w-full"
-						disabled={!form.formState.isValid}
+						disabled={!form.formState.isValid || isPending}
 					>
-						{false ? "Submitting..." : "Sign Up"}
+						{isPending ? "Submitting..." : "Sign Up"}
 					</Button>
 				</form>
 			</Form>
