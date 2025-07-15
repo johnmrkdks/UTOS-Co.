@@ -1,25 +1,26 @@
 export enum UserRoleEnum {
-	SuperAdmin = "SUPER_ADMIN",
-	Admin = "ADMIN",
-	Driver = "DRIVER",
-	Customer = "CUSTOMER",
+	SuperAdmin = "super_admin",
+	Admin = "admin",
+	Driver = "driver",
+	User = "user",
 }
 
 export enum BookingStatusEnum {
-	Active = "ACTIVE",
-	Pending = "PENDING",
-	Confirmed = "CONFIRMED",
-	Canceled = "CANCELED",
+	Active = "active",
+	Pending = "pending",
+	Confirmed = "confirmed",
+	Canceled = "canceled",
 }
 
 export enum RateableTypeEnum {
-	Car = "CAR",
-	Driver = "DRIVER",
-	Ride = "RIDE",
+	Car = "car",
+	Driver = "driver",
+	Ride = "ride",
+	Passenger = "passenger",
+	Booking = "booking",
 }
 
 export enum PaymentMethodEnum {
-	Cash = "CASH",
-	CreditCard = "CREDIT_CARD",
-	DebitCard = "DEBIT_CARD",
+	CreditCard = "credit_card",
+	DebitCard = "debit_card",
 }

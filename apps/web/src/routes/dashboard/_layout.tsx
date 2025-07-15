@@ -1,3 +1,4 @@
+import Loader from "@/components/loader";
 import {
 	SidebarInset,
 	SidebarProvider,
@@ -18,7 +19,11 @@ function RouteComponent() {
 	const { isPending } = authClient.useSession();
 
 	if (isPending) {
-		return <div>Loading...</div>;
+		return (
+			<div className="h-screen flex flex-col items-center justify-center">
+				<Loader />
+			</div>
+		);
 	}
 
 	return (

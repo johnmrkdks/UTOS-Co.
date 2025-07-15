@@ -14,8 +14,8 @@ export const carFeatures = sqliteTable("car_features", {
 });
 
 export const carFeautesRelations = relations(carFeatures, ({ one }) => ({
-	feature: one(carFeatures, {
+	feature: one(cars, {
 		fields: [carFeatures.carId],
-		references: [carFeatures.id],
+		references: [cars.id],
 	}),
 }));

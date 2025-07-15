@@ -16,10 +16,7 @@ export const users = sqliteTable("users", {
 		.default(sql`(CURRENT_TIMESTAMP)`),
 
 	// Admin plugin fields
-	role: text("role")
-		.$type<UserRoleEnum>()
-		.notNull()
-		.default(UserRoleEnum.Customer),
+	role: text("role").$type<UserRoleEnum>().notNull().default(UserRoleEnum.User),
 	banned: integer("banned", { mode: "boolean" }).default(false),
 	banReason: text("ban_reason"),
 	banExpires: integer("ban_expires", { mode: "timestamp" }),

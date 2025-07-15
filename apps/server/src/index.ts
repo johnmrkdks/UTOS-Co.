@@ -1,8 +1,8 @@
 import { env } from "cloudflare:workers";
 import { trpcServer } from "@hono/trpc-server";
-import { createContext } from "./trpc/context";
-import { appRouter } from "./trpc/routers/_app";
-import { auth } from "./lib/auth";
+import { createContext } from "@/trpc/context";
+import { appRouter } from "@/trpc/routers/_app";
+import { auth } from "@/lib/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -11,11 +11,13 @@ const app = new Hono();
 
 app.use(logger());
 app.use(
-	"/*",
+	"*",
 	cors({
 		origin: env.CORS_ORIGIN || "",
-		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "Authorization"],
+		allowMethods: ["GET", "POST", "OPTIONS"],
+		exposeHeaders: ["Content-Length"],
+		maxAge: 600,
 		credentials: true,
 	}),
 );

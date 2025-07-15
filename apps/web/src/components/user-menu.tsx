@@ -52,11 +52,12 @@ export function UserMenu() {
 
 	return (
 		<div className="flex items-center gap-4">
-			{session && session.user.role === "admin" && (
-				<Button variant="secondary" className="rounded-xl shadow-none" asChild>
-					<Link to="/dashboard">Dashboard</Link>
-				</Button>
-			)}
+			{(session && session.user.role === "admin") ||
+				(session.user.role === "super_admin" && (
+					<Button className="rounded-xl shadow-none" asChild>
+						<Link to="/dashboard">Dashboard</Link>
+					</Button>
+				))}
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>

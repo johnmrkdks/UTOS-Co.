@@ -18,8 +18,8 @@ export const carImages = sqliteTable("car_images", {
 });
 
 export const carImagesRelations = relations(carImages, ({ one }) => ({
-	image: one(carImages, {
+	image: one(cars, {
 		fields: [carImages.carId],
-		references: [carImages.id],
+		references: [cars.id],
 	}),
 }));
