@@ -6,7 +6,9 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const AccountSchema = createSelectSchema(accounts);
+export const AccountSchema = createSelectSchema(accounts).omit({
+	password: true,
+});
 export const InsertAccountSchema = createInsertSchema(accounts);
 export const UpdateAccountSchema = createUpdateSchema(accounts);
 

@@ -22,7 +22,7 @@ export type SortParams = z.infer<typeof SortSchema>;
 export type BaseQueryParams = z.infer<typeof BaseQuerySchema>;
 
 export type QueryResult<T> = {
-	data: T[];
+	data: T;
 	pagination: {
 		page: number;
 		limit: number;
