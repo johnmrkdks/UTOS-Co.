@@ -3,8 +3,7 @@ import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin } from "better-auth/plugins";
 import { env } from "cloudflare:workers";
-import * as schema from "@/db/schema";
-import { UserRoleEnum } from "@/db/enums";
+import * as schema from "@/db/sqlite/schema";
 import {
 	ac,
 	adminRole,

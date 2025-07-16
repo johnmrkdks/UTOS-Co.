@@ -1,0 +1,15 @@
+import { drivers } from "@/db/sqlite/schema";
+import {
+	createInsertSchema,
+	createSelectSchema,
+	createUpdateSchema,
+} from "drizzle-zod";
+import { z } from "zod";
+
+export const DriverSchema = createSelectSchema(drivers);
+export const InsertDriverSchema = createInsertSchema(drivers);
+export const UpdateDriverSchema = createUpdateSchema(drivers);
+
+export type Driver = z.infer<typeof DriverSchema>;
+export type InsertDriver = z.infer<typeof InsertDriverSchema>;
+export type UpdateDriver = z.infer<typeof UpdateDriverSchema>;

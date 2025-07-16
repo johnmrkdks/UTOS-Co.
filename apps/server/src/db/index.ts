@@ -1,6 +1,5 @@
-import { drizzle } from "drizzle-orm/d1";
-import { env } from "cloudflare:workers";
+import { d1 } from "./d1";
 
-export const db = drizzle(env.DB);
+export const db = d1;
 
 export type DB = typeof db;

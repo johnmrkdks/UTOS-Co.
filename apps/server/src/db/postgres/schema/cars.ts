@@ -1,0 +1,40 @@
+import { relations } from "drizzle-orm";
+import {
+	pgTable,
+	integer,
+	text,
+	timestamp,
+	boolean,
+	jsonb,
+} from "drizzle-orm/pg-core";
+
+export const cars = pgTable("cars", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	description: text("description").notNull(),
+	images: jsonb("images").notNull().$type<string[]>(),
+	dateManufactured: timestamp("date_manufactured", {
+		mode: "date",
+	}).notNull(),
+	make: text("make").notNull(),
+	model: text("model").notNull(),
+	mileage: integer("mileage").notNull(),
+	color: text("color").notNull(),
+	pricePerDay: integer("price_per_day"),
+	pricePerKm: integer("price_per_km"),
+	isForDelivery: boolean("is_for_delivery").notNull().default(false),
+	isAvailable: boolean("is_available").notNull().default(false),
+	isForHire: boolean("is_for_hire").notNull().default(false),
+	isForRent: boolean("is_for_rent").notNull().default(false),
+	bodyType: text("body_type").notNull(),
+	fuelType: text("fuel_type").notNull(),
+	transmission: text("transmission").notNull(),
+	driveType: text("drive_type").notNull(),
+	condition: text("condition").notNull(),
+	engineSize: integer("engine_size").notNull(),
+	doors: integer("doors").notNull(),
+	cylinders: integer("cylinders").notNull(),
+	features: jsonb("features"),
+	createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+	updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+});

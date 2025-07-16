@@ -2,35 +2,44 @@
 	"name": "server",
 	"main": "src/index.ts",
 	"type": "module",
+	"exports": {
+		"./trpc/routers/_app": "./src/trpc/routers/_app.ts"
+	},
 	"scripts": {
 		"build": "wrangler deploy --dry-run",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"check-types": "tsc --noEmit",
 		"compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
 		"dev": "wrangler types && wrangler dev --port=3000 --remote",
 		"start": "wrangler dev",
-		"deploy": "wrangler deploy",
+		"deploy": "wranger types && wrangler deploy",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
-		"db:push": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate"
+		"db:push-d1": "drizzle-kit push --config=drizzle.d1-config.ts",
+		"db:push-supabase": "drizzle-kit push --config=drizzle.supabase-config.ts",
+		"db:studio-d1": "drizzle-kit studio --config=drizzle.d1-config.ts",
+		"db:studio-supabase": "drizzle-kit studio --config=drizzle.supabase-config.ts",
+		"db:generate-d1": "drizzle-kit generate --config=drizzle.d1-config.ts",
+		"db:generate-supabase": "drizzle-kit generate --config=drizzle.supabase-config.ts",
+		"db:migrate-d1": "drizzle-kit migrate --config=drizzle.d1-config.ts",
+		"db:migrate-supabase": "drizzle-kit migrate --config=drizzle.supabase-config.ts"
 	},
 	"dependencies": {
 		"@hono/trpc-server": "^0.4.0",
 		"@libsql/client": "^0.15.9",
-		"@trpc/client": "^11.4.2",
 		"@trpc/server": "^11.4.2",
-		"better-auth": "^1.2.12",
+		"better-auth": "catalog:",
 		"dotenv": "^16.4.7",
-		"drizzle-orm": "^0.44.2",
+		"drizzle-orm": "catalog:",
+		"drizzle-zod": "^0.7.1",
 		"hono": "^4.8.2",
-		"nuqs": "^2.4.3",
-		"zod": "^4.0.2"
+		"nuqs": "catalog:",
+		"postgres": "^3.4.7",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"tsc-alias": "^1.8.11",
-		"typescript": "^5.8.2",
-		"drizzle-kit": "^0.31.2",
-		"wrangler": "^4.23.0"
+		"tsc-alias": "catalog:",
+		"typescript": "catalog:",
+		"drizzle-kit": "catalog:",
+		"wrangler": "catalog:"
 	}
 }
