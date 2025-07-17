@@ -1,7 +1,6 @@
 import type { DB } from "@/db";
-import { carFeatures, carImages, cars } from "@/db/schema";
-import type { Car, InsertCar } from "@/schemas/tables/car";
-import { getTableColumns } from "drizzle-orm";
+import { cars } from "@/db/schema";
+import type { Car, InsertCar } from "@/schemas/shared/tables/car";
 
 type CreateCarParams = InsertCar;
 

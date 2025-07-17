@@ -9,8 +9,8 @@ import { CarFeatureSchema } from "./car-feature";
 import { CarImageSchema } from "./car-image";
 
 export const CarSchema = createSelectSchema(cars).extend({
-	features: z.array(CarFeatureSchema),
-	images: z.array(CarImageSchema),
+	features: z.array(CarFeatureSchema).default([]).optional(),
+	images: z.array(CarImageSchema).default([]).optional(),
 });
 export const InsertCarSchema = createInsertSchema(cars).extend({});
 export const UpdateCarSchema = createUpdateSchema(cars);

@@ -3,6 +3,7 @@ import { users } from "./users";
 import { cars } from "./cars";
 import { packages } from "./packages";
 import { relations, sql } from "drizzle-orm";
+import { BookingStatusEnum } from "../enums";
 
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey(),
@@ -19,7 +20,8 @@ export const bookings = sqliteTable("bookings", {
 	endDate: integer("end_date", { mode: "timestamp" }).notNull(),
 	status: text("status")
 		.notNull()
-		.$type<"pending" | "confirmed" | "canceled">(),
+		.$type<BookingStatusEnum>()
+		.default(BookingStatusEnum.Pending),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.default(sql`(CURRENT_TIMESTAMP)`),
