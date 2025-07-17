@@ -1,8 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-import { cars } from "./cars";
+import { cars } from "@/db/sqlite/schema/cars";
 
-export const bodyTypes = sqliteTable("body_types", {
+export const carBodyTypes = sqliteTable("car_body_types", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull().unique(),
 	createdAt: integer("created_at", { mode: "timestamp" })
@@ -10,6 +10,6 @@ export const bodyTypes = sqliteTable("body_types", {
 		.default(sql`(CURRENT_TIMESTAMP)`),
 });
 
-export const bodyTypesRelations = relations(bodyTypes, ({ many }) => ({
+export const carBodyTypesRelations = relations(carBodyTypes, ({ many }) => ({
 	cars: many(cars),
 }));

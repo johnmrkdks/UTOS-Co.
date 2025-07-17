@@ -2,7 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { cars } from "@/db/sqlite/schema/cars";
 
-export const fuelTypes = sqliteTable("fuel_types", {
+export const carFuelTypes = sqliteTable("car_fuel_types", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull().unique(),
 	createdAt: integer("created_at", { mode: "timestamp" })
@@ -10,6 +10,6 @@ export const fuelTypes = sqliteTable("fuel_types", {
 		.default(sql`(CURRENT_TIMESTAMP)`),
 });
 
-export const fuelTypesRelations = relations(fuelTypes, ({ many }) => ({
+export const carFuelTypesRelations = relations(carFuelTypes, ({ many }) => ({
 	cars: many(cars),
 }));

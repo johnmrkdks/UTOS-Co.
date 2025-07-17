@@ -3,11 +3,11 @@ import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
 import { carImages } from "@/db/sqlite/schema/cars/car-images";
 import { carFeatures } from "@/db/sqlite/schema/cars/car-features";
 import { carModels } from "@/db/sqlite/schema/cars/car-models";
-import { bodyTypes } from "@/db/sqlite/schema/cars/car-body-types";
-import { fuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
-import { transmissionTypes } from "@/db/sqlite/schema/cars/car-transmission-types";
-import { driveTypes } from "@/db/sqlite/schema/cars/car-drive-types";
-import { conditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
+import { carBodyTypes } from "@/db/sqlite/schema/cars/car-body-types";
+import { carFuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
+import { carTransmissionTypes } from "@/db/sqlite/schema/cars/car-transmission-types";
+import { carDriveTypes } from "@/db/sqlite/schema/cars/car-drive-types";
+import { carConditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
 
 export const cars = sqliteTable(
 	"cars",
@@ -25,19 +25,19 @@ export const cars = sqliteTable(
 			.references(() => carModels.id, { onDelete: "restrict" }),
 		bodyTypeId: text("body_type_id")
 			.notNull()
-			.references(() => bodyTypes.id, { onDelete: "restrict" }),
+			.references(() => carBodyTypes.id, { onDelete: "restrict" }),
 		fuelTypeId: text("fuel_type_id")
 			.notNull()
-			.references(() => fuelTypes.id, { onDelete: "restrict" }),
+			.references(() => carFuelTypes.id, { onDelete: "restrict" }),
 		transmissionTypeId: text("transmission_type_id")
 			.notNull()
-			.references(() => transmissionTypes.id, { onDelete: "restrict" }),
+			.references(() => carTransmissionTypes.id, { onDelete: "restrict" }),
 		driveTypeId: text("drive_type_id")
 			.notNull()
-			.references(() => driveTypes.id, { onDelete: "restrict" }),
+			.references(() => carDriveTypes.id, { onDelete: "restrict" }),
 		conditionTypeId: text("condition_type_id")
 			.notNull()
-			.references(() => conditionTypes.id, { onDelete: "restrict" }),
+			.references(() => carConditionTypes.id, { onDelete: "restrict" }),
 
 		// Car-specific attributes
 		mileage: integer("mileage").notNull(),
@@ -84,25 +84,25 @@ export const carsRelations = relations(cars, ({ one, many }) => ({
 		fields: [cars.modelId],
 		references: [carModels.id],
 	}),
-	bodyType: one(bodyTypes, {
+	bodyType: one(carBodyTypes, {
 		fields: [cars.bodyTypeId],
-		references: [bodyTypes.id],
+		references: [carBodyTypes.id],
 	}),
-	fuelType: one(fuelTypes, {
+	fuelType: one(carFuelTypes, {
 		fields: [cars.fuelTypeId],
-		references: [fuelTypes.id],
+		references: [carFuelTypes.id],
 	}),
-	transmissionType: one(transmissionTypes, {
+	transmissionType: one(carTransmissionTypes, {
 		fields: [cars.transmissionTypeId],
-		references: [transmissionTypes.id],
+		references: [carTransmissionTypes.id],
 	}),
-	driveType: one(driveTypes, {
+	driveType: one(carDriveTypes, {
 		fields: [cars.driveTypeId],
-		references: [driveTypes.id],
+		references: [carDriveTypes.id],
 	}),
-	conditionType: one(conditionTypes, {
+	conditionType: one(carConditionTypes, {
 		fields: [cars.conditionTypeId],
-		references: [conditionTypes.id],
+		references: [carConditionTypes.id],
 	}),
 	images: many(carImages),
 	features: many(carFeatures),

@@ -1,6 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
-import { cars } from "./cars";
+import { cars } from "@/db/sqlite/schema/cars";
 
 export const carFeatures = sqliteTable(
 	"car_features",
