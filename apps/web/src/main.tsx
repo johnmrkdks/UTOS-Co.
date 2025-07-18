@@ -4,7 +4,7 @@ import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient, trpc } from "./utils/trpc";
+import { queryClient, trpc } from "@/trpc";
 import { StrictMode } from "react";
 
 const router = createRouter({

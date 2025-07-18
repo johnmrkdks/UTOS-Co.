@@ -12,7 +12,11 @@ import {
 } from "@/components/ui/sidebar";
 import type { RouteConfig } from "@/types/route-config";
 import { Link, useLocation } from "@tanstack/react-router";
-import { DASHBOARD_ROUTES, DASHBOARD_SUB_ROUTES } from "../dashboard-routes";
+import {
+	DASHBOARD_ROUTES,
+	DASHBOARD_SUB_ROUTES,
+	DASHBOARD_MANAGEMENT_SUB_ROUTES,
+} from "../dashboard-routes";
 import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +36,11 @@ const links: LinkProps[] = [
 		title: "Name Something",
 		url: "#",
 		items: DASHBOARD_SUB_ROUTES,
+	},
+	{
+		title: "Management",
+		url: "#",
+		items: DASHBOARD_MANAGEMENT_SUB_ROUTES,
 	},
 ];
 

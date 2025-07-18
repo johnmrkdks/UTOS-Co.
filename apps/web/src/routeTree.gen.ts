@@ -26,6 +26,7 @@ import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashb
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
 import { Route as DashboardLayoutPackagesIndexRouteImport } from './routes/dashboard/_layout/packages/index'
 import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboard/_layout/inbox/index'
+import { Route as DashboardLayoutCarManagementIndexRouteImport } from './routes/dashboard/_layout/car-management/index'
 import { Route as DashboardLayoutBoardIndexRouteImport } from './routes/dashboard/_layout/board/index'
 
 const DashboardRouteImport = createFileRoute('/dashboard')()
@@ -112,6 +113,12 @@ const DashboardLayoutInboxIndexRoute =
     path: '/inbox/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutCarManagementIndexRoute =
+  DashboardLayoutCarManagementIndexRouteImport.update({
+    id: '/car-management/',
+    path: '/car-management/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutBoardIndexRoute =
   DashboardLayoutBoardIndexRouteImport.update({
     id: '/board/',
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/': typeof MarketingIndexRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
@@ -167,6 +176,7 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/dashboard/_layout/board/': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/_layout/car-management/': typeof DashboardLayoutCarManagementIndexRoute
   '/dashboard/_layout/inbox/': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/_layout/packages/': typeof DashboardLayoutPackagesIndexRoute
   '/dashboard/_layout/report/': typeof DashboardLayoutReportIndexRoute
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard/'
     | '/dashboard/board'
+    | '/dashboard/car-management'
     | '/dashboard/inbox'
     | '/dashboard/packages'
     | '/dashboard/report'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/'
     | '/dashboard/board'
+    | '/dashboard/car-management'
     | '/dashboard/inbox'
     | '/dashboard/packages'
     | '/dashboard/report'
@@ -221,6 +233,7 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/dashboard/_layout/'
     | '/dashboard/_layout/board/'
+    | '/dashboard/_layout/car-management/'
     | '/dashboard/_layout/inbox/'
     | '/dashboard/_layout/packages/'
     | '/dashboard/_layout/report/'
@@ -348,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutInboxIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/car-management/': {
+      id: '/dashboard/_layout/car-management/'
+      path: '/car-management'
+      fullPath: '/dashboard/car-management'
+      preLoaderRoute: typeof DashboardLayoutCarManagementIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/dashboard/_layout/board/': {
       id: '/dashboard/_layout/board/'
       path: '/board'
@@ -383,6 +403,7 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 interface DashboardLayoutRouteChildren {
   DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
   DashboardLayoutBoardIndexRoute: typeof DashboardLayoutBoardIndexRoute
+  DashboardLayoutCarManagementIndexRoute: typeof DashboardLayoutCarManagementIndexRoute
   DashboardLayoutInboxIndexRoute: typeof DashboardLayoutInboxIndexRoute
   DashboardLayoutPackagesIndexRoute: typeof DashboardLayoutPackagesIndexRoute
   DashboardLayoutReportIndexRoute: typeof DashboardLayoutReportIndexRoute
@@ -392,6 +413,8 @@ interface DashboardLayoutRouteChildren {
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
   DashboardLayoutBoardIndexRoute: DashboardLayoutBoardIndexRoute,
+  DashboardLayoutCarManagementIndexRoute:
+    DashboardLayoutCarManagementIndexRoute,
   DashboardLayoutInboxIndexRoute: DashboardLayoutInboxIndexRoute,
   DashboardLayoutPackagesIndexRoute: DashboardLayoutPackagesIndexRoute,
   DashboardLayoutReportIndexRoute: DashboardLayoutReportIndexRoute,
