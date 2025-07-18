@@ -1,20 +1,12 @@
 import type { DB } from "@/db";
 import { carTransmissionTypes } from "@/db/schema";
-import type {
-	CarTransmissionType,
-	InsertCarTransmissionType,
-} from "@/schemas/shared/tables/cars/car-transmission-type";
+import type { CarTransmissionType, InsertCarTransmissionType } from "@/schemas/shared/tables/car-transmission-type";
+import { carTransmissionTypes } from "@/db/schema";
 
-type CreateCarTransmissionType = InsertCarTransmissionType;
+type CreateCarTransmissionTypeParams = InsertCarTransmissionType;
 
-export async function createCarModel(
-	db: DB,
-	params: CreateCarTransmissionType,
-): Promise<CarTransmissionType> {
-	const [record] = await db
-		.insert(carTransmissionTypes)
-		.values(params)
-		.returning();
+export async function createCarTransmissionType(db: DB, params: CreateCarTransmissionTypeParams): Promise<CarTransmissionType> {
+	const [record] = await db.insert(carTransmissionTypes).values(params).returning();
 
 	return record;
 }

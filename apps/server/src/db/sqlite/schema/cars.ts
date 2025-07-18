@@ -73,7 +73,6 @@ export const cars = sqliteTable(
 			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
-		modelIdx: index("cars_model_idx").on(table.modelId),
 		availabilityIdx: index("cars_availability_idx").on(table.isAvailable),
 		priceIdx: index("cars_price_idx").on(table.pricePerDay),
 	}),

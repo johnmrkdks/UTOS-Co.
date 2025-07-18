@@ -15,7 +15,9 @@ export const BookingSchema = createSelectSchema(bookings).extend({
 	user: UserSchema.optional(),
 	package: PackageSchema.optional(),
 });
-export const InsertBookingSchema = createInsertSchema(bookings);
+export const InsertBookingSchema = createInsertSchema(bookings, {
+	status: z.nativeEnum(BookingStatusEnum),
+});
 export const UpdateBookingSchema = createUpdateSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum),
 });

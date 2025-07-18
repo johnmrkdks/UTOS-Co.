@@ -1,27 +1,10 @@
 import type { DB } from "@/db";
 import { carModels } from "@/db/schema";
-import type {
-	CarModel,
-	UpdateCarModel,
-} from "@/schemas/shared/tables/cars/car-model";
 import { eq } from "drizzle-orm";
+import type { UpdateCarModel } from "@/schemas/shared/tables/car-model";
+import { carModels } from "@/db/schema";
 
-type UpdateCarModelParams = {
-	id: string;
-	data: Partial<UpdateCarModel>;
-};
-
-export async function updateCarModel(
-	db: DB,
-	params: UpdateCarModelParams,
-): Promise<CarModel> {
-	const { id, data } = params;
-
-	const [record] = await db
-		.update(carModels)
-		.set(data)
-		.where(eq(carModels.id, id))
-		.returning();
-
-	return record;
+export async function updateCarModel(db: DB, id: string, data: UpdateCarModel) {
+	const [updatedCarModel] = await db.update(carModels).set(data).where(eq(carModels.id, id)).returning();
+	return updatedCarModel;
 }

@@ -1,4 +1,4 @@
-import { carBodyTypes } from "@/db/sqlite/schema/cars/car-body-types";
+import { carBodyTypes } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,

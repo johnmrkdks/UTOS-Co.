@@ -1,4 +1,4 @@
-import { users } from "@/db/sqlite/schema/users";
+import { users } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,

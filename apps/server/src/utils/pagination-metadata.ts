@@ -16,7 +16,7 @@ type PaginationMetadataParams = {
 	totalCount: number;
 };
 
-export function generatePaginationMetadata({
+export function paginationMetadata({
 	page,
 	pageSize,
 	totalCount,

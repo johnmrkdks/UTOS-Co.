@@ -6,6 +6,16 @@ import {
 	type PaginationMetadata,
 } from "./pagination-metadata";
 
+export const ResourceListSchema = z.object({
+	limit: z.number().optional(),
+	offset: z.number().optional(),
+	sortBy: z.string().optional(),
+	sortOrder: z.enum(["asc", "desc"]).optional(),
+	filters: z.record(z.string(), z.string()).optional(),
+});
+
+export type ResourceList = z.infer<typeof ResourceListSchema>;
+
 export const QueryListResultSchema = (table: SQLiteTableWithColumns<any>) =>
 	z.object({
 		metadata: paginationMetadataSchema,

@@ -21,7 +21,6 @@ export const carImages = sqliteTable(
 			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
-		carIdx: index("car_images_car_idx").on(table.carId),
 		orderIdx: index("car_images_order_idx").on(table.carId, table.order),
 	}),
 );

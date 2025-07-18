@@ -1,4 +1,4 @@
-import { packages } from "@/db/sqlite/schema/packages";
+import { packages } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,

@@ -1,19 +1,17 @@
 import type { DB } from "@/db";
 import { cars } from "@/db/schema";
 import type { Car } from "@/schemas/shared/tables/car";
-import {
-	advancedQuery,
-	type AdvancedQuerySchema,
-} from "@/utils/filter-pagination-sort";
-import type { QueryListResult } from "@/utils/resource-list-schema";
-
-type GetCarsParams = AdvancedQuerySchema;
+import { filterPaginationSort } from "@/utils/filter-pagination-sort";
+import type {
+	QueryListResult,
+	ResourceList,
+} from "@/utils/resource-list-schema";
 
 export async function getCars(
 	db: DB,
-	params: GetCarsParams,
+	params: ResourceList,
 ): Promise<QueryListResult<Car>> {
-	const records = await advancedQuery(db, cars, params);
+	const records = await filterPaginationSort(db, cars, params);
 
 	return records;
 }

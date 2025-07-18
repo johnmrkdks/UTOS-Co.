@@ -1,4 +1,4 @@
-import { carFuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
+import { carFuelTypes } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,

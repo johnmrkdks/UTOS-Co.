@@ -27,7 +27,9 @@ export const CarSchema = createSelectSchema(cars).extend({
 	transmissionType: CarTransmissionTypeSchema.optional(),
 });
 export const InsertCarSchema = createInsertSchema(cars).extend({});
-export const UpdateCarSchema = createUpdateSchema(cars);
+export const UpdateCarSchema = createUpdateSchema(cars, {
+	modelId: z.string().optional(),
+});
 
 export type Car = z.infer<typeof CarSchema>;
 export type InsertCar = z.infer<typeof InsertCarSchema>;

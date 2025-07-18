@@ -1,24 +1,13 @@
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
-import type { Booking, UpdateBooking } from "@/schemas/shared/tables/booking";
 import { eq } from "drizzle-orm";
+import type { UpdateBooking } from "@/schemas/shared/tables/booking";
+import { BookingStatusEnum } from "@/db/sqlite/enums";
 
-type UpdateBookingParams = {
-	id: string;
-	data: Omit<UpdateBooking, "status">;
-};
-
-export async function updateBooking(
-	db: DB,
-	params: UpdateBookingParams,
-): Promise<Booking> {
-	const { id, data } = params;
-
-	const [record] = await db
-		.update(bookings)
-		.set(data)
-		.where(eq(bookings.id, id))
-		.returning();
-
-	return record;
+export async function updateBooking(db: DB, id: string, data: UpdateBooking) {
+	const [updatedBooking] = await db.update(bookings).set({
+		...data,
+		status: data.status as BookingStatusEnum,
+	}).where(eq(bookings.id, id)).returning();
+	return updatedBooking;
 }
