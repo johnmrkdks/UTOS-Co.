@@ -41,8 +41,7 @@ export const carsImagesRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			const updatedCarImage = await updateCarImageService(
 				db,
-				input.id,
-				input.data,
+				input,
 			);
 			return updatedCarImage;
 		}),

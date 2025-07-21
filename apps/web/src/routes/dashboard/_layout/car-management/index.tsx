@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CarFeatures } from "@/features/dashboard/car-management/components/car-features";
 import { createFileRoute } from "@tanstack/react-router";
 import { CarIcon, SettingsIcon } from "lucide-react";
 
@@ -11,7 +12,7 @@ function RouteComponent() {
 		<div className="mx-auto">
 			<div className="space-y-6">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
+					<h1 className="text-2xl font-bold tracking-tight">
 						Car Management System
 					</h1>
 					<p className="text-muted-foreground">
@@ -34,7 +35,7 @@ function RouteComponent() {
 
 					<TabsContent value="cars">{/* <CarsList /> */}</TabsContent>
 
-					<TabsContent value="features">{/* <CarFeatures /> */}</TabsContent>
+					<TabsContent value="features"><CarFeatures /></TabsContent>
 				</Tabs>
 			</div>
 		</div>

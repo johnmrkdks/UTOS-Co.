@@ -1,10 +1,11 @@
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
 
 export const packages = sqliteTable(
 	"packages",
 	{
-		id: text("id").primaryKey(),
+		id: text("id").primaryKey().$defaultFn(() => createId()),
 		name: text("name").notNull(),
 		description: text("description").notNull(),
 		pricePerDay: integer("price_per_day"), // NOTE: Temporary field

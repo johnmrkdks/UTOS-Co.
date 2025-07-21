@@ -1,9 +1,14 @@
 import { updateRating } from "@/data/ratings/update-rating";
 import type { DB } from "@/db";
-import type { UpdateRating } from "@/schemas/shared/tables/rating";
+import type { UpdateRating } from "@/schemas/shared";
 
-export async function updateRatingService(db: DB, id: string, data: UpdateRating) {
-	const updatedRating = await updateRating(db, id, data);
+type UpdateRatingParams = {
+	id: string;
+	data: UpdateRating;
+};
+
+export async function updateRatingService(db: DB, { id, data }: UpdateRatingParams) {
+	const updatedRating = await updateRating(db, { id, data });
 
 	return updatedRating;
 }

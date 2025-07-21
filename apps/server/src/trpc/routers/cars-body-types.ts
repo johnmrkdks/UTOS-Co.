@@ -39,11 +39,7 @@ export const carsBodyTypesRouter = router({
 	update: protectedProcedure
 		.input(z.object({ id: z.string(), data: UpdateCarBodyTypeSchema }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const updatedCarBodyType = await updateCarBodyTypeService(
-				db,
-				input.id,
-				input.data,
-			);
+			const updatedCarBodyType = await updateCarBodyTypeService(db, input);
 			return updatedCarBodyType;
 		}),
 });

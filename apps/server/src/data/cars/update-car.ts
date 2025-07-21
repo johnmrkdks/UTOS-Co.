@@ -5,12 +5,10 @@ import { eq } from "drizzle-orm";
 
 type UpdateCarParams = {
 	id: string;
-	data: Partial<UpdateCar>;
+	data: UpdateCar;
 };
 
-export async function updateCar(db: DB, params: UpdateCarParams): Promise<Car> {
-	const { id, data } = params;
-
+export async function updateCar(db: DB, { id, data }: UpdateCarParams) {
 	const [record] = await db
 		.update(cars)
 		.set(data)

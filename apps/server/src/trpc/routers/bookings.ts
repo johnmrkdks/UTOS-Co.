@@ -41,8 +41,7 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			const updatedBooking = await updateBookingService(
 				db,
-				input.id,
-				input.data,
+				input,
 			);
 			return updatedBooking;
 		}),

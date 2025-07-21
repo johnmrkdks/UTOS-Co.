@@ -2,9 +2,10 @@ import { relations, sql } from "drizzle-orm";
 import { sqliteTable, integer, text, unique } from "drizzle-orm/sqlite-core";
 import { cars } from "@/db/sqlite/schema/cars";
 import { carBrands } from "./car-brands";
+import { createId } from "@paralleldrive/cuid2";
 
 export const carModels = sqliteTable("car_models", {
-	id: text("id").primaryKey(),
+	id: text("id").primaryKey().$defaultFn(() => createId()),
 	brandId: text("brand_id")
 		.notNull()
 		.references(() => carBrands.id, { onDelete: "cascade" }),

@@ -1,6 +1,6 @@
 import { createCarDriveType } from "@/data/cars-drive-types/create-car-drive-type";
 import type { DB } from "@/db";
-import type { CarDriveType, InsertCarDriveType } from "@/schemas/shared/tables/car-drive-type";
+import type { CarDriveType, InsertCarDriveType } from "@/schemas/shared";
 import formatter from "lodash";
 
 export async function createCarDriveTypeService(db: DB, data: InsertCarDriveType): Promise<CarDriveType> {

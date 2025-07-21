@@ -8,11 +8,12 @@ import { carFuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
 import { carTransmissionTypes } from "@/db/sqlite/schema/cars/car-transmission-types";
 import { carDriveTypes } from "@/db/sqlite/schema/cars/car-drive-types";
 import { carConditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
+import { createId } from "@paralleldrive/cuid2";
 
 export const cars = sqliteTable(
 	"cars",
 	{
-		id: text("id").primaryKey(),
+		id: text("id").primaryKey().$defaultFn(() => createId()),
 		name: text("name").notNull(),
 		description: text("description").notNull(),
 		dateManufactured: integer("date_manufactured", {

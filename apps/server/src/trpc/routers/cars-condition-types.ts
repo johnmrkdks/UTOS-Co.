@@ -47,8 +47,7 @@ export const carsConditionTypesRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			const updatedCarConditionType = await updateCarConditionTypeService(
 				db,
-				input.id,
-				input.data,
+				input,
 			);
 			return updatedCarConditionType;
 		}),

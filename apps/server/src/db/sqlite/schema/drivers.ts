@@ -2,9 +2,10 @@ import { relations, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { cars } from "./cars";
 import { users } from "./users";
+import { createId } from "@paralleldrive/cuid2";
 
 export const drivers = sqliteTable("drivers", {
-	id: text("id").primaryKey(),
+	id: text("id").primaryKey().$defaultFn(() => createId()),
 	userId: text("user_id").references(() => users.id),
 	licenseNumber: text("license_number").notNull(),
 	carId: text("car_id").references(() => cars.id, { onDelete: "cascade" }),

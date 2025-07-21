@@ -41,8 +41,7 @@ export const carsFuelTypesRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			const updatedCarFuelType = await updateCarFuelTypeService(
 				db,
-				input.id,
-				input.data,
+				input
 			);
 			return updatedCarFuelType;
 		}),

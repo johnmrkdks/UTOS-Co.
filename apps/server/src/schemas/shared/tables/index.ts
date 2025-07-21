@@ -9,7 +9,6 @@ export * from "./cars/car-image";
 export * from "./cars/car-model";
 export * from "./cars/car-transmission-type";
 
-export * from "./enums";
 export * from "./account";
 export * from "./booking";
 export * from "./driver";

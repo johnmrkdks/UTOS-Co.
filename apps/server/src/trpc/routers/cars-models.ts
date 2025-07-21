@@ -41,8 +41,7 @@ export const carsModelsRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			const updatedCarModel = await updateCarModelService(
 				db,
-				input.id,
-				input.data,
+				input,
 			);
 			return updatedCarModel;
 		}),

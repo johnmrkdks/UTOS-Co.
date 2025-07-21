@@ -4,9 +4,10 @@ import { cars } from "./cars";
 import { packages } from "./packages";
 import { relations, sql } from "drizzle-orm";
 import { BookingStatusEnum } from "../enums";
+import { createId } from "@paralleldrive/cuid2";
 
 export const bookings = sqliteTable("bookings", {
-	id: text("id").primaryKey(),
+	id: text("id").primaryKey().$defaultFn(() => createId()),
 	carId: text("car_id")
 		.notNull()
 		.references(() => cars.id, { onDelete: "cascade" }),

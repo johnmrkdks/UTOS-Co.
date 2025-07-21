@@ -39,7 +39,7 @@ export const ratingsRouter = router({
 	update: protectedProcedure
 		.input(z.object({ id: z.string(), data: UpdateRatingSchema }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const updatedRating = await updateRatingService(db, input.id, input.data);
+			const updatedRating = await updateRatingService(db, input);
 			return updatedRating;
 		}),
 });

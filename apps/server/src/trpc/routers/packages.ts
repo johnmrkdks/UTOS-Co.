@@ -41,8 +41,7 @@ export const packagesRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			const updatedPackage = await updatePackageService(
 				db,
-				input.id,
-				input.data,
+				input,
 			);
 			return updatedPackage;
 		}),

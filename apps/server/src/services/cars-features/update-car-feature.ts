@@ -1,15 +1,20 @@
 import { updateCarFeature } from "@/data/cars-features/update-car-feature";
 import type { DB } from "@/db";
-import type { UpdateCarFeature } from "@/schemas/shared/tables/car-feature";
+import type { UpdateCarFeature } from "@/schemas/shared";
 import formatter from "lodash";
 
-export async function updateCarFeatureService(db: DB, id: string, data: UpdateCarFeature) {
+type UpdateCarFeatureParams = {
+	id: string;
+	data: UpdateCarFeature;
+};
+
+export async function updateCarFeatureService(db: DB, { id, data }: UpdateCarFeatureParams) {
 	const values = {
 		...data,
-		name: data.name ? formatter.startCase(data.name) : undefined,
+		feature: data.feature ? formatter.startCase(data.feature) : undefined,
 	} as UpdateCarFeature;
 
-	const updatedCarFeature = await updateCarFeature(db, id, values);
+	const updatedCarFeature = await updateCarFeature(db, { id, data: values });
 
 	return updatedCarFeature;
 }

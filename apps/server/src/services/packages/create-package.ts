@@ -1,6 +1,6 @@
 import { createPackage } from "@/data/packages/create-package";
 import type { DB } from "@/db";
-import type { Package, InsertPackage } from "@/schemas/shared/tables/package";
+import type { Package, InsertPackage } from "@/schemas/shared";
 import formatter from "lodash";
 
 export async function createPackageService(db: DB, data: InsertPackage): Promise<Package> {
