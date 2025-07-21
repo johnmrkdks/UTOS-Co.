@@ -11,9 +11,7 @@ jobs:
     name: Deploy Server to Cloudflare Workers
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
+      - uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
       - name: Deploy
@@ -28,9 +26,7 @@ jobs:
     name: Deploy Web to Cloudflare Pages
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
+      - uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
       - name: Build
