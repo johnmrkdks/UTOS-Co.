@@ -11,9 +11,11 @@
 		"start": "vite",
 		"check-types": "tsc --noEmit",
 		"wrangler:dev": "wrangler dev --port=3001",
-		"deploy": "bun run build && wrangler deploy"
+		"deploy": "pnpm run build && wrangler deploy"
 	},
 	"devDependencies": {
+		"@cloudflare/vite-plugin": "^1.9.0",
+		"@tanstack/react-query-devtools": "^5.80.5",
 		"@tanstack/react-router-devtools": "^1.114.27",
 		"@tanstack/router-plugin": "^1.114.27",
 		"@types/node": "^22.13.13",
@@ -23,15 +25,18 @@
 		"postcss": "^8.5.3",
 		"tailwindcss": "^4.0.15",
 		"vite": "^6.2.2",
-		"@tanstack/react-query-devtools": "^5.80.5",
-		"@cloudflare/vite-plugin": "^1.9.0",
 		"wrangler": "catalog:"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.1.1",
+		"@radix-ui/react-avatar": "^1.1.10",
+		"@radix-ui/react-dialog": "^1.1.14",
+		"@radix-ui/react-label": "^2.1.7",
 		"@radix-ui/react-select": "^2.2.5",
+		"@radix-ui/react-separator": "^1.1.7",
 		"@radix-ui/react-slot": "^1.2.3",
 		"@radix-ui/react-tabs": "^1.1.12",
+		"@radix-ui/react-tooltip": "^1.2.7",
 		"@tailwindcss/vite": "^4.0.15",
 		"@tanstack/react-form": "^1.12.3",
 		"@tanstack/react-query": "^5.80.5",
@@ -46,6 +51,7 @@
 		"radix-ui": "^1.4.2",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
+		"react-hook-form": "^7.60.0",
 		"server": "workspace:*",
 		"sonner": "^2.0.5",
 		"tailwind-merge": "^3.3.1",

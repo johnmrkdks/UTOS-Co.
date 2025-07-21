@@ -18,7 +18,7 @@
   ],
   "examples": [],
   "auth": true,
-  "packageManager": "bun",
+  "packageManager": "pnpm",
   "dbSetup": "d1",
   "api": "trpc",
   "webDeploy": "workers"
