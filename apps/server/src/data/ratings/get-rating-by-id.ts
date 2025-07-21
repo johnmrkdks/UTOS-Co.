@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { ratings } from "@/db/schema";
-import type { Rating } from "@/schemas/shared/tables/rating";
+import type { Rating } from "@/schemas/shared";
 import { eq } from "drizzle-orm";
 
 export async function getRatingById(

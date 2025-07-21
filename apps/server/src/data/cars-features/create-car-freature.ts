@@ -3,7 +3,7 @@ import { carFeatures } from "@/db/schema";
 import type {
 	CarFeature,
 	InsertCarFeature,
-} from "@/schemas/shared/tables/cars/car-feature";
+} from "@/schemas/shared";
 
 type CreateCarFeatureParams = InsertCarFeature;
 

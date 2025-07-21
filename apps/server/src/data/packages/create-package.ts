@@ -1,6 +1,5 @@
 import type { DB } from "@/db";
-import { packages } from "@/db/schema";
-import type { Package, InsertPackage } from "@/schemas/shared/tables/package";
+import type { Package, InsertPackage } from "@/schemas/shared";
 import { packages } from "@/db/schema";
 
 type CreatePackageParams = InsertPackage;

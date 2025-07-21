@@ -9,8 +9,8 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOutIcon, UserIcon } from "lucide-react";
-import { Button } from "./ui/button";
-import { Skeleton } from "./ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function UserMenu() {
 	const navigate = useNavigate();

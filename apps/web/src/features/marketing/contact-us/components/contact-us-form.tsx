@@ -1,12 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,11 +41,11 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 
 	return (
 		<div {...props} className={cn("flex flex-col gap-4", className)}>
-      <h1 className="text-2xl font-bold">Contact Us</h1>
+			<h1 className="text-2xl font-bold">Contact Us</h1>
 			<Form {...form}>
-				<form 
-          className="flex flex-col gap-6"
-          onSubmit={form.handleSubmit(handleSubmit)}>
+				<form
+					className="flex flex-col gap-6"
+					onSubmit={form.handleSubmit(handleSubmit)}>
 					<div className="flex flex-col gap-4">
 						<FormField
 							control={form.control}
@@ -89,9 +87,9 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 							)}
 						/>
 					</div>
-          <div className="w-1/2">
-            <Button type="submit" variant="dark" className="w-full rounded-xl">Submit</Button>
-          </div>
+					<div className="w-1/2">
+						<Button type="submit" variant="dark" className="w-full rounded-xl">Submit</Button>
+					</div>
 				</form>
 			</Form>
 		</div>

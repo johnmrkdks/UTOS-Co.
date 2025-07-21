@@ -1,6 +1,5 @@
 import type { DB } from "@/db";
-import { ratings } from "@/db/schema";
-import type { Rating, InsertRating } from "@/schemas/shared/tables/rating";
+import type { Rating, InsertRating } from "@/schemas/shared";
 import { ratings } from "@/db/schema";
 
 type CreateRatingParams = InsertRating;

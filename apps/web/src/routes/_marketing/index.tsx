@@ -1,4 +1,4 @@
-import Home from "@/features/marketing/components/home";
+import { Home } from "@/features/marketing/home/components";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_marketing/")({

@@ -1,7 +1,6 @@
 import type { DB } from "@/db";
-import { packages } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import type { UpdatePackage } from "@/schemas/shared/tables/package";
+import type { UpdatePackage } from "@/schemas/shared";
 import { packages } from "@/db/schema";
 
 export async function updatePackage(db: DB, id: string, data: UpdatePackage) {

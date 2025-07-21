@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { carImages } from "@/db/schema";
-import type { CarImage } from "@/schemas/shared/tables/cars/car-image";
+import type { CarImage } from "@/schemas/shared";
 import { eq } from "drizzle-orm";
 
 export async function getCarImageById(

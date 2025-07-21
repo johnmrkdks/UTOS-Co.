@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { packages } from "@/db/schema";
-import type { Package } from "@/schemas/shared/tables/package";
+import type { Package } from "@/schemas/shared";
 import { eq } from "drizzle-orm";
 
 export async function getPackageById(

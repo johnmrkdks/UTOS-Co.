@@ -1,6 +1,5 @@
 import type { DB } from "@/db";
-import { carBodyTypes } from "@/db/schema";
-import type { CarBodyType, InsertCarBodyType } from "@/schemas/shared/tables/car-body-type";
+import type { CarBodyType, InsertCarBodyType } from "@/schemas/shared";
 import { carBodyTypes } from "@/db/schema";
 
 type CreateCarBodyTypeParams = InsertCarBodyType;

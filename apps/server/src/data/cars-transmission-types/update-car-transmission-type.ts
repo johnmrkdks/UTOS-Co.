@@ -1,7 +1,6 @@
 import type { DB } from "@/db";
-import { carTransmissionTypes } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import type { UpdateCarTransmissionType } from "@/schemas/shared/tables/car-transmission-type";
+import type { UpdateCarTransmissionType } from "@/schemas/shared";
 import { carTransmissionTypes } from "@/db/schema";
 
 export async function updateCarTransmissionType(db: DB, id: string, data: UpdateCarTransmissionType) {

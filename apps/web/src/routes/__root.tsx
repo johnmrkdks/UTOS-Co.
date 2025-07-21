@@ -1,7 +1,6 @@
-import Header from "@/components/header";
 import Loader from "@/components/loader";
 import { Toaster } from "@/components/ui/sonner";
-import type { trpc } from "@/utils/trpc";
+import type { trpc } from "@/trpc";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {

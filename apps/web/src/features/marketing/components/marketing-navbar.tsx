@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 
-import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import { MARKETING_ROUTES } from "@/features/marketing/marketing-routes";
-import { Logo } from "./logo";
+import { Logo } from "@/components/logo";
+import { UserMenu } from "./navbar/user-menu";
 
 type HeaderProps = {
 	className?: string;
 };
 
-export default function Header({ className, ...props }: HeaderProps) {
+export function MarketingNavbar({ className, ...props }: HeaderProps) {
 	return (
 		<div className={cn("bg-beige", className)} {...props}>
 			<div className="flex flex-row items-center justify-between p-4">

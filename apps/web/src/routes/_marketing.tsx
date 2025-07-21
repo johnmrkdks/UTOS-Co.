@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import { MarketingNavbar } from "@/features/marketing/components/marketing-navbar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_marketing")({
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_marketing")({
 function RouteComponent() {
 	return (
 		<div className="min-h-10/12 relative overflow-hidden">
-			<Header className="sticky top-0 z-10" />
+			<MarketingNavbar className="sticky top-0 z-10" />
 			<div className=" overflow-auto">
 				<Outlet />
 			</div>

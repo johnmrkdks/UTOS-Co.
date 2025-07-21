@@ -15,7 +15,7 @@ export const InsertRatingSchema = createInsertSchema(ratings, {
 	entityType: z.nativeEnum(RateableTypeEnum),
 });
 export const UpdateRatingSchema = createUpdateSchema(ratings, {
-	rateableType: z.nativeEnum(RateableTypeEnum).optional(),
+	entityType: z.nativeEnum(RateableTypeEnum).optional(),
 });
 
 export type Rating = z.infer<typeof RatingSchema>;

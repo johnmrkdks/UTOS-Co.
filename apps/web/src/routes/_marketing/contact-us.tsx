@@ -1,4 +1,4 @@
-import { ContactUs } from "@/features/marketing/components/contact-us";
+import { ContactUs } from "@/features/marketing/contact-us/components";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_marketing/contact-us")({

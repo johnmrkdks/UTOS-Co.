@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
-import type { Booking, InsertBooking } from "@/schemas/shared/tables/booking";
+import type { Booking, InsertBooking } from "@/schemas/shared";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 
 type CreateBookingParams = InsertBooking;

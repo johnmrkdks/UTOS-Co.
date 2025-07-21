@@ -1,6 +1,5 @@
 import type { DB } from "@/db";
-import { carImages } from "@/db/schema";
-import type { CarImage, InsertCarImage } from "@/schemas/shared/tables/car-image";
+import type { CarImage, InsertCarImage } from "@/schemas/shared";
 import { carImages } from "@/db/schema";
 
 type CreateCarImageParams = InsertCarImage;
