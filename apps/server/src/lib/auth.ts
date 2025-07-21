@@ -22,8 +22,6 @@ const plugins: BetterAuthOptions["plugins"] = [
 
 const configs = {};
 
-console.log(env.BETTER_AUTH_URL);
-
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "sqlite",
@@ -36,8 +34,8 @@ export const auth = betterAuth({
 	},
 	socialProviders: {
 		google: {
-			clientId: process.env.GOOGLE_CLIENT_ID as string,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+			clientId: env.GOOGLE_CLIENT_ID,
+			clientSecret: env.GOOGLE_CLIENT_SECRET,
 		},
 	},
 	secret: env.BETTER_AUTH_SECRET,
