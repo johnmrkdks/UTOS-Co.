@@ -12,7 +12,6 @@ export function Brands() {
 						<CardDescription>Manage car brands in your inventory</CardDescription>
 					</div>
 					<AddBrandDialog />
-
 				</div>
 			</CardHeader>
 			<CardContent>
