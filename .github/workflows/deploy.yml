@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
         # Trigger cloudfare deployment
       - name: Deploy
