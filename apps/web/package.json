@@ -11,6 +11,7 @@
 		"start": "vite",
 		"check-types": "tsc --noEmit",
 		"wrangler:dev": "wrangler dev --port=3001",
+		"preview": "pnpm run build && wrangler dev",
 		"deploy": "pnpm run build && wrangler deploy"
 	},
 	"devDependencies": {

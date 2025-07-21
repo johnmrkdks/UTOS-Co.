@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import Loader from "@/components/loader";
 import { useState } from "react";
 
+const CLIENT_URL = import.meta.env.VITE_CLIENT_URL;
+
 export function SignInWithOAuth() {
 	const navigate = useNavigate();
 	const [isRedirecting, setIsRedirecting] = useState(false);
@@ -16,6 +18,7 @@ export function SignInWithOAuth() {
 	}
 
 	const signInWithGoogle = async () => {
+		console.log("Client URL", CLIENT_URL);
 		const { data, error } = await authClient.signIn.social(
 			{
 				provider: "google",

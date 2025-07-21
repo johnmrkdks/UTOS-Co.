@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 NODE_ENV = "production"
 CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
-BETTER_AUTH_URL="http://localhost:3000"
+BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 

@@ -87,6 +87,9 @@ importers:
       '@types/lodash':
         specifier: ^4.17.20
         version: 4.17.20
+      '@types/node':
+        specifier: ^22.16.5
+        version: 22.16.5
       '@types/qs':
         specifier: ^6.14.0
         version: 6.14.0
