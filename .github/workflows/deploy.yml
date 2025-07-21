@@ -45,7 +45,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: "wrangler deploy --config apps/server/wrangler.toml"
 
   deploy-web:
     runs-on: ubuntu-latest
