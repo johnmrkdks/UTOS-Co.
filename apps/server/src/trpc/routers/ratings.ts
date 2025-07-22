@@ -8,6 +8,7 @@ import { getRatingService } from "@/services/ratings/get-rating";
 import { getRatingsService } from "@/services/ratings/get-ratings";
 import { updateRatingService } from "@/services/ratings/update-rating";
 import { protectedProcedure, router } from "@/trpc/init";
+import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
 import { z } from "zod";
 
@@ -15,32 +16,52 @@ export const ratingsRouter = router({
 	create: protectedProcedure
 		.input(InsertRatingSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
-			const newRating = await createRatingService(db, input);
-			return newRating;
+			try {
+				const newRating = await createRatingService(db, input);
+				return newRating;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	delete: protectedProcedure
-		.input(z.string())
+		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const deletedRating = await deleteRatingService(db, input);
-			return deletedRating;
+			try {
+				const deletedRating = await deleteRatingService(db, input.id);
+				return deletedRating;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	get: protectedProcedure
-		.input(z.string())
+		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx: { db }, input }) => {
-			const rating = await getRatingService(db, input);
-			return rating;
+			try {
+				const rating = await getRatingService(db, input.id);
+				return rating;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
-			const ratings = await getRatingsService(db, input);
-			return ratings;
+			try {
+				const ratings = await getRatingsService(db, input);
+				return ratings;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	update: protectedProcedure
 		.input(z.object({ id: z.string(), data: UpdateRatingSchema }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const updatedRating = await updateRatingService(db, input);
-			return updatedRating;
+			try {
+				const updatedRating = await updateRatingService(db, input);
+				return updatedRating;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 });
 

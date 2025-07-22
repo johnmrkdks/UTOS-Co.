@@ -8,6 +8,7 @@ import { getCarConditionTypeService } from "@/services/cars-condition-types/get-
 import { getCarConditionTypesService } from "@/services/cars-condition-types/get-car-condition-types";
 import { updateCarConditionTypeService } from "@/services/cars-condition-types/update-car-condition-type";
 import { protectedProcedure, router } from "@/trpc/init";
+import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
 import { z } from "zod";
 
@@ -15,41 +16,61 @@ export const carConditionTypesRouter = router({
 	create: protectedProcedure
 		.input(InsertCarConditionTypeSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
-			const newCarConditionType = await createCarConditionTypeService(
-				db,
-				input,
-			);
-			return newCarConditionType;
+			try {
+				const newCarConditionType = await createCarConditionTypeService(
+					db,
+					input,
+				);
+				return newCarConditionType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	delete: protectedProcedure
-		.input(z.string())
+		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const deletedCarConditionType = await deleteCarConditionTypeService(
-				db,
-				input,
-			);
-			return deletedCarConditionType;
+			try {
+				const deletedCarConditionType = await deleteCarConditionTypeService(
+					db,
+					input.id,
+				);
+				return deletedCarConditionType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	get: protectedProcedure
-		.input(z.string())
+		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx: { db }, input }) => {
-			const carConditionType = await getCarConditionTypeService(db, input);
-			return carConditionType;
+			try {
+				const carConditionType = await getCarConditionTypeService(db, input.id);
+				return carConditionType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
-			const carConditionTypes = await getCarConditionTypesService(db, input);
-			return carConditionTypes;
+			try {
+				const carConditionTypes = await getCarConditionTypesService(db, input);
+				return carConditionTypes;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	update: protectedProcedure
 		.input(z.object({ id: z.string(), data: UpdateCarConditionTypeSchema }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const updatedCarConditionType = await updateCarConditionTypeService(
-				db,
-				input,
-			);
-			return updatedCarConditionType;
+			try {
+				const updatedCarConditionType = await updateCarConditionTypeService(
+					db,
+					input,
+				);
+				return updatedCarConditionType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 });
 

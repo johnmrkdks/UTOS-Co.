@@ -8,6 +8,7 @@ import { getPackageService } from "@/services/packages/get-package";
 import { getPackagesService } from "@/services/packages/get-packages";
 import { updatePackageService } from "@/services/packages/update-package";
 import { protectedProcedure, router } from "@/trpc/init";
+import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
 import { z } from "zod";
 
@@ -15,35 +16,55 @@ export const packagesRouter = router({
 	create: protectedProcedure
 		.input(InsertPackageSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
-			const newPackage = await createPackageService(db, input);
-			return newPackage;
+			try {
+				const newPackage = await createPackageService(db, input);
+				return newPackage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	delete: protectedProcedure
-		.input(z.string())
+		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const deletedPackage = await deletePackageService(db, input);
-			return deletedPackage;
+			try {
+				const deletedPackage = await deletePackageService(db, input.id);
+				return deletedPackage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	get: protectedProcedure
-		.input(z.string())
+		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx: { db }, input }) => {
-			const packageItem = await getPackageService(db, input);
-			return packageItem;
+			try {
+				const packageItem = await getPackageService(db, input.id);
+				return packageItem;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
-			const packages = await getPackagesService(db, input);
-			return packages;
+			try {
+				const packages = await getPackagesService(db, input);
+				return packages;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 	update: protectedProcedure
 		.input(z.object({ id: z.string(), data: UpdatePackageSchema }))
 		.mutation(async ({ ctx: { db }, input }) => {
-			const updatedPackage = await updatePackageService(
-				db,
-				input,
-			);
-			return updatedPackage;
+			try {
+				const updatedPackage = await updatePackageService(
+					db,
+					input,
+				);
+				return updatedPackage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 		}),
 });
 
