@@ -1,15 +1,13 @@
 import type { DB } from "@/db";
 import { carBrands } from "@/db/schema";
-import type { CarBrand } from "@/schemas/shared";
-import { ErrorFactory } from "@/utils/error-factory";
 import { eq } from "drizzle-orm";
 
-export async function getCarBrandById(
+export async function getCarBrandByName(
 	db: DB,
-	id: string,
+	name: string,
 ) {
 	const record = await db.query.carBrands.findFirst({
-		where: eq(carBrands.id, id),
+		where: eq(carBrands.name, name),
 	});
 
 	return record;

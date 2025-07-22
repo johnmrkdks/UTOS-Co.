@@ -17,11 +17,17 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
+import { DataTableLoadingWrapper } from "./data-table-loading-wrapper"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[]
 	data: TData[]
+
+	// Loading state
+	isLoading?: boolean
+	loadingRowCount?: number
 
 	// Pagination options
 	enablePagination?: boolean
@@ -45,10 +51,11 @@ type DataTableProps<TData, TValue> = {
 	// Visibility options
 	enableColumnVisibility?: boolean
 
-	// Custom components - these override the default ones
+	// Custom components
 	ToolbarComponent?: React.ComponentType<any>
 	PaginationComponent?: React.ComponentType<any>
 	emptyState?: React.ReactNode
+	loadingState?: React.ReactNode
 
 	// Styling
 	className?: string
@@ -66,9 +73,25 @@ type DataTableProps<TData, TValue> = {
 	onColumnFiltersChange?: (filters: ColumnFiltersState) => void
 }
 
+function TableRowSkeleton({ columnCount }: { columnCount: number }) {
+	return (
+		<TableRow className="hover:bg-transparent">
+			{Array.from({ length: columnCount }).map((_, i) => (
+				<TableCell key={i}>
+					<Skeleton className="h-6 w-full" />
+				</TableCell>
+			))}
+		</TableRow>
+	)
+}
+
 export function DataTable<TData, TValue>({
 	columns,
 	data,
+
+	// Loading defaults
+	isLoading = false,
+	loadingRowCount = 10,
 
 	// Pagination defaults
 	enablePagination = true,
@@ -76,7 +99,7 @@ export function DataTable<TData, TValue>({
 	pageSizeOptions = [10, 25, 50, 100],
 
 	// Selection defaults
-	enableRowSelection = false, // Changed default to false
+	enableRowSelection = false,
 	enableMultiRowSelection = true,
 
 	// Filtering and sorting defaults
@@ -96,6 +119,7 @@ export function DataTable<TData, TValue>({
 	ToolbarComponent,
 	PaginationComponent,
 	emptyState,
+	loadingState,
 
 	// Styling
 	className = "flex flex-col gap-4",
@@ -118,7 +142,7 @@ export function DataTable<TData, TValue>({
 	const [sorting, setSorting] = React.useState<SortingState>(initialSorting)
 
 	const table = useReactTable<TData>({
-		data,
+		data: isLoading ? [] : data, // Use empty array when loading to prevent flash
 		columns,
 		state: {
 			...(enableSorting && { sorting }),
@@ -138,7 +162,6 @@ export function DataTable<TData, TValue>({
 		enableMultiRowSelection: enableMultiRowSelection,
 		enableSorting: enableSorting,
 		enableColumnFilters: enableColumnFilters,
-
 		onRowSelectionChange: enableRowSelection
 			? (updater) => {
 				setRowSelection(updater)
@@ -148,7 +171,6 @@ export function DataTable<TData, TValue>({
 				}
 			}
 			: undefined,
-
 		onSortingChange: (updater) => {
 			setSorting(updater)
 			if (onSortingChange) {
@@ -164,7 +186,6 @@ export function DataTable<TData, TValue>({
 			}
 		},
 		onColumnVisibilityChange: enableColumnVisibility ? setColumnVisibility : undefined,
-
 		getCoreRowModel: getCoreRowModel(),
 		...(enableFiltering && { getFilteredRowModel: getFilteredRowModel() }),
 		...(enablePagination && { getPaginationRowModel: getPaginationRowModel() }),
@@ -178,53 +199,80 @@ export function DataTable<TData, TValue>({
 	// Determine which components to render
 	const shouldShowToolbar = ToolbarComponent || enableToolbar
 	const shouldShowPagination = PaginationComponent || enablePagination
-
 	const ToolbarToRender = ToolbarComponent || DataTableToolbar
 	const PaginationToRender = PaginationComponent || DataTablePagination
 
 	return (
-		<div className={cn(className)}>
-			{shouldShowToolbar && (
-				<ToolbarToRender table={table} searchKey={searchKey} searchPlaceholder={searchPlaceholder} />
-			)}
+		<DataTableLoadingWrapper
+			isLoading={isLoading}
+			columns={columns}
+			loadingRowCount={loadingRowCount}
+			enableToolbar={shouldShowToolbar}
+			enablePagination={shouldShowPagination}
+			className={className}
+		>
+			<div className={cn(className)}>
+				{shouldShowToolbar && (
+					<ToolbarToRender
+						table={table}
+						searchKey={searchKey}
+						searchPlaceholder={searchPlaceholder}
+						disabled={isLoading}
+					/>
+				)}
 
-			<div className={cn("bg-white", tableClassName)}>
-				<Table>
-					<TableHeader>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									return (
-										<TableHead key={header.id} colSpan={header.colSpan}>
-											{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-										</TableHead>
-									)
-								})}
-							</TableRow>
-						))}
-					</TableHeader>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow key={row.id} data-state={enableRowSelection && row.getIsSelected() ? "selected" : undefined}>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-									))}
+				<div className={cn("bg-white", tableClassName)}>
+					<Table>
+						<TableHeader>
+							{table.getHeaderGroups().map((headerGroup) => (
+								<TableRow key={headerGroup.id}>
+									{headerGroup.headers.map((header) => {
+										return (
+											<TableHead key={header.id} colSpan={header.colSpan}>
+												{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+											</TableHead>
+										)
+									})}
 								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell colSpan={columns.length} className="h-24 text-center">
-									{emptyState || "No results."}
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
+							))}
+						</TableHeader>
+						<TableBody>
+							{isLoading ? (
+								// Show skeleton rows when loading
+								Array.from({ length: loadingRowCount }).map((_, i) => (
+									<TableRowSkeleton key={i} columnCount={columns.length} />
+								))
+							) : table.getRowModel().rows?.length ? (
+								// Show actual data
+								table
+									.getRowModel()
+									.rows.map((row) => (
+										<TableRow
+											key={row.id}
+											data-state={enableRowSelection && row.getIsSelected() ? "selected" : undefined}
+										>
+											{row.getVisibleCells().map((cell) => (
+												<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+											))}
+										</TableRow>
+									))
+							) : (
+								// Show empty state
+								<TableRow>
+									<TableCell colSpan={columns.length} className="h-24 text-center">
+										{emptyState || "No results."}
+									</TableCell>
+								</TableRow>
+							)}
+						</TableBody>
+					</Table>
+				</div>
 
-			{shouldShowPagination && <PaginationToRender table={table} pageSizeOptions={pageSizeOptions} />}
-		</div>
+				{shouldShowPagination && (
+					<PaginationToRender table={table} pageSizeOptions={pageSizeOptions} disabled={isLoading} />
+				)}
+			</div>
+		</DataTableLoadingWrapper>
 	)
 }
 

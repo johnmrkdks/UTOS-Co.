@@ -2,8 +2,9 @@ import { DataTableColumnHeader } from "@/components/tables/data-table-column-hea
 import { Badge } from "@/components/ui/badge"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { CarBrandWithEnrichedData } from "server/types"
+import { BrandTableRowActions } from "./brand-table-row-actions"
 
-export const brandColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
+export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 	{
 		id: "name",
 		accessorKey: "name",
@@ -37,5 +38,15 @@ export const brandColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 		),
 		enableSorting: false,
 		enableHiding: false,
-	}
+	},
+	{
+		id: "actions",
+		accessorKey: "actions",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Actions" />
+		),
+		cell: ({ row }) => <BrandTableRowActions row={row} />,
+		enableSorting: false,
+		enableHiding: false,
+	},
 ]

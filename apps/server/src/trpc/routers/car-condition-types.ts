@@ -11,7 +11,7 @@ import { protectedProcedure, router } from "@/trpc/init";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
 import { z } from "zod";
 
-export const carsConditionTypesRouter = router({
+export const carConditionTypesRouter = router({
 	create: protectedProcedure
 		.input(InsertCarConditionTypeSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
