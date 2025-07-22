@@ -6,9 +6,9 @@ import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 
 export async function createCarService(db: DB, data: InsertCar): Promise<Car> {
-	const checkCarExists = await getCarByName(db, data.name);
+	const car = await getCarByName(db, data.name);
 
-	if (checkCarExists) {
+	if (car) {
 		throw ErrorFactory.duplicateEntry('Car', "name");
 	}
 

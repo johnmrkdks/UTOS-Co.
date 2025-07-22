@@ -1,6 +1,8 @@
+import { getCarModelById } from "@/data/cars-models/get-car-model-by-id";
 import { updateCarModel } from "@/data/cars-models/update-car-model";
 import type { DB } from "@/db";
 import type { UpdateCarModel } from "@/schemas/shared";
+import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 
 type UpdateCarModelParams = {
@@ -9,6 +11,12 @@ type UpdateCarModelParams = {
 };
 
 export async function updateCarModelService(db: DB, { id, data }: UpdateCarModelParams) {
+	const carModel = await getCarModelById(db, id);
+
+	if (!carModel) {
+		throw ErrorFactory.notFound("Car model not found.");
+	}
+
 	const values = {
 		...data,
 		name: data.name ? formatter.startCase(data.name) : undefined,

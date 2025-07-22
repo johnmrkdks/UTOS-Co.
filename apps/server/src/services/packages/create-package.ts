@@ -6,9 +6,9 @@ import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 
 export async function createPackageService(db: DB, data: InsertPackage): Promise<Package> {
-	const checkPackageExists = await getPackageByName(db, data.name);
+	const packageName = await getPackageByName(db, data.name);
 
-	if (checkPackageExists) {
+	if (packageName) {
 		throw ErrorFactory.duplicateEntry('Package', "name");
 	}
 

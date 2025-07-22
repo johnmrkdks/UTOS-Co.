@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function getBookingById(
 	db: DB,
 	id: string,
-): Promise<Booking | null> {
+) {
 	const record = await db.query.bookings.findFirst({
 		where: eq(bookings.id, id),
 		with: {
@@ -15,10 +15,6 @@ export async function getBookingById(
 			package: true,
 		},
 	});
-
-	if (!record) {
-		throw new Error("Booking not found");
-	}
 
 	return record;
 }

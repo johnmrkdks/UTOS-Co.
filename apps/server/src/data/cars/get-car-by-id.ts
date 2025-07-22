@@ -3,7 +3,7 @@ import { cars } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type { Car } from "@/schemas/shared";
 
-export async function getCarById(db: DB, id: string): Promise<Car | null> {
+export async function getCarById(db: DB, id: string) {
 	const record = await db.query.cars.findFirst({
 		where: eq(cars.id, id),
 		with: {
@@ -11,10 +11,6 @@ export async function getCarById(db: DB, id: string): Promise<Car | null> {
 			images: true,
 		},
 	});
-
-	if (!record) {
-		throw new Error("Car not found");
-	}
 
 	return record;
 }

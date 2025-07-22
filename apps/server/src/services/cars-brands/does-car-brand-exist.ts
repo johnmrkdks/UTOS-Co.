@@ -1,7 +1,5 @@
 import { doesCarBrandExist } from "@/data/cars-brands/does-car-brand-exist";
-import { getCarBrand } from "@/data/cars-brands/get-car-brand";
 import type { DB } from "@/db";
-import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
 
 export const DoesCarBrandExistSchema = z.object({

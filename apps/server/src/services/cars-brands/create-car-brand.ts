@@ -7,9 +7,9 @@ import formatter from "lodash";
 
 export async function createCarBrandService(db: DB, data: InsertCarBrand): Promise<CarBrand> {
 
-	const checkBrandNameExists = await getCarBrandByName(db, data.name);
+	const carBrandName = await getCarBrandByName(db, data.name);
 
-	if (checkBrandNameExists) {
+	if (carBrandName) {
 		throw ErrorFactory.duplicateEntry('Car brand', "name");
 	}
 
