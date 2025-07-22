@@ -2,11 +2,11 @@ import {
 	InsertPackageSchema,
 	UpdatePackageSchema,
 } from "@/schemas/shared/tables/package";
-import { createPackageService } from "@/services/packages/create-package";
-import { deletePackageService } from "@/services/packages/delete-package";
-import { getPackageService } from "@/services/packages/get-package";
+import { createPackageService, CreatePackageServiceSchema } from "@/services/packages/create-package";
+import { deletePackageService, DeletePackageServiceSchema } from "@/services/packages/delete-package";
+import { getPackageService, GetPackageServiceSchema } from "@/services/packages/get-package";
 import { getPackagesService } from "@/services/packages/get-packages";
-import { updatePackageService } from "@/services/packages/update-package";
+import { updatePackageService, UpdatePackageServiceSchema } from "@/services/packages/update-package";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
@@ -14,7 +14,7 @@ import { z } from "zod";
 
 export const packagesRouter = router({
 	create: protectedProcedure
-		.input(InsertPackageSchema)
+		.input(CreatePackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newPackage = await createPackageService(db, input);
@@ -24,20 +24,20 @@ export const packagesRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeletePackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const deletedPackage = await deletePackageService(db, input.id);
+				const deletedPackage = await deletePackageService(db, input);
 				return deletedPackage;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(GetPackageServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const packageItem = await getPackageService(db, input.id);
+				const packageItem = await getPackageService(db, input);
 				return packageItem;
 			} catch (error) {
 				handleTRPCError(error);
@@ -54,7 +54,7 @@ export const packagesRouter = router({
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdatePackageSchema }))
+		.input(UpdatePackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedPackage = await updatePackageService(

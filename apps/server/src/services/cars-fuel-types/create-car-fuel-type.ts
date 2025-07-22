@@ -1,15 +1,23 @@
 import { createCarFuelType } from "@/data/cars-fuel-types/create-car-fuel-type";
 import { getCarFuelTypeByName } from "@/data/cars-fuel-types/get-car-fuel-type-by-name";
 import type { DB } from "@/db";
-import type { CarFuelType, InsertCarFuelType } from "@/schemas/shared";
+import { InsertCarFuelTypeSchema, type InsertCarFuelType } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-export async function createCarFuelTypeService(db: DB, data: InsertCarFuelType): Promise<CarFuelType> {
+export const CreateCarFuelTypeServiceSchema = z.object({
+	data: InsertCarFuelTypeSchema,
+});
+
+export async function createCarFuelTypeService(
+	db: DB,
+	{ data }: z.infer<typeof CreateCarFuelTypeServiceSchema>,
+) {
 	const carFuelTypeName = await getCarFuelTypeByName(db, data.name);
 
 	if (carFuelTypeName) {
-		throw ErrorFactory.duplicateEntry('Car fuel type', "name");
+		throw ErrorFactory.duplicateEntry("Car fuel type", "name");
 	}
 
 	const values = {

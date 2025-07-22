@@ -2,8 +2,13 @@ import { deletePackage } from "@/data/packages/delete-package";
 import { getPackageById } from "@/data/packages/get-package-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-export async function deletePackageService(db: DB, id: string) {
+export const DeletePackageServiceSchema = z.object({
+	id: z.string(),
+});
+
+export async function deletePackageService(db: DB, { id }: z.infer<typeof DeletePackageServiceSchema>) {
 	const _package = await getPackageById(db, id);
 
 	if (!_package) {

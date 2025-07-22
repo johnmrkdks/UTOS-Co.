@@ -1,20 +1,27 @@
 import {
-	InsertCarConditionTypeSchema,
-	UpdateCarConditionTypeSchema,
-} from "@/schemas/shared/tables/cars/car-condition-type";
-import { createCarConditionTypeService } from "@/services/cars-condition-types/create-car-condition-type";
-import { deleteCarConditionTypeService } from "@/services/cars-condition-types/delete-car-condition-type";
-import { getCarConditionTypeService } from "@/services/cars-condition-types/get-car-condition-type";
+	CreateCarConditionTypeServiceSchema,
+	createCarConditionTypeService,
+} from "@/services/cars-condition-types/create-car-condition-type";
+import {
+	DeleteCarConditionTypeServiceSchema,
+	deleteCarConditionTypeService,
+} from "@/services/cars-condition-types/delete-car-condition-type";
+import {
+	GetCarConditionTypeServiceSchema,
+	getCarConditionTypeService,
+} from "@/services/cars-condition-types/get-car-condition-type";
 import { getCarConditionTypesService } from "@/services/cars-condition-types/get-car-condition-types";
-import { updateCarConditionTypeService } from "@/services/cars-condition-types/update-car-condition-type";
+import {
+	UpdateCarConditionTypeServiceSchema,
+	updateCarConditionTypeService,
+} from "@/services/cars-condition-types/update-car-condition-type";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
-import { z } from "zod";
 
 export const carConditionTypesRouter = router({
 	create: protectedProcedure
-		.input(InsertCarConditionTypeSchema)
+		.input(CreateCarConditionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newCarConditionType = await createCarConditionTypeService(
@@ -27,12 +34,12 @@ export const carConditionTypesRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeleteCarConditionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const deletedCarConditionType = await deleteCarConditionTypeService(
 					db,
-					input.id,
+					input,
 				);
 				return deletedCarConditionType;
 			} catch (error) {
@@ -40,10 +47,10 @@ export const carConditionTypesRouter = router({
 			}
 		}),
 	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(GetCarConditionTypeServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const carConditionType = await getCarConditionTypeService(db, input.id);
+				const carConditionType = await getCarConditionTypeService(db, input);
 				return carConditionType;
 			} catch (error) {
 				handleTRPCError(error);
@@ -60,7 +67,7 @@ export const carConditionTypesRouter = router({
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdateCarConditionTypeSchema }))
+		.input(UpdateCarConditionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedCarConditionType = await updateCarConditionTypeService(

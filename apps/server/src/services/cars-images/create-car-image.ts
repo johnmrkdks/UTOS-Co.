@@ -1,8 +1,16 @@
 import { createCarImage } from "@/data/cars-images/create-car-image";
 import type { DB } from "@/db";
-import type { CarImage, InsertCarImage } from "@/schemas/shared";
+import { InsertCarImageSchema } from "@/schemas/shared";
+import { z } from "zod";
 
-export async function createCarImageService(db: DB, data: InsertCarImage): Promise<CarImage> {
+export const CreateCarImageServiceSchema = z.object({
+	data: InsertCarImageSchema,
+});
+
+export async function createCarImageService(
+	db: DB,
+	{ data }: z.infer<typeof CreateCarImageServiceSchema>,
+) {
 	const newCarImage = createCarImage(db, data);
 
 	return newCarImage;

@@ -1,11 +1,16 @@
 import { createPackage } from "@/data/packages/create-package";
 import { getPackageByName } from "@/data/packages/get-package-by-name";
 import type { DB } from "@/db";
-import type { Package, InsertPackage } from "@/schemas/shared";
+import { type Package, type InsertPackage, InsertPackageSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-export async function createPackageService(db: DB, data: InsertPackage): Promise<Package> {
+export const CreatePackageServiceSchema = z.object({
+	data: InsertPackageSchema
+});
+
+export async function createPackageService(db: DB, { data }: z.infer<typeof CreatePackageServiceSchema>) {
 	const packageName = await getPackageByName(db, data.name);
 
 	if (packageName) {

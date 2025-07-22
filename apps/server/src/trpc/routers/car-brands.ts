@@ -1,23 +1,30 @@
 import {
-	InsertCarBrandSchema,
-	UpdateCarBrandSchema,
-} from "@/schemas/shared/tables/cars/car-brand";
-import { createCarBrandService } from "@/services/cars-brands/create-car-brand";
-import { deleteCarBrandService } from "@/services/cars-brands/delete-car-brand";
-import { getCarBrandService } from "@/services/cars-brands/get-car-brand";
+	CreateCarBrandServiceSchema,
+	createCarBrandService,
+} from "@/services/cars-brands/create-car-brand";
+import {
+	DeleteCarBrandServiceSchema,
+	deleteCarBrandService,
+} from "@/services/cars-brands/delete-car-brand";
+import {
+	DoesCarBrandExistSchema,
+	doesCarBrandExistService,
+} from "@/services/cars-brands/does-car-brand-exist";
+import { GetCarBrandServiceSchema, getCarBrandService } from "@/services/cars-brands/get-car-brand";
 import { getCarBrandsService } from "@/services/cars-brands/get-car-brands";
 import { getCarBrandsWithEnrichedDataService } from "@/services/cars-brands/get-car-brands-with-enriched-data";
 import { getCarBrandsWithModelsService } from "@/services/cars-brands/get-car-brands-with-models";
-import { updateCarBrandService } from "@/services/cars-brands/update-car-brand";
+import {
+	UpdateCarBrandServiceSchema,
+	updateCarBrandService,
+} from "@/services/cars-brands/update-car-brand";
 import { protectedProcedure, router } from "@/trpc/init";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
-import { z } from "zod";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { DoesCarBrandExistSchema, doesCarBrandExistService } from "@/services/cars-brands/does-car-brand-exist";
+import { ResourceListSchema } from "@/utils/resource-list-schema";
 
 export const carBrandsRouter = router({
 	create: protectedProcedure
-		.input(InsertCarBrandSchema)
+		.input(CreateCarBrandServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newCarBrand = await createCarBrandService(db, input);
@@ -27,7 +34,7 @@ export const carBrandsRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeleteCarBrandServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const deletedCarBrand = await deleteCarBrandService(db, input);
@@ -46,18 +53,16 @@ export const carBrandsRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
-		.query(async ({ ctx: { db }, input }) => {
-			try {
-				const carBrand = await getCarBrandService(db, input);
-				return carBrand;
-			} catch (error) {
-				handleTRPCError(error);
-			}
+	get: protectedProcedure.input(GetCarBrandServiceSchema).query(async ({ ctx: { db }, input }) => {
+		try {
 			const carBrand = await getCarBrandService(db, input);
 			return carBrand;
-		}),
+		} catch (error) {
+			handleTRPCError(error);
+		}
+		const carBrand = await getCarBrandService(db, input);
+		return carBrand;
+	}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
@@ -82,14 +87,15 @@ export const carBrandsRouter = router({
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const carBrandsWithEnrichedData = await getCarBrandsWithEnrichedDataService(db, input);
+				const carBrandsWithEnrichedData =
+					await getCarBrandsWithEnrichedDataService(db, input);
 				return carBrandsWithEnrichedData;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdateCarBrandSchema }))
+		.input(UpdateCarBrandServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedCarBrand = await updateCarBrandService(db, input);

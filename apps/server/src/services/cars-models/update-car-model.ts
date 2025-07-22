@@ -1,16 +1,20 @@
 import { getCarModelById } from "@/data/cars-models/get-car-model-by-id";
 import { updateCarModel } from "@/data/cars-models/update-car-model";
 import type { DB } from "@/db";
-import type { UpdateCarModel } from "@/schemas/shared";
+import { UpdateCarModelSchema, type UpdateCarModel } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-type UpdateCarModelParams = {
-	id: string;
-	data: UpdateCarModel;
-};
+export const UpdateCarModelServiceSchema = z.object({
+	id: z.string(),
+	data: UpdateCarModelSchema,
+});
 
-export async function updateCarModelService(db: DB, { id, data }: UpdateCarModelParams) {
+export async function updateCarModelService(
+	db: DB,
+	{ id, data }: z.infer<typeof UpdateCarModelServiceSchema>,
+) {
 	const carModel = await getCarModelById(db, id);
 
 	if (!carModel) {

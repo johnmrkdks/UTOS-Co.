@@ -1,8 +1,16 @@
 import { getCarBodyType } from "@/data/cars-body-types/get-car-body-type";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-export async function getCarBodyTypeService(db: DB, id: string) {
+export const GetCarBodyTypeServiceSchema = z.object({
+	id: z.string(),
+});
+
+export async function getCarBodyTypeService(
+	db: DB,
+	{ id }: z.infer<typeof GetCarBodyTypeServiceSchema>,
+) {
 	const carBodyType = await getCarBodyType(db, id);
 
 	if (!carBodyType) {

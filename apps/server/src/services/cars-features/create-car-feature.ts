@@ -1,15 +1,23 @@
 import { createCarFeature } from "@/data/cars-features/create-car-feature";
 import { getCarFeatureByFeature } from "@/data/cars-features/get-car-feature-by-feature";
 import type { DB } from "@/db";
-import type { CarFeature, InsertCarFeature } from "@/schemas/shared";
+import { InsertCarFeatureSchema, type InsertCarFeature } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-export async function createCarFeatureService(db: DB, data: InsertCarFeature): Promise<CarFeature> {
+export const CreateCarFeatureServiceSchema = z.object({
+	data: InsertCarFeatureSchema,
+});
+
+export async function createCarFeatureService(
+	db: DB,
+	{ data }: z.infer<typeof CreateCarFeatureServiceSchema>,
+) {
 	const carFeature = await getCarFeatureByFeature(db, data.feature);
 
 	if (carFeature) {
-		throw ErrorFactory.duplicateEntry('Car feature', "feature");
+		throw ErrorFactory.duplicateEntry("Car feature", "feature");
 	}
 
 	const values = {

@@ -2,11 +2,11 @@ import {
 	InsertCarTransmissionTypeSchema,
 	UpdateCarTransmissionTypeSchema,
 } from "@/schemas/shared/tables/cars/car-transmission-type";
-import { createCarTransmissionTypeService } from "@/services/cars-transmission-types/create-car-transmission-type";
-import { deleteCarTransmissionTypeService } from "@/services/cars-transmission-types/delete-car-transmission-type";
-import { getCarTransmissionTypeService } from "@/services/cars-transmission-types/get-car-transmission-type";
+import { createCarTransmissionTypeService, CreateCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/create-car-transmission-type";
+import { deleteCarTransmissionTypeService, DeleteCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/delete-car-transmission-type";
+import { getCarTransmissionTypeService, GetCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/get-car-transmission-type";
 import { getCarTransmissionTypesService } from "@/services/cars-transmission-types/get-car-transmission-types";
-import { updateCarTransmissionTypeService } from "@/services/cars-transmission-types/update-car-transmission-type";
+import { updateCarTransmissionTypeService, UpdateCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/update-car-transmission-type";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
@@ -14,7 +14,7 @@ import { z } from "zod";
 
 export const carTransmissionTypesRouter = router({
 	create: protectedProcedure
-		.input(InsertCarTransmissionTypeSchema)
+		.input(CreateCarTransmissionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newCarTransmissionType = await createCarTransmissionTypeService(
@@ -27,23 +27,23 @@ export const carTransmissionTypesRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeleteCarTransmissionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const deletedCarTransmissionType =
-					await deleteCarTransmissionTypeService(db, input.id);
+					await deleteCarTransmissionTypeService(db, input);
 				return deletedCarTransmissionType;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(GetCarTransmissionTypeServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
 				const carTransmissionType = await getCarTransmissionTypeService(
 					db,
-					input.id,
+					input,
 				);
 				return carTransmissionType;
 			} catch (error) {
@@ -64,7 +64,7 @@ export const carTransmissionTypesRouter = router({
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdateCarTransmissionTypeSchema }))
+		.input(UpdateCarTransmissionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedCarTransmissionType =

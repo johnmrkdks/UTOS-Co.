@@ -2,8 +2,13 @@ import { deleteRating } from "@/data/ratings/delete-rating";
 import { getRatingById } from "@/data/ratings/get-rating-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-export async function deleteRatingService(db: DB, id: string) {
+export const DeleteRatingServiceSchema = z.object({
+	id: z.string(),
+});
+
+export async function deleteRatingService(db: DB, { id }: z.infer<typeof DeleteRatingServiceSchema>) {
 	const rating = await getRatingById(db, id);
 
 	if (!rating) {

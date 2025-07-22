@@ -1,16 +1,20 @@
 import { getCarFeature } from "@/data/cars-features/get-car-feature";
 import { updateCarFeature } from "@/data/cars-features/update-car-feature";
 import type { DB } from "@/db";
-import type { UpdateCarFeature } from "@/schemas/shared";
+import { UpdateCarFeatureSchema, type UpdateCarFeature } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-type UpdateCarFeatureParams = {
-	id: string;
-	data: UpdateCarFeature;
-};
+export const UpdateCarFeatureServiceSchema = z.object({
+	id: z.string(),
+	data: UpdateCarFeatureSchema,
+});
 
-export async function updateCarFeatureService(db: DB, { id, data }: UpdateCarFeatureParams) {
+export async function updateCarFeatureService(
+	db: DB,
+	{ id, data }: z.infer<typeof UpdateCarFeatureServiceSchema>,
+) {
 	const carFeature = await getCarFeature(db, id);
 
 	if (!carFeature) {

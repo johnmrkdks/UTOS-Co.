@@ -2,8 +2,13 @@ import { deleteCarTransmissionType } from "@/data/cars-transmission-types/delete
 import { getCarTransmissionTypeById } from "@/data/cars-transmission-types/get-car-transmission-type-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-export async function deleteCarTransmissionTypeService(db: DB, id: string) {
+export const DeleteCarTransmissionTypeServiceSchema = z.object({
+	id: z.string(),
+});
+
+export async function deleteCarTransmissionTypeService(db: DB, { id }: z.infer<typeof DeleteCarTransmissionTypeServiceSchema>) {
 	const carTransmissionType = await getCarTransmissionTypeById(db, id);
 
 	if (!carTransmissionType) {

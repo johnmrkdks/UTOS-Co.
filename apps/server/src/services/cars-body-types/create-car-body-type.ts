@@ -1,15 +1,23 @@
 import { createCarBodyType } from "@/data/cars-body-types/create-car-body-type";
 import { getCarBodyTypeByName } from "@/data/cars-body-types/get-car-body-type-by-name";
 import type { DB } from "@/db";
-import type { CarBodyType, InsertCarBodyType } from "@/schemas/shared";
+import { InsertCarBodyTypeSchema, type CarBodyType, type InsertCarBodyType } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-export async function createCarBodyTypeService(db: DB, data: InsertCarBodyType): Promise<CarBodyType> {
+export const CreateCarBodyTypeServiceSchema = z.object({
+	data: InsertCarBodyTypeSchema,
+});
+
+export async function createCarBodyTypeService(
+	db: DB,
+	{ data }: z.infer<typeof CreateCarBodyTypeServiceSchema>,
+) {
 	const carBodyType = await getCarBodyTypeByName(db, data.name);
 
 	if (carBodyType) {
-		throw ErrorFactory.duplicateEntry('Car body type', "name");
+		throw ErrorFactory.duplicateEntry("Car body type", "name");
 	}
 
 	const values = {

@@ -2,8 +2,16 @@ import { deleteCarConditionType } from "@/data/cars-condition-types/delete-car-c
 import { getCarConditionType } from "@/data/cars-condition-types/get-car-condition-type";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-export async function deleteCarConditionTypeService(db: DB, id: string) {
+export const DeleteCarConditionTypeServiceSchema = z.object({
+	id: z.string(),
+});
+
+export async function deleteCarConditionTypeService(
+	db: DB,
+	{ id }: z.infer<typeof DeleteCarConditionTypeServiceSchema>,
+) {
 	const carConditionType = await getCarConditionType(db, id);
 
 	if (!carConditionType) {

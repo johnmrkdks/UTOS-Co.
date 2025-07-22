@@ -2,11 +2,11 @@ import {
 	InsertRatingSchema,
 	UpdateRatingSchema,
 } from "@/schemas/shared/tables/rating";
-import { createRatingService } from "@/services/ratings/create-rating";
-import { deleteRatingService } from "@/services/ratings/delete-rating";
-import { getRatingService } from "@/services/ratings/get-rating";
+import { createRatingService, CreateRatingServiceSchema } from "@/services/ratings/create-rating";
+import { deleteRatingService, DeleteRatingServiceSchema } from "@/services/ratings/delete-rating";
+import { getRatingService, GetRatingServiceSchema } from "@/services/ratings/get-rating";
 import { getRatingsService } from "@/services/ratings/get-ratings";
-import { updateRatingService } from "@/services/ratings/update-rating";
+import { updateRatingService, UpdateRatingServiceSchema } from "@/services/ratings/update-rating";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
@@ -14,7 +14,7 @@ import { z } from "zod";
 
 export const ratingsRouter = router({
 	create: protectedProcedure
-		.input(InsertRatingSchema)
+		.input(CreateRatingServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newRating = await createRatingService(db, input);
@@ -24,20 +24,20 @@ export const ratingsRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeleteRatingServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const deletedRating = await deleteRatingService(db, input.id);
+				const deletedRating = await deleteRatingService(db, input);
 				return deletedRating;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(GetRatingServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const rating = await getRatingService(db, input.id);
+				const rating = await getRatingService(db, input);
 				return rating;
 			} catch (error) {
 				handleTRPCError(error);
@@ -54,7 +54,7 @@ export const ratingsRouter = router({
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdateRatingSchema }))
+		.input(UpdateRatingServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedRating = await updateRatingService(db, input);

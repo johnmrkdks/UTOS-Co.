@@ -1,15 +1,16 @@
 import { getRatingById } from "@/data/ratings/get-rating-by-id";
 import { updateRating } from "@/data/ratings/update-rating";
 import type { DB } from "@/db";
-import type { UpdateRating } from "@/schemas/shared";
+import { UpdateRatingSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-type UpdateRatingParams = {
-	id: string;
-	data: UpdateRating;
-};
+export const UpdateRatingServiceSchema = z.object({
+	id: z.string(),
+	data: UpdateRatingSchema,
+});
 
-export async function updateRatingService(db: DB, { id, data }: UpdateRatingParams) {
+export async function updateRatingService(db: DB, { id, data }: z.infer<typeof UpdateRatingServiceSchema>) {
 	const rating = await getRatingById(db, id);
 
 	if (!rating) {

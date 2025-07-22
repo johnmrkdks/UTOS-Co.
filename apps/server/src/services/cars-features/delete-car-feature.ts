@@ -2,8 +2,16 @@ import { deleteCarFeature } from "@/data/cars-features/delete-car-feature";
 import { getCarFeature } from "@/data/cars-features/get-car-feature";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { z } from "zod";
 
-export async function deleteCarFeatureService(db: DB, id: string) {
+export const DeleteCarFeatureServiceSchema = z.object({
+	id: z.string(),
+});
+
+export async function deleteCarFeatureService(
+	db: DB,
+	{ id }: z.infer<typeof DeleteCarFeatureServiceSchema>,
+) {
 	const carFeature = await getCarFeature(db, id);
 
 	if (!carFeature) {
