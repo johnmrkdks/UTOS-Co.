@@ -6,7 +6,10 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const DriverSchema = createSelectSchema(drivers);
+export const DriverSchema = createSelectSchema(drivers, {
+	createdAt: z.union([z.date(), z.string()]),
+	updatedAt: z.union([z.date(), z.string()]),
+});
 export const InsertDriverSchema = createInsertSchema(drivers);
 export const UpdateDriverSchema = createUpdateSchema(drivers);
 

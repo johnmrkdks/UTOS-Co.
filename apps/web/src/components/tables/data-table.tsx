@@ -96,7 +96,7 @@ export function DataTable<TData, TValue>({
 	// Pagination defaults
 	enablePagination = true,
 	pageSize = 25,
-	pageSizeOptions = [10, 25, 50, 100],
+	pageSizeOptions = [5, 10, 25, 50, 100],
 
 	// Selection defaults
 	enableRowSelection = false,
@@ -207,8 +207,8 @@ export function DataTable<TData, TValue>({
 			isLoading={isLoading}
 			columns={columns}
 			loadingRowCount={loadingRowCount}
-			enableToolbar={shouldShowToolbar}
-			enablePagination={shouldShowPagination}
+			enableToolbar={shouldShowToolbar!}
+			enablePagination={shouldShowPagination!}
 			className={className}
 		>
 			<div className={cn(className)}>

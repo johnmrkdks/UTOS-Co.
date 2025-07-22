@@ -23,6 +23,6 @@ export const QueryListResultSchema = (table: SQLiteTableWithColumns<any>) =>
 	});
 
 export type QueryListResult<T> = {
-	data: Partial<T>[];
+	data: T[];
 	metadata: PaginationMetadata;
 };

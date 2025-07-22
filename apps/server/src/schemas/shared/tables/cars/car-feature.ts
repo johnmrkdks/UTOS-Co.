@@ -6,7 +6,9 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const CarFeatureSchema = createSelectSchema(carFeatures);
+export const CarFeatureSchema = createSelectSchema(carFeatures, {
+	createdAt: z.union([z.date(), z.string()]),
+});
 export const InsertCarFeatureSchema = createInsertSchema(carFeatures);
 export const UpdateCarFeatureSchema = createUpdateSchema(carFeatures);
 

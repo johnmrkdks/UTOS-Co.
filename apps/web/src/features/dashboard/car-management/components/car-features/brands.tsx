@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddBrandDialog } from "./brands/add-brand-dialog";
-import { BrandsTableList } from "./brands/brands-table-list";
+import { BrandTableList } from "./brands/brand-table-list";
 
 export function Brands() {
 	return (
@@ -15,7 +15,7 @@ export function Brands() {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<BrandsTableList />
+				<BrandTableList />
 			</CardContent>
 		</Card>
 	)

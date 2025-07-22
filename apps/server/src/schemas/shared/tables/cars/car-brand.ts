@@ -8,16 +8,18 @@ import { z } from "zod";
 import { CarModelSchema } from "./car-model";
 
 // Base schemas
-export const CarBrandSchema = createSelectSchema(carBrands);
+export const CarBrandSchema = createSelectSchema(carBrands, {
+	createdAt: z.union([z.date(), z.string()]),
+});
 export const InsertCarBrandSchema = createInsertSchema(carBrands);
 export const UpdateCarBrandSchema = createUpdateSchema(carBrands);
 
 // Extended schemas
-export const CarBrandWithModelsSchema = createSelectSchema(carBrands).extend({
+export const CarBrandWithModelsSchema = CarBrandSchema.extend({
 	models: z.array(CarModelSchema)
 });
 
-export const CarBrandWithEnrichedDataSchema = createSelectSchema(carBrands).extend({
+export const CarBrandWithEnrichedDataSchema = CarBrandSchema.extend({
 	metadata: z.object({
 		modelCount: z.number(),
 		carsCount: z.number(),

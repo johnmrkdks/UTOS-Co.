@@ -8,7 +8,9 @@ import { z } from "zod";
 import { CarBrandSchema } from "./car-brand";
 
 // Base schemas
-export const CarModelSchema = createSelectSchema(carModels);
+export const CarModelSchema = createSelectSchema(carModels, {
+	createdAt: z.union([z.date(), z.string()]),
+});
 export const InsertCarModelSchema = createInsertSchema(carModels);
 export const UpdateCarModelSchema = createUpdateSchema(carModels);
 

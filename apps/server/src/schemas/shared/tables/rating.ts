@@ -8,7 +8,10 @@ import {
 import { z } from "zod";
 import { UserSchema } from "./user";
 
-export const RatingSchema = createSelectSchema(ratings).extend({
+export const RatingSchema = createSelectSchema(ratings, {
+	createdAt: z.union([z.date(), z.string()]),
+	updatedAt: z.union([z.date(), z.string()]),
+}).extend({
 	user: UserSchema.optional(),
 });
 export const InsertRatingSchema = createInsertSchema(ratings, {

@@ -6,7 +6,11 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const UserSchema = createSelectSchema(users);
+export const UserSchema = createSelectSchema(users, {
+	banExpires: z.union([z.date(), z.string()]),
+	createdAt: z.union([z.date(), z.string()]),
+	updatedAt: z.union([z.date(), z.string()]),
+});
 export const InsertUserSchema = createInsertSchema(users);
 export const UpdateUserSchema = createUpdateSchema(users);
 

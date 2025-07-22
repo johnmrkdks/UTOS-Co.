@@ -15,7 +15,11 @@ import { CarBodyTypeSchema } from "./cars/car-body-type";
 import { CarConditionTypeSchema } from "./cars/car-condition-type";
 import { CarDriveTypeSchema } from "./cars/car-drive-type";
 
-export const CarSchema = createSelectSchema(cars).extend({
+export const CarSchema = createSelectSchema(cars, {
+	createdAt: z.union([z.date(), z.string()]),
+	updatedAt: z.union([z.date(), z.string()]),
+	dateManufactured: z.union([z.date(), z.string()]),
+}).extend({
 	bodyType: CarBodyTypeSchema.optional(),
 	brand: CarBrandSchema.optional(),
 	conditionType: CarConditionTypeSchema.optional(),

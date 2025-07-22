@@ -7,7 +7,9 @@ import {
 import { z } from "zod";
 
 export const CarTransmissionTypeSchema =
-	createSelectSchema(carTransmissionTypes);
+	createSelectSchema(carTransmissionTypes, {
+		createdAt: z.union([z.date(), z.string()]),
+	});
 export const InsertCarTransmissionTypeSchema =
 	createInsertSchema(carTransmissionTypes);
 export const UpdateCarTransmissionTypeSchema =

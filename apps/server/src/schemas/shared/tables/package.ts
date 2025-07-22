@@ -6,7 +6,10 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const PackageSchema = createSelectSchema(packages);
+export const PackageSchema = createSelectSchema(packages, {
+	createdAt: z.union([z.date(), z.string()]),
+	updatedAt: z.union([z.date(), z.string()]),
+});
 export const InsertPackageSchema = createInsertSchema(packages);
 export const UpdatePackageSchema = createUpdateSchema(packages);
 

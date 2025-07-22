@@ -6,7 +6,11 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const SessionSchema = createSelectSchema(sessions);
+export const SessionSchema = createSelectSchema(sessions, {
+	createdAt: z.union([z.date(), z.string()]),
+	updatedAt: z.union([z.date(), z.string()]),
+	expiresAt: z.union([z.date(), z.string()]),
+});
 export const InsertSessionSchema = createInsertSchema(sessions);
 export const UpdateSessionSchema = createUpdateSchema(sessions);
 

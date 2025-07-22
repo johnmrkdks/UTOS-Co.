@@ -6,7 +6,9 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 
-export const CarConditionTypeSchema = createSelectSchema(carConditionTypes);
+export const CarConditionTypeSchema = createSelectSchema(carConditionTypes, {
+	createdAt: z.union([z.date(), z.string()]),
+});
 export const InsertCarConditionTypeSchema =
 	createInsertSchema(carConditionTypes);
 export const UpdateCarConditionTypeSchema =
