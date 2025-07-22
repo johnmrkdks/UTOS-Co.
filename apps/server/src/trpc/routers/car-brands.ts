@@ -13,6 +13,7 @@ import { protectedProcedure, router } from "@/trpc/init";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
 import { z } from "zod";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
+import { DoesCarBrandExistSchema, doesCarBrandExistService } from "@/services/cars-brands/does-car-brand-exist";
 
 export const carBrandsRouter = router({
 	create: protectedProcedure
@@ -31,6 +32,16 @@ export const carBrandsRouter = router({
 			try {
 				const deletedCarBrand = await deleteCarBrandService(db, input);
 				return deletedCarBrand;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	doesCarBrandExist: protectedProcedure
+		.input(DoesCarBrandExistSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const doesCarBrandExist = await doesCarBrandExistService(db, input);
+				return doesCarBrandExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

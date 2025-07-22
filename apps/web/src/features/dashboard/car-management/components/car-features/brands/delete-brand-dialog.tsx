@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2Icon } from "lucide-react"
@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { CarBrand } from "server/types"
-import { useDeleteCarBrandMutation } from "@/features/dashboard/car-management/hooks/queries/use-delete-car-brand-mutation"
+import { useDeleteCarBrandMutation } from "@/features/dashboard/car-management/hooks/brands/queries/use-delete-car-brand-mutation"
 
 type DeleteBrandDialogProps = {
 	brand: CarBrand
@@ -36,13 +36,17 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 		},
 	})
 
-	const handleSubmit = (data: FormValues) => {
+	const handleReset = () => {
+		form.reset()
+	}
+
+	const handleSubmit = () => {
 		mutation.mutate(
 			{ id: brand.id },
 			{
 				onSuccess: () => {
+					handleReset()
 					setIsDialogOpen(false)
-					form.reset()
 				},
 			}
 		)
@@ -55,7 +59,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 					<Trash2Icon className="w-4 h-4" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="flex flex-col gap-8">
+			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
 				<DialogHeader>
 					<DialogTitle>Delete Brand</DialogTitle>
 					<DialogDescription>
@@ -63,12 +67,12 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-8">
 						<FormField
 							control={form.control}
 							name="confirmation"
 							render={({ field }) => (
-								<FormItem className="flex items-center gap-2 space-y-0">
+								<FormItem className="flex items-center gap-2">
 									<FormControl>
 										<Checkbox
 											checked={field.value}
@@ -76,7 +80,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 										/>
 									</FormControl>
 									<FormLabel>
-										Are you sure you want to delete the brand{" "}
+										Are you sure you want to delete the brand
 										<span className="font-bold">{brand.name}</span>?
 									</FormLabel>
 									<FormMessage />
@@ -84,6 +88,17 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 							)}
 						/>
 						<DialogFooter>
+							<DialogClose>
+								<Button
+									type="button"
+									variant="ghost"
+									onClick={() => {
+										handleReset();
+									}}
+								>
+									Cancel
+								</Button>
+							</DialogClose>
 							<Button
 								type="submit"
 								variant="destructive"

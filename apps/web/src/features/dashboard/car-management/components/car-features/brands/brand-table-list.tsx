@@ -1,6 +1,6 @@
 import { DataTable } from "@/components/tables/data-table";
 import { brandTableColumns } from "./brand-table-columns";
-import { useGetCarBrandsWithEnrichedDataQuery } from "@/features/dashboard/car-management/hooks/queries/use-get-car-brands-with-enriched-data-query";
+import { useGetCarBrandsWithEnrichedDataQuery } from "@/features/dashboard/car-management/hooks/brands/queries/use-get-car-brands-with-enriched-data-query";
 
 export function BrandTableList() {
 	const { data: carBrands, isLoading } = useGetCarBrandsWithEnrichedDataQuery();

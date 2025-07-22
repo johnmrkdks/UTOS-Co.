@@ -9,9 +9,10 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 		id: "name",
 		accessorKey: "name",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Brand Name" />
+			<DataTableColumnHeader className="ml-4
+				" column={column} title="Brand Name" />
 		),
-		cell: ({ row }) => <div className="w-[80px]">{row.getValue("name")}</div>,
+		cell: ({ row }) => <div className="ml-4">{row.getValue("name")}</div>,
 		enableSorting: false,
 		enableHiding: false,
 	},
@@ -22,7 +23,7 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Model Count" />
 		),
 		cell: ({ row }) => (
-			<div className="w-[80px]"><Badge variant="secondary">{Number(row.getValue("metadata.modelCount")).toLocaleString()} cars</Badge></div>
+			<div className=""><Badge variant="secondary">{Number(row.getValue("metadata.modelCount")).toLocaleString()} cars</Badge></div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -34,7 +35,19 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Car Count" />
 		),
 		cell: ({ row }) => (
-			<div className="w-[80px]"><Badge variant="outline">{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars</Badge></div>
+			<div className=""><Badge variant="outline">{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars</Badge></div>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		id: "createdAt",
+		accessorKey: "createdAt",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Created At" />
+		),
+		cell: ({ row }) => (
+			<div className="">{new Date(row.getValue("createdAt")).toLocaleDateString()}</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -43,9 +56,13 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 		id: "actions",
 		accessorKey: "actions",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Actions" />
+			<DataTableColumnHeader className="flex justify-end mr-4" column={column} title="Actions" />
 		),
-		cell: ({ row }) => <BrandTableRowActions row={row} />,
+		cell: ({ row }) => (
+			<div className="flex justify-end mr-4">
+				<BrandTableRowActions row={row} />
+			</div>
+		),
 		enableSorting: false,
 		enableHiding: false,
 	},

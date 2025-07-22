@@ -1,6 +1,7 @@
 import type { Row } from "@tanstack/react-table"
 import { EditBrandDialog } from "./edit-brand-dialog"
 import { DeleteBrandDialog } from "./delete-brand-dialog"
+import type { CarBrand } from "server/types"
 
 type DataTableRowActionsProps<TData> = {
 	row: Row<TData>
@@ -9,7 +10,7 @@ type DataTableRowActionsProps<TData> = {
 export function BrandTableRowActions<TData>({
 	row,
 }: DataTableRowActionsProps<TData>) {
-	const brand = row.original
+	const brand = row.original as CarBrand;
 
 	return (
 		<div className="flex gap-2">

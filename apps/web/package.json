@@ -46,6 +46,7 @@
 		"@tanstack/react-table": "^8.21.3",
 		"@trpc/client": "^11.4.2",
 		"@trpc/tanstack-react-query": "^11.4.3",
+		"@uidotdev/usehooks": "^2.4.1",
 		"better-auth": "catalog:",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
