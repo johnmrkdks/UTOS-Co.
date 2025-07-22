@@ -6,6 +6,8 @@ import { createCarBrandService } from "@/services/cars-brands/create-car-brand";
 import { deleteCarBrandService } from "@/services/cars-brands/delete-car-brand";
 import { getCarBrandService } from "@/services/cars-brands/get-car-brand";
 import { getCarBrandsService } from "@/services/cars-brands/get-car-brands";
+import { getCarBrandsWithEnrichedDataService } from "@/services/cars-brands/get-car-brands-with-enriched-data";
+import { getCarBrandsWithModelsService } from "@/services/cars-brands/get-car-brands-with-models";
 import { updateCarBrandService } from "@/services/cars-brands/update-car-brand";
 import { protectedProcedure, router } from "@/trpc/init";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
@@ -35,6 +37,18 @@ export const carsBrandsRouter = router({
 		.query(async ({ ctx: { db }, input }) => {
 			const carBrands = await getCarBrandsService(db, input);
 			return carBrands;
+		}),
+	listWithModels: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			const carBrandsWithModels = await getCarBrandsWithModelsService(db, input);
+			return carBrandsWithModels;
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			const carBrandsWithEnrichedData = await getCarBrandsWithEnrichedDataService(db, input);
+			return carBrandsWithEnrichedData;
 		}),
 	update: protectedProcedure
 		.input(z.object({ id: z.string(), data: UpdateCarBrandSchema }))

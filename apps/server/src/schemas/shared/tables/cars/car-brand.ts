@@ -5,12 +5,29 @@ import {
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { CarModelSchema } from "./car-model";
 
+// Base schemas
 export const CarBrandSchema = createSelectSchema(carBrands);
 export const InsertCarBrandSchema = createInsertSchema(carBrands);
 export const UpdateCarBrandSchema = createUpdateSchema(carBrands);
 
+// Extended schemas
+export const CarBrandWithModelsSchema = createSelectSchema(carBrands).extend({
+	models: z.array(CarModelSchema)
+});
+
+export const CarBrandWithEnrichedDataSchema = createSelectSchema(carBrands).extend({
+	metadata: z.object({
+		modelCount: z.number(),
+		carsCount: z.number(),
+	})
+});
+
 export type CarBrand = z.infer<typeof CarBrandSchema>;
 export type InsertCarBrand = z.infer<typeof InsertCarBrandSchema>;
 export type UpdateCarBrand = z.infer<typeof UpdateCarBrandSchema>;
+
+export type CarBrandWithModels = z.infer<typeof CarBrandWithModelsSchema>;
+export type CarBrandWithEnrichedData = z.infer<typeof CarBrandWithEnrichedDataSchema>;
 

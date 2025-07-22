@@ -1,8 +1,9 @@
 import { DataTableColumnHeader } from "@/components/tables/data-table-column-header"
+import { Badge } from "@/components/ui/badge"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { CarBrand } from "server/types"
+import type { CarBrandWithEnrichedData } from "server/types"
 
-export const brandColumns: ColumnDef<CarBrand>[] = [
+export const brandColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 	{
 		id: "name",
 		accessorKey: "name",
@@ -13,4 +14,28 @@ export const brandColumns: ColumnDef<CarBrand>[] = [
 		enableSorting: false,
 		enableHiding: false,
 	},
+	{
+		id: "metadata.modelCount",
+		accessorKey: "metadata.modelCount",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Model Count" />
+		),
+		cell: ({ row }) => (
+			<div className="w-[80px]"><Badge variant="secondary">{Number(row.getValue("metadata.modelCount")).toLocaleString()} cars</Badge></div>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		id: "metadata.carsCount",
+		accessorKey: "metadata.carsCount",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Car Count" />
+		),
+		cell: ({ row }) => (
+			<div className="w-[80px]"><Badge variant="outline">{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars</Badge></div>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	}
 ]
