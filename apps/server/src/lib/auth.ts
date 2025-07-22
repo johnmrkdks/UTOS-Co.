@@ -11,6 +11,7 @@ import {
 	superAdminRole,
 	userRole,
 } from "./permissions";
+import { customHash, customVerify } from "./scrypt";
 
 const plugins: BetterAuthOptions["plugins"] = [
 	admin({
@@ -31,6 +32,10 @@ export const auth = betterAuth({
 	trustedOrigins: [env.CORS_ORIGIN],
 	emailAndPassword: {
 		enabled: true,
+		password: {
+			hash: customHash,
+			verify: customVerify,
+		},
 	},
 	socialProviders: {
 		google: {

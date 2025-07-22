@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { InputPassword } from "@/components/input-password";
 import { SignInWithOAuth } from "./sign-in-with-oauth";
+import { useSignInMutation } from "@/features/auth/hooks/queries/use-sign-in-mutation";
 
 type FormValues = z.infer<typeof signInSchema>;
 
@@ -27,6 +28,7 @@ export default function SignInForm() {
 		from: "/",
 	});
 	const { isPending } = authClient.useSession();
+	const mutation = useSignInMutation();
 
 	const form = useForm({
 		resolver: zodResolver(signInSchema),
@@ -34,31 +36,21 @@ export default function SignInForm() {
 			email: "",
 			password: "",
 		},
+		disabled: mutation.isPending,
 	});
 
 	if (isPending) {
 		return <Loader />;
 	}
 
-	const onSubmit = async (data: FormValues) => {
-		await authClient.signIn.email(
-			{
-				email: data.email,
-				password: data.password,
+	const onSubmit = (data: FormValues) => {
+		mutation.mutate(data, {
+			onSuccess: () => {
+				navigate({
+					to: "/",
+				});
 			},
-			{
-				onSuccess: (data) => {
-					console.log(data);
-					navigate({
-						to: "/",
-					});
-					toast.success("Sign in successful");
-				},
-				onError: (error) => {
-					toast.error(error.error.message);
-				},
-			},
-		);
+		});
 	};
 
 	return (
@@ -104,9 +96,10 @@ export default function SignInForm() {
 					<Button
 						type="submit"
 						className="w-full"
-						disabled={!form.formState.isValid || isPending}
+						disabled={!form.formState.isValid || mutation.isPending}
+						loading={mutation.isPending}
 					>
-						{isPending ? "Signing in..." : "Sign in"}
+						{mutation.isPending ? "Signing in..." : "Sign in"}
 					</Button>
 				</form>
 			</Form>
