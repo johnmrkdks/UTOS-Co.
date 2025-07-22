@@ -1,11 +1,16 @@
 import { createCar } from "@/data/cars/create-car";
 import { getCarByName } from "@/data/cars/get-car-by-name";
 import type { DB } from "@/db";
-import type { Car, InsertCar } from "@/schemas/shared";
+import { InsertCarSchema, type Car, type InsertCar } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
+import { z } from "zod";
 
-export async function createCarService(db: DB, data: InsertCar): Promise<Car> {
+export const CreateCarServiceSchema = z.object({
+	data: InsertCarSchema,
+});
+
+export async function createCarService(db: DB, { data }: z.infer<typeof CreateCarServiceSchema>) {
 	const car = await getCarByName(db, data.name);
 
 	if (car) {

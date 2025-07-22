@@ -1,8 +1,13 @@
 import { createBooking } from "@/data/bookings/create-booking";
 import type { DB } from "@/db";
-import type { Booking, InsertBooking } from "@/schemas/shared";
+import { InsertBookingSchema, type Booking, type InsertBooking } from "@/schemas/shared";
+import { z } from "zod";
 
-export async function createBookingService(db: DB, data: InsertBooking): Promise<Booking> {
+export const CreateBookingServiceSchema = z.object({
+	data: InsertBookingSchema,
+});
+
+export async function createBookingService(db: DB, { data }: z.infer<typeof CreateBookingServiceSchema>) {
 	const newBooking = createBooking(db, data);
 
 	return newBooking;

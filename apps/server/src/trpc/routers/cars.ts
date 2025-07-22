@@ -1,9 +1,9 @@
 import { InsertCarSchema, UpdateCarSchema } from "@/schemas/shared/tables/car";
-import { createCarService } from "@/services/cars/create-car";
-import { deleteCarService } from "@/services/cars/delete-car";
-import { getCarService } from "@/services/cars/get-car";
+import { createCarService, CreateCarServiceSchema } from "@/services/cars/create-car";
+import { deleteCarService, DeleteCarServiceSchema } from "@/services/cars/delete-car";
+import { getCarService, GetCarServiceSchema } from "@/services/cars/get-car";
 import { getCarsService } from "@/services/cars/get-cars";
-import { updateCarService } from "@/services/cars/update-car";
+import { updateCarService, UpdateCarServiceSchema } from "@/services/cars/update-car";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
@@ -11,7 +11,7 @@ import { z } from "zod";
 
 export const carsRouter = router({
 	create: protectedProcedure
-		.input(InsertCarSchema)
+		.input(CreateCarServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newCar = await createCarService(db, input);
@@ -21,20 +21,20 @@ export const carsRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeleteCarServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const deletedCar = await deleteCarService(db, input.id);
+				const deletedCar = await deleteCarService(db, input);
 				return deletedCar;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(GetCarServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const car = await getCarService(db, input.id);
+				const car = await getCarService(db, input);
 				return car;
 			} catch (error) {
 				handleTRPCError(error);
@@ -51,7 +51,7 @@ export const carsRouter = router({
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdateCarSchema }))
+		.input(UpdateCarServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedCar = await updateCarService(db, input);

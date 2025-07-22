@@ -2,11 +2,11 @@ import {
 	InsertBookingSchema,
 	UpdateBookingSchema,
 } from "@/schemas/shared/tables/booking";
-import { createBookingService } from "@/services/bookings/create-booking";
-import { deleteBookingService } from "@/services/bookings/delete-booking";
-import { getBookingService } from "@/services/bookings/get-booking";
+import { createBookingService, CreateBookingServiceSchema } from "@/services/bookings/create-booking";
+import { DeleteBookingServiceSchema, deleteBookingService } from "@/services/bookings/delete-booking";
+import { GetBookingServiceSchema, getBookingService } from "@/services/bookings/get-booking";
 import { getBookingsService } from "@/services/bookings/get-bookings";
-import { updateBookingService } from "@/services/bookings/update-booking";
+import { updateBookingService, UpdateBookingServiceSchema } from "@/services/bookings/update-booking";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/resource-list-schema";
@@ -14,7 +14,7 @@ import { z } from "zod";
 
 export const bookingsRouter = router({
 	create: protectedProcedure
-		.input(InsertBookingSchema)
+		.input(CreateBookingServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newBooking = await createBookingService(db, input);
@@ -24,20 +24,20 @@ export const bookingsRouter = router({
 			}
 		}),
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(DeleteBookingServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const deletedBooking = await deleteBookingService(db, input.id);
+				const deletedBooking = await deleteBookingService(db, input);
 				return deletedBooking;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	get: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(GetBookingServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const booking = await getBookingService(db, input.id);
+				const booking = await getBookingService(db, input);
 				return booking;
 			} catch (error) {
 				handleTRPCError(error);
@@ -54,7 +54,7 @@ export const bookingsRouter = router({
 			}
 		}),
 	update: protectedProcedure
-		.input(z.object({ id: z.string(), data: UpdateBookingSchema }))
+		.input(UpdateBookingServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedBooking = await updateBookingService(
