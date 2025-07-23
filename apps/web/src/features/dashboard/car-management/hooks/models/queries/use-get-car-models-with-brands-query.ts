@@ -1,6 +1,6 @@
 import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetCarBrandsWithModelQuery = () => {
-	return useQuery(trpc.carBrands.listWithModels.queryOptions({}));
+export const useGetCarModelsWithBrandQuery = () => {
+	return useQuery(trpc.carModels.listWithBrand.queryOptions({}));
 };

@@ -10,9 +10,6 @@ export async function getCarBrandsWithEnrichedDataService(db: DB, params: Resour
 	const carModelsCount = await getCarModelsCountByBrands(db);
 	const carsCount = await getCarsCountByBrands(db);
 
-	console.log("CarBrands", carBrands.data);
-	console.log("CarBrands Metadata", carBrands.metadata);
-
 	const data = carBrands.data.map(brand => {
 		return {
 			...brand,

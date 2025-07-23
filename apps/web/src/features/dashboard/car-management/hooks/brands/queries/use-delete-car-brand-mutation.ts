@@ -7,12 +7,13 @@ export const useDeleteCarBrandMutation = () => {
 
 	return useMutation(trpc.carBrands.delete.mutationOptions({
 		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: trpc.carBrands.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.carBrands.listWithEnrichedData.queryKey() });
 
 			toast.success("Brand deleted");
 		},
 		onError: (error) => {
-			toast.error("Error deleting brand:", {
+			toast.error("Error while deleting brand", {
 				description: error.message,
 			});
 		},

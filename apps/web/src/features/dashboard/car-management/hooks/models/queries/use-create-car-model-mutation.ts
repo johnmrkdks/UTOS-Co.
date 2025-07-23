@@ -2,17 +2,17 @@ import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const useCreateCarBrandMutation = () => {
+export const useCreateCarModelMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.carBrands.create.mutationOptions({
+	return useMutation(trpc.carModels.create.mutationOptions({
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: trpc.carBrands.listWithEnrichedData.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.carModels.listWithEnrichedData.queryKey() });
 
-			toast.success(`Brand ${data?.name!} added`);
+			toast.success(`Model ${data?.name!} added`);
 		},
 		onError: (error) => {
-			toast.error("Error while adding brand", {
+			toast.error("Error while adding model", {
 				description: error.message,
 			});
 		},

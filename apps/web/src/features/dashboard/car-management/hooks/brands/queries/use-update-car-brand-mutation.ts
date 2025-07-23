@@ -7,12 +7,13 @@ export const useUpdateCarBrandMutation = () => {
 
 	return useMutation(trpc.carBrands.update.mutationOptions({
 		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: trpc.carBrands.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.carBrands.listWithEnrichedData.queryKey() });
 
-			toast.success(`Brand ${data.name} updated`);
+			toast.success(`Brand ${data?.name} updated`);
 		},
 		onError: (error) => {
-			toast.error("Error updating brand", {
+			toast.error("Error while updating brand", {
 				description: error.message,
 			});
 		},

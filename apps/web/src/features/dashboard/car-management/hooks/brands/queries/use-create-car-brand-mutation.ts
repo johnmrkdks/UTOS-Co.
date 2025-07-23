@@ -7,9 +7,10 @@ export const useCreateCarBrandMutation = () => {
 
 	return useMutation(trpc.carBrands.create.mutationOptions({
 		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: trpc.carBrands.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.carBrands.listWithEnrichedData.queryKey() });
 
-			toast.success(`Brand ${data?.name!} added`);
+			toast.success(`Brand ${data?.name} added`);
 		},
 		onError: (error) => {
 			toast.error("Error while adding brand", {

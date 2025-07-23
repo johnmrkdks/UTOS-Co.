@@ -2,17 +2,18 @@ import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const useUpdateCarBrandMutation = () => {
+export const useUpdateCarModelMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.carBrands.update.mutationOptions({
+	return useMutation(trpc.carModels.update.mutationOptions({
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: trpc.carBrands.listWithEnrichedData.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.carModels.list.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.carModels.listWithEnrichedData.queryKey() });
 
-			toast.success(`Brand ${data.name} updated`);
+			toast.success(`Model ${data?.name} updated`);
 		},
 		onError: (error) => {
-			toast.error("Error updating brand", {
+			toast.error("Error while updating model", {
 				description: error.message,
 			});
 		},

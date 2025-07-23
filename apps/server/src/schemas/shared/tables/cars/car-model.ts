@@ -19,8 +19,15 @@ export const CarModelWithBrandSchema = CarModelSchema.extend({
 	brand: CarBrandSchema
 });
 
+export const CarModelWithEnrichedDataSchema = CarModelSchema.extend({
+	metadata: z.object({
+		carsCount: z.number(),
+	})
+});
+
 export type CarModel = z.infer<typeof CarModelSchema>;
 export type InsertCarModel = z.infer<typeof InsertCarModelSchema>;
 export type UpdateCarModel = z.infer<typeof UpdateCarModelSchema>;
 
 export type CarModelWithBrand = z.infer<typeof CarModelWithBrandSchema>;
+export type CarModelWithEnrichedData = z.infer<typeof CarModelWithEnrichedDataSchema>;
