@@ -3,12 +3,15 @@ import { getCarModelsCountByBrands } from "@/data/cars-models/get-car-models-cou
 import { getCarsCountByBrands } from "@/data/cars/get-cars-count-by-brands";
 import type { DB } from "@/db";
 import type { CarBrandWithEnrichedData } from "@/schemas/shared";
-import type { QueryListResult, ResourceList } from "@/utils/resource-list-schema";
+import type { QueryListResult, ResourceList } from "@/utils/query/resource-list";
 
-export async function getCarBrandsWithEnrichedDataService(db: DB, options: ResourceList): Promise<QueryListResult<CarBrandWithEnrichedData>> {
-	const carBrands = await getCarBrands(db, options);
+export async function getCarBrandsWithEnrichedDataService(db: DB, params: ResourceList): Promise<QueryListResult<CarBrandWithEnrichedData>> {
+	const carBrands = await getCarBrands(db, params);
 	const carModelsCount = await getCarModelsCountByBrands(db);
 	const carsCount = await getCarsCountByBrands(db);
+
+	console.log("CarBrands", carBrands.data);
+	console.log("CarBrands Metadata", carBrands.metadata);
 
 	const data = carBrands.data.map(brand => {
 		return {

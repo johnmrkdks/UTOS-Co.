@@ -7,7 +7,7 @@ import {
 	deleteCarBrandService,
 } from "@/services/cars-brands/delete-car-brand";
 import {
-	DoesCarBrandExistSchema,
+	DoesCarBrandExistServiceSchema,
 	doesCarBrandExistService,
 } from "@/services/cars-brands/does-car-brand-exist";
 import { GetCarBrandServiceSchema, getCarBrandService } from "@/services/cars-brands/get-car-brand";
@@ -20,7 +20,7 @@ import {
 } from "@/services/cars-brands/update-car-brand";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 
 export const carBrandsRouter = router({
 	create: protectedProcedure
@@ -44,7 +44,7 @@ export const carBrandsRouter = router({
 			}
 		}),
 	doesCarBrandExist: protectedProcedure
-		.input(DoesCarBrandExistSchema)
+		.input(DoesCarBrandExistServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const doesCarBrandExist = await doesCarBrandExistService(db, input);

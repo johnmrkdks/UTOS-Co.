@@ -14,7 +14,7 @@ import {
 } from "@/services/cars-images/update-car-image";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 
 export const carImagesRouter = router({
 	create: protectedProcedure

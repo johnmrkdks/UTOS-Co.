@@ -9,7 +9,7 @@ import { getRatingsService } from "@/services/ratings/get-ratings";
 import { updateRatingService, UpdateRatingServiceSchema } from "@/services/ratings/update-rating";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";
 
 export const ratingsRouter = router({

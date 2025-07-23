@@ -4,12 +4,13 @@ import {
 } from "@/schemas/shared/tables/cars/car-model";
 import { createCarModelService, CreateCarModelServiceSchema } from "@/services/cars-models/create-car-model";
 import { deleteCarModelService, DeleteCarModelServiceSchema } from "@/services/cars-models/delete-car-model";
+import { doesCarModelExistService, DoesCarModelExistServiceSchema } from "@/services/cars-models/does-car-model-exist";
 import { getCarModelService, GetCarModelServiceSchema } from "@/services/cars-models/get-car-model";
 import { getCarModelsService } from "@/services/cars-models/get-car-models";
 import { updateCarModelService, UpdateCarModelServiceSchema } from "@/services/cars-models/update-car-model";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";
 
 export const carModelsRouter = router({
@@ -29,6 +30,16 @@ export const carModelsRouter = router({
 			try {
 				const deletedCarModel = await deleteCarModelService(db, input);
 				return deletedCarModel;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	doesCarModelExist: protectedProcedure
+		.input(DoesCarModelExistServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const doesCarModelExist = await doesCarModelExistService(db, input);
+				return doesCarModelExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

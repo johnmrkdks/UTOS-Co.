@@ -1,17 +1,21 @@
 import type { DB } from "@/db";
 import { carBrands } from "@/db/schema";
-import type { CarBrand } from "@/schemas/shared";
-import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
 import { RQBFilterBuilder } from "@/utils/query/filter-builders";
+import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
 import type { QueryBuilder } from "@/utils/query/query-builder";
 import type { ResourceList } from "@/utils/query/resource-list";
 
-export async function getCarBrands(db: DB, options: ResourceList) {
+export async function getCarBrandsWithModels(db: DB, options: ResourceList) {
+	const query = await db.query.carBrands.findMany({
+		with: { models: true }
+	});
+
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.carBrands.findMany(),
+		baseQuery: () => query,
 		filterBuilder: new RQBFilterBuilder(carBrands),
 		queryType: "rqb",
 	};
 
-	return filterPaginationSort<CarBrand>(queryBuilder, options);
+	return filterPaginationSort(queryBuilder, options);
+
 }

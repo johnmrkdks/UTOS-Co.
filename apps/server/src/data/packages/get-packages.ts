@@ -1,9 +1,17 @@
 import type { DB } from "@/db";
 import { packages } from "@/db/schema";
-import { filterPaginationSort } from "@/utils/filter-pagination-sort";
-import type { ResourceList } from "@/utils/resource-list-schema";
+import { RQBFilterBuilder } from "@/utils/query/filter-builders";
+import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
+import type { ResourceList } from "@/utils/query/resource-list";
+import type { QueryBuilder } from "@/utils/query/query-builder";
+import type { Package } from "@/schemas/shared";
 
 export async function getPackages(db: DB, options: ResourceList) {
-	const result = await filterPaginationSort(db, packages, options);
-	return result;
+	const queryBuilder: QueryBuilder = {
+		baseQuery: () => db.query.packages.findMany(),
+		filterBuilder: new RQBFilterBuilder(packages),
+		queryType: "rqb",
+	};
+
+	return await filterPaginationSort<Package>(queryBuilder, options);
 }

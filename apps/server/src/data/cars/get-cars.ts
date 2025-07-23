@@ -1,17 +1,20 @@
 import type { DB } from "@/db";
 import { cars } from "@/db/schema";
 import type { Car } from "@/schemas/shared";
-import { filterPaginationSort } from "@/utils/filter-pagination-sort";
-import type {
-	QueryListResult,
-	ResourceList,
-} from "@/utils/resource-list-schema";
+import { RQBFilterBuilder } from "@/utils/query/filter-builders";
+import type { QueryBuilder } from "@/utils/query/query-builder";
+import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
+import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getCars(
 	db: DB,
 	params: ResourceList,
-): Promise<QueryListResult<Car>> {
-	const records = await filterPaginationSort(db, cars, params);
+) {
+	const queryBuilder: QueryBuilder = {
+		baseQuery: () => db.query.cars.findMany(),
+		filterBuilder: new RQBFilterBuilder(cars),
+		queryType: "rqb",
+	};
 
-	return records;
+	return await filterPaginationSort<Car>(queryBuilder, params);
 }

@@ -17,7 +17,7 @@ import {
 } from "@/services/cars-drive-types/update-car-drive-type";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 
 export const carDriveTypesRouter = router({
 	create: protectedProcedure

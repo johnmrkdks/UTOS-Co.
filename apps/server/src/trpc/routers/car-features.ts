@@ -17,7 +17,7 @@ import {
 } from "@/services/cars-features/update-car-feature";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 
 export const carFeaturesRouter = router({
 	create: protectedProcedure

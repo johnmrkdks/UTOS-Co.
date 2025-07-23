@@ -6,7 +6,7 @@ import { getCarsService } from "@/services/cars/get-cars";
 import { updateCarService, UpdateCarServiceSchema } from "@/services/cars/update-car";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { ResourceListSchema } from "@/utils/resource-list-schema";
+import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";
 
 export const carsRouter = router({
