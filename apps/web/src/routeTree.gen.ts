@@ -22,11 +22,14 @@ import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout/index'
+import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './routes/dashboard/_layout/todays-scheduled/index'
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
+import { Route as DashboardLayoutPublishedIndexRouteImport } from './routes/dashboard/_layout/published/index'
 import { Route as DashboardLayoutPackagesIndexRouteImport } from './routes/dashboard/_layout/packages/index'
 import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboard/_layout/inbox/index'
 import { Route as DashboardLayoutCarManagementIndexRouteImport } from './routes/dashboard/_layout/car-management/index'
+import { Route as DashboardLayoutBookmarksIndexRouteImport } from './routes/dashboard/_layout/bookmarks/index'
 import { Route as DashboardLayoutBoardIndexRouteImport } from './routes/dashboard/_layout/board/index'
 
 const DashboardRouteImport = createFileRoute('/dashboard')()
@@ -89,6 +92,12 @@ const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
+const DashboardLayoutTodaysScheduledIndexRoute =
+  DashboardLayoutTodaysScheduledIndexRouteImport.update({
+    id: '/todays-scheduled/',
+    path: '/todays-scheduled/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutSettingsIndexRoute =
   DashboardLayoutSettingsIndexRouteImport.update({
     id: '/settings/',
@@ -99,6 +108,12 @@ const DashboardLayoutReportIndexRoute =
   DashboardLayoutReportIndexRouteImport.update({
     id: '/report/',
     path: '/report/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutPublishedIndexRoute =
+  DashboardLayoutPublishedIndexRouteImport.update({
+    id: '/published/',
+    path: '/published/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
 const DashboardLayoutPackagesIndexRoute =
@@ -117,6 +132,12 @@ const DashboardLayoutCarManagementIndexRoute =
   DashboardLayoutCarManagementIndexRouteImport.update({
     id: '/car-management/',
     path: '/car-management/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutBookmarksIndexRoute =
+  DashboardLayoutBookmarksIndexRouteImport.update({
+    id: '/bookmarks/',
+    path: '/bookmarks/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
 const DashboardLayoutBoardIndexRoute =
@@ -138,11 +159,14 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
   '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
+  '/dashboard/todays-scheduled': typeof DashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
@@ -155,11 +179,14 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/': typeof MarketingIndexRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
   '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
+  '/dashboard/todays-scheduled': typeof DashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,11 +203,14 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/dashboard/_layout/board/': typeof DashboardLayoutBoardIndexRoute
+  '/dashboard/_layout/bookmarks/': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/_layout/car-management/': typeof DashboardLayoutCarManagementIndexRoute
   '/dashboard/_layout/inbox/': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/_layout/packages/': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/_layout/published/': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/_layout/report/': typeof DashboardLayoutReportIndexRoute
   '/dashboard/_layout/settings/': typeof DashboardLayoutSettingsIndexRoute
+  '/dashboard/_layout/todays-scheduled/': typeof DashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -196,11 +226,14 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard/'
     | '/dashboard/board'
+    | '/dashboard/bookmarks'
     | '/dashboard/car-management'
     | '/dashboard/inbox'
     | '/dashboard/packages'
+    | '/dashboard/published'
     | '/dashboard/report'
     | '/dashboard/settings'
+    | '/dashboard/todays-scheduled'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -213,11 +246,14 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/'
     | '/dashboard/board'
+    | '/dashboard/bookmarks'
     | '/dashboard/car-management'
     | '/dashboard/inbox'
     | '/dashboard/packages'
+    | '/dashboard/published'
     | '/dashboard/report'
     | '/dashboard/settings'
+    | '/dashboard/todays-scheduled'
   id:
     | '__root__'
     | '/_marketing'
@@ -233,11 +269,14 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/dashboard/_layout/'
     | '/dashboard/_layout/board/'
+    | '/dashboard/_layout/bookmarks/'
     | '/dashboard/_layout/car-management/'
     | '/dashboard/_layout/inbox/'
     | '/dashboard/_layout/packages/'
+    | '/dashboard/_layout/published/'
     | '/dashboard/_layout/report/'
     | '/dashboard/_layout/settings/'
+    | '/dashboard/_layout/todays-scheduled/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -333,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/todays-scheduled/': {
+      id: '/dashboard/_layout/todays-scheduled/'
+      path: '/todays-scheduled'
+      fullPath: '/dashboard/todays-scheduled'
+      preLoaderRoute: typeof DashboardLayoutTodaysScheduledIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/dashboard/_layout/settings/': {
       id: '/dashboard/_layout/settings/'
       path: '/settings'
@@ -345,6 +391,13 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/dashboard/report'
       preLoaderRoute: typeof DashboardLayoutReportIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/published/': {
+      id: '/dashboard/_layout/published/'
+      path: '/published'
+      fullPath: '/dashboard/published'
+      preLoaderRoute: typeof DashboardLayoutPublishedIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
     '/dashboard/_layout/packages/': {
@@ -366,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/car-management'
       fullPath: '/dashboard/car-management'
       preLoaderRoute: typeof DashboardLayoutCarManagementIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/bookmarks/': {
+      id: '/dashboard/_layout/bookmarks/'
+      path: '/bookmarks'
+      fullPath: '/dashboard/bookmarks'
+      preLoaderRoute: typeof DashboardLayoutBookmarksIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
     '/dashboard/_layout/board/': {
@@ -403,22 +463,29 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 interface DashboardLayoutRouteChildren {
   DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
   DashboardLayoutBoardIndexRoute: typeof DashboardLayoutBoardIndexRoute
+  DashboardLayoutBookmarksIndexRoute: typeof DashboardLayoutBookmarksIndexRoute
   DashboardLayoutCarManagementIndexRoute: typeof DashboardLayoutCarManagementIndexRoute
   DashboardLayoutInboxIndexRoute: typeof DashboardLayoutInboxIndexRoute
   DashboardLayoutPackagesIndexRoute: typeof DashboardLayoutPackagesIndexRoute
+  DashboardLayoutPublishedIndexRoute: typeof DashboardLayoutPublishedIndexRoute
   DashboardLayoutReportIndexRoute: typeof DashboardLayoutReportIndexRoute
   DashboardLayoutSettingsIndexRoute: typeof DashboardLayoutSettingsIndexRoute
+  DashboardLayoutTodaysScheduledIndexRoute: typeof DashboardLayoutTodaysScheduledIndexRoute
 }
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
   DashboardLayoutBoardIndexRoute: DashboardLayoutBoardIndexRoute,
+  DashboardLayoutBookmarksIndexRoute: DashboardLayoutBookmarksIndexRoute,
   DashboardLayoutCarManagementIndexRoute:
     DashboardLayoutCarManagementIndexRoute,
   DashboardLayoutInboxIndexRoute: DashboardLayoutInboxIndexRoute,
   DashboardLayoutPackagesIndexRoute: DashboardLayoutPackagesIndexRoute,
+  DashboardLayoutPublishedIndexRoute: DashboardLayoutPublishedIndexRoute,
   DashboardLayoutReportIndexRoute: DashboardLayoutReportIndexRoute,
   DashboardLayoutSettingsIndexRoute: DashboardLayoutSettingsIndexRoute,
+  DashboardLayoutTodaysScheduledIndexRoute:
+    DashboardLayoutTodaysScheduledIndexRoute,
 }
 
 const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(

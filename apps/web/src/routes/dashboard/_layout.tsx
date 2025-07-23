@@ -2,13 +2,12 @@ import Loader from "@/components/loader";
 import {
 	SidebarInset,
 	SidebarProvider,
-	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { DashboardNavbar } from "@/features/dashboard/components/dashboard-navbar";
 import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar";
-import { authClient } from "@/lib/auth-client";
 import { requireAdmin } from "@/utils/auth";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { Suspense } from "react";
 
 export const Route = createFileRoute("/dashboard/_layout")({
 	component: RouteComponent,
@@ -16,23 +15,22 @@ export const Route = createFileRoute("/dashboard/_layout")({
 });
 
 function RouteComponent() {
-	const { isPending } = authClient.useSession();
-
-	if (isPending) {
-		return (
-			<div className="h-screen flex flex-col items-center justify-center">
-				<Loader />
-			</div>
-		);
-	}
+	const routerState = useRouterState();
 
 	return (
 		<SidebarProvider>
 			<DashboardSidebar />
 			<SidebarInset className="relative overflow-hidden">
 				<DashboardNavbar className="sticky top-0 z-10" />
-				<div className="h-full p-4 overflow-auto">
-					<Outlet />
+				<div className="h-full p-4 overflow-auto relative">
+					{routerState.status === 'pending' && (
+						<div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+							<Loader />
+						</div>
+					)}
+					<Suspense fallback={<Loader />}>
+						<Outlet />
+					</Suspense>
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

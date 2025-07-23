@@ -1,18 +1,5 @@
-
-import {
-	BoltIcon,
-	BookOpenIcon,
-	Layers2Icon,
-	LogOutIcon,
-	PinIcon,
-	UserPenIcon,
-} from "lucide-react"
-
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@/components/ui/avatar"
+import { BoltIcon, BookOpenIcon, Layers2Icon, LogOutIcon, PinIcon, PenIcon as UserPenIcon } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -23,13 +10,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 import { authClient } from "@/lib/auth-client"
 import { useNavigate } from "@tanstack/react-router"
 import { getNameInitials } from "@/utils/format"
 
 export function UserMenu() {
-	const navigate = useNavigate();
-	const { data: session, isPending } = authClient.useSession();
+	const navigate = useNavigate()
+	const { data: session, isPending } = authClient.useSession()
 
 	function handleLogout() {
 		authClient.signOut({
@@ -37,13 +25,22 @@ export function UserMenu() {
 				onSuccess: () => {
 					navigate({
 						to: "/",
-					});
+					})
 				},
 			},
-		});
+		})
 	}
 
-	console.log(session);
+	// Show skeleton while loading
+	if (isPending) {
+		return (
+			<Button variant="ghost" className="h-auto p-0 hover:bg-transparent" disabled>
+				<Avatar>
+					<Skeleton className="h-full w-full rounded-full" />
+				</Avatar>
+			</Button>
+		)
+	}
 
 	return (
 		<DropdownMenu>
@@ -57,12 +54,8 @@ export function UserMenu() {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="max-w-64" align="end">
 				<DropdownMenuLabel className="flex min-w-0 flex-col">
-					<span className="text-foreground truncate text-sm font-medium">
-						{session?.user.name}
-					</span>
-					<span className="text-muted-foreground truncate text-xs font-normal">
-						{session?.user.email}
-					</span>
+					<span className="text-foreground truncate text-sm font-medium">{session?.user.name}</span>
+					<span className="text-muted-foreground truncate text-xs font-normal">{session?.user.email}</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
