@@ -13,12 +13,14 @@ GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "down-under-chauffeur-test-db"
-database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+database_name = "down-under-chauffeur-db"
+database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
+preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
 migrations_dir = "./src/db/migrations"
 
 [[r2_buckets]]
 binding = 'BUCKET'
 bucket_name = 'down-under-chauffeur-bucket'
+preview_bucket_name = "down-under-chauffeur-test-bucket"
 
 
