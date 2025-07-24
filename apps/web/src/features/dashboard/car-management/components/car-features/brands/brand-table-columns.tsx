@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { CarBrandWithEnrichedData } from "server/types"
 import { BrandTableRowActions } from "./brand-table-row-actions"
+import { formatSQLiteDate } from "@/utils/formatter/format-sqlite-date"
 
 export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 	{
@@ -47,7 +48,7 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Created At" />
 		),
 		cell: ({ row }) => (
-			<div className="">{new Date(row.getValue("createdAt")).toLocaleDateString()}</div>
+			<div className="">{formatSQLiteDate(row.getValue("createdAt"))}</div>
 		),
 		enableSorting: false,
 		enableHiding: false,

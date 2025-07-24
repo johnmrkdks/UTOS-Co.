@@ -1,5 +1,5 @@
 import { deleteCarBrand } from "@/data/cars-brands/delete-car-brand";
-import { getCarBrand } from "@/data/cars-brands/get-car-brand";
+import { getCarBrandById } from "@/data/cars-brands/get-car-brand-by-id";
 import { getCarModelsCountByBrandId } from "@/data/cars-models/get-car-models-count-by-brand-id";
 import { getCarsCountByBrandId } from "@/data/cars/get-cars-count-by-brand-id";
 import type { DB } from "@/db";
@@ -23,7 +23,7 @@ export async function deleteCarBrandService(
 		throw ErrorFactory.badRequest("Some entities are using this car brand. Please delete them first.");
 	}
 
-	const carBrand = await getCarBrand(db, id);
+	const carBrand = await getCarBrandById(db, id);
 
 	if (!carBrand) {
 		throw ErrorFactory.notFound("Car brand not found.");

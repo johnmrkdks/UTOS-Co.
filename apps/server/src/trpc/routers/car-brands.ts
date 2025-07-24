@@ -7,9 +7,9 @@ import {
 	deleteCarBrandService,
 } from "@/services/cars-brands/delete-car-brand";
 import {
-	DoesCarBrandExistServiceSchema,
-	doesCarBrandExistService,
-} from "@/services/cars-brands/does-car-brand-exist";
+	IsCarBrandExistServiceSchema,
+	isCarBrandExistService,
+} from "@/services/cars-brands/is-car-brand-exist";
 import { GetCarBrandServiceSchema, getCarBrandService } from "@/services/cars-brands/get-car-brand";
 import { getCarBrandsService } from "@/services/cars-brands/get-car-brands";
 import { getCarBrandsWithEnrichedDataService } from "@/services/cars-brands/get-car-brands-with-enriched-data";
@@ -21,8 +21,19 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
+import { checkCarBrandUsageService, CheckCarBrandUsageServiceSchema } from "@/services/cars-brands/check-car-brand-usage";
 
 export const carBrandsRouter = router({
+	checkCarBrandUsage: protectedProcedure
+		.input(CheckCarBrandUsageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const checkCarBrandUsage = await checkCarBrandUsageService(db, input);
+				return checkCarBrandUsage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
 	create: protectedProcedure
 		.input(CreateCarBrandServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
@@ -43,12 +54,12 @@ export const carBrandsRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	doesCarBrandExist: protectedProcedure
-		.input(DoesCarBrandExistServiceSchema)
+	isCarBrandExist: protectedProcedure
+		.input(IsCarBrandExistServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const doesCarBrandExist = await doesCarBrandExistService(db, input);
-				return doesCarBrandExist;
+				const isCarBrandExist = await isCarBrandExistService(db, input);
+				return isCarBrandExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

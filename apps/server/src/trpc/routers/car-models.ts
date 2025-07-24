@@ -4,7 +4,7 @@ import {
 } from "@/schemas/shared/tables/cars/car-model";
 import { createCarModelService, CreateCarModelServiceSchema } from "@/services/cars-models/create-car-model";
 import { deleteCarModelService, DeleteCarModelServiceSchema } from "@/services/cars-models/delete-car-model";
-import { doesCarModelExistService, DoesCarModelExistServiceSchema } from "@/services/cars-models/does-car-model-exist";
+import { isCarModelExistService, IsCarModelExistServiceSchema } from "@/services/cars-models/is-car-model-exist";
 import { getCarModelsWithEnrichedDataService } from "@/services/cars-models/get-car-brands-with-enriched-data";
 import { getCarModelService, GetCarModelServiceSchema } from "@/services/cars-models/get-car-model";
 import { getCarModelsService } from "@/services/cars-models/get-car-models";
@@ -36,12 +36,12 @@ export const carModelsRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	doesCarModelExist: protectedProcedure
-		.input(DoesCarModelExistServiceSchema)
+	isCarModelExist: protectedProcedure
+		.input(IsCarModelExistServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const doesCarModelExist = await doesCarModelExistService(db, input);
-				return doesCarModelExist;
+				const isCarModelExist = await isCarModelExistService(db, input);
+				return isCarModelExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

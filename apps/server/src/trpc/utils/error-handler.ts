@@ -4,6 +4,7 @@ import { ErrorFactory } from '@/utils/error-factory';
 
 export const mapAppErrorToTRPC = (error: AppError): TRPCError => {
 	const codeMap: Record<ErrorCode, TRPCError['code']> = {
+		[ErrorCode.MISSING_ENTRY]: 'NOT_FOUND',
 		[ErrorCode.BAD_REQUEST]: 'BAD_REQUEST',
 		[ErrorCode.VALIDATION_ERROR]: 'BAD_REQUEST',
 		[ErrorCode.NOT_FOUND]: 'NOT_FOUND',

@@ -5,6 +5,8 @@ import { useGetCarBrandsWithEnrichedDataQuery } from "@/features/dashboard/car-m
 export function BrandTableList() {
 	const { data: carBrands, isLoading } = useGetCarBrandsWithEnrichedDataQuery();
 
+	console.log(carBrands)
+
 	return (
 		<DataTable
 			columns={brandTableColumns}

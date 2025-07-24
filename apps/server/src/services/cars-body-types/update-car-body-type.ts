@@ -1,4 +1,4 @@
-import { getCarBodyType } from "@/data/cars-body-types/get-car-body-type";
+import { getCarBodyTypeById } from "@/data/cars-body-types/get-car-body-type-by-id";
 import { updateCarBodyType } from "@/data/cars-body-types/update-car-body-type";
 import type { DB } from "@/db";
 import { UpdateCarBodyTypeSchema, type UpdateCarBodyType } from "@/schemas/shared";
@@ -15,7 +15,7 @@ export async function updateCarBodyTypeService(
 	db: DB,
 	{ id, data }: z.infer<typeof UpdateCarBodyTypeServiceSchema>,
 ) {
-	const carBodyType = await getCarBodyType(db, id);
+	const carBodyType = await getCarBodyTypeById(db, id);
 
 	if (!carBodyType) {
 		throw ErrorFactory.notFound("Car body type not found.");

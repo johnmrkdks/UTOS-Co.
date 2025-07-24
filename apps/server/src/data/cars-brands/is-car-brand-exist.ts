@@ -2,7 +2,7 @@ import type { DB } from "@/db";
 import { carBrands } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function doesCarBrandExist(
+export async function isCarBrandExist(
 	db: DB,
 	name: string,
 ): Promise<boolean> {

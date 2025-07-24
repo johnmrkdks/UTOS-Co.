@@ -1,5 +1,5 @@
 import { deleteCarDriveType } from "@/data/cars-drive-types/delete-car-drive-type";
-import { getCarDriveType } from "@/data/cars-drive-types/get-car-drive-type";
+import { getCarDriveType } from "@/data/cars-drive-types/get-car-brand-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";

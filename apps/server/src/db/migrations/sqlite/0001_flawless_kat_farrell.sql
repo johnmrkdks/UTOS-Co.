@@ -1,0 +1,1 @@
+ALTER TABLE `cars` RENAME COLUMN "number_plate" TO "license_plate";

@@ -41,7 +41,7 @@ export const cars = sqliteTable(
 			.references(() => carConditionTypes.id, { onDelete: "restrict" }),
 
 		// Car-specific attributes
-		numberPlate: text("number_plate").notNull(),
+		licensePlate: text("license_plate").notNull(),
 		mileage: integer("mileage").notNull(),
 		color: text("color").notNull(),
 		engineSize: integer("engine_size").notNull(), // in CC

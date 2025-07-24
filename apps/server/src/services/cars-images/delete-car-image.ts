@@ -1,4 +1,5 @@
 import { deleteCarImage } from "@/data/cars-images/delete-car-image";
+import { getCarImageById } from "@/data/cars-images/get-car-image-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
@@ -11,7 +12,7 @@ export async function deleteCarImageService(
 	db: DB,
 	{ id }: z.infer<typeof DeleteCarImageServiceSchema>,
 ) {
-	const carImage = await deleteCarImage(db, id);
+	const carImage = await getCarImageById(db, id);
 
 	if (!carImage) {
 		throw ErrorFactory.notFound("Car image not found.");

@@ -1,7 +1,7 @@
 import { getBookingById } from "@/data/bookings/get-booking-by-id";
 import { updateBooking } from "@/data/bookings/update-booking";
 import type { DB } from "@/db";
-import { UpdateBookingSchema, type UpdateBooking } from "@/schemas/shared";
+import { UpdateBookingSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import z from "zod";
 

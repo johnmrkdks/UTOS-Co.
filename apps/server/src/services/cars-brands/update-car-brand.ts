@@ -1,4 +1,4 @@
-import { getCarBrand } from "@/data/cars-brands/get-car-brand";
+import { getCarBrandById } from "@/data/cars-brands/get-car-brand-by-id";
 import { updateCarBrand } from "@/data/cars-brands/update-car-brand";
 import type { DB } from "@/db";
 import { UpdateCarBrandSchema, type UpdateCarBrand } from "@/schemas/shared";
@@ -15,7 +15,7 @@ export async function updateCarBrandService(
 	db: DB,
 	{ id, data }: z.infer<typeof UpdateCarBrandServiceSchema>,
 ) {
-	const carBrand = await getCarBrand(db, id);
+	const carBrand = await getCarBrandById(db, id);
 
 	if (!carBrand) {
 		throw ErrorFactory.notFound("Car brand not found.");
