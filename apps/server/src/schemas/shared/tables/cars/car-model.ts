@@ -11,15 +11,17 @@ import { CarBrandSchema } from "./car-brand";
 export const CarModelSchema = createSelectSchema(carModels, {
 	createdAt: z.union([z.date(), z.string()]),
 });
-export const InsertCarModelSchema = createInsertSchema(carModels);
-export const UpdateCarModelSchema = createUpdateSchema(carModels);
+export const InsertCarModelSchema = createInsertSchema(carModels)
+	.omit({ id: true, createdAt: true })
+export const UpdateCarModelSchema = createUpdateSchema(carModels)
+	.omit({ createdAt: true });
 
 // Extended schema
 export const CarModelWithBrandSchema = CarModelSchema.extend({
 	brand: CarBrandSchema
 });
 
-export const CarModelWithEnrichedDataSchema = CarModelSchema.extend({
+export const CarModelWithEnrichedDataSchema = CarModelWithBrandSchema.extend({
 	metadata: z.object({
 		carsCount: z.number(),
 	})

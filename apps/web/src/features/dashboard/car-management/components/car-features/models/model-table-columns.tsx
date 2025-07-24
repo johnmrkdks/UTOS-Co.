@@ -1,30 +1,28 @@
 import { DataTableColumnHeader } from "@/components/tables/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { CarBrandWithEnrichedData } from "server/types"
-import { BrandTableRowActions } from "./brand-table-row-actions"
+import type { CarModelWithEnrichedData } from "server/types"
+import { ModelTableRowActions } from "./model-table-row-actions"
 
-export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
+export const modelTableColumns: ColumnDef<CarModelWithEnrichedData>[] = [
 	{
 		id: "name",
 		accessorKey: "name",
 		header: ({ column }) => (
 			<DataTableColumnHeader className="ml-4
-				" column={column} title="Brand Name" />
+				" column={column} title="Model Name" />
 		),
 		cell: ({ row }) => <div className="ml-4">{row.getValue("name")}</div>,
 		enableSorting: false,
 		enableHiding: false,
 	},
 	{
-		id: "metadata.modelCount",
-		accessorKey: "metadata.modelCount",
+		id: "brand.name",
+		accessorKey: "brand.name",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Model Count" />
+			<DataTableColumnHeader column={column} title="Brand Name" />
 		),
-		cell: ({ row }) => (
-			<div className=""><Badge variant="secondary">{Number(row.getValue("metadata.modelCount")).toLocaleString()} cars</Badge></div>
-		),
+		cell: ({ row }) => <div>{row.getValue("brand.name")}</div>,
 		enableSorting: false,
 		enableHiding: false,
 	},
@@ -60,7 +58,7 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 		),
 		cell: ({ row }) => (
 			<div className="flex justify-end mr-4">
-				<BrandTableRowActions row={row} />
+				<ModelTableRowActions row={row} />
 			</div>
 		),
 		enableSorting: false,

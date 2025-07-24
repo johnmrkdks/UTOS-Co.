@@ -6,13 +6,11 @@ import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 import { z } from "zod";
 
-export const CreateCarFuelTypeServiceSchema = z.object({
-	data: InsertCarFuelTypeSchema,
-});
+export const CreateCarFuelTypeServiceSchema = InsertCarFuelTypeSchema;
 
 export async function createCarFuelTypeService(
 	db: DB,
-	{ data }: z.infer<typeof CreateCarFuelTypeServiceSchema>,
+	data: z.infer<typeof CreateCarFuelTypeServiceSchema>,
 ) {
 	const carFuelTypeName = await getCarFuelTypeByName(db, data.name);
 

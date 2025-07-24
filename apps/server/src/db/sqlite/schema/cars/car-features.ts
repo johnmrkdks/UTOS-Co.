@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { cars } from "@/db/sqlite/schema/cars";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -14,10 +14,7 @@ export const carFeatures = sqliteTable(
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.default(sql`(CURRENT_TIMESTAMP)`),
-	},
-	(table) => ({
-		carIdx: index("car_features_car_idx").on(table.carId),
-	}),
+	}
 );
 
 export const carFeaturesRelations = relations(carFeatures, ({ one }) => ({

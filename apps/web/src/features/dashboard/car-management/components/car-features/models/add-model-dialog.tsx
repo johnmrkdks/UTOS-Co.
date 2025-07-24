@@ -9,45 +9,40 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Loader2, Check, X, SquarePenIcon } from "lucide-react"
+import { PlusIcon, Loader2, Check, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useDebounce } from "@uidotdev/usehooks"
-import { useUpdateCarBrandMutation } from "@/features/dashboard/car-management/hooks/brands/queries/use-update-car-brand-mutation"
-import { useCheckCarBrandMutation } from "@/features/dashboard/car-management/hooks/brands/queries/use-check-car-brand-mutation"
-import type { CarBrand } from "server/types"
-
-type EditBrandDialogProps = {
-	brand: CarBrand
-}
+import { useCheckCarModelMutation } from "@/features/dashboard/car-management/hooks/models/queries/use-check-car-model-mutation"
+import { useCreateCarModelMutation } from "@/features/dashboard/car-management/hooks/models/queries/use-create-car-model-mutation"
+import { useGetCarBrandsQuery } from "@/features/dashboard/car-management/hooks/brands/queries/use-get-car-brands-query"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const FormSchema = z.object({
-	name: z.string().min(1, "Brand name is required").max(50, "Brand name must be less than 50 characters"),
+	name: z.string().min(1, "Model name is required").max(50, "Model name must be less than 50 characters"),
+	brandId: z.string().min(1, "Brand id is required"),
+	year: z.coerce.number().min(1900).max(new Date().getFullYear())
 })
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function EditBrandDialog({ brand }: EditBrandDialogProps) {
+export function AddModelDialog() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
 	const [nameAvailability, setNameAvailability] = useState<boolean | null>(null)
-	const mutation = useUpdateCarBrandMutation()
-	const checkNameMutation = useCheckCarBrandMutation()
+	const { data: brands, isLoading: isBrandsLoading } = useGetCarBrandsQuery();
+	const mutation = useCreateCarModelMutation();
+	const checkNameMutation = useCheckCarModelMutation();
 
 	const form = useForm<FormValues>({
+		disabled: mutation.isPending,
 		defaultValues: {
-			name: brand.name
+			name: "",
+			brandId: "",
 		},
 	})
-
-	// Reset form when value changes
-	useEffect(() => {
-		form.reset({
-			name: brand.name,
-		});
-	}, [brand, form]);
 
 	const debouncedCheckName = useDebounce(form.watch("name"), 300)
 	const formRef = useRef(form)
@@ -57,11 +52,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	checkNameMutationRef.current = checkNameMutation
 
 	useEffect(() => {
-		// Only check availability if the name is different from the original brand name
-		if (debouncedCheckName &&
-			debouncedCheckName.length > 0 &&
-			debouncedCheckName !== brand.name) {
-
+		if (debouncedCheckName && debouncedCheckName.length > 0) {
 			setNameAvailability(null);
 
 			checkNameMutationRef.current.mutate({
@@ -83,11 +74,10 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 				},
 			})
 		} else {
-			// Clear errors and set availability to null if it's the original name or empty
 			formRef.current.clearErrors("name")
 			setNameAvailability(null)
 		}
-	}, [debouncedCheckName, brand.name])
+	}, [debouncedCheckName])
 
 	const handleReset = () => {
 		form.reset()
@@ -95,10 +85,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	}
 
 	const handleSubmit = (data: FormValues) => {
-		mutation.mutate({
-			id: brand.id,
-			data
-		}, {
+		mutation.mutate(FormSchema.parse(data), {
 			onSuccess: () => {
 				handleReset()
 				setIsDialogOpen(false)
@@ -107,11 +94,6 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	}
 
 	const getValidationIcon = () => {
-		// Don't show validation icons if it's the same as the original name
-		if (debouncedCheckName === brand.name) {
-			return null
-		}
-
 		if (checkNameMutation.isPending && debouncedCheckName) {
 			return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
 		}
@@ -128,11 +110,6 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	}
 
 	const getValidationMessage = () => {
-		// Don't show validation messages if it's the same as the original name
-		if (debouncedCheckName === brand.name) {
-			return null
-		}
-
 		if (checkNameMutation.isPending && debouncedCheckName) {
 			return (
 				<div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -146,7 +123,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 			return (
 				<div className="flex items-center gap-1 text-sm text-green-600">
 					<Check className="h-3 w-3" />
-					Brand name is available
+					Model name is available
 				</div>
 			)
 		}
@@ -157,41 +134,86 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="icon">
-					<SquarePenIcon className="w-4 h-4" />
+				<Button>
+					<PlusIcon className="w-4 h-4" />
+					Add Model
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
 				<DialogHeader >
-					<DialogTitle>Edit Brand</DialogTitle>
-					<DialogDescription>
-						Enter the name of the car brand.
-					</DialogDescription>
+					<DialogTitle>Add New Model</DialogTitle>
+					<DialogDescription>Enter the name of the new car model.</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
-						<div>
+						<div className="flex flex-col gap-4">
 							<FormField
-								name="name"
+								control={form.control}
+								name="brandId"
 								render={({ field }) => (
-									<div className="grid gap-2">
-										<FormLabel>Brand Name</FormLabel>
-										<FormControl>
-											<div className="relative">
-												<Input
-													disabled={mutation.isPending}
-													placeholder="Enter brand name"
-													className="pr-8"
-													{...field}
-												/>
-												<div className="absolute right-2 top-1/2 -translate-y-1/2">{getValidationIcon()}</div>
-											</div>
-										</FormControl>
+									<FormItem className="w-96">
+										<FormLabel>Brand</FormLabel>
+										<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<FormControl>
+												<SelectTrigger className="w-60" disabled={isBrandsLoading}>
+													<SelectValue placeholder="Select brand" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{
+													brands?.data?.map(brand => (
+														<SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
+													))
+												}
+											</SelectContent>
+										</Select>
 										<FormMessage />
-										{getValidationMessage()}
-									</div>
+									</FormItem>
 								)}
 							/>
+
+							<div className="grid grid-cols-2 gap-2">
+								<FormField
+									name="name"
+									render={({ field }) => (
+										<FormItem className="flex flex-col items-start">
+											<FormLabel>Model Name</FormLabel>
+											<FormControl>
+												<div className="relative">
+													<Input
+														placeholder="Enter model name"
+														className="pr-8"
+														{...field}
+													/>
+													<div className="absolute right-2 top-1/2 -translate-y-1/2">{getValidationIcon()}</div>
+												</div>
+											</FormControl>
+											<FormMessage />
+											{getValidationMessage()}
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									name="year"
+									render={({ field }) => (
+										<FormItem className="flex flex-col items-start">
+											<FormLabel>Model Year</FormLabel>
+											<FormControl>
+												<div className="relative">
+													<Input
+														type="number"
+														placeholder="Enter year"
+														className="pr-8"
+														{...field}
+													/>
+												</div>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
 						</div>
 						<DialogFooter>
 							<DialogClose>
@@ -206,15 +228,16 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 							<Button
 								type="submit"
 								disabled={
+									!form.formState.isValid ||
 									!form.formState.isDirty ||
-									mutation.isPending ||
-									checkNameMutation.isPending ||
 									!!form.formState.errors.name ||
+									checkNameMutation.isPending ||
+									mutation.isPending ||
 									nameAvailability === false
 								}
 								loading={mutation.isPending}
 							>
-								{mutation.isPending ? "Updating..." : "Save Changes"}
+								{mutation.isPending ? "Adding..." : "Add Model"}
 							</Button>
 						</DialogFooter>
 					</form>
@@ -223,3 +246,4 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 		</Dialog>
 	)
 }
+

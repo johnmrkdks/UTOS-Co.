@@ -27,6 +27,10 @@ export class ErrorFactory {
 		return new AppError(message, ErrorCode.VALIDATION_ERROR, 400, details);
 	}
 
+	static missingEntry(resource: string, field: string): AppError {
+		return new AppError(`${resource} is missing ${field}`, ErrorCode.MISSING_ENTRY, 400);
+	}
+
 	static unauthorized(message: string = 'Unauthorized'): AppError {
 		return new AppError(message, ErrorCode.UNAUTHORIZED, 401);
 	}

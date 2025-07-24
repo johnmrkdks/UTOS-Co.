@@ -3,7 +3,7 @@ import { carModels, cars } from "@/db/schema";
 import { eq, count } from "drizzle-orm";
 
 export async function getCarsCountByBrandId(db: DB, brandId: string) {
-	return await db.select({
+	const [record] = await db.select({
 		brandId: carModels.brandId,
 		count: count(cars.id).as('count')
 	})
@@ -11,4 +11,6 @@ export async function getCarsCountByBrandId(db: DB, brandId: string) {
 		.leftJoin(carModels, eq(cars.modelId, carModels.id))
 		.where(eq(carModels.brandId, brandId))
 		.groupBy(carModels.brandId)
+
+	return record?.count || 0;
 }

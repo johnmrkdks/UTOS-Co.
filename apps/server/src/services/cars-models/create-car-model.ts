@@ -6,14 +6,17 @@ import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 import { z } from "zod";
 
-export const CreateCarModelServiceSchema = z.object({
-	data: InsertCarModelSchema,
-});
+export const CreateCarModelServiceSchema = InsertCarModelSchema;
 
 export async function createCarModelService(
 	db: DB,
-	{ data }: z.infer<typeof CreateCarModelServiceSchema>,
+	data: z.infer<typeof CreateCarModelServiceSchema>,
 ) {
+
+	if (!data.brandId) {
+		throw ErrorFactory.missingEntry("Car model", "brandId");
+	}
+
 	const carModelName = await getCarModelByName(db, data.name);
 
 	if (carModelName) {

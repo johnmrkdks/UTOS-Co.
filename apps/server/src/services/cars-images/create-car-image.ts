@@ -3,13 +3,11 @@ import type { DB } from "@/db";
 import { InsertCarImageSchema } from "@/schemas/shared";
 import { z } from "zod";
 
-export const CreateCarImageServiceSchema = z.object({
-	data: InsertCarImageSchema,
-});
+export const CreateCarImageServiceSchema = InsertCarImageSchema;
 
 export async function createCarImageService(
 	db: DB,
-	{ data }: z.infer<typeof CreateCarImageServiceSchema>,
+	data: z.infer<typeof CreateCarImageServiceSchema>,
 ) {
 	const newCarImage = createCarImage(db, data);
 

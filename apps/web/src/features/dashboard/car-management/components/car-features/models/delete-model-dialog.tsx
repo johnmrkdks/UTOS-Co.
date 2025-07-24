@@ -8,10 +8,10 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { CarBrand } from "server/types"
-import { useDeleteCarBrandMutation } from "@/features/dashboard/car-management/hooks/brands/queries/use-delete-car-brand-mutation"
+import { useDeleteCarModelMutation } from "@/features/dashboard/car-management/hooks/models/queries/use-delete-car-model-mutation"
 
 type DeleteBrandDialogProps = {
-	brand: CarBrand
+	model: CarBrand
 	className?: string
 }
 
@@ -19,18 +19,19 @@ const FormSchema = z.object({
 	confirmation: z
 		.boolean()
 		.refine((val) => val === true, {
-			message: "You must confirm to delete the brand",
+			message: "You must confirm to delete the model",
 		}),
 })
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) {
+export function DeleteModelDialog({ model, className }: DeleteBrandDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const mutation = useDeleteCarBrandMutation()
+	const mutation = useDeleteCarModelMutation()
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
+		disabled: mutation.isPending,
 		defaultValues: {
 			confirmation: false,
 		},
@@ -42,7 +43,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 
 	const handleSubmit = () => {
 		mutation.mutate(
-			{ id: brand.id },
+			{ id: model.id },
 			{
 				onSuccess: () => {
 					handleReset()
@@ -63,7 +64,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 				<DialogHeader>
 					<DialogTitle>Delete Brand</DialogTitle>
 					<DialogDescription>
-						Deleting a brand will remove all associated cars and models.
+						Deleting a model will remove all associated cars and models.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -80,8 +81,8 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 										/>
 									</FormControl>
 									<FormLabel>
-										Are you sure you want to delete the brand
-										<span className="font-bold">{brand.name}</span>?
+										Are you sure you want to delete the model
+										<span className="font-bold">{model.name}</span>?
 									</FormLabel>
 									<FormMessage />
 								</FormItem>

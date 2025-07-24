@@ -8,7 +8,7 @@ export const carModels = sqliteTable("car_models", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
 	brandId: text("brand_id")
 		.notNull()
-		.references(() => carBrands.id, { onDelete: "cascade" }),
+		.references(() => carBrands.id, { onDelete: "restrict" }),
 	name: text("name").notNull(),
 	year: integer("year").notNull(),
 	generation: text("generation"),

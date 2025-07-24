@@ -4,5 +4,8 @@ import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getCarBrandsService(db: DB, params: ResourceList) {
 	const carBrands = await getCarBrands(db, params);
+
+	console.log("Car brands", carBrands);
+
 	return carBrands;
 }

@@ -31,6 +31,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
+		disabled: mutation.isPending,
 		defaultValues: {
 			confirmation: false,
 		},

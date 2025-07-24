@@ -9,7 +9,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PlusIcon, Loader2, Check, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -32,6 +32,7 @@ export function AddBrandDialog() {
 	const checkNameMutation = useCheckCarBrandMutation()
 
 	const form = useForm<FormValues>({
+		disabled: mutation.isPending,
 		defaultValues: {
 			name: "",
 		},
@@ -78,7 +79,7 @@ export function AddBrandDialog() {
 	}
 
 	const handleSubmit = (data: FormValues) => {
-		mutation.mutate(data, {
+		mutation.mutate(FormSchema.parse(data), {
 			onSuccess: () => {
 				handleReset()
 				setIsDialogOpen(false)
@@ -143,12 +144,11 @@ export function AddBrandDialog() {
 							<FormField
 								name="name"
 								render={({ field }) => (
-									<div className="grid gap-2">
+									<FormItem>
 										<FormLabel>Brand Name</FormLabel>
 										<FormControl>
 											<div className="relative">
 												<Input
-													disabled={mutation.isPending}
 													placeholder="Enter brand name"
 													className="pr-8"
 													{...field}
@@ -158,7 +158,7 @@ export function AddBrandDialog() {
 										</FormControl>
 										<FormMessage />
 										{getValidationMessage()}
-									</div>
+									</FormItem>
 								)}
 							/>
 						</div>

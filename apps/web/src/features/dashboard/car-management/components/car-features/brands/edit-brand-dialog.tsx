@@ -9,7 +9,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Loader2, Check, X, SquarePenIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -37,6 +37,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	const checkNameMutation = useCheckCarBrandMutation()
 
 	const form = useForm<FormValues>({
+		disabled: mutation.isPending,
 		defaultValues: {
 			name: brand.name
 		},
@@ -97,7 +98,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	const handleSubmit = (data: FormValues) => {
 		mutation.mutate({
 			id: brand.id,
-			data
+			data: FormSchema.parse(data)
 		}, {
 			onSuccess: () => {
 				handleReset()
@@ -174,13 +175,12 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 							<FormField
 								name="name"
 								render={({ field }) => (
-									<div className="grid gap-2">
+									<FormItem>
 										<FormLabel>Brand Name</FormLabel>
 										<FormControl>
 											<div className="relative">
 												<Input
-													disabled={mutation.isPending}
-													placeholder="Enter brand name"
+													placeholder="Enter brand"
 													className="pr-8"
 													{...field}
 												/>
@@ -189,7 +189,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 										</FormControl>
 										<FormMessage />
 										{getValidationMessage()}
-									</div>
+									</FormItem>
 								)}
 							/>
 						</div>

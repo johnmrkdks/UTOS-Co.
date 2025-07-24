@@ -6,11 +6,9 @@ import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 import { z } from "zod";
 
-export const CreatePackageServiceSchema = z.object({
-	data: InsertPackageSchema
-});
+export const CreatePackageServiceSchema = InsertPackageSchema
 
-export async function createPackageService(db: DB, { data }: z.infer<typeof CreatePackageServiceSchema>) {
+export async function createPackageService(db: DB, data: z.infer<typeof CreatePackageServiceSchema>) {
 	const packageName = await getPackageByName(db, data.name);
 
 	if (packageName) {

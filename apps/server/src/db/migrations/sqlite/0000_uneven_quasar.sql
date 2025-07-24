@@ -22,7 +22,7 @@ CREATE TABLE `bookings` (
 	`user_id` text NOT NULL,
 	`start_date` integer NOT NULL,
 	`end_date` integer NOT NULL,
-	`status` text NOT NULL,
+	`status` text DEFAULT 'pending' NOT NULL,
 	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE no action ON DELETE cascade,
@@ -30,50 +30,41 @@ CREATE TABLE `bookings` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `car_features` (
-	`id` text PRIMARY KEY NOT NULL,
-	`car_id` text NOT NULL,
-	`feature` text NOT NULL,
-	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE cascade ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `car_images` (
-	`id` text PRIMARY KEY NOT NULL,
-	`car_id` text NOT NULL,
-	`url` text NOT NULL,
-	`order` integer DEFAULT 0,
-	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE cascade ON DELETE cascade
-);
---> statement-breakpoint
 CREATE TABLE `cars` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text NOT NULL,
 	`date_manufactured` integer NOT NULL,
-	`make` text NOT NULL,
-	`model` text NOT NULL,
+	`model_id` text NOT NULL,
+	`body_type_id` text NOT NULL,
+	`fuel_type_id` text NOT NULL,
+	`transmission_type_id` text NOT NULL,
+	`drive_type_id` text NOT NULL,
+	`condition_type_id` text NOT NULL,
+	`number_plate` text NOT NULL,
 	`mileage` integer NOT NULL,
 	`color` text NOT NULL,
+	`engine_size` integer NOT NULL,
+	`doors` integer NOT NULL,
+	`cylinders` integer NOT NULL,
 	`price_per_day` integer,
 	`price_per_km` integer,
 	`is_for_delivery` integer DEFAULT false NOT NULL,
 	`is_available` integer DEFAULT false NOT NULL,
 	`is_for_hire` integer DEFAULT false NOT NULL,
 	`is_for_rent` integer DEFAULT false NOT NULL,
-	`body_type` text NOT NULL,
-	`fuel_type` text NOT NULL,
-	`transmission` text NOT NULL,
-	`drive_type` text NOT NULL,
-	`condition` text NOT NULL,
-	`engine_size` integer NOT NULL,
-	`doors` integer NOT NULL,
-	`cylinders` integer NOT NULL,
 	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` integer DEFAULT (CURRENT_TIMESTAMP)
+	`updated_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`model_id`) REFERENCES `car_models`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`body_type_id`) REFERENCES `car_body_types`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`fuel_type_id`) REFERENCES `car_fuel_types`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`transmission_type_id`) REFERENCES `car_transmission_types`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`drive_type_id`) REFERENCES `car_drive_types`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`condition_type_id`) REFERENCES `car_condition_types`(`id`) ON UPDATE no action ON DELETE restrict
 );
 --> statement-breakpoint
+CREATE INDEX `cars_availability_idx` ON `cars` (`is_available`);--> statement-breakpoint
+CREATE INDEX `cars_price_idx` ON `cars` (`price_per_day`);--> statement-breakpoint
 CREATE TABLE `drivers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text,
@@ -87,6 +78,79 @@ CREATE TABLE `drivers` (
 	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `car_body_types` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_body_types_name_unique` ON `car_body_types` (`name`);--> statement-breakpoint
+CREATE TABLE `car_brands` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_brands_name_unique` ON `car_brands` (`name`);--> statement-breakpoint
+CREATE TABLE `car_condition_types` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_condition_types_name_unique` ON `car_condition_types` (`name`);--> statement-breakpoint
+CREATE TABLE `car_drive_types` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_drive_types_name_unique` ON `car_drive_types` (`name`);--> statement-breakpoint
+CREATE TABLE `car_features` (
+	`id` text PRIMARY KEY NOT NULL,
+	`car_id` text NOT NULL,
+	`feature` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE cascade ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `car_fuel_types` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_fuel_types_name_unique` ON `car_fuel_types` (`name`);--> statement-breakpoint
+CREATE TABLE `car_images` (
+	`id` text PRIMARY KEY NOT NULL,
+	`car_id` text NOT NULL,
+	`url` text NOT NULL,
+	`alt_text` text,
+	`order` integer DEFAULT 0 NOT NULL,
+	`is_main` integer DEFAULT false,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE cascade ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `car_images_order_idx` ON `car_images` (`car_id`,`order`);--> statement-breakpoint
+CREATE TABLE `car_models` (
+	`id` text PRIMARY KEY NOT NULL,
+	`brand_id` text NOT NULL,
+	`name` text NOT NULL,
+	`year` integer NOT NULL,
+	`generation` text,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`brand_id`) REFERENCES `car_brands`(`id`) ON UPDATE no action ON DELETE restrict
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_models_brand_id_name_year_unique` ON `car_models` (`brand_id`,`name`,`year`);--> statement-breakpoint
+CREATE TABLE `car_transmission_types` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `car_transmission_types_name_unique` ON `car_transmission_types` (`name`);--> statement-breakpoint
 CREATE TABLE `packages` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
