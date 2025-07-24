@@ -207,8 +207,8 @@ export function DataTable<TData, TValue>({
 			isLoading={isLoading}
 			columns={columns}
 			loadingRowCount={loadingRowCount}
-			enableToolbar={shouldShowToolbar!}
-			enablePagination={shouldShowPagination!}
+			enableToolbar={!!shouldShowToolbar}
+			enablePagination={!!shouldShowPagination}
 			className={className}
 		>
 			<div className={cn(className)}>

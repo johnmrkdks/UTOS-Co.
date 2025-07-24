@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEntityNameValidation } from "@/features/dashboard/hooks/use-entity-name-validation"
 import { EntityNameValidationDisplay } from "@/features/dashboard/components/forms/entity-name-validation-display"
 import { ValidatedTextInputField } from "@/components/form-fields"
+import { TRPCClientError } from "@trpc/client"
 
 type EditBrandDialogProps = {
 	brand: CarBrand
@@ -57,8 +58,8 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 			checkNameMutation.mutate(
 				{ name },
 				{
-					onSuccess: (isAvailable) => resolve(isAvailable!),
-					onError: (error) => reject(error),
+					onSuccess: (isAvailable: boolean) => resolve(isAvailable!),
+					onError: (error: TRPCClientError<any>) => reject(error),
 				}
 			)
 		})

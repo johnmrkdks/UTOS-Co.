@@ -4,10 +4,10 @@
 	"type": "module",
 	"exports": {
 		"./trpc/routers/_app": "./src/trpc/routers/_app.ts",
-		"./types": "./src/schemas/shared/index.ts"
+		"./types": "./src/types/index.ts"
 	},
 	"scripts": {
-		"build": "wrangler types && wrangler deploy --dry-run",
+		"build": "tsc --build && wrangler types && wrangler deploy --dry-run",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"check-types": "tsc --noEmit",
 		"compile": "pnpm build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",

@@ -6,15 +6,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { LogOutIcon, UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUserQuery } from "@/features/auth/hooks/queries/use-user-query";
 
 export function UserMenu() {
-	const navigate = useNavigate();
-	const { data: session, isPending } = authClient.useSession();
+	const { session, isPending, handleLogout } = useUserQuery();
 
 	if (isPending) {
 		return <Skeleton className="h-9 w-24" />;
@@ -36,18 +35,6 @@ export function UserMenu() {
 				</Button>
 			</>
 		);
-	}
-
-	function handleLogout() {
-		authClient.signOut({
-			fetchOptions: {
-				onSuccess: () => {
-					navigate({
-						to: "/",
-					});
-				},
-			},
-		});
 	}
 
 	return (

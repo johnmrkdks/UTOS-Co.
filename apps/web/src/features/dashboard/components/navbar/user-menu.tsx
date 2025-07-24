@@ -11,25 +11,11 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { authClient } from "@/lib/auth-client"
-import { useNavigate } from "@tanstack/react-router"
 import { getNameInitials } from "@/utils/format"
+import { useUserQuery } from "@/features/auth/hooks/queries/use-user-query"
 
 export function UserMenu() {
-	const navigate = useNavigate()
-	const { data: session, isPending } = authClient.useSession()
-
-	function handleLogout() {
-		authClient.signOut({
-			fetchOptions: {
-				onSuccess: () => {
-					navigate({
-						to: "/",
-					})
-				},
-			},
-		})
-	}
+	const { session, isPending, handleLogout } = useUserQuery()
 
 	// Show skeleton while loading
 	if (isPending) {

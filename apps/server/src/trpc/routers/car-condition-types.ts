@@ -12,6 +12,7 @@ import {
 } from "@/services/cars-condition-types/get-car-condition-type";
 import { getCarConditionTypesService } from "@/services/cars-condition-types/get-car-condition-types";
 import { getCarConditionTypesWithEnrichedDataService } from "@/services/cars-condition-types/get-car-condition-types-with-enriched-data";
+import { isCarConditionTypeExistService, IsCarConditionTypeExistServiceSchema } from "@/services/cars-condition-types/is-car-condition-type-exist";
 import {
 	UpdateCarConditionTypeServiceSchema,
 	updateCarConditionTypeService,
@@ -53,6 +54,16 @@ export const carConditionTypesRouter = router({
 			try {
 				const carConditionType = await getCarConditionTypeService(db, input);
 				return carConditionType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	isCarConditionTypeExist: protectedProcedure
+		.input(IsCarConditionTypeExistServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const isCarConditionTypeExist = await isCarConditionTypeExistService(db, input);
+				return isCarConditionTypeExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

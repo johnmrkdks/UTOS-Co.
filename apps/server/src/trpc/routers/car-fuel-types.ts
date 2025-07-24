@@ -12,6 +12,7 @@ import {
 } from "@/services/cars-fuel-types/get-car-fuel-type";
 import { getCarFuelTypesService } from "@/services/cars-fuel-types/get-car-fuel-types";
 import { getCarFuelTypesWithEnrichedDataService } from "@/services/cars-fuel-types/get-car-fuel-types-with-enriched-data";
+import { isCarFuelTypeExistService, IsCarFuelTypeExistServiceSchema } from "@/services/cars-fuel-types/is-car-drive-type-exist";
 import {
 	UpdateCarFuelTypeServiceSchema,
 	updateCarFuelTypeService,
@@ -47,6 +48,16 @@ export const carFuelTypesRouter = router({
 			try {
 				const carFuelType = await getCarFuelTypeService(db, input);
 				return carFuelType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	isCarFuelTypeExist: protectedProcedure
+		.input(IsCarFuelTypeExistServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const isCarFuelTypeExist = await isCarFuelTypeExistService(db, input);
+				return isCarFuelTypeExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

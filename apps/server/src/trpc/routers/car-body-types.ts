@@ -12,6 +12,7 @@ import {
 } from "@/services/cars-body-types/get-car-body-type";
 import { getCarBodyTypesService } from "@/services/cars-body-types/get-car-body-types";
 import { getCarBodyTypesWithEnrichedDataService } from "@/services/cars-body-types/get-car-body-types-with-enriched-data";
+import { isCarBodyTypeExistService, IsCarBodyTypeExistServiceSchema } from "@/services/cars-body-types/is-car-body-type-exist";
 import {
 	UpdateCarBodyTypeServiceSchema,
 	updateCarBodyTypeService,
@@ -47,6 +48,16 @@ export const carBodyTypesRouter = router({
 			try {
 				const carBodyType = await getCarBodyTypeService(db, input);
 				return carBodyType;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	isCarBodyTypeExist: protectedProcedure
+		.input(IsCarBodyTypeExistServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const isCarBodyTypeExist = await isCarBodyTypeExistService(db, input);
+				return isCarBodyTypeExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

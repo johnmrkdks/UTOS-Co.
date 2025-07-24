@@ -12,6 +12,7 @@ import {
 } from "@/services/cars-features/get-car-feature";
 import { getCarFeaturesService } from "@/services/cars-features/get-car-features";
 import { getCarFeaturesWithEnrichedDataService } from "@/services/cars-features/get-car-features-with-enriched-data";
+import { isCarFeatureExistService, IsCarFeatureExistServiceSchema } from "@/services/cars-features/is-car-drive-type-exist";
 import {
 	UpdateCarFeatureServiceSchema,
 	updateCarFeatureService,
@@ -47,6 +48,16 @@ export const carFeaturesRouter = router({
 			try {
 				const carFeature = await getCarFeatureService(db, input);
 				return carFeature;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	isCarFeatureExist: protectedProcedure
+		.input(IsCarFeatureExistServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const isCarFeatureExist = await isCarFeatureExistService(db, input);
+				return isCarFeatureExist;
 			} catch (error) {
 				handleTRPCError(error);
 			}

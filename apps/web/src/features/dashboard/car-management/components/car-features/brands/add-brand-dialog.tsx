@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEntityNameValidation } from "@/features/dashboard/hooks/use-entity-name-validation"
 import { EntityNameValidationDisplay } from "@/features/dashboard/components/forms/entity-name-validation-display"
 import { ValidatedTextInputField } from "@/components/form-fields"
+import { TRPCClientError } from "@trpc/client"
 
 const FormSchema = z.object({
 	name: z.string().min(1, "Brand name is required").max(50, "Brand name must be less than 50 characters"),
@@ -45,8 +46,8 @@ export function AddBrandDialog() {
 			checkNameMutation.mutate(
 				{ name },
 				{
-					onSuccess: (isAvailable) => resolve(isAvailable!),
-					onError: (error) => reject(error),
+					onSuccess: (isAvailable: boolean) => resolve(isAvailable!),
+					onError: (error: TRPCClientError<any>) => reject(error),
 				}
 			)
 		})
