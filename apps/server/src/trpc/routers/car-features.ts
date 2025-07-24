@@ -11,6 +11,7 @@ import {
 	getCarFeatureService,
 } from "@/services/cars-features/get-car-feature";
 import { getCarFeaturesService } from "@/services/cars-features/get-car-features";
+import { getCarFeaturesWithEnrichedDataService } from "@/services/cars-features/get-car-features-with-enriched-data";
 import {
 	UpdateCarFeatureServiceSchema,
 	updateCarFeatureService,
@@ -56,6 +57,16 @@ export const carFeaturesRouter = router({
 			try {
 				const carFeatures = await getCarFeaturesService(db, input);
 				return carFeatures;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carFeaturesWithEnrichedData = await getCarFeaturesWithEnrichedDataService(db, input);
+				return carFeaturesWithEnrichedData;
 			} catch (error) {
 				handleTRPCError(error);
 			}

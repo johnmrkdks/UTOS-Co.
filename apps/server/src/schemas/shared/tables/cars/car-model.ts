@@ -27,9 +27,12 @@ export const CarModelWithEnrichedDataSchema = CarModelWithBrandSchema.extend({
 	})
 });
 
+// Base types
 export type CarModel = z.infer<typeof CarModelSchema>;
 export type InsertCarModel = z.infer<typeof InsertCarModelSchema>;
 export type UpdateCarModel = z.infer<typeof UpdateCarModelSchema>;
 
+// Extended types
 export type CarModelWithBrand = z.infer<typeof CarModelWithBrandSchema>;
 export type CarModelWithEnrichedData = z.infer<typeof CarModelWithEnrichedDataSchema>;
+

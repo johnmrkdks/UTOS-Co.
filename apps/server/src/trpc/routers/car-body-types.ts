@@ -11,6 +11,7 @@ import {
 	getCarBodyTypeService,
 } from "@/services/cars-body-types/get-car-body-type";
 import { getCarBodyTypesService } from "@/services/cars-body-types/get-car-body-types";
+import { getCarBodyTypesWithEnrichedDataService } from "@/services/cars-body-types/get-car-body-types-with-enriched-data";
 import {
 	UpdateCarBodyTypeServiceSchema,
 	updateCarBodyTypeService,
@@ -55,6 +56,16 @@ export const carBodyTypesRouter = router({
 		.query(async ({ ctx: { db }, input }) => {
 			try {
 				const carBodyTypes = await getCarBodyTypesService(db, input);
+				return carBodyTypes;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carBodyTypes = await getCarBodyTypesWithEnrichedDataService(db, input);
 				return carBodyTypes;
 			} catch (error) {
 				handleTRPCError(error);

@@ -11,6 +11,7 @@ import {
 	getCarDriveTypeService,
 } from "@/services/cars-drive-types/get-car-drive-type";
 import { getCarDriveTypesService } from "@/services/cars-drive-types/get-car-drive-types";
+import { getCarDriveTypesWithEnrichedDataService } from "@/services/cars-drive-types/get-car-drive-types-with-enriched-data";
 import {
 	UpdateCarDriveTypeServiceSchema,
 	updateCarDriveTypeService,
@@ -55,6 +56,16 @@ export const carDriveTypesRouter = router({
 		.query(async ({ ctx: { db }, input }) => {
 			try {
 				const carDriveTypes = await getCarDriveTypesService(db, input);
+				return carDriveTypes;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carDriveTypes = await getCarDriveTypesWithEnrichedDataService(db, input);
 				return carDriveTypes;
 			} catch (error) {
 				handleTRPCError(error);

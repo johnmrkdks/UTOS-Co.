@@ -6,6 +6,7 @@ import { createCarTransmissionTypeService, CreateCarTransmissionTypeServiceSchem
 import { deleteCarTransmissionTypeService, DeleteCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/delete-car-transmission-type";
 import { getCarTransmissionTypeService, GetCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/get-car-transmission-type";
 import { getCarTransmissionTypesService } from "@/services/cars-transmission-types/get-car-transmission-types";
+import { getCarTransmissionTypesWithEnrichedDataService } from "@/services/cars-transmission-types/get-car-transmission-types-with-enriched-data";
 import { updateCarTransmissionTypeService, UpdateCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/update-car-transmission-type";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
@@ -59,6 +60,17 @@ export const carTransmissionTypesRouter = router({
 					input,
 				);
 				return carTransmissionTypes;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carTransmissionTypesWithEnrichedData =
+					await getCarTransmissionTypesWithEnrichedDataService(db, input);
+				return carTransmissionTypesWithEnrichedData;
 			} catch (error) {
 				handleTRPCError(error);
 			}

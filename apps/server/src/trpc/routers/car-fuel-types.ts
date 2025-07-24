@@ -11,6 +11,7 @@ import {
 	getCarFuelTypeService,
 } from "@/services/cars-fuel-types/get-car-fuel-type";
 import { getCarFuelTypesService } from "@/services/cars-fuel-types/get-car-fuel-types";
+import { getCarFuelTypesWithEnrichedDataService } from "@/services/cars-fuel-types/get-car-fuel-types-with-enriched-data";
 import {
 	UpdateCarFuelTypeServiceSchema,
 	updateCarFuelTypeService,
@@ -56,6 +57,16 @@ export const carFuelTypesRouter = router({
 			try {
 				const carFuelTypes = await getCarFuelTypesService(db, input);
 				return carFuelTypes;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carFuelTypesWithEnrichedData = await getCarFuelTypesWithEnrichedDataService(db, input);
+				return carFuelTypesWithEnrichedData;
 			} catch (error) {
 				handleTRPCError(error);
 			}

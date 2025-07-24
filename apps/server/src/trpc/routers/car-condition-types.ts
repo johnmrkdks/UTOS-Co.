@@ -11,6 +11,7 @@ import {
 	getCarConditionTypeService,
 } from "@/services/cars-condition-types/get-car-condition-type";
 import { getCarConditionTypesService } from "@/services/cars-condition-types/get-car-condition-types";
+import { getCarConditionTypesWithEnrichedDataService } from "@/services/cars-condition-types/get-car-condition-types-with-enriched-data";
 import {
 	UpdateCarConditionTypeServiceSchema,
 	updateCarConditionTypeService,
@@ -62,6 +63,17 @@ export const carConditionTypesRouter = router({
 			try {
 				const carConditionTypes = await getCarConditionTypesService(db, input);
 				return carConditionTypes;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	listWithEnrichedData: protectedProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carConditionTypesWithEnrichedData =
+					await getCarConditionTypesWithEnrichedDataService(db, input);
+				return carConditionTypesWithEnrichedData;
 			} catch (error) {
 				handleTRPCError(error);
 			}
