@@ -1,4 +1,4 @@
-import { About } from "@/features/marketing/about/components";
+import { About } from "@/features/marketing/_pages/about/_components";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_marketing/about-us")({

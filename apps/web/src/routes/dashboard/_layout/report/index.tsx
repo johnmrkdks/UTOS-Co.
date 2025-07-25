@@ -1,5 +1,5 @@
-import { DetailReports } from "@/features/dashboard/report/components/detail-reports";
-import { ReportOverview } from "@/features/dashboard/report/components/overview";
+import { DetailReports } from "@/features/dashboard/_pages/reports/_components/detail-reports";
+import { ReportOverview } from "@/features/dashboard/_pages/reports/_components/overview";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/_layout/report/")({

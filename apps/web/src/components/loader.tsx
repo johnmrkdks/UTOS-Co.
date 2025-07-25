@@ -3,7 +3,7 @@ import { Loader2Icon } from "lucide-react";
 
 type LoaderProps = React.ComponentProps<"div">;
 
-export default function Loader({ className, ...props }: LoaderProps) {
+export function Loader({ className, ...props }: LoaderProps) {
 	return (
 		<div className={cn("flex h-full items-center justify-center pt-8", className)} {...props}>
 			<Loader2Icon className="animate-spin" />

@@ -1,4 +1,3 @@
-import Loader from "@/components/loader";
 import { Toaster } from "@/components/ui/sonner";
 import type { trpc } from "@/trpc";
 import type { QueryClient } from "@tanstack/react-query";
@@ -12,7 +11,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import "../index.css";
 
-export interface RouterAppContext {
+export type RouterAppContext = {
 	trpc: typeof trpc;
 	queryClient: QueryClient;
 }

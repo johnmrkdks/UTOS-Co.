@@ -1,10 +1,10 @@
-import Loader from "@/components/loader";
+import { Loader } from "@/components/loader";
 import {
 	SidebarInset,
 	SidebarProvider,
 } from "@/components/ui/sidebar";
-import { DashboardNavbar } from "@/features/dashboard/components/dashboard-navbar";
-import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar";
+import { DashboardNavbar } from "@/features/dashboard/_components/dashboard-navbar";
+import { DashboardSidebar } from "@/features/dashboard/_components/dashboard-sidebar";
 import { requireAdmin } from "@/utils/auth";
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { Suspense } from "react";

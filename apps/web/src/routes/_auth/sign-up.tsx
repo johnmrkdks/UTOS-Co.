@@ -1,8 +1,8 @@
 import { Logo } from "@/components/logo";
-import SignUpForm from "@/features/auth/components/sign-up-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import placeholder from "@/assets/placeholder.svg";
-import { SydneyImageCover } from "@/features/auth/components/sydney-image-cover";
+import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
+import SignUpForm from "@/features/auth/_components/sign-up-form";
 
 export const Route = createFileRoute("/_auth/sign-up")({
 	component: RouteComponent,

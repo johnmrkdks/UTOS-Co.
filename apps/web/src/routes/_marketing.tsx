@@ -1,4 +1,4 @@
-import { MarketingNavbar } from "@/features/marketing/components/marketing-navbar";
+import { MarketingNavbar } from "@/features/marketing/_components/marketing-navbar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_marketing")({

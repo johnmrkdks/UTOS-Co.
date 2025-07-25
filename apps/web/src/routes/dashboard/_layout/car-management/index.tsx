@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CarFeatures } from "@/features/dashboard/car-management/components/car-features";
+import { CarFeatures } from "@/features/dashboard/_pages/car-management/_components/car-features";
 import { createFileRoute } from "@tanstack/react-router";
 import { CarIcon, SettingsIcon } from "lucide-react";
 

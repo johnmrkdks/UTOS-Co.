@@ -1,7 +1,7 @@
 import placeholder from "@/assets/placeholder.svg";
 import { Logo } from "@/components/logo";
-import SignInForm from "@/features/auth/components/sign-in-form";
-import { SydneyImageCover } from "@/features/auth/components/sydney-image-cover";
+import { SignInForm } from "@/features/auth/_components/sign-in-form";
+import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/sign-in")({
