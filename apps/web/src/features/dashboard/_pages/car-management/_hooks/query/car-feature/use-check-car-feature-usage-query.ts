@@ -1,8 +1,8 @@
 
 import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCarFeatureUsageServiceSchema } from "server/src/services/cars-features/check-car-feature-usage";
+import type { CheckCarFeatureUsageParams } from "server/types";
 
-export const useCheckCarFeatureUsageQuery = (options: CheckCarFeatureUsageServiceSchema) => {
-	return useQuery(trpc.carFeatures.checkUsage.queryOptions(options));
+export const useCheckCarFeatureUsageQuery = (params: CheckCarFeatureUsageParams) => {
+	return useQuery(trpc.carFeatures.checkUsage.queryOptions(params));
 };

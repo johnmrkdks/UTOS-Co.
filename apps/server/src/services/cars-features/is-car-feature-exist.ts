@@ -3,11 +3,11 @@ import type { DB } from "@/db";
 import { z } from "zod";
 
 export const IsCarFeatureExistServiceSchema = z.object({
-	feature: z.string().min(1).max(50),
+	name: z.string().min(1).max(50),
 });
 
 export type IsCarFeatureExistParams = z.infer<typeof IsCarFeatureExistServiceSchema>;
 
-export async function isCarFeatureExistService(db: DB, { feature }: IsCarFeatureExistParams) {
-	return await isCarFeatureExist(db, feature);
+export async function isCarFeatureExistService(db: DB, { name }: IsCarFeatureExistParams) {
+	return await isCarFeatureExist(db, name);
 }

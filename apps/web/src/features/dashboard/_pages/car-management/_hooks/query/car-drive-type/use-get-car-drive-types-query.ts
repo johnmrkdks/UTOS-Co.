@@ -1,8 +1,8 @@
 
 import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { ResourceListSchema } from "@/utils/query/resource-list";
+import type { ResourceList } from "server/types";
 
-export const useGetCarDriveTypesQuery = (options: ResourceListSchema) => {
-	return useQuery(trpc.carDriveTypes.list.queryOptions(options));
+export const useGetCarDriveTypesQuery = (params: ResourceList) => {
+	return useQuery(trpc.carDriveTypes.list.queryOptions(params));
 };

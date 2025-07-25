@@ -1,4 +1,5 @@
 export type * from "./create-car-drive-type";
+export type * from "./check-car-drive-type-usage";
 export type * from "./delete-car-drive-type";
 export type * from "./get-car-drive-type";
 export type * from "./get-car-drive-types";

@@ -1,8 +1,8 @@
 
 import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { ResourceListSchema } from "@/utils/query/resource-list";
+import type { ResourceList } from "server/types";
 
-export const useGetCarModelsWithEnrichedDataQuery = (options: ResourceListSchema) => {
-	return useQuery(trpc.carModels.listWithEnrichedData.queryOptions(options));
+export const useGetCarModelsWithEnrichedDataQuery = (params: ResourceList) => {
+	return useQuery(trpc.carModels.listWithEnrichedData.queryOptions(params));
 };

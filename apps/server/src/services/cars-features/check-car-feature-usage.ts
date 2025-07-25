@@ -27,7 +27,7 @@ export async function checkCarFeatureUsageService(
 		usage,
 		canDelete: !usage.isInUse,
 		errorMessage: usage.isInUse
-			? `Cannot delete "${carFeature.feature}". It is currently used by ${usage.carCount} cars.`
+			? `Cannot delete "${carFeature.name}". It is currently used by ${usage.carCount} cars.`
 			: null,
 	};
 }

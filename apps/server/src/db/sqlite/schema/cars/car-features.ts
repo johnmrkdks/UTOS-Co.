@@ -10,7 +10,7 @@ export const carFeatures = sqliteTable(
 		carId: text("car_id")
 			.notNull()
 			.references(() => cars.id, { onDelete: "cascade", onUpdate: "cascade" }),
-		feature: text("feature").notNull(),
+		name: text("name").notNull(),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.default(sql`(CURRENT_TIMESTAMP)`),

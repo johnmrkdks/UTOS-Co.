@@ -4,10 +4,10 @@ import { eq } from "drizzle-orm";
 
 export async function isCarFeatureExist(
 	db: DB,
-	feature: string,
+	name: string,
 ): Promise<boolean> {
 	const record = await db.query.carFeatures.findFirst({
-		where: eq(carFeatures.feature, feature),
+		where: eq(carFeatures.name, name),
 		columns: { id: true },
 	});
 	return !record;
