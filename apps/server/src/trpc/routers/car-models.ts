@@ -14,8 +14,19 @@ import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";
+import { checkCarModelUsageService, CheckCarModelUsageServiceSchema } from "@/services/cars-models/check-car-model-usage";
 
 export const carModelsRouter = router({
+	checkUsage: protectedProcedure
+		.input(CheckCarModelUsageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const checkCarModelUsage = await checkCarModelUsageService(db, input);
+				return checkCarModelUsage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
 	create: protectedProcedure
 		.input(CreateCarModelServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {

@@ -1,5 +1,6 @@
 import { deleteCarModel } from "@/data/cars-models/delete-car-model";
 import { getCarModelById } from "@/data/cars-models/get-car-model-by-id";
+import { getCarsCountByModelId } from "@/data/cars/get-cars-count-by-model-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
@@ -12,6 +13,12 @@ export async function deleteCarModelService(
 	db: DB,
 	{ id }: z.infer<typeof DeleteCarModelServiceSchema>,
 ) {
+	const carCount = await getCarsCountByModelId(db, id);
+
+	if (carCount > 0) {
+		throw ErrorFactory.badRequest("Some entities are using this car model. Please delete them first.");
+	}
+
 	const carModel = await getCarModelById(db, id);
 
 	if (!carModel) {

@@ -1,16 +1,15 @@
+import { count } from "drizzle-orm";
+import { db } from "@db/index";
+import { cars } from "@db/schema/cars";
 import type { DB } from "@/db";
-import { cars } from "@/db/schema";
-import { eq, count } from "drizzle-orm";
 
-export async function getCarsCountByConditionTypeId(db: DB, id: string) {
-	const [record] = await db
-		.select({
-			conditionTypeId: cars.conditionTypeId,
-			count: count(cars.id).as('count')
-		})
-		.from(cars)
-		.where(eq(cars.conditionTypeId, id))
-		.groupBy(cars.conditionTypeId);
+export const getCarsCountByConditionTypeId = async (db: DB, conditionTypeId: string) => {
+  const [result] = await db
+    .select({
+      value: count(),
+    })
+    .from(cars)
+    .where((cars) => cars.conditionTypeId.eq(parseInt(conditionTypeId, 10)));
 
-	return record?.count || 0;
-}
+  return result.value;
+};

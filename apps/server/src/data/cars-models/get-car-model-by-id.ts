@@ -1,15 +1,11 @@
 import type { DB } from "@/db";
-import { carModels } from "@/db/schema";
-import type { CarModel } from "@/schemas/shared";
+import { carModels } from "@db/schema/cars";
 import { eq } from "drizzle-orm";
 
-export async function getCarModelById(
-	db: DB,
-	id: string,
-) {
-	const record = await db.query.carModels.findFirst({
-		where: eq(carModels.id, id),
-	});
+export const getCarModelById = async (db: DB, id: string) => {
+    const carModel = await db.query.carModels.findFirst({
+        where: eq(carModels.id, parseInt(id, 10)),
+    });
 
-	return record;
-}
+    return carModel;
+};

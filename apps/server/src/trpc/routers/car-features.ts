@@ -12,7 +12,6 @@ import {
 } from "@/services/cars-features/get-car-feature";
 import { getCarFeaturesService } from "@/services/cars-features/get-car-features";
 import { getCarFeaturesWithEnrichedDataService } from "@/services/cars-features/get-car-features-with-enriched-data";
-import { isCarFeatureExistService, IsCarFeatureExistServiceSchema } from "@/services/cars-features/is-car-drive-type-exist";
 import {
 	UpdateCarFeatureServiceSchema,
 	updateCarFeatureService,
@@ -20,8 +19,20 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
+import { checkCarFeatureUsageService, CheckCarFeatureUsageServiceSchema } from "@/services/cars-features/check-car-feature-usage";
+import { isCarFeatureExistService, IsCarFeatureExistServiceSchema } from "@/services/cars-features/is-car-feature-exist";
 
 export const carFeaturesRouter = router({
+	checkUsage: protectedProcedure
+		.input(CheckCarFeatureUsageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const checkCarFeatureUsage = await checkCarFeatureUsageService(db, input);
+				return checkCarFeatureUsage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
 	create: protectedProcedure
 		.input(CreateCarFeatureServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {

@@ -20,8 +20,19 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
+import { checkCarConditionTypeUsageService, CheckCarConditionTypeUsageServiceSchema } from "@/services/cars-condition-types/check-car-condition-type-usage";
 
 export const carConditionTypesRouter = router({
+	checkUsage: protectedProcedure
+		.input(CheckCarConditionTypeUsageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const checkCarConditionTypeUsage = await checkCarConditionTypeUsageService(db, input);
+				return checkCarConditionTypeUsage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
 	create: protectedProcedure
 		.input(CreateCarConditionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {

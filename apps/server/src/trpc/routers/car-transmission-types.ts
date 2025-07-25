@@ -7,14 +7,24 @@ import { deleteCarTransmissionTypeService, DeleteCarTransmissionTypeServiceSchem
 import { getCarTransmissionTypeService, GetCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/get-car-transmission-type";
 import { getCarTransmissionTypesService } from "@/services/cars-transmission-types/get-car-transmission-types";
 import { getCarTransmissionTypesWithEnrichedDataService } from "@/services/cars-transmission-types/get-car-transmission-types-with-enriched-data";
-import { isCarTransmissionTypeExistService, IsCarTransmittionTypeExistServiceSchema } from "@/services/cars-transmission-types/is-car-transmission-type-exist";
+import { isCarTransmissionTypeExistService, IsCarTransmissionTypeExistServiceSchema } from "@/services/cars-transmission-types/is-car-transmission-type-exist";
 import { updateCarTransmissionTypeService, UpdateCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/update-car-transmission-type";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { z } from "zod";
+import { checkCarTransmissionTypeUsageService, CheckCarTransmissionTypeUsageServiceSchema } from "@/services/cars-transmission-types/check-car-transmission-type-usage";
 
 export const carTransmissionTypesRouter = router({
+	checkUsage: protectedProcedure
+		.input(CheckCarTransmissionTypeUsageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const checkCarTransmissionTypeUsage = await checkCarTransmissionTypeUsageService(db, input);
+				return checkCarTransmissionTypeUsage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
 	create: protectedProcedure
 		.input(CreateCarTransmissionTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
@@ -53,7 +63,7 @@ export const carTransmissionTypesRouter = router({
 			}
 		}),
 	isCarTransmissionTypeExist: protectedProcedure
-		.input(IsCarTransmittionTypeExistServiceSchema)
+		.input(IsCarTransmissionTypeExistServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const isCarTransmissionTypeExist = await isCarTransmissionTypeExistService(

@@ -12,7 +12,7 @@ import {
 } from "@/services/cars-fuel-types/get-car-fuel-type";
 import { getCarFuelTypesService } from "@/services/cars-fuel-types/get-car-fuel-types";
 import { getCarFuelTypesWithEnrichedDataService } from "@/services/cars-fuel-types/get-car-fuel-types-with-enriched-data";
-import { isCarFuelTypeExistService, IsCarFuelTypeExistServiceSchema } from "@/services/cars-fuel-types/is-car-drive-type-exist";
+import { isCarFuelTypeExistService, IsCarFuelTypeExistServiceSchema } from "@/services/cars-fuel-types/is-car-fuel-type-exist";
 import {
 	UpdateCarFuelTypeServiceSchema,
 	updateCarFuelTypeService,
@@ -20,8 +20,19 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
+import { checkCarFuelTypeUsageService, CheckCarFuelTypeUsageServiceSchema } from "@/services/cars-fuel-types/check-car-fuel-type-usage";
 
 export const carFuelTypesRouter = router({
+	checkUsage: protectedProcedure
+		.input(CheckCarFuelTypeUsageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const checkCarFuelTypeUsage = await checkCarFuelTypeUsageService(db, input);
+				return checkCarFuelTypeUsage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
 	create: protectedProcedure
 		.input(CreateCarFuelTypeServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {

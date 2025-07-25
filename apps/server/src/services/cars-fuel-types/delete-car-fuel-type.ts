@@ -1,5 +1,6 @@
 import { deleteCarFuelType } from "@/data/cars-fuel-types/delete-car-fuel-type";
 import { getCarFuelTypeById } from "@/data/cars-fuel-types/get-car-fuel-type-by-id";
+import { getCarsCountByFuelTypeId } from "@/data/cars/get-cars-count-by-fuel-type-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
@@ -12,6 +13,12 @@ export async function deleteCarFuelTypeService(
 	db: DB,
 	{ id }: z.infer<typeof DeleteCarFuelTypeServiceSchema>,
 ) {
+	const carCount = await getCarsCountByFuelTypeId(db, id);
+
+	if (carCount > 0) {
+		throw ErrorFactory.badRequest("Some entities are using this car fuel type. Please delete them first.");
+	}
+
 	const carFuelType = await getCarFuelTypeById(db, id);
 
 	if (!carFuelType) {
