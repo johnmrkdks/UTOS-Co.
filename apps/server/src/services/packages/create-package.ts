@@ -8,7 +8,9 @@ import { z } from "zod";
 
 export const CreatePackageServiceSchema = InsertPackageSchema
 
-export async function createPackageService(db: DB, data: z.infer<typeof CreatePackageServiceSchema>) {
+export type CreatePackageParams = z.infer<typeof CreatePackageServiceSchema>;
+
+export async function createPackageService(db: DB, data: CreatePackageParams) {
 	const packageName = await getPackageByName(db, data.name);
 
 	if (packageName) {

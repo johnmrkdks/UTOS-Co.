@@ -5,13 +5,15 @@ import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
 
-export const DeleteCarFeatureServiceSchema = z.object({
+export const DeleteCarFeatureParams = z.object({
 	id: z.string(),
 });
 
+export type DeleteCarFeatureParams = z.infer<typeof DeleteCarFeatureParams>;
+
 export async function deleteCarFeatureService(
 	db: DB,
-	{ id }: z.infer<typeof DeleteCarFeatureServiceSchema>,
+	{ id }: DeleteCarFeatureParams,
 ) {
 	const carCount = await getCarsCountByFeatureId(db, id);
 

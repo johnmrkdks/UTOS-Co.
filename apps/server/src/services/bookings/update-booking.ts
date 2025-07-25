@@ -10,7 +10,14 @@ export const UpdateBookingServiceSchema = z.object({
 	data: UpdateBookingSchema,
 });
 
-export async function updateBookingService(db: DB, { id, data }: z.infer<typeof UpdateBookingServiceSchema>) {
+export type UpdateBookingParams = z.infer<
+	typeof UpdateBookingServiceSchema
+>;
+
+export async function updateBookingService(
+	db: DB,
+	{ id, data }: UpdateBookingParams,
+) {
 	const booking = await getBookingById(db, id);
 
 	if (!booking) {

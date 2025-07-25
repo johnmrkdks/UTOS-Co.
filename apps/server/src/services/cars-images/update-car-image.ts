@@ -10,9 +10,11 @@ export const UpdateCarImageServiceSchema = z.object({
 	data: UpdateCarImageSchema,
 });
 
+export type UpdateCarImageParams = z.infer<typeof UpdateCarImageServiceSchema>;
+
 export async function updateCarImageService(
 	db: DB,
-	{ id, data }: z.infer<typeof UpdateCarImageServiceSchema>,
+	{ id, data }: UpdateCarImageParams,
 ) {
 	const carImage = await getCarImageById(db, id);
 

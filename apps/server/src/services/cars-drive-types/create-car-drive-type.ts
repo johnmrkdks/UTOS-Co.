@@ -8,9 +8,11 @@ import { z } from "zod";
 
 export const CreateCarDriveTypeServiceSchema = InsertCarDriveTypeSchema;
 
+export type CreateCarDriveTypeParams = z.infer<typeof CreateCarDriveTypeServiceSchema>;
+
 export async function createCarDriveTypeService(
 	db: DB,
-	data: z.infer<typeof CreateCarDriveTypeServiceSchema>,
+	data: CreateCarDriveTypeParams,
 ) {
 	const carDriveTypeName = await getCarDriveTypeByName(db, data.name);
 

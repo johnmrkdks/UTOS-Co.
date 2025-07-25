@@ -8,9 +8,11 @@ import { z } from "zod";
 
 export const CreateCarBrandServiceSchema = InsertCarBrandSchema
 
+export type CreateCarBrandParams = z.infer<typeof CreateCarBrandServiceSchema>;
+
 export async function createCarBrandService(
 	db: DB,
-	data: z.infer<typeof CreateCarBrandServiceSchema>,
+	data: CreateCarBrandParams,
 ) {
 	const carBrandName = await getCarBrandByName(db, data.name);
 

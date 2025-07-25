@@ -8,9 +8,11 @@ export const CheckCarTransmissionTypeUsageServiceSchema = z.object({
 	id: z.string(),
 });
 
+export type CheckCarTransmissionTypeUsageParams = z.infer<typeof CheckCarTransmissionTypeUsageServiceSchema>;
+
 export async function checkCarTransmissionTypeUsageService(
 	db: DB,
-	{ id }: z.infer<typeof CheckCarTransmissionTypeUsageServiceSchema>,
+	{ id }: CheckCarTransmissionTypeUsageParams,
 ) {
 	const carTransmissionType = await getCarTransmissionTypeById(db, id);
 

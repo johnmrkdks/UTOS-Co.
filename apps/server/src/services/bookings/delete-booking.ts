@@ -5,10 +5,17 @@ import { ErrorFactory } from "@/utils/error-factory";
 import z from "zod";
 
 export const DeleteBookingServiceSchema = z.object({
-	id: z.string()
+	id: z.string(),
 });
 
-export async function deleteBookingService(db: DB, { id }: z.infer<typeof DeleteBookingServiceSchema>) {
+export type DeleteBookingParams = z.infer<
+	typeof DeleteBookingServiceSchema
+>;
+
+export async function deleteBookingService(
+	db: DB,
+	{ id }: DeleteBookingParams,
+) {
 	const booking = await getBookingById(db, id);
 
 	if (!booking) {

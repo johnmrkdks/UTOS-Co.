@@ -5,7 +5,9 @@ import { z } from "zod";
 
 export const CreateRatingServiceSchema = InsertRatingSchema;
 
-export async function createRatingService(db: DB, data: z.infer<typeof CreateRatingServiceSchema>) {
+export type CreateRatingParams = z.infer<typeof CreateRatingServiceSchema>;
+
+export async function createRatingService(db: DB, data: CreateRatingParams) {
 	const newRating = createRating(db, data);
 
 	return newRating;

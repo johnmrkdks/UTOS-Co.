@@ -1,15 +1,14 @@
-import { count } from "drizzle-orm";
-import { db } from "@db/index";
-import { cars } from "@db/schema/cars";
+import { count, eq } from "drizzle-orm";
+import { cars } from "@/db/schema";
 import type { DB } from "@/db";
 
 export const getCarsCountByModelId = async (db: DB, modelId: string) => {
-  const [result] = await db
-    .select({
-      value: count(),
-    })
-    .from(cars)
-    .where((cars) => cars.modelId.eq(parseInt(modelId, 10)));
+	const [result] = await db
+		.select({
+			value: count(),
+		})
+		.from(cars)
+		.where(eq(cars.modelId, modelId))
 
-  return result.value;
+	return result.value;
 };

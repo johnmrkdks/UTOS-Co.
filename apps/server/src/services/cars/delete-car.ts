@@ -5,10 +5,12 @@ import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
 
 export const DeleteCarServiceSchema = z.object({
-	id: z.string()
+	id: z.string(),
 });
 
-export async function deleteCarService(db: DB, { id }: z.infer<typeof DeleteCarServiceSchema>) {
+export type DeleteCarParams = z.infer<typeof DeleteCarServiceSchema>;
+
+export async function deleteCarService(db: DB, { id }: DeleteCarParams) {
 	const car = await getCarById(db, id);
 
 	if (!car) {

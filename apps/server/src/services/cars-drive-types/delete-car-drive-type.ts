@@ -9,9 +9,11 @@ export const DeleteCarDriveTypeServiceSchema = z.object({
 	id: z.string(),
 });
 
+export type DeleteCarDriveTypeParams = z.infer<typeof DeleteCarDriveTypeServiceSchema>;
+
 export async function deleteCarDriveTypeService(
 	db: DB,
-	{ id }: z.infer<typeof DeleteCarDriveTypeServiceSchema>,
+	{ id }: DeleteCarDriveTypeParams,
 ) {
 	const carCount = await getCarsCountByDriveTypeId(db, id);
 

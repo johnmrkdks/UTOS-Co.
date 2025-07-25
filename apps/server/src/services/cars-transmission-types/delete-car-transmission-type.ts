@@ -9,7 +9,9 @@ export const DeleteCarTransmissionTypeServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function deleteCarTransmissionTypeService(db: DB, { id }: z.infer<typeof DeleteCarTransmissionTypeServiceSchema>) {
+export type DeleteCarTransmissionTypeParams = z.infer<typeof DeleteCarTransmissionTypeServiceSchema>;
+
+export async function deleteCarTransmissionTypeService(db: DB, { id }: DeleteCarTransmissionTypeParams) {
 	const carCount = await getCarsCountByTransmissionTypeId(db, id);
 
 	if (carCount > 0) {

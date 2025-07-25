@@ -11,9 +11,11 @@ export const UpdateCarBrandServiceSchema = z.object({
 	data: UpdateCarBrandSchema,
 });
 
+export type UpdateCarBrandParams = z.infer<typeof UpdateCarBrandServiceSchema>;
+
 export async function updateCarBrandService(
 	db: DB,
-	{ id, data }: z.infer<typeof UpdateCarBrandServiceSchema>,
+	{ id, data }: UpdateCarBrandParams,
 ) {
 	const carBrand = await getCarBrandById(db, id);
 

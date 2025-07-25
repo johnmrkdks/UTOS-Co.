@@ -6,7 +6,9 @@ export const GetCarTransmissionTypeServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function getCarTransmissionTypeService(db: DB, { id }: z.infer<typeof GetCarTransmissionTypeServiceSchema>) {
+export type GetCarTransmissionTypeByIdParams = z.infer<typeof GetCarTransmissionTypeServiceSchema>;
+
+export async function getCarTransmissionTypeService(db: DB, { id }: GetCarTransmissionTypeByIdParams) {
 	const carTransmissionType = await getCarTransmissionTypeById(db, id);
 
 	return carTransmissionType;

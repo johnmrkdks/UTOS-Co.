@@ -8,9 +8,11 @@ export const DeleteCarImageServiceSchema = z.object({
 	id: z.string(),
 });
 
+export type DeleteCarImageParams = z.infer<typeof DeleteCarImageServiceSchema>;
+
 export async function deleteCarImageService(
 	db: DB,
-	{ id }: z.infer<typeof DeleteCarImageServiceSchema>,
+	{ id }: DeleteCarImageParams,
 ) {
 	const carImage = await getCarImageById(db, id);
 

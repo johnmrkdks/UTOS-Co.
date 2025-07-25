@@ -6,6 +6,8 @@ export const IsCarFeatureExistServiceSchema = z.object({
 	feature: z.string().min(1).max(50),
 });
 
-export async function isCarFeatureExistService(db: DB, { feature }: z.infer<typeof IsCarFeatureExistServiceSchema>) {
+export type IsCarFeatureExistParams = z.infer<typeof IsCarFeatureExistServiceSchema>;
+
+export async function isCarFeatureExistService(db: DB, { feature }: IsCarFeatureExistParams) {
 	return await isCarFeatureExist(db, feature);
 }

@@ -10,7 +10,9 @@ export const UpdateRatingServiceSchema = z.object({
 	data: UpdateRatingSchema,
 });
 
-export async function updateRatingService(db: DB, { id, data }: z.infer<typeof UpdateRatingServiceSchema>) {
+export type UpdateRatingParams = z.infer<typeof UpdateRatingServiceSchema>;
+
+export async function updateRatingService(db: DB, { id, data }: UpdateRatingParams) {
 	const rating = await getRatingById(db, id);
 
 	if (!rating) {

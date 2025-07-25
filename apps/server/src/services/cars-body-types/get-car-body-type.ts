@@ -7,9 +7,11 @@ export const GetCarBodyTypeServiceSchema = z.object({
 	id: z.string(),
 });
 
+export type GetCarBodyTypeByIdParams = z.infer<typeof GetCarBodyTypeServiceSchema>;
+
 export async function getCarBodyTypeService(
 	db: DB,
-	{ id }: z.infer<typeof GetCarBodyTypeServiceSchema>,
+	{ id }: GetCarBodyTypeByIdParams,
 ) {
 	const carBodyType = await getCarBodyTypeById(db, id);
 

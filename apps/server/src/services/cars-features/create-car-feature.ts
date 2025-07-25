@@ -8,9 +8,11 @@ import { z } from "zod";
 
 export const CreateCarFeatureServiceSchema = InsertCarFeatureSchema;
 
+export type CreateCarFeatureParams = z.infer<typeof CreateCarFeatureServiceSchema>;
+
 export async function createCarFeatureService(
 	db: DB,
-	data: z.infer<typeof CreateCarFeatureServiceSchema>,
+	data: CreateCarFeatureParams,
 ) {
 	const carFeature = await getCarFeatureByFeature(db, data.feature);
 

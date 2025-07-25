@@ -4,10 +4,12 @@ import { ErrorFactory } from "@/utils/error-factory";
 import z from "zod";
 
 export const GetBookingServiceSchema = z.object({
-	id: z.string()
+	id: z.string(),
 });
 
-export async function getBookingService(db: DB, { id }: z.infer<typeof GetBookingServiceSchema>) {
+export type GetBookingByIdParams = z.infer<typeof GetBookingServiceSchema>;
+
+export async function getBookingService(db: DB, { id }: GetBookingByIdParams) {
 	const booking = await getBookingById(db, id);
 
 	if (!booking) {

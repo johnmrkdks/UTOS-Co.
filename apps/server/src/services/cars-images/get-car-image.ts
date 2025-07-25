@@ -7,7 +7,9 @@ export const GetCarImageServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function getCarImageService(db: DB, { id }: z.infer<typeof GetCarImageServiceSchema>) {
+export type GetCarImageByIdParams = z.infer<typeof GetCarImageServiceSchema>;
+
+export async function getCarImageService(db: DB, { id }: GetCarImageByIdParams) {
 	const carImage = await getCarImageById(db, id);
 
 	if (!carImage) {

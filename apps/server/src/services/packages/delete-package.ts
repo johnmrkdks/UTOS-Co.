@@ -8,7 +8,9 @@ export const DeletePackageServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function deletePackageService(db: DB, { id }: z.infer<typeof DeletePackageServiceSchema>) {
+export type DeletePackageParams = z.infer<typeof DeletePackageServiceSchema>;
+
+export async function deletePackageService(db: DB, { id }: DeletePackageParams) {
 	const _package = await getPackageById(db, id);
 
 	if (!_package) {

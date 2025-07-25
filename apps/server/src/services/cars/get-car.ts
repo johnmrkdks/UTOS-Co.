@@ -4,10 +4,12 @@ import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
 
 export const GetCarServiceSchema = z.object({
-	id: z.string()
+	id: z.string(),
 });
 
-export async function getCarService(db: DB, { id }: z.infer<typeof GetCarServiceSchema>) {
+export type GetCarByIdParams = z.infer<typeof GetCarServiceSchema>;
+
+export async function getCarService(db: DB, { id }: GetCarByIdParams) {
 	const car = await getCarById(db, id);
 
 	if (!car) {

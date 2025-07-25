@@ -5,9 +5,11 @@ import { z } from "zod";
 
 export const CreateCarImageServiceSchema = InsertCarImageSchema;
 
+export type CreateCarImageParams = z.infer<typeof CreateCarImageServiceSchema>;
+
 export async function createCarImageService(
 	db: DB,
-	data: z.infer<typeof CreateCarImageServiceSchema>,
+	data: CreateCarImageParams,
 ) {
 	const newCarImage = createCarImage(db, data);
 

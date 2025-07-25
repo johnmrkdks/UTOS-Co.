@@ -8,9 +8,11 @@ export const CheckCarFeatureUsageServiceSchema = z.object({
 	id: z.string(),
 });
 
+export type CheckCarFeatureUsageParams = z.infer<typeof CheckCarFeatureUsageServiceSchema>;
+
 export async function checkCarFeatureUsageService(
 	db: DB,
-	{ id }: z.infer<typeof CheckCarFeatureUsageServiceSchema>,
+	{ id }: CheckCarFeatureUsageParams,
 ) {
 	const carFeature = await getCarFeatureById(db, id);
 
@@ -25,7 +27,7 @@ export async function checkCarFeatureUsageService(
 		usage,
 		canDelete: !usage.isInUse,
 		errorMessage: usage.isInUse
-			? `Cannot delete "${carFeature.name}". It is currently used by ${usage.carCount} cars.`
+			? `Cannot delete "${carFeature.feature}". It is currently used by ${usage.carCount} cars.`
 			: null,
 	};
 }

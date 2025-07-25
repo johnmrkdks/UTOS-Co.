@@ -7,7 +7,9 @@ export const GetCarBrandServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function getCarBrandService(db: DB, { id }: z.infer<typeof GetCarBrandServiceSchema>) {
+export type GetCarBrandByIdParams = z.infer<typeof GetCarBrandServiceSchema>;
+
+export async function getCarBrandService(db: DB, { id }: GetCarBrandByIdParams) {
 	const carBrand = await getCarBrandById(db, id);
 
 	if (!carBrand) {

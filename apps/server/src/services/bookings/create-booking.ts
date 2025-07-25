@@ -5,7 +5,9 @@ import { z } from "zod";
 
 export const CreateBookingServiceSchema = InsertBookingSchema
 
-export async function createBookingService(db: DB, data: z.infer<typeof CreateBookingServiceSchema>) {
+export type CreateBookingParams = z.infer<typeof CreateBookingServiceSchema>
+
+export async function createBookingService(db: DB, data: CreateBookingParams) {
 	const newBooking = createBooking(db, data);
 
 	return newBooking;

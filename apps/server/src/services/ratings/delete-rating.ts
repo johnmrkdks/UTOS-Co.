@@ -8,7 +8,9 @@ export const DeleteRatingServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function deleteRatingService(db: DB, { id }: z.infer<typeof DeleteRatingServiceSchema>) {
+export type DeleteRatingParams = z.infer<typeof DeleteRatingServiceSchema>;
+
+export async function deleteRatingService(db: DB, { id }: DeleteRatingParams) {
 	const rating = await getRatingById(db, id);
 
 	if (!rating) {

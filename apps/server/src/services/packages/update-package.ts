@@ -11,7 +11,9 @@ export const UpdatePackageServiceSchema = z.object({
 	data: UpdatePackageSchema,
 });
 
-export async function updatePackageService(db: DB, { id, data }: z.infer<typeof UpdatePackageServiceSchema>) {
+export type UpdatePackageParams = z.infer<typeof UpdatePackageServiceSchema>;
+
+export async function updatePackageService(db: DB, { id, data }: UpdatePackageParams) {
 	const _package = await getPackageById(db, id);
 
 	if (!_package) {

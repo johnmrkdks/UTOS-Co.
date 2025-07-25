@@ -7,7 +7,9 @@ export const GetPackageServiceSchema = z.object({
 	id: z.string(),
 });
 
-export async function getPackageService(db: DB, { id }: z.infer<typeof GetPackageServiceSchema>) {
+export type GetPackageByIdParams = z.infer<typeof GetPackageServiceSchema>;
+
+export async function getPackageService(db: DB, { id }: GetPackageByIdParams) {
 	const packageItem = await getPackageById(db, id);
 
 	if (!packageItem) {

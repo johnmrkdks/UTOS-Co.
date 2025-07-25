@@ -7,9 +7,11 @@ export const GetCarFeatureServiceSchema = z.object({
 	id: z.string(),
 });
 
+export type GetCarFeatureByIdParams = z.infer<typeof GetCarFeatureServiceSchema>;
+
 export async function getCarFeatureService(
 	db: DB,
-	{ id }: z.infer<typeof GetCarFeatureServiceSchema>,
+	{ id }: GetCarFeatureByIdParams,
 ) {
 	const carFeature = await getCarFeatureById(db, id);
 
