@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarFeatures } from "@/features/dashboard/_pages/car-management/_components/car-features";
+import { CarsList } from "@/features/dashboard/_pages/car-management/_components/cars-list";
 import { createFileRoute } from "@tanstack/react-router";
 import { CarIcon, SettingsIcon } from "lucide-react";
 
@@ -33,7 +34,7 @@ function RouteComponent() {
 						</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="cars">{/* <CarsList /> */}</TabsContent>
+					<TabsContent value="cars"> <CarsList /></TabsContent>
 
 					<TabsContent value="features"><CarFeatures /></TabsContent>
 				</Tabs>

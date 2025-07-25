@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 export const getCarModelById = async (db: DB, id: string) => {
 	const carModel = await db.query.carModels.findFirst({
-		where: eq(carModels.id, parseInt(id, 10)),
+		where: eq(carModels.id, id),
 	});
 
 	return carModel;
