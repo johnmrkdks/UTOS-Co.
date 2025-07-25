@@ -7,13 +7,12 @@ export async function checkCarFuelTypeUsage(db: DB, id: string) {
 		where: eq(cars.fuelTypeId, id),
 	});
 
-	const carModelsCount = 0; // car fuel types are not linked to car models
 	const carCount = carsUsingFuelType.length;
 	const isInUse = carCount > 0;
 
 	return {
 		carCount,
-		carModelsCount,
+		totalUsages: carsUsingFuelType.length,
 		isInUse,
 		cars: carsUsingFuelType,
 	};

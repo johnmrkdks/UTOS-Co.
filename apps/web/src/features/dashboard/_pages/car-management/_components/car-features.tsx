@@ -4,7 +4,7 @@ import { Models } from "./car-features/models"
 import { FuelTypes } from "./car-features/fuel-types"
 import { TransmissionTypes } from "./car-features/transmission-types"
 import { DriveTypes } from "./car-features/drive-types"
-import { Conditions } from "./car-features/conditions"
+import { ConditionTypes } from "./car-features/conditions"
 import { Features } from "./car-features/features"
 import { BodyTypes } from "./car-features/body-types"
 
@@ -24,7 +24,7 @@ export function CarFeatures() {
 					<TabsTrigger value="models">Models</TabsTrigger>
 					<TabsTrigger value="fuel">Fuel Types</TabsTrigger>
 					<TabsTrigger value="body">Body Types</TabsTrigger>
-					<TabsTrigger value="transmission">Transmission</TabsTrigger>
+					<TabsTrigger value="transmission">Transmissions</TabsTrigger>
 					<TabsTrigger value="drive">Drive Types</TabsTrigger>
 					<TabsTrigger value="conditions">Conditions</TabsTrigger>
 				</TabsList>
@@ -58,7 +58,7 @@ export function CarFeatures() {
 				</TabsContent>
 
 				<TabsContent value="conditions">
-					<Conditions />
+					<ConditionTypes />
 				</TabsContent>
 			</Tabs>
 		</div>

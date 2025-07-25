@@ -7,13 +7,12 @@ export async function checkCarDriveTypeUsage(db: DB, id: string) {
 		where: eq(cars.driveTypeId, id),
 	});
 
-	const carModelsCount = 0; // car drive types are not linked to car models
 	const carCount = carsUsingDriveType.length;
 	const isInUse = carCount > 0;
 
 	return {
 		carCount,
-		carModelsCount,
+		totalUsages: carsUsingDriveType.length,
 		isInUse,
 		cars: carsUsingDriveType,
 	};

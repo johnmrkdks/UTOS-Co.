@@ -1,0 +1,17 @@
+import { DataTable } from "@/components/tables/data-table";
+import { driveTypeTableColumns } from "./drive-type-table-columns";
+import { useGetCarDriveTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-get-car-drive-types-with-enriched-data-query"
+
+export function DriveTypeTableList() {
+	const { data, isLoading } = useGetCarDriveTypesWithEnrichedDataQuery({});
+
+	return (
+		<DataTable
+			columns={driveTypeTableColumns}
+			data={data?.data || []}
+			isLoading={isLoading}
+			loadingRowCount={5}
+			pageSize={5}
+		/>
+	)
+}

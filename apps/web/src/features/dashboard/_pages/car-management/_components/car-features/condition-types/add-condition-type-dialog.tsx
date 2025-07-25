@@ -11,43 +11,35 @@ import {
 } from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form"
 import { PlusIcon } from "lucide-react"
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod/v3"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { SelectField, ValidatedTextInputField, TextInputField } from "@/components/form-fields"
+import { ValidatedTextInputField } from "@/components/form-fields"
 import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
 import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useCreateCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-create-car-model-mutation"
-import { useGetCarBrandsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-get-car-brands-query"
-import { useIsCarModelExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-is-car-model-exist-mutation"
+import { useCreateCarConditionTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-create-car-condition-type-mutation"
+import { useIsCarConditionTypeExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-is-car-condition-type-exist-mutation"
 
 const FormSchema = z.object({
 	name: z
 		.string()
-		.min(1, "Model name is required")
-		.max(50, "Model name must be less than 50 characters"),
-	brandId: z.string().min(1, "Brand id is required"),
-	year: z.coerce
-		.number()
-		.min(1900, "Year must be 1900 or later")
-		.max(new Date().getFullYear(), `Year cannot be later than ${new Date().getFullYear()}`),
+		.min(1, "Condition type is required")
+		.max(50, "Condition type must be less than 50 characters"),
 });
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function AddModelDialog() {
+export function AddConditionTypeDialog() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: brands, isLoading: isBrandsLoading } = useGetCarBrandsQuery({});
-	const mutation = useCreateCarModelMutation();
-	const checkNameMutation = useIsCarModelExistMutation();
+	const mutation = useCreateCarConditionTypeMutation();
+	const checkNameMutation = useIsCarConditionTypeExistMutation();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
 		disabled: mutation.isPending,
 		defaultValues: {
 			name: "",
-			brandId: "",
 		},
 	})
 
@@ -78,15 +70,6 @@ export function AddModelDialog() {
 		entityName: form.watch("name")?.trim(),
 	})
 
-	// Memoize brand options to prevent unnecessary re-renders
-	const brandOptions = useMemo(() =>
-		brands?.data?.map(brand => ({
-			value: brand.id,
-			label: brand.name
-		})) || [],
-		[brands?.data]
-	)
-
 	const handleReset = () => {
 		form.reset()
 		nameValidation.reset()
@@ -107,7 +90,7 @@ export function AddModelDialog() {
 		const hasErrors = Object.keys(form.formState.errors).length > 0
 		const isNameUnavailable = nameValidation.nameAvailability === false
 		const isCheckingName = nameValidation.isChecking
-		const hasRequiredFields = values.name?.trim() && values.brandId && values.year
+		const hasRequiredFields = values.name?.trim();
 
 		return hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
 	}
@@ -117,46 +100,23 @@ export function AddModelDialog() {
 			<DialogTrigger asChild>
 				<Button>
 					<PlusIcon className="w-4 h-4" />
-					Add Model
+					Add Condition Type
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
 				<DialogHeader>
-					<DialogTitle>Add New Model</DialogTitle>
-					<DialogDescription>Enter the name of the new car model.</DialogDescription>
+					<DialogTitle>Add New Condition Type</DialogTitle>
+					<DialogDescription>Enter the name of the new condition type.</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
-						<div className="flex flex-col gap-4">
-							<SelectField
-								form={form}
-								name="brandId"
-								label="Brand"
-								placeholder="Select brand"
-								disabled={isBrandsLoading}
-								options={brandOptions}
-							/>
-
-							<div className="grid grid-cols-2 gap-2">
-								<ValidatedTextInputField
-									form={form}
-									name="name"
-									label="Model Name"
-									placeholder="Enter model name"
-									className="flex flex-col items-start"
-									validationDisplay={validationDisplay}
-								/>
-
-								<TextInputField
-									form={form}
-									name="year"
-									label="Model Year"
-									type="number"
-									placeholder="Enter year"
-									className="flex flex-col items-start"
-								/>
-							</div>
-						</div>
+						<ValidatedTextInputField
+							form={form}
+							name="name"
+							label="Condition Type"
+							placeholder="Enter condition type"
+							validationDisplay={validationDisplay}
+						/>
 						<DialogFooter>
 							<DialogClose>
 								<Button
@@ -172,7 +132,7 @@ export function AddModelDialog() {
 								disabled={!canSubmit()}
 								loading={mutation.isPending}
 							>
-								{mutation.isPending ? "Adding..." : "Add Model"}
+								{mutation.isPending ? "Adding..." : "Add Condition Type"}
 							</Button>
 						</DialogFooter>
 					</form>

@@ -7,13 +7,12 @@ export async function checkCarBodyTypeUsage(db: DB, id: string) {
 		where: eq(cars.bodyTypeId, id),
 	});
 
-	const carModelsCount = 0;
 	const carCount = carsUsingBodyType.length;
 	const isInUse = carCount > 0;
 
 	return {
 		carCount,
-		carModelsCount,
+		totalUsages: carsUsingBodyType.length,
 		isInUse,
 		cars: carsUsingBodyType,
 	};

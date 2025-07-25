@@ -13,45 +13,46 @@ import { Form } from "@/components/ui/form"
 import { SquarePenIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
-import type { CarBrand } from "server/types"
+import { z } from "zod/v3"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useUpdateCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-update-car-brand-mutation"
-import { useCheckCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-mutation"
-import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
+import type { CarConditionType } from "server/types"
 import { ValidatedTextInputField } from "@/components/form-fields"
-import { TRPCClientError } from "@trpc/client"
+import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
+import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
+import { useUpdateCarConditionTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-update-car-condition-type-mutation"
+import { useIsCarConditionTypeExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-is-car-condition-type-exist-mutation"
 
-type EditBrandDialogProps = {
-	brand: CarBrand
+type EditConditionTypeDialogProps = {
+	conditionType: CarConditionType
 }
 
 const FormSchema = z.object({
-	name: z.string().min(1, "Brand name is required").max(50, "Brand name must be less than 50 characters"),
+	name: z.string().min(1, "Condition type is required").max(50, "Condition type must be less than 50 characters"),
 })
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function EditBrandDialog({ brand }: EditBrandDialogProps) {
+export function EditConditionTypeDialog({ conditionType }: EditConditionTypeDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const mutation = useUpdateCarBrandMutation()
-	const checkNameMutation = useCheckCarBrandMutation()
+	const mutation = useUpdateCarConditionTypeMutation()
+	const checkNameMutation = useIsCarConditionTypeExistMutation()
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
 		disabled: mutation.isPending,
 		defaultValues: {
-			name: brand.name
+			name: conditionType.name,
 		},
 	})
 
-	// Reset form when value changes
+	// Reset form when dialog opens or conditionType changes
 	useEffect(() => {
-		form.reset({
-			name: brand.name,
-		});
-	}, [brand, form]);
+		if (isDialogOpen) {
+			form.reset({
+				name: conditionType.name,
+			})
+		}
+	}, [conditionType, form, isDialogOpen])
 
 	const validateName = (name: string): Promise<boolean> => {
 		return new Promise((resolve, reject) => {
@@ -69,7 +70,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 		form,
 		fieldName: "name",
 		validateNameFn: validateName,
-		originalValue: brand.name,
+		originalValue: conditionType.name,
 		errorMessage: `${form.watch("name")} already used.`,
 	})
 
@@ -82,38 +83,45 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	})
 
 	const handleReset = () => {
-		form.reset()
+		form.reset({
+			name: conditionType.name,
+		})
 		nameValidation.reset()
 	}
 
 	const handleSubmit = (data: FormValues) => {
-		mutation.mutate({
-			id: brand.id,
-			data: FormSchema.parse(data)
-		}, {
-			onSuccess: () => {
-				handleReset()
-				setIsDialogOpen(false)
+		mutation.mutate(
+			{
+				id: conditionType.id,
+				data: FormSchema.parse(data),
 			},
-		})
-	}
-
-	const hasChanges = () => {
-		const currentValues = form.getValues()
-		return (
-			currentValues.name !== brand.name
+			{
+				onSuccess: () => {
+					setIsDialogOpen(false)
+				},
+			},
 		)
 	}
 
+	// Check if form has changed from original values
+	const hasChanges = () => {
+		const currentValues = form.getValues()
+		return (
+			currentValues.name !== conditionType.name
+		)
+	}
 
+	// Check if form is valid and ready to submit
 	const canSubmit = () => {
 		const values = form.getValues()
 		const hasErrors = Object.keys(form.formState.errors).length > 0
 		const isNameUnavailable = nameValidation.nameAvailability === false
 		const isCheckingName = nameValidation.isChecking
-		const hasRequiredFields = values.name?.trim()
+		const hasRequiredFields = values.name?.trim();
 
-		return hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
+		return (
+			hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
+		)
 	}
 
 	return (
@@ -124,36 +132,26 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
-				<DialogHeader >
-					<DialogTitle>Edit Brand</DialogTitle>
-					<DialogDescription>
-						Enter the name of the car brand.
-					</DialogDescription>
+				<DialogHeader>
+					<DialogTitle>Edit Condition Type</DialogTitle>
+					<DialogDescription>Edit the details of the condition type.</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}
 							name="name"
-							label="Brand Name"
-							placeholder="Enter brand name"
+							label="Condition Type"
+							placeholder="Enter condition type"
 							validationDisplay={validationDisplay}
 						/>
 						<DialogFooter>
-							<DialogClose>
-								<Button
-									type="button"
-									variant="ghost"
-									onClick={handleReset}
-								>
+							<DialogClose asChild>
+								<Button type="button" variant="ghost" onClick={handleReset}>
 									Cancel
 								</Button>
 							</DialogClose>
-							<Button
-								type="submit"
-								disabled={!canSubmit()}
-								loading={mutation.isPending}
-							>
+							<Button type="submit" disabled={!canSubmit()} loading={mutation.isPending}>
 								{mutation.isPending ? "Updating..." : "Save Changes"}
 							</Button>
 						</DialogFooter>

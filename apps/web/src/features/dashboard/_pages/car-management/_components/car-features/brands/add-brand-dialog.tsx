@@ -41,7 +41,7 @@ export function AddBrandDialog() {
 		},
 	})
 
-	const validateCarBrandName = (name: string): Promise<boolean> => {
+	const validateName = (name: string): Promise<boolean> => {
 		return new Promise((resolve, reject) => {
 			checkNameMutation.mutate(
 				{ name },
@@ -56,7 +56,7 @@ export function AddBrandDialog() {
 	const nameValidation = useEntityNameValidation({
 		form,
 		fieldName: "name",
-		validateNameFn: validateCarBrandName,
+		validateNameFn: validateName,
 		errorMessage: `${form.watch("name")} already exists.`,
 	})
 

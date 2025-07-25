@@ -7,13 +7,12 @@ export async function checkCarTransmissionTypeUsage(db: DB, id: string) {
 		where: eq(cars.transmissionTypeId, id),
 	});
 
-	const carModelsCount = 0; // car transmission types are not linked to car models
 	const carCount = carsUsingTransmissionType.length;
 	const isInUse = carCount > 0;
 
 	return {
 		carCount,
-		carModelsCount,
+		totalUsages: carsUsingTransmissionType.length,
 		isInUse,
 		cars: carsUsingTransmissionType,
 	};

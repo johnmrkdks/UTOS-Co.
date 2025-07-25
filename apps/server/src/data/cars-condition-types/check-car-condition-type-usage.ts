@@ -7,13 +7,12 @@ export async function checkCarConditionTypeUsage(db: DB, id: string) {
 		where: eq(cars.conditionTypeId, id),
 	});
 
-	const carModelsCount = 0; // car condition types are not linked to car models
 	const carCount = carsUsingConditionType.length;
 	const isInUse = carCount > 0;
 
 	return {
 		carCount,
-		carModelsCount,
+		totalUsages: carsUsingConditionType.length,
 		isInUse,
 		cars: carsUsingConditionType,
 	};

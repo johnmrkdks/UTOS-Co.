@@ -12,13 +12,12 @@ export async function checkCarFeatureUsage(db: DB, id: string) {
 		},
 	});
 
-	const carModelsCount = 0; // car features are not linked to car models
 	const carCount = carsUsingFeature.length;
 	const isInUse = carCount > 0;
 
 	return {
 		carCount,
-		carModelsCount,
+		totalUsages: carsUsingFeature.length,
 		isInUse,
 		cars: carsUsingFeature,
 	};

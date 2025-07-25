@@ -65,7 +65,7 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 		}
 	}, [model, form, isDialogOpen])
 
-	const validateCarModelName = (name: string): Promise<boolean> => {
+	const validateName = (name: string): Promise<boolean> => {
 		return new Promise((resolve, reject) => {
 			checkNameMutation.mutate(
 				{ name },
@@ -80,7 +80,7 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 	const nameValidation = useEntityNameValidation({
 		form,
 		fieldName: "name",
-		validateNameFn: validateCarModelName,
+		validateNameFn: validateName,
 		originalValue: model.name,
 		errorMessage: `${form.watch("name")} already used.`,
 	})

@@ -14,32 +14,32 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2Icon, AlertTriangle, Car, Settings } from "lucide-react"
+import { Trash2Icon, AlertTriangle, Car } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import type { CarModel } from "server/types"
-import { useCheckCarModelUsageQuery } from "../../../_hooks/query/car-model/use-check-car-model-usage-query"
-import { useDeleteCarModelMutation } from "../../../_hooks/query/car-model/use-delete-car-model-mutation"
+import type { CarTransmissionType } from "server/types"
+import { useCheckCarTransmissionTypeUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-transmission-type/use-check-car-transmission-type-usage-query"
+import { useDeleteCarTransmissionTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-transmission-type/use-delete-car-transmission-type-mutation"
 
-type DeleteModelDialogProps = {
-	model: CarModel
+type DeleteTransmissionTypeDialogProps = {
+	transmissionType: CarTransmissionType
 	className?: string
 }
 
 const FormSchema = z.object({
 	confirmation: z.boolean().refine((val) => val === true, {
-		message: "You must confirm to delete the model",
+		message: "You must confirm to delete the transmission type",
 	}),
 })
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) {
+export function DeleteTransmissionTypeDialog({ transmissionType, className }: DeleteTransmissionTypeDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: checkUsage, isLoading: isCheckingUsage } = useCheckCarModelUsageQuery({ id: model.id })
-	const mutation = useDeleteCarModelMutation()
+	const { data: checkUsage, isLoading: isCheckingUsage } = useCheckCarTransmissionTypeUsageQuery({ id: transmissionType.id })
+	const mutation = useDeleteCarTransmissionTypeMutation()
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -55,7 +55,7 @@ export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) 
 
 	const handleSubmit = () => {
 		mutation.mutate(
-			{ id: model.id },
+			{ id: transmissionType.id },
 			{
 				onSuccess: () => {
 					handleReset()
@@ -77,11 +77,11 @@ export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) 
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-6">
 				<DialogHeader>
-					<DialogTitle>Delete Model</DialogTitle>
+					<DialogTitle>Delete Transmission Type</DialogTitle>
 					<DialogDescription>
 						{isInUse
-							? "This model cannot be deleted because it is currently in use."
-							: "Before deleting this model, please make sure that all models associated with this model are not in use."}
+							? "This transmission type cannot be deleted because it is currently in use."
+							: "Before deleting this transmission type, please make sure that all models associated with this transmission type are not in use."}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -118,14 +118,14 @@ export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) 
 							{/* Success Message */}
 							{!isInUse && (
 								<Alert>
-									<AlertDescription>This model is not currently in use and can be safely deleted.</AlertDescription>
+									<AlertDescription>This transmission type is not currently in use and can be safely deleted.</AlertDescription>
 								</Alert>
 							)}
 						</>
 					) : null}
 				</div>
 
-				{/* Form - Only show if model can be deleted */}
+				{/* Form - Only show if transmissionType can be deleted */}
 				{canDelete && (
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-6">
@@ -138,7 +138,7 @@ export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) 
 											<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 										</FormControl>
 										<FormLabel>
-											Are you sure you want to delete the model <span className="font-bold">{model.name}</span>?
+											Are you sure you want to delete the transmission type <span className="font-bold">{transmissionType.name}</span>?
 										</FormLabel>
 										<FormMessage />
 									</FormItem>
@@ -167,7 +167,7 @@ export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) 
 							disabled={mutation.isPending || !form.watch("confirmation") || isCheckingUsage}
 							onClick={form.handleSubmit(handleSubmit)}
 						>
-							{mutation.isPending ? "Deleting..." : "Delete Model"}
+							{mutation.isPending ? "Deleting..." : "Delete Transmission Type"}
 						</Button>
 					)}
 				</DialogFooter>
@@ -175,4 +175,5 @@ export function DeleteModelDialog({ model, className }: DeleteModelDialogProps) 
 		</Dialog>
 	)
 }
+
 

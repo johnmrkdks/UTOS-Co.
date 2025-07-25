@@ -13,45 +13,46 @@ import { Form } from "@/components/ui/form"
 import { SquarePenIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
-import type { CarBrand } from "server/types"
+import { z } from "zod/v3"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useUpdateCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-update-car-brand-mutation"
-import { useCheckCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-mutation"
-import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
+import type { CarDriveType } from "server/types"
 import { ValidatedTextInputField } from "@/components/form-fields"
-import { TRPCClientError } from "@trpc/client"
+import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
+import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
+import { useUpdateCarDriveTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-update-car-drive-type-mutation"
+import { useIsCarDriveTypeExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-is-car-drive-type-exist-mutation"
 
-type EditBrandDialogProps = {
-	brand: CarBrand
+type EditDriveTypeDialogProps = {
+	driveType: CarDriveType
 }
 
 const FormSchema = z.object({
-	name: z.string().min(1, "Brand name is required").max(50, "Brand name must be less than 50 characters"),
+	name: z.string().min(1, "Drive type is required").max(50, "Drive type must be less than 50 characters"),
 })
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function EditBrandDialog({ brand }: EditBrandDialogProps) {
+export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const mutation = useUpdateCarBrandMutation()
-	const checkNameMutation = useCheckCarBrandMutation()
+	const mutation = useUpdateCarDriveTypeMutation()
+	const checkNameMutation = useIsCarDriveTypeExistMutation()
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
 		disabled: mutation.isPending,
 		defaultValues: {
-			name: brand.name
+			name: driveType.name,
 		},
 	})
 
-	// Reset form when value changes
+	// Reset form when dialog opens or driveType changes
 	useEffect(() => {
-		form.reset({
-			name: brand.name,
-		});
-	}, [brand, form]);
+		if (isDialogOpen) {
+			form.reset({
+				name: driveType.name,
+			})
+		}
+	}, [driveType, form, isDialogOpen])
 
 	const validateName = (name: string): Promise<boolean> => {
 		return new Promise((resolve, reject) => {
@@ -69,7 +70,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 		form,
 		fieldName: "name",
 		validateNameFn: validateName,
-		originalValue: brand.name,
+		originalValue: driveType.name,
 		errorMessage: `${form.watch("name")} already used.`,
 	})
 
@@ -82,38 +83,45 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 	})
 
 	const handleReset = () => {
-		form.reset()
+		form.reset({
+			name: driveType.name,
+		})
 		nameValidation.reset()
 	}
 
 	const handleSubmit = (data: FormValues) => {
-		mutation.mutate({
-			id: brand.id,
-			data: FormSchema.parse(data)
-		}, {
-			onSuccess: () => {
-				handleReset()
-				setIsDialogOpen(false)
+		mutation.mutate(
+			{
+				id: driveType.id,
+				data: FormSchema.parse(data),
 			},
-		})
-	}
-
-	const hasChanges = () => {
-		const currentValues = form.getValues()
-		return (
-			currentValues.name !== brand.name
+			{
+				onSuccess: () => {
+					setIsDialogOpen(false)
+				},
+			},
 		)
 	}
 
+	// Check if form has changed from original values
+	const hasChanges = () => {
+		const currentValues = form.getValues()
+		return (
+			currentValues.name !== driveType.name
+		)
+	}
 
+	// Check if form is valid and ready to submit
 	const canSubmit = () => {
 		const values = form.getValues()
 		const hasErrors = Object.keys(form.formState.errors).length > 0
 		const isNameUnavailable = nameValidation.nameAvailability === false
 		const isCheckingName = nameValidation.isChecking
-		const hasRequiredFields = values.name?.trim()
+		const hasRequiredFields = values.name?.trim();
 
-		return hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
+		return (
+			hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
+		)
 	}
 
 	return (
@@ -124,36 +132,26 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
-				<DialogHeader >
-					<DialogTitle>Edit Brand</DialogTitle>
-					<DialogDescription>
-						Enter the name of the car brand.
-					</DialogDescription>
+				<DialogHeader>
+					<DialogTitle>Edit Drive Type</DialogTitle>
+					<DialogDescription>Edit the details of the drive type.</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}
 							name="name"
-							label="Brand Name"
-							placeholder="Enter brand name"
+							label="Drive Type"
+							placeholder="Enter drive type"
 							validationDisplay={validationDisplay}
 						/>
 						<DialogFooter>
-							<DialogClose>
-								<Button
-									type="button"
-									variant="ghost"
-									onClick={handleReset}
-								>
+							<DialogClose asChild>
+								<Button type="button" variant="ghost" onClick={handleReset}>
 									Cancel
 								</Button>
 							</DialogClose>
-							<Button
-								type="submit"
-								disabled={!canSubmit()}
-								loading={mutation.isPending}
-							>
+							<Button type="submit" disabled={!canSubmit()} loading={mutation.isPending}>
 								{mutation.isPending ? "Updating..." : "Save Changes"}
 							</Button>
 						</DialogFooter>

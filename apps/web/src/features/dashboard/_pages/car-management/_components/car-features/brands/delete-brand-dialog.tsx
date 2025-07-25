@@ -38,7 +38,7 @@ type FormValues = z.infer<typeof FormSchema>
 
 export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: checkCarBrandUsage, isLoading: isCheckingCarBrandUsage } = useCheckCarBrandUsageQuery({ id: brand.id })
+	const { data: checkUsage, isLoading: isCheckingUsage } = useCheckCarBrandUsageQuery({ id: brand.id })
 	const mutation = useDeleteCarBrandMutation()
 
 	const form = useForm<FormValues>({
@@ -65,8 +65,8 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 		)
 	}
 
-	const canDelete = checkCarBrandUsage?.canDelete ?? true
-	const isInUse = checkCarBrandUsage?.usage?.isInUse ?? false
+	const canDelete = checkUsage?.canDelete ?? true
+	const isInUse = checkUsage?.usage?.isInUse ?? false
 
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -81,42 +81,42 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 					<DialogDescription>
 						{isInUse
 							? "This brand cannot be deleted because it is currently in use."
-							: "Deleting a brand will remove all associated cars and models."}
+							: "Before deleting this brand, please make sure that all models associated with this brand are not in use."}
 					</DialogDescription>
 				</DialogHeader>
 
 				{/* Usage Information */}
 				<div className="space-y-4">
-					{isCheckingCarBrandUsage ? (
+					{isCheckingUsage ? (
 						<div className="space-y-3">
 							<Skeleton className="h-4 w-full" />
 							<Skeleton className="h-16 w-full" />
 						</div>
-					) : checkCarBrandUsage ? (
+					) : checkUsage ? (
 						<>
 							{/* Usage Stats */}
 							<div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
 								<div className="flex items-center gap-2">
 									<Car className="w-4 h-4 text-muted-foreground" />
 									<span className="text-sm font-medium">Cars:</span>
-									<Badge variant="secondary">{checkCarBrandUsage.usage.carCount}</Badge>
+									<Badge variant="secondary">{checkUsage.usage.carCount}</Badge>
 								</div>
 								<div className="flex items-center gap-2">
 									<Settings className="w-4 h-4 text-muted-foreground" />
 									<span className="text-sm font-medium">Models:</span>
-									<Badge variant="secondary">{checkCarBrandUsage.usage.carModelsCount}</Badge>
+									<Badge variant="secondary">{checkUsage.usage.carModelsCount}</Badge>
 								</div>
 								<div className="flex items-center gap-2">
 									<span className="text-sm font-medium">Total:</span>
-									<Badge variant={isInUse ? "destructive" : "secondary"}>{checkCarBrandUsage.usage.totalUsages}</Badge>
+									<Badge variant={isInUse ? "destructive" : "secondary"}>{checkUsage.usage.totalUsages}</Badge>
 								</div>
 							</div>
 
 							{/* Error Message */}
-							{isInUse && checkCarBrandUsage.errorMessage && (
+							{isInUse && checkUsage.errorMessage && (
 								<Alert variant="destructive">
 									<AlertTriangle className="h-4 w-4" />
-									<AlertDescription>{checkCarBrandUsage.errorMessage}</AlertDescription>
+									<AlertDescription>{checkUsage.errorMessage}</AlertDescription>
 								</Alert>
 							)}
 
@@ -169,7 +169,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 						<Button
 							type="submit"
 							variant="destructive"
-							disabled={mutation.isPending || !form.watch("confirmation") || isCheckingCarBrandUsage}
+							disabled={mutation.isPending || !form.watch("confirmation") || isCheckingUsage}
 							onClick={form.handleSubmit(handleSubmit)}
 						>
 							{mutation.isPending ? "Deleting..." : "Delete Brand"}
