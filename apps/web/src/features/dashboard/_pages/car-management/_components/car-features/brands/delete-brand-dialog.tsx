@@ -20,8 +20,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { CarBrand } from "server/types"
-import { useDeleteCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/brand/use-delete-car-brand-mutation"
-import { useCheckCarBrandUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/brand/use-check-car-brand-usage-query"
+import { useDeleteCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-delete-car-brand-mutation"
+import { useCheckCarBrandUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-usage-query"
 
 type DeleteBrandDialogProps = {
 	brand: CarBrand
@@ -38,7 +38,7 @@ type FormValues = z.infer<typeof FormSchema>
 
 export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: checkCarBrandUsage, isLoading: isCheckingCarBrandUsage } = useCheckCarBrandUsageQuery(brand.id)
+	const { data: checkCarBrandUsage, isLoading: isCheckingCarBrandUsage } = useCheckCarBrandUsageQuery({ id: brand.id })
 	const mutation = useDeleteCarBrandMutation()
 
 	const form = useForm<FormValues>({

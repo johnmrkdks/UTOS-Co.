@@ -14,7 +14,7 @@ export const ResourceListSchema = z.object({
 	filters: z.record(z.string(), z.string()).optional(),
 });
 
-export type ResourceList = z.infer<typeof ResourceListSchema>;
+export type ResourceList = z.infer<typeof ResourceListSchema>
 
 export const QueryListResultSchema = (table: SQLiteTableWithColumns<any>) =>
 	z.object({

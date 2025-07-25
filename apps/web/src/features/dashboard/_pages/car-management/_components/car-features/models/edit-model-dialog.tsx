@@ -19,9 +19,9 @@ import type { CarModel } from "server/types"
 import { SelectField, ValidatedTextInputField, TextInputField } from "@/components/form-fields"
 import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
 import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useUpdateCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/model/use-update-car-model-mutation"
-import { useCheckCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/model/use-check-car-model-mutation"
-import { useGetCarBrandsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/brand/use-get-car-brands-query"
+import { useUpdateCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-update-car-model-mutation"
+import { useGetCarBrandsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-get-car-brands-query"
+import { useIsCarModelExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-is-car-model-exist-mutation"
 
 type EditModelDialogProps = {
 	model: CarModel
@@ -40,9 +40,9 @@ type FormValues = z.infer<typeof FormSchema>
 
 export function EditModelDialog({ model }: EditModelDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: brands, isLoading: isBrandsLoading } = useGetCarBrandsQuery()
+	const { data: brands, isLoading: isBrandsLoading } = useGetCarBrandsQuery({})
 	const mutation = useUpdateCarModelMutation()
-	const checkNameMutation = useCheckCarModelMutation()
+	const checkNameMutation = useIsCarModelExistMutation()
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),

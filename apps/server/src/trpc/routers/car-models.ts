@@ -5,7 +5,7 @@ import {
 import { createCarModelService, CreateCarModelServiceSchema } from "@/services/cars-models/create-car-model";
 import { deleteCarModelService, DeleteCarModelServiceSchema } from "@/services/cars-models/delete-car-model";
 import { isCarModelExistService, IsCarModelExistServiceSchema } from "@/services/cars-models/is-car-model-exist";
-import { getCarModelsWithEnrichedDataService } from "@/services/cars-models/get-car-brands-with-enriched-data";
+import { getCarModelsWithEnrichedDataService } from "@/services/cars-models/get-car-models-with-enriched-data";
 import { getCarModelService, GetCarModelServiceSchema } from "@/services/cars-models/get-car-model";
 import { getCarModelsService } from "@/services/cars-models/get-car-models";
 import { getCarModelsWithBrandService } from "@/services/cars-models/get-car-models-with-brands";

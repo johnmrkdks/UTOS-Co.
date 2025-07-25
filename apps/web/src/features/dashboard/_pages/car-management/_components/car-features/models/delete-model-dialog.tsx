@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { CarBrand } from "server/types"
-import { useDeleteCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/model/use-delete-car-model-mutation"
+import { useDeleteCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-delete-car-model-mutation"
 
 type DeleteBrandDialogProps = {
 	model: CarBrand
