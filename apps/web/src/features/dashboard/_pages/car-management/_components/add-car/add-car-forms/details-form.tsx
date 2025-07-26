@@ -117,6 +117,39 @@ export function DetailsForm({ control }: DetailsFormProps) {
 						</FormItem>
 					)}
 				/>
+				<FormField
+					control={control}
+					name="seatingCapacity"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Seating Capacity</FormLabel>
+							<FormControl>
+								<Input
+									type="number"
+									min="1"
+									max="15"
+									{...field}
+									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 4)}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={control}
+					name="luggageCapacity"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Luggage Capacity (Optional)</FormLabel>
+							<FormControl>
+								<Input placeholder="e.g., 2 large bags, 500L" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 			</div>
 		</div>
 	)

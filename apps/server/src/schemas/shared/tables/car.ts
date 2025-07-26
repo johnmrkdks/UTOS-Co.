@@ -14,11 +14,15 @@ import { CarTransmissionTypeSchema } from "./cars/car-transmission-type";
 import { CarBodyTypeSchema } from "./cars/car-body-type";
 import { CarConditionTypeSchema } from "./cars/car-condition-type";
 import { CarDriveTypeSchema } from "./cars/car-drive-type";
+import { CarCategorySchema } from "./cars/car-category";
 
 export const CarSchema = createSelectSchema(cars, {
 	createdAt: z.union([z.date(), z.string()]),
 	updatedAt: z.union([z.date(), z.string()]),
-	dateManufactured: z.union([z.date(), z.string()]),
+	insuranceExpiry: z.union([z.date(), z.string()]),
+	registrationExpiry: z.union([z.date(), z.string()]),
+	lastServiceDate: z.union([z.date(), z.string()]),
+	nextServiceDue: z.union([z.date(), z.string()]),
 }).extend({
 	bodyType: CarBodyTypeSchema.optional(),
 	brand: CarBrandSchema.optional(),
@@ -29,6 +33,7 @@ export const CarSchema = createSelectSchema(cars, {
 	images: z.array(CarImageSchema).default([]).optional(),
 	model: CarModelSchema.optional(),
 	transmissionType: CarTransmissionTypeSchema.optional(),
+	category: CarCategorySchema.optional(),
 });
 export const InsertCarSchema = createInsertSchema(cars).extend({});
 export const UpdateCarSchema = createUpdateSchema(cars, {

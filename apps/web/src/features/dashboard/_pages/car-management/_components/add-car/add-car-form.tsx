@@ -8,6 +8,9 @@ import { BasicInfoForm } from "./add-car-forms/basic-info-form";
 import { Separator } from "@/components/ui/separator";
 import { SpecificationsForm } from "./add-car-forms/specifications-form";
 import { DetailsForm } from "./add-car-forms/details-form";
+import { CarStatusEnum } from "server/types";
+import { MaintenanceForm } from "./add-car-forms/maintenance-form";
+import { OperationalStatusForm } from "./add-car-forms/operational-status-form";
 
 export type AddCarFormValues = z.infer<typeof AddCarFormSchema>
 
@@ -18,13 +21,19 @@ export function AddCarForm() {
 			name: "",
 			description: "",
 			licensePlate: "",
+			vinNumber: "",
 			mileage: 0,
 			color: "",
 			engineSize: 0,
 			doors: 4,
 			cylinders: 4,
-			pricePerDay: 0,
-			pricePerKm: 0,
+			seatingCapacity: 4,
+			luggageCapacity: "",
+			availableForPackages: true,
+			availableForCustom: true,
+			isActive: true,
+			isAvailable: true,
+			status: CarStatusEnum.Available,
 			features: [],
 			images: [],
 		},
@@ -49,6 +58,14 @@ export function AddCarForm() {
 						<Separator />
 
 						<DetailsForm control={form.control} />
+
+						<Separator />
+
+						<MaintenanceForm control={form.control} />
+
+						<Separator />
+
+						<OperationalStatusForm control={form.control} />
 					</div>
 					<div>
 						Image upload
