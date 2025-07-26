@@ -22,7 +22,7 @@ function RouteComponent() {
 			<DashboardSidebar />
 			<SidebarInset className="relative overflow-hidden">
 				<DashboardNavbar className="sticky top-0 z-10" />
-				<div className="h-full p-4 overflow-auto relative">
+				<div className="h-full overflow-auto relative">
 					{routerState.status === 'pending' && (
 						<div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
 							<Loader />
