@@ -17,11 +17,7 @@ export async function requireAuth() {
 
 export async function requireAdmin() {
 	const session = await requireAuth();
-	if (
-		session &&
-		session.user.role !== "admin" &&
-		session.user.role !== "super_admin"
-	) {
+	if (session?.user.role !== "admin" && session?.user.role !== "super_admin") {
 		throw redirect({
 			to: "/",
 			search: {
@@ -33,25 +29,15 @@ export async function requireAdmin() {
 }
 
 export async function getAuth() {
-	const session = await requireAuth();
-	if (
-		session &&
-		session.user.role !== "admin" &&
-		session.user.role !== "super_admin"
-	) {
+	const session = await authClient.getSession();
+	if (!session) {
 		throw redirect({
-			to: "/",
+			to: "/sign-in",
+			search: {
+				redirect: window.location.pathname,
+			},
 		});
 	}
 
-	if (
-		session &&
-		(session.user.role === "admin" || session.user.role === "super_admin")
-	) {
-		throw redirect({
-			to: "/dashboard",
-		});
-	}
-
-	return session;
+	return session.data;
 }

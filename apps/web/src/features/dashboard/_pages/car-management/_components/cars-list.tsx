@@ -3,13 +3,15 @@ import { useCarsListViewToogleStore } from "@/features/dashboard/_pages/car-mana
 import { ViewToggle } from "./cars-list/view-toggle";
 import { mockCarsData } from "@/data/mock-cars-data";
 import { CarsListGrid } from "./cars-list/cars-list-grid";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
 export function CarsList() {
 	const { viewMode } = useCarsListViewToogleStore();
 
 	return (
-		<div className="flex flex-col gap-4">
-			<div className="flex items-center justify-between">
+		<div className="relative flex flex-col gap-0">
+			{/* Sticky Toolbar */}
+			<PaddingLayout className="sticky top-[85px] z-9 bg-background border-b border-boder flex items-center justify-between">
 				<div>
 					Filters here
 				</div>
@@ -17,25 +19,28 @@ export function CarsList() {
 					<AddCarDialog />
 					<ViewToggle />
 				</div>
-			</div>
-			<p className="text-muted-foreground text-xs italic">Mock data for testing purposes</p>
+			</PaddingLayout>
 
-			<div>
-				{
-					viewMode === "grid" && (
-						<CarsListGrid cars={mockCarsData} className="grid grid-cols-3 gap-4" />
-					)
-				}
+			{/* Scrollable Content */}
+			<PaddingLayout className="overflow-y-auto h-full">
+				<p className="text-muted-foreground text-xs italic">Mock data for testing purposes</p>
 
-				{
-					viewMode === "table" && (
-						<div>
-							Table View
-						</div>
-					)
-				}
-			</div>
+				<div>
+					{
+						viewMode === "grid" && (
+							<CarsListGrid cars={mockCarsData} className="grid grid-cols-3 gap-4" />
+						)
+					}
+
+					{
+						viewMode === "table" && (
+							<div>
+								Table View
+							</div>
+						)
+					}
+				</div>
+			</PaddingLayout >
 		</div>
-
 	)
 }
