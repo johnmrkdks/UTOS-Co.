@@ -31,6 +31,7 @@ import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboar
 import { Route as DashboardLayoutCarManagementIndexRouteImport } from './routes/dashboard/_layout/car-management/index'
 import { Route as DashboardLayoutBookmarksIndexRouteImport } from './routes/dashboard/_layout/bookmarks/index'
 import { Route as DashboardLayoutBoardIndexRouteImport } from './routes/dashboard/_layout/board/index'
+import { Route as DashboardLayoutCarManagementAddCarRouteImport } from './routes/dashboard/_layout/car-management/add-car'
 
 const DashboardRouteImport = createFileRoute('/dashboard')()
 
@@ -146,6 +147,12 @@ const DashboardLayoutBoardIndexRoute =
     path: '/board/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutCarManagementAddCarRoute =
+  DashboardLayoutCarManagementAddCarRouteImport.update({
+    id: '/car-management/add-car',
+    path: '/car-management/add-car',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
+  '/dashboard/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
   '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
@@ -178,6 +186,7 @@ export interface FileRoutesByTo {
   '/services': typeof MarketingServicesRoute
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/dashboard/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
   '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
@@ -202,6 +211,7 @@ export interface FileRoutesById {
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
+  '/dashboard/_layout/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
   '/dashboard/_layout/board/': typeof DashboardLayoutBoardIndexRoute
   '/dashboard/_layout/bookmarks/': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/_layout/car-management/': typeof DashboardLayoutCarManagementIndexRoute
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/'
     | '/dashboard/'
+    | '/dashboard/car-management/add-car'
     | '/dashboard/board'
     | '/dashboard/bookmarks'
     | '/dashboard/car-management'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/dashboard'
     | '/'
+    | '/dashboard/car-management/add-car'
     | '/dashboard/board'
     | '/dashboard/bookmarks'
     | '/dashboard/car-management'
@@ -268,6 +280,7 @@ export interface FileRouteTypes {
     | '/dashboard/_layout'
     | '/_marketing/'
     | '/dashboard/_layout/'
+    | '/dashboard/_layout/car-management/add-car'
     | '/dashboard/_layout/board/'
     | '/dashboard/_layout/bookmarks/'
     | '/dashboard/_layout/car-management/'
@@ -435,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutBoardIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/car-management/add-car': {
+      id: '/dashboard/_layout/car-management/add-car'
+      path: '/car-management/add-car'
+      fullPath: '/dashboard/car-management/add-car'
+      preLoaderRoute: typeof DashboardLayoutCarManagementAddCarRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
   }
 }
 
@@ -462,6 +482,7 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 
 interface DashboardLayoutRouteChildren {
   DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
+  DashboardLayoutCarManagementAddCarRoute: typeof DashboardLayoutCarManagementAddCarRoute
   DashboardLayoutBoardIndexRoute: typeof DashboardLayoutBoardIndexRoute
   DashboardLayoutBookmarksIndexRoute: typeof DashboardLayoutBookmarksIndexRoute
   DashboardLayoutCarManagementIndexRoute: typeof DashboardLayoutCarManagementIndexRoute
@@ -475,6 +496,8 @@ interface DashboardLayoutRouteChildren {
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
+  DashboardLayoutCarManagementAddCarRoute:
+    DashboardLayoutCarManagementAddCarRoute,
   DashboardLayoutBoardIndexRoute: DashboardLayoutBoardIndexRoute,
   DashboardLayoutBookmarksIndexRoute: DashboardLayoutBookmarksIndexRoute,
   DashboardLayoutCarManagementIndexRoute:

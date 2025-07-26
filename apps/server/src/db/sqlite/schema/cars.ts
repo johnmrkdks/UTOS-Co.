@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text, index, real } from "drizzle-orm/sqlite-core";
 import { carImages } from "@/db/sqlite/schema/cars/car-images";
 import { carFeatures } from "@/db/sqlite/schema/cars/car-features";
 import { carModels } from "@/db/sqlite/schema/cars/car-models";
@@ -9,6 +9,8 @@ import { carTransmissionTypes } from "@/db/sqlite/schema/cars/car-transmission-t
 import { carDriveTypes } from "@/db/sqlite/schema/cars/car-drive-types";
 import { carConditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
 import { createId } from "@paralleldrive/cuid2";
+import { CarStatusEnum } from "@/db/sqlite/enums";
+import { carCategories } from "@/db/sqlite/schema/cars/car-categories";
 
 export const cars = sqliteTable(
 	"cars",
@@ -16,9 +18,10 @@ export const cars = sqliteTable(
 		id: text("id").primaryKey().$defaultFn(() => createId()),
 		name: text("name").notNull(),
 		description: text("description").notNull(),
-		dateManufactured: integer("date_manufactured", {
-			mode: "timestamp",
-		}).notNull(),
+
+		// Vehicle identification
+		licensePlate: text("license_plate").notNull().unique(),
+		vinNumber: text("vin_number"), // Vehicle Identification Number
 
 		// Foreign keys to normalized tables
 		modelId: text("model_id")
@@ -39,32 +42,52 @@ export const cars = sqliteTable(
 		conditionTypeId: text("condition_type_id")
 			.notNull()
 			.references(() => carConditionTypes.id, { onDelete: "restrict" }),
+		categoryId: text("category_id")
+			.notNull()
+			.references(() => carCategories.id, { onDelete: "restrict" }),
 
-		// Car-specific attributes
-		licensePlate: text("license_plate").notNull(),
-		mileage: integer("mileage").notNull(),
+		// Vehicle specifications
 		color: text("color").notNull(),
 		engineSize: integer("engine_size").notNull(), // in CC
 		doors: integer("doors").notNull(),
 		cylinders: integer("cylinders").notNull(),
+		mileage: integer("mileage").notNull(),
 
-		// Pricing
-		pricePerDay: integer("price_per_day"), // in cents
-		pricePerKm: integer("price_per_km"), // in cents
+		// Passenger capacity (important for bookings)
+		seatingCapacity: integer("seating_capacity").notNull().default(4),
+		luggageCapacity: text("luggage_capacity"),
 
-		// Availability flags
-		isForDelivery: integer("is_for_delivery", { mode: "boolean" })
+		// Service availability
+		availableForPackages: integer("available_for_packages", { mode: "boolean" })
 			.notNull()
-			.default(false),
+			.default(true),
+		availableForCustom: integer("available_for_custom", { mode: "boolean" })
+			.notNull()
+			.default(true),
+
+		// Location tracking (for nearby car selection)
+		currentLatitude: real("current_latitude"),
+		currentLongitude: real("current_longitude"),
+		lastLocationUpdate: integer("last_location_update", { mode: "timestamp" }),
+
+		// Maintenance and compliance
+		insuranceExpiry: integer("insurance_expiry", { mode: "timestamp" }),
+		registrationExpiry: integer("registration_expiry", { mode: "timestamp" }),
+		lastServiceDate: integer("last_service_date", { mode: "timestamp" }),
+		nextServiceDue: integer("next_service_due", { mode: "timestamp" }),
+
+		// Operational status
+		isActive: integer("is_active", { mode: "boolean" })
+			.notNull()
+			.default(true), // Can be used for service
 		isAvailable: integer("is_available", { mode: "boolean" })
 			.notNull()
-			.default(false),
-		isForHire: integer("is_for_hire", { mode: "boolean" })
+			.default(true), // Currently available for booking
+
+		// Service status tracking
+		status: text("status").$type<CarStatusEnum>()
 			.notNull()
-			.default(false),
-		isForRent: integer("is_for_rent", { mode: "boolean" })
-			.notNull()
-			.default(false),
+			.default(CarStatusEnum.Available),
 
 		// Timestamps
 		createdAt: integer("created_at", { mode: "timestamp" })
@@ -75,8 +98,11 @@ export const cars = sqliteTable(
 			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
-		availabilityIdx: index("cars_availability_idx").on(table.isAvailable),
-		priceIdx: index("cars_price_idx").on(table.pricePerDay),
+		availabilityIdx: index("cars_availability_idx").on(table.isAvailable, table.isActive),
+		categoryIdx: index("cars_category_idx").on(table.categoryId),
+		statusIdx: index("cars_status_idx").on(table.status),
+		locationIdx: index("cars_location_idx").on(table.currentLatitude, table.currentLongitude),
+		licensePlateIdx: index("cars_license_plate_idx").on(table.licensePlate),
 	}),
 );
 
@@ -105,6 +131,15 @@ export const carsRelations = relations(cars, ({ one, many }) => ({
 		fields: [cars.conditionTypeId],
 		references: [carConditionTypes.id],
 	}),
+	// NEW relations
+	category: one(carCategories, {
+		fields: [cars.categoryId],
+		references: [carCategories.id],
+	}),
 	images: many(carImages),
 	features: many(carFeatures),
+}));
+
+export const carCategoriesRelations = relations(carCategories, ({ many }) => ({
+	cars: many(cars),
 }));

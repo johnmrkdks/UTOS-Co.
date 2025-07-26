@@ -1,41 +1,82 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { users } from "./users";
-import { cars } from "./cars";
-import { packages } from "./packages";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { users } from "@/db/sqlite/schema/users";
+import { cars } from "@/db/sqlite/schema/cars";
+import { packages } from "@/db/sqlite/schema/packages";
 import { relations, sql } from "drizzle-orm";
-import { BookingStatusEnum } from "../enums";
+import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
 import { createId } from "@paralleldrive/cuid2";
+import { drivers } from "@/db/sqlite/schema/drivers";
+import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
+	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
+
 	carId: text("car_id")
 		.notNull()
 		.references(() => cars.id, { onDelete: "cascade" }),
-	packageId: text("package_id")
-		.notNull()
-		.references(() => packages.id, { onDelete: "cascade" }),
 	userId: text("user_id")
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
-	startDate: integer("start_date", { mode: "timestamp" }).notNull(),
-	endDate: integer("end_date", { mode: "timestamp" }).notNull(),
-	status: text("status")
-		.notNull()
-		.$type<BookingStatusEnum>()
-		.default(BookingStatusEnum.Pending),
-	createdAt: integer("created_at", { mode: "timestamp" })
-		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
-		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+	driverId: text("driver_id").references(() => drivers.id),
+	packageId: text("package_id").references(() => packages.id, { onDelete: "cascade" }),
+
+	driverAssignedAt: integer("driver_assigned_at", { mode: "timestamp" }),
+
+	// Route information (for both types)
+	originAddress: text("origin_address").notNull(),
+	originLatitude: real("origin_latitude"),
+	originLongitude: real("origin_longitude"),
+
+	destinationAddress: text("destination_address").notNull(),
+	destinationLatitude: real("destination_latitude"),
+	destinationLongitude: real("destination_longitude"),
+
+	// Timing
+	scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }).notNull(),
+	estimatedDuration: integer("estimated_duration"), // in minutes
+	actualPickupTime: integer("actual_pickup_time", { mode: "timestamp" }),
+	actualDropoffTime: integer("actual_dropoff_time", { mode: "timestamp" }),
+
+	// Distance & pricing
+	estimatedDistance: integer("estimated_distance"), // in meters
+	actualDistance: integer("actual_distance"), // in meters
+
+	// Pricing (different models for package vs custom)
+	quotedAmount: integer("quoted_amount").notNull(), // initial quote
+	finalAmount: integer("final_amount"), // actual charged amount
+	baseFare: integer("base_fare"), // for custom bookings
+	distanceFare: integer("distance_fare"), // for custom bookings
+	timeFare: integer("time_fare"), // for custom bookings
+	extraCharges: integer("extra_charges").default(0),
+
+	// Customer details
+	customerName: text("customer_name").notNull(),
+	customerPhone: text("customer_phone").notNull(),
+	customerEmail: text("customer_email"),
+	passengerCount: integer("passenger_count").notNull().default(1),
+	specialRequests: text("special_requests"),
+
+	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
+
+	// Booking timeline tracking
+	confirmedAt: integer("confirmed_at", { mode: "timestamp" }),
+	driverEnRouteAt: integer("driver_en_route_at", { mode: "timestamp" }),
+	serviceStartedAt: integer("service_started_at", { mode: "timestamp" }),
+	serviceCompletedAt: integer("service_completed_at", { mode: "timestamp" }),
+
+	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
 });
 
-export const bookingsRelations = relations(bookings, ({ one }) => ({
+export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	user: one(users, { fields: [bookings.userId], references: [users.id] }),
 	car: one(cars, { fields: [bookings.carId], references: [cars.id] }),
-	package: one(packages, {
-		fields: [bookings.packageId],
-		references: [packages.id],
-	}),
+	driver: one(drivers, { fields: [bookings.driverId], references: [drivers.id] }),
+	package: one(packages, { fields: [bookings.packageId], references: [packages.id] }),
+	stops: many(bookingStops),
+}));
+
+export const bookingStopsRelations = relations(bookingStops, ({ one }) => ({
+	booking: one(bookings, { fields: [bookingStops.bookingId], references: [bookings.id] }),
 }));

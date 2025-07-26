@@ -5,11 +5,20 @@ export enum UserRoleEnum {
 	User = "user",
 }
 
+export enum BookingTypeEnum {
+	Package = "package",     // Fixed service packages
+	Custom = "custom"        // Custom route/instant quote
+}
+
 export enum BookingStatusEnum {
-	Active = "active",
-	Pending = "pending",
-	Confirmed = "confirmed",
-	Canceled = "canceled",
+	Pending = "pending",           // Just created
+	Confirmed = "confirmed",       // Payment confirmed
+	DriverAssigned = "driver_assigned", // Driver allocated
+	InProgress = "in_progress",    // Service started
+	Completed = "completed",       // Service finished
+	Cancelled = "cancelled",       // Cancelled by customer/admin
+	NoShow = "no_show",           // Customer didn't show up
+	Failed = "failed"             // Service couldn't be completed
 }
 
 export enum RateableTypeEnum {
@@ -23,4 +32,12 @@ export enum RateableTypeEnum {
 export enum PaymentMethodEnum {
 	CreditCard = "credit_card",
 	DebitCard = "debit_card",
+}
+
+export enum CarStatusEnum {
+	Available = "available",
+	Booked = "booked",
+	InService = "in_service",
+	Maintenance = "maintenance",
+	OutOfService = "out_of_service",
 }

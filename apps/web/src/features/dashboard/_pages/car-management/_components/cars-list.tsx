@@ -1,9 +1,22 @@
-import { AddCarDialog } from "./cars-list/add-car";
 import { useCarsListViewToogleStore } from "@/features/dashboard/_pages/car-management/_store/use-cars-list-view-toogle-store";
 import { ViewToggle } from "./cars-list/view-toggle";
 import { mockCarsData } from "@/data/mock-cars-data";
 import { CarsListGrid } from "./cars-list/cars-list-grid";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
+import { Link } from "@tanstack/react-router";
+import { PlusIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function AddCarButton() {
+	return (
+		<Link to="/dashboard/car-management/add-car">
+			<Button>
+				<PlusIcon className="w-4 h-4" />
+				Add New Car
+			</Button>
+		</Link>
+	)
+}
 
 export function CarsList() {
 	const { viewMode } = useCarsListViewToogleStore();
@@ -15,8 +28,9 @@ export function CarsList() {
 				<div>
 					Filters here
 				</div>
+
 				<div className="flex gap-2">
-					<AddCarDialog />
+					<AddCarButton />
 					<ViewToggle />
 				</div>
 			</PaddingLayout>
