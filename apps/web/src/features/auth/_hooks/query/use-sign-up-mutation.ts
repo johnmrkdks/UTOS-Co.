@@ -19,8 +19,14 @@ export const useSignUpMutation = () => {
 				},
 			);
 		},
-		onSuccess: () => {
-			toast.success("Sign up successful");
+		onSuccess: ({ data, error }) => {
+			if (data && data.user) {
+				toast.success("Sign up successful");
+			}
+
+			if (error) {
+				throw error;
+			}
 		},
 		onError: (error) => {
 			toast.error(error.message);

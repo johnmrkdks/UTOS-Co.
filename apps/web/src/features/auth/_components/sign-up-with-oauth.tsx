@@ -2,47 +2,47 @@ import { Button } from "@/components/ui/button";
 import { companyIcons } from "@/features/auth/_utils/icons";
 import { useNavigate } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { Loader } from "@/components/loader";
+import { useState } from "react";
+import { useSignInWitGoogleOAuthMutation } from "@/features/auth/_hooks/query/use-sign-in-with-google-oauth-mutation";
+import { OAuthButton } from "./oauth-button";
 
 export function SignUpWithOAuth() {
 	const navigate = useNavigate();
 	const { isPending } = authClient.useSession();
+	const [isRedirecting, setIsRedirecting] = useState(false);
+	const mutation = useSignInWitGoogleOAuthMutation();
 
 	if (isPending) {
 		return <Loader />;
 	}
 
-	const signUpWithGoogle = async () => {
-		await authClient.signIn.social(
-			{
-				provider: "google",
-			},
-			{
-				onSuccess: (data) => {
-					console.log(data);
+	const signInWithGoogle = async () => {
+		setIsRedirecting(true);
 
+		mutation.mutate(void 0, {
+			onSuccess: ({ data }) => {
+				if (data && data.redirect) {
+					setIsRedirecting(true);
+				}
+
+				if (data && !data.redirect) {
 					navigate({
-						to: "/dashboard",
+						to: "/",
 					});
-					toast.success("Sign in successful");
-				},
-				onError: (error) => {
-					toast.error(error.error.message);
-				},
+				}
 			},
-		);
+		});
 	};
 
 	return (
 		<div>
-			<Button
-				variant="outline"
-				className="px-2.5 py-3.5"
-				onClick={signUpWithGoogle}
-			>
-				<img src={companyIcons.google} alt="Google" className="h-4 w-4" />
-			</Button>
+			<OAuthButton
+				provider="Google"
+				icon={companyIcons.google || "/placeholder.svg?height=16&width=16"}
+				onClick={signInWithGoogle}
+				isLoading={isRedirecting}
+			/>
 		</div>
 	);
 }

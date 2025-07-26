@@ -2,19 +2,14 @@ import { authClient } from "@/lib/auth-client";
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner";
 
-type SignInParams = {
-	email: string;
-	password: string;
-};
-
-export const useSignInMutation = () => {
+export const useSignInWitGoogleOAuthMutation = () => {
 	return useMutation({
-		mutationFn: async (values: SignInParams) => {
-			return await authClient.signIn.email(
+		mutationFn: async () => {
+			return await authClient.signIn.social(
 				{
-					email: values.email,
-					password: values.password,
-				},
+					provider: "google",
+					callbackURL: import.meta.env.VITE_CLIENT_URL,
+				}
 			);
 		},
 		onSuccess: ({ data, error }) => {
@@ -27,7 +22,6 @@ export const useSignInMutation = () => {
 			}
 		},
 		onError: (error) => {
-			console.log("error", error);
 			toast.error(error.message);
 		},
 	})
