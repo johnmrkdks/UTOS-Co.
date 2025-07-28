@@ -11,7 +11,10 @@ type UpdateCarParams = {
 export async function updateCar(db: DB, { id, data }: UpdateCarParams) {
 	const [record] = await db
 		.update(cars)
-		.set(data)
+		.set({
+			...data,
+			status: data.status as Car["status"],
+		})
 		.where(eq(cars.id, id))
 		.returning();
 

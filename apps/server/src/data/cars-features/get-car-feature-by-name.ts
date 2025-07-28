@@ -2,12 +2,12 @@ import type { DB } from "@/db";
 import { carFeatures } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function getCarFeatureByFeature(
+export async function getCarFeatureByName(
 	db: DB,
-	feature: string,
+	name: string,
 ) {
 	const record = await db.query.carFeatures.findFirst({
-		where: eq(carFeatures.feature, feature),
+		where: eq(carFeatures.name, name),
 	});
 
 	return record;

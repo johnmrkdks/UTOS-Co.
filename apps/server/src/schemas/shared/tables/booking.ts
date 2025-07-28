@@ -11,8 +11,6 @@ import { PackageSchema } from "./package";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 
 export const BookingSchema = createSelectSchema(bookings, {
-	endDate: z.union([z.date(), z.string()]),
-	startDate: z.union([z.date(), z.string()]),
 	createdAt: z.union([z.date(), z.string()]),
 	updatedAt: z.union([z.date(), z.string()]),
 }).extend({

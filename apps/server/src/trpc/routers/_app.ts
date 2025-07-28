@@ -13,6 +13,7 @@ import { carTransmissionTypesRouter } from "./car-transmission-types";
 import { bookingsRouter } from "./bookings";
 import { packagesRouter } from "./packages";
 import { ratingsRouter } from "./ratings";
+import { carCategoriesRouter } from "./car-categories";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -27,6 +28,7 @@ export const appRouter = router({
 	cars: carsRouter,
 	carBodyTypes: carBodyTypesRouter,
 	carBrands: carBrandsRouter,
+	carCategories: carCategoriesRouter,
 	carConditionTypes: carConditionTypesRouter,
 	carDriveTypes: carDriveTypesRouter,
 	carFeatures: carFeaturesRouter,

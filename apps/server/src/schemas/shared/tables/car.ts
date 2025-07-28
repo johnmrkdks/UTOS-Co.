@@ -15,14 +15,10 @@ import { CarBodyTypeSchema } from "./cars/car-body-type";
 import { CarConditionTypeSchema } from "./cars/car-condition-type";
 import { CarDriveTypeSchema } from "./cars/car-drive-type";
 import { CarCategorySchema } from "./cars/car-category";
+import { CarStatusEnum } from "@/types";
 
 export const CarSchema = createSelectSchema(cars, {
-	createdAt: z.union([z.date(), z.string()]),
-	updatedAt: z.union([z.date(), z.string()]),
-	insuranceExpiry: z.union([z.date(), z.string()]),
-	registrationExpiry: z.union([z.date(), z.string()]),
-	lastServiceDate: z.union([z.date(), z.string()]),
-	nextServiceDue: z.union([z.date(), z.string()]),
+	status: z.nativeEnum(CarStatusEnum),
 }).extend({
 	bodyType: CarBodyTypeSchema.optional(),
 	brand: CarBrandSchema.optional(),

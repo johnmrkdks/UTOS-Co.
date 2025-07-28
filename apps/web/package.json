@@ -15,6 +15,7 @@
 		"deploy": "pnpm run build && wrangler deploy"
 	},
 	"devDependencies": {
+		"server": "workspace:*",
 		"@cloudflare/vite-plugin": "^1.9.0",
 		"@tanstack/react-query-devtools": "^5.80.5",
 		"@tanstack/react-router-devtools": "^1.114.27",
@@ -60,7 +61,6 @@
 		"react-day-picker": "^9.8.1",
 		"react-dom": "^19.0.0",
 		"react-hook-form": "^7.60.0",
-		"server": "workspace:*",
 		"sonner": "^2.0.5",
 		"tailwind-merge": "^3.3.1",
 		"tw-animate-css": "^1.2.5",

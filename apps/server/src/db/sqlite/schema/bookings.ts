@@ -34,7 +34,7 @@ export const bookings = sqliteTable("bookings", {
 
 	// Timing
 	scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }).notNull(),
-	estimatedDuration: integer("estimated_duration"), // in minutes
+	estimatedDuration: integer("estimated_duration"), // in seconds
 	actualPickupTime: integer("actual_pickup_time", { mode: "timestamp" }),
 	actualDropoffTime: integer("actual_dropoff_time", { mode: "timestamp" }),
 

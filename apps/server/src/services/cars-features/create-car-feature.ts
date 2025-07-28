@@ -1,5 +1,5 @@
 import { createCarFeature } from "@/data/cars-features/create-car-feature";
-import { getCarFeatureByFeature } from "@/data/cars-features/get-car-feature-by-feature";
+import { getCarFeatureByName } from "@/data/cars-features/get-car-feature-by-name";
 import type { DB } from "@/db";
 import { InsertCarFeatureSchema, type InsertCarFeature } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
@@ -14,15 +14,15 @@ export async function createCarFeatureService(
 	db: DB,
 	data: CreateCarFeatureParams,
 ) {
-	const carFeature = await getCarFeatureByFeature(db, data.feature);
+	const carFeature = await getCarFeatureByName(db, data.name);
 
 	if (carFeature) {
-		throw ErrorFactory.duplicateEntry("Car feature", "feature");
+		throw ErrorFactory.duplicateEntry("Car feature", "name");
 	}
 
 	const values = {
 		...data,
-		feature: formatter.startCase(data.feature),
+		name: formatter.startCase(data.name),
 	} as InsertCarFeature;
 
 	const newCarFeature = createCarFeature(db, values);

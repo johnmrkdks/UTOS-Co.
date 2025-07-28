@@ -1,6 +1,5 @@
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
-import type { Booking } from "@/schemas/shared";
 import { eq } from "drizzle-orm";
 
 export async function getBookingById(

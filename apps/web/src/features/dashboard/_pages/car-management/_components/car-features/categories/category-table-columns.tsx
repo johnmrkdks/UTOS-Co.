@@ -1,10 +1,10 @@
 import { DataTableColumnHeader } from "@/components/tables/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { CarDriveTypeWithEnrichedData } from "server/types"
-import { DriveTypeTableRowActions } from "./drive-type-table-row-actions"
+import type { CarCategoryWithEnrichedData } from "server/types"
+import { CategoryTableRowActions } from "./category-table-row-actions"
 
-export const driveTypeTableColumns: ColumnDef<CarDriveTypeWithEnrichedData>[] = [
+export const categoryTableColumns: ColumnDef<CarCategoryWithEnrichedData>[] = [
 	{
 		id: "name",
 		accessorKey: "name",
@@ -48,7 +48,7 @@ export const driveTypeTableColumns: ColumnDef<CarDriveTypeWithEnrichedData>[] = 
 		),
 		cell: ({ row }) => (
 			<div className="flex justify-end mr-4">
-				<DriveTypeTableRowActions row={row} />
+				<CategoryTableRowActions row={row} />
 			</div>
 		),
 		enableSorting: false,

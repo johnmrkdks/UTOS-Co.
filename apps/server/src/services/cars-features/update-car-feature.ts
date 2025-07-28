@@ -25,7 +25,7 @@ export async function updateCarFeatureService(
 
 	const values = {
 		...data,
-		feature: data.feature ? formatter.startCase(data.feature) : undefined,
+		name: data.name ? formatter.startCase(data.name) : undefined,
 	} as UpdateCarFeature;
 
 	const updatedCarFeature = await updateCarFeature(db, { id, data: values });

@@ -8,6 +8,7 @@ import { ConditionTypes } from "./car-features/conditions"
 import { Features } from "./car-features/features"
 import { BodyTypes } from "./car-features/body-types"
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout"
+import { Categories } from "./car-features/categories"
 
 export function CarFeatures() {
 	return (
@@ -22,9 +23,10 @@ export function CarFeatures() {
 						</p>
 					</div>
 
-					<TabsList className="grid grid-cols-7">
+					<TabsList className="grid grid-cols-8">
 						<TabsTrigger value="brands">Brands</TabsTrigger>
 						<TabsTrigger value="models">Models</TabsTrigger>
+						<TabsTrigger value="categories">Categories</TabsTrigger>
 						<TabsTrigger value="fuel">Fuel Types</TabsTrigger>
 						<TabsTrigger value="body">Body Types</TabsTrigger>
 						<TabsTrigger value="transmission">Transmissions</TabsTrigger>
@@ -39,6 +41,10 @@ export function CarFeatures() {
 
 				<TabsContent value="models">
 					<Models />
+				</TabsContent>
+
+				<TabsContent value="categories">
+					<Categories />
 				</TabsContent>
 
 				<TabsContent value="fuel">

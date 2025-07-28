@@ -8,6 +8,7 @@ export * from "./cars/car-fuel-type";
 export * from "./cars/car-image";
 export * from "./cars/car-model";
 export * from "./cars/car-transmission-type";
+export * from "./cars/car-category";
 
 export * from "./account";
 export * from "./booking";

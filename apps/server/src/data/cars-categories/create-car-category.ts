@@ -1,11 +1,11 @@
 import type { DB } from "@/db";
-import type { CarDriveType, InsertCarDriveType } from "@/schemas/shared";
-import { carDriveTypes } from "@/db/schema";
+import type { InsertCarCategory } from "@/schemas/shared";
+import { carCategories } from "@/db/schema";
 
-type CreateCarDriveTypeParams = InsertCarDriveType;
+type CreateCarCategoryParams = InsertCarCategory;
 
-export async function createCarDriveType(db: DB, params: CreateCarDriveTypeParams): Promise<CarDriveType> {
-	const [record] = await db.insert(carDriveTypes).values(params).returning();
+export async function createCarCategory(db: DB, params: CreateCarCategoryParams) {
+	const [record] = await db.insert(carCategories).values(params).returning();
 
 	return record;
 }

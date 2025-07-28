@@ -1,17 +1,17 @@
 import type { DB } from "@/db";
-import { carDriveTypes } from "@/db/schema";
+import { carCategories } from "@/db/schema";
 import { RQBFilterBuilder } from "@/utils/query/filter-builders";
 import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
 import type { ResourceList } from "@/utils/query/resource-list";
 import type { QueryBuilder } from "@/utils/query/query-builder";
-import type { CarDriveType } from "@/schemas/shared";
+import type { CarCategory } from "@/schemas/shared";
 
-export async function getCarDriveTypes(db: DB, options: ResourceList) {
+export async function getCarCategories(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.carDriveTypes.findMany(),
-		filterBuilder: new RQBFilterBuilder(carDriveTypes),
+		baseQuery: () => db.query.carCategories.findMany(),
+		filterBuilder: new RQBFilterBuilder(carCategories),
 		queryType: "rqb",
 	};
 
-	return await filterPaginationSort<CarDriveType>(queryBuilder, options);
+	return await filterPaginationSort<CarCategory>(queryBuilder, options);
 }
