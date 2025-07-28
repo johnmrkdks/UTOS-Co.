@@ -19,27 +19,27 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import type { CarDriveType } from "server/types"
-import { useCheckCarDriveTypeUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-check-car-drive-type-usage-query"
-import { useDeleteCarDriveTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-delete-car-drive-type-mutation"
+import type { CarFeature } from "server/types"
+import { useCheckCarFeatureUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-feature/use-check-car-feature-usage-query"
+import { useDeleteCarFeatureMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-feature/use-delete-car-feature-mutation"
 
-type DeleteDriveTypeDialogProps = {
-	driveType: CarDriveType
+type DeleteFeatureDialogProps = {
+	feature: CarFeature
 	className?: string
 }
 
 const FormSchema = z.object({
 	confirmation: z.boolean().refine((val) => val === true, {
-		message: "You must confirm to delete the drive type",
+		message: "You must confirm to delete the feature",
 	}),
 })
 
 type FormValues = z.infer<typeof FormSchema>
 
-export function DeleteDriveTypeDialog({ driveType, className }: DeleteDriveTypeDialogProps) {
+export function DeleteFeatureDialog({ feature, className }: DeleteFeatureDialogProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: checkUsage, isLoading: isCheckingUsage } = useCheckCarDriveTypeUsageQuery({ id: driveType.id })
-	const mutation = useDeleteCarDriveTypeMutation()
+	const { data: checkUsage, isLoading: isCheckingUsage } = useCheckCarFeatureUsageQuery({ id: feature.id })
+	const mutation = useDeleteCarFeatureMutation()
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -55,7 +55,7 @@ export function DeleteDriveTypeDialog({ driveType, className }: DeleteDriveTypeD
 
 	const handleSubmit = () => {
 		mutation.mutate(
-			{ id: driveType.id },
+			{ id: feature.id },
 			{
 				onSuccess: () => {
 					handleReset()
@@ -77,11 +77,11 @@ export function DeleteDriveTypeDialog({ driveType, className }: DeleteDriveTypeD
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-6">
 				<DialogHeader>
-					<DialogTitle>Delete Category</DialogTitle>
+					<DialogTitle>Delete Feature</DialogTitle>
 					<DialogDescription>
 						{isInUse
-							? "This drive type cannot be deleted because it is currently in use."
-							: "Before deleting this drive type, please make sure that all models associated with this drive type are not in use."}
+							? "This feature cannot be deleted because it is currently in use."
+							: "Before deleting this feature, please make sure that all models associated with this feature are not in use."}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -118,14 +118,14 @@ export function DeleteDriveTypeDialog({ driveType, className }: DeleteDriveTypeD
 							{/* Success Message */}
 							{!isInUse && (
 								<Alert>
-									<AlertDescription>This drive type is not currently in use and can be safely deleted.</AlertDescription>
+									<AlertDescription>This feature is not currently in use and can be safely deleted.</AlertDescription>
 								</Alert>
 							)}
 						</>
 					) : null}
 				</div>
 
-				{/* Form - Only show if driveType can be deleted */}
+				{/* Form - Only show if feature can be deleted */}
 				{canDelete && (
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-6">
@@ -138,7 +138,7 @@ export function DeleteDriveTypeDialog({ driveType, className }: DeleteDriveTypeD
 											<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 										</FormControl>
 										<FormLabel>
-											Are you sure you want to delete the drive type <span className="font-bold">{driveType.name}</span>?
+											Are you sure you want to delete the feature <span className="font-bold">{feature.name}</span>?
 										</FormLabel>
 										<FormMessage />
 									</FormItem>
@@ -167,7 +167,7 @@ export function DeleteDriveTypeDialog({ driveType, className }: DeleteDriveTypeD
 							disabled={mutation.isPending || !form.watch("confirmation") || isCheckingUsage}
 							onClick={form.handleSubmit(handleSubmit)}
 						>
-							{mutation.isPending ? "Deleting..." : "Delete Drive Type"}
+							{mutation.isPending ? "Deleting..." : "Delete Feature"}
 						</Button>
 					)}
 				</DialogFooter>

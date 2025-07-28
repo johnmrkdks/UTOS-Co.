@@ -23,7 +23,7 @@ export function CarFeatures() {
 						</p>
 					</div>
 
-					<TabsList className="grid grid-cols-8">
+					<TabsList className="grid grid-cols-9">
 						<TabsTrigger value="brands">Brands</TabsTrigger>
 						<TabsTrigger value="models">Models</TabsTrigger>
 						<TabsTrigger value="categories">Categories</TabsTrigger>
@@ -32,6 +32,7 @@ export function CarFeatures() {
 						<TabsTrigger value="transmission">Transmissions</TabsTrigger>
 						<TabsTrigger value="drive">Drive Types</TabsTrigger>
 						<TabsTrigger value="conditions">Conditions</TabsTrigger>
+						<TabsTrigger value="features">Features</TabsTrigger>
 					</TabsList>
 				</div>
 
@@ -63,13 +64,14 @@ export function CarFeatures() {
 					<DriveTypes />
 				</TabsContent>
 
-				<TabsContent value="feature">
-					<Features />
-				</TabsContent>
-
 				<TabsContent value="conditions">
 					<ConditionTypes />
 				</TabsContent>
+
+				<TabsContent value="features">
+					<Features />
+				</TabsContent>
+
 			</Tabs>
 		</PaddingLayout>
 	)

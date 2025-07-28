@@ -7,9 +7,6 @@ export const carFeatures = sqliteTable(
 	"car_features",
 	{
 		id: text("id").primaryKey().$defaultFn(() => createId()),
-		carId: text("car_id")
-			.notNull()
-			.references(() => cars.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		name: text("name").notNull(),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
@@ -17,9 +14,6 @@ export const carFeatures = sqliteTable(
 	}
 );
 
-export const carFeaturesRelations = relations(carFeatures, ({ one }) => ({
-	car: one(cars, {
-		fields: [carFeatures.carId],
-		references: [cars.id],
-	}),
+export const carFeaturesRelations = relations(carFeatures, ({ many }) => ({
+	car: many(cars)
 }));

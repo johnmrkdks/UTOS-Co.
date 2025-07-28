@@ -46,7 +46,7 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 									/>
 								</PopoverContent>
 							</Popover>
-							<FormDescription>When the insurance expires</FormDescription>
+							<FormDescription className="text-xs">When the insurance expires</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -80,7 +80,7 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 									/>
 								</PopoverContent>
 							</Popover>
-							<FormDescription>When the registration expires</FormDescription>
+							<FormDescription className="text-xs">When the registration expires</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -114,7 +114,7 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 									/>
 								</PopoverContent>
 							</Popover>
-							<FormDescription>When the car was last serviced</FormDescription>
+							<FormDescription className="text-xs">When the car was last serviced</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -148,7 +148,7 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 									/>
 								</PopoverContent>
 							</Popover>
-							<FormDescription>When the next service is due</FormDescription>
+							<FormDescription className="text-xs">When the next service is due</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}

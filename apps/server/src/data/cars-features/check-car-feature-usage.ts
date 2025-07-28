@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 
 export async function checkCarFeatureUsage(db: DB, id: string) {
 	const carsUsingFeature = await db.query.cars.findMany({
-		where: eq(cars.id, carFeatures.carId),
 		with: {
 			features: {
 				where: eq(carFeatures.id, id),

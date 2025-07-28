@@ -16,40 +16,6 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 			<h3 className="text-lg font-medium">Operational Status</h3>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div className="space-y-4">
-					<h4 className="font-medium">Service Availability</h4>
-					<FormField
-						control={control}
-						name="availableForPackages"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>Available for Packages</FormLabel>
-									<FormDescription>Car can be used for package delivery services</FormDescription>
-								</div>
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={control}
-						name="availableForCustom"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>Available for Custom Services</FormLabel>
-									<FormDescription>Car can be used for custom booking services</FormDescription>
-								</div>
-							</FormItem>
-						)}
-					/>
-				</div>
 
 				<div className="space-y-4">
 					<h4 className="font-medium">System Status</h4>
@@ -63,7 +29,7 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Active</FormLabel>
-									<FormDescription>Car is active in the system</FormDescription>
+									<FormDescription className="text-xs">Car is active in the system</FormDescription>
 								</div>
 							</FormItem>
 						)}
@@ -79,7 +45,7 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Available</FormLabel>
-									<FormDescription>Car is currently available for booking</FormDescription>
+									<FormDescription className="text-xs">Car is currently available for booking</FormDescription>
 								</div>
 							</FormItem>
 						)}
@@ -105,8 +71,42 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 										<SelectItem value={CarStatusEnum.OutOfService}>Out of Service</SelectItem>
 									</SelectContent>
 								</Select>
-								<FormDescription>Current operational status of the car</FormDescription>
+								<FormDescription className="text-xs">Current operational status of the car</FormDescription>
 								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				<div className="space-y-4">
+					<h4 className="font-medium">Service Availability</h4>
+					<FormField
+						control={control}
+						name="availableForPackages"
+						render={({ field }) => (
+							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+								<FormControl>
+									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+								</FormControl>
+								<div className="space-y-1 leading-none">
+									<FormLabel>Available for Packages</FormLabel>
+									<FormDescription className="text-xs">Car can be used for package delivery services</FormDescription>
+								</div>
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={control}
+						name="availableForCustom"
+						render={({ field }) => (
+							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+								<FormControl>
+									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+								</FormControl>
+								<div className="space-y-1 leading-none">
+									<FormLabel>Available for Custom Services</FormLabel>
+									<FormDescription className="text-xs">Car can be used for custom booking services</FormDescription>
+								</div>
 							</FormItem>
 						)}
 					/>

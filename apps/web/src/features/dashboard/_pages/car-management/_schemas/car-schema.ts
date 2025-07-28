@@ -10,12 +10,12 @@ export const CarFeatureSchema = z.object({
 export const CarImageSchema = z.object({
 	url: z.string().url("Please enter a valid URL"),
 	altText: z.string().optional(),
-	order: z.number().min(0).default(0),
-	isMain: z.boolean().default(false),
+	order: z.coerce.number().min(1).int(),
+	isMain: z.boolean(),
 })
 
 // Updated main car form schema
-export const AddCarFormSchema = z.object({
+export const CarFormSchema = z.object({
 	name: z.string().min(1, "Car name is required"),
 	description: z.string().min(1, "Description is required"),
 
@@ -34,22 +34,18 @@ export const AddCarFormSchema = z.object({
 
 	// Vehicle specifications
 	color: z.string().min(1, "Color is required"),
-	engineSize: z.number().min(1, "Engine size must be greater than 0"),
-	doors: z.number().min(2).max(8, "Doors must be between 2 and 8"),
-	cylinders: z.number().min(1, "Cylinders must be greater than 0"),
-	mileage: z.number().min(0, "Mileage must be 0 or greater"),
+	engineSize: z.coerce.number().min(1, "Engine size must be greater than 0"),
+	doors: z.coerce.number().min(2).max(8, "Doors must be between 2 and 8"),
+	cylinders: z.coerce.number().min(1, "Cylinders must be greater than 0"),
+	mileage: z.coerce.number().min(0, "Mileage must be 0 or greater"),
 
 	// Passenger capacity
-	seatingCapacity: z.number().min(1, "Seating capacity must be at least 1").default(4),
+	seatingCapacity: z.coerce.number().min(1, "Seating capacity must be at least 1"),
 	luggageCapacity: z.string().optional(),
 
 	// Service availability
-	availableForPackages: z.boolean().default(true),
-	availableForCustom: z.boolean().default(true),
-
-	// Location tracking
-	currentLatitude: z.number().min(-90).max(90).optional(),
-	currentLongitude: z.number().min(-180).max(180).optional(),
+	availableForPackages: z.boolean(),
+	availableForCustom: z.boolean(),
 
 	// Maintenance and compliance
 	insuranceExpiry: z.date().optional(),
@@ -58,11 +54,11 @@ export const AddCarFormSchema = z.object({
 	nextServiceDue: z.date().optional(),
 
 	// Operational status
-	isActive: z.boolean().default(true),
-	isAvailable: z.boolean().default(true),
-	status: z.nativeEnum(CarStatusEnum).default(CarStatusEnum.Available),
+	isActive: z.boolean(),
+	isAvailable: z.boolean(),
+	status: z.nativeEnum(CarStatusEnum),
 
 	// Arrays for related data
-	features: z.array(CarFeatureSchema).default([]),
-	images: z.array(CarImageSchema).default([]),
+	features: z.array(CarFeatureSchema),
+	images: z.array(CarImageSchema),
 })
