@@ -1,14 +1,16 @@
 import type { Context as HonoContext } from "hono";
 import { auth } from "@/lib/auth";
 import { db, type DB } from "@/db";
+import type { Env } from "@/types/env";
 
 export type CreateContextOptions = {
-	context: HonoContext;
+	context: HonoContext<{ Bindings: Env }>;
 };
 
 type TRPCContext = {
 	session: Awaited<ReturnType<typeof auth.api.getSession>>;
 	db: DB;
+	env: Env;
 };
 
 export async function createContext({
@@ -20,6 +22,7 @@ export async function createContext({
 	return {
 		session,
 		db,
+		env: context.env,
 	};
 }
 

@@ -34,8 +34,14 @@ type SelectFieldConfig = {
 	isSearchableGrouped?: boolean // New flag for enhanced select
 }
 
+type SelectFieldProps = {
+	config: SelectFieldConfig
+	control: Control<AddCarFormValues>
+	className?: string
+}
+
 // Memoized select field component to prevent unnecessary re-renders
-const SelectField = ({ config, control }: { config: SelectFieldConfig; control: Control<AddCarFormValues> }) => {
+const SelectField = ({ config, control, className }: SelectFieldProps) => {
 	const [open, setOpen] = useState(false) // State to control the dropdown open/close for cmdk
 
 	// Group data by brand for searchable-grouped variant
@@ -69,7 +75,7 @@ const SelectField = ({ config, control }: { config: SelectFieldConfig; control: 
 						open={config.isSearchableGrouped ? open : undefined} // Only control open state for searchable-grouped
 					>
 						<FormControl>
-							<SelectTrigger>
+							<SelectTrigger className={cn("w-full", className)}>
 								<SelectValue placeholder={config.isLoading ? "Loading..." : config.placeholder} />
 							</SelectTrigger>
 						</FormControl>

@@ -14,3 +14,4 @@ export type * from "./cars-categories";
 
 export type * from "./packages";
 export type * from "./ratings";
+export type * from "./file";

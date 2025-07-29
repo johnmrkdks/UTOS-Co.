@@ -7,13 +7,13 @@ import { carConditionTypesRouter } from "./car-condition-types";
 import { carDriveTypesRouter } from "./car-drive-types";
 import { carFeaturesRouter } from "./car-features";
 import { carFuelTypesRouter } from "./car-fuel-types";
-import { carImagesRouter } from "./car-images";
 import { carModelsRouter } from "./car-models";
 import { carTransmissionTypesRouter } from "./car-transmission-types";
 import { bookingsRouter } from "./bookings";
 import { packagesRouter } from "./packages";
 import { ratingsRouter } from "./ratings";
 import { carCategoriesRouter } from "./car-categories";
+import { fileRouter } from "./file";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -25,6 +25,7 @@ export const appRouter = router({
 			user: ctx.session.user,
 		};
 	}),
+	files: fileRouter,
 	cars: carsRouter,
 	carBodyTypes: carBodyTypesRouter,
 	carBrands: carBrandsRouter,
@@ -33,7 +34,6 @@ export const appRouter = router({
 	carDriveTypes: carDriveTypesRouter,
 	carFeatures: carFeaturesRouter,
 	carFuelTypes: carFuelTypesRouter,
-	carImages: carImagesRouter,
 	carModels: carModelsRouter,
 	carTransmissionTypes: carTransmissionTypesRouter,
 	bookings: bookingsRouter,

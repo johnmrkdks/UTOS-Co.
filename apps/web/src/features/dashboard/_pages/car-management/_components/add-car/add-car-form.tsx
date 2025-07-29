@@ -275,8 +275,8 @@ export function AddCarForm({
 						<FormStatusIndicator isDirty={isDirty} onSaveDraft={handleSaveDraft} />
 						<ValidationErrors errorCount={errorCount} />
 
-						<div className="grid grid-cols-3 gap-4">
-							<div className="col-span-2 flex flex-col gap-4">
+						<div className="grid grid-cols-10 gap-4">
+							<div className="col-span-6 flex flex-col gap-4">
 								<BasicInfoForm control={form.control} />
 								<Separator />
 								<SpecificationsForm control={form.control} />
@@ -287,7 +287,7 @@ export function AddCarForm({
 								<Separator />
 								<OperationalStatusForm control={form.control} />
 							</div>
-							<div className="flex flex-col gap-4">
+							<div className="col-span-4 flex flex-col gap-4">
 								<FeaturesForm control={form.control} />
 								<ImagesForm control={form.control} />
 							</div>
@@ -305,12 +305,12 @@ export function AddCarForm({
 								>
 									{isDisabled ? (
 										<>
-											<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+											<Loader2 className="w-4 h-4 animate-spin" />
 											Adding...
 										</>
 									) : (
 										<>
-											<Save className="w-4 h-4 mr-2" />
+											<Save className="w-4 h-4" />
 											Add New Car
 										</>
 									)}
@@ -322,7 +322,6 @@ export function AddCarForm({
 									onClick={handleDiscard}
 									disabled={isDisabled}
 								>
-									<X className="w-4 h-4 mr-2" />
 									Cancel
 								</Button>
 

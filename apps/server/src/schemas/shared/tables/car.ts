@@ -19,6 +19,7 @@ import { CarStatusEnum } from "@/types";
 
 export const CarSchema = createSelectSchema(cars, {
 	status: z.nativeEnum(CarStatusEnum),
+	updatedAt: z.date().optional(),
 }).extend({
 	bodyType: CarBodyTypeSchema.optional(),
 	brand: CarBrandSchema.optional(),
