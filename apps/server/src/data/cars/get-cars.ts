@@ -10,8 +10,20 @@ export async function getCars(
 	db: DB,
 	params: ResourceList,
 ) {
+	const query = db.query.cars.findMany({
+		with: {
+			bodyType: true,
+			conditionType: true,
+			category: true,
+			driveType: true,
+			fuelType: true,
+			model: true,
+			transmissionType: true,
+		},
+	});
+
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.cars.findMany(),
+		baseQuery: () => query,
 		filterBuilder: new RQBFilterBuilder(cars),
 		queryType: "rqb",
 	};

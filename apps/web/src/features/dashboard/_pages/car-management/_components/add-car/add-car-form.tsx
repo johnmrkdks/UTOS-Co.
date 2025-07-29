@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, type FieldErrors } from "react-hook-form"
 import { z } from "zod/v3"
 import { CarFormSchema } from "@/features/dashboard/_pages/car-management/_schemas/car-schema"
 import { BasicInfoForm } from "./add-car-forms/basic-info-form"
@@ -14,13 +14,21 @@ import { OperationalStatusForm } from "./add-car-forms/operational-status-form"
 import { ImagesForm } from "./add-car-forms/images-form"
 import { FeaturesForm } from "./add-car-forms/features-form"
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { useState, useCallback, useEffect, useMemo } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useNavigate } from "@tanstack/react-router"
-import { Loader2, Save, X, FileText, Clock, Trash2 } from "lucide-react"
+import { Loader2, Save, FileText, AlertCircleIcon, ImageIcon, InfoIcon } from "lucide-react"
 import { useAddCarDraftStore } from "@/features/dashboard/_pages/car-management/_hooks/add-car-draft-store"
 import { toast } from "sonner"
 import { useCreateCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-create-car-mutation"
+import { useCarDraftForm } from "@/features/dashboard/_pages/car-management/_hooks/use-car-draft-form"
+import {
+	DiscardDialog,
+	DraftDialog,
+} from "@/features/dashboard/_pages/car-management/_components/draft/draft-dialogs"
+import {
+	FormStatusIndicator,
+	StatusBadge,
+} from "@/features/dashboard/_pages/car-management/_components/draft/draft-indicators"
 
 export type AddCarFormValues = z.infer<typeof CarFormSchema>
 
@@ -51,109 +59,106 @@ const DEFAULT_VALUES: Partial<AddCarFormValues> = {
 	status: CarStatusEnum.Available,
 	features: [],
 	images: [],
+
+	modelId: "",
+	bodyTypeId: "",
+	fuelTypeId: "",
+	transmissionTypeId: "",
+	driveTypeId: "",
+	conditionTypeId: "",
+	categoryId: "",
 }
 
-// Status indicator component - memoized to prevent re-renders
-const FormStatusIndicator = ({ isDirty, onSaveDraft }: { isDirty: boolean, onSaveDraft: () => void }) => {
-	if (!isDirty) return null
+interface ValidationErrorsProps {
+	errors: FieldErrors<AddCarFormValues>
+	errorCount: number
+}
+
+export const ValidationErrors = ({ errors, errorCount }: ValidationErrorsProps) => {
+	if (errorCount === 0 || !errors) return null
+
+	// Group errors by type for better user experience
+	const imageErrors = errors?.images
+	const formErrors = Object.entries(errors || {}).filter(([key]) => key !== 'images')
 
 	return (
-		<div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
-			<div className="flex items-center justify-between">
-				<p className="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
-					<span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-					You have unsaved changes
-				</p>
-				<Button
-					type="button"
-					variant="ghost"
-					size="sm"
-					onClick={onSaveDraft}
-					className="h-auto px-2 py-1 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-800/30"
-				>
-					<Save className="w-3 h-3 mr-1" />
-					Save draft
-				</Button>
-			</div>
+		<div className="mb-4 space-y-3">
+			{/* General form errors */}
+			{formErrors.length > 0 && (
+				<div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+					<div className="flex items-start gap-2">
+						<AlertCircleIcon className="size-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
+						<div className="space-y-2">
+							<p className="text-sm text-red-800 dark:text-red-200 font-medium">
+								Please fix the following fields:
+							</p>
+							<ul className="text-xs text-red-700 dark:text-red-300 space-y-1 ml-2">
+								{formErrors.map(([field, error]) => (
+									<li key={field} className="flex items-start gap-1">
+										<span className="w-1 h-1 bg-red-500 rounded-full mt-2 shrink-0"></span>
+										<span>
+											<strong className="capitalize">{field.replace(/([A-Z])/g, ' $1').trim()}:</strong>{' '}
+											{error?.message || 'This field has an error'}
+										</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Image-specific errors */}
+			{imageErrors && (
+				<div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md">
+					<div className="flex items-start gap-2">
+						<ImageIcon className="size-4 shrink-0 text-orange-600 dark:text-orange-400 mt-0.5" />
+						<div className="space-y-2">
+							<p className="text-sm text-orange-800 dark:text-orange-200 font-medium">
+								Image Upload Issues:
+							</p>
+							<div className="text-xs text-orange-700 dark:text-orange-300 space-y-2">
+								{imageErrors.message && (
+									<div className="p-2 bg-orange-100 dark:bg-orange-800/30 rounded border border-orange-200 dark:border-orange-700">
+										{imageErrors.message}
+									</div>
+								)}
+
+								<div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+									<InfoIcon className="size-3 shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
+									<div className="text-blue-700 dark:text-blue-300">
+										<strong>Quick fixes:</strong>
+										<ul className="mt-1 space-y-1 ml-2">
+											<li>• Make sure at least one image is uploaded</li>
+											<li>• Check that exactly one image is marked as "Main"</li>
+											<li>• Try removing all images and re-uploading them</li>
+											<li>• Make sure all images have valid URLs</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
 
-// Validation errors component - memoized
-const ValidationErrors = ({ errorCount }: { errorCount: number }) => {
-	if (errorCount === 0) return null
-
-	return (
-		<div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-			<p className="text-sm text-red-800 dark:text-red-200 font-medium">
-				Please fix {errorCount} error{errorCount !== 1 ? 's' : ''} before submitting
-			</p>
-		</div>
-	)
-}
-
-// Status badge component
-const StatusBadge = ({ isDirty, hasErrors, errorCount }: { isDirty: boolean, hasErrors: boolean, errorCount: number }) => {
-	if (isDirty) {
-		return (
-			<span className="flex items-center gap-1">
-				<span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-				Auto-saving...
-			</span>
-		)
-	}
-
-	if (hasErrors) {
-		return (
-			<span className="text-red-600 dark:text-red-400">
-				{errorCount} error{errorCount !== 1 ? 's' : ''}
-			</span>
-		)
-	}
-
-	return (
-		<span className="text-green-600 dark:text-green-400 flex items-center gap-1">
-			<span className="w-2 h-2 bg-green-500 rounded-full"></span>
-			All saved
-		</span>
-	)
-}
-
-// Draft age formatter
-const formatDraftAge = (draftAge: number | null): string => {
-	if (!draftAge) return 'some time ago'
-
-	if (draftAge < 60) {
-		return `${draftAge} minute${draftAge !== 1 ? 's' : ''} ago`
-	}
-
-	if (draftAge < 1440) {
-		const hours = Math.floor(draftAge / 60)
-		return `${hours} hour${hours !== 1 ? 's' : ''} ago`
-	}
-
-	return 'more than a day ago'
-}
-
-export function AddCarForm({
-	onSubmit: onSubmitProp,
-	initialData,
-	isLoading = false,
-	className
-}: AddCarFormProps) {
+export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = false, className }: AddCarFormProps) {
 	const navigate = useNavigate()
-	const [showDiscardAlert, setShowDiscardAlert] = useState(false)
-	const [showDraftDialog, setShowDraftDialog] = useState(false)
-	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const mutation = useCreateCarMutation()
-	const { saveDraft, loadDraft, clearDraft, hasDraft, getDraftAge } = useAddCarDraftStore()
+	const draftStore = useAddCarDraftStore()
 
 	// Memoize form default values
-	const formDefaultValues = useMemo(() => ({
-		...DEFAULT_VALUES,
-		...initialData,
-	}), [initialData])
+	const formDefaultValues = useMemo(
+		() => ({
+			...DEFAULT_VALUES,
+			...initialData,
+		}),
+		[initialData],
+	)
 
 	const form = useForm<AddCarFormValues>({
 		resolver: zodResolver(CarFormSchema),
@@ -161,111 +166,55 @@ export function AddCarForm({
 		mode: "onChange",
 	})
 
-	const { formState: { isDirty, isValid, errors } } = form
-	const errorCount = Object.keys(errors).length
+	const {
+		formState: { isDirty, isValid, errors },
+	} = form
+
+	const errorCount = errors ? Object.keys(errors).length : 0
 	const hasErrors = errorCount > 0
-	const draftAge = getDraftAge()
 
-	// Auto-save draft with debouncing
-	useEffect(() => {
-		if (!isDirty || initialData) return
+	const {
+		showDiscardAlert,
+		setShowDiscardAlert,
+		showDraftDialog,
+		setShowDraftDialog,
+		handleSaveDraft,
+		handleLoadDraft,
+		handleDeleteDraft,
+		handleDiscard,
+		confirmDiscard,
+	} = useCarDraftForm({
+		form,
+		draftStore,
+		initialData,
+		onDiscardSuccess: () => navigate({ to: "/dashboard/car-management" }),
+	})
 
-		const timeoutId = setTimeout(() => {
-			saveDraft(form.getValues())
-		}, 2000)
+	const handleSubmit = useCallback(
+		async (data: AddCarFormValues) => {
 
-		return () => clearTimeout(timeoutId)
-	}, [isDirty, form, saveDraft, initialData])
-
-	// Check for existing draft on mount
-	useEffect(() => {
-		if (!initialData && hasDraft()) {
-			setShowDraftDialog(true)
-		}
-	}, [initialData, hasDraft])
-
-	// Handle browser navigation with unsaved changes
-	useEffect(() => {
-		if (!isDirty) return
-
-		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			e.preventDefault()
-			e.returnValue = "You have unsaved changes. Are you sure you want to leave?"
-		}
-
-		window.addEventListener("beforeunload", handleBeforeUnload)
-		return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-	}, [isDirty])
-
-	// Optimized handlers with useCallback
-	const handleSubmit = useCallback(async (data: AddCarFormValues) => {
-		if (!onSubmitProp) {
-			console.log("Form submitted:", data)
-			toast.success("Car has been added successfully!")
-			clearDraft()
-			return
-		}
-
-		setIsSubmitting(true)
-		try {
-			await onSubmitProp(data)
 			const parsedData = CarFormSchema.parse(data)
-			mutation.mutate(parsedData)
 
-			toast.success("Car has been added successfully!")
-			clearDraft()
-			form.reset()
-			navigate({ to: "/dashboard/car-management" })
-		} catch (error) {
-			console.error("Form submission error:", error)
-			toast.error("Failed to add car. Please try again.")
-		} finally {
-			setIsSubmitting(false)
-		}
-	}, [onSubmitProp, form, navigate, clearDraft, mutation])
+			console.log("parsedData", parsedData)
 
-	const handleDiscard = useCallback(() => {
-		if (isDirty) {
-			setShowDiscardAlert(true)
-		} else {
-			navigate({ to: "/dashboard/car-management" })
-		}
-	}, [isDirty, navigate])
-
-	const confirmDiscard = useCallback(() => {
-		form.reset()
-		clearDraft()
-		setShowDiscardAlert(false)
-		navigate({ to: "/dashboard/car-management" })
-	}, [form, clearDraft, navigate])
-
-	const handleSaveDraft = useCallback(() => {
-		saveDraft(form.getValues())
-		toast.message("Draft saved", {
-			description: "Your progress has been saved as a draft.",
-		})
-	}, [form, saveDraft])
-
-	const handleLoadDraft = useCallback(() => {
-		const draftData = loadDraft()
-		if (draftData) {
-			form.reset({ ...form.getValues(), ...draftData })
-			setShowDraftDialog(false)
-			toast.message("Draft loaded", {
-				description: "Your previous draft has been restored.",
+			mutation.mutate(parsedData, {
+				onSuccess: () => {
+					toast.success("Car has been added successfully!")
+					draftStore.clearDraft()
+					form.reset()
+					navigate({ to: "/dashboard/car-management" })
+				},
+				onError: (error) => {
+					console.error("Form submission error:", error)
+					toast.error("Failed to add car. Please try again.")
+				},
 			})
-		}
-	}, [loadDraft, form])
 
-	const handleDeleteDraft = useCallback(() => {
-		clearDraft()
-		setShowDraftDialog(false)
-		toast.message("Draft deleted", {
-			description: "Your saved draft has been removed.",
-		})
-	}, [clearDraft])
+		},
+		[onSubmitProp, form, navigate, draftStore, mutation],
+	)
 
-	const isDisabled = isSubmitting || isLoading
+	const isPending = mutation.isPending || form.formState.isSubmitting
 
 	return (
 		<>
@@ -273,7 +222,7 @@ export function AddCarForm({
 				<form onSubmit={form.handleSubmit(handleSubmit)} className={`flex flex-col h-full ${className || ""}`}>
 					<PaddingLayout className="flex-1 overflow-y-auto pb-10 pt-0">
 						<FormStatusIndicator isDirty={isDirty} onSaveDraft={handleSaveDraft} />
-						<ValidationErrors errorCount={errorCount} />
+						<ValidationErrors errors={errors} errorCount={errorCount} />
 
 						<div className="grid grid-cols-10 gap-4">
 							<div className="col-span-6 flex flex-col gap-4">
@@ -300,12 +249,12 @@ export function AddCarForm({
 							<div className="flex items-center gap-2">
 								<Button
 									type="submit"
-									disabled={isDisabled || !isValid}
+									disabled={isPending || !isValid}
 									className="min-w-[120px]"
+									loading={isPending}
 								>
-									{isDisabled ? (
+									{isPending ? (
 										<>
-											<Loader2 className="w-4 h-4 animate-spin" />
 											Adding...
 										</>
 									) : (
@@ -316,16 +265,11 @@ export function AddCarForm({
 									)}
 								</Button>
 
-								<Button
-									type="button"
-									variant="outline"
-									onClick={handleDiscard}
-									disabled={isDisabled}
-								>
+								<Button type="button" variant="outline" onClick={handleDiscard} disabled={isPending}>
 									Cancel
 								</Button>
 
-								{hasDraft() && !isDirty && (
+								{draftStore.hasDraft() && !isDirty && (
 									<Button
 										type="button"
 										variant="ghost"
@@ -333,7 +277,7 @@ export function AddCarForm({
 										onClick={handleSaveDraft}
 										className="text-muted-foreground"
 									>
-										<FileText className="w-4 h-4 mr-1" />
+										<FileText className="w-4 h-4" />
 										Draft available
 									</Button>
 								)}
@@ -348,62 +292,21 @@ export function AddCarForm({
 			</Form>
 
 			{/* Draft Dialog */}
-			<AlertDialog open={showDraftDialog} onOpenChange={setShowDraftDialog}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle className="flex items-center gap-2">
-							<FileText className="w-5 h-5" />
-							Draft Available
-						</AlertDialogTitle>
-						<AlertDialogDescription>
-							You have a saved draft from {formatDraftAge(draftAge)}. Would you like to continue where you left off?
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter className="flex-col sm:flex-row gap-2">
-						<div className="flex gap-2">
-							<Button
-								variant="outline"
-								onClick={handleDeleteDraft}
-								className="text-red-600 hover:text-red-700 hover:bg-red-50"
-							>
-								<Trash2 className="w-4 h-4 mr-2" />
-								Delete Draft
-							</Button>
-							<AlertDialogCancel onClick={() => setShowDraftDialog(false)}>
-								Start Fresh
-							</AlertDialogCancel>
-						</div>
-						<AlertDialogAction onClick={handleLoadDraft}>
-							<Clock className="w-4 h-4 mr-2" />
-							Load Draft
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<DraftDialog
+				open={showDraftDialog}
+				onOpenChange={setShowDraftDialog}
+				onLoadDraft={handleLoadDraft}
+				onDeleteDraft={handleDeleteDraft}
+				draftAge={draftStore.getDraftAge()}
+			/>
 
 			{/* Discard Dialog */}
-			<AlertDialog open={showDiscardAlert} onOpenChange={setShowDiscardAlert}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
-						<AlertDialogDescription>
-							You have unsaved changes that will be permanently lost. This action cannot be undone.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel disabled={isSubmitting}>
-							Keep editing
-						</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={confirmDiscard}
-							disabled={isSubmitting}
-							className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-						>
-							Discard changes
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<DiscardDialog
+				open={showDiscardAlert}
+				onOpenChange={setShowDiscardAlert}
+				onConfirmDiscard={confirmDiscard}
+				isSubmitting={mutation.isPending}
+			/>
 		</>
 	)
 }

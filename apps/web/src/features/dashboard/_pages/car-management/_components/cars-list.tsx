@@ -6,6 +6,7 @@ import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { Link } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useGetCarsQuery } from "../_hooks/query/car/use-get-cars-query";
 
 function AddCarButton() {
 	return (
@@ -20,6 +21,9 @@ function AddCarButton() {
 
 export function CarsList() {
 	const { viewMode } = useCarsListViewToogleStore();
+	const { data: cars, isLoading: isCarsLoading } = useGetCarsQuery({});
+
+	console.log("cars", cars);
 
 	return (
 		<div className="relative flex flex-col gap-0">

@@ -6,6 +6,7 @@ import { env } from "cloudflare:workers";
 import crypto from "node:crypto";
 
 export const CreatePresignedUrlServiceSchema = z.object({
+	entity: z.string(), // e.g "cars", "package"
 	fileName: z.string(),
 	fileType: z.string(),
 	fileSize: z.number(),
@@ -13,9 +14,9 @@ export const CreatePresignedUrlServiceSchema = z.object({
 
 export type CreatePresignedUrlParams = z.infer<typeof CreatePresignedUrlServiceSchema>;
 
-export async function createPresignedUrlService({ fileName, fileType, fileSize }: CreatePresignedUrlParams) {
-    const randomSuffix = crypto.randomBytes(8).toString("hex");
-    const key = `${randomSuffix}-${fileName}`;
+export async function createPresignedUrlService({ entity, fileName, fileType, fileSize }: CreatePresignedUrlParams) {
+	const randomSuffix = crypto.randomBytes(8).toString("hex");
+	const key = `${entity}-${randomSuffix}`;
 
 	const putCommand = putObject({
 		key,
@@ -30,8 +31,11 @@ export async function createPresignedUrlService({ fileName, fileType, fileSize }
 			expiresIn: 60 * 5, // 5 minutes
 		});
 
+		const imageUrl = `${env.CLOUDFLARE_R2_S3_ENDPOINT}/${env.CLOUDFLARE_R2_BUCKET_NAME}/${key}`;
+
 		return {
 			url,
+			imageUrl,
 			key,
 			bucket: env.CLOUDFLARE_R2_BUCKET_NAME,
 		};

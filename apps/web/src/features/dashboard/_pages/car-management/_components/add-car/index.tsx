@@ -9,6 +9,7 @@ export function AddCar() {
 				<p className="text-sm text-muted-foreground">
 					Fill in the car details using the predefined features for consistency.
 				</p>
+				<span className="text-red-500 text-xs">Add New Car not working yet</span>
 			</PaddingLayout>
 
 			<AddCarForm />
