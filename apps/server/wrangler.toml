@@ -6,17 +6,23 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 NODE_ENV = "production"
 CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
+
+# Better Auth
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
 BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
+
+# Google OAuth
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 
-CLOUDFLARE_ACCESS_KEY_ID = "128b7ac2122be2cb93d94cde4b45f7b1"
-CLOUDFLARE_SECRET_ACCESS_KEY = "c508f0ee43dcd8cc66e2571aadfe33de5e5589f559a77c251573f89ef65bcd7c"
-
-CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-test-bucket"
+# Cloudflare R2
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "a40e520f2281e9b9fb92ccf3f70f9e462abf1cec6da83fd796431b801d8c37ae"
+CLOUDFLARE_R2_TOKEN_KEY = "SF9rYkiNS9G_w1QaMWA5WDapeoaRRdBYKNc2zV4o"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
 CLOUDFLARE_R2_REGION = "oc" # Oceania
 CLOUDFLARE_R2_S3_ENDPOINT = "https://982e002f72f3d258dd99f8aaf8a68a82.r2.cloudflarestorage.com"
+CLOUDLARE__R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
 
 
 [[d1_databases]]

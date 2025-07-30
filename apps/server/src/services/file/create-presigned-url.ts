@@ -6,7 +6,7 @@ import { env } from "cloudflare:workers";
 import crypto from "node:crypto";
 
 export const CreatePresignedUrlServiceSchema = z.object({
-	entity: z.string(), // e.g "cars", "package"
+	entityType: z.enum(["cars", "packages", "bookings", "users"]), // e.g "cars", "package"
 	fileName: z.string(),
 	fileType: z.string(),
 	fileSize: z.number(),
@@ -14,9 +14,24 @@ export const CreatePresignedUrlServiceSchema = z.object({
 
 export type CreatePresignedUrlParams = z.infer<typeof CreatePresignedUrlServiceSchema>;
 
-export async function createPresignedUrlService({ entity, fileName, fileType, fileSize }: CreatePresignedUrlParams) {
+export async function createPresignedUrlService({ entityType, fileName, fileType, fileSize }: CreatePresignedUrlParams) {
 	const randomSuffix = crypto.randomBytes(8).toString("hex");
-	const key = `${entity}-${randomSuffix}`;
+	let key = ""
+
+	switch (entityType) {
+		case "cars":
+			key = `${entityType}/car-${randomSuffix}`;
+			break;
+		case "packages":
+			key = `${entityType}/package-${randomSuffix}`;
+			break;
+		case "bookings":
+			key = `${entityType}/booking-${randomSuffix}`;
+			break;
+		case "users":
+			key = `${entityType}/user-${randomSuffix}`;
+			break;
+	}
 
 	const putCommand = putObject({
 		key,
@@ -31,7 +46,7 @@ export async function createPresignedUrlService({ entity, fileName, fileType, fi
 			expiresIn: 60 * 5, // 5 minutes
 		});
 
-		const imageUrl = `${env.CLOUDFLARE_R2_S3_ENDPOINT}/${env.CLOUDFLARE_R2_BUCKET_NAME}/${key}`;
+		const imageUrl = `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
 
 		return {
 			url,

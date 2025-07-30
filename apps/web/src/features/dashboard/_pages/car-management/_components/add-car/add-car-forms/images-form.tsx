@@ -138,7 +138,7 @@ function ImagesUploader({
 					setUploadProgress(prev => ({ ...prev, [fileId]: 0 }))
 
 					const presignedData = await createPresignedUrlMutation.mutateAsync({
-						entity: "cars",
+						entityType: "cars",
 						fileName: file.name,
 						fileType: file.type,
 						fileSize: file.size,
@@ -215,7 +215,7 @@ function ImagesUploader({
 		maxSize,
 		multiple: true,
 		maxFiles,
-		onFilesChange: handleFilesChange,
+		onFilesAdded: handleFilesChange,
 	})
 
 	// Optimized remove image handler
@@ -236,14 +236,7 @@ function ImagesUploader({
 		onChange(reorderedImages)
 	}, [files, removeFile, safeValue, updateImageOrder, onChange])
 
-	// Optimized set main image handler
-	const handleSetMainImage = useCallback((index: number) => {
-		const updatedImages = safeValue.map((img, i) => ({
-			...img,
-			isMain: i === index,
-		}))
-		onChange(updatedImages)
-	}, [safeValue, onChange])
+
 
 	// Optimized drag end handler
 	const handleDragEnd = useCallback((result: any) => {
@@ -410,14 +403,6 @@ function ImagesUploader({
 																			<span>
 																				{formatBytes(file.file instanceof File ? file.file.size : file.file.size)}
 																			</span>
-																			{isMainImage && (
-																				<>
-																					<span>•</span>
-																					<span className="text-yellow-600 dark:text-yellow-400 font-medium">
-																						Main Image
-																					</span>
-																				</>
-																			)}
 																		</div>
 																	</div>
 
@@ -439,13 +424,6 @@ function ImagesUploader({
 																) : (
 																	<div className="flex items-center gap-2">
 																		<div className="flex items-center space-x-1">
-																			<Checkbox
-																				id={`main-image-${index}`}
-																				checked={isMainImage}
-																				onCheckedChange={() => index > 0 && handleSetMainImage(index)}
-																				disabled={index === 0}
-																				className="size-3.5"
-																			/>
 																			<Label
 																				htmlFor={`main-image-${index}`}
 																				className={cn(
@@ -453,7 +431,13 @@ function ImagesUploader({
 																					index === 0 && "text-muted-foreground"
 																				)}
 																			>
-																				Main
+																				{isMainImage && (
+																					<>
+																						<span className="text-yellow-600 dark:text-yellow-400 font-medium">
+																							Main Image
+																						</span>
+																					</>
+																				)}
 																			</Label>
 																		</div>
 																	</div>
