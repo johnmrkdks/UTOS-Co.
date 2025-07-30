@@ -46,10 +46,9 @@ export function CarsList() {
 				<div>
 					{
 						viewMode === "grid" && (
-							<CarsListGrid cars={mockCarsData} className="grid grid-cols-3 gap-4" />
+							<CarsListGrid cars={cars?.data} isLoading={isCarsLoading} className="grid grid-cols-3 gap-4" />
 						)
 					}
-
 					{
 						viewMode === "table" && (
 							<div>

@@ -9,17 +9,19 @@ type CarGridCardProps = {
 }
 
 export function CarGridCard({ car }: CarGridCardProps) {
+	const mainImage = car.images?.find((image) => image.isMain)
+
 	return (
 		<Card key={car.id} className="overflow-hidden">
 			<div className="aspect-video relative">
-				<img src={car?.images?.at(0)?.url || placeholder} alt={car.name} className="object-fill" />
+				<img src={mainImage?.url || placeholder} alt={car.name} className="object-cover w-full h-full" />
 			</div>
 			<CardHeader>
 				<div className="flex items-start justify-between">
 					<div>
 						<CardTitle className="text-lg">{car.name}</CardTitle>
 						<CardDescription>
-							{`${car.brand?.name} • ${car.model?.name} • ${car.model?.year}`}
+							{`${car.model?.brand?.name} • ${car.model?.name} • ${car.model?.year}`}
 						</CardDescription>
 					</div>
 					<Badge variant="secondary">{car.conditionType?.name}</Badge>

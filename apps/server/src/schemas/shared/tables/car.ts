@@ -6,9 +6,9 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 import { CarFeatureSchema } from "./cars/car-feature";
-import { CarImageSchema } from "./cars/car-image";
+import { CarImageSchema, InsertCarImageSchema } from "./cars/car-image";
 import { CarBrandSchema } from "./cars/car-brand";
-import { CarModelSchema } from "./cars/car-model";
+import { CarModelSchema, CarModelWithBrandSchema } from "./cars/car-model";
 import { CarFuelTypeSchema } from "./cars/car-fuel-type";
 import { CarTransmissionTypeSchema } from "./cars/car-transmission-type";
 import { CarBodyTypeSchema } from "./cars/car-body-type";
@@ -22,17 +22,18 @@ export const CarSchema = createSelectSchema(cars, {
 	updatedAt: z.date().optional(),
 }).extend({
 	bodyType: CarBodyTypeSchema.optional(),
-	brand: CarBrandSchema.optional(),
 	conditionType: CarConditionTypeSchema.optional(),
 	driveType: CarDriveTypeSchema.optional(),
 	features: z.array(CarFeatureSchema).default([]).optional(),
 	fuelType: CarFuelTypeSchema.optional(),
 	images: z.array(CarImageSchema).default([]).optional(),
-	model: CarModelSchema.optional(),
+	model: CarModelWithBrandSchema.optional(),
 	transmissionType: CarTransmissionTypeSchema.optional(),
 	category: CarCategorySchema.optional(),
 });
-export const InsertCarSchema = createInsertSchema(cars).extend({});
+export const InsertCarSchema = createInsertSchema(cars).extend({
+	images: z.array(InsertCarImageSchema).default([]).optional(),
+});
 export const UpdateCarSchema = createUpdateSchema(cars, {
 	modelId: z.string().optional(),
 });

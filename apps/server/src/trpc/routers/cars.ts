@@ -17,6 +17,7 @@ export const carsRouter = router({
 				const newCar = await createCarService(db, input);
 				return newCar;
 			} catch (error) {
+				console.log(error);
 				handleTRPCError(error);
 			}
 		}),

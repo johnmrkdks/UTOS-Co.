@@ -4,10 +4,18 @@ import { cn } from "@/lib/utils";
 
 type CarGridCardProps = {
 	cars: Car[]
+	isLoading: boolean
 	className?: string
 }
 
-export function CarsListGrid({ cars, className, ...props }: CarGridCardProps) {
+export function CarsListGrid({ cars = [], isLoading, className, ...props }: CarGridCardProps) {
+
+	if (isLoading) {
+		return (
+			<>Loading...</>
+		)
+	}
+
 	return (
 		<div className={cn("gap-4", className)} {...props}>
 			{

@@ -17,8 +17,13 @@ export async function getCars(
 			category: true,
 			driveType: true,
 			fuelType: true,
-			model: true,
+			model: {
+				with: {
+					brand: true
+				}
+			},
 			transmissionType: true,
+			images: true
 		},
 	});
 

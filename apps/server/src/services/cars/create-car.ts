@@ -1,5 +1,6 @@
 import { createCar } from "@/data/cars/create-car";
 import { getCarByName } from "@/data/cars/get-car-by-name";
+import { createCarImage } from "@/data/cars-images/create-car-image";
 import type { DB } from "@/db";
 import { InsertCarSchema, type InsertCar } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
@@ -23,7 +24,22 @@ export async function createCarService(db: DB, data: CreateCarParams) {
 		modelId: data.modelId,
 	} as InsertCar;
 
-	const newCar = createCar(db, values);
+	const newCar = await createCar(db, values);
+
+	console.log("NEW CAR", newCar);
+
+	console.log("DATA IMAGE", data.images);
+
+	if (data.images) {
+		for (const image of data.images) {
+			await createCarImage(db, {
+				carId: newCar.id,
+				url: image.url,
+				order: image.order,
+				isMain: image.isMain,
+			});
+		}
+	}
 
 	return newCar;
 }
