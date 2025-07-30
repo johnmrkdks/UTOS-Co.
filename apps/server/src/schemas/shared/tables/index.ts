@@ -1,4 +1,5 @@
 export * from "./car";
+export * from "./cars-to-feature";
 export * from "./cars/car-body-type";
 export * from "./cars/car-brand";
 export * from "./cars/car-condition-type";

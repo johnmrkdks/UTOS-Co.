@@ -1,44 +1,44 @@
-import type { Control } from "react-hook-form"
-import { useController } from "react-hook-form"
-import { Plus, SearchIcon } from "lucide-react"
-import { memo, useState, useMemo, useCallback } from "react"
+import type { Control } from "react-hook-form";
+import { useController } from "react-hook-form";
+import { SearchIcon } from "lucide-react";
+import { memo, useState, useMemo, useCallback } from "react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
-import type { AddCarFormValues } from "../add-car-form"
-import { useGetCarFeaturesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-feature/use-get-car-features-query"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
+import type { AddCarFormValues } from "../add-car-form";
+import { useGetCarFeaturesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-feature/use-get-car-features-query";
+import { AddFeatureDialog } from "../../car-features/features/add-feature-dialog";
 
 // Types
 type FeaturesFormProps = {
-	control: Control<AddCarFormValues>
-	className?: string
-}
+	control: Control<AddCarFormValues>;
+	className?: string;
+};
 
-type Feature = { id: string; name: string }
+type Feature = { id: string; name: string };
 
 // Sub-component for individual feature checkboxes
-// Moved outside the main component to prevent re-definition on each render.
-// uses useController for better performance and encapsulation.
 const FeatureItem = memo(({ control, feature }: { control: Control<AddCarFormValues>; feature: Feature }) => {
 	const { field } = useController({
 		control,
-		name: "featureIds", // Note: using the new schema field name
-	})
+		name: "features",
+	});
 
-	const isChecked = field.value?.includes(feature.id) ?? false
+	const isChecked = useMemo(() => field.value?.includes(feature.id) ?? false, [field.value, feature.id]);
 
 	const onCheckedChange = useCallback(() => {
-		const currentValues = field.value ?? []
+		const currentValues = field.value ?? [];
 		const newValues = isChecked
 			? currentValues.filter((id) => id !== feature.id)
-			: [...currentValues, feature.id]
-		field.onChange(newValues)
-	}, [field, isChecked, feature.id])
+			: [...currentValues, feature.id];
+		field.onChange(newValues);
+	}, [field, isChecked, feature.id]);
 
 	return (
 		<FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md p-1.5 hover:bg-muted/50">
@@ -49,37 +49,35 @@ const FeatureItem = memo(({ control, feature }: { control: Control<AddCarFormVal
 				{feature.name}
 			</FormLabel>
 		</FormItem>
-	)
-})
-FeatureItem.displayName = "FeatureItem"
+	);
+});
+FeatureItem.displayName = "FeatureItem";
 
 // Main component
 export const FeaturesForm = memo<FeaturesFormProps>(({ control, className, ...props }) => {
-	const [searchTerm, setSearchTerm] = useState("")
-	const { data: featuresResponse, isLoading } = useGetCarFeaturesQuery({})
-	const allFeatures = useMemo(() => featuresResponse?.data ?? [], [featuresResponse])
+	const [searchTerm, setSearchTerm] = useState("");
+	const debouncedSearchTerm = useDebounce(searchTerm, 300);
+	const { data: featuresResponse, isLoading } = useGetCarFeaturesQuery({});
+	const allFeatures = useMemo(() => featuresResponse?.data ?? [], [featuresResponse]);
 
 	const filteredFeatures = useMemo(
 		() =>
-			searchTerm
+			debouncedSearchTerm
 				? allFeatures.filter((feature) =>
-					feature.name.toLowerCase().includes(searchTerm.toLowerCase())
-				)
+						feature.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()),
+					)
 				: allFeatures,
-		[allFeatures, searchTerm]
-	)
+		[allFeatures, debouncedSearchTerm],
+	);
 
 	return (
 		<Card className={cn("shadow-none", className)} {...props}>
 			<CardHeader>
 				<div className="flex w-full flex-row items-center justify-between">
 					<CardTitle className="text-lg">Car Features</CardTitle>
-					<Button type="button" variant="outline" size="sm">
-						<Plus className="h-4 w-4" />
-						Add New Feature
-					</Button>
+					<AddFeatureDialog />
 				</div>
-				<CardDescription>Select the features available in this car.</CardDescription>
+				<CardDescription>Select the features available in this car. You can search and select multiple features.</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="relative">
@@ -88,44 +86,55 @@ export const FeaturesForm = memo<FeaturesFormProps>(({ control, className, ...pr
 						placeholder="Search features..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
-						className="bg-background pl-9 h-9"
+						className="h-9 bg-background pl-9"
 						disabled={isLoading}
 					/>
 				</div>
 
 				<FormField
 					control={control}
-					name="featureIds" // Note: using the new schema field name
+					name="features"
 					render={({ field }) => (
 						<>
 							<div className="flex items-center justify-between pt-1.5 text-sm">
 								<span className="text-xs text-muted-foreground">
-									{/* Selected count is now derived directly from the form state */}
 									{field.value?.length ?? 0} of {allFeatures.length} selected
 								</span>
-								{(field.value?.length ?? 0) > 0 && (
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										onClick={() => field.onChange([])} // Simplified clear all
-										className="h-6 px-2 py-1 text-xs hover:text-destructive"
-									>
-										Clear all
-									</Button>
-								)}
+								<div className="flex items-center space-x-2">
+									{filteredFeatures.length > 0 && (
+										<Button
+											type="button"
+											variant="link"
+											size="sm"
+											onClick={() => {
+												const currentSelected = new Set(field.value ?? []);
+												filteredFeatures.forEach((f) => currentSelected.add(f.id));
+												field.onChange(Array.from(currentSelected));
+											}}
+											className="h-auto p-0 text-xs"
+										>
+											Select all visible
+										</Button>
+									)}
+									{(field.value?.length ?? 0) > 0 && (
+										<Button
+											type="button"
+											variant="link"
+											size="sm"
+											onClick={() => field.onChange([])}
+											className="h-auto p-0 text-xs text-destructive hover:text-destructive"
+										>
+											Clear selection
+										</Button>
+									)}
+								</div>
 							</div>
 
 							<FormItem>
 								<ScrollArea className="h-[400px] w-full rounded-md border bg-background p-2">
 									<div className="grid grid-cols-2 gap-x-4 gap-y-2">
-										{/* Simplified rendering logic */}
 										{filteredFeatures.map((feature) => (
-											<FeatureItem
-												key={feature.id}
-												control={control}
-												feature={feature}
-											/>
+											<FeatureItem key={feature.id} control={control} feature={feature} />
 										))}
 									</div>
 									{isLoading && (
@@ -135,9 +144,11 @@ export const FeaturesForm = memo<FeaturesFormProps>(({ control, className, ...pr
 									)}
 									{!isLoading && filteredFeatures.length === 0 && (
 										<div className="py-8 text-center text-muted-foreground">
-											<p className="text-sm">
-												No features found
-												{searchTerm && ` matching "${searchTerm}"`}
+											<p className="text-sm font-semibold">No features found</p>
+											<p className="text-xs">
+												{searchTerm
+													? `No features match your search for "${searchTerm}".`
+													: "There are no features available to select."}
 											</p>
 										</div>
 									)}
@@ -149,6 +160,7 @@ export const FeaturesForm = memo<FeaturesFormProps>(({ control, className, ...pr
 				/>
 			</CardContent>
 		</Card>
-	)
-})
-FeaturesForm.displayName = "FeaturesForm"
+	);
+});
+FeaturesForm.displayName = "FeaturesForm";
+

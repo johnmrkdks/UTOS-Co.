@@ -15,6 +15,9 @@ export const carModels = sqliteTable("car_models", {
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.default(sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.default(sql`(CURRENT_TIMESTAMP)`),
 },
 	(table) => ({
 		brandModelYearUnique: unique().on(table.brandId, table.name, table.year),

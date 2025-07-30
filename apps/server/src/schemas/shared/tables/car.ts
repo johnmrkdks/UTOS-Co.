@@ -33,6 +33,7 @@ export const CarSchema = createSelectSchema(cars, {
 });
 export const InsertCarSchema = createInsertSchema(cars).extend({
 	images: z.array(InsertCarImageSchema).default([]).optional(),
+	features: z.array(z.string()).default([]).optional(),
 });
 export const UpdateCarSchema = createUpdateSchema(cars, {
 	modelId: z.string().optional(),

@@ -9,6 +9,9 @@ export const carFuelTypes = sqliteTable("car_fuel_types", {
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.default(sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const carFuelTypesRelations = relations(carFuelTypes, ({ many }) => ({

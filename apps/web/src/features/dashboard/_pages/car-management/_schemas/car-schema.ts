@@ -60,7 +60,7 @@ export const CarFormSchema = z.object({
 	isAvailable: z.boolean(),
 	status: z.nativeEnum(CarStatusEnum),
 	// Arrays for related data
-	features: z.array(CarFeatureSchema),
+	features: z.array(z.string()).optional(),
 	images: z.array(CarImageSchema)
 		.optional()
 		.superRefine((images, ctx) => {

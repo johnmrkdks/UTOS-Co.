@@ -10,7 +10,7 @@ export const transmissionTypeTableColumns: ColumnDef<CarTransmissionTypeWithEnri
 		accessorKey: "name",
 		header: ({ column }) => (
 			<DataTableColumnHeader className="ml-4
-				" column={column} title="Fuel Type" />
+				" column={column} title="Transmission Type" />
 		),
 		cell: ({ row }) => <div className="ml-4">{row.getValue("name")}</div>,
 		enableSorting: false,
@@ -36,6 +36,18 @@ export const transmissionTypeTableColumns: ColumnDef<CarTransmissionTypeWithEnri
 		),
 		cell: ({ row }) => (
 			<div className="">{new Date(row.getValue("createdAt")).toLocaleDateString()}</div>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		id: "updatedAt",
+		accessorKey: "updatedAt",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Updated At" />
+		),
+		cell: ({ row }) => (
+			<div className="">{new Date(row.getValue("updatedAt")).toLocaleDateString()}</div>
 		),
 		enableSorting: false,
 		enableHiding: false,

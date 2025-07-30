@@ -36,6 +36,13 @@
       "when": 1753689619668,
       "tag": "0004_young_professor_monster",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1753875074121,
+      "tag": "0005_daffy_metal_master",
+      "breakpoints": true
     }
   ]
 }

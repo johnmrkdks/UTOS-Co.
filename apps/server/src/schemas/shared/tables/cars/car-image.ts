@@ -10,9 +10,10 @@ import { z } from "zod";
 export const CarImageSchema = createSelectSchema(carImages, {
 	createdAt: z.union([z.date(), z.string()]),
 });
-export const InsertCarImageSchema = createInsertSchema(carImages).omit({
-	carId: true,
-});
+export const InsertCarImageSchema = createInsertSchema(carImages)
+	.omit({
+		carId: true,
+	})
 export const UpdateCarImageSchema = createUpdateSchema(carImages);
 
 // Extended schemas

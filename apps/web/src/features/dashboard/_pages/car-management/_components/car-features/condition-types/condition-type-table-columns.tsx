@@ -10,7 +10,7 @@ export const conditionTypeTableColumns: ColumnDef<CarConditionTypeWithEnrichedDa
 		accessorKey: "name",
 		header: ({ column }) => (
 			<DataTableColumnHeader className="ml-4
-				" column={column} title="Drive Type" />
+				" column={column} title="Condition" />
 		),
 		cell: ({ row }) => <div className="ml-4">{row.getValue("name")}</div>,
 		enableSorting: false,
@@ -36,6 +36,18 @@ export const conditionTypeTableColumns: ColumnDef<CarConditionTypeWithEnrichedDa
 		),
 		cell: ({ row }) => (
 			<div className="">{new Date(row.getValue("createdAt")).toLocaleDateString()}</div>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		id: "updatedAt",
+		accessorKey: "updatedAt",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Updated At" />
+		),
+		cell: ({ row }) => (
+			<div className="">{new Date(row.getValue("updatedAt")).toLocaleDateString()}</div>
 		),
 		enableSorting: false,
 		enableHiding: false,

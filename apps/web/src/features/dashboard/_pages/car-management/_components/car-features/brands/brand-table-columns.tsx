@@ -54,6 +54,18 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 		enableHiding: false,
 	},
 	{
+		id: "updatedAt",
+		accessorKey: "updatedAt",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Updated At" />
+		),
+		cell: ({ row }) => (
+			<div className="">{new Date(row.getValue("updatedAt")).toLocaleDateString()}</div>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
 		id: "actions",
 		accessorKey: "actions",
 		header: ({ column }) => (

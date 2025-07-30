@@ -1,7 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { sqliteTable, integer, text, index, real } from "drizzle-orm/sqlite-core";
 import { carImages } from "@/db/sqlite/schema/cars/car-images";
-import { carFeatures } from "@/db/sqlite/schema/cars/car-features";
 import { carModels } from "@/db/sqlite/schema/cars/car-models";
 import { carBodyTypes } from "@/db/sqlite/schema/cars/car-body-types";
 import { carFuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
@@ -11,6 +10,7 @@ import { carConditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
 import { createId } from "@paralleldrive/cuid2";
 import { CarStatusEnum } from "@/db/sqlite/enums";
 import { carCategories } from "@/db/sqlite/schema/cars/car-categories";
+import { carsToFeatures } from "./cars-to-features";
 
 export const cars = sqliteTable(
 	"cars",
@@ -131,13 +131,12 @@ export const carsRelations = relations(cars, ({ one, many }) => ({
 		fields: [cars.conditionTypeId],
 		references: [carConditionTypes.id],
 	}),
-	// NEW relations
 	category: one(carCategories, {
 		fields: [cars.categoryId],
 		references: [carCategories.id],
 	}),
 	images: many(carImages),
-	features: many(carFeatures),
+	carsToFeatures: many(carsToFeatures),
 }));
 
 export const carCategoriesRelations = relations(carCategories, ({ many }) => ({

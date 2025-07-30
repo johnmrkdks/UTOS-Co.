@@ -20,6 +20,9 @@ export const carImages = sqliteTable(
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.default(sql`(CURRENT_TIMESTAMP)`),
+		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
 		orderIdx: index("car_images_order_idx").on(table.carId, table.order),

@@ -37,7 +37,7 @@ export function EntityNameValidationDisplay({
 				message: (
 					<div className="flex items-center gap-2 text-sm text-green-600">
 						<CheckIcon className="w-3 h-3" />
-						{entityName} name is available
+						{entityName} is available
 					</div>
 				)
 			}

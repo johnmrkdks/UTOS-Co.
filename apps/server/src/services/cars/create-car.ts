@@ -6,6 +6,7 @@ import { InsertCarSchema, type InsertCar } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
 import { z } from "zod";
+import { createCarsToFeature } from "@/data/cars-to-features/create-cars-to-feature";
 
 export const CreateCarServiceSchema = InsertCarSchema
 
@@ -29,6 +30,16 @@ export async function createCarService(db: DB, data: CreateCarParams) {
 	console.log("NEW CAR", newCar);
 
 	console.log("DATA IMAGE", data.images);
+	console.log("DATA FEATURES", data.features);
+
+	if (data.features) {
+		for (const feature of data.features) {
+			await createCarsToFeature(db, {
+				carId: newCar.id,
+				featureId: feature,
+			});
+		}
+	}
 
 	if (data.images) {
 		for (const image of data.images) {

@@ -25,8 +25,10 @@ export const carCategories = sqliteTable(
 		isActive: integer("is_active", { mode: "boolean" }).default(true),
 
 		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
 			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
 			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({

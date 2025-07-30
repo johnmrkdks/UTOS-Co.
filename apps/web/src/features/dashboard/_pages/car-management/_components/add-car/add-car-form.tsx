@@ -14,9 +14,9 @@ import { OperationalStatusForm } from "./add-car-forms/operational-status-form"
 import { ImagesForm } from "./add-car-forms/images-form"
 import { FeaturesForm } from "./add-car-forms/features-form"
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout"
-import { useState, useCallback, useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useNavigate } from "@tanstack/react-router"
-import { Loader2, Save, FileText, AlertCircleIcon, ImageIcon, InfoIcon } from "lucide-react"
+import { SaveIcon, FileTextIcon, AlertCircleIcon, ImageIcon, InfoIcon } from "lucide-react"
 import { useAddCarDraftStore } from "@/features/dashboard/_pages/car-management/_hooks/add-car-draft-store"
 import { toast } from "sonner"
 import { useCreateCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-create-car-mutation"
@@ -259,7 +259,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 										</>
 									) : (
 										<>
-											<Save className="w-4 h-4" />
+											<SaveIcon className="w-4 h-4" />
 											Add New Car
 										</>
 									)}
@@ -277,7 +277,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 										onClick={handleSaveDraft}
 										className="text-muted-foreground"
 									>
-										<FileText className="w-4 h-4" />
+										<FileTextIcon className="w-4 h-4" />
 										Draft available
 									</Button>
 								)}

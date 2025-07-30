@@ -41,8 +41,6 @@ export function CarsList() {
 
 			{/* Scrollable Content */}
 			<PaddingLayout className="overflow-y-auto h-full">
-				<p className="text-muted-foreground text-xs italic">Mock data for testing purposes</p>
-
 				<div>
 					{
 						viewMode === "grid" && (

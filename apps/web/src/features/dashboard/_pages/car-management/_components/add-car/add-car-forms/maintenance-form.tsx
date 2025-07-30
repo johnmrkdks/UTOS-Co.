@@ -8,6 +8,7 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import type { AddCarFormValues } from "../add-car-form"
+import { DateInput } from "@/components/date-input"
 
 type MaintenanceFormProps = {
 	control: Control<AddCarFormValues>
@@ -24,28 +25,9 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 					render={({ field }) => (
 						<FormItem className="flex flex-col">
 							<FormLabel>Insurance Expiry (Optional)</FormLabel>
-							<Popover>
-								<PopoverTrigger asChild>
-									<FormControl>
-										<Button
-											variant={"outline"}
-											className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-										>
-											{field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-											<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-										</Button>
-									</FormControl>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={field.value}
-										onSelect={field.onChange}
-										disabled={(date) => date < new Date()}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
+							<FormControl>
+								<DateInput {...field} />
+							</FormControl>
 							<FormDescription className="text-xs">When the insurance expires</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -58,28 +40,9 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 					render={({ field }) => (
 						<FormItem className="flex flex-col">
 							<FormLabel>Registration Expiry (Optional)</FormLabel>
-							<Popover>
-								<PopoverTrigger asChild>
-									<FormControl>
-										<Button
-											variant={"outline"}
-											className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-										>
-											{field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-											<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-										</Button>
-									</FormControl>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={field.value}
-										onSelect={field.onChange}
-										disabled={(date) => date < new Date()}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
+							<FormControl>
+								<DateInput {...field} />
+							</FormControl>
 							<FormDescription className="text-xs">When the registration expires</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -92,28 +55,9 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 					render={({ field }) => (
 						<FormItem className="flex flex-col">
 							<FormLabel>Last Service Date (Optional)</FormLabel>
-							<Popover>
-								<PopoverTrigger asChild>
-									<FormControl>
-										<Button
-											variant={"outline"}
-											className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-										>
-											{field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-											<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-										</Button>
-									</FormControl>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={field.value}
-										onSelect={field.onChange}
-										disabled={(date) => date > new Date()}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
+							<FormControl>
+								<DateInput {...field} />
+							</FormControl>
 							<FormDescription className="text-xs">When the car was last serviced</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -126,28 +70,9 @@ export function MaintenanceForm({ control }: MaintenanceFormProps) {
 					render={({ field }) => (
 						<FormItem className="flex flex-col">
 							<FormLabel>Next Service Due (Optional)</FormLabel>
-							<Popover>
-								<PopoverTrigger asChild>
-									<FormControl>
-										<Button
-											variant={"outline"}
-											className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-										>
-											{field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-											<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-										</Button>
-									</FormControl>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={field.value}
-										onSelect={field.onChange}
-										disabled={(date) => date < new Date()}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
+							<FormControl>
+								<DateInput {...field} />
+							</FormControl>
 							<FormDescription className="text-xs">When the next service is due</FormDescription>
 							<FormMessage />
 						</FormItem>
