@@ -13,6 +13,10 @@
 - Zod: ^4.x.x
 - Tanstack Query: ^5.x.x
 - Zustand: ^4.x.x
+- TRPC Client: ^10.x.x
+- Date FNS: ^4.x.x
+- Better Auth: ^1.x.x
+- @tprc/tanstack-react-queryt: ^11.x.x
 
 ## Naming Conventions
 - `kebab-case` - for all folders/files
@@ -34,8 +38,7 @@
   
 ## Domain Folders
 - `src` - main source code and shared common modules
-- `src/app` - main Next.js app router folder
-- `src/features` - main features folder **(Only if necessary)**
+- `src/features` - main features folder
 
 ## Shared Modules Structure
 Shared modules follow this structure:
@@ -63,14 +66,29 @@ When creating new feature files, follow this structure:
 
 ```
 src/features/<feature-name>/
-├── _actions/               # Feature's server actions (only if necessary)
 ├── _assets/                # Feature's assets (only if necessary)
 ├── _components/            # Feature's components
 ├── _constants/             # Feature's constants
 ├── _contexts/              # Feature's react context API
 ├── _hooks/                 # Feature's hooks, tanstack query and mutation (only if necessary)
+├── _pages/                 # Feature's pages components (only if necessary)
 ├── _lib/                   # Feature's 3rd party integrations (only if necessary)
 ├── _stores/                # Feature's state stores (e.g., zustand)
 ├── _types/                 # Feature's types
 └── _utils/                 # Feature's utilities
 ```
+
+## Nested Feature Domain Structure - Optional
+When creating new nested feature files, follow this structure:
+```
+src/features/<feature-name>/_pages/<nested-feature-name>/
+├── _components/            # Nested feature's components
+├── _constants/             # Nested feature's constants
+├── _contexts/              # Nested feature's react context API
+├── _hooks/                 # Nested feature's hooks, tanstack query and mutation
+├── _lib/                   # Nested feature's 3rd party integrations (only if necessary)
+├── _stores/                # Nested feature's state stores (e.g., zustand)
+├── _types/                 # Nested feature's types
+└── _utils/                 # Nested feature's utilities
+```
+

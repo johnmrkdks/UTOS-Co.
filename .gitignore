@@ -2,3 +2,7 @@ node_modules
 .turbo
 
 .env
+
+# Markdowns for AI
+GEMINI.md
+
