@@ -16,20 +16,21 @@ export type CreatePresignedUrlParams = z.infer<typeof CreatePresignedUrlServiceS
 
 export async function createPresignedUrlService({ entityType, fileName, fileType, fileSize }: CreatePresignedUrlParams) {
 	const randomSuffix = crypto.randomBytes(8).toString("hex");
+	const extension = fileName.split(".").pop();
 	let key = ""
 
 	switch (entityType) {
 		case "cars":
-			key = `${entityType}/car-${randomSuffix}`;
+			key = `${entityType}/car-${randomSuffix}${extension ? `.${extension}` : ''}`;
 			break;
 		case "packages":
-			key = `${entityType}/package-${randomSuffix}`;
+			key = `${entityType}/package-${randomSuffix}${extension ? `.${extension}` : ''}`;
 			break;
 		case "bookings":
-			key = `${entityType}/booking-${randomSuffix}`;
+			key = `${entityType}/booking-${randomSuffix}${extension ? `.${extension}` : ''}`;
 			break;
 		case "users":
-			key = `${entityType}/user-${randomSuffix}`;
+			key = `${entityType}/user-${randomSuffix}${extension ? `.${extension}` : ''}`;
 			break;
 	}
 
@@ -46,7 +47,7 @@ export async function createPresignedUrlService({ entityType, fileName, fileType
 			expiresIn: 60 * 5, // 5 minutes
 		});
 
-		const imageUrl = `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+		const imageUrl = `${env.CLOUDLARE_R2_PUBLIC_URL}/${key}`;
 
 		return {
 			url,

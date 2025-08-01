@@ -16,13 +16,13 @@ GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 
 # Cloudflare R2
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
 CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
-CLOUDFLARE_R2_SECRET_ACCESS_KEY = "a40e520f2281e9b9fb92ccf3f70f9e462abf1cec6da83fd796431b801d8c37ae"
-CLOUDFLARE_R2_TOKEN_KEY = "SF9rYkiNS9G_w1QaMWA5WDapeoaRRdBYKNc2zV4o"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
 CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
 CLOUDFLARE_R2_REGION = "oc" # Oceania
 CLOUDFLARE_R2_S3_ENDPOINT = "https://982e002f72f3d258dd99f8aaf8a68a82.r2.cloudflarestorage.com"
-CLOUDLARE__R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
+CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
 
 
 [[d1_databases]]
@@ -37,4 +37,5 @@ binding = 'BUCKET'
 bucket_name = 'down-under-chauffeur-bucket'
 preview_bucket_name = "down-under-chauffeur-test-bucket"
 
-
+[observability.logs]
+enabled = true
