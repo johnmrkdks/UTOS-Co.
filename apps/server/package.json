@@ -12,6 +12,7 @@
 		"check-types": "tsc --noEmit",
 		"compile": "pnpm build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
 		"dev": "wrangler types && wrangler dev --port=3000 --remote",
+		"preview": "wrangler build && wrangler dev",
 		"start": "wrangler dev",
 		"deploy": "wrangler types && wrangler deploy",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",

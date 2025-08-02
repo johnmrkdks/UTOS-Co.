@@ -47,7 +47,7 @@ export async function createPresignedUrlService({ entityType, fileName, fileType
 			expiresIn: 60 * 5, // 5 minutes
 		});
 
-		const imageUrl = `${env.CLOUDLARE_R2_PUBLIC_URL}/${key}`;
+		const imageUrl = `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
 
 		return {
 			url,
