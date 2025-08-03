@@ -4,6 +4,7 @@ import {
 	BookTextIcon,
 	CalendarCheck2,
 	CalendarCheck2Icon,
+	CalendarIcon,
 	CarIcon,
 	ClipboardListIcon,
 	InboxIcon,
@@ -45,6 +46,11 @@ export const DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
 		label: "Car Management",
 		path: "/dashboard/car-management",
 		icon: CarIcon,
+	},
+	{
+		label: "Booking Management",
+		path: "/dashboard/booking-management",
+		icon: CalendarIcon,
 	},
 ];
 
