@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_marketing/contact-us")({
 
 function RouteComponent() {
 	return (
-		<main className="bg-beige h-full min-h-svh flex justify-center items-center">
-			<ContactUs className="" />
+		<main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+			<ContactUs />
 		</main>
 	);
 }

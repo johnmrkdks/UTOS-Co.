@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/ui/lib/utils";
 import { Logo } from "@/components/logo";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
 import { MARKETING_ROUTES } from "@/features/marketing/_constants/marketing-routes";

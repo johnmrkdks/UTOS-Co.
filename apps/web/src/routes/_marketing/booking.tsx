@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_marketing/booking')({
 
 function RouteComponent() {
 	return (
-		<main className="text-center w-10/12 mx-auto p-4">
+		<main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
 			<Booking />
 		</main>
 	)

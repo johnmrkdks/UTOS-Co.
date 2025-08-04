@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { AddCategoryDialog } from "./categories/add-category-dialog";
 import { CategoryTableList } from "./categories/drive-type-table-list";
 

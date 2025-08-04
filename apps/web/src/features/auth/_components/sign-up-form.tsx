@@ -1,6 +1,6 @@
 import { Loader } from "@/components/loader";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { authClient } from "@/lib/auth-client";
 import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
@@ -14,9 +14,9 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
+} from "@workspace/ui/components/form";
 import { SignUpWithOAuth } from "./sign-up-with-oauth";
-import { InputPassword } from "@/components/input-password";
+import { InputPassword } from "@workspace/ui/components/input-password";
 import { useSignUpMutation } from "@/features/auth/_hooks/query/use-sign-up-mutation";
 
 type FormValues = z.infer<typeof signUpSchema>;

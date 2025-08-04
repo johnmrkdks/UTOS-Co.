@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_marketing")({
 
 function RouteComponent() {
 	return (
-		<div className="min-h-10/12 relative overflow-hidden">
-			<MarketingNavbar className="sticky top-0 z-10" />
+		<div className="relative">
+			<MarketingNavbar className="sticky top-0 z-20" />
 			<div className=" overflow-auto">
 				<Outlet />
 			</div>

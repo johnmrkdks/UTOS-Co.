@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
+import { Button } from "@workspace/ui/components/button";
+import { DialogClose, DialogFooter } from "@workspace/ui/components/dialog";
+import { Form } from "@workspace/ui/components/form";
 import { useForm } from "react-hook-form";
 
 type AddNewPackageFormProps = {

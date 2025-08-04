@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@workspace/ui/lib/utils"
 
 type PaddingLayoutProps = {
 	children: React.ReactNode

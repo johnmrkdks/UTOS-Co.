@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@workspace/ui/components/badge";
 import { Star } from "lucide-react";
 import type { Car as CarType } from "server/types";
 import { useGetCarFeaturesQuery } from "../../../../_hooks/query/car-feature/use-get-car-features-query";

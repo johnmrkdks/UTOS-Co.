@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/button";
 import { companyIcons } from "@/features/auth/_utils/icons";
 import { useNavigate } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";

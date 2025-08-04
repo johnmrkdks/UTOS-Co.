@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@workspace/ui/components/button"
 import {
 	Dialog,
 	DialogClose,
@@ -8,8 +8,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@/components/ui/dialog"
-import { Form } from "@/components/ui/form"
+} from "@workspace/ui/components/dialog"
+import { Form } from "@workspace/ui/components/form"
 import { PlusIcon } from "lucide-react"
 import { useState, useMemo } from "react"
 import { useForm } from "react-hook-form"

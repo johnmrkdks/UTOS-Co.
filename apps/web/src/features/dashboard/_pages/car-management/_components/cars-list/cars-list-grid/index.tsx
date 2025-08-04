@@ -1,7 +1,7 @@
 import CarGridCard from "./car-grid-card"
 import { CarGridSkeleton } from "./car-grid-skeleton"
 import type { Car } from "server/types"
-import { cn } from "@/lib/utils"
+import { cn } from "@workspace/ui/lib/utils"
 import { EmptyCarsList } from "./empty-cars-list"
 
 type CarGridCardProps = {

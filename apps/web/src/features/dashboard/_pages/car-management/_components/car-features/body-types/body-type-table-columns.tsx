@@ -1,5 +1,5 @@
 import { DataTableColumnHeader } from "@/components/tables/data-table-column-header"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@workspace/ui/components/badge"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { CarBodyTypeWithEnrichedData } from "server/types"
 import { BodyTypeTableRowActions } from "./body-type-table-row-actions"

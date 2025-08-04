@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@workspace/ui/components/button"
 import {
 	Dialog,
 	DialogClose,
@@ -8,12 +8,12 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@workspace/ui/components/dialog"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
+import { Checkbox } from "@workspace/ui/components/checkbox"
+import { Alert, AlertDescription } from "@workspace/ui/components/alert"
+import { Badge } from "@workspace/ui/components/badge"
+import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Trash2Icon, AlertTriangle, Car, Settings } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"

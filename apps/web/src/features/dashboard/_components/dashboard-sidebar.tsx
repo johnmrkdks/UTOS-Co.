@@ -9,7 +9,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@workspace/ui/components/sidebar";
 import type { RouteConfig } from "@/types/route-config";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
@@ -18,7 +18,7 @@ import {
 	DASHBOARD_MANAGEMENT_SUB_ROUTES,
 } from "@/features/dashboard/_constants/dashboard-routes";
 import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/ui/lib/utils";
 
 type LinkProps = {
 	title: string;

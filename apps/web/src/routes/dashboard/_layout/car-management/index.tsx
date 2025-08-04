@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { CarFeatures } from "@/features/dashboard/_pages/car-management/_components/car-features";
 import { CarsList } from "@/features/dashboard/_pages/car-management/_components/cars-list";

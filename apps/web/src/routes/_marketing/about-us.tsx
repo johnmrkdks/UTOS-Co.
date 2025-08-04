@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_marketing/about-us")({
 
 function RouteComponent() {
 	return (
-		<main className="text-center w-10/12 mx-auto p-4">
-			<About className="" />
+		<main>
+			<About />
 		</main>
 	);
 }

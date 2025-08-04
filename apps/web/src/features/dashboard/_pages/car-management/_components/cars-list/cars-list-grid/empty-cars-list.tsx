@@ -1,5 +1,5 @@
 import { CarIcon, SearchIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@workspace/ui/components/button"
 import { useRouter } from "@tanstack/react-router";
 
 export function EmptyCarsList() {

@@ -1,9 +1,9 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
+import { Input } from "@workspace/ui/components/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
 import type { UseFormReturn, FieldValues, Path } from "react-hook-form"
 import type { ReactNode } from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "@workspace/ui/lib/utils"
 
 interface TextInputFieldProps<T extends FieldValues> {
 	form: UseFormReturn<T>

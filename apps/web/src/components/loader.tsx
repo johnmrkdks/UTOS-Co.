@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/ui/lib/utils";
 import { Loader2Icon } from "lucide-react";
 
 type LoaderProps = React.ComponentProps<"div">;

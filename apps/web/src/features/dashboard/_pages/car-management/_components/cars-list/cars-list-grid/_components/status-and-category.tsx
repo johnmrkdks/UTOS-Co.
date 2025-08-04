@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@workspace/ui/components/badge";
 import { CheckCircle, XCircle, AlertTriangle, Settings, Calendar } from "lucide-react";
 import type { Car } from "server/types";
 

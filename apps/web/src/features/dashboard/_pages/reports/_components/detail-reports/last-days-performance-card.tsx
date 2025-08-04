@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { cn } from "@workspace/ui/lib/utils";
 
 type LastDaysPerformanceCardProps = React.ComponentProps<"div">;
 

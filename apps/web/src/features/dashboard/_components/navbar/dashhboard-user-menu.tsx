@@ -1,6 +1,6 @@
 import { BoltIcon, BookOpenIcon, Layers2Icon, LogOutIcon, PinIcon, PenIcon as UserPenIcon } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
+import { Button } from "@workspace/ui/components/button"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -9,8 +9,8 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@workspace/ui/components/dropdown-menu"
+import { Skeleton } from "@workspace/ui/components/skeleton"
 import { getNameInitials } from "@/utils/format"
 import { useUserQuery } from "@/hooks/query/use-user-query"
 

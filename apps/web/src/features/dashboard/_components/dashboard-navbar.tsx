@@ -1,7 +1,7 @@
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { DashboardUserMenu } from "@/features/dashboard/_components/navbar/dashhboard-user-menu";
 import { NotificationMenu } from "@/features/dashboard/_components/navbar/notification-menu";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/ui/lib/utils";
 import { ModalProviders } from "@/features/dashboard/_providers/modal-providers";
 
 type DashboardNavbarProps = React.ComponentProps<"header">;

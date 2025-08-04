@@ -1,8 +1,8 @@
 import type { Control } from "react-hook-form"
 
-import { Checkbox } from "@/components/ui/checkbox"
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@workspace/ui/components/checkbox"
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
 import type { AddCarFormValues } from "../add-car-form"
 import { CarStatusEnum } from "server/types"
 

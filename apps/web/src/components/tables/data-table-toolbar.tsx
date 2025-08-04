@@ -1,7 +1,7 @@
 import type { Table } from "@tanstack/react-table"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
 import { DataTableViewOptions } from "./data-table-view-options"
 import { XIcon } from "lucide-react"
 

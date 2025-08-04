@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_marketing/")({
 
 function RouteComponent() {
 	return (
-		<main className="bg-[url(/src/assets/images/car1.png)] bg-center bg-cover bg-no-repeat">
-			<Home className="bg-white/60" />
+		<main>
+			<Home />
 		</main>
 	);
 }

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { BellIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
+} from "@workspace/ui/components/popover";
+import { Separator } from "@workspace/ui/components/separator";
 
 const initialNotifications = [
 	{

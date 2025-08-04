@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react"
 import { MapPin, Loader2 } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Input } from "@workspace/ui/components/input"
+import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { useGooglePlacesAutocomplete } from "../_hooks/use-google-places-autocomplete"
 
 interface PlaceResult {

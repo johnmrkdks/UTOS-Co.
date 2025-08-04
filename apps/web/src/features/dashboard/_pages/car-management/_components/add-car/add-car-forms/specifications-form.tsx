@@ -1,8 +1,8 @@
-import { SelectItem } from "@/components/ui/select"
+import { SelectItem } from "@workspace/ui/components/select"
 import type { Control } from "react-hook-form"
 import { useMemo, useState, memo } from "react"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
 import type { AddCarFormValues } from "../add-car-form"
 import { useGetCarBodyTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-body-type/use-get-car-body-types-query"
 import { useGetCarTransmissionTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-transmission-type/use-get-car-transmission-types-query"
@@ -10,12 +10,12 @@ import { useGetCarDriveTypesQuery } from "@/features/dashboard/_pages/car-manage
 import { useGetCarConditionTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-get-car-condition-types-query"
 import { useGetCarCategoriesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-category/use-get-car-categories-query"
 import { useGetCarModelsWithBrandQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-get-car-models-with-brand-query"
-import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command"
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@workspace/ui/components/command"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@workspace/ui/lib/utils"
 import { useGetCarFuelTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-fuel-type/use-get-car-fuel-types-query"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover"
+import { Button } from "@workspace/ui/components/button"
 
 type SpecificationsFormProps = {
 	control: Control<AddCarFormValues>

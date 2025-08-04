@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs"
 import { Brands } from "./car-features/brands"
 import { Models } from "./car-features/models"
 import { FuelTypes } from "./car-features/fuel-types"

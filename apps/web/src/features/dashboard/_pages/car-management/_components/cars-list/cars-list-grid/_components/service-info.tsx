@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Wrench } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Car as CarType } from "server/types";
 
 interface ServiceInfoProps {

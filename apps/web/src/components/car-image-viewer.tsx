@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@workspace/ui/components/button"
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
+import { Dialog, DialogContent } from "@workspace/ui/components/dialog"
+import { cn } from "@workspace/ui/lib/utils"
 import type { CarImage } from "server/types"
 
 type CarImageViewerProps = {

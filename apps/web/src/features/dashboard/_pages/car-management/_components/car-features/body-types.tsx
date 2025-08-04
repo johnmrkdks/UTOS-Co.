@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { AddBodyTypeDialog } from "./body-types/add-body-type-dialog";
 import { BodyTypeTableList } from "./body-types/body-type-table-list";
 

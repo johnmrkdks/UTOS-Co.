@@ -1,11 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
-	DialogFooter,
 	DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@workspace/ui/components/dialog";
 import { PlusIcon } from "lucide-react";
 import { AddNewPackageForm } from "./add-new-package-form";
 

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogContent,
@@ -6,7 +6,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "@/components/ui/dialog";
+} from "@workspace/ui/components/dialog";
 import {
 	Form,
 	FormControl,
@@ -15,16 +15,16 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { Textarea } from "@workspace/ui/components/textarea";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@workspace/ui/components/select";
 import { useCreatePackageBookingMutation } from "../_hooks/query/use-create-package-booking-mutation";
 import { useGetPackagesQuery } from "../_hooks/query/use-get-packages-query";
 import { useGetCarsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-get-cars-query";
@@ -35,9 +35,9 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@workspace/ui/lib/utils";
+import { Calendar } from "@workspace/ui/components/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
 
 const createPackageBookingSchema = z.object({
 	packageId: z.string().min(1, "Please select a package"),

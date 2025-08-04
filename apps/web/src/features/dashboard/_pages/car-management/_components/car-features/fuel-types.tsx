@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { AddFuelTypeDialog } from "./fuel-types/add-fuel-type-dialog";
 import { FuelTypeTableList } from "./fuel-types/fuel-type-table-list";
 

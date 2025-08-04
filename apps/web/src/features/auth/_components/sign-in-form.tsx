@@ -1,6 +1,6 @@
 import { Loader } from "@/components/loader";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { authClient } from "@/lib/auth-client";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "@tanstack/react-router";
@@ -13,8 +13,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
-import { InputPassword } from "@/components/input-password";
+} from "@workspace/ui/components/form";
+import { InputPassword } from "@workspace/ui/components/input-password";
 import { SignInWithOAuth } from "./sign-in-with-oauth";
 import { signInSchema } from "@/features/auth/_schemas/sign-in-schema";
 import { useSignInMutation } from "@/features/auth/_hooks/query/use-sign-in-mutation";

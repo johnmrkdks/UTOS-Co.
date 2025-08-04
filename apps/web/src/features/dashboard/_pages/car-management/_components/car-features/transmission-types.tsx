@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { AddTransmissionTypeDialog } from "./transmission-types/add-transmission-type-dialog";
 import { TransmissionTypeTableList } from "./transmission-types/transmission-type-table-list";
 
