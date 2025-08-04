@@ -58,11 +58,11 @@ const createPackageBookingSchema = z.object({
 type CreatePackageBookingForm = z.infer<typeof createPackageBookingSchema>;
 
 export function CreatePackageBookingDialog() {
-	const { 
-		isCreatePackageBookingDialogOpen, 
-		closeCreatePackageBookingDialog 
+	const {
+		isCreatePackageBookingDialogOpen,
+		closeCreatePackageBookingDialog
 	} = useBookingManagementModalProvider();
-	
+
 	const form = useForm<CreatePackageBookingForm>({
 		resolver: zodResolver(createPackageBookingSchema),
 		defaultValues: {
@@ -74,12 +74,10 @@ export function CreatePackageBookingDialog() {
 
 	// Fetch data for dropdowns
 	const packagesQuery = useGetPackagesQuery({
-		page: 1,
 		limit: 100,
 	});
-	
+
 	const carsQuery = useGetCarsQuery({
-		page: 1,
 		limit: 100,
 	});
 
@@ -287,10 +285,10 @@ export function CreatePackageBookingDialog() {
 									<FormItem>
 										<FormLabel>Number of Passengers</FormLabel>
 										<FormControl>
-											<Input 
-												type="number" 
-												min="1" 
-												max="8" 
+											<Input
+												type="number"
+												min="1"
+												max="8"
 												{...field}
 												onChange={(e) => field.onChange(Number(e.target.value))}
 											/>
@@ -308,7 +306,7 @@ export function CreatePackageBookingDialog() {
 								<FormItem>
 									<FormLabel>Special Requests (Optional)</FormLabel>
 									<FormControl>
-										<Textarea 
+										<Textarea
 											placeholder="Any special requests or notes..."
 											{...field}
 										/>

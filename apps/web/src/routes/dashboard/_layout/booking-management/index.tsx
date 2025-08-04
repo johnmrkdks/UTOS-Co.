@@ -26,13 +26,12 @@ function RouteComponent() {
 }
 
 function BookingManagementContent() {
-	const { 
-		openCreatePackageBookingDialog, 
-		openCreateCustomBookingDialog 
+	const {
+		openCreatePackageBookingDialog,
+		openCreateCustomBookingDialog
 	} = useBookingManagementModalProvider();
 
 	const bookingsQuery = useGetBookingsQuery({
-		page: 1,
 		limit: 10,
 	});
 

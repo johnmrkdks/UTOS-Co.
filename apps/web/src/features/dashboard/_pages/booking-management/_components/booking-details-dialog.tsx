@@ -21,12 +21,12 @@ import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booki
 import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { format } from "date-fns";
-import { 
-	User, 
-	Phone, 
-	Mail, 
-	MapPin, 
-	Clock, 
+import {
+	User,
+	Phone,
+	Mail,
+	MapPin,
+	Clock,
 	Car,
 	DollarSign,
 	Package,
@@ -47,12 +47,12 @@ const statusOptions = [
 ];
 
 export function BookingDetailsDialog() {
-	const { 
-		isBookingDetailsDialogOpen, 
+	const {
+		isBookingDetailsDialogOpen,
 		closeBookingDetailsDialog,
-		selectedBookingId 
+		selectedBookingId
 	} = useBookingManagementModalProvider();
-	
+
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
 
 	const bookingQuery = useGetBookingByIdQuery(
@@ -65,7 +65,7 @@ export function BookingDetailsDialog() {
 
 	const handleStatusUpdate = (newStatus: string) => {
 		if (!selectedBookingId || !newStatus) return;
-		
+
 		updateStatusMutation.mutate({
 			id: selectedBookingId,
 			status: newStatus as any,
@@ -73,7 +73,7 @@ export function BookingDetailsDialog() {
 	};
 
 	const booking = bookingQuery.data;
-	
+
 	if (!booking) return null;
 
 	return (
@@ -341,12 +341,12 @@ export function BookingDetailsDialog() {
 										<Separator />
 									</div>
 								)}
-								
+
 								<div className="flex justify-between font-medium">
 									<span>Quoted Amount</span>
 									<span>${(booking.quotedAmount / 100).toFixed(2)}</span>
 								</div>
-								
+
 								{booking.finalAmount && booking.finalAmount !== booking.quotedAmount && (
 									<div className="flex justify-between font-medium text-green-600">
 										<span>Final Amount</span>
