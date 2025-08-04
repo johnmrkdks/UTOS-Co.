@@ -1,46 +1,161 @@
 import { Link } from "@tanstack/react-router";
-
+import { useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/button";
 import { Logo } from "@/components/logo";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
 import { MARKETING_ROUTES } from "@/features/marketing/_constants/marketing-routes";
+import {
+	Phone,
+	Menu,
+	X,
+	Star,
+	Shield,
+	Clock,
+	FacebookIcon,
+	InstagramIcon,
+	MailIcon
+} from "lucide-react";
 
 type HeaderProps = {
 	className?: string;
 };
 
 export function MarketingNavbar({ className, ...props }: HeaderProps) {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 	return (
-		<div className={cn("bg-beige", className)} {...props}>
-			<div className="flex flex-row items-center justify-between p-4">
-				<Link to="/" className="flex items-center gap-2 font-medium">
-					<Logo />
-				</Link>
-				<nav className="flex gap-4 text-lg">
-					<NavLinks />
-				</nav>
-				<div className="flex items-center gap-2">
-					<MarketingUserMenu />
+		<div className={cn("bg-beige shadow-lg relative z-50", className)} {...props}>
+			{/* Top Contact Bar */}
+			<div className="hidden md:block bg-foreground border-b border-border">
+				<div className="container mx-auto px-6 py-2">
+					<div className="flex items-center justify-between text-sm">
+						<div className="flex items-center gap-6 text-beige">
+							<div className="flex items-center gap-2">
+								<Phone className="w-4 h-4 text-primary" />
+								<a href="tel:+61422693233" className="hover:text-primary transition-colors">
+									+61 422 693 233
+								</a>
+							</div>
+							<div className="flex items-center gap-2">
+								<MailIcon className="w-4 h-4 text-primary" />
+								<a href="mailto:syd@downunderchauffeurs.com" className="hover:text-primary transition-colors">
+									syd@downunderchauffeurs.com
+								</a>
+							</div>
+						</div>
+						<div className="hidden md:flex items-center gap-4 text-beige text-sm">
+							<div className="flex items-center gap-1">
+								<FacebookIcon className="w-4 h-4 fill-primary text-primary" />
+								<a href="https://www.facebook.com/380139225188224" target="_blank" rel="noopener noreferrer" >
+									Facebook
+								</a>
+							</div>
+							<div className="flex items-center gap-1">
+								<InstagramIcon className="w-4 h-4 text-primary" />
+								<a href="https://www.instagram.com/downunderchauffeurs" target="_blank" rel="noopener noreferrer">
+									Instagram
+								</a>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-			<hr />
+
+			{/* Main Navigation */}
+			<div className="container mx-auto px-6">
+				<div className="flex items-center justify-between py-4">
+					{/* Logo */}
+					<Link to="/" className="flex items-center gap-3 group">
+						<Logo />
+						<div className="hidden sm:block">
+							<h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+								Down Under Chauffeur
+							</h1>
+							<p className="text-xs text-muted-foreground -mt-1">
+								Sydney's Premier Luxury Service
+							</p>
+						</div>
+					</Link>
+
+					{/* Desktop Navigation */}
+					<nav className="hidden lg:flex items-center gap-8">
+						<NavLinks />
+					</nav>
+
+					{/* CTA & Mobile Menu */}
+					<div className="flex items-center gap-2 md:gap-8">
+						<div className="hidden lg:flex items-center gap-3">
+							<Link to="/booking">
+								<Button
+									size="sm"
+									variant="dark"
+									className="text-primary-foreground font-semibold"
+								>
+									Book Now
+								</Button>
+							</Link>
+						</div>
+
+						<MarketingUserMenu />
+
+						{/* Mobile menu button */}
+						<button
+							onClick={() => setIsMenuOpen(!isMenuOpen)}
+							className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
+						>
+							{isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+						</button>
+					</div>
+				</div>
+			</div>
+
+			{/* Mobile Navigation */}
+			{isMenuOpen && (
+				<div className="lg:hidden absolute top-full left-0 w-full bg-beige border-t border-border shadow-lg">
+					<div className="container mx-auto px-6 py-6">
+						<nav className="flex flex-col gap-4 mb-6">
+							<MobileNavLinks onClose={() => setIsMenuOpen(false)} />
+						</nav>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
 
 function NavLinks() {
-	const links = MARKETING_ROUTES.map(({ path, label }) => {
+	const links = MARKETING_ROUTES.filter(route => route.path !== '/').map(({ path, label }) => {
 		return (
 			<Link
 				key={path}
 				to={path}
 				activeProps={{ className: "text-primary" }}
-				className="text-sm font-semibold"
+				className="text-foreground hover:text-primary transition-colors font-medium relative group"
+			>
+				{label}
+				<div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+			</Link>
+		);
+	});
+
+	return <>{links}</>;
+}
+
+function MobileNavLinks({ onClose }: { onClose: () => void }) {
+	const links = MARKETING_ROUTES.filter(route => route.path !== '/').map(({ path, label }) => {
+		return (
+			<Link
+				key={path}
+				to={path}
+				onClick={onClose}
+				activeProps={{ className: "text-primary bg-primary/10" }}
+				className="text-foreground hover:text-primary hover:bg-primary/5 transition-all p-3 rounded-lg font-medium"
 			>
 				{label}
 			</Link>
 		);
 	});
 
-	return <div className="flex items-center gap-4">{links}</div>;
+	return <>{links}</>;
 }

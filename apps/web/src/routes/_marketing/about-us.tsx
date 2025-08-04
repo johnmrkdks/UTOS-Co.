@@ -1,4 +1,4 @@
-import { About } from "@/features/marketing/_pages/about/_components";
+import { AboutUs } from "@/features/marketing/_pages/about-us/_components";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_marketing/about-us")({
@@ -6,9 +6,5 @@ export const Route = createFileRoute("/_marketing/about-us")({
 });
 
 function RouteComponent() {
-	return (
-		<main>
-			<About />
-		</main>
-	);
+	return <AboutUs />;
 }

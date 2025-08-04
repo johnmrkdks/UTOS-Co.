@@ -88,14 +88,14 @@ export function InstantQuoteWidget() {
 					Get Instant Quote
 				</CardTitle>
 				<CardDescription>
-					Calculate your fare instantly for luxury chauffeur service across Australia
+					Calculate your fare instantly for luxury chauffeur service across Australia. Available Mon-Sun 00:00 – 23:45
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
 					<form onSubmit={(e) => e.preventDefault()} className="space-y-6">
 						{/* Trip Details */}
-						<div className="space-y-4">
+						<div className="space-y-8">
 							<FormField
 								control={form.control}
 								name="originAddress"
@@ -155,7 +155,7 @@ export function InstantQuoteWidget() {
 						</Button>
 
 						{!canCalculateQuote && (
-							<p className="text-sm text-muted-foreground text-center">
+							<p className="text-xs text-muted-foreground text-center">
 								* Regular Transfers Only - extras may apply
 							</p>
 						)}

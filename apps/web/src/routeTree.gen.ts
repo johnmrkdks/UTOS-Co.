@@ -14,7 +14,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
+import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
 import { Route as MarketingServicesRouteImport } from './routes/_marketing/services'
+import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { Route as MarketingFaqsRouteImport } from './routes/_marketing/faqs'
 import { Route as MarketingContactUsRouteImport } from './routes/_marketing/contact-us'
 import { Route as MarketingBookingRouteImport } from './routes/_marketing/booking'
@@ -54,9 +56,20 @@ const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => DashboardRoute,
 } as any)
+const MarketingTermsAndConditionsRoute =
+  MarketingTermsAndConditionsRouteImport.update({
+    id: '/terms-and-conditions',
+    path: '/terms-and-conditions',
+    getParentRoute: () => MarketingRoute,
+  } as any)
 const MarketingServicesRoute = MarketingServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => MarketingRoute,
 } as any)
 const MarketingFaqsRoute = MarketingFaqsRouteImport.update({
@@ -168,7 +181,9 @@ export interface FileRoutesByFullPath {
   '/booking': typeof MarketingBookingRoute
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
+  '/privacy': typeof MarketingPrivacyRoute
   '/services': typeof MarketingServicesRoute
+  '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
@@ -191,7 +206,9 @@ export interface FileRoutesByTo {
   '/booking': typeof MarketingBookingRoute
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
+  '/privacy': typeof MarketingPrivacyRoute
   '/services': typeof MarketingServicesRoute
+  '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/': typeof MarketingIndexRoute
   '/dashboard/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
@@ -215,7 +232,9 @@ export interface FileRoutesById {
   '/_marketing/booking': typeof MarketingBookingRoute
   '/_marketing/contact-us': typeof MarketingContactUsRoute
   '/_marketing/faqs': typeof MarketingFaqsRoute
+  '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/services': typeof MarketingServicesRoute
+  '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
@@ -241,7 +260,9 @@ export interface FileRouteTypes {
     | '/booking'
     | '/contact-us'
     | '/faqs'
+    | '/privacy'
     | '/services'
+    | '/terms-and-conditions'
     | '/dashboard'
     | '/'
     | '/dashboard/'
@@ -264,7 +285,9 @@ export interface FileRouteTypes {
     | '/booking'
     | '/contact-us'
     | '/faqs'
+    | '/privacy'
     | '/services'
+    | '/terms-and-conditions'
     | '/dashboard'
     | '/'
     | '/dashboard/car-management/add-car'
@@ -287,7 +310,9 @@ export interface FileRouteTypes {
     | '/_marketing/booking'
     | '/_marketing/contact-us'
     | '/_marketing/faqs'
+    | '/_marketing/privacy'
     | '/_marketing/services'
+    | '/_marketing/terms-and-conditions'
     | '/dashboard'
     | '/dashboard/_layout'
     | '/_marketing/'
@@ -342,11 +367,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_marketing/terms-and-conditions': {
+      id: '/_marketing/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof MarketingTermsAndConditionsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/services': {
       id: '/_marketing/services'
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof MarketingServicesRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/privacy': {
+      id: '/_marketing/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof MarketingPrivacyRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/faqs': {
@@ -483,7 +522,9 @@ interface MarketingRouteChildren {
   MarketingBookingRoute: typeof MarketingBookingRoute
   MarketingContactUsRoute: typeof MarketingContactUsRoute
   MarketingFaqsRoute: typeof MarketingFaqsRoute
+  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
   MarketingServicesRoute: typeof MarketingServicesRoute
+  MarketingTermsAndConditionsRoute: typeof MarketingTermsAndConditionsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
 
@@ -492,7 +533,9 @@ const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingBookingRoute: MarketingBookingRoute,
   MarketingContactUsRoute: MarketingContactUsRoute,
   MarketingFaqsRoute: MarketingFaqsRoute,
+  MarketingPrivacyRoute: MarketingPrivacyRoute,
   MarketingServicesRoute: MarketingServicesRoute,
+  MarketingTermsAndConditionsRoute: MarketingTermsAndConditionsRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
 

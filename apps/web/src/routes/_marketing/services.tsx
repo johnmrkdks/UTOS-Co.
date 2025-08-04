@@ -6,9 +6,5 @@ export const Route = createFileRoute('/_marketing/services')({
 })
 
 function RouteComponent() {
-  return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Services />
-    </main>
-  )
+  return <Services />
 }

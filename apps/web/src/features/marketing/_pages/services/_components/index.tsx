@@ -1,13 +1,13 @@
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { 
-	Plane, 
-	Building, 
-	MapPin, 
-	Users, 
-	Star, 
-	Clock, 
+import {
+	Plane,
+	Building,
+	MapPin,
+	Users,
+	Star,
+	Clock,
 	Shield,
 	Car,
 	Sparkles,
@@ -94,24 +94,24 @@ export function Services({ className, ...props }: ServicesProps) {
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Hero Section */}
-			<div className="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-amber-900">
-				<div className="absolute inset-0 bg-black/20" />
+			<div className="relative py-24 bg-gradient-to-br from-foreground to-primary bg-[url('/src/assets/images/car3.jpeg')] bg-center bg-cover bg-no-repeat">
+				<div className="absolute inset-0 bg-foreground/70" />
 				<div className="relative z-10 container mx-auto px-6 text-center">
 					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-amber-100 text-amber-800 rounded-full text-sm font-medium mb-6">
+						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-sm font-medium mb-6">
 							<Sparkles className="w-4 h-4 mr-2" />
 							Premium Transportation Services
 						</div>
-						
-						<h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
+
+						<h1 className="text-5xl lg:text-6xl font-bold text-beige mb-6">
 							Luxury Transportation
-							<span className="block text-transparent bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text">
+							<span className="block text-primary">
 								Tailored for You
 							</span>
 						</h1>
-						
-						<p className="text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto mb-8">
-							From airport transfers to special events, our comprehensive range of services 
+
+						<p className="text-xl text-beige/80 leading-relaxed max-w-3xl mx-auto mb-8">
+							From airport transfers to special events, our comprehensive range of services
 							ensures you travel in comfort, style, and punctuality every time.
 						</p>
 
@@ -119,7 +119,7 @@ export function Services({ className, ...props }: ServicesProps) {
 							<Link to="/booking">
 								<Button
 									size="lg"
-									className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-8 py-6 text-lg font-semibold rounded-xl"
+									className="bg-primary text-beige hover:bg-soft-beige px-8 py-6 text-lg font-semibold rounded-xl"
 								>
 									Book Now
 								</Button>
@@ -128,7 +128,7 @@ export function Services({ className, ...props }: ServicesProps) {
 								<Button
 									variant="outline"
 									size="lg"
-									className="border-white/20 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl"
+									className="border-white/20 text-foreground hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl"
 								>
 									Get Quote
 								</Button>
@@ -139,65 +139,65 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* Services Grid */}
-			<div className="py-24 bg-white">
+			<div className="py-24 bg-background">
 				<div className="container mx-auto px-6">
 					<div className="text-center mb-16">
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">
+						<h2 className="text-4xl font-bold text-foreground mb-4">
 							Our Premium Services
 						</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
-							Choose from our comprehensive range of luxury transportation services, 
+						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+							Choose from our comprehensive range of luxury transportation services,
 							each designed to exceed your expectations.
 						</p>
 					</div>
-					
+
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{services.map((service, index) => (
-							<div 
+							<div
 								key={service.title}
 								className={cn(
-									"relative bg-white border-2 rounded-2xl p-8 hover:border-amber-200 transition-all duration-300 group hover:shadow-xl",
-									service.popular ? "border-amber-300 shadow-lg" : "border-gray-200"
+									"relative bg-card border-2 rounded-2xl p-8 hover:border-primary/30 transition-all duration-300 group hover:shadow-xl",
+									service.popular ? "border-primary shadow-lg" : "border-border"
 								)}
 							>
 								{service.popular && (
-									<div className="absolute -top-3 left-6 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-4 py-1 rounded-full text-sm font-semibold">
+									<div className="absolute -top-3 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
 										Most Popular
 									</div>
 								)}
-								
+
 								<div className="flex items-center mb-6">
-									<div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
-										<service.icon className="w-7 h-7 text-amber-600" />
+									<div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+										<service.icon className="w-7 h-7 text-primary" />
 									</div>
 									<div>
-										<h3 className="text-xl font-bold text-gray-900 mb-1">
+										<h3 className="text-xl font-bold text-card-foreground mb-1">
 											{service.title}
 										</h3>
-										<div className="text-2xl font-bold text-amber-600">
+										<div className="text-2xl font-bold text-primary">
 											{service.price}
 										</div>
 									</div>
 								</div>
-								
-								<p className="text-gray-600 mb-6 leading-relaxed">
+
+								<p className="text-muted-foreground mb-6 leading-relaxed">
 									{service.description}
 								</p>
-								
+
 								<ul className="space-y-3 mb-8">
 									{service.features.map((feature, featureIndex) => (
-										<li key={featureIndex} className="flex items-center text-gray-700">
-											<div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3">
-												<div className="w-2 h-2 bg-green-600 rounded-full" />
+										<li key={featureIndex} className="flex items-center text-muted-foreground">
+											<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+												<div className="w-2 h-2 bg-primary rounded-full" />
 											</div>
 											{feature}
 										</li>
 									))}
 								</ul>
-								
+
 								<Link to="/booking">
-									<Button 
-										className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-semibold rounded-xl transition-all duration-300"
+									<Button
+										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300"
 									>
 										Book This Service
 									</Button>
@@ -209,40 +209,40 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* Fleet Showcase */}
-			<div className="py-24 bg-gray-50">
+			<div className="py-24 bg-beige">
 				<div className="container mx-auto px-6">
 					<div className="text-center mb-16">
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">
+						<h2 className="text-4xl font-bold text-foreground mb-4">
 							Our Premium Fleet
 						</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
-							Experience luxury and comfort with our meticulously maintained fleet 
+						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+							Experience luxury and comfort with our meticulously maintained fleet
 							of premium vehicles, each equipped with modern amenities.
 						</p>
 					</div>
-					
+
 					<div className="grid md:grid-cols-3 gap-8">
 						{fleetHighlights.map((vehicle, index) => (
-							<div 
+							<div
 								key={vehicle.name}
-								className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
+								className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group border border-border"
 							>
-								<div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-									<Car className="w-16 h-16 text-gray-400" />
+								<div className="h-48 bg-muted flex items-center justify-center">
+									<Car className="w-16 h-16 text-muted-foreground" />
 								</div>
-								
+
 								<div className="p-6">
 									<div className="flex justify-between items-start mb-3">
 										<div>
-											<h3 className="text-xl font-bold text-gray-900">
+											<h3 className="text-xl font-bold text-card-foreground">
 												{vehicle.name}
 											</h3>
-											<p className="text-amber-600 font-semibold">
+											<p className="text-primary font-semibold">
 												{vehicle.type}
 											</p>
 										</div>
 										<div className="text-right">
-											<div className="flex items-center text-gray-600">
+											<div className="flex items-center text-muted-foreground">
 												<Users className="w-4 h-4 mr-1" />
 												{vehicle.passengers}
 											</div>
@@ -256,18 +256,18 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* Why Choose Us */}
-			<div className="py-24 bg-white">
+			<div className="py-24 bg-background">
 				<div className="container mx-auto px-6">
 					<div className="grid lg:grid-cols-2 gap-16 items-center">
 						<div>
-							<h2 className="text-4xl font-bold text-gray-900 mb-6">
+							<h2 className="text-4xl font-bold text-foreground mb-6">
 								Why Choose Down Under Chauffeur?
 							</h2>
-							<p className="text-xl text-gray-600 mb-8 leading-relaxed">
-								We're not just a transportation service – we're your partners in creating 
+							<p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+								We're not just a transportation service – we're your partners in creating
 								exceptional travel experiences that reflect your style and priorities.
 							</p>
-							
+
 							<div className="space-y-6">
 								{[
 									{
@@ -287,14 +287,14 @@ export function Services({ className, ...props }: ServicesProps) {
 									}
 								].map((benefit, index) => (
 									<div key={benefit.title} className="flex items-start">
-										<div className="w-12 h-12 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex items-center justify-center mr-4 mt-1">
-											<benefit.icon className="w-6 h-6 text-amber-600" />
+										<div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4 mt-1">
+											<benefit.icon className="w-6 h-6 text-primary" />
 										</div>
 										<div>
-											<h3 className="text-lg font-bold text-gray-900 mb-2">
+											<h3 className="text-lg font-bold text-foreground mb-2">
 												{benefit.title}
 											</h3>
-											<p className="text-gray-600 leading-relaxed">
+											<p className="text-muted-foreground leading-relaxed">
 												{benefit.description}
 											</p>
 										</div>
@@ -302,13 +302,13 @@ export function Services({ className, ...props }: ServicesProps) {
 								))}
 							</div>
 						</div>
-						
+
 						<div className="relative">
-							<div className="aspect-square bg-gradient-to-br from-amber-100 to-amber-200 rounded-3xl flex items-center justify-center">
-								<Car className="w-32 h-32 text-amber-600" />
+							<div className="aspect-square bg-primary/10 rounded-3xl flex items-center justify-center">
+								<Car className="w-32 h-32 text-primary" />
 							</div>
-							<div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center">
-								<Sparkles className="w-8 h-8 text-gray-600" />
+							<div className="absolute -bottom-6 -right-6 w-24 h-24 bg-muted rounded-2xl flex items-center justify-center">
+								<Sparkles className="w-8 h-8 text-muted-foreground" />
 							</div>
 						</div>
 					</div>
@@ -316,22 +316,22 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* CTA Section */}
-			<div className="py-24 bg-gradient-to-br from-amber-600 to-amber-800">
+			<div className="py-24 bg-primary">
 				<div className="container mx-auto px-6 text-center">
 					<div className="max-w-3xl mx-auto">
 						<h2 className="text-4xl font-bold text-white mb-6">
 							Ready to Experience Luxury Transportation?
 						</h2>
-						<p className="text-xl text-amber-100 mb-8 leading-relaxed">
-							Book your premium chauffeur service today and discover why discerning 
+						<p className="text-xl text-white/80 mb-8 leading-relaxed">
+							Book your premium chauffeur service today and discover why discerning
 							clients choose Down Under Chauffeur for their transportation needs.
 						</p>
-						
+
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<Link to="/booking">
 								<Button
 									size="lg"
-									className="bg-white text-amber-700 hover:bg-gray-100 px-8 py-6 text-lg font-semibold rounded-xl"
+									className="bg-white text-primary hover:bg-beige px-8 py-6 text-lg font-semibold rounded-xl"
 								>
 									Book Your Journey
 								</Button>
@@ -340,7 +340,7 @@ export function Services({ className, ...props }: ServicesProps) {
 								<Button
 									variant="outline"
 									size="lg"
-									className="border-white/20 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl"
+									className="border-white/20 text-primary hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl"
 								>
 									Contact Us
 								</Button>

@@ -6,9 +6,5 @@ export const Route = createFileRoute("/_marketing/")({
 });
 
 function RouteComponent() {
-	return (
-		<main>
-			<Home />
-		</main>
-	);
+	return <Home />;
 }

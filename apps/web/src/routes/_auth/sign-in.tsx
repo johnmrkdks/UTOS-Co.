@@ -3,6 +3,7 @@ import { Logo } from "@/components/logo";
 import { SignInForm } from "@/features/auth/_components/sign-in-form";
 import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Car, Shield, Star, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_auth/sign-in")({
 	component: RouteComponent,
@@ -11,30 +12,79 @@ export const Route = createFileRoute("/_auth/sign-in")({
 function RouteComponent() {
 	return (
 		<div className="grid min-h-screen lg:grid-cols-2">
-			<div className="bg-beige flex flex-col gap-4 p-6 md:p-10">
-				<div className="flex justify-between gap-2">
-					<Link to="/" className="flex items-center gap-2 font-medium">
+			{/* Left Panel - Sign In Form */}
+			<div className="bg-beige flex flex-col gap-8 p-6 md:p-10">
+				{/* Header */}
+				<div className="flex justify-between items-center">
+					<Link to="/" className="flex items-center gap-3 font-medium group">
 						<Logo />
+						<div>
+							<h2 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+								Down Under Chauffeur
+							</h2>
+							<p className="text-xs text-muted-foreground">
+								Sydney's Premier Luxury Service
+							</p>
+						</div>
 					</Link>
-					<div className="text-center text-sm">
+					<div className="text-center text-sm text-muted-foreground">
 						Don&apos;t have an account?{" "}
-						<Link to="/sign-up" className="text-primary font-medium">
+						<Link to="/sign-up" className="text-primary font-semibold hover:text-primary/80 transition-colors">
 							Sign up
 						</Link>
 					</div>
 				</div>
-				<div className="flex flex-1 items-center justify-center">
-					<div className="w-full max-w-xs">
-						<SignInForm />
+
+				{/* Welcome Section */}
+				<div className="text-center space-y-4">
+					<div className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+						<Car className="w-4 h-4 mr-2" />
+						Welcome Back
+					</div>
+					<h1 className="text-3xl font-bold text-foreground">
+						Sign in to your account
+					</h1>
+					<p className="text-muted-foreground">
+						Access your luxury chauffeur bookings and account preferences
+					</p>
+				</div>
+
+				{/* Form Section */}
+				<div className="flex flex-1 items-start justify-center">
+					<div className="w-full max-w-md">
+						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border">
+							<SignInForm />
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<div className="bg-muted relative hidden lg:block">
-				<div className="absolute top-4 left-4 text-black text-lg font-bold z-10">
-					Down Under Chauffeurs
+			{/* Right Panel - Image */}
+			<div className="bg-gradient-to-br from-foreground to-primary/20 relative hidden lg:block">
+				<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+				<div className="absolute top-8 left-8 text-beige z-10">
+					<h3 className="text-2xl font-bold mb-2">Down Under Chauffeur</h3>
+					<p className="text-beige/80 text-sm">Sydney's Premier Luxury Transportation</p>
 				</div>
-				<SydneyImageCover className="absolute inset-0 h-full w-full object-cover" />
+				<SydneyImageCover className="absolute inset-0 h-full w-full object-cover opacity-60" />
+
+				{/* Bottom testimonial */}
+				<div className="absolute bottom-8 left-8 right-8 text-beige z-10">
+					<div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+						<div className="flex items-center gap-1 mb-3">
+							{[...Array(5)].map((_, i) => (
+								<Star key={i} className="w-4 h-4 fill-primary text-primary" />
+							))}
+						</div>
+						<p className="text-sm leading-relaxed mb-3">
+							"Exceptional service and luxury vehicles. The professional chauffeurs
+							make every journey a premium experience."
+						</p>
+						<p className="text-xs text-beige/70 font-medium">
+							— Sarah M., Corporate Client
+						</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

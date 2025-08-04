@@ -21,19 +21,19 @@ export function MarketingUserMenu() {
 
 	if (!session) {
 		return (
-			<>
-				<Button size="lg" className="rounded-xl shadow-none" asChild>
-					<Link to="/sign-up">Sign Up</Link>
-				</Button>
+			<div className="flex items-center gap-2">
 				<Button
-					variant="secondary"
-					size="lg"
-					className="rounded-xl shadow-none bg-background"
+					variant="outline"
+					size="sm"
+					className="shadow-none"
 					asChild
 				>
 					<Link to="/sign-in">Sign In</Link>
 				</Button>
-			</>
+				<Button size="sm" className="shadow-none" asChild>
+					<Link to="/sign-up">Sign Up</Link>
+				</Button>
+			</div>
 		);
 	}
 
