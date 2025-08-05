@@ -111,7 +111,7 @@ export function InstantQuoteWidget() {
 												value={field.value || ""}
 												onChange={field.onChange}
 												placeholder="Enter pickup location in Australia..."
-												className="text-xs md:text-sm"
+												className="text-xs md:text-sm bg-background"
 											/>
 										</FormControl>
 										<FormMessage />
@@ -133,7 +133,7 @@ export function InstantQuoteWidget() {
 												value={field.value || ""}
 												onChange={field.onChange}
 												placeholder="Enter destination in Australia..."
-												className="text-xs md:text-sm"
+												className="text-xs md:text-sm bg-background"
 											/>
 										</FormControl>
 										<FormMessage />

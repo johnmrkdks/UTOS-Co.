@@ -29,7 +29,7 @@ body {
 :root {
 	--radius: 0.625rem;
 	--background: oklch(1 0 0);
-	--foreground: oklch(0.15 0 0); /* Dark text */
+	--foreground: oklch(0.235 0 0); /* Dark text */
 	--beige: oklch(0.9404 0.0446 107.23); /* Beige background */
 	--soft-beige: oklch(0.9726 0.0132 111.27);
 	--card: oklch(0.98 0.01 85); /* Slightly lighter beige for cards */
