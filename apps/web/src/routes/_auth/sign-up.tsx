@@ -18,7 +18,7 @@ function RouteComponent() {
 				<div className="flex justify-between items-center">
 					<Link to="/" className="flex items-center gap-3 font-medium group">
 						<Logo />
-						<div>
+						<div className="hidden md:block">
 							<h2 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
 								Down Under Chauffeur
 							</h2>
@@ -27,7 +27,7 @@ function RouteComponent() {
 							</p>
 						</div>
 					</Link>
-					<div className="text-center text-sm text-muted-foreground">
+					<div className="text-center text-xs md:text-sm text-muted-foreground">
 						Already have an account?{" "}
 						<Link to="/sign-in" className="text-primary font-semibold hover:text-primary/80 transition-colors">
 							Sign in
@@ -37,14 +37,14 @@ function RouteComponent() {
 
 				{/* Welcome Section */}
 				<div className="text-center space-y-4">
-					<div className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+					<div className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-xs md:text-sm font-medium">
 						<Users className="w-4 h-4 mr-2" />
 						Join Our Premium Service
 					</div>
-					<h1 className="text-3xl font-bold text-foreground">
+					<h1 className="text-2xl md:text-3xl font-bold text-foreground">
 						Create your account
 					</h1>
-					<p className="text-muted-foreground">
+					<p className="text-sm md:text-base text-muted-foreground">
 						Join thousands of satisfied clients who trust us for luxury transportation
 					</p>
 				</div>
@@ -52,9 +52,17 @@ function RouteComponent() {
 				{/* Form Section */}
 				<div className="flex flex-1 items-start justify-center">
 					<div className="w-full max-w-md">
-						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border">
-							<SignUpForm />
-						</div>
+						<SignUpForm className="bg-card p-6 md:p-8 rounded-lg border border-border" />
+					</div>
+				</div>
+
+				{/* Footer */}
+				<div className="text-center text-xs text-muted-foreground border-t border-border/30 pt-4">
+					<p>© 2024 Down Under Chauffeur. Premium luxury transportation in Sydney.</p>
+					<div className="flex justify-center gap-4 mt-2">
+						<Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
+						<Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms</Link>
+						<Link to="/contact-us" className="hover:text-primary transition-colors">Support</Link>
 					</div>
 				</div>
 			</div>
@@ -74,15 +82,15 @@ function RouteComponent() {
 						<h4 className="text-lg font-bold mb-4">Join Our Premium Community</h4>
 						<div className="grid grid-cols-3 gap-4 text-center">
 							<div>
-								<div className="text-2xl font-bold text-primary">1000+</div>
+								<div className="text-2xl font-bold text-primary-secondary">1000+</div>
 								<div className="text-xs text-beige/70">Happy Clients</div>
 							</div>
 							<div>
-								<div className="text-2xl font-bold text-primary">5.0</div>
+								<div className="text-2xl font-bold text-primary-secondary">5.0</div>
 								<div className="text-xs text-beige/70">Star Rating</div>
 							</div>
 							<div>
-								<div className="text-2xl font-bold text-primary">15+</div>
+								<div className="text-2xl font-bold text-primary-secondary">15+</div>
 								<div className="text-xs text-beige/70">Luxury Vehicles</div>
 							</div>
 						</div>

@@ -18,10 +18,15 @@ import {
 import { SignUpWithOAuth } from "./sign-up-with-oauth";
 import { InputPassword } from "@workspace/ui/components/input-password";
 import { useSignUpMutation } from "@/features/auth/_hooks/query/use-sign-up-mutation";
+import { cn } from "@workspace/ui/lib/utils";
+
+type SignUpFromProps = {
+	className?: string;
+};
 
 type FormValues = z.infer<typeof signUpSchema>;
 
-export default function SignUpForm() {
+export default function SignUpForm({ className, ...props }: SignUpFromProps) {
 	const navigate = useNavigate({
 		from: "/",
 	});
@@ -53,8 +58,8 @@ export default function SignUpForm() {
 	};
 
 	return (
-		<div className="flex flex-col gap-4 mx-auto w-full max-w-md">
-			<h1 className="text-center text-3xl font-bold">Sign Up</h1>
+		<div className={cn("flex flex-col gap-4 mx-auto w-full max-w-md", className)} {...props}>
+			<h1 className="text-center text-2xl md:text-3xl font-bold">Sign Up</h1>
 
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -67,7 +72,7 @@ export default function SignUpForm() {
 									<FormControl>
 										<Input
 											{...field}
-											className="bg-background"
+											className="bg-background text-xs md:text-sm"
 											placeholder="Enter your name..."
 										/>
 									</FormControl>
@@ -86,7 +91,7 @@ export default function SignUpForm() {
 									<FormControl>
 										<Input
 											{...field}
-											className="bg-background"
+											className="bg-background text-xs md:text-sm"
 											placeholder="Enter your email..."
 										/>
 									</FormControl>
@@ -105,7 +110,7 @@ export default function SignUpForm() {
 									<FormControl>
 										<InputPassword
 											{...field}
-											className="bg-background"
+											className="bg-background text-xs md:text-sm"
 											placeholder="Enter your password..."
 										/>
 									</FormControl>

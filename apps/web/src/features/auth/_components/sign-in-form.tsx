@@ -18,10 +18,15 @@ import { InputPassword } from "@workspace/ui/components/input-password";
 import { SignInWithOAuth } from "./sign-in-with-oauth";
 import { signInSchema } from "@/features/auth/_schemas/sign-in-schema";
 import { useSignInMutation } from "@/features/auth/_hooks/query/use-sign-in-mutation";
+import { cn } from "@workspace/ui/lib/utils";
+
+type SignInFromProps = {
+	className?: string;
+};
 
 type FormValues = z.infer<typeof signInSchema>;
 
-export function SignInForm() {
+export function SignInForm({ className, ...props }: SignInFromProps) {
 	const navigate = useNavigate({
 		from: "/",
 	});
@@ -52,8 +57,8 @@ export function SignInForm() {
 	};
 
 	return (
-		<div className="flex flex-col gap-4 mx-auto w-full max-w-md">
-			<h1 className="text-center text-3xl font-bold">Sign In</h1>
+		<div className={cn("flex flex-col gap-4 mx-auto w-full max-w-md", className)} {...props}>
+			<h1 className="text-center text-2xl md:text-3xl font-bold">Sign In</h1>
 
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -61,12 +66,12 @@ export function SignInForm() {
 						<FormField
 							name="email"
 							render={({ field }) => (
-								<FormItem className="space-y-2">
+								<FormItem>
 									<FormLabel>Email</FormLabel>
 									<FormControl>
 										<Input
 											{...field}
-											className="bg-background"
+											className="bg-background text-xs md:text-sm"
 											placeholder="your@email.com"
 										/>
 									</FormControl>
@@ -80,10 +85,10 @@ export function SignInForm() {
 						<FormField
 							name="password"
 							render={({ field }) => (
-								<FormItem className="space-y-2">
+								<FormItem>
 									<FormLabel>Password</FormLabel>
 									<FormControl>
-										<InputPassword {...field} className="bg-background" />
+										<InputPassword {...field} className="bg-background text-xs md:text-sm" />
 									</FormControl>
 									<FormMessage />
 								</FormItem>

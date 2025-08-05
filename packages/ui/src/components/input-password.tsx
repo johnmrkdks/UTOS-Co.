@@ -14,11 +14,11 @@ export function InputPassword({
 	const toggleVisibility = () => setIsVisible((prevState) => !prevState);
 
 	return (
-		<div className={cn("*:not-first:mt-2 bg-transparent", className)}>
+		<div className="*:not-first:mt-2 bg-transparent">
 			<div className="relative">
 				<Input
 					id={id}
-					className="pe-9"
+					className={cn("pe-9", className)}
 					placeholder="Password"
 					type={isVisible ? "text" : "password"}
 					{...props}
