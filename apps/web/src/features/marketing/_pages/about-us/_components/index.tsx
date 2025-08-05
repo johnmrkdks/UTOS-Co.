@@ -66,19 +66,19 @@ const achievements = [
 
 const team = [
 	{
-		name: "Michael Chen",
+		name: "Name Here",
 		role: "Founder & CEO",
 		experience: "15+ years in luxury transportation",
 		description: "Passionate about delivering exceptional service and building lasting client relationships."
 	},
 	{
-		name: "Sarah Williams",
+		name: "Name Here",
 		role: "Operations Manager",
 		experience: "10+ years in hospitality",
 		description: "Ensures every detail of your journey is perfectly orchestrated for maximum comfort."
 	},
 	{
-		name: "David Thompson",
+		name: "Name Here",
 		role: "Head Chauffeur",
 		experience: "20+ years professional driving",
 		description: "Leads our team of chauffeurs with expertise in luxury service and Sydney navigation."
@@ -117,54 +117,70 @@ export function AboutUs({ className, ...props }: AboutProps) {
 				</div>
 			</div>
 
-			{/* Our Story */}
+			{/* About Down Under Chauffeurs */}
 			<div className="py-24 bg-beige">
 				<div className="container mx-auto px-6">
-					<div className="grid lg:grid-cols-2 gap-16 items-center">
-						<div>
-							<h2 className="text-4xl font-bold text-foreground mb-6">
-								Crafting Exceptional Journeys Since 2020
-							</h2>
-							<div className="space-y-6 text-muted-foreground leading-relaxed">
-								<p className="text-lg">
-									What began as a vision to transform luxury transportation in Sydney
-									has evolved into the city's most trusted chauffeur service. Founded by
-									industry veterans with over two decades of combined experience, Down Under
-									Chauffeur was born from a simple belief: every journey should be extraordinary.
-								</p>
-								<p>
-									We recognized that busy professionals, discerning travelers, and those
-									celebrating life's special moments deserved more than just transportation –
-									they deserved an experience that reflected their values and elevated their day.
-								</p>
-								<p>
-									Today, we're proud to serve over 1000 satisfied clients, from CEOs and
-									celebrities to families celebrating milestones. Our commitment to excellence
-									has earned us a perfect 5-star rating and the trust of Sydney's most
-									discerning clientele.
-								</p>
-							</div>
+					<div className="text-center mb-16">
+						<h2 className="text-4xl font-bold text-foreground mb-4">
+							About Down Under Chauffeurs
+						</h2>
+					</div>
 
-							<div className="mt-8">
-								<Link to="/services">
-									<Button
-										size="lg"
-										className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-									>
-										Explore Our Services
-									</Button>
-								</Link>
+					<div className="grid lg:grid-cols-3 gap-12">
+						{/* Our History */}
+						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border">
+							<div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+								<Clock className="w-8 h-8 text-primary" />
+							</div>
+							<h3 className="text-2xl font-bold text-card-foreground mb-4">
+								Our History
+							</h3>
+							<div className="space-y-4 text-muted-foreground leading-relaxed">
+								<p>
+									Founded in 2020, downunderchauffeurs started as a small transportation service for local events. Over the years, we have expanded our services to include airport transportation and corporate travel.
+								</p>
+								<p className="font-medium text-primary">
+									Airport transfers Sydney luxury chauffeur service
+								</p>
 							</div>
 						</div>
 
-						<div className="relative">
-							<div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/20 rounded-3xl flex items-center justify-center border border-primary/20">
-								<Car className="w-32 h-32 text-primary" />
+						{/* Our Fleet */}
+						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border">
+							<div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+								<Car className="w-8 h-8 text-primary" />
 							</div>
-							<div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-beige to-soft-beige rounded-2xl flex items-center justify-center border border-border shadow-lg">
-								<Heart className="w-8 h-8 text-primary" />
-							</div>
+							<h3 className="text-2xl font-bold text-card-foreground mb-4">
+								Our Fleet
+							</h3>
+							<p className="text-muted-foreground leading-relaxed">
+								We have a diverse fleet of vehicles to meet your transportation needs, ranging from luxury sedans to spacious vans. Our vehicles are regularly maintained and kept clean for your comfort.
+							</p>
 						</div>
+
+						{/* Our Drivers */}
+						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border">
+							<div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+								<Users className="w-8 h-8 text-primary" />
+							</div>
+							<h3 className="text-2xl font-bold text-card-foreground mb-4">
+								Our Drivers
+							</h3>
+							<p className="text-muted-foreground leading-relaxed">
+								Our drivers are experienced and professional, ensuring that you arrive at your destination safely and on time. They undergo regular training and background checks to ensure your safety.
+							</p>
+						</div>
+					</div>
+
+					<div className="text-center mt-12">
+						<Link to="/services">
+							<Button
+								size="lg"
+								className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+							>
+								Explore Our Services
+							</Button>
+						</Link>
 					</div>
 				</div>
 			</div>

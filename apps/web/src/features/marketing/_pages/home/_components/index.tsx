@@ -52,7 +52,7 @@ export function Home({ className, ...props }: HomeProps) {
 								</div>
 
 								<h1 className="text-5xl lg:text-7xl font-bold leading-tight text-foreground">
-									Experience
+									Premium
 									<span className="block text-primary">
 										Luxury
 									</span>
