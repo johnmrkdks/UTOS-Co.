@@ -3,6 +3,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { InstantQuoteWidget } from "./instant-quote-widget";
 import { Star, Shield, Clock, Award } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type HomeProps = {
 	className?: string;
@@ -32,6 +33,8 @@ const features = [
 ];
 
 export function Home({ className, ...props }: HomeProps) {
+	const isMobile = useIsMobile();
+
 	return (
 		<div
 			{...props}
@@ -42,18 +45,22 @@ export function Home({ className, ...props }: HomeProps) {
 				{/* Overlay for better text readability */}
 				<div className="absolute inset-0 bg-foreground/70" />
 
-				<div className="relative z-10 container mx-auto px-6 py-20 min-h-[80vh] flex items-center">
+				<div className="relative z-10 container mx-auto px-6 py-10 md:py-20 min-h-[80vh] flex items-center">
 					<div className="grid grid-flow-row grid-cols-1 space-y-10 lg:grid-flow-col lg:grid-cols-3 lg:gap-16 items-center w-full">
 						{/* Left Column - Content */}
 						<div className="col-span-2 flex flex-col justify-center space-y-8">
 							<div className="space-y-6">
-								<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-sm font-medium">
-									🇦🇺 Sydney's Premier Chauffeur Service
+								<div className="inline-flex items-center px-4 py-1.5 bg-beige/10 backdrop-blur-xl border border-beige/20 text-beige rounded-full text-xs md:text-sm font-medium shadow-2xl hover:bg-beige/20 hover:shadow-amber-500/20 transition-all duration-500 group">
+									<span className="mr-2 text-base group-hover:scale-110 transition-transform duration-300">🇦🇺</span>
+									<span className="bg-gradient-to-r from-beige to-amber-100 bg-clip-text text-transparent font-semibold tracking-wide">
+										Sydney's Premier Chauffeur Service
+									</span>
+									<div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400/10 via-transparent to-amber-200/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 								</div>
 
-								<h1 className="text-4xl lg:text-7xl font-bold leading-tight text-beige">
+								<h1 className="text-4xl lg:text-7xl font-bold font-serif leading-tight text-beige">
 									Premium
-									<span className="block text-primary-secondary">
+									<span className="block text-primary-secondary italic">
 										Luxury
 									</span>
 									Transportation
@@ -68,8 +75,7 @@ export function Home({ className, ...props }: HomeProps) {
 							<div className="flex flex-col sm:flex-row gap-4">
 								<Link to="/booking">
 									<Button
-										size="lg"
-										className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+										className="bg-primary hover:bg-primary/90 text-primary-foreground px-4.5 py-5 text-base md:px-8 md:py-6 md:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
 									>
 										Book Your Journey
 									</Button>
@@ -77,8 +83,7 @@ export function Home({ className, ...props }: HomeProps) {
 								<Link to="/services">
 									<Button
 										variant="outline"
-										size="lg"
-										className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300"
+										className="border-background/20 text-primary hover:bg-background/10 px-4.5 py-5 text-base md:px-8 md:py-6 md:text-lg font-semibold rounded-xl transition-all duration-300"
 									>
 										View Services
 									</Button>

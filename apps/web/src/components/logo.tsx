@@ -10,7 +10,7 @@ export function Logo({ className }: LogoProps) {
 		<img
 			src={logo}
 			alt="Down Under Chauffeur Logo"
-			className={cn("rounded-xl h-12 w-20", className)}
+			className={cn("rounded-xl h-10 w-16 md:h-12 md:w-20", className)}
 		/>
 	);
 }

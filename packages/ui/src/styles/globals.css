@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
 @import "tailwindcss";
 @source "../../../apps/**/*.{ts,tsx}";
@@ -13,6 +14,7 @@
 	--font-sans:
 		"Inter", "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
 		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-serif: "Playfair Display", serif;
 }
 
 html,
@@ -35,7 +37,7 @@ body {
 	--popover: oklch(0.98 0.01 85);
 	--popover-foreground: oklch(0.15 0 0);
 	--primary: oklch(0.45 0.08 180); /* Teal green for buttons */
-	--primary-secondary: oklch(0.6 0.1011 180);
+	--primary-secondary: oklch(0.75 0.18 180);
 	--primary-foreground: oklch(0.98 0 0);
 	--secondary: oklch(0.92 0.03 85); /* Lighter beige */
 	--secondary-foreground: oklch(0.2 0 0);
