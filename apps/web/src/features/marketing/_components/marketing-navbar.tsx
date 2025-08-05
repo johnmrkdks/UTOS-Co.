@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Logo } from "@/components/logo";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
 import { MARKETING_ROUTES } from "@/features/marketing/_constants/marketing-routes";
+import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	Phone,
 	Menu,
@@ -33,28 +34,28 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 						<div className="flex items-center gap-6 text-beige">
 							<div className="flex items-center gap-2">
 								<Phone className="w-4 h-4 text-primary" />
-								<a href="tel:+61422693233" className="hover:text-primary transition-colors">
-									+61 422 693 233
+								<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors">
+									{CONTACT_INFO.phone.display}
 								</a>
 							</div>
 							<div className="flex items-center gap-2">
 								<MailIcon className="w-4 h-4 text-primary" />
-								<a href="mailto:syd@downunderchauffeurs.com" className="hover:text-primary transition-colors">
-									syd@downunderchauffeurs.com
+								<a href={CONTACT_INFO.email.link} className="hover:text-primary transition-colors">
+									{CONTACT_INFO.email.display}
 								</a>
 							</div>
 						</div>
 						<div className="hidden md:flex items-center gap-4 text-beige text-sm">
 							<div className="flex items-center gap-1">
 								<FacebookIcon className="w-4 h-4 fill-primary text-primary" />
-								<a href="https://www.facebook.com/380139225188224" target="_blank" rel="noopener noreferrer" >
-									Facebook
+								<a href={CONTACT_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" >
+									{CONTACT_INFO.social.facebook.label}
 								</a>
 							</div>
 							<div className="flex items-center gap-1">
 								<InstagramIcon className="w-4 h-4 text-primary" />
-								<a href="https://www.instagram.com/downunderchauffeurs" target="_blank" rel="noopener noreferrer">
-									Instagram
+								<a href={CONTACT_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer">
+									{CONTACT_INFO.social.instagram.label}
 								</a>
 							</div>
 						</div>
@@ -70,7 +71,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 						<Logo />
 						<div className="hidden sm:block">
 							<h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-								Down Under Chauffeur
+								{CONTACT_INFO.business.name}
 							</h1>
 							<p className="text-xs text-muted-foreground -mt-1">
 								Sydney's Premier Luxury Service

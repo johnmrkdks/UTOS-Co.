@@ -38,9 +38,9 @@ export function Home({ className, ...props }: HomeProps) {
 			className={cn("relative", className)}
 		>
 			{/* Hero Section */}
-			<div className="relative bg-[url(/src/assets/images/car1.png)] bg-center bg-cover bg-no-repeat min-h-[80vh]">
+			<div className="relative bg-[url(/src/assets/images/car1.png)] bg-center bg-cover bg-no-repeat min-h-[80vh] bg-gradient-to-r from-background/60 via-background/70 to-background/40">
 				{/* Overlay for better text readability */}
-				<div className="absolute inset-0 bg-gradient-to-r from-background/60 via-background/70 to-background/40" />
+				<div className="absolute inset-0 bg-foreground/70" />
 
 				<div className="relative z-10 container mx-auto px-6 py-20 min-h-[80vh] flex items-center">
 					<div className="grid grid-flow-row grid-cols-1 space-y-10 lg:grid-flow-col lg:grid-cols-3 lg:gap-16 items-center w-full">
@@ -51,15 +51,15 @@ export function Home({ className, ...props }: HomeProps) {
 									🇦🇺 Sydney's Premier Chauffeur Service
 								</div>
 
-								<h1 className="text-5xl lg:text-7xl font-bold leading-tight text-foreground">
+								<h1 className="text-4xl lg:text-7xl font-bold leading-tight text-beige">
 									Premium
-									<span className="block text-primary">
+									<span className="block text-primary-secondary">
 										Luxury
 									</span>
 									Transportation
 								</h1>
 
-								<p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+								<p className="text-base md:text-xl text-background/80 leading-relaxed max-w-lg">
 									Elevate your journey with Down Under Chauffeur. Professional drivers,
 									premium vehicles, and unparalleled service for discerning clients.
 								</p>
@@ -78,7 +78,7 @@ export function Home({ className, ...props }: HomeProps) {
 									<Button
 										variant="outline"
 										size="lg"
-										className="border-border text-foreground hover:bg-muted px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300"
+										className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300"
 									>
 										View Services
 									</Button>
@@ -87,16 +87,16 @@ export function Home({ className, ...props }: HomeProps) {
 
 							{/* Trust Indicators */}
 							<div className="flex items-center gap-6 pt-6">
-								<div className="flex items-center gap-2">
+								<div className="flex flex-col items-start md:flex-row md:items-center gap-2">
 									<div className="flex">
 										{[...Array(5)].map((_, i) => (
-											<Star key={i} className="w-5 h-5 fill-primary text-primary" />
+											<Star key={i} className="w-5 h-5 fill-primary-secondary text-primary-secondary" />
 										))}
 									</div>
-									<span className="text-sm font-medium text-muted-foreground">5.0 Rating</span>
+									<span className="text-sm font-medium text-background/70">5.0 Rating</span>
 								</div>
-								<div className="h-6 w-px bg-border" />
-								<div className="text-sm font-medium text-muted-foreground">1000+ Happy Clients</div>
+								<div className="h-6 w-px bg-background/30" />
+								<div className="text-sm font-medium text-background/70">1000+ Happy Clients</div>
 							</div>
 						</div>
 

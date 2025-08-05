@@ -1,6 +1,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
+import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	ChevronDown,
 	ChevronUp,
@@ -156,23 +157,23 @@ export function FAQs({ className, ...props }: FAQsProps) {
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Hero Section */}
-			<div className="relative py-24 bg-gradient-to-br from-foreground via-foreground/90 to-primary/20 bg-[url('/src/assets/images/car4.jpeg')] bg-center bg-cover bg-no-repeat">
-				<div className="absolute inset-0 bg-foreground/70" />
+			<div className="relative py-24 bg-[url('/src/assets/images/car4.jpeg')] bg-center bg-cover bg-no-repeat">
+				<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
 				<div className="relative z-10 container mx-auto px-6 text-center">
 					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-sm font-medium mb-6">
+						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-xs md:text-sm font-medium mb-6">
 							<HelpCircle className="w-4 h-4 mr-2" />
 							Frequently Asked Questions
 						</div>
 
-						<h1 className="text-5xl lg:text-6xl font-bold text-beige mb-6">
+						<h1 className="text-4xl lg:text-6xl font-bold text-background mb-6">
 							Got
-							<span className="block text-primary">
+							<span className="block text-primary-secondary">
 								Questions?
 							</span>
 						</h1>
 
-						<p className="text-xl text-beige/80 leading-relaxed max-w-3xl mx-auto mb-8">
+						<p className="text-lg md:text-xl text-background/80 leading-relaxed max-w-3xl mx-auto mb-8">
 							Find answers to the most common questions about our luxury chauffeur services.
 							Can't find what you're looking for? Our team is here to help.
 						</p>
@@ -186,11 +187,11 @@ export function FAQs({ className, ...props }: FAQsProps) {
 									Contact Support
 								</Button>
 							</Link>
-							<a href="tel:+61298765432">
+							<a href={CONTACT_INFO.phone.link}>
 								<Button
 									variant="outline"
 									size="lg"
-									className="border-beige/20 text-foreground hover:bg-beige/10 px-8 py-6 text-lg font-semibold rounded-xl"
+									className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl"
 								>
 									Call Now
 								</Button>
@@ -251,8 +252,8 @@ export function FAQs({ className, ...props }: FAQsProps) {
 								icon: Phone,
 								title: "Call Us",
 								description: "Speak with our team 24/7",
-								action: "tel:+61298765432",
-								label: "+61 2 9876 5432"
+								action: CONTACT_INFO.phone.link,
+								label: CONTACT_INFO.phone.display
 							},
 							{
 								icon: MapPin,

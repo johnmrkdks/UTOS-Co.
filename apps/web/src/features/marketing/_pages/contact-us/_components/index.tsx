@@ -3,6 +3,7 @@ import { ContactUsForm } from "./contact-us-form";
 import { ContactUsMap } from "./map";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
+import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	Phone,
 	Mail,
@@ -20,16 +21,16 @@ const contactMethods = [
 		icon: Phone,
 		title: "Call Us",
 		description: "Speak directly with our team",
-		contact: "+61 2 9876 5432",
-		action: "tel:+61298765432",
+		contact: CONTACT_INFO.phone.display,
+		action: CONTACT_INFO.phone.link,
 		available: "00:00 – 23:45"
 	},
 	{
 		icon: Mail,
 		title: "Email Us",
 		description: "Send us a detailed message",
-		contact: "syd@downunderchauffeurs.com",
-		action: "mailto:syd@downunderchauffeurs.com",
+		contact: CONTACT_INFO.email.display,
+		action: CONTACT_INFO.email.link,
 		available: "24 hours response"
 	},
 ];
@@ -60,29 +61,29 @@ export function ContactUs({ className, ...props }: ContactUsProps) {
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Hero Section */}
-			<div className="relative py-24 bg-gradient-to-br from-foreground via-foreground/90 to-primary/20 bg-[url('/src/assets/images/sydney.webp')] bg-center bg-cover bg-no-repeat">
-				<div className="absolute inset-0 bg-foreground/70" />
+			<div className="relative py-24 bg-[url('/src/assets/images/sydney.webp')] bg-center bg-cover bg-no-repeat">
+				<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
 				<div className="relative z-10 container mx-auto px-6 text-center">
 					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-sm font-medium mb-6">
+						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-xs md:text-sm font-medium mb-6">
 							<Phone className="w-4 h-4 mr-2" />
 							Get in Touch
 						</div>
 
-						<h1 className="text-5xl lg:text-6xl font-bold text-beige mb-6">
+						<h1 className="text-4xl lg:text-6xl font-bold text-background mb-6">
 							Contact Our
-							<span className="block text-primary">
+							<span className="block text-primary-secondary">
 								Luxury Team
 							</span>
 						</h1>
 
-						<p className="text-xl text-beige/80 leading-relaxed max-w-3xl mx-auto mb-8">
+						<p className="text-lg md:text-xl text-background/80 leading-relaxed max-w-3xl mx-auto mb-8">
 							Ready to experience premium transportation? Our dedicated team is here to assist
 							you daily from 00:00 – 23:45 with personalized service and expert guidance.
 						</p>
 
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<a href="tel:+61298765432">
+							<a href={CONTACT_INFO.phone.link}>
 								<Button
 									size="lg"
 									className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -94,7 +95,7 @@ export function ContactUs({ className, ...props }: ContactUsProps) {
 								<Button
 									variant="outline"
 									size="lg"
-									className="border-beige/20 text-foreground hover:bg-beige/10 px-8 py-6 text-lg font-semibold rounded-xl"
+									className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl"
 								>
 									Book Online
 								</Button>

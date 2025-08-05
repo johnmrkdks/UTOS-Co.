@@ -87,9 +87,10 @@ export function InstantQuoteWidget() {
 					<Calculator className="h-6 w-6 text-primary" />
 					Get Instant Quote
 				</CardTitle>
-				<CardDescription>
-					Calculate your fare instantly for luxury chauffeur service across Australia. Available Mon-Sun 00:00 – 23:45
-				</CardDescription>
+				<div className="flex flex-col gap-2 text-xs md:text-sm ">
+					<p>Calculate your fare instantly for luxury chauffeur service across Australia.</p>
+					<span className="font-semibold">Available Mon-Sun 00:00 – 23:45</span>
+				</div>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -110,7 +111,7 @@ export function InstantQuoteWidget() {
 												value={field.value || ""}
 												onChange={field.onChange}
 												placeholder="Enter pickup location in Australia..."
-												className="text-base"
+												className="text-xs md:text-sm"
 											/>
 										</FormControl>
 										<FormMessage />
@@ -132,7 +133,7 @@ export function InstantQuoteWidget() {
 												value={field.value || ""}
 												onChange={field.onChange}
 												placeholder="Enter destination in Australia..."
-												className="text-base"
+												className="text-xs md:text-sm"
 											/>
 										</FormControl>
 										<FormMessage />
@@ -150,7 +151,7 @@ export function InstantQuoteWidget() {
 							className="w-full h-12 text-base font-semibold"
 							size="lg"
 						>
-							<Calculator className="mr-2 h-5 w-5" />
+							<Calculator className="h-5 w-5" />
 							{isCalculating ? "Calculating..." : "Estimate Fare"}
 						</Button>
 

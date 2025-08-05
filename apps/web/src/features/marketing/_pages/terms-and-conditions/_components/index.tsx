@@ -1,6 +1,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
+import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	FileText,
 	Clock,
@@ -165,7 +166,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 								<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
 									<div className="flex items-center text-muted-foreground">
 										<Phone className="w-5 h-5 mr-2 text-primary" />
-										<span className="font-medium">+61 422 693 233</span>
+										<span className="font-medium">{CONTACT_INFO.phone.display}</span>
 									</div>
 									
 									<div className="flex gap-4">
@@ -184,7 +185,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 
 						{/* Legal Footer */}
 						<div className="mt-12 text-center text-sm text-muted-foreground">
-							<p>© 2024 Down Under Chauffeurs. All rights reserved.</p>
+							<p>© {CONTACT_INFO.business.foundedYear === 2020 ? `${CONTACT_INFO.business.foundedYear}-${new Date().getFullYear()}` : new Date().getFullYear()} {CONTACT_INFO.business.name}. All rights reserved.</p>
 							<p className="mt-2">
 								These terms and conditions are effective as of the date of your booking and may be updated from time to time.
 							</p>
