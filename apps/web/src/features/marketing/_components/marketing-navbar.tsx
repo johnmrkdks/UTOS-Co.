@@ -30,16 +30,10 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 	return (
 		<div className={cn("bg-beige shadow-lg relative z-50", className)} {...props}>
 			{/* Top Contact Bar */}
-			<div className="bg-foreground border-b border-border">
+			<div className="hidden md:block bg-foreground border-b border-border">
 				<div className="container mx-auto px-6 py-2">
 					<div className="flex items-center justify-center md:justify-between text-xs md:text-sm">
 						<div className="flex items-center gap-6 text-beige">
-							<div className="flex items-center gap-2 font-medium">
-								<CalendarIcon className="w-4 h-4 text-primary" />
-								Available Mon-Sun 00:00 – 23:45
-							</div>
-						</div>
-						<div className="hidden md:flex items-center gap-4 text-beige text-xs md:text-sm">
 							<div className="flex items-center gap-2">
 								<Phone className="w-4 h-4 text-primary" />
 								<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors">
@@ -52,6 +46,9 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 									{CONTACT_INFO.email.display}
 								</a>
 							</div>
+
+						</div>
+						<div className="hidden md:flex items-center gap-4 text-beige text-xs md:text-sm">
 							<div className="flex items-center gap-1">
 								<FacebookIcon className="w-4 h-4 fill-primary text-primary" />
 								<a href={CONTACT_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" >
