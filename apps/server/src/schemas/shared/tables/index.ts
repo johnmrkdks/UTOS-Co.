@@ -15,6 +15,8 @@ export * from "./account";
 export * from "./booking";
 export * from "./driver";
 export * from "./package";
+export * from "./package-category";
+export * from "./pricing-config";
 export * from "./rating";
 export * from "./session";
 export * from "./user";

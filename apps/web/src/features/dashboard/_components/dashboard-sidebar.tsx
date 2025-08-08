@@ -28,19 +28,19 @@ type LinkProps = {
 
 const links: LinkProps[] = [
 	{
-		title: "",
+		title: "Overview",
 		url: "#",
 		items: DASHBOARD_ROUTES,
 	},
 	{
-		title: "Name Something",
-		url: "#",
-		items: DASHBOARD_SUB_ROUTES,
-	},
-	{
-		title: "Management",
+		title: "Operations",
 		url: "#",
 		items: DASHBOARD_MANAGEMENT_SUB_ROUTES,
+	},
+	{
+		title: "Tools & Settings",
+		url: "#",
+		items: DASHBOARD_SUB_ROUTES,
 	},
 ];
 

@@ -28,12 +28,17 @@ import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './route
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
 import { Route as DashboardLayoutPublishedIndexRouteImport } from './routes/dashboard/_layout/published/index'
+import { Route as DashboardLayoutPricingConfigIndexRouteImport } from './routes/dashboard/_layout/pricing-config/index'
 import { Route as DashboardLayoutPackagesIndexRouteImport } from './routes/dashboard/_layout/packages/index'
+import { Route as DashboardLayoutPackageCategoriesIndexRouteImport } from './routes/dashboard/_layout/package-categories/index'
 import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboard/_layout/inbox/index'
+import { Route as DashboardLayoutDriversIndexRouteImport } from './routes/dashboard/_layout/drivers/index'
 import { Route as DashboardLayoutCarManagementIndexRouteImport } from './routes/dashboard/_layout/car-management/index'
 import { Route as DashboardLayoutBookmarksIndexRouteImport } from './routes/dashboard/_layout/bookmarks/index'
 import { Route as DashboardLayoutBookingManagementIndexRouteImport } from './routes/dashboard/_layout/booking-management/index'
 import { Route as DashboardLayoutBoardIndexRouteImport } from './routes/dashboard/_layout/board/index'
+import { Route as DashboardLayoutAnalyticsIndexRouteImport } from './routes/dashboard/_layout/analytics/index'
+import { Route as DashboardLayoutAdminTestingIndexRouteImport } from './routes/dashboard/_layout/admin-testing/index'
 import { Route as DashboardLayoutCarManagementAddCarRouteImport } from './routes/dashboard/_layout/car-management/add-car'
 
 const DashboardRouteImport = createFileRoute('/dashboard')()
@@ -131,16 +136,34 @@ const DashboardLayoutPublishedIndexRoute =
     path: '/published/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutPricingConfigIndexRoute =
+  DashboardLayoutPricingConfigIndexRouteImport.update({
+    id: '/pricing-config/',
+    path: '/pricing-config/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutPackagesIndexRoute =
   DashboardLayoutPackagesIndexRouteImport.update({
     id: '/packages/',
     path: '/packages/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutPackageCategoriesIndexRoute =
+  DashboardLayoutPackageCategoriesIndexRouteImport.update({
+    id: '/package-categories/',
+    path: '/package-categories/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutInboxIndexRoute =
   DashboardLayoutInboxIndexRouteImport.update({
     id: '/inbox/',
     path: '/inbox/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutDriversIndexRoute =
+  DashboardLayoutDriversIndexRouteImport.update({
+    id: '/drivers/',
+    path: '/drivers/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
 const DashboardLayoutCarManagementIndexRoute =
@@ -167,6 +190,18 @@ const DashboardLayoutBoardIndexRoute =
     path: '/board/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutAnalyticsIndexRoute =
+  DashboardLayoutAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutAdminTestingIndexRoute =
+  DashboardLayoutAdminTestingIndexRouteImport.update({
+    id: '/admin-testing/',
+    path: '/admin-testing/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutCarManagementAddCarRoute =
   DashboardLayoutCarManagementAddCarRouteImport.update({
     id: '/car-management/add-car',
@@ -188,12 +223,17 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
   '/dashboard/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
+  '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
+  '/dashboard/analytics': typeof DashboardLayoutAnalyticsIndexRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
   '/dashboard/booking-management': typeof DashboardLayoutBookingManagementIndexRoute
   '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
+  '/dashboard/drivers': typeof DashboardLayoutDriversIndexRoute
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
+  '/dashboard/package-categories': typeof DashboardLayoutPackageCategoriesIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/pricing-config': typeof DashboardLayoutPricingConfigIndexRoute
   '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
   '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
@@ -212,12 +252,17 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/': typeof MarketingIndexRoute
   '/dashboard/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
+  '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
+  '/dashboard/analytics': typeof DashboardLayoutAnalyticsIndexRoute
   '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
   '/dashboard/booking-management': typeof DashboardLayoutBookingManagementIndexRoute
   '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/car-management': typeof DashboardLayoutCarManagementIndexRoute
+  '/dashboard/drivers': typeof DashboardLayoutDriversIndexRoute
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
+  '/dashboard/package-categories': typeof DashboardLayoutPackageCategoriesIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/pricing-config': typeof DashboardLayoutPricingConfigIndexRoute
   '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
   '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
@@ -240,12 +285,17 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/dashboard/_layout/car-management/add-car': typeof DashboardLayoutCarManagementAddCarRoute
+  '/dashboard/_layout/admin-testing/': typeof DashboardLayoutAdminTestingIndexRoute
+  '/dashboard/_layout/analytics/': typeof DashboardLayoutAnalyticsIndexRoute
   '/dashboard/_layout/board/': typeof DashboardLayoutBoardIndexRoute
   '/dashboard/_layout/booking-management/': typeof DashboardLayoutBookingManagementIndexRoute
   '/dashboard/_layout/bookmarks/': typeof DashboardLayoutBookmarksIndexRoute
   '/dashboard/_layout/car-management/': typeof DashboardLayoutCarManagementIndexRoute
+  '/dashboard/_layout/drivers/': typeof DashboardLayoutDriversIndexRoute
   '/dashboard/_layout/inbox/': typeof DashboardLayoutInboxIndexRoute
+  '/dashboard/_layout/package-categories/': typeof DashboardLayoutPackageCategoriesIndexRoute
   '/dashboard/_layout/packages/': typeof DashboardLayoutPackagesIndexRoute
+  '/dashboard/_layout/pricing-config/': typeof DashboardLayoutPricingConfigIndexRoute
   '/dashboard/_layout/published/': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/_layout/report/': typeof DashboardLayoutReportIndexRoute
   '/dashboard/_layout/settings/': typeof DashboardLayoutSettingsIndexRoute
@@ -267,12 +317,17 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard/'
     | '/dashboard/car-management/add-car'
+    | '/dashboard/admin-testing'
+    | '/dashboard/analytics'
     | '/dashboard/board'
     | '/dashboard/booking-management'
     | '/dashboard/bookmarks'
     | '/dashboard/car-management'
+    | '/dashboard/drivers'
     | '/dashboard/inbox'
+    | '/dashboard/package-categories'
     | '/dashboard/packages'
+    | '/dashboard/pricing-config'
     | '/dashboard/published'
     | '/dashboard/report'
     | '/dashboard/settings'
@@ -291,12 +346,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/'
     | '/dashboard/car-management/add-car'
+    | '/dashboard/admin-testing'
+    | '/dashboard/analytics'
     | '/dashboard/board'
     | '/dashboard/booking-management'
     | '/dashboard/bookmarks'
     | '/dashboard/car-management'
+    | '/dashboard/drivers'
     | '/dashboard/inbox'
+    | '/dashboard/package-categories'
     | '/dashboard/packages'
+    | '/dashboard/pricing-config'
     | '/dashboard/published'
     | '/dashboard/report'
     | '/dashboard/settings'
@@ -318,12 +378,17 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/dashboard/_layout/'
     | '/dashboard/_layout/car-management/add-car'
+    | '/dashboard/_layout/admin-testing/'
+    | '/dashboard/_layout/analytics/'
     | '/dashboard/_layout/board/'
     | '/dashboard/_layout/booking-management/'
     | '/dashboard/_layout/bookmarks/'
     | '/dashboard/_layout/car-management/'
+    | '/dashboard/_layout/drivers/'
     | '/dashboard/_layout/inbox/'
+    | '/dashboard/_layout/package-categories/'
     | '/dashboard/_layout/packages/'
+    | '/dashboard/_layout/pricing-config/'
     | '/dashboard/_layout/published/'
     | '/dashboard/_layout/report/'
     | '/dashboard/_layout/settings/'
@@ -465,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutPublishedIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/pricing-config/': {
+      id: '/dashboard/_layout/pricing-config/'
+      path: '/pricing-config'
+      fullPath: '/dashboard/pricing-config'
+      preLoaderRoute: typeof DashboardLayoutPricingConfigIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/dashboard/_layout/packages/': {
       id: '/dashboard/_layout/packages/'
       path: '/packages'
@@ -472,11 +544,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutPackagesIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/package-categories/': {
+      id: '/dashboard/_layout/package-categories/'
+      path: '/package-categories'
+      fullPath: '/dashboard/package-categories'
+      preLoaderRoute: typeof DashboardLayoutPackageCategoriesIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/dashboard/_layout/inbox/': {
       id: '/dashboard/_layout/inbox/'
       path: '/inbox'
       fullPath: '/dashboard/inbox'
       preLoaderRoute: typeof DashboardLayoutInboxIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/drivers/': {
+      id: '/dashboard/_layout/drivers/'
+      path: '/drivers'
+      fullPath: '/dashboard/drivers'
+      preLoaderRoute: typeof DashboardLayoutDriversIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
     '/dashboard/_layout/car-management/': {
@@ -505,6 +591,20 @@ declare module '@tanstack/react-router' {
       path: '/board'
       fullPath: '/dashboard/board'
       preLoaderRoute: typeof DashboardLayoutBoardIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/analytics/': {
+      id: '/dashboard/_layout/analytics/'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof DashboardLayoutAnalyticsIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/admin-testing/': {
+      id: '/dashboard/_layout/admin-testing/'
+      path: '/admin-testing'
+      fullPath: '/dashboard/admin-testing'
+      preLoaderRoute: typeof DashboardLayoutAdminTestingIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
     '/dashboard/_layout/car-management/add-car': {
@@ -546,12 +646,17 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 interface DashboardLayoutRouteChildren {
   DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
   DashboardLayoutCarManagementAddCarRoute: typeof DashboardLayoutCarManagementAddCarRoute
+  DashboardLayoutAdminTestingIndexRoute: typeof DashboardLayoutAdminTestingIndexRoute
+  DashboardLayoutAnalyticsIndexRoute: typeof DashboardLayoutAnalyticsIndexRoute
   DashboardLayoutBoardIndexRoute: typeof DashboardLayoutBoardIndexRoute
   DashboardLayoutBookingManagementIndexRoute: typeof DashboardLayoutBookingManagementIndexRoute
   DashboardLayoutBookmarksIndexRoute: typeof DashboardLayoutBookmarksIndexRoute
   DashboardLayoutCarManagementIndexRoute: typeof DashboardLayoutCarManagementIndexRoute
+  DashboardLayoutDriversIndexRoute: typeof DashboardLayoutDriversIndexRoute
   DashboardLayoutInboxIndexRoute: typeof DashboardLayoutInboxIndexRoute
+  DashboardLayoutPackageCategoriesIndexRoute: typeof DashboardLayoutPackageCategoriesIndexRoute
   DashboardLayoutPackagesIndexRoute: typeof DashboardLayoutPackagesIndexRoute
+  DashboardLayoutPricingConfigIndexRoute: typeof DashboardLayoutPricingConfigIndexRoute
   DashboardLayoutPublishedIndexRoute: typeof DashboardLayoutPublishedIndexRoute
   DashboardLayoutReportIndexRoute: typeof DashboardLayoutReportIndexRoute
   DashboardLayoutSettingsIndexRoute: typeof DashboardLayoutSettingsIndexRoute
@@ -562,14 +667,21 @@ const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
   DashboardLayoutCarManagementAddCarRoute:
     DashboardLayoutCarManagementAddCarRoute,
+  DashboardLayoutAdminTestingIndexRoute: DashboardLayoutAdminTestingIndexRoute,
+  DashboardLayoutAnalyticsIndexRoute: DashboardLayoutAnalyticsIndexRoute,
   DashboardLayoutBoardIndexRoute: DashboardLayoutBoardIndexRoute,
   DashboardLayoutBookingManagementIndexRoute:
     DashboardLayoutBookingManagementIndexRoute,
   DashboardLayoutBookmarksIndexRoute: DashboardLayoutBookmarksIndexRoute,
   DashboardLayoutCarManagementIndexRoute:
     DashboardLayoutCarManagementIndexRoute,
+  DashboardLayoutDriversIndexRoute: DashboardLayoutDriversIndexRoute,
   DashboardLayoutInboxIndexRoute: DashboardLayoutInboxIndexRoute,
+  DashboardLayoutPackageCategoriesIndexRoute:
+    DashboardLayoutPackageCategoriesIndexRoute,
   DashboardLayoutPackagesIndexRoute: DashboardLayoutPackagesIndexRoute,
+  DashboardLayoutPricingConfigIndexRoute:
+    DashboardLayoutPricingConfigIndexRoute,
   DashboardLayoutPublishedIndexRoute: DashboardLayoutPublishedIndexRoute,
   DashboardLayoutReportIndexRoute: DashboardLayoutReportIndexRoute,
   DashboardLayoutSettingsIndexRoute: DashboardLayoutSettingsIndexRoute,

@@ -11,9 +11,13 @@ import { carModelsRouter } from "./car-models";
 import { carTransmissionTypesRouter } from "./car-transmission-types";
 import { bookingsRouter } from "./bookings";
 import { packagesRouter } from "./packages";
+import { packageCategoriesRouter } from "./package-categories";
+import { packageRoutesRouter } from "./package-routes";
 import { ratingsRouter } from "./ratings";
 import { carCategoriesRouter } from "./car-categories";
 import { fileRouter } from "./file";
+import { pricingConfigRouter } from "./pricing-config";
+import { driversRouter } from "./drivers";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -37,7 +41,11 @@ export const appRouter = router({
 	carModels: carModelsRouter,
 	carTransmissionTypes: carTransmissionTypesRouter,
 	bookings: bookingsRouter,
+	drivers: driversRouter,
 	packages: packagesRouter,
+	packageCategories: packageCategoriesRouter,
+	packageRoutes: packageRoutesRouter,
+	pricingConfig: pricingConfigRouter,
 	ratings: ratingsRouter,
 });
 
