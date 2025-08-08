@@ -5,13 +5,14 @@ import { PackageCategoriesTable } from "./_components/package-categories-table";
 import { useModal } from "@/hooks/use-modal";
 import { AddPackageCategoryDialog } from "./_components/add-package-category-dialog";
 import { useGetPackageCategoriesQuery } from "./_hooks/query/use-get-package-categories-query";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
 export function PackageCategoriesPage() {
 	const { openModal } = useModal();
 	const { data: categories = [], isLoading } = useGetPackageCategoriesQuery();
 
 	return (
-		<div className="space-y-6">
+		<PaddingLayout className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-bold">Package Categories</h1>
@@ -55,6 +56,6 @@ export function PackageCategoriesPage() {
 			</Card>
 
 			<AddPackageCategoryDialog />
-		</div>
+		</PaddingLayout>
 	);
 }

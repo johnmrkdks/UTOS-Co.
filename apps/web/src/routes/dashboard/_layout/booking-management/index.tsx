@@ -12,6 +12,7 @@ import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-managem
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarPlus, PackageIcon, RouteIcon } from "lucide-react";
 import { Suspense } from "react";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
 export const Route = createFileRoute("/dashboard/_layout/booking-management/")({
 	component: RouteComponent,
@@ -36,7 +37,7 @@ function BookingManagementContent() {
 	});
 
 	return (
-		<div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Booking Management</h2>
 				<div className="flex items-center space-x-2">
@@ -190,6 +191,6 @@ function BookingManagementContent() {
 			<CreatePackageBookingDialog />
 			<CreateCustomBookingDialog />
 			<BookingDetailsDialog />
-		</div>
+		</PaddingLayout>
 	);
 }

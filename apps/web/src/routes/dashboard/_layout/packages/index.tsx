@@ -7,6 +7,7 @@ import { AddNewPackageForm } from "@/features/dashboard/_pages/packages/_compone
 import { Package, Plus } from "lucide-react";
 import { useState } from "react";
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
+import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
 export const Route = createFileRoute('/dashboard/_layout/packages/')(
 	{
@@ -19,7 +20,7 @@ function RouteComponent() {
 	const packagesQuery = useGetPackagesQuery();
 
 	return (
-		<div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Package Management</h2>
 				<Dialog open={showAddPackage} onOpenChange={setShowAddPackage}>
@@ -94,15 +95,15 @@ function RouteComponent() {
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Inactive Packages</CardTitle>
 						<Package className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{packagesQuery.data?.items?.filter((pkg: any) => !pkg.isAvailable).length || 0}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								Temporarily unavailable
-							</p>
-						</CardContent>
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">
+							{packagesQuery.data?.items?.filter((pkg: any) => !pkg.isAvailable).length || 0}
+						</div>
+						<p className="text-xs text-muted-foreground">
+							Temporarily unavailable
+						</p>
+					</CardContent>
 				</Card>
 			</div>
 
@@ -117,6 +118,6 @@ function RouteComponent() {
 					<PackagesTable />
 				</CardContent>
 			</Card>
-		</div>
+		</PaddingLayout>
 	);
 }

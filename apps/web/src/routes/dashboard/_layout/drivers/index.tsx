@@ -6,6 +6,7 @@ import { DriversTable } from "@/features/dashboard/_pages/drivers/_components/dr
 import { DriverApprovalTable } from "@/features/dashboard/_pages/drivers/_components/driver-approval-table";
 import { Users, UserCheck, UserX, Car } from "lucide-react";
 import { useGetDriversQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-drivers-query";
+import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
 export const Route = createFileRoute('/dashboard/_layout/drivers/')({
 	component: RouteComponent,
@@ -20,7 +21,7 @@ function RouteComponent() {
 	const inactiveDrivers = driversQuery.data?.items?.filter((driver: any) => !driver.isActive).length || 0;
 
 	return (
-		<div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Driver Management</h2>
 			</div>
@@ -143,6 +144,6 @@ function RouteComponent() {
 					</Card>
 				</TabsContent>
 			</Tabs>
-		</div>
+		</PaddingLayout>
 	);
 }

@@ -23,7 +23,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function AddPackageCategoryDialog() {
-	const { isModalOpen, closeModal } = useModal();
+	const { isOpen, data, closeModal } = useModal();
 	const createMutation = useCreatePackageCategoryMutation();
 
 	const {
@@ -50,7 +50,7 @@ export function AddPackageCategoryDialog() {
 	};
 
 	return (
-		<Dialog open={isModalOpen("add-package-category")} onOpenChange={handleClose}>
+		<Dialog open={isOpen && data === "add-package-category"} onOpenChange={handleClose}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Add Package Category</DialogTitle>

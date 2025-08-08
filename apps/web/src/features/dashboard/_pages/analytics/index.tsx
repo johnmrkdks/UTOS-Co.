@@ -10,6 +10,7 @@ import { DriverAnalytics } from "./_components/driver-analytics";
 import { CustomerSatisfaction } from "./_components/customer-satisfaction";
 import { PredictiveAnalytics } from "./_components/predictive-analytics";
 import { RealTimeMetrics } from "./_components/real-time-metrics";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
 export function AdvancedAnalyticsPage() {
 	const [dateRange, setDateRange] = useState("30d");
@@ -20,7 +21,7 @@ export function AdvancedAnalyticsPage() {
 		try {
 			// Simulate report generation
 			await new Promise(resolve => setTimeout(resolve, 2000));
-			
+
 			// In a real implementation, this would generate and download a report
 			const reportData = {
 				dateRange,
@@ -32,7 +33,7 @@ export function AdvancedAnalyticsPage() {
 					driverUtilization: 87,
 				},
 			};
-			
+
 			const blob = new Blob([JSON.stringify(reportData, null, 2)], {
 				type: 'application/json'
 			});
@@ -50,7 +51,7 @@ export function AdvancedAnalyticsPage() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-bold">Advanced Analytics</h1>
@@ -137,23 +138,23 @@ export function AdvancedAnalyticsPage() {
 							<TabsTrigger value="satisfaction">Satisfaction</TabsTrigger>
 							<TabsTrigger value="predictive">Predictive</TabsTrigger>
 						</TabsList>
-						
+
 						<TabsContent value="revenue" className="space-y-4">
 							<RevenueAnalytics dateRange={dateRange} />
 						</TabsContent>
-						
+
 						<TabsContent value="bookings" className="space-y-4">
 							<BookingPerformance dateRange={dateRange} />
 						</TabsContent>
-						
+
 						<TabsContent value="drivers" className="space-y-4">
 							<DriverAnalytics dateRange={dateRange} />
 						</TabsContent>
-						
+
 						<TabsContent value="satisfaction" className="space-y-4">
 							<CustomerSatisfaction dateRange={dateRange} />
 						</TabsContent>
-						
+
 						<TabsContent value="predictive" className="space-y-4">
 							<PredictiveAnalytics dateRange={dateRange} />
 						</TabsContent>
@@ -164,6 +165,6 @@ export function AdvancedAnalyticsPage() {
 					<RealTimeMetrics />
 				</div>
 			</div>
-		</div>
+		</PaddingLayout>
 	);
 }

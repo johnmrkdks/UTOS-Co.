@@ -9,6 +9,7 @@ import { QuoteTester } from "@/features/dashboard/_pages/pricing-config/_compone
 import { Settings, Plus, Calculator } from "lucide-react";
 import { useState } from "react";
 import { useGetPricingConfigsQuery } from "@/features/dashboard/_pages/pricing-config/_hooks/query/use-get-pricing-configs-query";
+import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
 export const Route = createFileRoute('/dashboard/_layout/pricing-config/')({
 	component: RouteComponent,
@@ -19,7 +20,7 @@ function RouteComponent() {
 	const pricingConfigsQuery = useGetPricingConfigsQuery();
 
 	return (
-		<div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Pricing Configuration</h2>
 				<Dialog open={showCreateConfig} onOpenChange={setShowCreateConfig}>
@@ -146,6 +147,6 @@ function RouteComponent() {
 					</Card>
 				</TabsContent>
 			</Tabs>
-		</div>
+		</PaddingLayout>
 	);
 }
