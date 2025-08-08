@@ -10,7 +10,6 @@ import {
 	ClipboardListIcon,
 	DollarSignIcon,
 	FlaskConicalIcon,
-	FoldersIcon,
 	InboxIcon,
 	LayoutDashboardIcon,
 	Package2Icon,
@@ -18,7 +17,27 @@ import {
 	UsersIcon,
 } from "lucide-react";
 
-export const DASHBOARD_ROUTES: RouteConfig[] = [
+const isDevelopment = import.meta.env.MODE === "development" || import.meta.env.DEV;
+
+// Helper function to filter routes based on environment
+const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
+	return routes.filter((route) => {
+		// Hide these pages in production
+		const developmentOnlyPaths = [
+			"/dashboard/analytics",
+			"/dashboard/pricing-config",
+			"/dashboard/admin-testing"
+		];
+
+		if (developmentOnlyPaths.includes(route.path) && !isDevelopment) {
+			return false;
+		}
+
+		return true;
+	});
+};
+
+const ALL_DASHBOARD_ROUTES: RouteConfig[] = [
 	{
 		label: "Dashboard",
 		path: "/dashboard/board",
@@ -31,16 +50,11 @@ export const DASHBOARD_ROUTES: RouteConfig[] = [
 	},
 ];
 
-export const DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
+const ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
 	{
 		label: "Packages",
 		path: "/dashboard/packages",
 		icon: Package2Icon,
-	},
-	{
-		label: "Package Categories",
-		path: "/dashboard/package-categories",
-		icon: FoldersIcon,
 	},
 	{
 		label: "Pricing Config",
@@ -64,7 +78,7 @@ export const DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
 	},
 ];
 
-export const DASHBOARD_SUB_ROUTES: RouteConfig[] = [
+const ALL_DASHBOARD_SUB_ROUTES: RouteConfig[] = [
 	{
 		label: "Admin Testing",
 		path: "/dashboard/admin-testing",
@@ -86,3 +100,8 @@ export const DASHBOARD_SUB_ROUTES: RouteConfig[] = [
 		icon: InboxIcon,
 	},
 ];
+
+// Export filtered routes based on environment
+export const DASHBOARD_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_ROUTES);
+export const DASHBOARD_MANAGEMENT_SUB_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES);
+export const DASHBOARD_SUB_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_SUB_ROUTES);

@@ -7,7 +7,7 @@ import {
 	DialogDescription,
 } from "@workspace/ui/components/dialog";
 import { useModal } from "@/hooks/use-modal";
-import { useDeletePackageCategoryMutation } from "../_hooks/query/use-delete-package-category-mutation";
+import { useDeletePackageCategoryMutation } from "../../_hooks/query/use-delete-package-category-mutation";
 
 export function DeletePackageCategoryDialog() {
 	const { isModalOpen, closeModal, modalData } = useModal();
@@ -15,7 +15,7 @@ export function DeletePackageCategoryDialog() {
 
 	const handleDelete = async () => {
 		if (!modalData?.id) return;
-		
+
 		await deleteMutation.mutateAsync({ id: modalData.id });
 		closeModal();
 	};

@@ -9,6 +9,7 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { ModalProvider } from "@/hooks/use-modal";
 import "@workspace/ui/globals.css"
 
 export type RouterAppContext = {
@@ -43,7 +44,7 @@ function RootComponent() {
 	});
 
 	return (
-		<>
+		<ModalProvider>
 			<HeadContent />
 			<div className="grid grid-rows-[auto_1fr] h-svh">
 				{/* {isFetching ? <Loader /> : <Outlet />} */}
@@ -51,8 +52,7 @@ function RootComponent() {
 			</div>
 			<Toaster richColors />
 			<TanStackRouterDevtools position="bottom-left" />
-			<Toaster richColors />
 			<ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
-		</>
+		</ModalProvider>
 	);
 }

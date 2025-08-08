@@ -12,7 +12,7 @@ import { useModal } from "@/hooks/use-modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUpdatePackageCategoryMutation } from "../_hooks/query/use-update-package-category-mutation";
+import { useUpdatePackageCategoryMutation } from "../../_hooks/query/use-update-package-category-mutation";
 import { useEffect } from "react";
 
 const schema = z.object({
@@ -48,7 +48,7 @@ export function EditPackageCategoryDialog() {
 
 	const onSubmit = async (data: FormData) => {
 		if (!modalData?.id) return;
-		
+
 		await updateMutation.mutateAsync({
 			id: modalData.id,
 			...data,

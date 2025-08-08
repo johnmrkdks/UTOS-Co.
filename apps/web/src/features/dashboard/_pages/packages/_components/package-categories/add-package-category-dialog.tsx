@@ -12,7 +12,7 @@ import { useModal } from "@/hooks/use-modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useCreatePackageCategoryMutation } from "../_hooks/query/use-create-package-category-mutation";
+import { useCreatePackageCategoryMutation } from "../../_hooks/query/use-create-package-category-mutation";
 
 const schema = z.object({
 	name: z.string().min(1, "Name is required"),
@@ -23,7 +23,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function AddPackageCategoryDialog() {
-	const { isOpen, data, closeModal } = useModal();
+	const { isModalOpen, closeModal } = useModal();
 	const createMutation = useCreatePackageCategoryMutation();
 
 	const {
@@ -50,7 +50,7 @@ export function AddPackageCategoryDialog() {
 	};
 
 	return (
-		<Dialog open={isOpen && data === "add-package-category"} onOpenChange={handleClose}>
+		<Dialog open={isModalOpen("add-package-category")} onOpenChange={handleClose}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Add Package Category</DialogTitle>

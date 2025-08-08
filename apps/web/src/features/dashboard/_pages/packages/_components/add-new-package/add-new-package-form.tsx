@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Switch } from "@workspace/ui/components/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,7 +15,9 @@ import { Loader2 } from "lucide-react";
 const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
 	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
-	pricePerDay: z.number().min(0, "Price must be positive"),
+	serviceType: z.string().min(1, "Service type is required"),
+	fixedPrice: z.number().min(0, "Price must be positive"),
+	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
 	isAvailable: z.boolean().default(true),
 });
 
@@ -34,7 +37,9 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 		defaultValues: {
 			name: "",
 			description: "",
-			pricePerDay: 0,
+			serviceType: "",
+			fixedPrice: 0,
+			maxPassengers: 4,
 			isAvailable: true,
 		},
 	});
@@ -42,7 +47,12 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 	const onSubmit = async (data: AddPackageForm) => {
 		setIsSubmitting(true);
 		try {
-			await createPackageMutation.mutateAsync(data);
+			// Convert price to cents for storage
+			const packageData = {
+				...data,
+				fixedPrice: Math.round(data.fixedPrice * 100), // Convert to cents
+			};
+			await createPackageMutation.mutateAsync(packageData);
 			form.reset();
 			onSuccess?.();
 		} catch (error) {
@@ -89,10 +99,34 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 
 				<FormField
 					control={form.control}
-					name="pricePerDay"
+					name="serviceType"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Price Per Day (AUD)</FormLabel>
+							<FormLabel>Service Type</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Select service type" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									<SelectItem value="transfer">Transfer</SelectItem>
+									<SelectItem value="tour">Tour</SelectItem>
+									<SelectItem value="event">Event</SelectItem>
+									<SelectItem value="hourly">Hourly</SelectItem>
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="fixedPrice"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Fixed Price (AUD)</FormLabel>
 							<FormControl>
 								<Input 
 									type="number" 
@@ -101,6 +135,27 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 									placeholder="0.00" 
 									{...field} 
 									onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="maxPassengers"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Max Passengers</FormLabel>
+							<FormControl>
+								<Input 
+									type="number" 
+									min="1"
+									max="20"
+									placeholder="4" 
+									{...field} 
+									onChange={(e) => field.onChange(parseInt(e.target.value) || 4)}
 								/>
 							</FormControl>
 							<FormMessage />
