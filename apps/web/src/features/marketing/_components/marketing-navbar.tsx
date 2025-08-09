@@ -30,41 +30,41 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 	return (
 		<div className={cn("bg-beige shadow-lg relative z-50", className)} {...props}>
 			{/* Top Contact Bar */}
-			<div className="hidden md:block bg-foreground border-b border-border">
-				<div className="container mx-auto px-6 py-2">
-					<div className="flex items-center justify-center md:justify-between text-xs md:text-sm">
-						<div className="flex items-center gap-6 text-beige">
-							<div className="flex items-center gap-2">
-								<Phone className="w-4 h-4 text-primary" />
-								<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors">
-									{CONTACT_INFO.phone.display}
-								</a>
-							</div>
-							<div className="flex items-center gap-2">
-								<MailIcon className="w-4 h-4 text-primary" />
-								<a href={CONTACT_INFO.email.link} className="hover:text-primary transition-colors">
-									{CONTACT_INFO.email.display}
-								</a>
-							</div>
-
-						</div>
-						<div className="hidden md:flex items-center gap-4 text-beige text-xs md:text-sm">
-							<div className="flex items-center gap-1">
-								<FacebookIcon className="w-4 h-4 fill-primary text-primary" />
-								<a href={CONTACT_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" >
-									{CONTACT_INFO.social.facebook.label}
-								</a>
-							</div>
-							<div className="flex items-center gap-1">
-								<InstagramIcon className="w-4 h-4 text-primary" />
-								<a href={CONTACT_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer">
-									{CONTACT_INFO.social.instagram.label}
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+			{/* <div className="hidden md:block bg-foreground border-b border-border"> */}
+			{/* 	<div className="container mx-auto px-6 py-2"> */}
+			{/* 		<div className="flex items-center justify-center md:justify-between text-xs md:text-sm"> */}
+			{/* 			<div className="flex items-center gap-6 text-beige"> */}
+			{/* 				<div className="flex items-center gap-2"> */}
+			{/* 					<Phone className="w-4 h-4 text-primary" /> */}
+			{/* 					<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors"> */}
+			{/* 						{CONTACT_INFO.phone.display} */}
+			{/* 					</a> */}
+			{/* 				</div> */}
+			{/* 				<div className="flex items-center gap-2"> */}
+			{/* 					<MailIcon className="w-4 h-4 text-primary" /> */}
+			{/* 					<a href={CONTACT_INFO.email.link} className="hover:text-primary transition-colors"> */}
+			{/* 						{CONTACT_INFO.email.display} */}
+			{/* 					</a> */}
+			{/* 				</div> */}
+			{/**/}
+			{/* 			</div> */}
+			{/* 			<div className="hidden md:flex items-center gap-4 text-beige text-xs md:text-sm"> */}
+			{/* 				<div className="flex items-center gap-1"> */}
+			{/* 					<FacebookIcon className="w-4 h-4 fill-primary text-primary" /> */}
+			{/* 					<a href={CONTACT_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" > */}
+			{/* 						{CONTACT_INFO.social.facebook.label} */}
+			{/* 					</a> */}
+			{/* 				</div> */}
+			{/* 				<div className="flex items-center gap-1"> */}
+			{/* 					<InstagramIcon className="w-4 h-4 text-primary" /> */}
+			{/* 					<a href={CONTACT_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer"> */}
+			{/* 						{CONTACT_INFO.social.instagram.label} */}
+			{/* 					</a> */}
+			{/* 				</div> */}
+			{/* 			</div> */}
+			{/* 		</div> */}
+			{/* 	</div> */}
+			{/* </div> */}
 
 			{/* Main Navigation */}
 			<div className="container mx-auto px-6">
