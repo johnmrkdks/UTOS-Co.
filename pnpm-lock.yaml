@@ -25,7 +25,7 @@ catalogs:
       specifier: ^0.473.0
       version: 0.473.0
     nuqs:
-      specifier: ^2.4.3
+      specifier: 2.4.3
       version: 2.4.3
     postcss:
       specifier: ^8.5.3

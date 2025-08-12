@@ -4,9 +4,23 @@ import { CarFeatures } from "@/features/dashboard/_pages/car-management/_compone
 import { CarsList } from "@/features/dashboard/_pages/car-management/_components/cars-list";
 import { createFileRoute } from "@tanstack/react-router";
 import { CarIcon, SettingsIcon } from "lucide-react";
+import { z } from "zod";
+
+// Search params schema for filters
+const carManagementSearchSchema = z.object({
+	search: z.string().optional(),
+	brand: z.string().optional(),
+	category: z.string().optional(),
+	availability: z.enum(["all", "available", "unavailable"]).optional(),
+	minPrice: z.number().optional(),
+	maxPrice: z.number().optional(),
+	page: z.number().optional(),
+	pageSize: z.number().optional(),
+})
 
 export const Route = createFileRoute("/dashboard/_layout/car-management/")({
 	component: RouteComponent,
+	validateSearch: carManagementSearchSchema,
 });
 
 function RouteComponent() {
