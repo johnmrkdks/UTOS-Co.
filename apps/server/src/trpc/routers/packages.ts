@@ -7,7 +7,7 @@ import { deletePackageService, DeletePackageServiceSchema } from "@/services/pac
 import { getPackageService, GetPackageServiceSchema } from "@/services/packages/get-package";
 import { getPackagesService } from "@/services/packages/get-packages";
 import { updatePackageService, UpdatePackageServiceSchema } from "@/services/packages/update-package";
-import { protectedProcedure, router } from "@/trpc/init";
+import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";

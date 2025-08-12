@@ -1,16 +1,15 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useUpdatePackageMutation() {
+export const useUpdatePackageMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: trpc.packages.update.mutate,
+	return useMutation(trpc.packages.update.mutationOptions({
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["packages"] });
+			queryClient.invalidateQueries({ queryKey: trpc.packages.list.queryKey() });
 			toast.success("Package updated successfully", {
-				description: `"${data.name}" has been updated.`,
+				description: `"${data?.name}" has been updated.`,
 			});
 		},
 		onError: (error) => {
@@ -18,5 +17,5 @@ export function useUpdatePackageMutation() {
 				description: error.message,
 			});
 		},
-	});
-}
+	}));
+};

@@ -25,8 +25,8 @@ import { ViewPackageDialog } from "./view-package-dialog";
 export function PackagesTable() {
 	const [editingPackage, setEditingPackage] = useState<any>(null);
 	const [viewingPackage, setViewingPackage] = useState<any>(null);
-	
-	const packagesQuery = useGetPackagesQuery();
+
+	const packagesQuery = useGetPackagesQuery({});
 	const deletePackageMutation = useDeletePackageMutation();
 
 	const handleDelete = async (packageId: string) => {
@@ -47,7 +47,7 @@ export function PackagesTable() {
 		);
 	}
 
-	const packages = packagesQuery.data?.items || [];
+	const packages = packagesQuery.data?.data || [];
 
 	if (packages.length === 0) {
 		return (
@@ -57,6 +57,8 @@ export function PackagesTable() {
 			</div>
 		);
 	}
+
+	console.log(packages);
 
 	return (
 		<>
@@ -76,7 +78,7 @@ export function PackagesTable() {
 						<TableRow key={pkg.id}>
 							<TableCell className="font-medium">{pkg.name}</TableCell>
 							<TableCell className="max-w-[300px] truncate">{pkg.description}</TableCell>
-							<TableCell>${pkg.pricePerDay?.toFixed(2) || "0.00"}</TableCell>
+							<TableCell>${(pkg.fixedPrice ? pkg.fixedPrice / 100 : 0).toFixed(2)}</TableCell>
 							<TableCell>
 								<Badge variant={pkg.isAvailable ? "default" : "secondary"}>
 									{pkg.isAvailable ? "Available" : "Unavailable"}
@@ -101,7 +103,7 @@ export function PackagesTable() {
 											<Pencil className="mr-2 h-4 w-4" />
 											Edit
 										</DropdownMenuItem>
-										<DropdownMenuItem 
+										<DropdownMenuItem
 											onClick={() => handleDelete(pkg.id)}
 											className="text-destructive"
 										>

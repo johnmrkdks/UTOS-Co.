@@ -49,12 +49,12 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 
 	const onSubmit = async (data: EditPackageForm) => {
 		if (!pkg?.id) return;
-		
+
 		setIsSubmitting(true);
 		try {
 			await updatePackageMutation.mutateAsync({
 				id: pkg.id,
-				...data,
+				data: data,
 			});
 			onOpenChange(false);
 		} catch (error) {
@@ -73,7 +73,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 						Update the package details. Click save when you're done.
 					</DialogDescription>
 				</DialogHeader>
-				
+
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
@@ -89,7 +89,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 								</FormItem>
 							)}
 						/>
-						
+
 						<FormField
 							control={form.control}
 							name="description"
@@ -97,10 +97,10 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 								<FormItem>
 									<FormLabel>Description</FormLabel>
 									<FormControl>
-										<Textarea 
-											placeholder="Describe the package services and features" 
+										<Textarea
+											placeholder="Describe the package services and features"
 											rows={3}
-											{...field} 
+											{...field}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -115,12 +115,12 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 								<FormItem>
 									<FormLabel>Price Per Day (AUD)</FormLabel>
 									<FormControl>
-										<Input 
-											type="number" 
-											step="0.01" 
+										<Input
+											type="number"
+											step="0.01"
 											min="0"
-											placeholder="0.00" 
-											{...field} 
+											placeholder="0.00"
+											{...field}
 											onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
 										/>
 									</FormControl>
@@ -141,9 +141,9 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 										</div>
 									</div>
 									<FormControl>
-										<Switch 
-											checked={field.value} 
-											onCheckedChange={field.onChange} 
+										<Switch
+											checked={field.value}
+											onCheckedChange={field.onChange}
 										/>
 									</FormControl>
 								</FormItem>
@@ -151,9 +151,9 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 						/>
 
 						<DialogFooter>
-							<Button 
-								type="button" 
-								variant="secondary" 
+							<Button
+								type="button"
+								variant="secondary"
 								onClick={() => onOpenChange(false)}
 								disabled={isSubmitting}
 							>

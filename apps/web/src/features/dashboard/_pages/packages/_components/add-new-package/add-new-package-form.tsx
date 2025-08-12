@@ -10,7 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { useCreatePackageMutation } from "../../_hooks/query/use-create-package-mutation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
@@ -19,6 +20,7 @@ const addPackageSchema = z.object({
 	fixedPrice: z.number().min(0, "Price must be positive"),
 	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
 	isAvailable: z.boolean().default(true),
+	bannerImageUrl: z.string().optional(),
 });
 
 type AddPackageForm = z.infer<typeof addPackageSchema>;
@@ -31,6 +33,13 @@ type AddNewPackageFormProps = {
 export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const createPackageMutation = useCreatePackageMutation();
+	
+	const [{ files: imageFiles }, { addFiles, removeFile, openFileDialog, getInputProps }] = useFileUpload({
+		maxFiles: 1,
+		maxSize: 5 * 1024 * 1024, // 5MB
+		accept: "image/*",
+		multiple: false,
+	});
 
 	const form = useForm<AddPackageForm>({
 		resolver: zodResolver(addPackageSchema),
@@ -41,6 +50,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			fixedPrice: 0,
 			maxPassengers: 4,
 			isAvailable: true,
+			bannerImageUrl: "",
 		},
 	});
 
@@ -97,25 +107,75 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 					)}
 				/>
 
+				{/* Banner Image Upload */}
+				<FormField
+					control={form.control}
+					name="bannerImageUrl"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Banner Image</FormLabel>
+							<FormControl>
+								<div className="space-y-3">
+									{imageFiles.length > 0 ? (
+										<div className="relative group">
+											<img
+												src={imageFiles[0].preview}
+												alt="Package banner preview"
+												className="w-full h-32 object-cover rounded-lg border"
+											/>
+											<Button
+												type="button"
+												variant="destructive"
+												size="sm"
+												className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+												onClick={() => {
+													removeFile(imageFiles[0].id);
+													field.onChange("");
+												}}
+											>
+												<X className="h-4 w-4" />
+											</Button>
+										</div>
+									) : (
+										<div
+											className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+											onClick={openFileDialog}
+										>
+											<Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+											<p className="text-sm text-gray-600">Click to upload banner image</p>
+											<p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+										</div>
+									)}
+									<input {...getInputProps()} />
+								</div>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
 				<FormField
 					control={form.control}
 					name="serviceType"
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Service Type</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
-								<FormControl>
+							<FormControl>
+								<Select onValueChange={field.onChange} defaultValue={field.value}>
 									<SelectTrigger>
 										<SelectValue placeholder="Select service type" />
 									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									<SelectItem value="transfer">Transfer</SelectItem>
-									<SelectItem value="tour">Tour</SelectItem>
-									<SelectItem value="event">Event</SelectItem>
-									<SelectItem value="hourly">Hourly</SelectItem>
-								</SelectContent>
-							</Select>
+									<SelectContent>
+										<SelectItem value="transfer">Transfer</SelectItem>
+										<SelectItem value="tour">Tour</SelectItem>
+										<SelectItem value="event">Event</SelectItem>
+										<SelectItem value="hourly">Hourly</SelectItem>
+									</SelectContent>
+								</Select>
+							</FormControl>
+							<div className="text-sm text-muted-foreground mt-1">
+								Service Type defines the operational model: Transfer (A to B), Tour (guided sightseeing), Event (special occasions), or Hourly (time-based rental).
+							</div>
 							<FormMessage />
 						</FormItem>
 					)}

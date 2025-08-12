@@ -1,18 +1,7 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import type { ResourceList } from "server/types";
 
-type UseGetDriversQueryOptions = {
-	limit?: number;
-	offset?: number;
-	enabled?: boolean;
+export const useGetDriversQuery = (params: ResourceList) => {
+	return useQuery(trpc.drivers.list.queryOptions(params));
 };
-
-export function useGetDriversQuery(options: UseGetDriversQueryOptions = {}) {
-	const { limit = 10, offset = 0, enabled = true } = options;
-
-	return useQuery({
-		queryKey: ["drivers", { limit, offset }],
-		queryFn: () => trpc.drivers.list.query({ limit, offset }),
-		enabled,
-	});
-}

@@ -109,7 +109,7 @@ function RouteComponent() {
 							<CardContent>
 								<div className="text-2xl font-bold">
 									${(
-										(packagesQuery.data?.items?.reduce((sum: number, pkg: any) => sum + (pkg.pricePerDay || 0), 0) || 0) /
+										(packagesQuery.data?.items?.reduce((sum: number, pkg: any) => sum + (pkg.fixedPrice ? pkg.fixedPrice / 100 : 0), 0) || 0) /
 										(packagesQuery.data?.items?.length || 1)
 									).toFixed(0)}
 								</div>
@@ -152,7 +152,10 @@ function RouteComponent() {
 					<div className="flex items-center justify-between">
 						<div>
 							<h3 className="text-lg font-semibold">Package Categories</h3>
-							<p className="text-sm text-muted-foreground">Manage package categories for organized booking options</p>
+							<p className="text-sm text-muted-foreground">
+								Manage package categories for organized booking options. Categories group packages by theme (e.g., "Airport Services", "City Tours") 
+								while Service Types define operational models (Transfer, Tour, Event, Hourly).
+							</p>
 						</div>
 						<Button
 							onClick={() => openModal("add-package-category")}

@@ -1,21 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { toast } from "sonner";
 
-export function useDeletePackageCategoryMutation() {
+export const useDeletePackageCategoryMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (data: { id: string }) => {
-			return await trpc.packageCategories.delete.mutate(data);
-		},
+	return useMutation(trpc.packageCategories.delete.mutationOptions({
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["package-categories"] });
+			queryClient.invalidateQueries({ queryKey: trpc.packageCategories.list.queryKey() });
 			toast.success("Package category deleted successfully");
 		},
 		onError: (error) => {
 			toast.error("Failed to delete package category");
 			console.error(error);
 		},
-	});
-}
+	}));
+};

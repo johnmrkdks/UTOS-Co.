@@ -1,18 +1,7 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import type { ResourceList } from "server/types";
 
-type UseGetPackagesQueryOptions = {
-	limit?: number;
-	offset?: number;
-	enabled?: boolean;
+export const useGetPackagesQuery = (params: ResourceList) => {
+	return useQuery(trpc.packages.list.queryOptions(params));
 };
-
-export function useGetPackagesQuery(options: UseGetPackagesQueryOptions = {}) {
-	const { limit = 10, offset = 0, enabled = true } = options;
-
-	return useQuery({
-		queryKey: ["packages", { limit, offset }],
-		queryFn: () => trpc.packages.list.query({ limit, offset }),
-		enabled,
-	});
-}

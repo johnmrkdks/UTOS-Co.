@@ -1,14 +1,13 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useCreatePricingConfigMutation() {
+export const useCreatePricingConfigMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: trpc.pricingConfig.create.mutate,
+	return useMutation(trpc.pricingConfig.create.mutationOptions({
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["pricing-configs"] });
+			queryClient.invalidateQueries({ queryKey: trpc.pricingConfig.list.queryKey() });
 			toast.success("Pricing configuration created", {
 				description: `"${data.name}" has been added.`,
 			});
@@ -18,5 +17,5 @@ export function useCreatePricingConfigMutation() {
 				description: error.message,
 			});
 		},
-	});
-}
+	}));
+};

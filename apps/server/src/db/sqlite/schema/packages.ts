@@ -10,6 +10,9 @@ export const packages = sqliteTable("packages", {
 
 	categoryId: text("category_id").references(() => packageCategories.id),
 
+	// Package image
+	bannerImageUrl: text("banner_image_url"), // URL for package banner image
+
 	// Service specifications
 	serviceType: text("service_type").notNull(), // "transfer", "tour", "event", "hourly"
 	duration: integer("duration"), // in minutes (null for transfers)

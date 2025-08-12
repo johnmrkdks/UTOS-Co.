@@ -1,25 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { toast } from "sonner";
 
-export function useCreatePackageCategoryMutation() {
+export const useCreatePackageCategoryMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (data: {
-			name: string;
-			description?: string;
-			displayOrder?: number;
-		}) => {
-			return await trpc.packageCategories.create.mutate(data);
-		},
+	return useMutation(trpc.packageCategories.create.mutationOptions({
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["package-categories"] });
+			queryClient.invalidateQueries({ queryKey: trpc.packageCategories.list.queryKey() });
 			toast.success("Package category created successfully");
 		},
 		onError: (error) => {
 			toast.error("Failed to create package category");
 			console.error(error);
 		},
-	});
-}
+	}));
+};

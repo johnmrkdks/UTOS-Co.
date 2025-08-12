@@ -1,18 +1,7 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import type { ResourceList } from "server/types";
 
-type UseGetPricingConfigsQueryOptions = {
-	limit?: number;
-	offset?: number;
-	enabled?: boolean;
+export const useGetPricingConfigsQuery = (params: ResourceList) => {
+	return useQuery(trpc.pricingConfig.list.queryOptions(params));
 };
-
-export function useGetPricingConfigsQuery(options: UseGetPricingConfigsQueryOptions = {}) {
-	const { limit = 10, offset = 0, enabled = true } = options;
-
-	return useQuery({
-		queryKey: ["pricing-configs", { limit, offset }],
-		queryFn: () => trpc.pricingConfig.list.query({ limit, offset }),
-		enabled,
-	});
-}
