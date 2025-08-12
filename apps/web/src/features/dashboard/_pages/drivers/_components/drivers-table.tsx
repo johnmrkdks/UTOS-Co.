@@ -30,7 +30,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 	const [editingDriver, setEditingDriver] = useState<any>(null);
 	const [viewingDriver, setViewingDriver] = useState<any>(null);
 	
-	const driversQuery = useGetDriversQuery();
+	const driversQuery = useGetDriversQuery({});
 	const updateDriverMutation = useUpdateDriverMutation();
 
 	const handleApprove = async (driverId: string) => {

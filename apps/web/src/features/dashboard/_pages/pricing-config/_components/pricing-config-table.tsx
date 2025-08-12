@@ -25,7 +25,7 @@ export function PricingConfigTable() {
 	const [editingConfig, setEditingConfig] = useState<any>(null);
 	const [viewingConfig, setViewingConfig] = useState<any>(null);
 	
-	const pricingConfigsQuery = useGetPricingConfigsQuery();
+	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 
 	if (pricingConfigsQuery.isLoading) {
 		return <PricingConfigTableSkeleton />;

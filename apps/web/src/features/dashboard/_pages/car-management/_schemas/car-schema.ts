@@ -58,6 +58,7 @@ export const CarFormSchema = z.object({
 	// Operational status
 	isActive: z.boolean(),
 	isAvailable: z.boolean(),
+	isPublished: z.boolean(),
 	status: z.nativeEnum(CarStatusEnum),
 	// Arrays for related data
 	features: z.array(z.string()).optional(),

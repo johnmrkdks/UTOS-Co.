@@ -83,6 +83,9 @@ export const cars = sqliteTable(
 		isAvailable: integer("is_available", { mode: "boolean" })
 			.notNull()
 			.default(true), // Currently available for booking
+		isPublished: integer("is_published", { mode: "boolean" })
+			.notNull()
+			.default(false), // Public visibility for customers
 
 		// Service status tracking
 		status: text("status").$type<CarStatusEnum>()
@@ -99,6 +102,7 @@ export const cars = sqliteTable(
 	},
 	(table) => ({
 		availabilityIdx: index("cars_availability_idx").on(table.isAvailable, table.isActive),
+		publishedAvailabilityIdx: index("cars_published_availability_idx").on(table.isPublished, table.isActive, table.isAvailable),
 		categoryIdx: index("cars_category_idx").on(table.categoryId),
 		statusIdx: index("cars_status_idx").on(table.status),
 		locationIdx: index("cars_location_idx").on(table.currentLatitude, table.currentLongitude),

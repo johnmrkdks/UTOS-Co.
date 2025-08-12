@@ -28,6 +28,7 @@ import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './route
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
 import { Route as DashboardLayoutPublishedIndexRouteImport } from './routes/dashboard/_layout/published/index'
+import { Route as DashboardLayoutPublicationManagementIndexRouteImport } from './routes/dashboard/_layout/publication-management/index'
 import { Route as DashboardLayoutPricingConfigIndexRouteImport } from './routes/dashboard/_layout/pricing-config/index'
 import { Route as DashboardLayoutPackagesIndexRouteImport } from './routes/dashboard/_layout/packages/index'
 import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboard/_layout/inbox/index'
@@ -135,6 +136,12 @@ const DashboardLayoutPublishedIndexRoute =
     path: '/published/',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const DashboardLayoutPublicationManagementIndexRoute =
+  DashboardLayoutPublicationManagementIndexRouteImport.update({
+    id: '/publication-management/',
+    path: '/publication-management/',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 const DashboardLayoutPricingConfigIndexRoute =
   DashboardLayoutPricingConfigIndexRouteImport.update({
     id: '/pricing-config/',
@@ -226,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
   '/dashboard/pricing-config': typeof DashboardLayoutPricingConfigIndexRoute
+  '/dashboard/publication-management': typeof DashboardLayoutPublicationManagementIndexRoute
   '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
   '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
@@ -254,6 +262,7 @@ export interface FileRoutesByTo {
   '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
   '/dashboard/pricing-config': typeof DashboardLayoutPricingConfigIndexRoute
+  '/dashboard/publication-management': typeof DashboardLayoutPublicationManagementIndexRoute
   '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/report': typeof DashboardLayoutReportIndexRoute
   '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
@@ -286,6 +295,7 @@ export interface FileRoutesById {
   '/dashboard/_layout/inbox/': typeof DashboardLayoutInboxIndexRoute
   '/dashboard/_layout/packages/': typeof DashboardLayoutPackagesIndexRoute
   '/dashboard/_layout/pricing-config/': typeof DashboardLayoutPricingConfigIndexRoute
+  '/dashboard/_layout/publication-management/': typeof DashboardLayoutPublicationManagementIndexRoute
   '/dashboard/_layout/published/': typeof DashboardLayoutPublishedIndexRoute
   '/dashboard/_layout/report/': typeof DashboardLayoutReportIndexRoute
   '/dashboard/_layout/settings/': typeof DashboardLayoutSettingsIndexRoute
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/dashboard/inbox'
     | '/dashboard/packages'
     | '/dashboard/pricing-config'
+    | '/dashboard/publication-management'
     | '/dashboard/published'
     | '/dashboard/report'
     | '/dashboard/settings'
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/dashboard/inbox'
     | '/dashboard/packages'
     | '/dashboard/pricing-config'
+    | '/dashboard/publication-management'
     | '/dashboard/published'
     | '/dashboard/report'
     | '/dashboard/settings'
@@ -376,6 +388,7 @@ export interface FileRouteTypes {
     | '/dashboard/_layout/inbox/'
     | '/dashboard/_layout/packages/'
     | '/dashboard/_layout/pricing-config/'
+    | '/dashboard/_layout/publication-management/'
     | '/dashboard/_layout/published/'
     | '/dashboard/_layout/report/'
     | '/dashboard/_layout/settings/'
@@ -517,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutPublishedIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/dashboard/_layout/publication-management/': {
+      id: '/dashboard/_layout/publication-management/'
+      path: '/publication-management'
+      fullPath: '/dashboard/publication-management'
+      preLoaderRoute: typeof DashboardLayoutPublicationManagementIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
     '/dashboard/_layout/pricing-config/': {
       id: '/dashboard/_layout/pricing-config/'
       path: '/pricing-config'
@@ -636,6 +656,7 @@ interface DashboardLayoutRouteChildren {
   DashboardLayoutInboxIndexRoute: typeof DashboardLayoutInboxIndexRoute
   DashboardLayoutPackagesIndexRoute: typeof DashboardLayoutPackagesIndexRoute
   DashboardLayoutPricingConfigIndexRoute: typeof DashboardLayoutPricingConfigIndexRoute
+  DashboardLayoutPublicationManagementIndexRoute: typeof DashboardLayoutPublicationManagementIndexRoute
   DashboardLayoutPublishedIndexRoute: typeof DashboardLayoutPublishedIndexRoute
   DashboardLayoutReportIndexRoute: typeof DashboardLayoutReportIndexRoute
   DashboardLayoutSettingsIndexRoute: typeof DashboardLayoutSettingsIndexRoute
@@ -659,6 +680,8 @@ const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardLayoutPackagesIndexRoute: DashboardLayoutPackagesIndexRoute,
   DashboardLayoutPricingConfigIndexRoute:
     DashboardLayoutPricingConfigIndexRoute,
+  DashboardLayoutPublicationManagementIndexRoute:
+    DashboardLayoutPublicationManagementIndexRoute,
   DashboardLayoutPublishedIndexRoute: DashboardLayoutPublishedIndexRoute,
   DashboardLayoutReportIndexRoute: DashboardLayoutReportIndexRoute,
   DashboardLayoutSettingsIndexRoute: DashboardLayoutSettingsIndexRoute,

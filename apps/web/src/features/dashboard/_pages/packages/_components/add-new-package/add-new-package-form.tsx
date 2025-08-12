@@ -20,6 +20,7 @@ const addPackageSchema = z.object({
 	fixedPrice: z.number().min(0, "Price must be positive"),
 	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
 	isAvailable: z.boolean().default(true),
+	isPublished: z.boolean().default(false),
 	bannerImageUrl: z.string().optional(),
 });
 
@@ -50,6 +51,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			fixedPrice: 0,
 			maxPassengers: 4,
 			isAvailable: true,
+			isPublished: false,
 			bannerImageUrl: "",
 		},
 	});
@@ -231,7 +233,28 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							<div className="space-y-0.5">
 								<FormLabel>Available for Booking</FormLabel>
 								<div className="text-sm text-muted-foreground">
-									Customers can book this package
+									Enable internal booking functionality
+								</div>
+							</div>
+							<FormControl>
+								<Switch 
+									checked={field.value} 
+									onCheckedChange={field.onChange} 
+								/>
+							</FormControl>
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="isPublished"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+							<div className="space-y-0.5">
+								<FormLabel>Publish to Customers</FormLabel>
+								<div className="text-sm text-muted-foreground">
+									Make this package visible to public customers
 								</div>
 							</div>
 							<FormControl>

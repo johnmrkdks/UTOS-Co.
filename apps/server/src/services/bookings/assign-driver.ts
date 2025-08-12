@@ -17,7 +17,7 @@ export async function assignDriverService(db: DB, data: AssignDriverParams) {
 		.update(bookings)
 		.set({
 			driverId: driverId,
-			driverAssignedAt: new Date().getTime() / 1000,
+			driverAssignedAt: new Date(),
 			status: "driver_assigned" as any,
 		})
 		.where(eq(bookings.id, bookingId))

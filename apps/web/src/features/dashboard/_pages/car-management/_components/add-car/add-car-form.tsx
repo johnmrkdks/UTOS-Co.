@@ -29,6 +29,7 @@ import {
 	FormStatusIndicator,
 	StatusBadge,
 } from "@/features/dashboard/_pages/car-management/_components/draft/draft-indicators"
+import { PublicationValidationPanel, useTogglePublishCarMutation } from "@/features/dashboard/_components/publication"
 
 export type AddCarFormValues = z.infer<typeof CarFormSchema>
 
@@ -56,6 +57,7 @@ const DEFAULT_VALUES: Partial<AddCarFormValues> = {
 	availableForCustom: true,
 	isActive: true,
 	isAvailable: true,
+	isPublished: false,
 	status: CarStatusEnum.Available,
 	features: [],
 	images: [],
@@ -166,9 +168,43 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		mode: "onChange",
 	})
 
+	const togglePublishMutation = useTogglePublishCarMutation()
+	
+	// Watch form data for validation
+	const currentFormData = form.watch()
+
 	const {
 		formState: { isDirty, isValid, errors },
 	} = form
+
+	// Transform form data for validation (add defaults for new car)
+	const carValidationData = useMemo(() => ({
+		id: initialData?.id || "new",
+		name: currentFormData.name || "",
+		description: currentFormData.description || "",
+		licensePlate: currentFormData.licensePlate || "",
+		images: currentFormData.images || [],
+		insuranceExpiry: currentFormData.insuranceExpiry ? new Date(currentFormData.insuranceExpiry) : undefined,
+		registrationExpiry: currentFormData.registrationExpiry ? new Date(currentFormData.registrationExpiry) : undefined,
+		lastServiceDate: currentFormData.lastServiceDate ? new Date(currentFormData.lastServiceDate) : undefined,
+		isActive: currentFormData.isActive ?? true,
+		isAvailable: currentFormData.isAvailable ?? true,
+		status: currentFormData.status || "available",
+		seatingCapacity: currentFormData.seatingCapacity || 4,
+		category: currentFormData.categoryId ? { name: "Category" } : undefined,
+		model: currentFormData.modelId ? { name: "Model", brand: { name: "Brand" } } : undefined,
+	}), [currentFormData, initialData])
+
+	const handleTogglePublish = useCallback((shouldPublish: boolean) => {
+		if (initialData?.id) {
+			togglePublishMutation.mutate({
+				id: initialData.id,
+				isPublished: shouldPublish,
+			})
+		} else {
+			toast.info("Save the car first before publishing")
+		}
+	}, [initialData?.id, togglePublishMutation])
 
 	const errorCount = errors ? Object.keys(errors).length : 0
 	const hasErrors = errorCount > 0
@@ -239,6 +275,15 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 							<div className="col-span-4 flex flex-col gap-4">
 								<FeaturesForm control={form.control} />
 								<ImagesForm control={form.control} />
+								
+								{/* Publication Validation Panel */}
+								<PublicationValidationPanel
+									data={carValidationData}
+									type="car"
+									isPublished={initialData?.isPublished ?? false}
+									onTogglePublish={handleTogglePublish}
+									isLoading={togglePublishMutation.isPending}
+								/>
 							</div>
 						</div>
 					</PaddingLayout>

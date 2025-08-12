@@ -6,6 +6,8 @@ import { createPackageService, CreatePackageServiceSchema } from "@/services/pac
 import { deletePackageService, DeletePackageServiceSchema } from "@/services/packages/delete-package";
 import { getPackageService, GetPackageServiceSchema } from "@/services/packages/get-package";
 import { getPackagesService } from "@/services/packages/get-packages";
+import { getPublishedPackagesService } from "@/services/packages/get-published-packages";
+import { togglePublishPackageService, TogglePublishPackageServiceSchema } from "@/services/packages/toggle-publish-package";
 import { updatePackageService, UpdatePackageServiceSchema } from "@/services/packages/update-package";
 import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
@@ -62,6 +64,43 @@ export const packagesRouter = router({
 					input,
 				);
 				return updatedPackage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	togglePublish: protectedProcedure
+		.input(TogglePublishPackageServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const updatedPackage = await togglePublishPackageService(db, input);
+				return updatedPackage;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	// Public endpoints for customer-facing functionality
+	listPublished: publicProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const packages = await getPublishedPackagesService(db, input);
+				return packages;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	getPublished: publicProcedure
+		.input(GetPackageServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const packageItem = await getPackageService(db, input);
+				if (!packageItem?.isPublished || !packageItem?.isAvailable) {
+					throw new Error("Package not found or not available");
+				}
+				return packageItem;
 			} catch (error) {
 				handleTRPCError(error);
 			}

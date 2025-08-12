@@ -110,7 +110,7 @@ export const carsTableColumns: ColumnDef<Car>[] = [
 		id: "isAvailable",
 		accessorKey: "isAvailable",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Status" />
+			<DataTableColumnHeader column={column} title="Availability" />
 		),
 		cell: ({ row }) => {
 			const isAvailable = row.getValue("isAvailable") as boolean
@@ -121,7 +121,7 @@ export const carsTableColumns: ColumnDef<Car>[] = [
 			)
 		},
 		enableSorting: true,
-		enableHiding: false,
+		enableHiding: true,
 	},
 	{
 		id: "year",

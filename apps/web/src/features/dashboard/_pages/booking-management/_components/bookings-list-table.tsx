@@ -50,8 +50,8 @@ export function BookingsListTable({ bookingType, status }: BookingsListTableProp
 	const { openBookingDetailsDialog } = useBookingManagementModalProvider();
 	
 	const bookingsQuery = useGetBookingsQuery({
-		page: 1,
 		limit: 50,
+		offset: 0,
 	});
 
 	const columns: ColumnDef<Booking>[] = [
@@ -88,11 +88,11 @@ export function BookingsListTable({ bookingType, status }: BookingsListTableProp
 			cell: ({ row }) => {
 				const status = row.getValue("status") as string;
 				const statusColors = {
-					pending: "warning",
-					confirmed: "success",
-					driver_assigned: "info",
-					in_progress: "primary",
-					completed: "success",
+					pending: "secondary",
+					confirmed: "default",
+					driver_assigned: "outline",
+					in_progress: "default",
+					completed: "default",
 					cancelled: "destructive",
 				};
 				return (
@@ -222,7 +222,7 @@ export function BookingsListTable({ bookingType, status }: BookingsListTableProp
 	return (
 		<DataTable
 			columns={columns}
-			data={bookingsQuery.data?.items || []}
+			data={bookingsQuery.data?.data || []}
 			searchKey="customerName"
 			searchPlaceholder="Search by customer name..."
 		/>

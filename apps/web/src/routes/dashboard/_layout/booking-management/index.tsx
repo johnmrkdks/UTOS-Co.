@@ -67,7 +67,7 @@ function BookingManagementContent() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							{bookingsQuery.data?.totalItems || 0}
+							{bookingsQuery.data?.data?.length || 0}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							All time bookings

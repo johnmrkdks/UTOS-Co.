@@ -13,7 +13,7 @@ export const Route = createFileRoute('/dashboard/_layout/drivers/')({
 });
 
 function RouteComponent() {
-	const driversQuery = useGetDriversQuery();
+	const driversQuery = useGetDriversQuery({});
 
 	const totalDrivers = driversQuery.data?.totalItems || 0;
 	const activeDrivers = driversQuery.data?.items?.filter((driver: any) => driver.isActive && driver.isApproved).length || 0;

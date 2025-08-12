@@ -13,6 +13,7 @@ import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks
 import { useGetPackageCategoriesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-package-categories-query";
 import { useModal } from "@/hooks/use-modal";
 import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
+import { PublicationStatsCard } from "@/features/dashboard/_components/publication";
 
 export const Route = createFileRoute('/dashboard/_layout/packages/')(
 	{
@@ -23,9 +24,18 @@ export const Route = createFileRoute('/dashboard/_layout/packages/')(
 function RouteComponent() {
 	const [showAddPackage, setShowAddPackage] = useState(false);
 	const [activeTab, setActiveTab] = useState("packages");
-	const packagesQuery = useGetPackagesQuery();
+	const packagesQuery = useGetPackagesQuery({});
 	const { data: categories = [], isLoading: categoriesLoading } = useGetPackageCategoriesQuery();
 	const { openModal } = useModal();
+
+	// Calculate publication stats
+	const packages = packagesQuery.data?.data || [];
+	const publicationStats = {
+		total: packages.length,
+		published: packages.filter((pkg: any) => pkg.isPublished && pkg.isAvailable).length,
+		unpublished: packages.filter((pkg: any) => !pkg.isPublished).length,
+		publishedWithIssues: packages.filter((pkg: any) => pkg.isPublished && !pkg.isAvailable).length,
+	};
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
@@ -78,7 +88,7 @@ function RouteComponent() {
 							</CardHeader>
 							<CardContent>
 								<div className="text-2xl font-bold">
-									{packagesQuery.data?.totalItems || 0}
+									{packages.length || 0}
 								</div>
 								<p className="text-xs text-muted-foreground">
 									Available service packages
@@ -93,43 +103,10 @@ function RouteComponent() {
 							</CardHeader>
 							<CardContent>
 								<div className="text-2xl font-bold">
-									{packagesQuery.data?.items?.filter((pkg: any) => pkg.isAvailable).length || 0}
+									{packages.filter((pkg: any) => pkg.isAvailable).length || 0}
 								</div>
 								<p className="text-xs text-muted-foreground">
 									Currently bookable
-								</p>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Average Price</CardTitle>
-								<Package className="h-4 w-4 text-muted-foreground" />
-							</CardHeader>
-							<CardContent>
-								<div className="text-2xl font-bold">
-									${(
-										(packagesQuery.data?.items?.reduce((sum: number, pkg: any) => sum + (pkg.fixedPrice ? pkg.fixedPrice / 100 : 0), 0) || 0) /
-										(packagesQuery.data?.items?.length || 1)
-									).toFixed(0)}
-								</div>
-								<p className="text-xs text-muted-foreground">
-									Per day across all packages
-								</p>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Inactive Packages</CardTitle>
-								<Package className="h-4 w-4 text-muted-foreground" />
-							</CardHeader>
-							<CardContent>
-								<div className="text-2xl font-bold">
-									{packagesQuery.data?.items?.filter((pkg: any) => !pkg.isAvailable).length || 0}
-								</div>
-								<p className="text-xs text-muted-foreground">
-									Temporarily unavailable
 								</p>
 							</CardContent>
 						</Card>
@@ -153,7 +130,7 @@ function RouteComponent() {
 						<div>
 							<h3 className="text-lg font-semibold">Package Categories</h3>
 							<p className="text-sm text-muted-foreground">
-								Manage package categories for organized booking options. Categories group packages by theme (e.g., "Airport Services", "City Tours") 
+								Manage package categories for organized booking options. Categories group packages by theme (e.g., "Airport Services", "City Tours")
 								while Service Types define operational models (Transfer, Tour, Event, Hourly).
 							</p>
 						</div>

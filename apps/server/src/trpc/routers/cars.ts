@@ -3,8 +3,10 @@ import { createCarService, CreateCarServiceSchema } from "@/services/cars/create
 import { deleteCarService, DeleteCarServiceSchema } from "@/services/cars/delete-car";
 import { getCarService, GetCarServiceSchema } from "@/services/cars/get-car";
 import { getCarsService } from "@/services/cars/get-cars";
+import { getPublishedCarsService } from "@/services/cars/get-published-cars";
+import { togglePublishCarService, TogglePublishCarServiceSchema } from "@/services/cars/toggle-publish-car";
 import { updateCarService, UpdateCarServiceSchema } from "@/services/cars/update-car";
-import { protectedProcedure, router } from "@/trpc/init";
+import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";
@@ -57,6 +59,43 @@ export const carsRouter = router({
 			try {
 				const updatedCar = await updateCarService(db, input);
 				return updatedCar;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	togglePublish: protectedProcedure
+		.input(TogglePublishCarServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const updatedCar = await togglePublishCarService(db, input);
+				return updatedCar;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	// Public endpoints for customer-facing functionality
+	listPublished: publicProcedure
+		.input(ResourceListSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const cars = await getPublishedCarsService(db, input);
+				return cars;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	getPublished: publicProcedure
+		.input(GetCarServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const car = await getCarService(db, input);
+				if (!car?.isPublished || !car?.isActive || !car?.isAvailable) {
+					throw new Error("Car not found or not available");
+				}
+				return car;
 			} catch (error) {
 				handleTRPCError(error);
 			}

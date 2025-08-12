@@ -1,15 +1,15 @@
 import { eq, asc } from "drizzle-orm";
-import type { DrizzleDB } from "@/db";
+import type { DB } from "@/db";
 import { packageCategories } from "@/db/sqlite/schema/packages/package-categories";
 
-export async function getAllPackageCategories(db: DrizzleDB) {
+export async function getAllPackageCategories(db: DB) {
 	return await db
 		.select()
 		.from(packageCategories)
 		.orderBy(asc(packageCategories.displayOrder), asc(packageCategories.name));
 }
 
-export async function getPackageCategoryById(db: DrizzleDB, id: string) {
+export async function getPackageCategoryById(db: DB, id: string) {
 	const result = await db
 		.select()
 		.from(packageCategories)
@@ -20,7 +20,7 @@ export async function getPackageCategoryById(db: DrizzleDB, id: string) {
 }
 
 export async function createPackageCategory(
-	db: DrizzleDB,
+	db: DB,
 	data: {
 		name: string;
 		description?: string;
@@ -40,7 +40,7 @@ export async function createPackageCategory(
 }
 
 export async function updatePackageCategory(
-	db: DrizzleDB,
+	db: DB,
 	id: string,
 	data: {
 		name: string;
@@ -61,7 +61,7 @@ export async function updatePackageCategory(
 	return category;
 }
 
-export async function deletePackageCategory(db: DrizzleDB, id: string) {
+export async function deletePackageCategory(db: DB, id: string) {
 	const [deletedCategory] = await db
 		.delete(packageCategories)
 		.where(eq(packageCategories.id, id))

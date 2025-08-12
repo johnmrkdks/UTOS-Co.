@@ -26,7 +26,7 @@ type QuoteTesterForm = z.infer<typeof quoteTesterSchema>;
 
 export function QuoteTester() {
 	const [quote, setQuote] = useState<any>(null);
-	const pricingConfigsQuery = useGetPricingConfigsQuery();
+	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 	
 	const form = useForm<QuoteTesterForm>({
 		resolver: zodResolver(quoteTesterSchema),

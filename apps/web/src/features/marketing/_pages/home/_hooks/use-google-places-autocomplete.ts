@@ -15,16 +15,12 @@ interface UseGooglePlacesAutocompleteOptions {
 	types?: string[]
 }
 
-// Extend the window object to include google
-declare global {
-	interface Window {
-		google: typeof google
-	}
-}
+// Google Maps types
+declare const google: any;
 
 export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocompleteOptions = {}) {
 	const inputRef = useRef<HTMLInputElement>(null)
-	const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
+	const autocompleteRef = useRef<any>(null)
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [predictions, setPredictions] = useState<PlaceResult[]>([])
 	const [isLoading, setIsLoading] = useState(false)
@@ -34,7 +30,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 		if (typeof window === "undefined") return
 
 		// Check if Google Maps is already loaded
-		if (window.google && window.google.maps && window.google.maps.places) {
+		if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
 			setIsLoaded(true)
 			return
 		}
@@ -70,14 +66,14 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 
 		try {
 			// Configure autocomplete options
-			const autocompleteOptions: google.maps.places.AutocompleteOptions = {
+			const autocompleteOptions = {
 				componentRestrictions: options.componentRestrictions || { country: "au" },
 				types: options.types || ["geocode"],
 				fields: ["place_id", "formatted_address", "name", "address_components"],
 			}
 
 			// Initialize autocomplete
-			autocompleteRef.current = new google.maps.places.Autocomplete(
+			autocompleteRef.current = new (window as any).google.maps.places.Autocomplete(
 				inputRef.current,
 				autocompleteOptions
 			)
@@ -99,7 +95,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 
 			return () => {
 				if (listener) {
-					google.maps.event.removeListener(listener)
+					(window as any).google.maps.event.removeListener(listener)
 				}
 			}
 		} catch (error) {
@@ -117,7 +113,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 		setIsLoading(true)
 
 		return new Promise((resolve) => {
-			const service = new google.maps.places.AutocompleteService()
+			const service = new (window as any).google.maps.places.AutocompleteService()
 			
 			service.getPlacePredictions(
 				{
@@ -125,10 +121,10 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 					componentRestrictions: options.componentRestrictions || { country: "au" },
 					types: options.types || ["geocode"],
 				},
-				(predictions: google.maps.places.AutocompletePrediction[] | null, status: google.maps.places.PlacesServiceStatus) => {
+				(predictions: any[] | null, status: any) => {
 					setIsLoading(false)
 					
-					if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+					if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
 						const results: PlaceResult[] = predictions.map((prediction) => ({
 							placeId: prediction.place_id,
 							description: prediction.description,

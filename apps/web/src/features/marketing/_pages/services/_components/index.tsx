@@ -1,6 +1,8 @@
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
+import { useGetPublishedPackagesQuery } from "../_hooks/query/use-get-published-packages-query";
+import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
 import {
 	Plane,
 	Building,
@@ -14,83 +16,52 @@ import {
 	Calendar
 } from "lucide-react";
 
-const services = [
-	{
-		icon: Plane,
-		title: "Airport Transfers",
-		description: "Seamless pickups and drop-offs from Sydney Airport with flight tracking and meet & greet service.",
-		features: ["Flight tracking", "Meet & greet", "Luggage assistance", "Multiple terminals"],
-		price: "From $85",
-		popular: true
-	},
-	{
-		icon: Building,
-		title: "Corporate Travel",
-		description: "Professional transportation for business meetings, conferences, and corporate events.",
-		features: ["Executive vehicles", "Flexible scheduling", "Business amenities", "Invoice billing"],
-		price: "From $95",
-		popular: false
-	},
-	{
-		icon: MapPin,
-		title: "City Tours",
-		description: "Discover Sydney's iconic landmarks with our knowledgeable chauffeurs as your personal guides.",
-		features: ["Custom itineraries", "Expert local guides", "Photo stops", "Flexible duration"],
-		price: "From $120",
-		popular: false
-	},
-	{
-		icon: Users,
-		title: "Special Events",
-		description: "Arrive in style for weddings, galas, proms, and other special occasions.",
-		features: ["Red carpet service", "Luxury fleet", "Event coordination", "Group bookings"],
-		price: "From $150",
-		popular: false
-	},
-	{
-		icon: Calendar,
-		title: "Hourly Charter",
-		description: "Flexible hourly rates for multiple stops, shopping trips, or extended city exploration.",
-		features: ["Flexible timing", "Multiple stops", "Wait time included", "Personal chauffeur"],
-		price: "From $80/hr",
-		popular: false
-	},
-	{
-		icon: Sparkles,
-		title: "VIP Experience",
-		description: "Ultimate luxury service with premium vehicles and white-glove treatment.",
-		features: ["Premium fleet", "Concierge service", "Champagne service", "Priority booking"],
-		price: "Custom pricing",
-		popular: false
-	}
-];
+// Service type to icon mapping
+const serviceIcons: Record<string, any> = {
+	transfer: Plane,
+	tour: MapPin,
+	event: Sparkles,
+	hourly: Calendar,
+	corporate: Building,
+	vip: Users
+};
 
-const fleetHighlights = [
-	{
-		name: "Mercedes S-Class",
-		type: "Executive Sedan",
-		passengers: "1-3",
-		image: "/images/mercedes-s-class.jpg"
-	},
-	{
-		name: "BMW 7 Series",
-		type: "Luxury Sedan",
-		passengers: "1-3",
-		image: "/images/bmw-7-series.jpg"
-	},
-	{
-		name: "Mercedes V-Class",
-		type: "Luxury Van",
-		passengers: "1-6",
-		image: "/images/mercedes-v-class.jpg"
-	}
-];
 
 type ServicesProps = {
 	className?: string;
 };
 
 export function Services({ className, ...props }: ServicesProps) {
+	// Fetch published packages
+	const { data: packagesData, isLoading: packagesLoading } = useGetPublishedPackagesQuery({
+		limit: 6
+	});
+	
+	// Fetch published cars for fleet showcase
+	const { data: carsData, isLoading: carsLoading } = useGetPublishedCarsQuery({
+		limit: 3
+	});
+	
+	const services = packagesData?.data?.map((pkg: any) => ({
+		icon: serviceIcons[pkg.serviceType] || Building,
+		title: pkg.name,
+		description: pkg.description,
+		features: [
+			`Max ${pkg.maxPassengers} passengers`,
+			pkg.includesDriver ? "Professional chauffeur" : "Self-drive",
+			pkg.includesFuel ? "Fuel included" : "Fuel not included",
+			pkg.includesTolls ? "Tolls included" : "Tolls separate"
+		].filter(Boolean),
+		price: `From $${(pkg.fixedPrice / 100).toFixed(0)}`,
+		popular: pkg.serviceType === "transfer" // Mark airport transfers as popular
+	})) || [];
+	
+	const fleetHighlights = carsData?.data?.map((car: any) => ({
+		name: car.name,
+		type: car.category?.name || "Luxury Vehicle",
+		passengers: `1-${car.seatingCapacity}`,
+		image: car.images?.find((img: any) => img.isMain)?.url || "/images/placeholder-car.jpg"
+	})) || [];
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Hero Section */}
@@ -152,7 +123,29 @@ export function Services({ className, ...props }: ServicesProps) {
 					</div>
 
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{services.map((service, index) => (
+						{packagesLoading ? (
+							// Loading skeleton
+							Array.from({ length: 6 }).map((_, index) => (
+								<div key={index} className="bg-card border-2 border-border rounded-2xl p-8">
+									<div className="flex items-center mb-6">
+										<div className="w-14 h-14 bg-muted rounded-2xl mr-4 animate-pulse" />
+										<div>
+											<div className="h-5 bg-muted rounded w-32 mb-2 animate-pulse" />
+											<div className="h-6 bg-muted rounded w-20 animate-pulse" />
+										</div>
+									</div>
+									<div className="h-4 bg-muted rounded w-full mb-2 animate-pulse" />
+									<div className="h-4 bg-muted rounded w-3/4 mb-6 animate-pulse" />
+									<div className="space-y-3 mb-8">
+										{Array.from({ length: 4 }).map((_, i) => (
+											<div key={i} className="h-4 bg-muted rounded w-5/6 animate-pulse" />
+										))}
+									</div>
+									<div className="h-12 bg-muted rounded animate-pulse" />
+								</div>
+							))
+						) : services.length > 0 ? (
+							services.map((service: any, index: number) => (
 							<div
 								key={service.title}
 								className={cn(
@@ -185,7 +178,7 @@ export function Services({ className, ...props }: ServicesProps) {
 								</p>
 
 								<ul className="space-y-3 mb-8">
-									{service.features.map((feature, featureIndex) => (
+									{service.features.map((feature: any, featureIndex: number) => (
 										<li key={featureIndex} className="flex items-center text-muted-foreground">
 											<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
 												<div className="w-2 h-2 bg-primary rounded-full" />
@@ -203,7 +196,26 @@ export function Services({ className, ...props }: ServicesProps) {
 									</Button>
 								</Link>
 							</div>
-						))}
+						))
+						) : (
+							// Empty state
+							<div className="col-span-full text-center py-16">
+								<div className="w-24 h-24 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+									<Sparkles className="w-12 h-12 text-muted-foreground" />
+								</div>
+								<h3 className="text-2xl font-bold text-foreground mb-4">
+									No Services Available
+								</h3>
+								<p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+									We're currently setting up our premium services. Please check back soon or contact us for more information.
+								</p>
+								<Link to="/contact-us">
+									<Button size="lg" className="px-8 py-6">
+										Contact Us
+									</Button>
+								</Link>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -222,13 +234,38 @@ export function Services({ className, ...props }: ServicesProps) {
 					</div>
 
 					<div className="grid md:grid-cols-3 gap-8">
-						{fleetHighlights.map((vehicle, index) => (
+						{carsLoading ? (
+							// Loading skeleton for cars
+							Array.from({ length: 3 }).map((_, index) => (
+								<div key={index} className="bg-card rounded-2xl overflow-hidden shadow-lg border border-border">
+									<div className="h-48 bg-muted animate-pulse" />
+									<div className="p-6">
+										<div className="flex justify-between items-start mb-3">
+											<div className="flex-1">
+												<div className="h-5 bg-muted rounded w-32 mb-2 animate-pulse" />
+												<div className="h-4 bg-muted rounded w-24 animate-pulse" />
+											</div>
+											<div className="h-4 bg-muted rounded w-16 animate-pulse" />
+										</div>
+									</div>
+								</div>
+							))
+						) : fleetHighlights.length > 0 ? (
+							fleetHighlights.map((vehicle: any, index: number) => (
 							<div
 								key={vehicle.name}
 								className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group border border-border"
 							>
-								<div className="h-48 bg-muted flex items-center justify-center">
-									<Car className="w-16 h-16 text-muted-foreground" />
+								<div className="h-48 bg-muted flex items-center justify-center overflow-hidden">
+									{vehicle.image && vehicle.image !== "/images/placeholder-car.jpg" ? (
+										<img 
+											src={vehicle.image} 
+											alt={vehicle.name}
+											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+										/>
+									) : (
+										<Car className="w-16 h-16 text-muted-foreground" />
+									)}
 								</div>
 
 								<div className="p-6">
@@ -250,7 +287,26 @@ export function Services({ className, ...props }: ServicesProps) {
 									</div>
 								</div>
 							</div>
-						))}
+						))
+						) : (
+							// Empty state for cars
+							<div className="col-span-full text-center py-16">
+								<div className="w-24 h-24 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+									<Car className="w-12 h-12 text-muted-foreground" />
+								</div>
+								<h3 className="text-2xl font-bold text-foreground mb-4">
+									Fleet Coming Soon
+								</h3>
+								<p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+									We're preparing our luxury fleet for you. Please check back soon or contact us for more information.
+								</p>
+								<Link to="/contact-us">
+									<Button size="lg" className="px-8 py-6">
+										Contact Us
+									</Button>
+								</Link>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

@@ -47,7 +47,7 @@ export function InstantQuoteWidget() {
 	})
 
 	const watchedValues = form.watch(["originAddress", "destinationAddress"])
-	const canCalculateQuote = watchedValues[0] && watchedValues[1] && watchedValues[2]
+	const canCalculateQuote = watchedValues[0] && watchedValues[1]
 
 	const handleCalculateQuote = () => {
 		// Mock quote calculation - in real implementation, this would call the API

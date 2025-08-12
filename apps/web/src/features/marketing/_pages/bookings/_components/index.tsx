@@ -2,6 +2,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { BookingCard } from "./booking-card";
 import { Link } from "@tanstack/react-router";
+import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
 import {
 	Car,
 	Calendar,
@@ -17,62 +18,6 @@ import {
 	Award
 } from "lucide-react";
 
-const bookingCards = [{
-	model: "Euro Sedan",
-	description: "Perfect for executive travel and airport transfers. Seats up to 3 passengers in luxury and comfort.",
-	features: ["Airport transfers", "Executive comfort", "3 passengers", "Professional chauffeur"],
-	pricing: {
-		airport: "$110",
-		hourly: "$100/hr",
-		minimum: "4 hours"
-	},
-	image: "placeholder.svg",
-	popular: false
-}, {
-	model: "Premium SUV",
-	description: "Spacious luxury SUV ideal for families and groups. Enhanced comfort with premium amenities.",
-	features: ["Family friendly", "Premium comfort", "5 passengers", "Extra luggage space"],
-	pricing: {
-		airport: "$140",
-		hourly: "$110/hr",
-		minimum: "4 hours"
-	},
-	image: "placeholder.svg",
-	popular: true
-}, {
-	model: "Mercedes V-Class Van",
-	description: "Luxury 7-seater van perfect for group travel and special events. Ultimate comfort and style.",
-	features: ["7 passengers", "Luxury interior", "Group travel", "Special events"],
-	pricing: {
-		airport: "$160",
-		hourly: "$130/hr",
-		minimum: "2 hours"
-	},
-	image: "placeholder.svg",
-	popular: false
-}, {
-	model: "12 Seater Sprinter Bus",
-	description: "Luxury coach for larger groups. Perfect for corporate events, weddings, and group transfers.",
-	features: ["12 passengers", "Corporate events", "Wedding parties", "Group transfers"],
-	pricing: {
-		airport: "$180",
-		hourly: "$150/hr",
-		minimum: "2 hours"
-	},
-	image: "placeholder.svg",
-	popular: false
-}, {
-	model: "15 Seater Sprinter Bus",
-	description: "Our largest luxury vehicle for maximum group capacity. Ideal for large corporate groups and events.",
-	features: ["15 passengers", "Large groups", "Corporate travel", "Event transportation"],
-	pricing: {
-		airport: "$210",
-		hourly: "$175/hr",
-		minimum: "2 hours"
-	},
-	image: "placeholder.svg",
-	popular: false
-}]
 
 const serviceFeatures = [
 	{
@@ -102,6 +47,28 @@ type BookingProps = {
 };
 
 export function Booking({ className, ...props }: BookingProps) {
+	// Fetch published cars
+	const { data: carsData, isLoading: carsLoading } = useGetPublishedCarsQuery({
+		limit: 5
+	});
+
+	const bookingCards = carsData?.data?.map((car: any, index: number) => ({
+		model: car.name,
+		description: car.description,
+		features: [
+			`${car.seatingCapacity} passengers`,
+			car.category?.name || "Luxury vehicle",
+			car.fuelType?.name || "Premium fuel",
+			car.transmissionType?.name || "Automatic"
+		].filter(Boolean),
+		pricing: {
+			airport: "Contact for pricing",
+			hourly: "Contact for pricing", 
+			minimum: "2 hours"
+		},
+		image: car.images?.find((img: any) => img.isMain)?.url || "placeholder.svg",
+		popular: index === 1 // Mark second car as popular
+	})) || [];
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Vehicle Selection */}
@@ -118,9 +85,51 @@ export function Booking({ className, ...props }: BookingProps) {
 					</div>
 
 					<div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
-						{bookingCards.map((card) => (
-							<BookingCard key={card.model} {...card} />
-						))}
+						{carsLoading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<div key={index} className="bg-card rounded-2xl border border-border p-6">
+									<div className="h-48 bg-muted rounded-xl mb-6 animate-pulse" />
+									<div className="space-y-4">
+										<div className="h-6 bg-muted rounded w-3/4 animate-pulse" />
+										<div className="h-4 bg-muted rounded w-full animate-pulse" />
+										<div className="h-4 bg-muted rounded w-5/6 animate-pulse" />
+										<div className="space-y-2">
+											{Array.from({ length: 4 }).map((_, i) => (
+												<div key={i} className="h-4 bg-muted rounded w-4/5 animate-pulse" />
+											))}
+										</div>
+										<div className="pt-4 space-y-2">
+											<div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+											<div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
+										</div>
+										<div className="h-10 bg-muted rounded animate-pulse" />
+									</div>
+								</div>
+							))
+						) : bookingCards.length > 0 ? (
+							bookingCards.map((card: any) => (
+								<BookingCard key={card.model} {...card} />
+							))
+						) : (
+							// Empty state
+							<div className="col-span-full text-center py-16">
+								<div className="w-24 h-24 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+									<Car className="w-12 h-12 text-muted-foreground" />
+								</div>
+								<h3 className="text-2xl font-bold text-foreground mb-4">
+									No Vehicles Available
+								</h3>
+								<p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+									We're currently preparing our luxury fleet. Please check back soon or contact us for more information.
+								</p>
+								<Link to="/contact-us">
+									<Button size="lg" className="px-8 py-6">
+										Contact Us
+									</Button>
+								</Link>
+							</div>
+						)}
 					</div>
 				</div>
 			</section>

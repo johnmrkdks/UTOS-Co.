@@ -17,7 +17,7 @@ export const Route = createFileRoute('/dashboard/_layout/pricing-config/')({
 
 function RouteComponent() {
 	const [showCreateConfig, setShowCreateConfig] = useState(false);
-	const pricingConfigsQuery = useGetPricingConfigsQuery();
+	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">

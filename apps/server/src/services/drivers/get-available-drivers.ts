@@ -1,5 +1,5 @@
 import type { DB } from "@/db";
-import { drivers, users, cars, bookings } from "@/db/schema";
+import { drivers, users, bookings } from "@/db/schema";
 import { eq, and, isNull, or } from "drizzle-orm";
 
 export async function getAvailableDriversService(db: DB, timeSlot?: { start: Date; end: Date }) {
@@ -9,25 +9,18 @@ export async function getAvailableDriversService(db: DB, timeSlot?: { start: Dat
 			id: drivers.id,
 			userId: drivers.userId,
 			licenseNumber: drivers.licenseNumber,
-			carId: drivers.carId,
 			isActive: drivers.isActive,
 			isApproved: drivers.isApproved,
+			rating: drivers.rating,
+			totalRides: drivers.totalRides,
 			user: {
 				id: users.id,
 				name: users.name,
 				email: users.email,
-				phone: users.phone,
-			},
-			car: {
-				id: cars.id,
-				name: cars.name,
-				licensePlate: cars.licensePlate,
-				status: cars.status,
 			},
 		})
 		.from(drivers)
 		.leftJoin(users, eq(drivers.userId, users.id))
-		.leftJoin(cars, eq(drivers.carId, cars.id))
 		.where(
 			and(
 				eq(drivers.isActive, true),
@@ -48,8 +41,8 @@ export async function getAvailableDriversService(db: DB, timeSlot?: { start: Dat
 					// Booking overlaps with requested time slot
 					or(
 						and(
-							eq(bookings.scheduledPickupTime, timeSlot.start.getTime() / 1000),
-							eq(bookings.actualDropoffTime, timeSlot.end.getTime() / 1000)
+							eq(bookings.scheduledPickupTime, timeSlot.start),
+							eq(bookings.actualDropoffTime, timeSlot.end)
 						)
 						// Add more sophisticated overlap logic as needed
 					)

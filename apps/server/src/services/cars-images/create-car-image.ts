@@ -3,7 +3,9 @@ import type { DB } from "@/db";
 import { InsertCarImageSchema } from "@/schemas/shared";
 import { z } from "zod";
 
-export const CreateCarImageServiceSchema = InsertCarImageSchema;
+export const CreateCarImageServiceSchema = InsertCarImageSchema.extend({
+	carId: z.string().min(1, "Car ID is required"),
+});
 
 export type CreateCarImageParams = z.infer<typeof CreateCarImageServiceSchema>;
 

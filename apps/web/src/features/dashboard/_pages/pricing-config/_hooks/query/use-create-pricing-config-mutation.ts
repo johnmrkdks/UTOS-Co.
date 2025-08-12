@@ -9,7 +9,7 @@ export const useCreatePricingConfigMutation = () => {
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: trpc.pricingConfig.list.queryKey() });
 			toast.success("Pricing configuration created", {
-				description: `"${data.name}" has been added.`,
+				description: `"${data?.name || 'Configuration'}" has been added.`,
 			});
 		},
 		onError: (error) => {

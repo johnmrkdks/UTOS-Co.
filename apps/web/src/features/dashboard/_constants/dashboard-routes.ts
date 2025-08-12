@@ -9,6 +9,7 @@ import {
 	CarIcon,
 	ClipboardListIcon,
 	DollarSignIcon,
+	EyeIcon,
 	FlaskConicalIcon,
 	InboxIcon,
 	LayoutDashboardIcon,
@@ -26,7 +27,8 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 		const developmentOnlyPaths = [
 			"/dashboard/analytics",
 			"/dashboard/pricing-config",
-			"/dashboard/admin-testing"
+			"/dashboard/admin-testing",
+			"/dashboard/publication-management",
 		];
 
 		if (developmentOnlyPaths.includes(route.path) && !isDevelopment) {
@@ -75,6 +77,11 @@ const ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
 		label: "Booking Management",
 		path: "/dashboard/booking-management",
 		icon: CalendarIcon,
+	},
+	{
+		label: "Publication Management",
+		path: "/dashboard/publication-management",
+		icon: EyeIcon,
 	},
 ];
 

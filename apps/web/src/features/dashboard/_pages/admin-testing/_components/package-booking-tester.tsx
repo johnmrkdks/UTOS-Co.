@@ -24,8 +24,8 @@ export function PackageBookingTester({ onResult }: PackageBookingTesterProps) {
 	const [passengerCount, setPassengerCount] = useState("2");
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { data: packagesData } = useGetPackagesQuery();
-	const packages = packagesData?.items || [];
+	const { data: packagesData } = useGetPackagesQuery({});
+	const packages = packagesData?.data || [];
 
 	const handleTest = async () => {
 		if (!selectedPackage || !pickupDate) {

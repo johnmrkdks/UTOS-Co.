@@ -9,6 +9,7 @@ import { PlusIcon } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { useGetCarsQuery } from "../_hooks/query/car/use-get-cars-query";
 import { useMemo } from "react";
+import { PublicationStatsCard } from "@/features/dashboard/_components/publication";
 
 function AddCarButton() {
 	return (
@@ -34,6 +35,7 @@ export function CarsList() {
 		brand: search.brand || "",
 		category: search.category || "",
 		availability: search.availability || "all",
+		publicationStatus: (search as any).publicationStatus || "all",
 		minPrice: search.minPrice || 0,
 		maxPrice: search.maxPrice || 10000,
 		page: search.page || 1,
@@ -81,6 +83,23 @@ export function CarsList() {
 			);
 		}
 
+		// Publication status filter
+		if (filters.publicationStatus !== "all") {
+			if (filters.publicationStatus === "published") {
+				filtered = filtered.filter((car: any) =>
+					car.isPublished && car.isActive && car.isAvailable && car.status === "available"
+				);
+			} else if (filters.publicationStatus === "unpublished") {
+				filtered = filtered.filter((car: any) =>
+					!car.isPublished
+				);
+			} else if (filters.publicationStatus === "published-with-issues") {
+				filtered = filtered.filter((car: any) =>
+					car.isPublished && (!car.isActive || !car.isAvailable || car.status !== "available")
+				);
+			}
+		}
+
 		// Price range filters
 		if (filters.minPrice > 0) {
 			filtered = filtered.filter((car: any) =>
@@ -101,6 +120,22 @@ export function CarsList() {
 	const cars = useMemo(() => ({
 		data: filteredCars
 	}), [filteredCars]);
+
+	// Calculate publication stats
+	const publicationStats = useMemo(() => {
+		if (!allCars?.data) return { total: 0, published: 0, unpublished: 0, publishedWithIssues: 0 };
+
+		const total = allCars.data.length;
+		const published = allCars.data.filter((car: any) =>
+			car.isPublished && car.isActive && car.isAvailable && car.status === "available"
+		).length;
+		const unpublished = allCars.data.filter((car: any) => !car.isPublished).length;
+		const publishedWithIssues = allCars.data.filter((car: any) =>
+			car.isPublished && (!car.isActive || !car.isAvailable || car.status !== "available")
+		).length;
+
+		return { total, published, unpublished, publishedWithIssues };
+	}, [allCars?.data]);
 
 	const handleFiltersChange = (newFilters: Partial<typeof filters>) => {
 		navigate({

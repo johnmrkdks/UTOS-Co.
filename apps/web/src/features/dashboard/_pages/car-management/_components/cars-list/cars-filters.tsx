@@ -167,30 +167,6 @@ export function CarsFilters({
 						<SelectItem value="unavailable">Unavailable</SelectItem>
 					</SelectContent>
 				</Select>
-
-				{/* Price Range */}
-				<div className="flex gap-2">
-					<Input
-						type="number"
-						placeholder="Min price"
-						value={filters.minPrice || ""}
-						onChange={(e) => onFiltersChange({
-							minPrice: Number(e.target.value) || 0,
-							page: 1
-						})}
-						className="w-full"
-					/>
-					<Input
-						type="number"
-						placeholder="Max price"
-						value={filters.maxPrice === 10000 ? "" : filters.maxPrice}
-						onChange={(e) => onFiltersChange({
-							maxPrice: Number(e.target.value) || 10000,
-							page: 1
-						})}
-						className="w-full"
-					/>
-				</div>
 			</div>
 
 			{/* Active Filters Summary */}
@@ -243,19 +219,6 @@ export function CarsFilters({
 								size="sm"
 								className="h-4 w-4 p-0 hover:bg-transparent"
 								onClick={() => onFiltersChange({ availability: "all" })}
-							>
-								<XIcon className="h-3 w-3" />
-							</Button>
-						</Badge>
-					)}
-					{(filters.minPrice > 0 || filters.maxPrice < 10000) && (
-						<Badge variant="secondary" className="gap-1">
-							Price: ${filters.minPrice} - ${filters.maxPrice === 10000 ? "∞" : filters.maxPrice}
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-4 w-4 p-0 hover:bg-transparent"
-								onClick={() => onFiltersChange({ minPrice: 0, maxPrice: 10000 })}
 							>
 								<XIcon className="h-3 w-3" />
 							</Button>

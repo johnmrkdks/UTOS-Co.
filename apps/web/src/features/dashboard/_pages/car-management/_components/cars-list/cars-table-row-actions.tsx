@@ -28,6 +28,7 @@ export function CarsTableRowActions({ row }: CarsTableRowActionsProps) {
 		openModal("edit-car", car)
 	}
 
+
 	const handleToggleAvailability = () => {
 		// TODO: Implement toggle availability mutation
 		toast.success(`Car ${car.isAvailable ? 'disabled' : 'enabled'} successfully`)

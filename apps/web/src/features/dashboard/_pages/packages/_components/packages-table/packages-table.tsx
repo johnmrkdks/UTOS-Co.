@@ -13,6 +13,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { useGetPackagesQuery } from "../../_hooks/query/use-get-packages-query";
@@ -21,7 +22,6 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useState } from "react";
 import { EditPackageDialog } from "./edit-package-dialog";
 import { ViewPackageDialog } from "./view-package-dialog";
-
 export function PackagesTable() {
 	const [editingPackage, setEditingPackage] = useState<any>(null);
 	const [viewingPackage, setViewingPackage] = useState<any>(null);
@@ -34,6 +34,7 @@ export function PackagesTable() {
 			await deletePackageMutation.mutateAsync({ id: packageId });
 		}
 	};
+
 
 	if (packagesQuery.isLoading) {
 		return <PackagesTableSkeleton />;
@@ -68,7 +69,7 @@ export function PackagesTable() {
 						<TableHead>Name</TableHead>
 						<TableHead>Description</TableHead>
 						<TableHead>Price/Day</TableHead>
-						<TableHead>Status</TableHead>
+						<TableHead>Availability</TableHead>
 						<TableHead>Created</TableHead>
 						<TableHead className="w-[50px]">Actions</TableHead>
 					</TableRow>
@@ -103,6 +104,7 @@ export function PackagesTable() {
 											<Pencil className="mr-2 h-4 w-4" />
 											Edit
 										</DropdownMenuItem>
+										<DropdownMenuSeparator />
 										<DropdownMenuItem
 											onClick={() => handleDelete(pkg.id)}
 											className="text-destructive"

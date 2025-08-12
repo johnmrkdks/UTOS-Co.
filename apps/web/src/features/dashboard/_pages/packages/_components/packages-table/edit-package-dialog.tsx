@@ -23,6 +23,7 @@ const editPackageSchema = z.object({
 	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
 	pricePerDay: z.number().min(0, "Price must be positive"),
 	isAvailable: z.boolean(),
+	isPublished: z.boolean(),
 });
 
 type EditPackageForm = z.infer<typeof editPackageSchema>;
@@ -44,6 +45,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 			description: pkg?.description || "",
 			pricePerDay: pkg?.pricePerDay || 0,
 			isAvailable: pkg?.isAvailable ?? true,
+			isPublished: pkg?.isPublished ?? false,
 		},
 	});
 
@@ -137,7 +139,28 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 									<div className="space-y-0.5">
 										<FormLabel>Available for Booking</FormLabel>
 										<div className="text-sm text-muted-foreground">
-											Customers can book this package
+											Enable internal booking functionality
+										</div>
+									</div>
+									<FormControl>
+										<Switch
+											checked={field.value}
+											onCheckedChange={field.onChange}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="isPublished"
+							render={({ field }) => (
+								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+									<div className="space-y-0.5">
+										<FormLabel>Publish to Customers</FormLabel>
+										<div className="text-sm text-muted-foreground">
+											Make this package visible to public customers
 										</div>
 									</div>
 									<FormControl>

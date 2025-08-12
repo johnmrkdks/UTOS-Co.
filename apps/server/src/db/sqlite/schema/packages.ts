@@ -38,6 +38,7 @@ export const packages = sqliteTable("packages", {
 
 	// Availability
 	isAvailable: integer("is_available", { mode: "boolean" }).default(true),
+	isPublished: integer("is_published", { mode: "boolean" }).default(false), // Public visibility for customers
 	availableDays: text("available_days"), // JSON: ["monday", "tuesday", ...] or null for all days
 	availableTimeStart: text("available_time_start"), // "09:00" or null for anytime
 	availableTimeEnd: text("available_time_end"), // "17:00" or null for anytime
@@ -45,5 +46,6 @@ export const packages = sqliteTable("packages", {
 	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
 }, (table) => ({
-	nameIdx: index("name_idx").on(table.name),
+	nameIdx: index("packages_name_idx").on(table.name),
+	publishedAvailabilityIdx: index("packages_published_availability_idx").on(table.isPublished, table.isAvailable),
 }));

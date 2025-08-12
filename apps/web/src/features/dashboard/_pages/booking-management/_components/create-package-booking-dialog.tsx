@@ -123,7 +123,7 @@ export function CreatePackageBookingDialog() {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{packagesQuery.data?.items?.map((pkg) => (
+												{packagesQuery.data?.data?.map((pkg: any) => (
 													<SelectItem key={pkg.id} value={pkg.id}>
 														{pkg.name} - ${(pkg.fixedPrice / 100).toFixed(2)}
 													</SelectItem>
@@ -148,7 +148,7 @@ export function CreatePackageBookingDialog() {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{carsQuery.data?.items?.map((car) => (
+												{carsQuery.data?.data?.map((car: any) => (
 													<SelectItem key={car.id} value={car.id}>
 														{car.name}
 													</SelectItem>

@@ -1,9 +1,9 @@
 import type { DB } from "@/db";
 import { pricingConfig } from "@/db/schema";
-import { ResourceListParams } from "@/utils/query/resource-list";
+import type { ResourceList } from "@/utils/query/resource-list";
 import { eq, desc } from "drizzle-orm";
 
-export async function getPricingConfigsService(db: DB, params: ResourceListParams) {
+export async function getPricingConfigsService(db: DB, params: ResourceList) {
 	const { limit = 10, offset = 0 } = params;
 
 	const configs = await db

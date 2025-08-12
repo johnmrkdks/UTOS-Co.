@@ -1,8 +1,8 @@
 import { eq, asc } from "drizzle-orm";
-import type { DrizzleDB } from "@/db";
+import type { DB } from "@/db";
 import { packageRoutes } from "@/db/sqlite/schema/packages/package-routes";
 
-export async function getPackageRoutesByPackageId(db: DrizzleDB, packageId: string) {
+export async function getPackageRoutesByPackageId(db: DB, packageId: string) {
 	return await db
 		.select()
 		.from(packageRoutes)
@@ -11,7 +11,7 @@ export async function getPackageRoutesByPackageId(db: DrizzleDB, packageId: stri
 }
 
 export async function createPackageRoute(
-	db: DrizzleDB,
+	db: DB,
 	data: {
 		packageId: string;
 		stopOrder: number;
@@ -43,7 +43,7 @@ export async function createPackageRoute(
 }
 
 export async function updatePackageRoute(
-	db: DrizzleDB,
+	db: DB,
 	id: string,
 	data: {
 		stopOrder: number;
@@ -74,7 +74,7 @@ export async function updatePackageRoute(
 	return route;
 }
 
-export async function deletePackageRoute(db: DrizzleDB, id: string) {
+export async function deletePackageRoute(db: DB, id: string) {
 	const [deletedRoute] = await db
 		.delete(packageRoutes)
 		.where(eq(packageRoutes.id, id))
@@ -84,7 +84,7 @@ export async function deletePackageRoute(db: DrizzleDB, id: string) {
 }
 
 export async function reorderPackageRoutes(
-	db: DrizzleDB,
+	db: DB,
 	packageId: string,
 	routeOrders: { id: string; stopOrder: number }[],
 ) {
