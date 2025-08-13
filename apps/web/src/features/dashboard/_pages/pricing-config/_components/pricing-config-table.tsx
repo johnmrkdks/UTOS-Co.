@@ -1,11 +1,5 @@
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@workspace/ui/components/table";
+import { DataTable } from "@workspace/ui/components/data-table";
+import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { MoreHorizontal, Pencil, Eye } from "lucide-react";
@@ -16,94 +10,169 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { useGetPricingConfigsQuery } from "../_hooks/query/use-get-pricing-configs-query";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useState } from "react";
 import { EditPricingConfigDialog } from "./edit-pricing-config-dialog";
 import { ViewPricingConfigDialog } from "./view-pricing-config-dialog";
+import type { ColumnDef } from "@tanstack/react-table";
+
+interface PricingConfig {
+	id: string;
+	name: string;
+	baseFare: number;
+	pricePerKm: number;
+	pricePerMinute?: number;
+	nightMultiplier?: number;
+	isActive: boolean;
+	createdAt: string;
+}
 
 export function PricingConfigTable() {
-	const [editingConfig, setEditingConfig] = useState<any>(null);
-	const [viewingConfig, setViewingConfig] = useState<any>(null);
+	const [editingConfig, setEditingConfig] = useState<PricingConfig | null>(null);
+	const [viewingConfig, setViewingConfig] = useState<PricingConfig | null>(null);
 	
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 
-	if (pricingConfigsQuery.isLoading) {
-		return <PricingConfigTableSkeleton />;
-	}
+	const columns: ColumnDef<PricingConfig>[] = [
+		{
+			accessorKey: "name",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Name" />
+			),
+			cell: ({ row }) => (
+				<div className="font-medium">{row.getValue("name")}</div>
+			),
+		},
+		{
+			accessorKey: "baseFare",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Base Fare" />
+			),
+			cell: ({ row }) => {
+				const baseFare = row.getValue("baseFare") as number;
+				return <div>${baseFare?.toFixed(2) || "0.00"}</div>;
+			},
+		},
+		{
+			accessorKey: "pricePerKm",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Per KM" />
+			),
+			cell: ({ row }) => {
+				const pricePerKm = row.getValue("pricePerKm") as number;
+				return <div>${pricePerKm?.toFixed(2) || "0.00"}</div>;
+			},
+		},
+		{
+			accessorKey: "pricePerMinute",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Per Minute" />
+			),
+			cell: ({ row }) => {
+				const pricePerMinute = row.getValue("pricePerMinute") as number;
+				return <div>${pricePerMinute?.toFixed(2) || "N/A"}</div>;
+			},
+		},
+		{
+			accessorKey: "nightMultiplier",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Night Multiplier" />
+			),
+			cell: ({ row }) => {
+				const nightMultiplier = row.getValue("nightMultiplier") as number;
+				return <div>{nightMultiplier ? `${nightMultiplier}x` : "1.0x"}</div>;
+			},
+		},
+		{
+			accessorKey: "isActive",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Status" />
+			),
+			cell: ({ row }) => {
+				const isActive = row.getValue("isActive") as boolean;
+				return (
+					<Badge variant={isActive ? "default" : "secondary"}>
+						{isActive ? "Active" : "Inactive"}
+					</Badge>
+				);
+			},
+			filterFn: (row, id, value) => {
+				return value.includes(row.getValue(id))
+			},
+		},
+		{
+			accessorKey: "createdAt",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Created" />
+			),
+			cell: ({ row }) => {
+				const createdAt = row.getValue("createdAt") as string;
+				return <div>{new Date(createdAt).toLocaleDateString()}</div>;
+			},
+		},
+		{
+			id: "actions",
+			header: "Actions",
+			cell: ({ row }) => {
+				const config = row.original;
+				
+				return (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+								<span className="sr-only">Open menu</span>
+								<MoreHorizontal className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => setViewingConfig(config)}>
+								<Eye className="mr-2 h-4 w-4" />
+								View Details
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setEditingConfig(config)}>
+								<Pencil className="mr-2 h-4 w-4" />
+								Edit
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				);
+			},
+			enableSorting: false,
+			enableHiding: false,
+		},
+	];
 
-	if (pricingConfigsQuery.isError) {
-		return (
-			<div className="text-center py-4">
-				<p className="text-muted-foreground">Failed to load pricing configurations</p>
-			</div>
-		);
-	}
+	const filterConfigs = [
+		{
+			columnId: "isActive",
+			title: "Status",
+			options: [
+				{ label: "Active", value: "true" },
+				{ label: "Inactive", value: "false" },
+			],
+		},
+	];
 
 	const configs = pricingConfigsQuery.data?.items || [];
 
-	if (configs.length === 0) {
-		return (
-			<div className="text-center py-8">
-				<p className="text-muted-foreground">No pricing configurations found</p>
-				<p className="text-sm text-muted-foreground">Create your first pricing configuration to get started</p>
-			</div>
-		);
-	}
-
 	return (
 		<>
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Name</TableHead>
-						<TableHead>Base Fare</TableHead>
-						<TableHead>Per KM</TableHead>
-						<TableHead>Per Minute</TableHead>
-						<TableHead>Night Multiplier</TableHead>
-						<TableHead>Status</TableHead>
-						<TableHead>Created</TableHead>
-						<TableHead className="w-[50px]">Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{configs.map((config: any) => (
-						<TableRow key={config.id}>
-							<TableCell className="font-medium">{config.name}</TableCell>
-							<TableCell>${config.baseFare?.toFixed(2) || "0.00"}</TableCell>
-							<TableCell>${config.pricePerKm?.toFixed(2) || "0.00"}</TableCell>
-							<TableCell>${config.pricePerMinute?.toFixed(2) || "N/A"}</TableCell>
-							<TableCell>{config.nightMultiplier ? `${config.nightMultiplier}x` : "1.0x"}</TableCell>
-							<TableCell>
-								<Badge variant={config.isActive ? "default" : "secondary"}>
-									{config.isActive ? "Active" : "Inactive"}
-								</Badge>
-							</TableCell>
-							<TableCell>
-								{new Date(config.createdAt).toLocaleDateString()}
-							</TableCell>
-							<TableCell>
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" size="sm">
-											<MoreHorizontal className="h-4 w-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuItem onClick={() => setViewingConfig(config)}>
-											<Eye className="mr-2 h-4 w-4" />
-											View Details
-										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setEditingConfig(config)}>
-											<Pencil className="mr-2 h-4 w-4" />
-											Edit
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</TableCell>
-						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+			<DataTable
+				columns={columns}
+				data={configs}
+				isLoading={pricingConfigsQuery.isLoading}
+				enableToolbar={true}
+				searchKey="name"
+				searchPlaceholder="Search pricing configurations..."
+				filterConfigs={filterConfigs}
+				enablePagination={true}
+				pageSize={10}
+				emptyState={
+					<div className="text-center py-8">
+						<p className="text-muted-foreground">No pricing configurations found</p>
+						<p className="text-sm text-muted-foreground">Create your first pricing configuration to get started</p>
+					</div>
+				}
+			/>
 
 			{editingConfig && (
 				<EditPricingConfigDialog
@@ -121,38 +190,5 @@ export function PricingConfigTable() {
 				/>
 			)}
 		</>
-	);
-}
-
-function PricingConfigTableSkeleton() {
-	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead>Name</TableHead>
-					<TableHead>Base Fare</TableHead>
-					<TableHead>Per KM</TableHead>
-					<TableHead>Per Minute</TableHead>
-					<TableHead>Night Multiplier</TableHead>
-					<TableHead>Status</TableHead>
-					<TableHead>Created</TableHead>
-					<TableHead className="w-[50px]">Actions</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>
-				{Array.from({ length: 5 }).map((_, i) => (
-					<TableRow key={i}>
-						<TableCell><Skeleton className="h-4 w-24" /></TableCell>
-						<TableCell><Skeleton className="h-4 w-16" /></TableCell>
-						<TableCell><Skeleton className="h-4 w-16" /></TableCell>
-						<TableCell><Skeleton className="h-4 w-16" /></TableCell>
-						<TableCell><Skeleton className="h-4 w-12" /></TableCell>
-						<TableCell><Skeleton className="h-6 w-20" /></TableCell>
-						<TableCell><Skeleton className="h-4 w-20" /></TableCell>
-						<TableCell><Skeleton className="h-8 w-8" /></TableCell>
-					</TableRow>
-				))}
-			</TableBody>
-		</Table>
 	);
 }

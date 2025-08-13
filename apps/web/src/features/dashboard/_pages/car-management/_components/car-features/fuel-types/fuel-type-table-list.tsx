@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@workspace/ui/components/data-table";
 import { fuelTypeTableColumns } from "./fuel-type-table-columns";
 import { useGetCarFuelTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-fuel-type/use-get-car-fuel-types-with-enriched-data-query"
 

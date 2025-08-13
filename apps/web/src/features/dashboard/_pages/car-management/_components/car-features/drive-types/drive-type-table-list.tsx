@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@workspace/ui/components/data-table";
 import { driveTypeTableColumns } from "./drive-type-table-columns";
 import { useGetCarDriveTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-get-car-drive-types-with-enriched-data-query"
 

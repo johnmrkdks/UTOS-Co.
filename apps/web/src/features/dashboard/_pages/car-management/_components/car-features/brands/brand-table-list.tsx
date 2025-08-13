@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@workspace/ui/components/data-table";
 import { brandTableColumns } from "./brand-table-columns";
 import { useGetCarBrandsWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-get-car-brands-with-enriched-data-query";
 

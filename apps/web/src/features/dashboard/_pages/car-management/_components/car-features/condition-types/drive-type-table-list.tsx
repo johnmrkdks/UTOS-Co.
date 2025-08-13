@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@workspace/ui/components/data-table";
 import { useGetCarConditionTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-get-car-condition-types-with-enriched-data-query"
 import { conditionTypeTableColumns } from "./condition-type-table-columns";
 

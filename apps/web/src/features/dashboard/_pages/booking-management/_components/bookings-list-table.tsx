@@ -1,7 +1,7 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { DataTable } from "@/components/tables/data-table";
-import { DataTableColumnHeader } from "@/components/tables/data-table-column-header";
+import { DataTable } from "@workspace/ui/components/data-table";
+import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";

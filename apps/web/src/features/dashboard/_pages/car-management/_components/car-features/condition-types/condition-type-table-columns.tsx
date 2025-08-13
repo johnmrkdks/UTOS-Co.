@@ -1,4 +1,4 @@
-import { DataTableColumnHeader } from "@/components/tables/data-table-column-header"
+import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header"
 import { Badge } from "@workspace/ui/components/badge"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { CarConditionTypeWithEnrichedData } from "server/types"

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@workspace/ui/components/data-table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Input } from "@workspace/ui/components/input";

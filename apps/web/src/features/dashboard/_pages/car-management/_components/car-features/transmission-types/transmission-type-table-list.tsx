@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@workspace/ui/components/data-table";
 import { transmissionTypeTableColumns } from "./transmission-type-table-columns";
 import { useGetCarTransmissionTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-transmission-type/use-get-car-transmission-types-with-enriched-data-query"
 

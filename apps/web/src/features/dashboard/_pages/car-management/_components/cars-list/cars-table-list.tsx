@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/tables/data-table"
+import { DataTable } from "@workspace/ui/components/data-table"
 import { carsTableColumns } from "./cars-table-columns"
 
 interface CarsTableListProps {
