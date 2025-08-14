@@ -16,7 +16,7 @@ import {
 	DASHBOARD_ROUTES,
 	DASHBOARD_SUB_ROUTES,
 	DASHBOARD_MANAGEMENT_SUB_ROUTES,
-} from "@/features/dashboard/_constants/dashboard-routes";
+} from "@/constants/dashboard-routes";
 import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -52,7 +52,7 @@ export function DashboardSidebar() {
 	};
 
 	return (
-		<Sidebar className="bg-soft-beige">
+		<Sidebar collapsible="none" className="bg-soft-beige border-r">
 			<SidebarHeader>
 				<DashboardCompanyLogo />
 			</SidebarHeader>

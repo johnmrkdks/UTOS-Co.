@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { DataTable } from "@workspace/ui/components/data-table";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
 import { Input } from "@workspace/ui/components/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Eye, EyeOff, Search, Filter } from "lucide-react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { Search, Filter } from "lucide-react";
 
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
 import { useTogglePublishPackageMutation } from "@/features/dashboard/_pages/packages/_hooks/query/use-toggle-publish-package-mutation";
-import { PublicationStatusBadge, PublicationToggleButton } from "@/features/dashboard/_components/publication";
+import { getPackagesPublicationColumns } from "./columns";
+import { TableSkeleton } from "./skeletons";
 
 export function PackagesPublicationTable() {
 	const [search, setSearch] = useState("");
@@ -17,7 +15,7 @@ export function PackagesPublicationTable() {
 
 	const { data: packagesData, isLoading } = useGetPackagesQuery({
 		limit: 50,
-		search: search || undefined
+		filters: search ? { search } : undefined
 	});
 
 	const togglePublishMutation = useTogglePublishPackageMutation();
@@ -50,119 +48,18 @@ export function PackagesPublicationTable() {
 		return "unpublished";
 	};
 
-	const handleTogglePublish = (packageId: string, currentStatus: boolean) => {
+	const handleTogglePublish = (packageId: string) => {
 		togglePublishMutation.mutate({ id: packageId });
 	};
 
-	const columns: ColumnDef<any>[] = [
-		{
-			accessorKey: "name",
-			header: "Package Name",
-			cell: ({ row }) => {
-				const pkg = row.original;
-				return (
-					<div className="space-y-1">
-						<div className="font-medium">{pkg.name}</div>
-						<div className="text-sm text-muted-foreground line-clamp-2">
-							{pkg.description}
-						</div>
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "category",
-			header: "Category",
-			cell: ({ row }) => {
-				return (
-					<Badge variant="outline">
-						{row.original.category?.name || "No Category"}
-					</Badge>
-				);
-			},
-		},
-		{
-			accessorKey: "pricing",
-			header: "Price",
-			cell: ({ row }) => {
-				const pkg = row.original;
-				return (
-					<div className="space-y-1">
-						<div className="font-medium">
-							${pkg.pricePerDay}/day
-						</div>
-						{pkg.pricePerHour && (
-							<div className="text-sm text-muted-foreground">
-								${pkg.pricePerHour}/hour
-							</div>
-						)}
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "status",
-			header: "Publication Status",
-			cell: ({ row }) => {
-				const pkg = row.original;
-				const status = getPublicationStatus(pkg);
-				return <PublicationStatusBadge status={status} entityType="package" />;
-			},
-		},
-		{
-			accessorKey: "availability_status",
-			header: "Availability Status",
-			cell: ({ row }) => {
-				const pkg = row.original;
-				return (
-					<div className="space-y-1">
-						<Badge className={pkg.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-							{pkg.isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
-						</Badge>
-						{pkg.maxBookings && (
-							<div className="text-xs text-muted-foreground">
-								Max: {pkg.maxBookings} bookings
-							</div>
-						)}
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "updatedAt",
-			header: "Last Updated",
-			cell: ({ row }) => {
-				const date = new Date(row.original.updatedAt);
-				return (
-					<div className="text-sm">
-						{date.toLocaleDateString()}
-						<div className="text-xs text-muted-foreground">
-							{date.toLocaleTimeString()}
-						</div>
-					</div>
-				);
-			},
-		},
-		{
-			id: "actions",
-			header: "Actions",
-			cell: ({ row }) => {
-				const pkg = row.original;
-				const canPublish = pkg.isAvailable;
+	const columns = getPackagesPublicationColumns({
+		onTogglePublish: handleTogglePublish,
+		isToggling: togglePublishMutation.isPending
+	});
 
-				return (
-					<PublicationToggleButton
-						isPublished={pkg.isPublished}
-						entityType="package"
-						entityId={pkg.id}
-						onToggle={() => handleTogglePublish(pkg.id, pkg.isPublished)}
-						disabled={!canPublish && !pkg.isPublished}
-						loading={togglePublishMutation.isPending}
-					/>
-				);
-			},
-		},
-	];
+	if (isLoading) {
+		return <TableSkeleton rows={5} columns={5} />;
+	}
 
 	return (
 		<div className="space-y-4">
@@ -224,7 +121,11 @@ export function PackagesPublicationTable() {
 			<DataTable
 				columns={columns}
 				data={filteredPackages}
-				loading={isLoading}
+				isLoading={false}
+				enableColumnPinning={true}
+				initialColumnPinning={{ right: ["actions"] }}
+				enableColumnVisibility={true}
+				enableSorting={true}
 			/>
 		</div>
 	);

@@ -3,6 +3,7 @@ import { DashboardUserMenu } from "@/features/dashboard/_components/navbar/dashh
 import { NotificationMenu } from "@/features/dashboard/_components/navbar/notification-menu";
 import { cn } from "@workspace/ui/lib/utils";
 import { ModalProviders } from "@/features/dashboard/_providers/modal-providers";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 type DashboardNavbarProps = React.ComponentProps<"header">;
 
@@ -15,8 +16,9 @@ export function DashboardNavbar({ className, ...props }: DashboardNavbarProps) {
 			)}
 			{...props}
 		>
-			<div>
-				<SidebarTrigger className="-ml-1" />
+			<div className="flex items-center gap-3">
+				<SidebarTrigger className="lg:hidden" />
+				<Breadcrumbs />
 			</div>
 			<div className="flex items-center gap-4">
 				<div className="flex items-center gap-2">

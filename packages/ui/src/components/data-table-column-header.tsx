@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Column } from "@tanstack/react-table"
-import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon, EyeOffIcon } from "lucide-react"
+import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon, EyeOffIcon, PinIcon, Pin } from "lucide-react"
 
 import { cn } from "../lib/utils"
 import { Button } from "./button"
@@ -18,6 +18,7 @@ interface DataTableColumnHeaderProps<TData, TValue>
 	title: string
 	sortable?: boolean
 	hideable?: boolean
+	pinnable?: boolean
 }
 
 export function DataTableColumnHeader<TData, TValue>({
@@ -26,12 +27,15 @@ export function DataTableColumnHeader<TData, TValue>({
 	className,
 	sortable = true,
 	hideable = true,
+	pinnable = true,
 	...props
 }: DataTableColumnHeaderProps<TData, TValue>) {
 	const canSort = sortable && column.getCanSort()
 	const canHide = hideable && column.getCanHide()
+	const canPin = pinnable && column.getCanPin()
+	const isPinned = column.getIsPinned()
 
-	if (!canSort && !canHide) {
+	if (!canSort && !canHide && !canPin) {
 		return (
 			<div className={cn("text-muted-foreground font-medium", className)} {...props}>
 				{title}
@@ -39,10 +43,13 @@ export function DataTableColumnHeader<TData, TValue>({
 		)
 	}
 
-	if (!canSort && canHide) {
+	if (!canSort && (canHide || canPin)) {
 		return (
 			<div className={cn("flex items-center gap-2", className)} {...props}>
 				<span className="text-muted-foreground font-medium">{title}</span>
+				{isPinned && (
+					<Pin className="h-3 w-3 text-blue-500" aria-label="Pinned column" />
+				)}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
@@ -55,10 +62,34 @@ export function DataTableColumnHeader<TData, TValue>({
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="start">
-						<DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-							<EyeOffIcon className="mr-2 h-4 w-4" />
-							Hide
-						</DropdownMenuItem>
+						{canPin && !isPinned && (
+							<>
+								<DropdownMenuItem onClick={() => column.pin("left")}>
+									<PinIcon className="mr-2 h-4 w-4" />
+									Stick to left
+								</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => column.pin("right")}>
+									<PinIcon className="mr-2 h-4 w-4 rotate-90" />
+									Stick to right
+								</DropdownMenuItem>
+								{canHide && <DropdownMenuSeparator />}
+							</>
+						)}
+						{canPin && isPinned && (
+							<>
+								<DropdownMenuItem onClick={() => column.pin(false)}>
+									<Pin className="mr-2 h-4 w-4" />
+									Unpin
+								</DropdownMenuItem>
+								{canHide && <DropdownMenuSeparator />}
+							</>
+						)}
+						{canHide && (
+							<DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
+								<EyeOffIcon className="mr-2 h-4 w-4" />
+								Hide
+							</DropdownMenuItem>
+						)}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
@@ -76,6 +107,9 @@ export function DataTableColumnHeader<TData, TValue>({
 						aria-label={`Sort by ${title}`}
 					>
 						<span className="text-muted-foreground font-medium">{title}</span>
+						{isPinned && (
+							<Pin className="ml-1 h-3 w-3 text-blue-500" aria-label="Pinned column" />
+						)}
 						{column.getIsSorted() === "desc" ? (
 							<ArrowDownIcon className="ml-2 h-4 w-4" />
 						) : column.getIsSorted() === "asc" ? (
@@ -95,6 +129,28 @@ export function DataTableColumnHeader<TData, TValue>({
 							<DropdownMenuItem onClick={() => column.toggleSorting(true)}>
 								<ArrowDownIcon className="mr-2 h-4 w-4" />
 								Desc
+							</DropdownMenuItem>
+							{(canPin || canHide) && <DropdownMenuSeparator />}
+						</>
+					)}
+					{canPin && !isPinned && (
+						<>
+							<DropdownMenuItem onClick={() => column.pin("left")}>
+								<PinIcon className="mr-2 h-4 w-4" />
+								Stick to left
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => column.pin("right")}>
+								<PinIcon className="mr-2 h-4 w-4 rotate-90" />
+								Stick to right
+							</DropdownMenuItem>
+							{canHide && <DropdownMenuSeparator />}
+						</>
+					)}
+					{canPin && isPinned && (
+						<>
+							<DropdownMenuItem onClick={() => column.pin(false)}>
+								<Pin className="mr-2 h-4 w-4" />
+								Unpin
 							</DropdownMenuItem>
 							{canHide && <DropdownMenuSeparator />}
 						</>

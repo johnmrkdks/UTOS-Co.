@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { Badge } from "@workspace/ui/components/badge";
 import { Car, Package2 } from "lucide-react";
 
-import { CarsPublicationTable } from "./_components/cars-publication-table";
-import { PackagesPublicationTable } from "./_components/packages-publication-table";
-import { PublicationOverviewStats } from "./_components/publication-overview-stats";
+import { OverviewTab, CarsTab, PackagesTab } from "./_components/tabs";
 
 export function PublicationManagementPage() {
 	const [activeTab, setActiveTab] = useState("overview");
@@ -37,35 +34,15 @@ export function PublicationManagementPage() {
 				</TabsList>
 
 				<TabsContent value="overview" className="space-y-4">
-					<PublicationOverviewStats />
+					<OverviewTab />
 				</TabsContent>
 
 				<TabsContent value="cars" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Car className="h-5 w-5" />
-								Cars Publication Status
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<CarsPublicationTable />
-						</CardContent>
-					</Card>
+					<CarsTab />
 				</TabsContent>
 
 				<TabsContent value="packages" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Package2 className="h-5 w-5" />
-								Packages Publication Status
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<PackagesPublicationTable />
-						</CardContent>
-					</Card>
+					<PackagesTab />
 				</TabsContent>
 			</Tabs>
 		</div>

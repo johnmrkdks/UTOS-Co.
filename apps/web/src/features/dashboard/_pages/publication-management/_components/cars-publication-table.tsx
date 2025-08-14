@@ -1,39 +1,22 @@
 import { useState } from "react";
 import { DataTable } from "@workspace/ui/components/data-table";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
 import { Input } from "@workspace/ui/components/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Eye, EyeOff, Search, Filter } from "lucide-react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { Search, Filter } from "lucide-react";
 
 import { useGetCarsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-get-cars-query";
 import { useTogglePublishCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/use-toggle-publish-car-mutation";
-import { PublicationStatusBadge, PublicationToggleButton } from "@/features/dashboard/_components/publication";
+import { getCarsPublicationColumns } from "./columns";
+import { TableSkeleton } from "./skeletons";
 
-interface CarPublicationData {
-	id: string;
-	name: string;
-	brand: string;
-	model: string;
-	category: string;
-	isPublished: boolean;
-	isActive: boolean;
-	isAvailable: boolean;
-	status: string;
-	createdAt: string;
-	updatedAt: string;
-}
 
 export function CarsPublicationTable() {
-	const [page, setPage] = useState(1);
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
 
 	const { data: carsData, isLoading } = useGetCarsQuery({
-		page,
 		limit: 50,
-		search: search || undefined
+		filters: search ? { search } : undefined
 	});
 
 	const togglePublishMutation = useTogglePublishCarMutation();
@@ -66,107 +49,18 @@ export function CarsPublicationTable() {
 		return "unpublished";
 	};
 
-	const handleTogglePublish = (carId: string, currentStatus: boolean) => {
+	const handleTogglePublish = (carId: string) => {
 		togglePublishMutation.mutate({ id: carId });
 	};
 
-	const columns: ColumnDef<any>[] = [
-		{
-			accessorKey: "name",
-			header: "Car Name",
-			cell: ({ row }) => {
-				const car = row.original;
-				return (
-					<div className="space-y-1">
-						<div className="font-medium">{car.name}</div>
-						<div className="text-sm text-muted-foreground">
-							{car.brand?.name} {car.model?.name}
-						</div>
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "category",
-			header: "Category",
-			cell: ({ row }) => {
-				return (
-					<Badge variant="outline">
-						{row.original.category?.name || "No Category"}
-					</Badge>
-				);
-			},
-		},
-		{
-			accessorKey: "status",
-			header: "Publication Status",
-			cell: ({ row }) => {
-				const car = row.original;
-				const status = getPublicationStatus(car);
-				return <PublicationStatusBadge status={status} entityType="car" />;
-			},
-		},
-		{
-			accessorKey: "operational_status",
-			header: "Operational Status",
-			cell: ({ row }) => {
-				const car = row.original;
-				const getStatusColor = (status: string) => {
-					switch (status) {
-						case 'available': return 'bg-green-100 text-green-800';
-						case 'maintenance': return 'bg-yellow-100 text-yellow-800';
-						case 'out_of_service': return 'bg-red-100 text-red-800';
-						default: return 'bg-gray-100 text-gray-800';
-					}
-				};
+	const columns = getCarsPublicationColumns({
+		onTogglePublish: handleTogglePublish,
+		isToggling: togglePublishMutation.isPending
+	});
 
-				return (
-					<div className="space-y-1">
-						<Badge className={getStatusColor(car.status)}>
-							{car.status?.replace('_', ' ').toUpperCase()}
-						</Badge>
-						<div className="text-xs text-muted-foreground">
-							Active: {car.isActive ? "Yes" : "No"} | Available: {car.isAvailable ? "Yes" : "No"}
-						</div>
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "updatedAt",
-			header: "Last Updated",
-			cell: ({ row }) => {
-				const date = new Date(row.original.updatedAt);
-				return (
-					<div className="text-sm">
-						{date.toLocaleDateString()}
-						<div className="text-xs text-muted-foreground">
-							{date.toLocaleTimeString()}
-						</div>
-					</div>
-				);
-			},
-		},
-		{
-			id: "actions",
-			header: "Actions",
-			cell: ({ row }) => {
-				const car = row.original;
-				const canPublish = car.isActive && car.isAvailable && car.status === 'available';
-
-				return (
-					<PublicationToggleButton
-						isPublished={car.isPublished}
-						entityType="car"
-						entityId={car.id}
-						onToggle={() => handleTogglePublish(car.id, car.isPublished)}
-						disabled={!canPublish && !car.isPublished}
-						loading={togglePublishMutation.isPending}
-					/>
-				);
-			},
-		},
-	];
+	if (isLoading) {
+		return <TableSkeleton rows={5} columns={6} />;
+	}
 
 	return (
 		<div className="space-y-4">
@@ -228,7 +122,11 @@ export function CarsPublicationTable() {
 			<DataTable
 				columns={columns}
 				data={filteredCars}
-				loading={isLoading}
+				isLoading={false}
+				enableColumnPinning={true}
+				initialColumnPinning={{ right: ["actions"] }}
+				enableColumnVisibility={true}
+				enableSorting={true}
 			/>
 		</div>
 	);

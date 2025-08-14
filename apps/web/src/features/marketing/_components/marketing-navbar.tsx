@@ -5,7 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Logo } from "@/components/logo";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
 import { AuthCTA } from "./navbar/auth-cta";
-import { MARKETING_ROUTES } from "@/features/marketing/_constants/marketing-routes";
+import { MARKETING_ROUTES } from "@/constants/marketing-routes";
 import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	Phone,
