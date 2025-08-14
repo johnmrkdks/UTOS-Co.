@@ -21,7 +21,7 @@ export function PublicationManagementPage() {
 			</div>
 
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-				<TabsList className="grid w-full grid-cols-3">
+				<TabsList className="grid grid-cols-3">
 					<TabsTrigger value="overview" className="flex items-center gap-2">
 						<Badge variant="outline" className="h-2 w-2 rounded-full bg-blue-500" />
 						Overview

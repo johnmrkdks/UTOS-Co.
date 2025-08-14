@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ModalProvider } from "@/hooks/use-modal";
-import "@workspace/ui/globals.css"
 
 export type RouterAppContext = {
 	trpc: typeof trpc;

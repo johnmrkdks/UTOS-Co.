@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+@import '@workspace/ui/globals.css';
+
+/**
+ * This is necessary to load the @repo/ui package when moving from
+ * @tailwindcss/vite v4.0.7 to v4.0.8.
+ *
+ * For more details, see:
+ * https://github.com/tailwindlabs/tailwindcss/issues/16733
+ */
+@source '../../../packages/ui';
+
+input[type="number"] {
+	-moz-appearance: textfield;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 5px;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
