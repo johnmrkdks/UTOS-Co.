@@ -20,10 +20,10 @@ interface PricingConfig {
 	name: string;
 	baseFare: number;
 	pricePerKm: number;
-	pricePerMinute?: number;
-	nightMultiplier?: number;
-	isActive: boolean;
-	createdAt: string;
+	pricePerMinute: number | null;
+	nightMultiplier: number | null;
+	isActive: boolean | null;
+	createdAt: string | null;
 }
 
 export function PricingConfigTable() {

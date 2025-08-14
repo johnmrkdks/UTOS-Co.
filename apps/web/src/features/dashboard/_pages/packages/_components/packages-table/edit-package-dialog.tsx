@@ -68,7 +68,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[525px]">
+			<DialogContent className="sm:max-w-[700px]">
 				<DialogHeader>
 					<DialogTitle>Edit Package</DialogTitle>
 					<DialogDescription>
@@ -77,101 +77,115 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 				</DialogHeader>
 
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Package Name</FormLabel>
-									<FormControl>
-										<Input placeholder="Enter package name" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+						{/* Two-column layout */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							{/* Left Column - Main Form Inputs */}
+							<div className="space-y-4">
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Package Name</FormLabel>
+											<FormControl>
+												<Input placeholder="Enter package name" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-						<FormField
-							control={form.control}
-							name="description"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Description</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Describe the package services and features"
-											rows={3}
-											{...field}
+								<FormField
+									control={form.control}
+									name="description"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Description</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder="Describe the package services and features"
+													rows={4}
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="pricePerDay"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Price Per Day (AUD)</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													step="0.01"
+													min="0"
+													placeholder="0.00"
+													{...field}
+													onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							{/* Right Column - Settings */}
+							<div className="space-y-4">
+								<div>
+									<h4 className="text-sm font-medium mb-3">Package Settings</h4>
+									<div className="space-y-3">
+										<FormField
+											control={form.control}
+											name="isAvailable"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+													<div className="space-y-0.5">
+														<FormLabel className="text-sm font-medium">Available for Booking</FormLabel>
+														<div className="text-xs text-muted-foreground">
+															Enable internal booking functionality
+														</div>
+													</div>
+													<FormControl>
+														<Switch
+															checked={field.value}
+															onCheckedChange={field.onChange}
+														/>
+													</FormControl>
+												</FormItem>
+											)}
 										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
 
-						<FormField
-							control={form.control}
-							name="pricePerDay"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Price Per Day (AUD)</FormLabel>
-									<FormControl>
-										<Input
-											type="number"
-											step="0.01"
-											min="0"
-											placeholder="0.00"
-											{...field}
-											onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+										<FormField
+											control={form.control}
+											name="isPublished"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+													<div className="space-y-0.5">
+														<FormLabel className="text-sm font-medium">Publish to Customers</FormLabel>
+														<div className="text-xs text-muted-foreground">
+															Make this package visible to public customers
+														</div>
+													</div>
+													<FormControl>
+														<Switch
+															checked={field.value}
+															onCheckedChange={field.onChange}
+														/>
+													</FormControl>
+												</FormItem>
+											)}
 										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="isAvailable"
-							render={({ field }) => (
-								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-									<div className="space-y-0.5">
-										<FormLabel>Available for Booking</FormLabel>
-										<div className="text-sm text-muted-foreground">
-											Enable internal booking functionality
-										</div>
 									</div>
-									<FormControl>
-										<Switch
-											checked={field.value}
-											onCheckedChange={field.onChange}
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="isPublished"
-							render={({ field }) => (
-								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-									<div className="space-y-0.5">
-										<FormLabel>Publish to Customers</FormLabel>
-										<div className="text-sm text-muted-foreground">
-											Make this package visible to public customers
-										</div>
-									</div>
-									<FormControl>
-										<Switch
-											checked={field.value}
-											onCheckedChange={field.onChange}
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
+								</div>
+							</div>
+						</div>
 
 						<DialogFooter>
 							<Button

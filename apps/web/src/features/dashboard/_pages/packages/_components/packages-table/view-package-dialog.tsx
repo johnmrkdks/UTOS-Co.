@@ -9,7 +9,9 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
-import { Calendar, DollarSign, Info, Package } from "lucide-react";
+import { Switch } from "@workspace/ui/components/switch";
+import { Calendar, DollarSign, Info, Package, Settings } from "lucide-react";
+import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
 
 type ViewPackageDialogProps = {
 	package: any;
@@ -18,6 +20,27 @@ type ViewPackageDialogProps = {
 };
 
 export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPackageDialogProps) {
+	const updatePackageMutation = useUpdatePackageMutation();
+
+	const handleToggleAvailable = async () => {
+		if (!pkg?.id) return;
+
+		try {
+			await updatePackageMutation.mutateAsync({
+				id: pkg.id,
+				data: {
+					name: pkg.name,
+					description: pkg.description,
+					pricePerDay: (pkg.fixedPrice || pkg.pricePerDay || 0) / 100, // Convert from cents for the API
+					isAvailable: !pkg.isAvailable,
+					isPublished: pkg.isPublished || false,
+				}
+			});
+		} catch (error) {
+			console.error("Failed to toggle package availability:", error);
+		}
+	};
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[525px]">
@@ -30,11 +53,21 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 				</DialogHeader>
 				
 				<div className="space-y-4">
-					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium">Status</span>
-						<Badge variant={pkg?.isAvailable ? "default" : "secondary"}>
-							{pkg?.isAvailable ? "Available" : "Unavailable"}
-						</Badge>
+					<div className="flex items-center justify-between p-3 border rounded-lg">
+						<div className="flex items-center gap-2">
+							<Settings className="h-4 w-4" />
+							<span className="text-sm font-medium">Available for Booking</span>
+						</div>
+						<div className="flex items-center gap-3">
+							<Badge variant={pkg?.isAvailable ? "default" : "secondary"}>
+								{pkg?.isAvailable ? "Available" : "Unavailable"}
+							</Badge>
+							<Switch
+								checked={pkg?.isAvailable || false}
+								onCheckedChange={handleToggleAvailable}
+								disabled={updatePackageMutation.isPending}
+							/>
+						</div>
 					</div>
 					
 					<Separator />

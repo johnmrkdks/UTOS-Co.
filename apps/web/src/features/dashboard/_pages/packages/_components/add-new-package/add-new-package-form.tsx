@@ -76,196 +76,215 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Package Name</FormLabel>
-							<FormControl>
-								<Input placeholder="Enter package name" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Description</FormLabel>
-							<FormControl>
-								<Textarea 
-									placeholder="Describe the package services and features" 
-									rows={3}
-									{...field} 
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				{/* Two-column layout */}
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					{/* Left Column - Main Form Inputs */}
+					<div className="space-y-4">
+						<FormField
+							control={form.control}
+							name="name"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Package Name</FormLabel>
+									<FormControl>
+										<Input placeholder="Enter package name" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Description</FormLabel>
+									<FormControl>
+										<Textarea 
+											placeholder="Describe the package services and features" 
+											rows={3}
+											{...field} 
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-				{/* Banner Image Upload */}
-				<FormField
-					control={form.control}
-					name="bannerImageUrl"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Banner Image</FormLabel>
-							<FormControl>
-								<div className="space-y-3">
-									{imageFiles.length > 0 ? (
-										<div className="relative group">
-											<img
-												src={imageFiles[0].preview}
-												alt="Package banner preview"
-												className="w-full h-32 object-cover rounded-lg border"
+						<FormField
+							control={form.control}
+							name="serviceType"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Service Type</FormLabel>
+									<FormControl>
+										<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<SelectTrigger>
+												<SelectValue placeholder="Select service type" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="transfer">Transfer</SelectItem>
+												<SelectItem value="tour">Tour</SelectItem>
+												<SelectItem value="event">Event</SelectItem>
+												<SelectItem value="hourly">Hourly</SelectItem>
+											</SelectContent>
+										</Select>
+									</FormControl>
+									<div className="text-sm text-muted-foreground mt-1">
+										Service Type defines the operational model: Transfer (A to B), Tour (guided sightseeing), Event (special occasions), or Hourly (time-based rental).
+									</div>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="fixedPrice"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Fixed Price (AUD)</FormLabel>
+										<FormControl>
+											<Input 
+												type="number" 
+												step="0.01" 
+												min="0"
+												placeholder="0.00" 
+												{...field} 
+												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
 											/>
-											<Button
-												type="button"
-												variant="destructive"
-												size="sm"
-												className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-												onClick={() => {
-													removeFile(imageFiles[0].id);
-													field.onChange("");
-												}}
-											>
-												<X className="h-4 w-4" />
-											</Button>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="maxPassengers"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Max Passengers</FormLabel>
+										<FormControl>
+											<Input 
+												type="number" 
+												min="1"
+												max="20"
+												placeholder="4" 
+												{...field} 
+												onChange={(e) => field.onChange(parseInt(e.target.value) || 4)}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</div>
+
+					{/* Right Column - Image Upload & Settings */}
+					<div className="space-y-4">
+						{/* Banner Image Upload */}
+						<FormField
+							control={form.control}
+							name="bannerImageUrl"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Banner Image</FormLabel>
+									<FormControl>
+										<div className="space-y-3">
+											{imageFiles.length > 0 ? (
+												<div className="relative group">
+													<img
+														src={imageFiles[0].preview}
+														alt="Package banner preview"
+														className="w-full h-40 object-cover rounded-lg border"
+													/>
+													<Button
+														type="button"
+														variant="destructive"
+														size="sm"
+														className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+														onClick={() => {
+															removeFile(imageFiles[0].id);
+															field.onChange("");
+														}}
+													>
+														<X className="h-4 w-4" />
+													</Button>
+												</div>
+											) : (
+												<div
+													className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors h-40 flex flex-col items-center justify-center"
+													onClick={openFileDialog}
+												>
+													<Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+													<p className="text-sm text-gray-600">Click to upload banner image</p>
+													<p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+												</div>
+											)}
+											<input {...getInputProps()} />
 										</div>
-									) : (
-										<div
-											className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
-											onClick={openFileDialog}
-										>
-											<Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-											<p className="text-sm text-gray-600">Click to upload banner image</p>
-											<p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-										</div>
-									)}
-									<input {...getInputProps()} />
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-				<FormField
-					control={form.control}
-					name="serviceType"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Service Type</FormLabel>
-							<FormControl>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
-									<SelectTrigger>
-										<SelectValue placeholder="Select service type" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="transfer">Transfer</SelectItem>
-										<SelectItem value="tour">Tour</SelectItem>
-										<SelectItem value="event">Event</SelectItem>
-										<SelectItem value="hourly">Hourly</SelectItem>
-									</SelectContent>
-								</Select>
-							</FormControl>
-							<div className="text-sm text-muted-foreground mt-1">
-								Service Type defines the operational model: Transfer (A to B), Tour (guided sightseeing), Event (special occasions), or Hourly (time-based rental).
-							</div>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+						{/* Settings Section */}
+						<div className="space-y-4">
+							<div>
+								<h4 className="text-sm font-medium mb-3">Package Settings</h4>
+								<div className="space-y-3">
+									<FormField
+										control={form.control}
+										name="isAvailable"
+										render={({ field }) => (
+											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+												<div className="space-y-0.5">
+													<FormLabel className="text-sm font-medium">Available for Booking</FormLabel>
+													<div className="text-xs text-muted-foreground">
+														Enable internal booking functionality
+													</div>
+												</div>
+												<FormControl>
+													<Switch 
+														checked={field.value} 
+														onCheckedChange={field.onChange} 
+													/>
+												</FormControl>
+											</FormItem>
+										)}
+									/>
 
-				<FormField
-					control={form.control}
-					name="fixedPrice"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Fixed Price (AUD)</FormLabel>
-							<FormControl>
-								<Input 
-									type="number" 
-									step="0.01" 
-									min="0"
-									placeholder="0.00" 
-									{...field} 
-									onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="maxPassengers"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Max Passengers</FormLabel>
-							<FormControl>
-								<Input 
-									type="number" 
-									min="1"
-									max="20"
-									placeholder="4" 
-									{...field} 
-									onChange={(e) => field.onChange(parseInt(e.target.value) || 4)}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isAvailable"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-							<div className="space-y-0.5">
-								<FormLabel>Available for Booking</FormLabel>
-								<div className="text-sm text-muted-foreground">
-									Enable internal booking functionality
+									<FormField
+										control={form.control}
+										name="isPublished"
+										render={({ field }) => (
+											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+												<div className="space-y-0.5">
+													<FormLabel className="text-sm font-medium">Publish to Customers</FormLabel>
+													<div className="text-xs text-muted-foreground">
+														Make this package visible to public customers
+													</div>
+												</div>
+												<FormControl>
+													<Switch 
+														checked={field.value} 
+														onCheckedChange={field.onChange} 
+													/>
+												</FormControl>
+											</FormItem>
+										)}
+									/>
 								</div>
 							</div>
-							<FormControl>
-								<Switch 
-									checked={field.value} 
-									onCheckedChange={field.onChange} 
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isPublished"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-							<div className="space-y-0.5">
-								<FormLabel>Publish to Customers</FormLabel>
-								<div className="text-sm text-muted-foreground">
-									Make this package visible to public customers
-								</div>
-							</div>
-							<FormControl>
-								<Switch 
-									checked={field.value} 
-									onCheckedChange={field.onChange} 
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
+						</div>
+					</div>
+				</div>
 
 				<DialogFooter>
 					<DialogClose asChild>

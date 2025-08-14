@@ -45,7 +45,7 @@ export function PricingConfigForm({ initialData, onSuccess, mode = "create" }: P
 	const createMutation = useCreatePricingConfigMutation();
 	const updateMutation = useUpdatePricingConfigMutation();
 
-	const form = useForm<PricingConfigForm>({
+	const form = useForm({
 		resolver: zodResolver(pricingConfigSchema),
 		defaultValues: {
 			name: initialData?.name || "",

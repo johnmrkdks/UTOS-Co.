@@ -50,7 +50,13 @@ export function CarsPublicationTable() {
 	};
 
 	const handleTogglePublish = (carId: string) => {
-		togglePublishMutation.mutate({ id: carId });
+		const car = filteredCars.find(c => c.id === carId);
+		if (!car) return;
+		
+		togglePublishMutation.mutate({
+			id: carId,
+			isPublished: !car.isPublished
+		});
 	};
 
 	const columns = getCarsPublicationColumns({

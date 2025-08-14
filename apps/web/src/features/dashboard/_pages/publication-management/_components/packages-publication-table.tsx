@@ -49,7 +49,13 @@ export function PackagesPublicationTable() {
 	};
 
 	const handleTogglePublish = (packageId: string) => {
-		togglePublishMutation.mutate({ id: packageId });
+		const pkg = filteredPackages.find(p => p.id === packageId);
+		if (!pkg) return;
+		
+		togglePublishMutation.mutate({
+			id: packageId,
+			isPublished: !pkg.isPublished
+		});
 	};
 
 	const columns = getPackagesPublicationColumns({

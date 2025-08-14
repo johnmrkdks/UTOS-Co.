@@ -2,7 +2,7 @@ import { DataTable } from "@workspace/ui/components/data-table";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, Power, PowerOff } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -12,9 +12,11 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { useGetPackagesQuery } from "../../_hooks/query/use-get-packages-query";
 import { useDeletePackageMutation } from "../../_hooks/query/use-delete-package-mutation";
+import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
 import { useState } from "react";
 import { EditPackageDialog } from "./edit-package-dialog";
 import { ViewPackageDialog } from "./view-package-dialog";
+import { DeletePackageDialog } from "../delete-package-dialog/delete-package-dialog";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface Package {
@@ -23,21 +25,37 @@ interface Package {
 	description: string;
 	fixedPrice: number;
 	isAvailable: boolean;
+	isPublished?: boolean | null;
+	serviceType?: string;
 	createdAt: string;
 }
 
 export function PackagesTable() {
 	const [editingPackage, setEditingPackage] = useState<Package | null>(null);
 	const [viewingPackage, setViewingPackage] = useState<Package | null>(null);
+	const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
 
 	const packagesQuery = useGetPackagesQuery({});
 	const deletePackageMutation = useDeletePackageMutation();
+	const updatePackageMutation = useUpdatePackageMutation();
 
-	const handleDelete = async (packageId: string) => {
-		if (confirm("Are you sure you want to delete this package?")) {
-			await deletePackageMutation.mutateAsync({ id: packageId });
+	const handleToggleAvailable = async (pkg: Package) => {
+		try {
+			await updatePackageMutation.mutateAsync({
+				id: pkg.id,
+				data: {
+					name: pkg.name,
+					description: pkg.description,
+					pricePerDay: pkg.fixedPrice / 100, // Convert from cents for the API
+					isAvailable: !pkg.isAvailable,
+					isPublished: false, // Default value
+				}
+			});
+		} catch (error) {
+			console.error("Failed to toggle package availability:", error);
 		}
 	};
+
 
 	const columns: ColumnDef<Package>[] = [
 		{
@@ -74,13 +92,13 @@ export function PackagesTable() {
 		{
 			accessorKey: "isAvailable",
 			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Availability" />
+				<DataTableColumnHeader column={column} title="Status" />
 			),
 			cell: ({ row }) => {
-				const isAvailable = row.getValue("isAvailable") as boolean;
+				const pkg = row.original;
 				return (
-					<Badge variant={isAvailable ? "default" : "secondary"}>
-						{isAvailable ? "Available" : "Unavailable"}
+					<Badge variant={pkg.isAvailable ? "default" : "secondary"}>
+						{pkg.isAvailable ? "Available" : "Unavailable"}
 					</Badge>
 				);
 			},
@@ -121,9 +139,25 @@ export function PackagesTable() {
 								<Pencil className="mr-2 h-4 w-4" />
 								Edit
 							</DropdownMenuItem>
+							<DropdownMenuItem 
+								onClick={() => handleToggleAvailable(pkg)}
+								disabled={updatePackageMutation.isPending}
+							>
+								{pkg.isAvailable ? (
+									<>
+										<PowerOff className="mr-2 h-4 w-4" />
+										Disable
+									</>
+								) : (
+									<>
+										<Power className="mr-2 h-4 w-4" />
+										Enable
+									</>
+								)}
+							</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
-								onClick={() => handleDelete(pkg.id)}
+								onClick={() => setDeletingPackage(pkg)}
 								className="text-destructive"
 							>
 								<Trash2 className="mr-2 h-4 w-4" />
@@ -184,6 +218,14 @@ export function PackagesTable() {
 					package={viewingPackage}
 					open={!!viewingPackage}
 					onOpenChange={(open) => !open && setViewingPackage(null)}
+				/>
+			)}
+
+			{deletingPackage && (
+				<DeletePackageDialog
+					package={deletingPackage}
+					open={!!deletingPackage}
+					onOpenChange={(open) => !open && setDeletingPackage(null)}
 				/>
 			)}
 		</>
