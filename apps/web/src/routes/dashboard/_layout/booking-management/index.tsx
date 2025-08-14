@@ -5,13 +5,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/componen
 import { BookingManagementModalProviders } from "@/features/dashboard/_pages/booking-management/_providers/booking-management-modal-providers";
 import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
 import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
+import { BookingFilters, type BookingFilters as BookingFiltersType } from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
+import { BookingStatusPipeline } from "@/features/dashboard/_pages/booking-management/_components/booking-status-pipeline";
+import { BookingRevenueReport } from "@/features/dashboard/_pages/booking-management/_components/booking-revenue-report";
 import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-package-booking-dialog";
 import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarPlus, PackageIcon, RouteIcon } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
 export const Route = createFileRoute("/dashboard/_layout/booking-management/")({
@@ -32,9 +35,28 @@ function BookingManagementContent() {
 		openCreateCustomBookingDialog
 	} = useBookingManagementModalProvider();
 
+	const [filters, setFilters] = useState<BookingFiltersType>({});
+
 	const bookingsQuery = useGetBookingsQuery({
-		limit: 10,
+		limit: 100,
 	});
+
+	// Calculate real-time metrics from bookings data
+	const bookingsData = bookingsQuery.data?.data || [];
+	const totalBookings = bookingsData.length;
+	const pendingBookings = bookingsData.filter(b => b.status === "pending").length;
+	const todaysBookings = bookingsData.filter(b => {
+		const today = new Date();
+		const bookingDate = new Date(b.scheduledPickupTime);
+		return bookingDate.toDateString() === today.toDateString();
+	}).length;
+	const activeBookings = bookingsData.filter(b => 
+		["driver_assigned", "in_progress"].includes(b.status)
+	).length;
+
+	const clearFilters = () => {
+		setFilters({});
+	};
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
@@ -46,7 +68,7 @@ function BookingManagementContent() {
 						className="flex items-center gap-2"
 					>
 						<PackageIcon className="h-4 w-4" />
-						Package Booking
+						Create Package Booking
 					</Button>
 					<Button
 						onClick={openCreateCustomBookingDialog}
@@ -54,7 +76,7 @@ function BookingManagementContent() {
 						className="flex items-center gap-2"
 					>
 						<RouteIcon className="h-4 w-4" />
-						Custom Booking
+						Create Custom Booking
 					</Button>
 				</div>
 			</div>
@@ -67,7 +89,7 @@ function BookingManagementContent() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							{bookingsQuery.data?.data?.length || 0}
+							{totalBookings}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							All time bookings
@@ -81,7 +103,7 @@ function BookingManagementContent() {
 						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">12</div>
+						<div className="text-2xl font-bold">{pendingBookings}</div>
 						<p className="text-xs text-muted-foreground">
 							Awaiting confirmation
 						</p>
@@ -94,7 +116,7 @@ function BookingManagementContent() {
 						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">8</div>
+						<div className="text-2xl font-bold">{todaysBookings}</div>
 						<p className="text-xs text-muted-foreground">
 							Scheduled for today
 						</p>
@@ -107,7 +129,7 @@ function BookingManagementContent() {
 						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">3</div>
+						<div className="text-2xl font-bold">{activeBookings}</div>
 						<p className="text-xs text-muted-foreground">
 							Currently in progress
 						</p>
@@ -115,9 +137,18 @@ function BookingManagementContent() {
 				</Card>
 			</div>
 
+			{/* Advanced Filters */}
+			<BookingFilters
+				filters={filters}
+				onFiltersChange={setFilters}
+				onClearFilters={clearFilters}
+			/>
+
 			<Tabs defaultValue="all" className="space-y-4">
 				<TabsList>
 					<TabsTrigger value="all">All Bookings</TabsTrigger>
+					<TabsTrigger value="pipeline">Status Pipeline</TabsTrigger>
+					<TabsTrigger value="revenue">Revenue Report</TabsTrigger>
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
 					<TabsTrigger value="custom">Custom Bookings</TabsTrigger>
 					<TabsTrigger value="pending">Pending</TabsTrigger>
@@ -133,8 +164,36 @@ function BookingManagementContent() {
 						</CardHeader>
 						<CardContent>
 							<Suspense fallback={<Loader />}>
-								<BookingsListTable />
+								<BookingsListTable filters={filters} />
 							</Suspense>
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="pipeline" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Real-time Status Pipeline</CardTitle>
+							<CardDescription>
+								Drag and drop bookings to update their status in real-time.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<BookingStatusPipeline filters={filters} />
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="revenue" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Revenue Analysis & Profit Reporting</CardTitle>
+							<CardDescription>
+								Comprehensive revenue breakdown with profit analysis insights.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<BookingRevenueReport filters={filters} />
 						</CardContent>
 					</Card>
 				</TabsContent>
@@ -149,7 +208,7 @@ function BookingManagementContent() {
 						</CardHeader>
 						<CardContent>
 							<Suspense fallback={<Loader />}>
-								<BookingsListTable bookingType="package" />
+								<BookingsListTable bookingType="package" filters={filters} />
 							</Suspense>
 						</CardContent>
 					</Card>
@@ -165,7 +224,7 @@ function BookingManagementContent() {
 						</CardHeader>
 						<CardContent>
 							<Suspense fallback={<Loader />}>
-								<BookingsListTable bookingType="custom" />
+								<BookingsListTable bookingType="custom" filters={filters} />
 							</Suspense>
 						</CardContent>
 					</Card>
@@ -181,7 +240,7 @@ function BookingManagementContent() {
 						</CardHeader>
 						<CardContent>
 							<Suspense fallback={<Loader />}>
-								<BookingsListTable status="pending" />
+								<BookingsListTable status="pending" filters={filters} />
 							</Suspense>
 						</CardContent>
 					</Card>

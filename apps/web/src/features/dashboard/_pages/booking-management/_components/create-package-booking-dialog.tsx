@@ -26,7 +26,7 @@ import {
 	SelectValue,
 } from "@workspace/ui/components/select";
 import { useCreatePackageBookingMutation } from "../_hooks/query/use-create-package-booking-mutation";
-import { useGetPackagesQuery } from "../_hooks/query/use-get-packages-query";
+import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
 import { useGetCarsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-get-cars-query";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { useForm } from "react-hook-form";
@@ -42,11 +42,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/component
 const createPackageBookingSchema = z.object({
 	packageId: z.string().min(1, "Please select a package"),
 	carId: z.string().min(1, "Please select a car"),
-	userId: z.string().min(1, "Please select a user").default("user-1"), // Default for demo
+	userId: z.string().min(1, "User ID is required"),
 	originAddress: z.string().min(1, "Origin address is required"),
 	destinationAddress: z.string().min(1, "Destination address is required"),
 	scheduledPickupTime: z.date({
-		required_error: "Pickup time is required",
+		message: "Pickup time is required",
 	}),
 	customerName: z.string().min(1, "Customer name is required"),
 	customerPhone: z.string().min(1, "Customer phone is required"),
@@ -101,9 +101,9 @@ export function CreatePackageBookingDialog() {
 		<Dialog open={isCreatePackageBookingDialogOpen} onOpenChange={handleClose}>
 			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
-					<DialogTitle>Create Package Booking</DialogTitle>
+					<DialogTitle>Create Package Booking (Admin)</DialogTitle>
 					<DialogDescription>
-						Create a new booking using a predefined package with fixed pricing.
+						Manually create a new package booking on behalf of a customer. This booking will use predefined package pricing and services.
 					</DialogDescription>
 				</DialogHeader>
 

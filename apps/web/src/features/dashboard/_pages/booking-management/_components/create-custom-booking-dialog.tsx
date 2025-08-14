@@ -8,38 +8,8 @@ import { QuoteDisplay } from "./custom-booking/quote-display"
 import type { CreateCustomBookingForm, QuoteResult } from "../_types/booking"
 import { useGetCarsQuery } from "../../car-management/_hooks/query/car/use-get-cars-query"
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider"
-
-const useCalculateInstantQuoteMutation = () => ({
-	mutate: (data: any, options: any) => {
-		setTimeout(() => {
-			options.onSuccess({
-				baseFare: 500,
-				distanceFare: 1200,
-				timeFare: 300,
-				extraCharges: 0,
-				totalAmount: 2000,
-				estimatedDistance: 12000,
-				estimatedDuration: 1800,
-				breakdown: {
-					baseRate: 500,
-					perKmRate: 100,
-					perMinuteRate: 10,
-					minimumFare: 800,
-				},
-			})
-		}, 1000)
-	},
-})
-
-const useCreateCustomBookingMutation = (onSuccess: () => void) => ({
-	mutate: (data: any) => {
-		setTimeout(() => {
-			toast.success("Booking created successfully!")
-			onSuccess()
-		}, 1000)
-	},
-	isPending: false,
-})
+import { useCalculateInstantQuoteMutation } from "../_hooks/query/use-calculate-instant-quote-mutation";
+import { useCreateCustomBookingMutation } from "../_hooks/query/use-create-custom-booking-mutation";
 
 export function CreateCustomBookingDialog() {
 	const { isCreateCustomBookingDialogOpen, closeCreateCustomBookingDialog } = useBookingManagementModalProvider()
@@ -116,9 +86,9 @@ export function CreateCustomBookingDialog() {
 				<DialogHeader className="flex-shrink-0">
 					<div className="flex items-center justify-between">
 						<div>
-							<DialogTitle>Create Custom Booking</DialogTitle>
+							<DialogTitle>Create Custom Booking (Admin)</DialogTitle>
 							<DialogDescription>
-								Create a custom booking with instant quote calculation based on route and time.
+								Manually create a custom booking on behalf of a customer. Calculate dynamic pricing based on route, time, and car type.
 							</DialogDescription>
 						</div>
 						<Button variant="ghost" size="icon" onClick={handleClose} disabled={createCustomBookingMutation.isPending}>

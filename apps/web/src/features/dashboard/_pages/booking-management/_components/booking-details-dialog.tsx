@@ -364,7 +364,7 @@ export function BookingDetailsDialog() {
 							<CardContent className="space-y-2 text-sm">
 								<div className="flex justify-between">
 									<span>Created</span>
-									<span>{format(new Date(booking.createdAt), "MMM dd, HH:mm")}</span>
+									<span>{booking.createdAt ? format(new Date(booking.createdAt), "MMM dd, HH:mm") : "N/A"}</span>
 								</div>
 								{booking.confirmedAt && (
 									<div className="flex justify-between">
