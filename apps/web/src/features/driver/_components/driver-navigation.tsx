@@ -18,7 +18,11 @@ interface NavigationItem {
 	requiresEmailVerification?: boolean;
 }
 
-export function DriverNavigation() {
+interface DriverNavigationProps {
+	onNavigate?: () => void;
+}
+
+export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { session } = useUserQuery();
@@ -83,6 +87,7 @@ export function DriverNavigation() {
 								} else {
 									navigate({ to: '/driver/verify-email' });
 								}
+								onNavigate?.();
 							}}
 							disabled={!accessible}
 						>

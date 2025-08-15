@@ -83,11 +83,11 @@ function DriverDashboardComponent() {
 	const isFullyOnboarded = completedSteps === totalSteps;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 lg:space-y-6">
 			{/* Welcome Header */}
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">Welcome back, {session?.user?.name}!</h1>
-				<p className="text-gray-600 mt-1">Here's your driver dashboard overview</p>
+				<h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Welcome back, {session?.user?.name}!</h1>
+				<p className="text-gray-600 mt-1 text-sm lg:text-base">Here's your driver dashboard overview</p>
 			</div>
 
 			{/* Onboarding Status Card */}
@@ -109,69 +109,77 @@ function DriverDashboardComponent() {
 					<CardContent className="space-y-4">
 						<Progress value={progressPercentage} className="w-full" />
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div className="space-y-3">
-								<div className="flex items-center gap-3">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										{onboardingProgress.emailVerified ? (
+											<CheckCircleIcon className="h-4 w-4 text-green-600" />
+										) : (
+											<AlertCircleIcon className="h-4 w-4 text-yellow-600" />
+										)}
+										<span className="text-sm">Email Verification</span>
+									</div>
 									{onboardingProgress.emailVerified ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
+										<Badge variant="default" className="bg-green-100 text-green-700 text-xs">Done</Badge>
 									) : (
-										<AlertCircleIcon className="h-5 w-5 text-yellow-600" />
-									)}
-									<span className="text-sm">Email Verification</span>
-									{onboardingProgress.emailVerified ? (
-										<Badge variant="default" className="bg-green-100 text-green-700">Done</Badge>
-									) : (
-										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Pending</Badge>
+										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">Pending</Badge>
 									)}
 								</div>
 
-								<div className="flex items-center gap-3">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										{onboardingProgress.profileComplete ? (
+											<CheckCircleIcon className="h-4 w-4 text-green-600" />
+										) : (
+											<AlertCircleIcon className="h-4 w-4 text-yellow-600" />
+										)}
+										<span className="text-sm">Complete Profile</span>
+									</div>
 									{onboardingProgress.profileComplete ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
+										<Badge variant="default" className="bg-green-100 text-green-700 text-xs">Done</Badge>
 									) : (
-										<AlertCircleIcon className="h-5 w-5 text-yellow-600" />
-									)}
-									<span className="text-sm">Complete Profile</span>
-									{onboardingProgress.profileComplete ? (
-										<Badge variant="default" className="bg-green-100 text-green-700">Done</Badge>
-									) : (
-										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Pending</Badge>
+										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">Pending</Badge>
 									)}
 								</div>
 							</div>
 
 							<div className="space-y-3">
-								<div className="flex items-center gap-3">
-									{onboardingProgress.documentsUploaded ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
-									) : (
-										<AlertCircleIcon className="h-5 w-5 text-gray-400" />
-									)}
-									<span className="text-sm">Documents (Optional)</span>
-									<Badge variant="outline" className="bg-gray-100 text-gray-600">Later</Badge>
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										{onboardingProgress.documentsUploaded ? (
+											<CheckCircleIcon className="h-4 w-4 text-green-600" />
+										) : (
+											<AlertCircleIcon className="h-4 w-4 text-gray-400" />
+										)}
+										<span className="text-sm">Documents (Optional)</span>
+									</div>
+									<Badge variant="outline" className="bg-gray-100 text-gray-600 text-xs">Later</Badge>
 								</div>
 
-								<div className="flex items-center gap-3">
-									{onboardingProgress.adminApproved ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
-									) : (
-										<ClockIcon className="h-5 w-5 text-blue-600" />
-									)}
-									<span className="text-sm">Admin Approval</span>
-									<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">Review</Badge>
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										{onboardingProgress.adminApproved ? (
+											<CheckCircleIcon className="h-4 w-4 text-green-600" />
+										) : (
+											<ClockIcon className="h-4 w-4 text-blue-600" />
+										)}
+										<span className="text-sm">Admin Approval</span>
+									</div>
+									<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Review</Badge>
 								</div>
 							</div>
 						</div>
 
-						<div className="pt-2 flex gap-3">
+						<div className="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-3">
 							{!onboardingProgress.emailVerified && (
-								<Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+								<Button size="sm" className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
 									<MailIcon className="h-4 w-4 mr-2" />
 									Verify Email
 								</Button>
 							)}
 							{!onboardingProgress.profileComplete && onboardingProgress.emailVerified && (
-								<Button size="sm" className="bg-green-600 hover:bg-green-700">
+								<Button size="sm" className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
 									<UserIcon className="h-4 w-4 mr-2" />
 									Complete Profile
 								</Button>
@@ -182,7 +190,7 @@ function DriverDashboardComponent() {
 			)}
 
 			{/* Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
@@ -237,7 +245,7 @@ function DriverDashboardComponent() {
 			</div>
 
 			{/* Recent Activity */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
 				{/* Recent Bookings */}
 				<Card>
 					<CardHeader>
@@ -253,27 +261,27 @@ function DriverDashboardComponent() {
 					<CardContent>
 						<div className="space-y-4">
 							{recentBookings.map((booking) => (
-								<div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
+								<div key={booking.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border rounded-lg gap-3 sm:gap-4">
 									<div className="flex-1">
 										<div className="flex items-center gap-2 mb-1">
-											<h4 className="font-medium">{booking.customer}</h4>
-											<Badge variant={booking.status === 'completed' ? 'default' : 'secondary'}>
+											<h4 className="font-medium text-sm lg:text-base">{booking.customer}</h4>
+											<Badge variant={booking.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
 												{booking.status}
 											</Badge>
 										</div>
-										<div className="text-sm text-gray-600 space-y-1">
+										<div className="text-xs lg:text-sm text-gray-600 space-y-1">
 											<div className="flex items-center gap-1">
-												<MapPinIcon className="h-3 w-3" />
-												<span>{booking.pickup} → {booking.destination}</span>
+												<MapPinIcon className="h-3 w-3 flex-shrink-0" />
+												<span className="truncate">{booking.pickup} → {booking.destination}</span>
 											</div>
 											<div className="flex items-center gap-1">
-												<CalendarIcon className="h-3 w-3" />
+												<CalendarIcon className="h-3 w-3 flex-shrink-0" />
 												<span>{booking.time}</span>
 											</div>
 										</div>
 									</div>
-									<div className="text-right">
-										<div className="font-semibold text-green-600">
+									<div className="text-right sm:text-left">
+										<div className="font-semibold text-green-600 text-lg">
 											${booking.amount.toFixed(2)}
 										</div>
 									</div>
@@ -291,33 +299,33 @@ function DriverDashboardComponent() {
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-3">
-							<Button className="w-full justify-start" size="lg">
-								<CarIcon className="h-5 w-5 mr-3" />
-								Go Online / Start Accepting Rides
+							<Button className="w-full justify-start text-left" size="lg">
+								<CarIcon className="h-5 w-5 mr-3 flex-shrink-0" />
+								<span className="truncate">Go Online / Start Accepting Rides</span>
 							</Button>
 
-							<Button variant="outline" className="w-full justify-start" size="lg">
-								<UserIcon className="h-5 w-5 mr-3" />
-								Update My Profile
+							<Button variant="outline" className="w-full justify-start text-left" size="lg">
+								<UserIcon className="h-5 w-5 mr-3 flex-shrink-0" />
+								<span className="truncate">Update My Profile</span>
 							</Button>
 
-							<Button variant="outline" className="w-full justify-start" size="lg">
-								<TrendingUpIcon className="h-5 w-5 mr-3" />
-								View Earnings Report
+							<Button variant="outline" className="w-full justify-start text-left" size="lg">
+								<TrendingUpIcon className="h-5 w-5 mr-3 flex-shrink-0" />
+								<span className="truncate">View Earnings Report</span>
 							</Button>
 
-							<Button variant="outline" className="w-full justify-start" size="lg">
-								<PhoneIcon className="h-5 w-5 mr-3" />
-								Contact Support
+							<Button variant="outline" className="w-full justify-start text-left" size="lg">
+								<PhoneIcon className="h-5 w-5 mr-3 flex-shrink-0" />
+								<span className="truncate">Contact Support</span>
 							</Button>
 						</div>
 
 						<div className="mt-6 p-4 bg-gray-50 rounded-lg">
-							<h4 className="font-medium mb-2">Need Help?</h4>
-							<p className="text-sm text-gray-600 mb-3">
+							<h4 className="font-medium mb-2 text-sm lg:text-base">Need Help?</h4>
+							<p className="text-xs lg:text-sm text-gray-600 mb-3">
 								Check out our driver resources and FAQ section.
 							</p>
-							<Button variant="outline" size="sm">
+							<Button variant="outline" size="sm" className="w-full sm:w-auto">
 								Help Center
 								<ArrowRightIcon className="h-4 w-4 ml-2" />
 							</Button>

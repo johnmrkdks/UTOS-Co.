@@ -1,8 +1,10 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import { DriverNavigation } from '@/features/driver/_components/driver-navigation';
 import {
@@ -13,7 +15,9 @@ import {
 	AlertCircleIcon,
 	ShieldCheckIcon,
 	UserIcon,
-	ClipboardListIcon
+	ClipboardListIcon,
+	MenuIcon,
+	XIcon
 } from "lucide-react";
 import { Logo } from '@/components/logo';
 import { SignOutConfirmationDialog } from '@/components/dialogs/sign-out-confirmation-dialog';
@@ -25,6 +29,7 @@ export const Route = createFileRoute('/driver/_layout')({
 function DriverLayoutComponent() {
 	const navigate = useNavigate();
 	const { session, signOutWithConfirmation } = useUserQuery();
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	const user = session?.user;
 
@@ -58,17 +63,128 @@ function DriverLayoutComponent() {
 					<div className="flex justify-between items-center h-16">
 						{/* Logo and Title */}
 						<div className="flex items-center">
-							<Logo />
-							<div className="ml-3">
+							{/* Mobile Menu Button */}
+							<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+								<SheetTrigger asChild>
+									<Button variant="ghost" size="sm" className="lg:hidden mr-2">
+										<MenuIcon className="h-5 w-5" />
+									</Button>
+								</SheetTrigger>
+								<SheetContent side="left" className="w-80 p-0">
+									<div className="p-4 border-b">
+										<div className="flex items-center justify-between">
+											<div className="flex items-center">
+												<Logo />
+												<div className="ml-2">
+													<h2 className="text-lg font-semibold">Driver Portal</h2>
+												</div>
+											</div>
+											<Button 
+												variant="ghost" 
+												size="sm" 
+												onClick={() => setIsMobileMenuOpen(false)}
+											>
+												<XIcon className="h-4 w-4" />
+											</Button>
+										</div>
+									</div>
+									<div className="p-4">
+										<DriverNavigation onNavigate={() => setIsMobileMenuOpen(false)} />
+									</div>
+									<div className="p-4 border-t mt-4">
+										<Card>
+											<CardHeader className="pb-4">
+												<CardTitle className="text-lg">Account Status</CardTitle>
+											</CardHeader>
+											<CardContent className="space-y-4">
+												<div className="flex items-center justify-between">
+													<div className="flex items-center space-x-2">
+														<MailIcon className="h-4 w-4 text-gray-500" />
+														<span className="text-sm">Email Status</span>
+													</div>
+													{isEmailVerified ? (
+														<Badge variant="default" className="bg-green-100 text-green-700">
+															Verified
+														</Badge>
+													) : (
+														<Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
+															Unverified
+														</Badge>
+													)}
+												</div>
+
+												<div className="flex items-center justify-between">
+													<div className="flex items-center space-x-2">
+														<UserIcon className="h-4 w-4 text-gray-500" />
+														<span className="text-sm">Profile</span>
+													</div>
+													{needsOnboarding ? (
+														<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+															Incomplete
+														</Badge>
+													) : (
+														<Badge variant="default" className="bg-green-100 text-green-700">
+															Complete
+														</Badge>
+													)}
+												</div>
+
+												<div className="flex items-center justify-between">
+													<div className="flex items-center space-x-2">
+														<ShieldCheckIcon className="h-4 w-4 text-gray-500" />
+														<span className="text-sm">Driver Status</span>
+													</div>
+													<Badge variant="secondary" className="bg-gray-100 text-gray-700">
+														Pending
+													</Badge>
+												</div>
+
+												{!isEmailVerified && (
+													<div className="pt-2 border-t">
+														<Button
+															size="sm"
+															className="w-full"
+															onClick={() => {
+																navigate({ to: '/driver/verify-email' });
+																setIsMobileMenuOpen(false);
+															}}
+														>
+															Verify Email
+														</Button>
+													</div>
+												)}
+
+												{needsOnboarding && isEmailVerified && (
+													<div className="pt-2 border-t">
+														<Button
+															size="sm"
+															className="w-full"
+															onClick={() => {
+																navigate({ to: '/driver/onboarding' });
+																setIsMobileMenuOpen(false);
+															}}
+														>
+															Complete Onboarding
+														</Button>
+													</div>
+												)}
+											</CardContent>
+										</Card>
+									</div>
+								</SheetContent>
+							</Sheet>
+
+							<Logo className="lg:block" />
+							<div className="ml-3 hidden sm:block">
 								<h1 className="text-xl font-semibold text-gray-900">Down Under Chauffeur</h1>
 								<p className="text-sm text-gray-500">Driver Portal</p>
 							</div>
 						</div>
 
 						{/* User Info and Actions */}
-						<div className="flex items-center space-x-4">
-							{/* Status Indicators */}
-							<div className="hidden md:flex items-center space-x-3">
+						<div className="flex items-center space-x-2 sm:space-x-4">
+							{/* Status Indicators - Hidden on mobile, shown on larger screens */}
+							<div className="hidden lg:flex items-center space-x-3">
 								{isEmailVerified ? (
 									<Badge variant="default" className="bg-green-100 text-green-800">
 										<CheckCircleIcon className="h-3 w-3 mr-1" />
@@ -90,10 +206,13 @@ function DriverLayoutComponent() {
 							</div>
 
 							{/* User Menu */}
-							<div className="flex items-center space-x-3">
-								<div className="text-right">
+							<div className="flex items-center space-x-2 sm:space-x-3">
+								<div className="text-right hidden sm:block">
 									<p className="text-sm font-medium text-gray-900">{session?.user.name}</p>
 									<p className="text-xs text-gray-500">{session?.user.email}</p>
+								</div>
+								<div className="text-right sm:hidden">
+									<p className="text-sm font-medium text-gray-900">{session?.user.name?.split(' ')[0]}</p>
 								</div>
 								<Button
 									variant="ghost"
@@ -109,10 +228,10 @@ function DriverLayoutComponent() {
 				</div>
 			</div>
 
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="flex gap-8">
-					{/* Sidebar Navigation */}
-					<div className="w-64 flex-shrink-0">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
+				<div className="lg:flex lg:gap-8">
+					{/* Desktop Sidebar Navigation - Hidden on mobile */}
+					<div className="hidden lg:block w-64 flex-shrink-0">
 						<Card>
 							<CardHeader className="pb-4">
 								<CardTitle className="text-lg">Navigation</CardTitle>
@@ -198,7 +317,7 @@ function DriverLayoutComponent() {
 					</div>
 
 					{/* Main Content */}
-					<div className="flex-1">
+					<div className="flex-1 lg:mt-0">
 						<Outlet />
 					</div>
 				</div>
