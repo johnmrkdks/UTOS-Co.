@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client";
 import { useNavigate } from "@tanstack/react-router";
+import { useSignOutWithConfirmation } from "@/hooks/use-sign-out-with-confirmation";
 
 export const useUserQuery = () => {
 	const navigate = useNavigate();
@@ -17,5 +18,13 @@ export const useUserQuery = () => {
 		});
 	}
 
-	return { session, isPending, handleLogout };
+	// New hook with confirmation dialog support
+	const signOutWithConfirmation = useSignOutWithConfirmation();
+
+	return { 
+		session, 
+		isPending, 
+		handleLogout, 
+		signOutWithConfirmation 
+	};
 }

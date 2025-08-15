@@ -4,6 +4,7 @@ import { updateDriverService, UpdateDriverServiceSchema } from "@/services/drive
 import { createDriverApplicationService, CreateDriverApplicationServiceSchema } from "@/services/drivers/create-driver-application";
 import { approveDriverApplicationService, ApproveDriverApplicationServiceSchema } from "@/services/drivers/approve-driver-application";
 import { getDriversByStatusService, GetDriversByStatusServiceSchema } from "@/services/drivers/get-drivers-by-status";
+import { deleteDriverService, DeleteDriverServiceSchema } from "@/services/drivers/delete-driver";
 import { assignDriverService, AssignDriverServiceSchema } from "@/services/bookings/assign-driver";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
@@ -82,6 +83,16 @@ export const driversRouter = router({
 			try {
 				const updatedBooking = await assignDriverService(db, input);
 				return updatedBooking;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	delete: protectedProcedure
+		.input(DeleteDriverServiceSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const result = await deleteDriverService(db, input);
+				return result;
 			} catch (error) {
 				handleTRPCError(error);
 			}

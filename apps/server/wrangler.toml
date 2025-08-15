@@ -14,6 +14,9 @@ BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
 # Google OAuth
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_OAUTH_REFRESH_TOKEN"
+GOOGLE_EMAIL_USER = "johnmrk.au@gmail.com"
+
 
 # Cloudflare R2
 CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"

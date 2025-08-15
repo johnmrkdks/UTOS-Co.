@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as DriverLayoutRouteImport } from './routes/driver/_layout'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
 import { Route as MarketingServicesRouteImport } from './routes/_marketing/services'
@@ -23,7 +24,12 @@ import { Route as MarketingBookingRouteImport } from './routes/_marketing/bookin
 import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-us'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
+import { Route as DriverLayoutIndexRouteImport } from './routes/driver/_layout/index'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout/index'
+import { Route as DriverLayoutVerifyEmailRouteImport } from './routes/driver/_layout/verify-email'
+import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layout/settings'
+import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
+import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
 import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './routes/dashboard/_layout/todays-scheduled/index'
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
@@ -42,8 +48,14 @@ import { Route as DashboardLayoutAdminTestingIndexRouteImport } from './routes/d
 import { Route as DashboardLayoutDriversOnboardingRouteImport } from './routes/dashboard/_layout/drivers/onboarding'
 import { Route as DashboardLayoutCarsAddCarRouteImport } from './routes/dashboard/_layout/cars/add-car'
 
+const DriverRouteImport = createFileRoute('/driver')()
 const DashboardRouteImport = createFileRoute('/dashboard')()
 
+const DriverRoute = DriverRouteImport.update({
+  id: '/driver',
+  path: '/driver',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -57,6 +69,10 @@ const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MarketingRoute,
+} as any)
+const DriverLayoutRoute = DriverLayoutRouteImport.update({
+  id: '/_layout',
+  getParentRoute: () => DriverRoute,
 } as any)
 const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
   id: '/_layout',
@@ -108,10 +124,35 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DriverLayoutIndexRoute = DriverLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
 const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DriverLayoutVerifyEmailRoute = DriverLayoutVerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
+const DriverLayoutSettingsRoute = DriverLayoutSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
+const DriverLayoutProfileRoute = DriverLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
+const DriverLayoutOnboardingRoute = DriverLayoutOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => DriverLayoutRoute,
 } as any)
 const DashboardLayoutTodaysScheduledIndexRoute =
   DashboardLayoutTodaysScheduledIndexRouteImport.update({
@@ -227,8 +268,14 @@ export interface FileRoutesByFullPath {
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/dashboard': typeof DashboardLayoutRouteWithChildren
+  '/driver': typeof DriverLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
+  '/driver/onboarding': typeof DriverLayoutOnboardingRoute
+  '/driver/profile': typeof DriverLayoutProfileRoute
+  '/driver/settings': typeof DriverLayoutSettingsRoute
+  '/driver/verify-email': typeof DriverLayoutVerifyEmailRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
+  '/driver/': typeof DriverLayoutIndexRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -258,7 +305,12 @@ export interface FileRoutesByTo {
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/dashboard': typeof DashboardLayoutIndexRoute
+  '/driver': typeof DriverLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/driver/onboarding': typeof DriverLayoutOnboardingRoute
+  '/driver/profile': typeof DriverLayoutProfileRoute
+  '/driver/settings': typeof DriverLayoutSettingsRoute
+  '/driver/verify-email': typeof DriverLayoutVerifyEmailRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -291,8 +343,15 @@ export interface FileRoutesById {
   '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
+  '/driver': typeof DriverRouteWithChildren
+  '/driver/_layout': typeof DriverLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
+  '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
+  '/driver/_layout/profile': typeof DriverLayoutProfileRoute
+  '/driver/_layout/settings': typeof DriverLayoutSettingsRoute
+  '/driver/_layout/verify-email': typeof DriverLayoutVerifyEmailRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
+  '/driver/_layout/': typeof DriverLayoutIndexRoute
   '/dashboard/_layout/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/_layout/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/_layout/admin-testing/': typeof DashboardLayoutAdminTestingIndexRoute
@@ -324,8 +383,14 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms-and-conditions'
     | '/dashboard'
+    | '/driver'
     | '/'
+    | '/driver/onboarding'
+    | '/driver/profile'
+    | '/driver/settings'
+    | '/driver/verify-email'
     | '/dashboard/'
+    | '/driver/'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -355,7 +420,12 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms-and-conditions'
     | '/dashboard'
+    | '/driver'
     | '/'
+    | '/driver/onboarding'
+    | '/driver/profile'
+    | '/driver/settings'
+    | '/driver/verify-email'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -387,8 +457,15 @@ export interface FileRouteTypes {
     | '/_marketing/terms-and-conditions'
     | '/dashboard'
     | '/dashboard/_layout'
+    | '/driver'
+    | '/driver/_layout'
     | '/_marketing/'
+    | '/driver/_layout/onboarding'
+    | '/driver/_layout/profile'
+    | '/driver/_layout/settings'
+    | '/driver/_layout/verify-email'
     | '/dashboard/_layout/'
+    | '/driver/_layout/'
     | '/dashboard/_layout/cars/add-car'
     | '/dashboard/_layout/drivers/onboarding'
     | '/dashboard/_layout/admin-testing/'
@@ -413,10 +490,18 @@ export interface RootRouteChildren {
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  DriverRoute: typeof DriverRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/driver': {
+      id: '/driver'
+      path: '/driver'
+      fullPath: '/driver'
+      preLoaderRoute: typeof DriverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -437,6 +522,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
       parentRoute: typeof MarketingRoute
+    }
+    '/driver/_layout': {
+      id: '/driver/_layout'
+      path: '/driver'
+      fullPath: '/driver'
+      preLoaderRoute: typeof DriverLayoutRouteImport
+      parentRoute: typeof DriverRoute
     }
     '/dashboard/_layout': {
       id: '/dashboard/_layout'
@@ -508,12 +600,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/driver/_layout/': {
+      id: '/driver/_layout/'
+      path: '/'
+      fullPath: '/driver/'
+      preLoaderRoute: typeof DriverLayoutIndexRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
     '/dashboard/_layout/': {
       id: '/dashboard/_layout/'
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardLayoutIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
+    }
+    '/driver/_layout/verify-email': {
+      id: '/driver/_layout/verify-email'
+      path: '/verify-email'
+      fullPath: '/driver/verify-email'
+      preLoaderRoute: typeof DriverLayoutVerifyEmailRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
+    '/driver/_layout/settings': {
+      id: '/driver/_layout/settings'
+      path: '/settings'
+      fullPath: '/driver/settings'
+      preLoaderRoute: typeof DriverLayoutSettingsRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
+    '/driver/_layout/profile': {
+      id: '/driver/_layout/profile'
+      path: '/profile'
+      fullPath: '/driver/profile'
+      preLoaderRoute: typeof DriverLayoutProfileRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
+    '/driver/_layout/onboarding': {
+      id: '/driver/_layout/onboarding'
+      path: '/onboarding'
+      fullPath: '/driver/onboarding'
+      preLoaderRoute: typeof DriverLayoutOnboardingRouteImport
+      parentRoute: typeof DriverLayoutRoute
     }
     '/dashboard/_layout/todays-scheduled/': {
       id: '/dashboard/_layout/todays-scheduled/'
@@ -723,11 +850,43 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface DriverLayoutRouteChildren {
+  DriverLayoutOnboardingRoute: typeof DriverLayoutOnboardingRoute
+  DriverLayoutProfileRoute: typeof DriverLayoutProfileRoute
+  DriverLayoutSettingsRoute: typeof DriverLayoutSettingsRoute
+  DriverLayoutVerifyEmailRoute: typeof DriverLayoutVerifyEmailRoute
+  DriverLayoutIndexRoute: typeof DriverLayoutIndexRoute
+}
+
+const DriverLayoutRouteChildren: DriverLayoutRouteChildren = {
+  DriverLayoutOnboardingRoute: DriverLayoutOnboardingRoute,
+  DriverLayoutProfileRoute: DriverLayoutProfileRoute,
+  DriverLayoutSettingsRoute: DriverLayoutSettingsRoute,
+  DriverLayoutVerifyEmailRoute: DriverLayoutVerifyEmailRoute,
+  DriverLayoutIndexRoute: DriverLayoutIndexRoute,
+}
+
+const DriverLayoutRouteWithChildren = DriverLayoutRoute._addFileChildren(
+  DriverLayoutRouteChildren,
+)
+
+interface DriverRouteChildren {
+  DriverLayoutRoute: typeof DriverLayoutRouteWithChildren
+}
+
+const DriverRouteChildren: DriverRouteChildren = {
+  DriverLayoutRoute: DriverLayoutRouteWithChildren,
+}
+
+const DriverRouteWithChildren =
+  DriverRoute._addFileChildren(DriverRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRouteWithChildren,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  DriverRoute: DriverRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,7 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/componen
 import { DriversTable } from "@/features/dashboard/_pages/drivers/_components/drivers-table";
 import { DriverApprovalTable } from "@/features/dashboard/_pages/drivers/_components/driver-approval-table";
 import { DriverApplicationsTable } from "@/features/dashboard/_pages/drivers/_components/driver-applications-table";
-import { UsersIcon, UserCheckIcon, UserXIcon, PlusIcon } from "lucide-react";
+import { CreateDriverUserDialog } from "@/features/dashboard/_pages/drivers/_components/create-driver-user-dialog";
+import { DriverUsersTable } from "@/features/dashboard/_pages/drivers/_components/driver-users-table";
+import { DriverProcessGuide } from "@/features/dashboard/_pages/drivers/_components/driver-process-guide";
+import { UsersIcon, UserCheckIcon, UserXIcon, PlusIcon, UserPlusIcon, InfoIcon } from "lucide-react";
 import { useGetDriversQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-drivers-query";
 import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
@@ -27,13 +30,21 @@ function RouteComponent() {
 	};
 
 	return (
-		<PaddingLayout className="flex-1 space-y-4">
+		<PaddingLayout className="flex-1 space-y-4 mb-8">
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Driver Management</h2>
-				<Button onClick={handleAddDriver}>
-					<PlusIcon className="h-4 w-4" />
-					Add Driver
-				</Button>
+				<div className="flex gap-2">
+					<CreateDriverUserDialog>
+						<Button variant="outline">
+							<UserPlusIcon className="h-4 w-4" />
+							Create Driver Account
+						</Button>
+					</CreateDriverUserDialog>
+					<Button onClick={handleAddDriver}>
+						<PlusIcon className="h-4 w-4" />
+						Driver Onboarding
+					</Button>
+				</div>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -93,10 +104,15 @@ function RouteComponent() {
 			<Tabs defaultValue="all" className="space-y-4">
 				<TabsList>
 					<TabsTrigger value="all">All Drivers</TabsTrigger>
+					<TabsTrigger value="accounts">Driver Accounts</TabsTrigger>
 					<TabsTrigger value="applications">Applications</TabsTrigger>
 					<TabsTrigger value="pending">Pending Approval</TabsTrigger>
 					<TabsTrigger value="active">Active</TabsTrigger>
 					<TabsTrigger value="inactive">Inactive</TabsTrigger>
+					<TabsTrigger value="guide" className="ml-auto">
+						<InfoIcon className="h-4 w-4 mr-1" />
+						Process Guide
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
@@ -111,6 +127,10 @@ function RouteComponent() {
 							<DriversTable />
 						</CardContent>
 					</Card>
+				</TabsContent>
+
+				<TabsContent value="accounts" className="space-y-4">
+					<DriverUsersTable />
 				</TabsContent>
 
 				<TabsContent value="applications" className="space-y-4">
@@ -167,6 +187,10 @@ function RouteComponent() {
 							<DriversTable filter="inactive" />
 						</CardContent>
 					</Card>
+				</TabsContent>
+
+				<TabsContent value="guide" className="space-y-4">
+					<DriverProcessGuide />
 				</TabsContent>
 			</Tabs>
 		</PaddingLayout>

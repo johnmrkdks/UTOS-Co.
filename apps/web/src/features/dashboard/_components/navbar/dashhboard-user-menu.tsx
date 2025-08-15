@@ -13,9 +13,10 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { getNameInitials } from "@/utils/format"
 import { useUserQuery } from "@/hooks/query/use-user-query"
+import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog"
 
 export function DashboardUserMenu() {
-	const { session, isPending, handleLogout } = useUserQuery()
+	const { session, isPending, signOutWithConfirmation } = useUserQuery()
 
 	// Show skeleton while loading
 	if (isPending) {
@@ -70,11 +71,20 @@ export function DashboardUserMenu() {
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={handleLogout}>
+				<DropdownMenuItem onClick={signOutWithConfirmation.openSignOutDialog}>
 					<LogOutIcon size={16} className="opacity-60" aria-hidden="true" />
 					<span>Sign Out</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
+			
+			<SignOutConfirmationDialog
+				isOpen={signOutWithConfirmation.isDialogOpen}
+				onClose={signOutWithConfirmation.closeSignOutDialog}
+				onConfirm={signOutWithConfirmation.confirmSignOut}
+				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userName={session?.user.name}
+				isLoading={signOutWithConfirmation.isSigningOut}
+			/>
 		</DropdownMenu>
 	)
 }

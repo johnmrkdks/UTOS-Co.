@@ -8,15 +8,26 @@ import {
 } from "@workspace/ui/components/table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Eye, UserCheck, UserX } from "lucide-react";
+import { MoreHorizontal, Pencil, Eye, UserCheck, UserX, Trash2 } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@workspace/ui/components/alert-dialog";
 import { useGetDriversQuery } from "../_hooks/query/use-get-drivers-query";
 import { useUpdateDriverMutation } from "../_hooks/query/use-update-driver-mutation";
+import { useDeleteDriverMutation } from "../_hooks/query/use-delete-driver-mutation";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useState } from "react";
 import { EditDriverDialog } from "./edit-driver-dialog";
@@ -29,9 +40,11 @@ type DriversTableProps = {
 export function DriversTable({ filter = "all" }: DriversTableProps) {
 	const [editingDriver, setEditingDriver] = useState<any>(null);
 	const [viewingDriver, setViewingDriver] = useState<any>(null);
+	const [deletingDriver, setDeletingDriver] = useState<any>(null);
 	
 	const driversQuery = useGetDriversQuery({});
 	const updateDriverMutation = useUpdateDriverMutation();
+	const deleteDriverMutation = useDeleteDriverMutation();
 
 	const handleApprove = async (driverId: string) => {
 		try {
@@ -65,6 +78,15 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 			});
 		} catch (error) {
 			console.error("Failed to toggle driver status:", error);
+		}
+	};
+
+	const handleDelete = async (driverId: string) => {
+		try {
+			await deleteDriverMutation.mutateAsync({ id: driverId });
+			setDeletingDriver(null);
+		} catch (error) {
+			console.error("Failed to delete driver:", error);
 		}
 	};
 
@@ -201,6 +223,13 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 												</>
 											)}
 										</DropdownMenuItem>
+										<DropdownMenuItem 
+											onClick={() => setDeletingDriver(driver)}
+											className="text-red-600"
+										>
+											<Trash2 className="mr-2 h-4 w-4" />
+											Delete Account
+										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</TableCell>
@@ -224,6 +253,27 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 					onOpenChange={(open) => !open && setViewingDriver(null)}
 				/>
 			)}
+
+			<AlertDialog open={!!deletingDriver} onOpenChange={(open) => !open && setDeletingDriver(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete Driver Account</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to delete {deletingDriver?.user?.name || "this driver"}'s account? 
+							This action cannot be undone and will permanently remove the driver and their associated user account from the system.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={() => deletingDriver && handleDelete(deletingDriver.id)}
+							className="bg-red-600 hover:bg-red-700"
+						>
+							Delete Account
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</>
 	);
 }

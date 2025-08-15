@@ -3,12 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/componen
 import { PackageBookingTester } from "./_components/package-booking-tester";
 import { CustomBookingTester } from "./_components/custom-booking-tester";
 import { EndToEndTester } from "./_components/end-to-end-tester";
+import { EmailTester } from "./_components/email-tester";
 import { TestResults } from "./_components/test-results";
 import { useState } from "react";
 
 export interface TestResult {
 	id: string;
-	type: "package" | "custom" | "end-to-end";
+	type: "package" | "custom" | "end-to-end" | "email";
 	status: "success" | "error" | "pending";
 	message: string;
 	timestamp: Date;
@@ -42,9 +43,10 @@ export function AdminTestingPage() {
 						</CardHeader>
 						<CardContent>
 							<Tabs defaultValue="package" className="w-full">
-								<TabsList className="grid w-full grid-cols-3">
+								<TabsList className="grid w-full grid-cols-4">
 									<TabsTrigger value="package">Package Booking</TabsTrigger>
 									<TabsTrigger value="custom">Custom Booking</TabsTrigger>
+									<TabsTrigger value="email">Email System</TabsTrigger>
 									<TabsTrigger value="end-to-end">End-to-End</TabsTrigger>
 								</TabsList>
 								
@@ -54,6 +56,10 @@ export function AdminTestingPage() {
 								
 								<TabsContent value="custom" className="space-y-4">
 									<CustomBookingTester onResult={addTestResult} />
+								</TabsContent>
+								
+								<TabsContent value="email" className="space-y-4">
+									<EmailTester onResult={addTestResult} />
 								</TabsContent>
 								
 								<TabsContent value="end-to-end" className="space-y-4">

@@ -12,9 +12,10 @@ import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { AuthCTA } from "./auth-cta";
+import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
 
 export function MarketingUserMenu() {
-	const { session, isPending, handleLogout } = useUserQuery();
+	const { session, isPending, signOutWithConfirmation } = useUserQuery();
 
 	if (isPending) {
 		return <Skeleton className="h-9 w-24" />;
@@ -24,14 +25,21 @@ export function MarketingUserMenu() {
 		return <AuthCTA className="hidden md:flex" />;
 	}
 
-	// Check if user has admin privileges
+	// Check if user has admin privileges or is a driver
 	const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
+	const isDriver = session.user.role === "driver";
 
 	return (
 		<div className="flex items-center gap-4">
 			{isAdmin && (
 				<Button className="rounded-xl shadow-none" asChild>
-					<Link to="/dashboard">Dashboard</Link>
+					<Link to="/dashboard">Admin Dashboard</Link>
+				</Button>
+			)}
+			
+			{isDriver && (
+				<Button className="rounded-xl shadow-none" asChild>
+					<Link to="/driver">Driver Dashboard</Link>
 				</Button>
 			)}
 
@@ -59,7 +67,7 @@ export function MarketingUserMenu() {
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem 
-						onClick={handleLogout}
+						onClick={signOutWithConfirmation.openSignOutDialog}
 						className="cursor-pointer transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
 					>
 						<LogOutIcon size={16} className="opacity-60 transition-opacity duration-150" aria-hidden="true" />
@@ -67,6 +75,15 @@ export function MarketingUserMenu() {
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
+			
+			<SignOutConfirmationDialog
+				isOpen={signOutWithConfirmation.isDialogOpen}
+				onClose={signOutWithConfirmation.closeSignOutDialog}
+				onConfirm={signOutWithConfirmation.confirmSignOut}
+				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userName={session?.user.name}
+				isLoading={signOutWithConfirmation.isSigningOut}
+			/>
 		</div>
 	);
 }

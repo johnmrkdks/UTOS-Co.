@@ -18,6 +18,8 @@ import { carCategoriesRouter } from "./car-categories";
 import { fileRouter } from "./file";
 import { pricingConfigRouter } from "./pricing-config";
 import { driversRouter } from "./drivers";
+import { adminRouter } from "./admin";
+import { mailRouter } from "./mail";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -47,6 +49,8 @@ export const appRouter = router({
 	packageRoutes: packageRoutesRouter,
 	pricingConfig: pricingConfigRouter,
 	ratings: ratingsRouter,
+	admin: adminRouter,
+	mail: mailRouter,
 });
 
 // Export type definition of API
