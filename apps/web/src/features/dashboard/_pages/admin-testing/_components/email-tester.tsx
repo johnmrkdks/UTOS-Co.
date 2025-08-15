@@ -5,7 +5,12 @@ import { Label } from "@workspace/ui/components/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
 import { Mail, Send, CheckCircle, AlertCircle } from "lucide-react";
-import { trpc } from "@/trpc";
+import { useTestEmailConnectionMutation } from "../_hooks/query/use-test-email-connection-mutation";
+import { useSendAccountVerificationMutation } from "../_hooks/query/use-send-account-verification-mutation";
+import { useSendPasswordResetMutation } from "../_hooks/query/use-send-password-reset-mutation";
+import { useSendDriverOnboardingMutation } from "../_hooks/query/use-send-driver-onboarding-mutation";
+import { useSendBookingConfirmationMutation } from "../_hooks/query/use-send-booking-confirmation-mutation";
+import { useSendInvoiceMutation } from "../_hooks/query/use-send-invoice-mutation";
 import type { TestResult } from "..";
 
 interface EmailTesterProps {
@@ -16,125 +21,36 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 	const [testEmail, setTestEmail] = useState("");
 	const [isLoading, setIsLoading] = useState<string | null>(null);
 
-	// Test email connection
-	const testConnectionMutation = trpc.mail.testEmailConnection.useMutation({
-		onSuccess: (data) => {
-			onResult({
-				type: "email",
-				status: "success",
-				message: `Email system connection test successful: ${data.message}`,
-				data: { timestamp: data.timestamp },
-			});
-		},
-		onError: (error) => {
-			onResult({
-				type: "email",
-				status: "error",
-				message: `Email connection test failed: ${error.message}`,
-			});
-		},
-		onSettled: () => setIsLoading(null),
-	});
-
-	// Send account verification email
-	const sendVerificationMutation = trpc.mail.sendAccountVerification.useMutation({
-		onSuccess: (data) => {
-			onResult({
-				type: "email",
-				status: "success",
-				message: `Account verification email sent successfully: ${data.message}`,
-			});
-		},
-		onError: (error) => {
-			onResult({
-				type: "email",
-				status: "error",
-				message: `Failed to send verification email: ${error.message}`,
-			});
-		},
-		onSettled: () => setIsLoading(null),
-	});
-
-	// Send password reset email
-	const sendPasswordResetMutation = trpc.mail.sendPasswordReset.useMutation({
-		onSuccess: (data) => {
-			onResult({
-				type: "email",
-				status: "success",
-				message: `Password reset email sent successfully: ${data.message}`,
-			});
-		},
-		onError: (error) => {
-			onResult({
-				type: "email",
-				status: "error",
-				message: `Failed to send password reset email: ${error.message}`,
-			});
-		},
-		onSettled: () => setIsLoading(null),
-	});
-
-	// Send driver onboarding email
-	const sendDriverOnboardingMutation = trpc.mail.sendDriverOnboarding.useMutation({
-		onSuccess: (data) => {
-			onResult({
-				type: "email",
-				status: "success",
-				message: `Driver onboarding email sent successfully: ${data.message}`,
-			});
-		},
-		onError: (error) => {
-			onResult({
-				type: "email",
-				status: "error",
-				message: `Failed to send driver onboarding email: ${error.message}`,
-			});
-		},
-		onSettled: () => setIsLoading(null),
-	});
-
-	// Send booking confirmation email
-	const sendBookingConfirmationMutation = trpc.mail.sendBookingConfirmation.useMutation({
-		onSuccess: (data) => {
-			onResult({
-				type: "email",
-				status: "success",
-				message: `Booking confirmation email sent successfully: ${data.message}`,
-			});
-		},
-		onError: (error) => {
-			onResult({
-				type: "email",
-				status: "error",
-				message: `Failed to send booking confirmation email: ${error.message}`,
-			});
-		},
-		onSettled: () => setIsLoading(null),
-	});
-
-	// Send invoice email
-	const sendInvoiceMutation = trpc.mail.sendInvoice.useMutation({
-		onSuccess: (data) => {
-			onResult({
-				type: "email",
-				status: "success",
-				message: `Invoice email sent successfully: ${data.message}`,
-			});
-		},
-		onError: (error) => {
-			onResult({
-				type: "email",
-				status: "error",
-				message: `Failed to send invoice email: ${error.message}`,
-			});
-		},
-		onSettled: () => setIsLoading(null),
-	});
+	// Custom callbacks to integrate with test results
+	const testConnectionMutation = useTestEmailConnectionMutation();
+	const sendVerificationMutation = useSendAccountVerificationMutation();
+	const sendPasswordResetMutation = useSendPasswordResetMutation();
+	const sendDriverOnboardingMutation = useSendDriverOnboardingMutation();
+	const sendBookingConfirmationMutation = useSendBookingConfirmationMutation();
+	const sendInvoiceMutation = useSendInvoiceMutation();
 
 	const handleTestConnection = () => {
 		if (!testEmail) return;
 		setIsLoading("connection");
-		testConnectionMutation.mutate({ testEmail });
+		testConnectionMutation.mutate({ testEmail }, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Email system connection test successful: ${data.message}`,
+					data: { timestamp: data.timestamp },
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Email connection test failed: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
+		});
 	};
 
 	const handleTestVerification = () => {
@@ -144,6 +60,23 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 			to: testEmail,
 			verificationToken: "test-token-" + Date.now(),
 			baseUrl: window.location.origin,
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Account verification email sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send verification email: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
 		});
 	};
 
@@ -154,6 +87,23 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 			to: testEmail,
 			resetToken: "reset-token-" + Date.now(),
 			baseUrl: window.location.origin,
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Password reset email sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send password reset email: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
 		});
 	};
 
@@ -164,6 +114,23 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 			to: testEmail,
 			driverName: "Test Driver",
 			loginUrl: window.location.origin + "/dashboard",
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Driver onboarding email sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send driver onboarding email: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
 		});
 	};
 
@@ -186,6 +153,23 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 				amount: 25000, // $250.00 in cents
 				currency: "AUD",
 			},
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Booking confirmation email sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send booking confirmation email: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
 		});
 	};
 
@@ -203,6 +187,23 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 				serviceType: "Custom Booking",
 				route: "Sydney Airport → City Centre → Return",
 				packageName: undefined,
+			},
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Invoice email sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send invoice email: ${error.message}`,
+				});
+				setIsLoading(null);
 			},
 		});
 	};
@@ -350,35 +351,6 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 								Invoice Email
 							</Button>
 						</div>
-					</div>
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>Setup Instructions</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-3 text-sm">
-						<p><strong>To enable email functionality, configure these environment variables:</strong></p>
-						<div className="bg-gray-50 p-3 rounded-md font-mono text-xs space-y-1">
-							<div>GMAIL_CLIENT_ID=your_oauth_client_id</div>
-							<div>GMAIL_CLIENT_SECRET=your_oauth_client_secret</div>
-							<div>GMAIL_REFRESH_TOKEN=your_refresh_token</div>
-							<div>GMAIL_USER=your.email@gmail.com</div>
-						</div>
-						<p className="text-gray-600">
-							<strong>Note:</strong> Follow the OAuth 2.0 setup guide at{" "}
-							<a 
-								href="https://nodemailer.com/usage/using-gmail" 
-								target="_blank" 
-								rel="noopener noreferrer"
-								className="text-blue-600 hover:underline"
-							>
-								nodemailer.com/usage/using-gmail
-							</a>{" "}
-							to get these credentials.
-						</p>
 					</div>
 				</CardContent>
 			</Card>

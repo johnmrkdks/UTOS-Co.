@@ -1,1 +1,0 @@
-ALTER TABLE `car_features` RENAME COLUMN "feature" TO "name";

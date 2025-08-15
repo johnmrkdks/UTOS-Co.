@@ -6,6 +6,7 @@ import { EndToEndTester } from "./_components/end-to-end-tester";
 import { EmailTester } from "./_components/email-tester";
 import { TestResults } from "./_components/test-results";
 import { useState } from "react";
+import { PaddingLayout } from "../../_layouts/padding-layout";
 
 export interface TestResult {
 	id: string;
@@ -29,7 +30,7 @@ export function AdminTestingPage() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<PaddingLayout className="space-y-6 mb-8">
 			<div>
 				<h1 className="text-2xl font-bold">Admin Testing Interface</h1>
 				<p className="text-gray-600">Test booking workflows, pricing, and system functionality</p>
@@ -49,19 +50,19 @@ export function AdminTestingPage() {
 									<TabsTrigger value="email">Email System</TabsTrigger>
 									<TabsTrigger value="end-to-end">End-to-End</TabsTrigger>
 								</TabsList>
-								
+
 								<TabsContent value="package" className="space-y-4">
 									<PackageBookingTester onResult={addTestResult} />
 								</TabsContent>
-								
+
 								<TabsContent value="custom" className="space-y-4">
 									<CustomBookingTester onResult={addTestResult} />
 								</TabsContent>
-								
+
 								<TabsContent value="email" className="space-y-4">
 									<EmailTester onResult={addTestResult} />
 								</TabsContent>
-								
+
 								<TabsContent value="end-to-end" className="space-y-4">
 									<EndToEndTester onResult={addTestResult} />
 								</TabsContent>
@@ -74,6 +75,6 @@ export function AdminTestingPage() {
 					<TestResults results={testResults} />
 				</div>
 			</div>
-		</div>
+		</PaddingLayout>
 	);
 }

@@ -33,7 +33,8 @@ binding = "DB"
 database_name = "down-under-chauffeur-db"
 database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
 preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
-migrations_dir = "./src/db/migrations"
+#preview_database_id = "DB"
+migrations_dir = "./drizzle/migrations/sqlite"
 
 [[r2_buckets]]
 binding = 'BUCKET'
