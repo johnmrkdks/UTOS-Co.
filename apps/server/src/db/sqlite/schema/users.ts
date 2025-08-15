@@ -10,10 +10,10 @@ export const users = sqliteTable("users", {
 	image: text("image"),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 
 	// Admin plugin fields
 	role: text("role").$type<UserRoleEnum>().notNull().default(UserRoleEnum.User),

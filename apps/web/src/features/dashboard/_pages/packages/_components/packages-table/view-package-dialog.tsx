@@ -7,11 +7,14 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Badge } from "@workspace/ui/components/badge";
-import { Separator } from "@workspace/ui/components/separator";
-import { Switch } from "@workspace/ui/components/switch";
-import { Calendar, DollarSign, Info, Package, Settings } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { Calendar, Info, Package, Route as RouteIcon } from "lucide-react";
 import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
+import { useGetPackageRoutesQuery } from "../../_hooks/query/use-get-package-routes-query";
+import { useState } from "react";
+import { PackageOverviewTab } from "./view-package-tabs/package-overview-tab";
+import { PackageRoutesTab } from "./view-package-tabs/package-routes-tab";
+import { PackageScheduleTab } from "./view-package-tabs/package-schedule-tab";
 
 type ViewPackageDialogProps = {
 	package: any;
@@ -21,6 +24,11 @@ type ViewPackageDialogProps = {
 
 export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPackageDialogProps) {
 	const updatePackageMutation = useUpdatePackageMutation();
+	const [activeTab, setActiveTab] = useState("overview");
+
+	// Get package routes
+	const routesQuery = useGetPackageRoutesQuery({ packageId: pkg?.id || "" });
+	const routes = routesQuery.data || [];
 
 	const handleToggleAvailable = async () => {
 		if (!pkg?.id) return;
@@ -43,84 +51,54 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[525px]">
+			<DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Package className="h-5 w-5" />
 						{pkg?.name}
 					</DialogTitle>
-					<DialogDescription>Package details and information</DialogDescription>
+					<DialogDescription>Package details, routes, and availability schedule</DialogDescription>
 				</DialogHeader>
-				
-				<div className="space-y-4">
-					<div className="flex items-center justify-between p-3 border rounded-lg">
-						<div className="flex items-center gap-2">
-							<Settings className="h-4 w-4" />
-							<span className="text-sm font-medium">Available for Booking</span>
-						</div>
-						<div className="flex items-center gap-3">
-							<Badge variant={pkg?.isAvailable ? "default" : "secondary"}>
-								{pkg?.isAvailable ? "Available" : "Unavailable"}
-							</Badge>
-							<Switch
-								checked={pkg?.isAvailable || false}
-								onCheckedChange={handleToggleAvailable}
-								disabled={updatePackageMutation.isPending}
-							/>
-						</div>
-					</div>
-					
-					<Separator />
-					
-					<div className="space-y-2">
-						<div className="flex items-center gap-2 text-sm font-medium">
-							<DollarSign className="h-4 w-4" />
-							Pricing
-						</div>
-						<p className="text-2xl font-bold">
-							${pkg?.pricePerDay?.toFixed(2) || "0.00"} <span className="text-sm font-normal text-muted-foreground">per day</span>
-						</p>
-					</div>
-					
-					<Separator />
-					
-					<div className="space-y-2">
-						<div className="flex items-center gap-2 text-sm font-medium">
-							<Info className="h-4 w-4" />
-							Description
-						</div>
-						<p className="text-sm text-muted-foreground leading-relaxed">
-							{pkg?.description || "No description provided"}
-						</p>
-					</div>
-					
-					<Separator />
-					
-					<div className="grid grid-cols-2 gap-4 text-sm">
-						<div className="space-y-1">
-							<div className="flex items-center gap-2 font-medium">
-								<Calendar className="h-4 w-4" />
-								Created
-							</div>
-							<p className="text-muted-foreground">
-								{pkg?.createdAt ? new Date(pkg.createdAt).toLocaleDateString() : "Unknown"}
-							</p>
-						</div>
-						
-						<div className="space-y-1">
-							<div className="flex items-center gap-2 font-medium">
-								<Calendar className="h-4 w-4" />
-								Updated
-							</div>
-							<p className="text-muted-foreground">
-								{pkg?.updatedAt ? new Date(pkg.updatedAt).toLocaleDateString() : "Unknown"}
-							</p>
-						</div>
-					</div>
-				</div>
 
-				<DialogFooter>
-					<Button onClick={() => onOpenChange(false)}>Close</Button>
+				<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+					<TabsList className="grid w-full grid-cols-3">
+						<TabsTrigger value="overview" className="flex items-center gap-2">
+							<Info className="h-4 w-4" />
+							Overview
+						</TabsTrigger>
+						<TabsTrigger value="routes" className="flex items-center gap-2">
+							<RouteIcon className="h-4 w-4" />
+							Routes ({routes.length})
+						</TabsTrigger>
+						<TabsTrigger value="schedule" className="flex items-center gap-2">
+							<Calendar className="h-4 w-4" />
+							Schedule
+						</TabsTrigger>
+					</TabsList>
+
+					<TabsContent value="overview" className="space-y-6">
+						<PackageOverviewTab 
+							pkg={pkg}
+							routes={routes}
+							onToggleAvailable={handleToggleAvailable}
+							isUpdating={updatePackageMutation.isPending}
+						/>
+					</TabsContent>
+
+					<TabsContent value="routes" className="space-y-6">
+						<PackageRoutesTab routes={routes} />
+					</TabsContent>
+
+					<TabsContent value="schedule" className="space-y-6">
+						<PackageScheduleTab pkg={pkg} />
+					</TabsContent>
+				</Tabs>
+
+				<DialogFooter className="flex justify-between">
+					<div className="flex-1" />
+					<div className="flex gap-2">
+						<Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+					</div>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

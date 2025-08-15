@@ -14,10 +14,10 @@ export const carsToFeatures = sqliteTable(
 			.references(() => carFeatures.id, { onDelete: "cascade" }),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 	}
 );
 

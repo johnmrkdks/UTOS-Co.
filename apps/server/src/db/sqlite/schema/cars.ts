@@ -95,10 +95,10 @@ export const cars = sqliteTable(
 		// Timestamps
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 	},
 	(table) => ({
 		availabilityIdx: index("cars_availability_idx").on(table.isAvailable, table.isActive),

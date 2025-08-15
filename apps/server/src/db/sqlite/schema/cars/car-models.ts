@@ -14,10 +14,10 @@ export const carModels = sqliteTable("car_models", {
 	generation: text("generation"),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 },
 	(table) => ({
 		brandModelYearUnique: unique().on(table.brandId, table.name, table.year),

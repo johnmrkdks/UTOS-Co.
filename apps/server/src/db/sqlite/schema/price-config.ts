@@ -37,6 +37,6 @@ export const pricingConfig = sqliteTable("pricing_config", {
 	carTypeId: text("car_type_id"), // if pricing varies by car type
 	isActive: integer("is_active", { mode: "boolean" }).default(true),
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });

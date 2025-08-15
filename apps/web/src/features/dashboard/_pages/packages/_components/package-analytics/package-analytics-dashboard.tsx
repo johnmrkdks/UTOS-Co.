@@ -101,63 +101,59 @@ export function PackageAnalyticsDashboard() {
 	const { overview, topPerformingPackages, bookingTrends, packageTypeDistribution } = mockPackageAnalytics;
 
 	return (
-		<div className="space-y-6">
-			{/* Overview Cards */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Packages</CardTitle>
-						<Package2 className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{overview.totalPackages}</div>
-						<p className="text-xs text-muted-foreground">
-							{overview.publishedPackages} published
-						</p>
+		<div className="space-y-4">
+			{/* Compact Overview Stats */}
+			<div className="grid gap-2 grid-cols-2 lg:grid-cols-4">
+				<Card className="border-0 bg-muted/30">
+					<CardContent className="p-3">
+						<div className="flex items-center gap-2">
+							<Package2 className="h-3 w-3 text-muted-foreground" />
+							<div className="min-w-0 flex-1">
+								<p className="text-xs text-muted-foreground truncate">Total Packages</p>
+								<p className="text-sm font-medium">{overview.totalPackages}</p>
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-						<Calendar className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{overview.totalBookings}</div>
-						<p className="text-xs text-muted-foreground">
-							+12.5% from last month
-						</p>
+				<Card className="border-0 bg-muted/30">
+					<CardContent className="p-3">
+						<div className="flex items-center gap-2">
+							<Calendar className="h-3 w-3 text-muted-foreground" />
+							<div className="min-w-0 flex-1">
+								<p className="text-xs text-muted-foreground truncate">Active Packages</p>
+								<p className="text-sm font-medium">{overview.activePackages}</p>
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-						<DollarSign className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">${overview.totalRevenue.toLocaleString()}</div>
-						<p className="text-xs text-muted-foreground">
-							+8.2% from last month
-						</p>
+				<Card className="border-0 bg-muted/30">
+					<CardContent className="p-3">
+						<div className="flex items-center gap-2">
+							<DollarSign className="h-3 w-3 text-muted-foreground" />
+							<div className="min-w-0 flex-1">
+								<p className="text-xs text-muted-foreground truncate">Revenue</p>
+								<p className="text-sm font-medium">${(overview.totalRevenue / 1000).toFixed(0)}k</p>
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-						<TrendingUp className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{overview.conversionRate}%</div>
-						<p className="text-xs text-muted-foreground">
-							Quote to booking ratio
-						</p>
+				<Card className="border-0 bg-muted/30">
+					<CardContent className="p-3">
+						<div className="flex items-center gap-2">
+							<TrendingUp className="h-3 w-3 text-muted-foreground" />
+							<div className="min-w-0 flex-1">
+								<p className="text-xs text-muted-foreground truncate">Conversion</p>
+								<p className="text-sm font-medium">{overview.conversionRate}%</p>
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 			</div>
 
-			<div className="grid gap-6 md:grid-cols-2">
+			<div className="grid gap-4 md:grid-cols-2">
 				{/* Booking Trends */}
 				<Card>
 					<CardHeader>
@@ -165,7 +161,7 @@ export function PackageAnalyticsDashboard() {
 						<CardDescription>Monthly booking and revenue performance</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="h-[300px]">
+						<div className="h-[200px]">
 							<ResponsiveContainer width="100%" height="100%">
 								<AreaChart data={bookingTrends}>
 									<defs>
@@ -214,7 +210,7 @@ export function PackageAnalyticsDashboard() {
 						<CardDescription>Distribution by service type</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="h-[300px]">
+						<div className="h-[200px]">
 							<ResponsiveContainer width="100%" height="100%">
 								<PieChart>
 									<Pie

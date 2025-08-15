@@ -43,8 +43,8 @@ export const packages = sqliteTable("packages", {
 	availableTimeStart: text("available_time_start"), // "09:00" or null for anytime
 	availableTimeEnd: text("available_time_end"), // "17:00" or null for anytime
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 }, (table) => ({
 	nameIdx: index("packages_name_idx").on(table.name),
 	publishedAvailabilityIdx: index("packages_published_availability_idx").on(table.isPublished, table.isAvailable),

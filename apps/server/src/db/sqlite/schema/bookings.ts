@@ -65,8 +65,8 @@ export const bookings = sqliteTable("bookings", {
 	serviceStartedAt: integer("service_started_at", { mode: "timestamp" }),
 	serviceCompletedAt: integer("service_completed_at", { mode: "timestamp" }),
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({

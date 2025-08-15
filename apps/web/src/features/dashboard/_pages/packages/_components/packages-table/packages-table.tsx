@@ -2,7 +2,7 @@ import { DataTable } from "@workspace/ui/components/data-table";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Trash2, Eye, Power, PowerOff } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, Power, PowerOff, Route as RouteIcon, Calendar } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,6 +17,8 @@ import { useState } from "react";
 import { EditPackageDialog } from "./edit-package-dialog";
 import { ViewPackageDialog } from "./view-package-dialog";
 import { DeletePackageDialog } from "../delete-package-dialog/delete-package-dialog";
+import { PackageRoutesDialog } from "../package-routes/package-routes-dialog";
+import { PackageSchedulingDialog } from "../package-scheduling/package-scheduling-dialog";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface Package {
@@ -34,6 +36,8 @@ export function PackagesTable() {
 	const [editingPackage, setEditingPackage] = useState<Package | null>(null);
 	const [viewingPackage, setViewingPackage] = useState<Package | null>(null);
 	const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
+	const [routesPackage, setRoutesPackage] = useState<Package | null>(null);
+	const [schedulingPackage, setSchedulingPackage] = useState<Package | null>(null);
 
 	const packagesQuery = useGetPackagesQuery({});
 	const deletePackageMutation = useDeletePackageMutation();
@@ -130,15 +134,25 @@ export function PackagesTable() {
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
+						<DropdownMenuContent align="end" className="w-56">
 							<DropdownMenuItem onClick={() => setViewingPackage(pkg)}>
 								<Eye className="mr-2 h-4 w-4" />
 								View Details
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setEditingPackage(pkg)}>
 								<Pencil className="mr-2 h-4 w-4" />
-								Edit
+								Edit Package
 							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem onClick={() => setRoutesPackage(pkg)}>
+								<RouteIcon className="mr-2 h-4 w-4" />
+								Manage Routes
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setSchedulingPackage(pkg)}>
+								<Calendar className="mr-2 h-4 w-4" />
+								Manage Schedule
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
 							<DropdownMenuItem 
 								onClick={() => handleToggleAvailable(pkg)}
 								disabled={updatePackageMutation.isPending}
@@ -146,12 +160,12 @@ export function PackagesTable() {
 								{pkg.isAvailable ? (
 									<>
 										<PowerOff className="mr-2 h-4 w-4" />
-										Disable
+										Disable Package
 									</>
 								) : (
 									<>
 										<Power className="mr-2 h-4 w-4" />
-										Enable
+										Enable Package
 									</>
 								)}
 							</DropdownMenuItem>
@@ -161,7 +175,7 @@ export function PackagesTable() {
 								className="text-destructive"
 							>
 								<Trash2 className="mr-2 h-4 w-4" />
-								Delete
+								Delete Package
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -226,6 +240,24 @@ export function PackagesTable() {
 					package={deletingPackage}
 					open={!!deletingPackage}
 					onOpenChange={(open) => !open && setDeletingPackage(null)}
+				/>
+			)}
+
+			{routesPackage && (
+				<PackageRoutesDialog
+					packageId={routesPackage.id}
+					packageName={routesPackage.name}
+					open={!!routesPackage}
+					onOpenChange={(open) => !open && setRoutesPackage(null)}
+				/>
+			)}
+
+			{schedulingPackage && (
+				<PackageSchedulingDialog
+					packageId={schedulingPackage.id}
+					packageName={schedulingPackage.name}
+					open={!!schedulingPackage}
+					onOpenChange={(open) => !open && setSchedulingPackage(null)}
 				/>
 			)}
 		</>

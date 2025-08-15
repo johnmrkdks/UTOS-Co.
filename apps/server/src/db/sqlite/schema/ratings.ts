@@ -13,10 +13,10 @@ export const ratings = sqliteTable("ratings", {
 	comment: text("comment"),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 });
 
 export const ratingsRelations = relations(ratings, ({ one }) => ({

@@ -26,10 +26,10 @@ export const carCategories = sqliteTable(
 
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 	},
 	(table) => ({
 		nameIdx: index("car_categories_name_idx").on(table.name),

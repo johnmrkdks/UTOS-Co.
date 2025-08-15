@@ -18,10 +18,13 @@ export const packagesRouter = router({
 	create: protectedProcedure
 		.input(CreatePackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
+			console.log("🔗 tRPC packages.create - Received input:", JSON.stringify(input, null, 2));
 			try {
 				const newPackage = await createPackageService(db, input);
+				console.log("🎉 tRPC packages.create - Success:", JSON.stringify(newPackage, null, 2));
 				return newPackage;
 			} catch (error) {
+				console.error("💥 tRPC packages.create - Error:", error);
 				handleTRPCError(error);
 			}
 		}),

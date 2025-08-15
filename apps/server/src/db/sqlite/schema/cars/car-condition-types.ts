@@ -8,10 +8,10 @@ export const carConditionTypes = sqliteTable("car_condition_types", {
 	name: text("name").notNull().unique(),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 		.notNull()
-		.default(sql`(CURRENT_TIMESTAMP)`),
+		.default(sql`(unixepoch())`),
 });
 
 export const carConditionTypesRelations = relations(

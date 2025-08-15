@@ -18,7 +18,7 @@ export const bookingStops = sqliteTable("booking_stops", {
 	waitingTime: integer("waiting_time").default(0), // in minutes
 	notes: text("notes"), // special instructions for this stop
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 }, (table) => ({
 	orderIdx: index("booking_stops_order_idx").on(table.bookingId, table.stopOrder),
 }));

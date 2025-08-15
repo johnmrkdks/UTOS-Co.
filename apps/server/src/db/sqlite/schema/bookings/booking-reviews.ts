@@ -10,5 +10,5 @@ export const bookingReviews = sqliteTable("booking_reviews", {
 	driverRating: integer("driver_rating").notNull(), // 1-5
 	vehicleRating: integer("vehicle_rating").notNull(), // 1-5
 	review: text("review"),
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });

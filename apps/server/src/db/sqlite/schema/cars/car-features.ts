@@ -11,10 +11,10 @@ export const carFeatures = sqliteTable(
 		description: text("description"),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(sql`(unixepoch())`),
 	}
 );
 

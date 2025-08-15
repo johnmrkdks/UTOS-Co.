@@ -11,7 +11,10 @@ import { z } from "zod";
 import { useState } from "react";
 import { useCreatePackageMutation } from "../../_hooks/query/use-create-package-mutation";
 import { Loader2, Upload, X } from "lucide-react";
+import { Progress } from "@workspace/ui/components/progress";
 import { useFileUpload } from "@/hooks/use-file-upload";
+import { useCreatePresignedUrlMutation } from "@/hooks/query/file/use-create-presigned-url-mutation";
+import { useUploadMutation } from "@/hooks/query/file/use-upload-mutation";
 
 const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
@@ -22,6 +25,23 @@ const addPackageSchema = z.object({
 	isAvailable: z.boolean().default(true),
 	isPublished: z.boolean().default(false),
 	bannerImageUrl: z.string().optional(),
+	// Optional fields that can be null/undefined in database
+	categoryId: z.string().optional(),
+	duration: z.number().optional(),
+	maxDistance: z.number().optional(),
+	extraKmPrice: z.number().optional(),
+	extraHourPrice: z.number().optional(),
+	depositRequired: z.number().optional(),
+	advanceBookingHours: z.number().default(24),
+	cancellationHours: z.number().default(24),
+	includesDriver: z.boolean().default(true),
+	includesFuel: z.boolean().default(true),
+	includesTolls: z.boolean().default(false),
+	includesWaiting: z.boolean().default(false),
+	waitingTimeMinutes: z.number().default(0),
+	availableDays: z.string().optional(),
+	availableTimeStart: z.string().optional(),
+	availableTimeEnd: z.string().optional(),
 });
 
 type AddPackageForm = z.infer<typeof addPackageSchema>;
@@ -33,13 +53,21 @@ type AddNewPackageFormProps = {
 
 export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [uploadProgress, setUploadProgress] = useState(0);
 	const createPackageMutation = useCreatePackageMutation();
+	const createPresignedUrlMutation = useCreatePresignedUrlMutation();
+	const uploadMutation = useUploadMutation();
 	
 	const [{ files: imageFiles }, { addFiles, removeFile, openFileDialog, getInputProps }] = useFileUpload({
 		maxFiles: 1,
 		maxSize: 5 * 1024 * 1024, // 5MB
 		accept: "image/*",
 		multiple: false,
+		onFilesAdded: async (newFiles) => {
+			if (newFiles.length > 0) {
+				await handleImageUpload(newFiles[0]);
+			}
+		},
 	});
 
 	const form = useForm<AddPackageForm>({
@@ -53,10 +81,53 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			isAvailable: true,
 			isPublished: false,
 			bannerImageUrl: "",
+			// Set defaults for optional fields
+			advanceBookingHours: 24,
+			cancellationHours: 24,
+			includesDriver: true,
+			includesFuel: true,
+			includesTolls: false,
+			includesWaiting: false,
+			waitingTimeMinutes: 0,
 		},
 	});
 
+	const handleImageUpload = async (fileWrapper: any) => {
+		try {
+			const file = fileWrapper.file as File;
+			setUploadProgress(10);
+
+			// Get presigned URL
+			const presignedData = await createPresignedUrlMutation.mutateAsync({
+				entityType: "packages",
+				fileName: file.name,
+				fileType: file.type,
+				fileSize: file.size,
+			});
+
+			setUploadProgress(50);
+
+			// Upload file to R2
+			await uploadMutation.mutateAsync({
+				url: presignedData.url,
+				file,
+			});
+
+			setUploadProgress(100);
+
+			// Update form with image URL
+			form.setValue("bannerImageUrl", presignedData.imageUrl);
+			
+		} catch (error) {
+			console.error("Image upload failed:", error);
+			setUploadProgress(0);
+		}
+	};
+
 	const onSubmit = async (data: AddPackageForm) => {
+		console.log("📝 Form submission started");
+		console.log("📊 Raw form data:", JSON.stringify(data, null, 2));
+		
 		setIsSubmitting(true);
 		try {
 			// Convert price to cents for storage
@@ -64,11 +135,23 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 				...data,
 				fixedPrice: Math.round(data.fixedPrice * 100), // Convert to cents
 			};
-			await createPackageMutation.mutateAsync(packageData);
+			
+			console.log("💰 Package data with price converted to cents:", JSON.stringify(packageData, null, 2));
+			console.log("🚀 Calling createPackageMutation...");
+			
+			const result = await createPackageMutation.mutateAsync(packageData);
+			
+			console.log("✅ Package created successfully:", JSON.stringify(result, null, 2));
+			
 			form.reset();
 			onSuccess?.();
 		} catch (error) {
-			console.error("Failed to create package:", error);
+			console.error("❌ Failed to create package:", error);
+			console.error("📋 Error details:", {
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+				data: JSON.stringify(data, null, 2)
+			});
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -203,6 +286,14 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														alt="Package banner preview"
 														className="w-full h-40 object-cover rounded-lg border"
 													/>
+													{uploadProgress > 0 && uploadProgress < 100 && (
+														<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+															<div className="bg-white p-2 rounded space-y-2 min-w-[120px]">
+																<Progress value={uploadProgress} className="h-2" />
+																<p className="text-xs text-center">{uploadProgress}%</p>
+															</div>
+														</div>
+													)}
 													<Button
 														type="button"
 														variant="destructive"
@@ -211,6 +302,8 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														onClick={() => {
 															removeFile(imageFiles[0].id);
 															field.onChange("");
+															form.setValue("bannerImageUrl", "");
+															setUploadProgress(0);
 														}}
 													>
 														<X className="h-4 w-4" />
