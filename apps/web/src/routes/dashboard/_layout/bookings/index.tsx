@@ -17,7 +17,7 @@ import { CalendarPlus, PackageIcon, RouteIcon } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
-export const Route = createFileRoute("/dashboard/_layout/booking-management/")({
+export const Route = createFileRoute("/dashboard/_layout/bookings/")({
 	component: RouteComponent,
 });
 
@@ -26,7 +26,7 @@ function RouteComponent() {
 		<BookingManagementModalProviders>
 			<BookingManagementContent />
 		</BookingManagementModalProviders>
-	);
+	)
 }
 
 function BookingManagementContent() {
@@ -39,7 +39,7 @@ function BookingManagementContent() {
 
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
-	});
+	})
 
 	// Calculate real-time metrics from bookings data
 	const bookingsData = bookingsQuery.data?.data || [];
@@ -56,7 +56,7 @@ function BookingManagementContent() {
 
 	const clearFilters = () => {
 		setFilters({});
-	};
+	}
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
@@ -251,5 +251,5 @@ function BookingManagementContent() {
 			<CreateCustomBookingDialog />
 			<BookingDetailsDialog />
 		</PaddingLayout>
-	);
+	)
 }

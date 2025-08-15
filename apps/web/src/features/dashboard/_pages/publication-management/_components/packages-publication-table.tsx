@@ -51,7 +51,7 @@ export function PackagesPublicationTable() {
 	const handleTogglePublish = (packageId: string) => {
 		const pkg = filteredPackages.find(p => p.id === packageId);
 		if (!pkg) return;
-		
+
 		togglePublishMutation.mutate({
 			id: packageId,
 			isPublished: !pkg.isPublished
@@ -81,8 +81,8 @@ export function PackagesPublicationTable() {
 					/>
 				</div>
 				<Select value={statusFilter} onValueChange={setStatusFilter}>
-					<SelectTrigger className="w-[200px]">
-						<Filter className="mr-2 h-4 w-4" />
+					<SelectTrigger className="">
+						<Filter className="h-4 w-4" />
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
@@ -97,25 +97,25 @@ export function PackagesPublicationTable() {
 
 			{/* Stats Summary */}
 			<div className="grid grid-cols-4 gap-4">
-				<div className="text-center p-3 bg-green-50 rounded-lg">
+				<div className="border text-center p-3 bg-green-50 rounded-lg">
 					<div className="text-2xl font-bold text-green-600">
 						{packages.filter(pkg => pkg.isPublished && pkg.isAvailable).length}
 					</div>
 					<div className="text-sm text-green-700">Published</div>
 				</div>
-				<div className="text-center p-3 bg-gray-50 rounded-lg">
+				<div className="border text-center p-3 bg-gray-50 rounded-lg">
 					<div className="text-2xl font-bold text-gray-600">
 						{packages.filter(pkg => !pkg.isPublished).length}
 					</div>
 					<div className="text-sm text-gray-700">Unpublished</div>
 				</div>
-				<div className="text-center p-3 bg-blue-50 rounded-lg">
+				<div className="border text-center p-3 bg-blue-50 rounded-lg">
 					<div className="text-2xl font-bold text-blue-600">
 						{packages.filter(pkg => !pkg.isPublished && pkg.isAvailable).length}
 					</div>
 					<div className="text-sm text-blue-700">Ready</div>
 				</div>
-				<div className="text-center p-3 bg-orange-50 rounded-lg">
+				<div className="border text-center p-3 bg-orange-50 rounded-lg">
 					<div className="text-2xl font-bold text-orange-600">
 						{packages.filter(pkg => pkg.isPublished && !pkg.isAvailable).length}
 					</div>

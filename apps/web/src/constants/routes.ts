@@ -24,16 +24,16 @@ export const formatPathToLabel = (path: string): string => {
 	// Remove leading slash and split by /
 	const segments = path.replace(/^\//, "").split("/");
 	const lastSegment = segments[segments.length - 1];
-	
+
 	if (!lastSegment) return "Home";
-	
+
 	// Handle special cases
 	const labelMap: Record<string, string> = {
-		"booking-management": "Booking Management",
-		"car-management": "Car Management", 
+		"bookings": "Booking Management",
+		"cars": "Car Management",
 		"pricing-config": "Pricing Config",
 		"admin-testing": "Admin Testing",
-		"publication-management": "Publication Management",
+		"publications": "Publication Management",
 		"todays-scheduled": "Today's Scheduled",
 		"about-us": "About Us",
 		"contact-us": "Contact Us",
@@ -54,31 +54,31 @@ export const formatPathToLabel = (path: string): string => {
 export const getBreadcrumbTrail = (pathname: string): Array<{ label: string; path?: string }> => {
 	const pathSegments = pathname.split("/").filter(Boolean);
 	const breadcrumbs: Array<{ label: string; path?: string }> = [];
-	
+
 	// Always start with root
 	if (pathname.startsWith("/dashboard")) {
 		// Always add Dashboard as root for dashboard routes
 		breadcrumbs.push({ label: "Dashboard", path: "/dashboard" });
-		
+
 		// Skip the first segment if it's "dashboard"
-		const relevantSegments = pathSegments[0] === "dashboard" 
-			? pathSegments.slice(1) 
+		const relevantSegments = pathSegments[0] === "dashboard"
+			? pathSegments.slice(1)
 			: pathSegments;
 
 		relevantSegments.forEach((segment, index) => {
 			const currentPath = `/dashboard/${relevantSegments.slice(0, index + 1).join("/")}`;
 			const label = getRouteLabelByPath(currentPath);
-			
+
 			// Skip if the label is the same as "Dashboard" to avoid duplication
 			if (label === "Dashboard") {
 				return;
 			}
-			
+
 			// Don't add path to the last item (current page)
 			const isLast = index === relevantSegments.length - 1;
-			breadcrumbs.push({ 
-				label, 
-				path: isLast ? undefined : currentPath 
+			breadcrumbs.push({
+				label,
+				path: isLast ? undefined : currentPath
 			});
 		});
 	} else {
@@ -86,16 +86,16 @@ export const getBreadcrumbTrail = (pathname: string): Array<{ label: string; pat
 		if (pathSegments.length > 0 && pathname !== "/") {
 			breadcrumbs.push({ label: "Home", path: "/" });
 		}
-		
+
 		pathSegments.forEach((segment, index) => {
 			const currentPath = `/${pathSegments.slice(0, index + 1).join("/")}`;
 			const label = getRouteLabelByPath(currentPath);
-			
+
 			// Don't add path to the last item (current page)
 			const isLast = index === pathSegments.length - 1;
-			breadcrumbs.push({ 
-				label, 
-				path: isLast ? undefined : currentPath 
+			breadcrumbs.push({
+				label,
+				path: isLast ? undefined : currentPath
 			});
 		});
 	}

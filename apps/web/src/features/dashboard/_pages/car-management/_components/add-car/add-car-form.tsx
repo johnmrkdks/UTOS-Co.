@@ -169,7 +169,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 	})
 
 	const togglePublishMutation = useTogglePublishCarMutation()
-	
+
 	// Watch form data for validation
 	const currentFormData = form.watch()
 
@@ -238,7 +238,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 					toast.success("Car has been added successfully!")
 					draftStore.clearDraft()
 					form.reset()
-					navigate({ to: "/dashboard/car-management" })
+					navigate({ to: "/dashboard/cars" })
 				},
 				onError: (error) => {
 					console.error("Form submission error:", error)
@@ -275,7 +275,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 							<div className="col-span-4 flex flex-col gap-4">
 								<FeaturesForm control={form.control} />
 								<ImagesForm control={form.control} />
-								
+
 								{/* Publication Validation Panel */}
 								<PublicationValidationPanel
 									data={carValidationData}

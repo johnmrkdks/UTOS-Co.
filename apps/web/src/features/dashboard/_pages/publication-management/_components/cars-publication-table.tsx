@@ -52,7 +52,7 @@ export function CarsPublicationTable() {
 	const handleTogglePublish = (carId: string) => {
 		const car = filteredCars.find(c => c.id === carId);
 		if (!car) return;
-		
+
 		togglePublishMutation.mutate({
 			id: carId,
 			isPublished: !car.isPublished
@@ -82,8 +82,8 @@ export function CarsPublicationTable() {
 					/>
 				</div>
 				<Select value={statusFilter} onValueChange={setStatusFilter}>
-					<SelectTrigger className="w-[200px]">
-						<Filter className="mr-2 h-4 w-4" />
+					<SelectTrigger className="">
+						<Filter className="h-4 w-4" />
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
@@ -98,25 +98,25 @@ export function CarsPublicationTable() {
 
 			{/* Stats Summary */}
 			<div className="grid grid-cols-4 gap-4">
-				<div className="text-center p-3 bg-green-50 rounded-lg">
+				<div className="border text-center p-3 bg-green-50 rounded-lg">
 					<div className="text-2xl font-bold text-green-600">
 						{cars.filter(car => car.isPublished && car.isActive && car.isAvailable && car.status === 'available').length}
 					</div>
 					<div className="text-sm text-green-700">Published</div>
 				</div>
-				<div className="text-center p-3 bg-gray-50 rounded-lg">
+				<div className="border text-center p-3 bg-gray-50 rounded-lg">
 					<div className="text-2xl font-bold text-gray-600">
 						{cars.filter(car => !car.isPublished).length}
 					</div>
 					<div className="text-sm text-gray-700">Unpublished</div>
 				</div>
-				<div className="text-center p-3 bg-blue-50 rounded-lg">
+				<div className="border text-center p-3 bg-blue-50 rounded-lg">
 					<div className="text-2xl font-bold text-blue-600">
 						{cars.filter(car => !car.isPublished && car.isActive && car.isAvailable && car.status === 'available').length}
 					</div>
 					<div className="text-sm text-blue-700">Ready</div>
 				</div>
-				<div className="text-center p-3 bg-orange-50 rounded-lg">
+				<div className="border text-center p-3 bg-orange-50 rounded-lg">
 					<div className="text-2xl font-bold text-orange-600">
 						{cars.filter(car => car.isPublished && (!car.isActive || !car.isAvailable || car.status !== 'available')).length}
 					</div>

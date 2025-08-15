@@ -63,8 +63,8 @@ const ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
 		icon: DollarSignIcon,
 	},
 	{
-		label: "Car Management",
-		path: "/dashboard/car-management",
+		label: "Cars",
+		path: "/dashboard/cars",
 		icon: CarIcon,
 	},
 	{
@@ -73,13 +73,13 @@ const ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
 		icon: UsersIcon,
 	},
 	{
-		label: "Booking Management",
-		path: "/dashboard/booking-management",
+		label: "Bookings",
+		path: "/dashboard/bookings",
 		icon: CalendarIcon,
 	},
 	{
-		label: "Publication Management",
-		path: "/dashboard/publication-management",
+		label: "Publications",
+		path: "/dashboard/publications",
 		icon: EyeIcon,
 	},
 ];

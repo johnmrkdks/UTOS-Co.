@@ -10,6 +10,25 @@ export const drivers = sqliteTable("drivers", {
 	licenseNumber: text("license_number").notNull(),
 	licenseExpiry: integer("license_expiry", { mode: "timestamp" }).notNull(),
 
+	// Document uploads
+	licenseDocumentUrl: text("license_document_url"),
+	insuranceDocumentUrl: text("insurance_document_url"),
+	backgroundCheckDocumentUrl: text("background_check_document_url"),
+	profilePhotoUrl: text("profile_photo_url"),
+
+	// Additional driver information
+	phoneNumber: text("phone_number"),
+	emergencyContactName: text("emergency_contact_name"),
+	emergencyContactPhone: text("emergency_contact_phone"),
+	address: text("address"),
+	dateOfBirth: integer("date_of_birth", { mode: "timestamp" }),
+	
+	// Onboarding status
+	onboardingStatus: text("onboarding_status").notNull().default("pending"), // pending, documents_uploaded, approved, rejected
+	onboardingNotes: text("onboarding_notes"),
+	approvedAt: integer("approved_at", { mode: "timestamp" }),
+	approvedBy: text("approved_by").references(() => users.id),
+
 	// Availability
 	isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 	isApproved: integer("is_approved", { mode: "boolean" })

@@ -13,7 +13,7 @@ import { PublicationStatsCard } from "@/features/dashboard/_components/publicati
 
 function AddCarButton() {
 	return (
-		<Link to="/dashboard/car-management/add-car">
+		<Link to="/dashboard/cars/add-car">
 			<Button>
 				<PlusIcon className="w-4 h-4" />
 				Add New Car
@@ -26,7 +26,7 @@ export function CarsList() {
 	const { viewMode } = useCarsListViewToogleStore();
 	const navigate = useNavigate()
 	const search = useSearch({
-		from: "/dashboard/_layout/car-management/",
+		from: "/dashboard/_layout/cars/",
 	})
 
 	// Get filters from search params with defaults
@@ -139,14 +139,14 @@ export function CarsList() {
 
 	const handleFiltersChange = (newFilters: Partial<typeof filters>) => {
 		navigate({
-			to: "/dashboard/car-management",
+			to: "/dashboard/cars",
 			search: (prev) => ({ ...prev, ...newFilters }),
 		})
 	}
 
 	const handleResetFilters = () => {
 		navigate({
-			to: "/dashboard/car-management",
+			to: "/dashboard/cars",
 			search: {
 				search: undefined,
 				brand: undefined,

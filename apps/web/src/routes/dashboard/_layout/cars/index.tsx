@@ -18,7 +18,7 @@ const carManagementSearchSchema = z.object({
 	pageSize: z.number().optional(),
 })
 
-export const Route = createFileRoute("/dashboard/_layout/car-management/")({
+export const Route = createFileRoute("/dashboard/_layout/cars/")({
 	component: RouteComponent,
 	validateSearch: carManagementSearchSchema,
 });
@@ -30,7 +30,7 @@ function RouteComponent() {
 				<PaddingLayout className="sticky top-0 z-10 flex items-center justify-between bg-background border-b border-border">
 					<div>
 						<h1 className="text-2xl font-bold tracking-tight">
-							Car Management System
+							Car Management
 						</h1>
 						<p className="text-sm text-muted-foreground">
 							Manage inventory and configure features
@@ -55,5 +55,5 @@ function RouteComponent() {
 				</div>
 			</Tabs>
 		</div>
-	);
+	)
 }
