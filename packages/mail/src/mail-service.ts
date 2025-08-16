@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { google } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import type { MailConfig, EmailOptions, BookingDetails, InvoiceData } from "./types";
 import {
@@ -12,11 +12,11 @@ import {
 
 export class MailService {
 	private config: MailConfig;
-	private oauth2Client: any;
+	private oauth2Client: OAuth2Client;
 
 	constructor(config: MailConfig) {
 		this.config = config;
-		this.oauth2Client = new google.auth.OAuth2(
+		this.oauth2Client = new OAuth2Client(
 			config.clientId,
 			config.clientSecret,
 			"https://developers.google.com/oauthplayground"

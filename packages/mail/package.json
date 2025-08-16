@@ -24,13 +24,13 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"nodemailer": "^7.0.5",
-		"googleapis": "^156.0.0"
+		"google-auth-library": "^10.2.1",
+		"nodemailer": "^7.0.5"
 	},
 	"devDependencies": {
 		"@types/nodemailer": "^7.0.0",
-		"typescript": "catalog:",
-		"tsup": "^8.0.0"
+		"tsup": "^8.0.0",
+		"typescript": "catalog:"
 	},
 	"files": [
 		"dist"
