@@ -1,8 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Progress } from "@workspace/ui/components/progress";
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import {
 	CarIcon,
@@ -26,6 +27,7 @@ export const Route = createFileRoute('/driver/_layout/')({
 
 function DriverDashboardComponent() {
 	const { session } = useUserQuery();
+	const navigate = useNavigate();
 
 	// Mock data - in real app, this would come from API
 	const driverStats = {
@@ -89,6 +91,9 @@ function DriverDashboardComponent() {
 				<h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Welcome back, {session?.user?.name}!</h1>
 				<p className="text-gray-600 mt-1 text-sm lg:text-base">Here's your driver dashboard overview</p>
 			</div>
+
+			{/* Email Verification Banner */}
+			<EmailVerificationBanner />
 
 			{/* Onboarding Status Card */}
 			{!isFullyOnboarded && (
@@ -173,13 +178,21 @@ function DriverDashboardComponent() {
 
 						<div className="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-3">
 							{!onboardingProgress.emailVerified && (
-								<Button size="sm" className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+								<Button 
+									size="sm" 
+									className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+									onClick={() => navigate({ to: "/driver/verify-email" })}
+								>
 									<MailIcon className="h-4 w-4 mr-2" />
 									Verify Email
 								</Button>
 							)}
 							{!onboardingProgress.profileComplete && onboardingProgress.emailVerified && (
-								<Button size="sm" className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
+								<Button 
+									size="sm" 
+									className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+									onClick={() => navigate({ to: "/driver/onboarding" })}
+								>
 									<UserIcon className="h-4 w-4 mr-2" />
 									Complete Profile
 								</Button>

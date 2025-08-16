@@ -7,13 +7,14 @@ import { DataTable } from "@workspace/ui/components/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
 import { DriverApplicationReview } from "./driver-application-review";
 import { useGetDriversByStatusQuery } from "../_hooks/query/use-get-drivers-by-status-query";
-import { Eye, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
+import { Eye, Clock, CheckCircle, XCircle, FileText, Mail, MailCheck } from "lucide-react";
 
 interface DriverApplicationData {
 	id: string;
 	userId: string | null;
 	userName: string | null;
 	userEmail: string | null;
+	userEmailVerified: boolean | null;
 	licenseNumber: string;
 	licenseExpiry: Date | null;
 	phoneNumber: string | null;
@@ -25,6 +26,10 @@ interface DriverApplicationData {
 	onboardingNotes: string | null;
 	approvedAt: Date | null;
 	approvedBy: string | null;
+	// Email verification tracking
+	emailVerificationSentAt: Date | null;
+	emailVerifiedAt: Date | null;
+	onboardingEmailSentAt: Date | null;
 	licenseDocumentUrl: string | null;
 	insuranceDocumentUrl: string | null;
 	backgroundCheckDocumentUrl: string | null;
@@ -38,7 +43,7 @@ interface DriverApplicationData {
 }
 
 interface DriverApplicationsTableProps {
-	status?: "pending" | "documents_uploaded" | "approved" | "rejected";
+	status?: "email_verification_pending" | "email_verified" | "pending" | "documents_uploaded" | "approved" | "rejected";
 }
 
 export function DriverApplicationsTable({ status = "documents_uploaded" }: DriverApplicationsTableProps) {
@@ -53,6 +58,8 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 
 	const getStatusBadge = (status: string) => {
 		const config = {
+			email_verification_pending: { variant: "secondary" as const, icon: Mail, label: "Email Pending" },
+			email_verified: { variant: "default" as const, icon: MailCheck, label: "Email Verified" },
 			pending: { variant: "secondary" as const, icon: Clock, label: "Pending" },
 			documents_uploaded: { variant: "default" as const, icon: FileText, label: "Under Review" },
 			approved: { variant: "default" as const, icon: CheckCircle, label: "Approved" },
@@ -96,7 +103,14 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 						</Avatar>
 						<div>
 							<div className="font-medium">{application.userName || 'Unknown'}</div>
-							<div className="text-sm text-muted-foreground">{application.userEmail}</div>
+							<div className="text-sm text-muted-foreground flex items-center gap-1">
+								{application.userEmail}
+								{application.userEmailVerified ? (
+									<MailCheck className="h-3 w-3 text-green-500" title="Email verified" />
+								) : (
+									<Mail className="h-3 w-3 text-yellow-500" title="Email not verified" />
+								)}
+							</div>
 						</div>
 					</div>
 				);

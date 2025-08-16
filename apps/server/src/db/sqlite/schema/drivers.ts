@@ -24,10 +24,15 @@ export const drivers = sqliteTable("drivers", {
 	dateOfBirth: integer("date_of_birth", { mode: "timestamp" }),
 	
 	// Onboarding status
-	onboardingStatus: text("onboarding_status").notNull().default("pending"), // pending, documents_uploaded, approved, rejected
+	onboardingStatus: text("onboarding_status").notNull().default("email_verification_pending"), // email_verification_pending, email_verified, documents_uploaded, approved, rejected
 	onboardingNotes: text("onboarding_notes"),
 	approvedAt: integer("approved_at", { mode: "timestamp" }),
 	approvedBy: text("approved_by").references(() => users.id),
+	
+	// Email verification tracking
+	emailVerificationSentAt: integer("email_verification_sent_at", { mode: "timestamp" }),
+	emailVerifiedAt: integer("email_verified_at", { mode: "timestamp" }),
+	onboardingEmailSentAt: integer("onboarding_email_sent_at", { mode: "timestamp" }),
 
 	// Availability
 	isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),

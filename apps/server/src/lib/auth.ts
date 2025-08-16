@@ -32,6 +32,7 @@ export const auth = betterAuth({
 	trustedOrigins: [env.CORS_ORIGIN],
 	emailAndPassword: {
 		enabled: true,
+		requireEmailVerification: false, // Allow login without verification, but encourage verification
 		password: {
 			hash: customHash,
 			verify: customVerify,
@@ -41,6 +42,11 @@ export const auth = betterAuth({
 		google: {
 			clientId: env.GOOGLE_CLIENT_ID,
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
+		},
+	},
+	account: {
+		accountLinking: {
+			enabled: true,
 		},
 	},
 	secret: env.BETTER_AUTH_SECRET,

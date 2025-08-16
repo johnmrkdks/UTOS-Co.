@@ -71,7 +71,10 @@ function DriverOnboardingComponent() {
 						</div>
 
 						<div className="flex gap-3">
-							<Button className="bg-yellow-600 hover:bg-yellow-700">
+							<Button 
+								className="bg-yellow-600 hover:bg-yellow-700"
+								onClick={() => navigate({ to: '/driver/verify-email' })}
+							>
 								<MailIcon className="h-4 w-4 mr-2" />
 								Verify Email Now
 							</Button>

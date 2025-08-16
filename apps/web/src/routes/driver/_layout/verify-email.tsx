@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import { authClient } from '@/lib/auth-client';
+import { useLinkGoogleAccount } from '@/hooks/auth/use-link-google-account';
 import { toast } from 'sonner';
 import {
 	MailIcon,
@@ -13,7 +14,8 @@ import {
 	RefreshCwIcon,
 	ArrowLeftIcon,
 	InboxIcon,
-	ShieldCheckIcon
+	ShieldCheckIcon,
+	LinkIcon
 } from "lucide-react";
 
 export const Route = createFileRoute('/driver/_layout/verify-email')({
@@ -24,6 +26,7 @@ function VerifyEmailComponent() {
 	const navigate = useNavigate();
 	const { session } = useUserQuery();
 	const [isResending, setIsResending] = useState(false);
+	const linkGoogleAccount = useLinkGoogleAccount();
 
 	const user = session?.user;
 
@@ -184,6 +187,38 @@ function VerifyEmailComponent() {
 							<ShieldCheckIcon className="h-4 w-4 mr-2" />
 							Account Settings
 						</Button>
+					</div>
+
+					{/* Google Account Linking Section */}
+					<div className="bg-white rounded-lg p-4 border border-green-200">
+						<div className="flex items-start gap-3">
+							<LinkIcon className="h-5 w-5 text-green-600 mt-0.5" />
+							<div className="flex-1">
+								<h4 className="font-medium text-green-900 mb-2">🔗 Optional: Link Your Google Account</h4>
+								<div className="text-sm text-green-800 space-y-2">
+									<p>For easier access and enhanced security, you can link your Google account to your driver profile.</p>
+									<p className="font-medium">Benefits:</p>
+									<ul className="list-disc list-inside space-y-1 ml-2">
+										<li>Sign in using Google in the future</li>
+										<li>Enhanced account security</li>
+										<li>Faster login process</li>
+										<li>Backup authentication method</li>
+									</ul>
+								</div>
+								<div className="mt-3">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => linkGoogleAccount.mutate()}
+										disabled={linkGoogleAccount.isPending}
+										className="border-green-200 text-green-700 hover:bg-green-50"
+									>
+										<LinkIcon className={`h-4 w-4 mr-2 ${linkGoogleAccount.isPending ? 'animate-spin' : ''}`} />
+										{linkGoogleAccount.isPending ? "Connecting..." : "Link Google Account"}
+									</Button>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div className="border-t pt-4">

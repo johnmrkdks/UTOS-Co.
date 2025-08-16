@@ -6,6 +6,7 @@ import { approveDriverApplicationService, ApproveDriverApplicationServiceSchema 
 import { getDriversByStatusService, GetDriversByStatusServiceSchema } from "@/services/drivers/get-drivers-by-status";
 import { deleteDriverService, DeleteDriverServiceSchema } from "@/services/drivers/delete-driver";
 import { assignDriverService, AssignDriverServiceSchema } from "@/services/bookings/assign-driver";
+import { sendDriverVerificationEmail, sendDriverOnboardingEmail, markDriverEmailVerified } from "@/services/drivers/driver-email-service";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -92,6 +93,46 @@ export const driversRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const result = await deleteDriverService(db, input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	sendVerificationEmail: protectedProcedure
+		.input(z.object({
+			driverId: z.string(),
+			adminContactEmail: z.string().email().optional(),
+		}))
+		.mutation(async ({ input }) => {
+			try {
+				const result = await sendDriverVerificationEmail(input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	sendOnboardingEmail: protectedProcedure
+		.input(z.object({
+			driverId: z.string(),
+			loginUrl: z.string().url(),
+			googleLinkingUrl: z.string().url().optional(),
+			adminContactEmail: z.string().email().optional(),
+		}))
+		.mutation(async ({ input }) => {
+			try {
+				const result = await sendDriverOnboardingEmail(input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	markEmailVerified: protectedProcedure
+		.input(z.object({
+			driverId: z.string(),
+		}))
+		.mutation(async ({ input }) => {
+			try {
+				const result = await markDriverEmailVerified(input.driverId);
 				return result;
 			} catch (error) {
 				handleTRPCError(error);
