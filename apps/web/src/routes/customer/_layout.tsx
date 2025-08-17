@@ -11,10 +11,13 @@ import {
 	Menu,
 	X,
 	Calculator,
-	Car
+	Car,
+	LogOut
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import { useUserQuery } from "@/hooks/query/use-user-query";
+import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
 
 export const Route = createFileRoute("/customer/_layout")({
 	beforeLoad: async () => {
@@ -27,6 +30,7 @@ export const Route = createFileRoute("/customer/_layout")({
 function CustomerLayout() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const location = useLocation();
+	const { session, signOutWithConfirmation } = useUserQuery();
 
 	const navigationItems = [
 		{ 
@@ -92,23 +96,41 @@ function CustomerLayout() {
 							</div>
 						</div>
 
-						{/* Desktop Navigation */}
-						<nav className="flex space-x-6">
-							{navigationItems.map((item) => (
-								<Link
-									key={item.name}
-									to={item.href}
-									className={cn(
-										"text-sm font-medium transition-colors hover:text-foreground",
-										item.active 
-											? "text-foreground border-b-2 border-primary pb-1" 
-											: "text-muted-foreground"
-									)}
+						<div className="flex items-center space-x-6">
+							{/* Desktop Navigation */}
+							<nav className="flex space-x-6">
+								{navigationItems.map((item) => (
+									<Link
+										key={item.name}
+										to={item.href}
+										className={cn(
+											"text-sm font-medium transition-colors hover:text-foreground",
+											item.active 
+												? "text-foreground border-b-2 border-primary pb-1" 
+												: "text-muted-foreground"
+										)}
+									>
+										{item.name}
+									</Link>
+								))}
+							</nav>
+
+							{/* User Menu */}
+							<div className="flex items-center space-x-3">
+								<div className="text-right">
+									<p className="text-sm font-medium text-foreground">{session?.user.name}</p>
+									<p className="text-xs text-muted-foreground">{session?.user.email}</p>
+								</div>
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={signOutWithConfirmation.openSignOutDialog}
+									className="text-muted-foreground hover:text-foreground"
 								>
-									{item.name}
-								</Link>
-							))}
-						</nav>
+									<LogOut className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
 					</div>
 
 					{/* Mobile Header */}
@@ -143,32 +165,59 @@ function CustomerLayout() {
 
 						{/* Mobile Navigation Menu */}
 						{isMobileMenuOpen && (
-							<div className="absolute left-0 right-0 top-full bg-background border-b border-border shadow-lg">
-								<nav className="container mx-auto px-4 py-4">
-									<div className="grid grid-cols-2 gap-2">
-										{navigationItems.map((item) => {
-											const Icon = item.icon;
-											return (
-												<Link
-													key={item.name}
-													to={item.href}
-													onClick={() => setIsMobileMenuOpen(false)}
-													className={cn(
-														"flex flex-col items-center justify-center p-4 rounded-lg transition-colors hover:bg-muted",
-														item.active 
-															? "bg-primary/10 text-primary border border-primary/20" 
-															: "text-muted-foreground"
-													)}
-												>
-													<Icon className="h-5 w-5 mb-2" />
-													<span className="text-xs font-medium text-center">
-														{item.name}
-													</span>
-												</Link>
-											);
-										})}
+							<div className="absolute left-0 right-0 top-full bg-background border-b border-border shadow-lg z-50">
+								<div className="container mx-auto px-4 py-4">
+									{/* User Info Section */}
+									<div className="flex items-center space-x-3 mb-4 p-3 bg-muted/50 rounded-lg">
+										<div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+											<User className="h-5 w-5 text-primary" />
+										</div>
+										<div className="flex-1">
+											<p className="text-sm font-medium text-foreground">{session?.user.name}</p>
+											<p className="text-xs text-muted-foreground">{session?.user.email}</p>
+										</div>
 									</div>
-								</nav>
+
+									{/* Navigation Grid */}
+									<nav>
+										<div className="grid grid-cols-2 gap-2 mb-4">
+											{navigationItems.map((item) => {
+												const Icon = item.icon;
+												return (
+													<Link
+														key={item.name}
+														to={item.href}
+														onClick={() => setIsMobileMenuOpen(false)}
+														className={cn(
+															"flex flex-col items-center justify-center p-4 rounded-lg transition-colors hover:bg-muted",
+															item.active 
+																? "bg-primary/10 text-primary border border-primary/20" 
+																: "text-muted-foreground"
+														)}
+													>
+														<Icon className="h-5 w-5 mb-2" />
+														<span className="text-xs font-medium text-center">
+															{item.name}
+														</span>
+													</Link>
+												);
+											})}
+										</div>
+
+										{/* Logout Button */}
+										<Button
+											variant="outline"
+											className="w-full flex items-center justify-center gap-2"
+											onClick={() => {
+												setIsMobileMenuOpen(false);
+												signOutWithConfirmation.openSignOutDialog();
+											}}
+										>
+											<LogOut className="h-4 w-4" />
+											<span>Sign Out</span>
+										</Button>
+									</nav>
+								</div>
 							</div>
 						)}
 					</div>
@@ -218,6 +267,16 @@ function CustomerLayout() {
 					onClick={() => setIsMobileMenuOpen(false)}
 				/>
 			)}
+
+			{/* Sign Out Confirmation Dialog */}
+			<SignOutConfirmationDialog
+				isOpen={signOutWithConfirmation.isDialogOpen}
+				onClose={signOutWithConfirmation.closeSignOutDialog}
+				onConfirm={signOutWithConfirmation.confirmSignOut}
+				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userName={session?.user.name}
+				isLoading={signOutWithConfirmation.isSigningOut}
+			/>
 		</div>
 	);
 }
