@@ -6,6 +6,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
 import { useUserQuery } from '@/hooks/query/use-user-query';
+import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import { DriverNavigation } from '@/features/driver/_components/driver-navigation';
 import {
 	CarIcon,
@@ -29,6 +30,7 @@ export const Route = createFileRoute('/driver/_layout')({
 function DriverLayoutComponent() {
 	const navigate = useNavigate();
 	const { session, signOutWithConfirmation } = useUserQuery();
+	const { data: currentDriver } = useCurrentDriverQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	const user = session?.user;
@@ -51,9 +53,14 @@ function DriverLayoutComponent() {
 	};
 
 
-	// Determine onboarding status
-	const isEmailVerified = user.emailVerified;
-	const needsOnboarding = false; // TODO: Implement driverProfile check when available
+	// Driver status based on actual driver data
+	const driverStatus = {
+		profileComplete: Boolean(currentDriver?.licenseNumber && currentDriver?.phoneNumber),
+		isApproved: Boolean(currentDriver?.isApproved),
+		isActive: Boolean(currentDriver?.isActive),
+	};
+	
+	const needsOnboarding = !driverStatus.profileComplete;
 
 	return (
 		<div className="relative min-h-screen bg-gray-50">
@@ -99,22 +106,6 @@ function DriverLayoutComponent() {
 											<CardContent className="space-y-4">
 												<div className="flex items-center justify-between">
 													<div className="flex items-center space-x-2">
-														<MailIcon className="h-4 w-4 text-gray-500" />
-														<span className="text-sm">Email Status</span>
-													</div>
-													{isEmailVerified ? (
-														<Badge variant="default" className="bg-green-100 text-green-700">
-															Verified
-														</Badge>
-													) : (
-														<Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-															Unverified
-														</Badge>
-													)}
-												</div>
-
-												<div className="flex items-center justify-between">
-													<div className="flex items-center space-x-2">
 														<UserIcon className="h-4 w-4 text-gray-500" />
 														<span className="text-sm">Profile</span>
 													</div>
@@ -139,22 +130,7 @@ function DriverLayoutComponent() {
 													</Badge>
 												</div>
 
-												{!isEmailVerified && (
-													<div className="pt-2 border-t">
-														<Button
-															size="sm"
-															className="w-full"
-															onClick={() => {
-																navigate({ to: '/driver/verify-email' });
-																setIsMobileMenuOpen(false);
-															}}
-														>
-															Verify Email
-														</Button>
-													</div>
-												)}
-
-												{needsOnboarding && isEmailVerified && (
+												{needsOnboarding && (
 													<div className="pt-2 border-t">
 														<Button
 															size="sm"
@@ -185,18 +161,6 @@ function DriverLayoutComponent() {
 						<div className="flex items-center space-x-2 sm:space-x-4">
 							{/* Status Indicators - Hidden on mobile, shown on larger screens */}
 							<div className="hidden lg:flex items-center space-x-3">
-								{isEmailVerified ? (
-									<Badge variant="default" className="bg-green-100 text-green-800">
-										<CheckCircleIcon className="h-3 w-3 mr-1" />
-										Verified
-									</Badge>
-								) : (
-									<Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-										<AlertCircleIcon className="h-3 w-3 mr-1" />
-										Email Unverified
-									</Badge>
-								)}
-
 								{needsOnboarding && (
 									<Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
 										<ClipboardListIcon className="h-3 w-3 mr-1" />
@@ -249,22 +213,6 @@ function DriverLayoutComponent() {
 							<CardContent className="space-y-4">
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
-										<MailIcon className="h-4 w-4 text-gray-500" />
-										<span className="text-sm">Email Status</span>
-									</div>
-									{isEmailVerified ? (
-										<Badge variant="default" className="bg-green-100 text-green-700">
-											Verified
-										</Badge>
-									) : (
-										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-											Unverified
-										</Badge>
-									)}
-								</div>
-
-								<div className="flex items-center justify-between">
-									<div className="flex items-center space-x-2">
 										<UserIcon className="h-4 w-4 text-gray-500" />
 										<span className="text-sm">Profile</span>
 									</div>
@@ -284,24 +232,18 @@ function DriverLayoutComponent() {
 										<ShieldCheckIcon className="h-4 w-4 text-gray-500" />
 										<span className="text-sm">Driver Status</span>
 									</div>
-									<Badge variant="secondary" className="bg-gray-100 text-gray-700">
-										Pending
-									</Badge>
+									{driverStatus.isApproved ? (
+										<Badge variant="default" className="bg-green-100 text-green-700">
+											Approved
+										</Badge>
+									) : (
+										<Badge variant="secondary" className="bg-gray-100 text-gray-700">
+											Pending
+										</Badge>
+									)}
 								</div>
 
-								{!isEmailVerified && (
-									<div className="pt-2 border-t">
-										<Button
-											size="sm"
-											className="w-full"
-											onClick={() => navigate({ to: '/driver/verify-email' })}
-										>
-											Verify Email
-										</Button>
-									</div>
-								)}
-
-								{needsOnboarding && isEmailVerified && (
+								{needsOnboarding && (
 									<div className="pt-2 border-t">
 										<Button
 											size="sm"

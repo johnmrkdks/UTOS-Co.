@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { DriversTable } from "@/features/dashboard/_pages/drivers/_components/drivers-table";
 import { DriverApprovalTable } from "@/features/dashboard/_pages/drivers/_components/driver-approval-table";
-import { DriverApplicationsTable } from "@/features/dashboard/_pages/drivers/_components/driver-applications-table";
 import { CreateDriverUserDialog } from "@/features/dashboard/_pages/drivers/_components/create-driver-user-dialog";
 import { DriverUsersTable } from "@/features/dashboard/_pages/drivers/_components/driver-users-table";
 import { DriverProcessGuide } from "@/features/dashboard/_pages/drivers/_components/driver-process-guide";
@@ -23,7 +22,7 @@ function RouteComponent() {
 	const totalDrivers = driversQuery.data?.totalItems || 0;
 	const activeDrivers = driversQuery.data?.items?.filter((driver: any) => driver.isActive && driver.isApproved).length || 0;
 	const pendingDrivers = driversQuery.data?.items?.filter((driver: any) => !driver.isApproved).length || 0;
-	const inactiveDrivers = driversQuery.data?.items?.filter((driver: any) => !driver.isActive).length || 0;
+	const inactiveDrivers = driversQuery.data?.items?.filter((driver: any) => driver.isApproved && !driver.isActive).length || 0;
 
 	const handleAddDriver = () => {
 		navigate({ to: '/dashboard/drivers/onboarding' });
@@ -95,7 +94,7 @@ function RouteComponent() {
 					<CardContent>
 						<div className="text-2xl font-bold">{inactiveDrivers}</div>
 						<p className="text-xs text-muted-foreground">
-							Currently inactive
+							Approved but inactive
 						</p>
 					</CardContent>
 				</Card>
@@ -105,7 +104,6 @@ function RouteComponent() {
 				<TabsList>
 					<TabsTrigger value="all">All Drivers</TabsTrigger>
 					<TabsTrigger value="accounts">Driver Accounts</TabsTrigger>
-					<TabsTrigger value="applications">Applications</TabsTrigger>
 					<TabsTrigger value="pending">Pending Approval</TabsTrigger>
 					<TabsTrigger value="active">Active</TabsTrigger>
 					<TabsTrigger value="inactive">Inactive</TabsTrigger>
@@ -133,19 +131,6 @@ function RouteComponent() {
 					<DriverUsersTable />
 				</TabsContent>
 
-				<TabsContent value="applications" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Driver Applications</CardTitle>
-							<CardDescription>
-								Review new driver applications with uploaded documents.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<DriverApplicationsTable status="documents_uploaded" />
-						</CardContent>
-					</Card>
-				</TabsContent>
 
 				<TabsContent value="pending" className="space-y-4">
 					<Card>
@@ -166,11 +151,11 @@ function RouteComponent() {
 						<CardHeader>
 							<CardTitle>Active Drivers</CardTitle>
 							<CardDescription>
-								Currently active and approved drivers.
+								Approved drivers who are currently active and can accept bookings.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<DriversTable filter="active" />
+							<DriversTable filter="approved-active" />
 						</CardContent>
 					</Card>
 				</TabsContent>
@@ -180,11 +165,11 @@ function RouteComponent() {
 						<CardHeader>
 							<CardTitle>Inactive Drivers</CardTitle>
 							<CardDescription>
-								Drivers who are currently inactive or suspended.
+								Approved drivers who are currently inactive and cannot accept bookings.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<DriversTable filter="inactive" />
+							<DriversTable filter="approved-inactive" />
 						</CardContent>
 					</Card>
 				</TabsContent>

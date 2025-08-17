@@ -3,14 +3,14 @@ import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
 
 export const CreateDriverApplicationServiceSchema = z.object({
-	userId: z.string().cuid2(),
+	userId: z.string().min(1, "User ID is required"),
 	licenseNumber: z.string().min(1, "License number is required"),
-	licenseExpiry: z.date(),
+	licenseExpiry: z.union([z.date(), z.string()]).transform((val) => new Date(val)),
 	phoneNumber: z.string().min(1, "Phone number is required"),
 	emergencyContactName: z.string().min(1, "Emergency contact name is required"),
 	emergencyContactPhone: z.string().min(1, "Emergency contact phone is required"),
 	address: z.string().min(1, "Address is required"),
-	dateOfBirth: z.date(),
+	dateOfBirth: z.union([z.date(), z.string()]).transform((val) => new Date(val)),
 	licenseDocumentUrl: z.string().optional(),
 	insuranceDocumentUrl: z.string().optional(),
 	backgroundCheckDocumentUrl: z.string().optional(),
@@ -26,7 +26,7 @@ export const createDriverApplicationService = async (
 	const driverData = {
 		id: createId(),
 		...data,
-		onboardingStatus: "documents_uploaded" as const,
+		onboardingStatus: "pending_approval" as const,
 		isApproved: false,
 		isActive: false,
 		rating: 5.0,

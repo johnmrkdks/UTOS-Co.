@@ -63,15 +63,46 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 
 	const onSubmit = async (data: DriverApplicationFormData) => {
 		try {
-			await createApplicationMutation.mutateAsync({
+			// Validate required data
+			if (!userId) {
+				toast.error("User ID is required. Please try refreshing the page.");
+				return;
+			}
+
+			if (!data.licenseExpiry || !data.dateOfBirth) {
+				toast.error("Please fill in all required date fields.");
+				return;
+			}
+
+			// Validate dates are valid
+			const licenseExpiryDate = new Date(data.licenseExpiry);
+			const dateOfBirthDate = new Date(data.dateOfBirth);
+
+			if (isNaN(licenseExpiryDate.getTime()) || isNaN(dateOfBirthDate.getTime())) {
+				toast.error("Please enter valid dates.");
+				return;
+			}
+
+			console.log("Submitting driver application with data:", {
 				userId,
 				licenseNumber: data.licenseNumber,
-				licenseExpiry: new Date(data.licenseExpiry),
+				licenseExpiry: data.licenseExpiry, // Send as string
 				phoneNumber: data.phoneNumber,
 				emergencyContactName: data.emergencyContactName,
 				emergencyContactPhone: data.emergencyContactPhone,
 				address: data.address,
-				dateOfBirth: new Date(data.dateOfBirth),
+				dateOfBirth: data.dateOfBirth, // Send as string
+			});
+
+			await createApplicationMutation.mutateAsync({
+				userId,
+				licenseNumber: data.licenseNumber,
+				licenseExpiry: data.licenseExpiry, // Send as string
+				phoneNumber: data.phoneNumber,
+				emergencyContactName: data.emergencyContactName,
+				emergencyContactPhone: data.emergencyContactPhone,
+				address: data.address,
+				dateOfBirth: data.dateOfBirth, // Send as string
 				// No documents for now
 				licenseDocumentUrl: undefined,
 				insuranceDocumentUrl: undefined,
@@ -85,7 +116,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 				status: "completed"
 			});
 
-			toast.success("Driver application submitted successfully! Awaiting admin approval.");
+			toast.success("Driver application submitted successfully! Your application is now pending admin review.");
 			onSuccess?.();
 		} catch (error) {
 			console.error("Application error:", error);
@@ -409,7 +440,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 										<div className="text-sm text-green-800">
 											<p className="font-medium">Almost Done!</p>
 											<p className="mt-1">
-												After submission, an admin will review your application. You'll receive updates via email and can track your status in the dashboard.
+												After submission, an admin will review your application. You can track your status in the dashboard.
 											</p>
 										</div>
 									</div>

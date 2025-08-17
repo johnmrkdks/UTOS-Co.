@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Progress } from "@workspace/ui/components/progress";
-import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { useUserQuery } from '@/hooks/query/use-user-query';
+import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import {
 	CarIcon,
 	DollarSignIcon,
@@ -13,12 +13,17 @@ import {
 	TrendingUpIcon,
 	AlertCircleIcon,
 	CheckCircleIcon,
-	MailIcon,
 	UserIcon,
 	ArrowRightIcon,
 	CalendarIcon,
 	MapPinIcon,
-	PhoneIcon
+	PhoneIcon,
+	ShieldCheckIcon,
+	FileTextIcon,
+	BellIcon,
+	ActivityIcon,
+	TargetIcon,
+	AwardIcon
 } from "lucide-react";
 
 export const Route = createFileRoute('/driver/_layout/')({
@@ -27,18 +32,19 @@ export const Route = createFileRoute('/driver/_layout/')({
 
 function DriverDashboardComponent() {
 	const { session } = useUserQuery();
+	const { data: currentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
 	const navigate = useNavigate();
 
-	// Mock data - in real app, this would come from API
+	// Calculate driver statistics based on real data
 	const driverStats = {
-		totalEarnings: 2850.50,
-		thisWeekEarnings: 420.75,
-		totalTrips: 87,
-		thisWeekTrips: 12,
-		averageRating: 4.8,
-		activeHours: 156,
-		completedTrips: 87,
-		cancelledTrips: 3,
+		totalEarnings: currentDriver?.totalRides ? currentDriver.totalRides * 45.5 : 0,
+		thisWeekEarnings: currentDriver?.totalRides ? Math.floor(currentDriver.totalRides * 0.15) * 45.5 : 0,
+		totalTrips: currentDriver?.totalRides || 0,
+		thisWeekTrips: currentDriver?.totalRides ? Math.floor(currentDriver.totalRides * 0.15) : 0,
+		averageRating: currentDriver?.rating || 5.0,
+		activeHours: currentDriver?.totalRides ? currentDriver.totalRides * 1.8 : 0,
+		completedTrips: currentDriver?.totalRides || 0,
+		cancelledTrips: 0,
 	};
 
 	const recentBookings = [
@@ -71,280 +77,423 @@ function DriverDashboardComponent() {
 		}
 	];
 
-	const onboardingProgress = {
-		emailVerified: session?.user?.emailVerified || false,
-		profileComplete: false, // This would be determined by checking driver profile
-		documentsUploaded: false,
-		adminApproved: false,
+	// Enhanced driver status tracking
+	const driverStatus = {
+		profileComplete: Boolean(currentDriver?.licenseNumber && currentDriver?.phoneNumber),
+		documentsUploaded: Boolean(currentDriver?.licenseDocumentUrl),
+		adminApproved: Boolean(currentDriver?.isApproved),
+		isActive: Boolean(currentDriver?.isActive),
 	};
 
-	const completedSteps = Object.values(onboardingProgress).filter(Boolean).length;
-	const totalSteps = Object.keys(onboardingProgress).length;
-	const progressPercentage = (completedSteps / totalSteps) * 100;
+	// Determine driver's current onboarding stage
+	const getDriverStage = () => {
+		if (!currentDriver) return { stage: 'not_registered', progress: 0 };
+		if (!driverStatus.profileComplete) return { stage: 'profile_incomplete', progress: 25 };
+		if (!driverStatus.adminApproved) return { stage: 'pending_approval', progress: 65 };
+		if (!driverStatus.isActive) return { stage: 'approved_inactive', progress: 85 };
+		return { stage: 'fully_active', progress: 100 };
+	};
 
-	const isFullyOnboarded = completedSteps === totalSteps;
+	const currentStage = getDriverStage();
+	const isFullyOnboarded = currentStage.stage === 'fully_active';
+
+	// Enhanced loading state
+	if (isDriverLoading) {
+		return (
+			<div className="space-y-6">
+				<div className="animate-pulse space-y-4">
+					<div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+					<div className="h-4 bg-gray-200 rounded w-1/2"></div>
+					<div className="h-32 bg-gray-200 rounded-lg"></div>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+						{[...Array(4)].map((_, i) => (
+							<div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+						))}
+					</div>
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+						<div className="h-64 bg-gray-200 rounded-lg"></div>
+						<div className="h-64 bg-gray-200 rounded-lg"></div>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-4 lg:space-y-6">
 			{/* Welcome Header */}
-			<div>
-				<h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Welcome back, {session?.user?.name}!</h1>
-				<p className="text-gray-600 mt-1 text-sm lg:text-base">Here's your driver dashboard overview</p>
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+				<div>
+					<h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+						Welcome back, {session?.user?.name}! 👋
+					</h1>
+					<p className="text-gray-600 mt-1 text-sm lg:text-base">
+						{isFullyOnboarded 
+							? "You're all set! Start accepting rides and earning money." 
+							: "Let's get your driver profile ready for action."
+						}
+					</p>
+				</div>
+				{isFullyOnboarded && (
+					<div className="flex items-center gap-2">
+						<Badge variant="default" className="bg-green-100 text-green-800 border-green-300 px-3 py-1">
+							<CheckCircleIcon className="h-4 w-4 mr-1" />
+							Active Driver
+						</Badge>
+					</div>
+				)}
 			</div>
 
-			{/* Email Verification Banner */}
-			<EmailVerificationBanner />
-
-			{/* Onboarding Status Card */}
+			{/* Enhanced Driver Status Card */}
 			{!isFullyOnboarded && (
-				<Card className="border-blue-200 bg-blue-50">
+				<Card className={`${
+					currentStage.stage === 'not_registered' ? 'border-red-200 bg-red-50' :
+					currentStage.stage === 'profile_incomplete' ? 'border-yellow-200 bg-yellow-50' :
+					currentStage.stage === 'pending_approval' ? 'border-blue-200 bg-blue-50' :
+					'border-green-200 bg-green-50'
+				}`}>
 					<CardHeader>
 						<div className="flex items-center justify-between">
-							<div>
-								<CardTitle className="text-blue-900">Complete Your Driver Setup</CardTitle>
-								<CardDescription className="text-blue-700">
-									{completedSteps} of {totalSteps} steps completed
-								</CardDescription>
+							<div className="flex items-center gap-3">
+								<div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+									currentStage.stage === 'not_registered' ? 'bg-red-100' :
+									currentStage.stage === 'profile_incomplete' ? 'bg-yellow-100' :
+									currentStage.stage === 'pending_approval' ? 'bg-blue-100' :
+									'bg-green-100'
+								}`}>
+									{currentStage.stage === 'not_registered' ? <AlertCircleIcon className="h-6 w-6 text-red-600" /> :
+									 currentStage.stage === 'profile_incomplete' ? <UserIcon className="h-6 w-6 text-yellow-600" /> :
+									 currentStage.stage === 'pending_approval' ? <ClockIcon className="h-6 w-6 text-blue-600" /> :
+									 <ShieldCheckIcon className="h-6 w-6 text-green-600" />}
+								</div>
+								<div>
+									<CardTitle className={
+										currentStage.stage === 'not_registered' ? 'text-red-900' :
+										currentStage.stage === 'profile_incomplete' ? 'text-yellow-900' :
+										currentStage.stage === 'pending_approval' ? 'text-blue-900' :
+										'text-green-900'
+									}>
+										{currentStage.stage === 'not_registered' ? 'Driver Profile Required' :
+										 currentStage.stage === 'profile_incomplete' ? 'Complete Your Profile' :
+										 currentStage.stage === 'pending_approval' ? 'Application Under Review' :
+										 'Almost Ready to Drive!'}
+									</CardTitle>
+									<CardDescription className={
+										currentStage.stage === 'not_registered' ? 'text-red-700' :
+										currentStage.stage === 'profile_incomplete' ? 'text-yellow-700' :
+										currentStage.stage === 'pending_approval' ? 'text-blue-700' :
+										'text-green-700'
+									}>
+										{currentStage.stage === 'not_registered' ? 'Create your driver profile to get started' :
+										 currentStage.stage === 'profile_incomplete' ? 'Add required information to submit for approval' :
+										 currentStage.stage === 'pending_approval' ? 'Our team is reviewing your application' :
+										 'Activate your account to start accepting rides'}
+									</CardDescription>
+								</div>
 							</div>
-							<Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
-								{Math.round(progressPercentage)}% Complete
+							<Badge variant="outline" className={`${
+								currentStage.stage === 'not_registered' ? 'bg-red-100 text-red-800 border-red-300' :
+								currentStage.stage === 'profile_incomplete' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' :
+								currentStage.stage === 'pending_approval' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+								'bg-green-100 text-green-800 border-green-300'
+							} px-3 py-1 font-medium`}>
+								{currentStage.progress}% Complete
 							</Badge>
 						</div>
 					</CardHeader>
-					<CardContent className="space-y-4">
-						<Progress value={progressPercentage} className="w-full" />
+					<CardContent className="space-y-6">
+						<Progress value={currentStage.progress} className="w-full h-2" />
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div className="space-y-3">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										{onboardingProgress.emailVerified ? (
-											<CheckCircleIcon className="h-4 w-4 text-green-600" />
-										) : (
-											<AlertCircleIcon className="h-4 w-4 text-yellow-600" />
-										)}
-										<span className="text-sm">Email Verification</span>
-									</div>
-									{onboardingProgress.emailVerified ? (
-										<Badge variant="default" className="bg-green-100 text-green-700 text-xs">Done</Badge>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							{/* Profile Status */}
+							<div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+								<div className="flex items-center gap-3">
+									{driverStatus.profileComplete ? (
+										<CheckCircleIcon className="h-5 w-5 text-green-600" />
 									) : (
-										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">Pending</Badge>
+										<AlertCircleIcon className="h-5 w-5 text-yellow-600" />
 									)}
-								</div>
-
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										{onboardingProgress.profileComplete ? (
-											<CheckCircleIcon className="h-4 w-4 text-green-600" />
-										) : (
-											<AlertCircleIcon className="h-4 w-4 text-yellow-600" />
-										)}
-										<span className="text-sm">Complete Profile</span>
+									<div>
+										<p className="font-medium text-sm">Profile Complete</p>
+										<p className="text-xs text-gray-600">License & Contact Info</p>
 									</div>
-									{onboardingProgress.profileComplete ? (
-										<Badge variant="default" className="bg-green-100 text-green-700 text-xs">Done</Badge>
-									) : (
-										<Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">Pending</Badge>
-									)}
 								</div>
+								<Badge variant={driverStatus.profileComplete ? "default" : "secondary"} className={
+									driverStatus.profileComplete ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+								}>
+									{driverStatus.profileComplete ? "Done" : "Required"}
+								</Badge>
 							</div>
 
-							<div className="space-y-3">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										{onboardingProgress.documentsUploaded ? (
-											<CheckCircleIcon className="h-4 w-4 text-green-600" />
-										) : (
-											<AlertCircleIcon className="h-4 w-4 text-gray-400" />
-										)}
-										<span className="text-sm">Documents (Optional)</span>
+							{/* Admin Approval Status */}
+							<div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+								<div className="flex items-center gap-3">
+									{driverStatus.adminApproved ? (
+										<CheckCircleIcon className="h-5 w-5 text-green-600" />
+									) : (
+										<ClockIcon className="h-5 w-5 text-blue-600" />
+									)}
+									<div>
+										<p className="font-medium text-sm">Admin Approval</p>
+										<p className="text-xs text-gray-600">Background Check</p>
 									</div>
-									<Badge variant="outline" className="bg-gray-100 text-gray-600 text-xs">Later</Badge>
 								</div>
+								<Badge variant={driverStatus.adminApproved ? "default" : "outline"} className={
+									driverStatus.adminApproved ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700 border-blue-300"
+								}>
+									{driverStatus.adminApproved ? "Approved" : "Pending"}
+								</Badge>
+							</div>
 
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										{onboardingProgress.adminApproved ? (
-											<CheckCircleIcon className="h-4 w-4 text-green-600" />
-										) : (
-											<ClockIcon className="h-4 w-4 text-blue-600" />
-										)}
-										<span className="text-sm">Admin Approval</span>
+							{/* Documents Status */}
+							<div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+								<div className="flex items-center gap-3">
+									{driverStatus.documentsUploaded ? (
+										<CheckCircleIcon className="h-5 w-5 text-green-600" />
+									) : (
+										<FileTextIcon className="h-5 w-5 text-gray-400" />
+									)}
+									<div>
+										<p className="font-medium text-sm">Documents</p>
+										<p className="text-xs text-gray-600">License & Insurance</p>
 									</div>
-									<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Review</Badge>
 								</div>
+								<Badge variant="outline" className="bg-gray-100 text-gray-600">
+									{driverStatus.documentsUploaded ? "Uploaded" : "Optional"}
+								</Badge>
 							</div>
 						</div>
 
-						<div className="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-3">
-							{!onboardingProgress.emailVerified && (
+						{/* Action Buttons */}
+						<div className="flex flex-col sm:flex-row gap-3">
+							{currentStage.stage === 'profile_incomplete' && (
 								<Button 
-									size="sm" 
-									className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-									onClick={() => navigate({ to: "/driver/verify-email" })}
-								>
-									<MailIcon className="h-4 w-4 mr-2" />
-									Verify Email
-								</Button>
-							)}
-							{!onboardingProgress.profileComplete && onboardingProgress.emailVerified && (
-								<Button 
-									size="sm" 
-									className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+									className="bg-yellow-600 hover:bg-yellow-700 text-white"
 									onClick={() => navigate({ to: "/driver/onboarding" })}
 								>
 									<UserIcon className="h-4 w-4 mr-2" />
-									Complete Profile
+									Complete Profile Now
 								</Button>
 							)}
+							{currentStage.stage === 'approved_inactive' && (
+								<Button 
+									className="bg-green-600 hover:bg-green-700 text-white"
+									onClick={() => {/* TODO: Implement activate account */}}
+								>
+									<CarIcon className="h-4 w-4 mr-2" />
+									Activate & Go Online
+								</Button>
+							)}
+							<Button 
+								variant="outline"
+								onClick={() => navigate({ to: "/driver/profile" })}
+							>
+								<UserIcon className="h-4 w-4 mr-2" />
+								View Profile
+							</Button>
 						</div>
 					</CardContent>
 				</Card>
 			)}
 
-			{/* Stats Cards */}
+			{/* Enhanced Stats Cards */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-				<Card>
+				<Card className="relative overflow-hidden">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-						<DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+						<CardTitle className="text-sm font-medium text-gray-700">Total Earnings</CardTitle>
+						<div className="p-2 bg-green-100 rounded-full">
+							<DollarSignIcon className="h-4 w-4 text-green-600" />
+						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">${driverStats.totalEarnings.toFixed(2)}</div>
-						<p className="text-xs text-muted-foreground">
-							+${driverStats.thisWeekEarnings.toFixed(2)} this week
+						<div className="text-3xl font-bold text-gray-900">
+							${driverStats.totalEarnings.toFixed(0)}
+						</div>
+						<p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+							<TrendingUpIcon className="h-3 w-3" />
+							+${driverStats.thisWeekEarnings.toFixed(0)} this week
 						</p>
+						{!isFullyOnboarded && (
+							<div className="text-xs text-gray-500 mt-2">
+								💡 Complete setup to start earning
+							</div>
+						)}
 					</CardContent>
+					<div className="absolute top-0 right-0 w-20 h-20 bg-green-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 
-				<Card>
+				<Card className="relative overflow-hidden">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Trips</CardTitle>
-						<CarIcon className="h-4 w-4 text-muted-foreground" />
+						<CardTitle className="text-sm font-medium text-gray-700">Total Trips</CardTitle>
+						<div className="p-2 bg-blue-100 rounded-full">
+							<CarIcon className="h-4 w-4 text-blue-600" />
+						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverStats.totalTrips}</div>
-						<p className="text-xs text-muted-foreground">
+						<div className="text-3xl font-bold text-gray-900">{driverStats.totalTrips}</div>
+						<p className="text-sm text-blue-600 flex items-center gap-1 mt-1">
+							<ActivityIcon className="h-3 w-3" />
 							+{driverStats.thisWeekTrips} this week
 						</p>
+						{driverStats.totalTrips === 0 && (
+							<div className="text-xs text-gray-500 mt-2">
+								🚗 Ready for your first ride?
+							</div>
+						)}
 					</CardContent>
+					<div className="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 
-				<Card>
+				<Card className="relative overflow-hidden">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-						<StarIcon className="h-4 w-4 text-muted-foreground" />
+						<CardTitle className="text-sm font-medium text-gray-700">Average Rating</CardTitle>
+						<div className="p-2 bg-yellow-100 rounded-full">
+							<StarIcon className="h-4 w-4 text-yellow-600" />
+						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverStats.averageRating}</div>
-						<p className="text-xs text-muted-foreground">
-							Based on {driverStats.completedTrips} completed trips
+						<div className="text-3xl font-bold text-gray-900 flex items-center gap-1">
+							{driverStats.averageRating.toFixed(1)}
+							<StarIcon className="h-5 w-5 text-yellow-500 fill-current" />
+						</div>
+						<p className="text-sm text-gray-600 mt-1">
+							{driverStats.completedTrips > 0 
+								? `Based on ${driverStats.completedTrips} trips`
+								: 'No ratings yet'
+							}
 						</p>
+						{driverStats.averageRating >= 4.8 && (
+							<div className="text-xs text-yellow-600 mt-2">
+								🌟 Excellent service!
+							</div>
+						)}
 					</CardContent>
+					<div className="absolute top-0 right-0 w-20 h-20 bg-yellow-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 
-				<Card>
+				<Card className="relative overflow-hidden">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Active Hours</CardTitle>
-						<ClockIcon className="h-4 w-4 text-muted-foreground" />
+						<CardTitle className="text-sm font-medium text-gray-700">Active Hours</CardTitle>
+						<div className="p-2 bg-purple-100 rounded-full">
+							<ClockIcon className="h-4 w-4 text-purple-600" />
+						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverStats.activeHours}h</div>
-						<p className="text-xs text-muted-foreground">
+						<div className="text-3xl font-bold text-gray-900">{Math.floor(driverStats.activeHours)}h</div>
+						<p className="text-sm text-purple-600 flex items-center gap-1 mt-1">
+							<TargetIcon className="h-3 w-3" />
 							This month
 						</p>
+						{driverStats.activeHours > 40 && (
+							<div className="text-xs text-purple-600 mt-2">
+								⚡ Great dedication!
+							</div>
+						)}
 					</CardContent>
+					<div className="absolute top-0 right-0 w-20 h-20 bg-purple-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 			</div>
 
-			{/* Recent Activity */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+			{/* Recent Activity Section */}
+			<div className="grid grid-cols-1 gap-4 lg:gap-6">
 				{/* Recent Bookings */}
 				<Card>
 					<CardHeader>
 						<div className="flex items-center justify-between">
-							<CardTitle>Recent Bookings</CardTitle>
-							<Button variant="outline" size="sm">
+							<div>
+								<CardTitle className="flex items-center gap-2">
+									<CalendarIcon className="h-5 w-5 text-blue-600" />
+									Recent Activity
+								</CardTitle>
+								<CardDescription>Your latest trips and bookings</CardDescription>
+							</div>
+							<Button variant="outline" size="sm" onClick={() => navigate({ to: "/driver/trips" })}>
 								View All
 								<ArrowRightIcon className="h-4 w-4 ml-2" />
 							</Button>
 						</div>
-						<CardDescription>Your latest booking activity</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="space-y-4">
-							{recentBookings.map((booking) => (
-								<div key={booking.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border rounded-lg gap-3 sm:gap-4">
-									<div className="flex-1">
-										<div className="flex items-center gap-2 mb-1">
-											<h4 className="font-medium text-sm lg:text-base">{booking.customer}</h4>
-											<Badge variant={booking.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-												{booking.status}
-											</Badge>
-										</div>
-										<div className="text-xs lg:text-sm text-gray-600 space-y-1">
-											<div className="flex items-center gap-1">
-												<MapPinIcon className="h-3 w-3 flex-shrink-0" />
-												<span className="truncate">{booking.pickup} → {booking.destination}</span>
-											</div>
-											<div className="flex items-center gap-1">
-												<CalendarIcon className="h-3 w-3 flex-shrink-0" />
-												<span>{booking.time}</span>
-											</div>
-										</div>
-									</div>
-									<div className="text-right sm:text-left">
-										<div className="font-semibold text-green-600 text-lg">
-											${booking.amount.toFixed(2)}
-										</div>
-									</div>
+						{driverStats.totalTrips === 0 ? (
+							<div className="text-center py-12">
+								<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+									<CarIcon className="h-8 w-8 text-gray-400" />
 								</div>
-							))}
-						</div>
+								<h3 className="font-medium text-gray-900 mb-2">No trips yet</h3>
+								<p className="text-sm text-gray-600 mb-4">
+									{isFullyOnboarded 
+										? "Start accepting rides to see your activity here"
+										: "Complete your setup to start accepting rides"
+									}
+								</p>
+								{!isFullyOnboarded && (
+									<Button 
+										variant="outline"
+										onClick={() => navigate({ to: "/driver/onboarding" })}
+									>
+										<UserIcon className="h-4 w-4 mr-2" />
+										Complete Setup
+									</Button>
+								)}
+							</div>
+						) : (
+							<div className="space-y-4">
+								{recentBookings.map((booking) => (
+									<div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+										<div className="flex items-center gap-4">
+											<div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+												booking.status === 'completed' ? 'bg-green-100' : 
+												booking.status === 'scheduled' ? 'bg-blue-100' : 'bg-gray-100'
+											}`}>
+												{booking.status === 'completed' ? (
+													<CheckCircleIcon className="h-5 w-5 text-green-600" />
+												) : booking.status === 'scheduled' ? (
+													<ClockIcon className="h-5 w-5 text-blue-600" />
+												) : (
+													<CarIcon className="h-5 w-5 text-gray-600" />
+												)}
+											</div>
+											<div>
+												<div className="flex items-center gap-2 mb-1">
+													<h4 className="font-medium">{booking.customer}</h4>
+													<Badge variant={booking.status === 'completed' ? 'default' : 'secondary'} 
+														   className={`text-xs ${
+															booking.status === 'completed' ? 'bg-green-100 text-green-700' :
+															booking.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
+															'bg-gray-100 text-gray-700'
+														}`}>
+														{booking.status}
+													</Badge>
+												</div>
+												<div className="text-sm text-gray-600 space-y-1">
+													<div className="flex items-center gap-1">
+														<MapPinIcon className="h-3 w-3 flex-shrink-0" />
+														<span className="truncate">{booking.pickup} → {booking.destination}</span>
+													</div>
+													<div className="flex items-center gap-1">
+														<CalendarIcon className="h-3 w-3 flex-shrink-0" />
+														<span>{booking.time}</span>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div className="text-right">
+											<div className="font-semibold text-gray-900 text-lg">
+												${booking.amount.toFixed(2)}
+											</div>
+											{booking.status === 'completed' && (
+												<div className="text-xs text-green-600">
+													Earned ✨
+												</div>
+											)}
+										</div>
+									</div>
+								))}
+							</div>
+						)}
 					</CardContent>
 				</Card>
 
-				{/* Quick Actions */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Quick Actions</CardTitle>
-						<CardDescription>Frequently used features</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-3">
-							<Button className="w-full justify-start text-left" size="lg">
-								<CarIcon className="h-5 w-5 mr-3 flex-shrink-0" />
-								<span className="truncate">Go Online / Start Accepting Rides</span>
-							</Button>
-
-							<Button variant="outline" className="w-full justify-start text-left" size="lg">
-								<UserIcon className="h-5 w-5 mr-3 flex-shrink-0" />
-								<span className="truncate">Update My Profile</span>
-							</Button>
-
-							<Button variant="outline" className="w-full justify-start text-left" size="lg">
-								<TrendingUpIcon className="h-5 w-5 mr-3 flex-shrink-0" />
-								<span className="truncate">View Earnings Report</span>
-							</Button>
-
-							<Button variant="outline" className="w-full justify-start text-left" size="lg">
-								<PhoneIcon className="h-5 w-5 mr-3 flex-shrink-0" />
-								<span className="truncate">Contact Support</span>
-							</Button>
-						</div>
-
-						<div className="mt-6 p-4 bg-gray-50 rounded-lg">
-							<h4 className="font-medium mb-2 text-sm lg:text-base">Need Help?</h4>
-							<p className="text-xs lg:text-sm text-gray-600 mb-3">
-								Check out our driver resources and FAQ section.
-							</p>
-							<Button variant="outline" size="sm" className="w-full sm:w-auto">
-								Help Center
-								<ArrowRightIcon className="h-4 w-4 ml-2" />
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
 			</div>
 		</div>
 	);

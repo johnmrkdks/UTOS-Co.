@@ -1,13 +1,11 @@
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
-import { useUserQuery } from "@/hooks/query/use-user-query";
 import {
 	LayoutDashboardIcon,
 	UserIcon,
 	SettingsIcon,
 	ClipboardListIcon,
-	MailIcon,
+	CarIcon,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -15,7 +13,6 @@ interface NavigationItem {
 	label: string;
 	href: string;
 	icon: React.ComponentType<{ className?: string }>;
-	requiresEmailVerification?: boolean;
 }
 
 interface DriverNavigationProps {
@@ -25,9 +22,6 @@ interface DriverNavigationProps {
 export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { session } = useUserQuery();
-
-	const isEmailVerified = session?.user.emailVerified || false;
 
 	const navigationItems: NavigationItem[] = [
 		{
@@ -37,11 +31,16 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 			href: '/driver'
 		},
 		{
+			id: 'trips',
+			label: 'My Trips',
+			icon: CarIcon,
+			href: '/driver/trips'
+		},
+		{
 			id: 'onboarding',
 			label: 'Complete Profile',
 			icon: ClipboardListIcon,
-			href: '/driver/onboarding',
-			requiresEmailVerification: true
+			href: '/driver/onboarding'
 		},
 		{
 			id: 'profile',
@@ -61,49 +60,25 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 		return location.pathname === href;
 	};
 
-	const canAccess = (item: NavigationItem) => {
-		if (item.requiresEmailVerification && !isEmailVerified) {
-			return false;
-		}
-		return true;
-	};
-
 	return (
 		<div className="space-y-1">
 			{navigationItems.map((item) => {
 				const Icon = item.icon;
-				const accessible = canAccess(item);
 				const active = isActive(item.href);
 
 				return (
-					<div key={item.id} className="relative">
-						<Button
-							variant={active ? "default" : "ghost"}
-							className={`w-full justify-start ${!accessible ? 'opacity-50 cursor-not-allowed' : ''
-								}`}
-							onClick={() => {
-								if (accessible) {
-									navigate({ to: item.href });
-								} else {
-									navigate({ to: '/driver/verify-email' });
-								}
-								onNavigate?.();
-							}}
-							disabled={!accessible}
-						>
-							<Icon className="h-4 w-4 mr-2" />
-							{item.label}
-						</Button>
-
-						{item.requiresEmailVerification && !isEmailVerified && (
-							<div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-								<Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">
-									<MailIcon className="h-2 w-2 mr-1" />
-									Verify
-								</Badge>
-							</div>
-						)}
-					</div>
+					<Button
+						key={item.id}
+						variant={active ? "default" : "ghost"}
+						className="w-full justify-start"
+						onClick={() => {
+							navigate({ to: item.href });
+							onNavigate?.();
+						}}
+					>
+						<Icon className="h-4 w-4 mr-2" />
+						{item.label}
+					</Button>
 				);
 			})}
 		</div>

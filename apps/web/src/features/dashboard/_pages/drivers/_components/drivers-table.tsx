@@ -15,16 +15,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@workspace/ui/components/alert-dialog";
 import { useGetDriversQuery } from "../_hooks/query/use-get-drivers-query";
 import { useUpdateDriverMutation } from "../_hooks/query/use-update-driver-mutation";
 import { useDeleteDriverMutation } from "../_hooks/query/use-delete-driver-mutation";
@@ -32,59 +22,66 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useState } from "react";
 import { EditDriverDialog } from "./edit-driver-dialog";
 import { ViewDriverDialog } from "./view-driver-dialog";
+import { DeleteDriverConfirmationDialog } from "./delete-driver-confirmation-dialog";
+import { DriverActionConfirmationDialog } from "./driver-action-confirmation-dialog";
 
 type DriversTableProps = {
-	filter?: "all" | "active" | "inactive" | "pending";
+	filter?: "all" | "active" | "inactive" | "pending" | "approved-active" | "approved-inactive";
 };
 
 export function DriversTable({ filter = "all" }: DriversTableProps) {
 	const [editingDriver, setEditingDriver] = useState<any>(null);
 	const [viewingDriver, setViewingDriver] = useState<any>(null);
 	const [deletingDriver, setDeletingDriver] = useState<any>(null);
+	const [actionDriver, setActionDriver] = useState<{ driver: any; action: "approve" | "reject" | "activate" | "deactivate" } | null>(null);
 	
 	const driversQuery = useGetDriversQuery({});
 	const updateDriverMutation = useUpdateDriverMutation();
 	const deleteDriverMutation = useDeleteDriverMutation();
 
-	const handleApprove = async (driverId: string) => {
-		try {
-			await updateDriverMutation.mutateAsync({
-				id: driverId,
-				isApproved: true,
-				isActive: true,
-			});
-		} catch (error) {
-			console.error("Failed to approve driver:", error);
-		}
-	};
+	const handleDriverAction = async (driverId: string, notes?: string) => {
+		if (!actionDriver) return;
 
-	const handleReject = async (driverId: string) => {
 		try {
-			await updateDriverMutation.mutateAsync({
-				id: driverId,
-				isApproved: false,
-				isActive: false,
-			});
+			const { action } = actionDriver;
+			
+			switch (action) {
+				case "approve":
+					await updateDriverMutation.mutateAsync({
+						id: driverId,
+						isApproved: true,
+						isActive: true,
+					});
+					break;
+				case "reject":
+					await updateDriverMutation.mutateAsync({
+						id: driverId,
+						isApproved: false,
+						isActive: false,
+						onboardingNotes: notes,
+					});
+					break;
+				case "activate":
+					await updateDriverMutation.mutateAsync({
+						id: driverId,
+						isActive: true,
+					});
+					break;
+				case "deactivate":
+					await updateDriverMutation.mutateAsync({
+						id: driverId,
+						isActive: false,
+					});
+					break;
+			}
 		} catch (error) {
-			console.error("Failed to reject driver:", error);
-		}
-	};
-
-	const handleToggleActive = async (driver: any) => {
-		try {
-			await updateDriverMutation.mutateAsync({
-				id: driver.id,
-				isActive: !driver.isActive,
-			});
-		} catch (error) {
-			console.error("Failed to toggle driver status:", error);
+			console.error(`Failed to ${actionDriver.action} driver:`, error);
 		}
 	};
 
 	const handleDelete = async (driverId: string) => {
 		try {
 			await deleteDriverMutation.mutateAsync({ id: driverId });
-			setDeletingDriver(null);
 		} catch (error) {
 			console.error("Failed to delete driver:", error);
 		}
@@ -111,6 +108,10 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 		drivers = drivers.filter((driver: any) => !driver.isActive);
 	} else if (filter === "pending") {
 		drivers = drivers.filter((driver: any) => !driver.isApproved);
+	} else if (filter === "approved-active") {
+		drivers = drivers.filter((driver: any) => driver.isApproved && driver.isActive);
+	} else if (filter === "approved-inactive") {
+		drivers = drivers.filter((driver: any) => driver.isApproved && !driver.isActive);
 	}
 
 	if (drivers.length === 0) {
@@ -121,6 +122,8 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 					{filter === "pending" && "No pending approvals"}
 					{filter === "active" && "No active drivers"}
 					{filter === "inactive" && "No inactive drivers"}
+					{filter === "approved-active" && "No active approved drivers"}
+					{filter === "approved-inactive" && "No inactive approved drivers"}
 					{filter === "all" && "No drivers registered yet"}
 				</p>
 			</div>
@@ -192,7 +195,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 										</DropdownMenuItem>
 										{!driver.isApproved && (
 											<DropdownMenuItem 
-												onClick={() => handleApprove(driver.id)}
+												onClick={() => setActionDriver({ driver, action: "approve" })}
 												className="text-green-600"
 											>
 												<UserCheck className="mr-2 h-4 w-4" />
@@ -201,28 +204,33 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 										)}
 										{!driver.isApproved && (
 											<DropdownMenuItem 
-												onClick={() => handleReject(driver.id)}
+												onClick={() => setActionDriver({ driver, action: "reject" })}
 												className="text-red-600"
 											>
 												<UserX className="mr-2 h-4 w-4" />
 												Reject
 											</DropdownMenuItem>
 										)}
-										<DropdownMenuItem 
-											onClick={() => handleToggleActive(driver)}
-										>
-											{driver.isActive ? (
-												<>
-													<UserX className="mr-2 h-4 w-4" />
-													Deactivate
-												</>
-											) : (
-												<>
-													<UserCheck className="mr-2 h-4 w-4" />
-													Activate
-												</>
-											)}
-										</DropdownMenuItem>
+										{driver.isApproved && (
+											<DropdownMenuItem 
+												onClick={() => setActionDriver({ 
+													driver, 
+													action: driver.isActive ? "deactivate" : "activate" 
+												})}
+											>
+												{driver.isActive ? (
+													<>
+														<UserX className="mr-2 h-4 w-4" />
+														Deactivate
+													</>
+												) : (
+													<>
+														<UserCheck className="mr-2 h-4 w-4" />
+														Activate
+													</>
+												)}
+											</DropdownMenuItem>
+										)}
 										<DropdownMenuItem 
 											onClick={() => setDeletingDriver(driver)}
 											className="text-red-600"
@@ -254,26 +262,24 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 				/>
 			)}
 
-			<AlertDialog open={!!deletingDriver} onOpenChange={(open) => !open && setDeletingDriver(null)}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Driver Account</AlertDialogTitle>
-						<AlertDialogDescription>
-							Are you sure you want to delete {deletingDriver?.user?.name || "this driver"}'s account? 
-							This action cannot be undone and will permanently remove the driver and their associated user account from the system.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={() => deletingDriver && handleDelete(deletingDriver.id)}
-							className="bg-red-600 hover:bg-red-700"
-						>
-							Delete Account
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<DeleteDriverConfirmationDialog
+				driver={deletingDriver}
+				open={!!deletingDriver}
+				onOpenChange={(open) => !open && setDeletingDriver(null)}
+				onConfirm={handleDelete}
+				isDeleting={deleteDriverMutation.isPending}
+			/>
+
+			{actionDriver && (
+				<DriverActionConfirmationDialog
+					driver={actionDriver.driver}
+					action={actionDriver.action}
+					open={!!actionDriver}
+					onOpenChange={(open) => !open && setActionDriver(null)}
+					onConfirm={handleDriverAction}
+					isLoading={updateDriverMutation.isPending}
+				/>
+			)}
 		</>
 	);
 }

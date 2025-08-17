@@ -26,7 +26,7 @@ import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as DriverLayoutIndexRouteImport } from './routes/driver/_layout/index'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout/index'
-import { Route as DriverLayoutVerifyEmailRouteImport } from './routes/driver/_layout/verify-email'
+import { Route as DriverLayoutTripsRouteImport } from './routes/driver/_layout/trips'
 import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layout/settings'
 import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
 import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
@@ -134,9 +134,9 @@ const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const DriverLayoutVerifyEmailRoute = DriverLayoutVerifyEmailRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
+const DriverLayoutTripsRoute = DriverLayoutTripsRouteImport.update({
+  id: '/trips',
+  path: '/trips',
   getParentRoute: () => DriverLayoutRoute,
 } as any)
 const DriverLayoutSettingsRoute = DriverLayoutSettingsRouteImport.update({
@@ -273,7 +273,7 @@ export interface FileRoutesByFullPath {
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
-  '/driver/verify-email': typeof DriverLayoutVerifyEmailRoute
+  '/driver/trips': typeof DriverLayoutTripsRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
   '/driver/': typeof DriverLayoutIndexRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
@@ -310,7 +310,7 @@ export interface FileRoutesByTo {
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
-  '/driver/verify-email': typeof DriverLayoutVerifyEmailRoute
+  '/driver/trips': typeof DriverLayoutTripsRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -349,7 +349,7 @@ export interface FileRoutesById {
   '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/_layout/profile': typeof DriverLayoutProfileRoute
   '/driver/_layout/settings': typeof DriverLayoutSettingsRoute
-  '/driver/_layout/verify-email': typeof DriverLayoutVerifyEmailRoute
+  '/driver/_layout/trips': typeof DriverLayoutTripsRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/driver/_layout/': typeof DriverLayoutIndexRoute
   '/dashboard/_layout/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
@@ -388,7 +388,7 @@ export interface FileRouteTypes {
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
-    | '/driver/verify-email'
+    | '/driver/trips'
     | '/dashboard/'
     | '/driver/'
     | '/dashboard/cars/add-car'
@@ -425,7 +425,7 @@ export interface FileRouteTypes {
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
-    | '/driver/verify-email'
+    | '/driver/trips'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -463,7 +463,7 @@ export interface FileRouteTypes {
     | '/driver/_layout/onboarding'
     | '/driver/_layout/profile'
     | '/driver/_layout/settings'
-    | '/driver/_layout/verify-email'
+    | '/driver/_layout/trips'
     | '/dashboard/_layout/'
     | '/driver/_layout/'
     | '/dashboard/_layout/cars/add-car'
@@ -614,11 +614,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
-    '/driver/_layout/verify-email': {
-      id: '/driver/_layout/verify-email'
-      path: '/verify-email'
-      fullPath: '/driver/verify-email'
-      preLoaderRoute: typeof DriverLayoutVerifyEmailRouteImport
+    '/driver/_layout/trips': {
+      id: '/driver/_layout/trips'
+      path: '/trips'
+      fullPath: '/driver/trips'
+      preLoaderRoute: typeof DriverLayoutTripsRouteImport
       parentRoute: typeof DriverLayoutRoute
     }
     '/driver/_layout/settings': {
@@ -854,7 +854,7 @@ interface DriverLayoutRouteChildren {
   DriverLayoutOnboardingRoute: typeof DriverLayoutOnboardingRoute
   DriverLayoutProfileRoute: typeof DriverLayoutProfileRoute
   DriverLayoutSettingsRoute: typeof DriverLayoutSettingsRoute
-  DriverLayoutVerifyEmailRoute: typeof DriverLayoutVerifyEmailRoute
+  DriverLayoutTripsRoute: typeof DriverLayoutTripsRoute
   DriverLayoutIndexRoute: typeof DriverLayoutIndexRoute
 }
 
@@ -862,7 +862,7 @@ const DriverLayoutRouteChildren: DriverLayoutRouteChildren = {
   DriverLayoutOnboardingRoute: DriverLayoutOnboardingRoute,
   DriverLayoutProfileRoute: DriverLayoutProfileRoute,
   DriverLayoutSettingsRoute: DriverLayoutSettingsRoute,
-  DriverLayoutVerifyEmailRoute: DriverLayoutVerifyEmailRoute,
+  DriverLayoutTripsRoute: DriverLayoutTripsRoute,
   DriverLayoutIndexRoute: DriverLayoutIndexRoute,
 }
 
