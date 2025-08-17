@@ -21,6 +21,7 @@ export * from "./packages";
 
 export * from "./price-config";
 export * from "./accounts";
+export * from "./customer-profiles";
 export * from "./drivers";
 export * from "./ratings";
 export * from "./sessions";

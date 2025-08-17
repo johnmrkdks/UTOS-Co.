@@ -41,3 +41,29 @@ export async function getAuth() {
 
 	return session.data;
 }
+
+export async function requireCustomer() {
+	const session = await requireAuth();
+	if (session?.user.role !== "user") {
+		throw redirect({
+			to: "/",
+			search: {
+				error: "unauthorized",
+			},
+		});
+	}
+	return session;
+}
+
+export async function requireDriver() {
+	const session = await requireAuth();
+	if (session?.user.role !== "driver") {
+		throw redirect({
+			to: "/",
+			search: {
+				error: "unauthorized",
+			},
+		});
+	}
+	return session;
+}

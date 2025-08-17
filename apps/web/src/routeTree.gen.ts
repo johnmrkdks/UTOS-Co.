@@ -15,6 +15,7 @@ import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as DriverLayoutRouteImport } from './routes/driver/_layout'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
+import { Route as CustomerLayoutRouteImport } from './routes/customer/_layout'
 import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
 import { Route as MarketingServicesRouteImport } from './routes/_marketing/services'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
@@ -26,10 +27,15 @@ import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as DriverLayoutIndexRouteImport } from './routes/driver/_layout/index'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout/index'
+import { Route as CustomerLayoutIndexRouteImport } from './routes/customer/_layout/index'
 import { Route as DriverLayoutTripsRouteImport } from './routes/driver/_layout/trips'
 import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layout/settings'
 import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
 import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
+import { Route as CustomerLayoutServicesRouteImport } from './routes/customer/_layout/services'
+import { Route as CustomerLayoutProfileRouteImport } from './routes/customer/_layout/profile'
+import { Route as CustomerLayoutInstantQuoteRouteImport } from './routes/customer/_layout/instant-quote'
+import { Route as CustomerLayoutBookingsRouteImport } from './routes/customer/_layout/bookings'
 import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './routes/dashboard/_layout/todays-scheduled/index'
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
@@ -47,9 +53,11 @@ import { Route as DashboardLayoutAnalyticsIndexRouteImport } from './routes/dash
 import { Route as DashboardLayoutAdminTestingIndexRouteImport } from './routes/dashboard/_layout/admin-testing/index'
 import { Route as DashboardLayoutDriversOnboardingRouteImport } from './routes/dashboard/_layout/drivers/onboarding'
 import { Route as DashboardLayoutCarsAddCarRouteImport } from './routes/dashboard/_layout/cars/add-car'
+import { Route as CustomerLayoutAccountSettingsRouteImport } from './routes/customer/_layout/account/settings'
 
 const DriverRouteImport = createFileRoute('/driver')()
 const DashboardRouteImport = createFileRoute('/dashboard')()
+const CustomerRouteImport = createFileRoute('/customer')()
 
 const DriverRoute = DriverRouteImport.update({
   id: '/driver',
@@ -59,6 +67,11 @@ const DriverRoute = DriverRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerRoute = CustomerRouteImport.update({
+  id: '/customer',
+  path: '/customer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingRoute = MarketingRouteImport.update({
@@ -77,6 +90,10 @@ const DriverLayoutRoute = DriverLayoutRouteImport.update({
 const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => DashboardRoute,
+} as any)
+const CustomerLayoutRoute = CustomerLayoutRouteImport.update({
+  id: '/_layout',
+  getParentRoute: () => CustomerRoute,
 } as any)
 const MarketingTermsAndConditionsRoute =
   MarketingTermsAndConditionsRouteImport.update({
@@ -134,6 +151,11 @@ const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
+const CustomerLayoutIndexRoute = CustomerLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CustomerLayoutRoute,
+} as any)
 const DriverLayoutTripsRoute = DriverLayoutTripsRouteImport.update({
   id: '/trips',
   path: '/trips',
@@ -153,6 +175,27 @@ const DriverLayoutOnboardingRoute = DriverLayoutOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => DriverLayoutRoute,
+} as any)
+const CustomerLayoutServicesRoute = CustomerLayoutServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => CustomerLayoutRoute,
+} as any)
+const CustomerLayoutProfileRoute = CustomerLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => CustomerLayoutRoute,
+} as any)
+const CustomerLayoutInstantQuoteRoute =
+  CustomerLayoutInstantQuoteRouteImport.update({
+    id: '/instant-quote',
+    path: '/instant-quote',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
+const CustomerLayoutBookingsRoute = CustomerLayoutBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => CustomerLayoutRoute,
 } as any)
 const DashboardLayoutTodaysScheduledIndexRoute =
   DashboardLayoutTodaysScheduledIndexRouteImport.update({
@@ -256,6 +299,12 @@ const DashboardLayoutCarsAddCarRoute =
     path: '/cars/add-car',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const CustomerLayoutAccountSettingsRoute =
+  CustomerLayoutAccountSettingsRouteImport.update({
+    id: '/account/settings',
+    path: '/account/settings',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
@@ -267,15 +316,22 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof MarketingPrivacyRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
+  '/customer': typeof CustomerLayoutRouteWithChildren
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
+  '/customer/bookings': typeof CustomerLayoutBookingsRoute
+  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
+  '/customer/profile': typeof CustomerLayoutProfileRoute
+  '/customer/services': typeof CustomerLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
+  '/customer/': typeof CustomerLayoutIndexRoute
   '/dashboard/': typeof DashboardLayoutIndexRoute
   '/driver/': typeof DriverLayoutIndexRoute
+  '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -304,13 +360,19 @@ export interface FileRoutesByTo {
   '/privacy': typeof MarketingPrivacyRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
+  '/customer': typeof CustomerLayoutIndexRoute
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/driver': typeof DriverLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/customer/bookings': typeof CustomerLayoutBookingsRoute
+  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
+  '/customer/profile': typeof CustomerLayoutProfileRoute
+  '/customer/services': typeof CustomerLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
+  '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -341,17 +403,25 @@ export interface FileRoutesById {
   '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/services': typeof MarketingServicesRoute
   '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
+  '/customer': typeof CustomerRouteWithChildren
+  '/customer/_layout': typeof CustomerLayoutRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverRouteWithChildren
   '/driver/_layout': typeof DriverLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
+  '/customer/_layout/bookings': typeof CustomerLayoutBookingsRoute
+  '/customer/_layout/instant-quote': typeof CustomerLayoutInstantQuoteRoute
+  '/customer/_layout/profile': typeof CustomerLayoutProfileRoute
+  '/customer/_layout/services': typeof CustomerLayoutServicesRoute
   '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/_layout/profile': typeof DriverLayoutProfileRoute
   '/driver/_layout/settings': typeof DriverLayoutSettingsRoute
   '/driver/_layout/trips': typeof DriverLayoutTripsRoute
+  '/customer/_layout/': typeof CustomerLayoutIndexRoute
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/driver/_layout/': typeof DriverLayoutIndexRoute
+  '/customer/_layout/account/settings': typeof CustomerLayoutAccountSettingsRoute
   '/dashboard/_layout/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/_layout/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/_layout/admin-testing/': typeof DashboardLayoutAdminTestingIndexRoute
@@ -382,15 +452,22 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/services'
     | '/terms-and-conditions'
+    | '/customer'
     | '/dashboard'
     | '/driver'
     | '/'
+    | '/customer/bookings'
+    | '/customer/instant-quote'
+    | '/customer/profile'
+    | '/customer/services'
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
     | '/driver/trips'
+    | '/customer/'
     | '/dashboard/'
     | '/driver/'
+    | '/customer/account/settings'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -419,13 +496,19 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/services'
     | '/terms-and-conditions'
+    | '/customer'
     | '/dashboard'
     | '/driver'
     | '/'
+    | '/customer/bookings'
+    | '/customer/instant-quote'
+    | '/customer/profile'
+    | '/customer/services'
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
     | '/driver/trips'
+    | '/customer/account/settings'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -455,17 +538,25 @@ export interface FileRouteTypes {
     | '/_marketing/privacy'
     | '/_marketing/services'
     | '/_marketing/terms-and-conditions'
+    | '/customer'
+    | '/customer/_layout'
     | '/dashboard'
     | '/dashboard/_layout'
     | '/driver'
     | '/driver/_layout'
     | '/_marketing/'
+    | '/customer/_layout/bookings'
+    | '/customer/_layout/instant-quote'
+    | '/customer/_layout/profile'
+    | '/customer/_layout/services'
     | '/driver/_layout/onboarding'
     | '/driver/_layout/profile'
     | '/driver/_layout/settings'
     | '/driver/_layout/trips'
+    | '/customer/_layout/'
     | '/dashboard/_layout/'
     | '/driver/_layout/'
+    | '/customer/_layout/account/settings'
     | '/dashboard/_layout/cars/add-car'
     | '/dashboard/_layout/drivers/onboarding'
     | '/dashboard/_layout/admin-testing/'
@@ -489,6 +580,7 @@ export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRouteWithChildren
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
+  CustomerRoute: typeof CustomerRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   DriverRoute: typeof DriverRouteWithChildren
 }
@@ -507,6 +599,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer': {
+      id: '/customer'
+      path: '/customer'
+      fullPath: '/customer'
+      preLoaderRoute: typeof CustomerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing': {
@@ -536,6 +635,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardLayoutRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/customer/_layout': {
+      id: '/customer/_layout'
+      path: '/customer'
+      fullPath: '/customer'
+      preLoaderRoute: typeof CustomerLayoutRouteImport
+      parentRoute: typeof CustomerRoute
     }
     '/_marketing/terms-and-conditions': {
       id: '/_marketing/terms-and-conditions'
@@ -614,6 +720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/customer/_layout/': {
+      id: '/customer/_layout/'
+      path: '/'
+      fullPath: '/customer/'
+      preLoaderRoute: typeof CustomerLayoutIndexRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
     '/driver/_layout/trips': {
       id: '/driver/_layout/trips'
       path: '/trips'
@@ -641,6 +754,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/driver/onboarding'
       preLoaderRoute: typeof DriverLayoutOnboardingRouteImport
       parentRoute: typeof DriverLayoutRoute
+    }
+    '/customer/_layout/services': {
+      id: '/customer/_layout/services'
+      path: '/services'
+      fullPath: '/customer/services'
+      preLoaderRoute: typeof CustomerLayoutServicesRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
+    '/customer/_layout/profile': {
+      id: '/customer/_layout/profile'
+      path: '/profile'
+      fullPath: '/customer/profile'
+      preLoaderRoute: typeof CustomerLayoutProfileRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
+    '/customer/_layout/instant-quote': {
+      id: '/customer/_layout/instant-quote'
+      path: '/instant-quote'
+      fullPath: '/customer/instant-quote'
+      preLoaderRoute: typeof CustomerLayoutInstantQuoteRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
+    '/customer/_layout/bookings': {
+      id: '/customer/_layout/bookings'
+      path: '/bookings'
+      fullPath: '/customer/bookings'
+      preLoaderRoute: typeof CustomerLayoutBookingsRouteImport
+      parentRoute: typeof CustomerLayoutRoute
     }
     '/dashboard/_layout/todays-scheduled/': {
       id: '/dashboard/_layout/todays-scheduled/'
@@ -761,6 +902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutCarsAddCarRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/customer/_layout/account/settings': {
+      id: '/customer/_layout/account/settings'
+      path: '/account/settings'
+      fullPath: '/customer/account/settings'
+      preLoaderRoute: typeof CustomerLayoutAccountSettingsRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
   }
 }
 
@@ -788,6 +936,40 @@ const MarketingRouteChildren: MarketingRouteChildren = {
 
 const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
+)
+
+interface CustomerLayoutRouteChildren {
+  CustomerLayoutBookingsRoute: typeof CustomerLayoutBookingsRoute
+  CustomerLayoutInstantQuoteRoute: typeof CustomerLayoutInstantQuoteRoute
+  CustomerLayoutProfileRoute: typeof CustomerLayoutProfileRoute
+  CustomerLayoutServicesRoute: typeof CustomerLayoutServicesRoute
+  CustomerLayoutIndexRoute: typeof CustomerLayoutIndexRoute
+  CustomerLayoutAccountSettingsRoute: typeof CustomerLayoutAccountSettingsRoute
+}
+
+const CustomerLayoutRouteChildren: CustomerLayoutRouteChildren = {
+  CustomerLayoutBookingsRoute: CustomerLayoutBookingsRoute,
+  CustomerLayoutInstantQuoteRoute: CustomerLayoutInstantQuoteRoute,
+  CustomerLayoutProfileRoute: CustomerLayoutProfileRoute,
+  CustomerLayoutServicesRoute: CustomerLayoutServicesRoute,
+  CustomerLayoutIndexRoute: CustomerLayoutIndexRoute,
+  CustomerLayoutAccountSettingsRoute: CustomerLayoutAccountSettingsRoute,
+}
+
+const CustomerLayoutRouteWithChildren = CustomerLayoutRoute._addFileChildren(
+  CustomerLayoutRouteChildren,
+)
+
+interface CustomerRouteChildren {
+  CustomerLayoutRoute: typeof CustomerLayoutRouteWithChildren
+}
+
+const CustomerRouteChildren: CustomerRouteChildren = {
+  CustomerLayoutRoute: CustomerLayoutRouteWithChildren,
+}
+
+const CustomerRouteWithChildren = CustomerRoute._addFileChildren(
+  CustomerRouteChildren,
 )
 
 interface DashboardLayoutRouteChildren {
@@ -885,6 +1067,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRouteWithChildren,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
+  CustomerRoute: CustomerRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   DriverRoute: DriverRouteWithChildren,
 }

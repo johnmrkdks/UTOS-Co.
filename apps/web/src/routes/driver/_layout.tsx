@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useNavigate, Link, useLocation } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -18,10 +18,13 @@ import {
 	UserIcon,
 	ClipboardListIcon,
 	MenuIcon,
-	XIcon
+	XIcon,
+	LayoutDashboardIcon,
+	SettingsIcon
 } from "lucide-react";
 import { Logo } from '@/components/logo';
 import { SignOutConfirmationDialog } from '@/components/dialogs/sign-out-confirmation-dialog';
+import { cn } from "@workspace/ui/lib/utils";
 
 export const Route = createFileRoute('/driver/_layout')({
 	component: DriverLayoutComponent,
@@ -29,11 +32,44 @@ export const Route = createFileRoute('/driver/_layout')({
 
 function DriverLayoutComponent() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { session, signOutWithConfirmation } = useUserQuery();
 	const { data: currentDriver } = useCurrentDriverQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	const user = session?.user;
+
+	// Navigation items for bottom navigation (primary items only)
+	const navigationItems = [
+		{ 
+			name: "Dashboard", 
+			href: "/driver", 
+			icon: LayoutDashboardIcon,
+			active: location.pathname === "/driver",
+			primary: true
+		},
+		{ 
+			name: "My Trips", 
+			href: "/driver/trips", 
+			icon: CarIcon,
+			active: location.pathname === "/driver/trips",
+			primary: true
+		},
+		{ 
+			name: "Profile", 
+			href: "/driver/profile", 
+			icon: UserIcon,
+			active: location.pathname === "/driver/profile",
+			primary: true
+		},
+		{ 
+			name: "Settings", 
+			href: "/driver/settings", 
+			icon: SettingsIcon,
+			active: location.pathname === "/driver/settings",
+			primary: true
+		},
+	];
 
 	// Redirect if not driver
 	if (user && user.role !== 'driver') {
@@ -192,7 +228,7 @@ function DriverLayoutComponent() {
 				</div>
 			</div>
 
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 pb-20 lg:pb-8">
 				<div className="lg:flex lg:gap-8">
 					{/* Desktop Sidebar Navigation - Hidden on mobile */}
 					<div className="hidden lg:block w-64 flex-shrink-0">
@@ -263,6 +299,35 @@ function DriverLayoutComponent() {
 						<Outlet />
 					</div>
 				</div>
+			</div>
+
+			{/* Bottom Navigation for Mobile (Primary Items) */}
+			<div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200">
+				<nav className="container mx-auto px-2 py-2">
+					<div className="flex justify-around">
+						{navigationItems.filter(item => item.primary).map((item) => {
+							const Icon = item.icon;
+							return (
+								<Link
+									key={item.name}
+									to={item.href}
+									className={cn(
+										"flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1",
+										item.active 
+											? "text-primary" 
+											: "text-gray-500 hover:text-gray-700"
+									)}
+								>
+									<Icon className="h-5 w-5 mb-1" />
+									<span className="text-xs font-medium truncate">
+										{item.name === "My Trips" ? "Trips" : 
+										 item.name}
+									</span>
+								</Link>
+							);
+						})}
+					</div>
+				</nav>
 			</div>
 			
 			<SignOutConfirmationDialog
