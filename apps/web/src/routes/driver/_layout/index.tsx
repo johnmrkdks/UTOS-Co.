@@ -145,35 +145,41 @@ function DriverDashboardComponent() {
 				isFullyOnboarded={isFullyOnboarded}
 			/>
 
-			{/* Compact Stats Cards */}
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-				<Card className="p-3">
+			{/* Mobile-Optimized Stats Cards */}
+			<div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+				{/* Total Earnings Card */}
+				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
 					<CardHeader className="p-0 pb-2">
 						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-gray-600">Total Earnings</span>
-							<DollarSignIcon className="h-3 w-3 text-green-600" />
+							<span className="text-xs font-medium text-muted-foreground truncate">Earnings</span>
+							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+								<DollarSignIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
+							</div>
 						</div>
 					</CardHeader>
 					<CardContent className="p-0">
-						<div className="text-lg font-bold text-gray-900">
+						<div className="text-lg sm:text-xl font-bold text-foreground">
 							${driverStats.totalEarnings.toFixed(0)}
 						</div>
 						<p className="text-xs text-green-600 flex items-center gap-1">
 							<TrendingUpIcon className="h-2 w-2" />
-							+${driverStats.thisWeekEarnings.toFixed(0)} week
+							+${driverStats.thisWeekEarnings.toFixed(0)}
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card className="p-3">
+				{/* Total Trips Card */}
+				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
 					<CardHeader className="p-0 pb-2">
 						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-gray-600">Total Trips</span>
-							<CarIcon className="h-3 w-3 text-blue-600" />
+							<span className="text-xs font-medium text-muted-foreground truncate">Trips</span>
+							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+								<CarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
+							</div>
 						</div>
 					</CardHeader>
 					<CardContent className="p-0">
-						<div className="text-lg font-bold text-gray-900">{driverStats.totalTrips}</div>
+						<div className="text-lg sm:text-xl font-bold text-foreground">{driverStats.totalTrips}</div>
 						<p className="text-xs text-blue-600 flex items-center gap-1">
 							<ActivityIcon className="h-2 w-2" />
 							+{driverStats.thisWeekTrips} week
@@ -181,71 +187,88 @@ function DriverDashboardComponent() {
 					</CardContent>
 				</Card>
 
-				<Card className="p-3">
+				{/* Rating Card */}
+				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
 					<CardHeader className="p-0 pb-2">
 						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-gray-600">Rating</span>
-							<StarIcon className="h-3 w-3 text-yellow-600" />
+							<span className="text-xs font-medium text-muted-foreground truncate">Rating</span>
+							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+								<StarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-yellow-600" />
+							</div>
 						</div>
 					</CardHeader>
 					<CardContent className="p-0">
-						<div className="text-lg font-bold text-gray-900 flex items-center gap-1">
+						<div className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-1">
 							{driverStats.averageRating.toFixed(1)}
 							<StarIcon className="h-3 w-3 text-yellow-500 fill-current" />
 						</div>
-						<p className="text-xs text-gray-600">
+						<p className="text-xs text-muted-foreground truncate">
 							{driverStats.completedTrips > 0 
 								? `${driverStats.completedTrips} trips`
-								: 'No ratings yet'
+								: 'No ratings'
 							}
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card className="p-3">
+				{/* Hours Card */}
+				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
 					<CardHeader className="p-0 pb-2">
 						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-gray-600">Hours</span>
-							<ClockIcon className="h-3 w-3 text-purple-600" />
+							<span className="text-xs font-medium text-muted-foreground truncate">Hours</span>
+							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+								<ClockIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
+							</div>
 						</div>
 					</CardHeader>
 					<CardContent className="p-0">
-						<div className="text-lg font-bold text-gray-900">{Math.floor(driverStats.activeHours)}h</div>
+						<div className="text-lg sm:text-xl font-bold text-foreground">{Math.floor(driverStats.activeHours)}h</div>
 						<p className="text-xs text-purple-600 flex items-center gap-1">
 							<TargetIcon className="h-2 w-2" />
-							This month
+							Month
 						</p>
 					</CardContent>
 				</Card>
 			</div>
 
-			{/* Recent Activity Section */}
-			<div className="grid grid-cols-1 gap-4 lg:gap-6">
+			{/* Recent Activity Section - Mobile Optimized */}
+			<div className="grid grid-cols-1 gap-4">
 				{/* Recent Bookings */}
-				<Card>
-					<CardHeader>
+				<Card className="hover:shadow-md transition-shadow">
+					<CardHeader className="pb-4">
 						<div className="flex items-center justify-between">
-							<div>
-								<CardTitle className="flex items-center gap-2">
-									<CalendarIcon className="h-5 w-5 text-blue-600" />
-									Recent Activity
-								</CardTitle>
-								<CardDescription>Your latest trips and bookings</CardDescription>
+							<div className="flex items-center gap-3">
+								<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+									<CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+								</div>
+								<div>
+									<CardTitle className="text-lg sm:text-xl font-bold text-foreground">
+										Recent Activity
+									</CardTitle>
+									<CardDescription className="text-sm text-muted-foreground hidden sm:block">
+										Your latest trips and bookings
+									</CardDescription>
+								</div>
 							</div>
-							<Button variant="outline" size="sm" onClick={() => navigate({ to: "/driver/trips" })}>
+							<Button 
+								variant="ghost" 
+								size="sm" 
+								className="text-xs sm:text-sm px-2 sm:px-3"
+								onClick={() => navigate({ to: "/driver/trips" })}
+							>
 								View All
-								<ArrowRightIcon className="h-4 w-4 ml-2" />
+								<ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
 							</Button>
 						</div>
 					</CardHeader>
 					<CardContent>
 						{driverStats.totalTrips === 0 ? (
-							<div className="text-center py-12">
-								<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-									<CarIcon className="h-8 w-8 text-gray-400" />
+							<div className="text-center py-8 sm:py-12">
+								<div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-muted to-muted/50 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+									<CarIcon className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
 								</div>
-								<h3 className="font-medium text-gray-900 mb-2">No trips yet</h3>
-								<p className="text-sm text-gray-600 mb-4">
+								<h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">No trips yet</h3>
+								<p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-sm mx-auto leading-relaxed">
 									{isFullyOnboarded 
 										? "Start accepting rides to see your activity here"
 										: "Complete your setup to start accepting rides"
@@ -254,6 +277,7 @@ function DriverDashboardComponent() {
 								{!isFullyOnboarded && (
 									<Button 
 										variant="outline"
+										className="h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-medium"
 										onClick={() => navigate({ to: "/driver/onboarding" })}
 									>
 										<UserIcon className="h-4 w-4 mr-2" />
@@ -262,35 +286,37 @@ function DriverDashboardComponent() {
 								)}
 							</div>
 						) : (
-							<div className="space-y-4">
+							<div className="space-y-3 sm:space-y-4">
 								{recentBookings.map((booking) => (
-									<div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-										<div className="flex items-center gap-4">
-											<div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+									<div key={booking.id} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/30 transition-all duration-200 hover:shadow-md active:scale-[0.98] touch-manipulation">
+										<div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+											<div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
 												booking.status === 'completed' ? 'bg-green-100' : 
-												booking.status === 'scheduled' ? 'bg-blue-100' : 'bg-gray-100'
+												booking.status === 'scheduled' ? 'bg-blue-100' : 'bg-muted'
 											}`}>
 												{booking.status === 'completed' ? (
-													<CheckCircleIcon className="h-5 w-5 text-green-600" />
+													<CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
 												) : booking.status === 'scheduled' ? (
-													<ClockIcon className="h-5 w-5 text-blue-600" />
+													<ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
 												) : (
-													<CarIcon className="h-5 w-5 text-gray-600" />
+													<CarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
 												)}
 											</div>
-											<div>
-												<div className="flex items-center gap-2 mb-1">
-													<h4 className="font-medium">{booking.customer}</h4>
-													<Badge variant={booking.status === 'completed' ? 'default' : 'secondary'} 
-														   className={`text-xs ${
-															booking.status === 'completed' ? 'bg-green-100 text-green-700' :
-															booking.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
-															'bg-gray-100 text-gray-700'
-														}`}>
+											<div className="flex-1 min-w-0">
+												<div className="flex items-center gap-2 mb-1 flex-wrap">
+													<h4 className="font-medium text-foreground text-sm sm:text-base truncate">{booking.customer}</h4>
+													<Badge 
+														variant={booking.status === 'completed' ? 'default' : 'secondary'} 
+														className={`text-xs px-2 py-0.5 ${
+															booking.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
+															booking.status === 'scheduled' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+															'bg-muted text-muted-foreground'
+														}`}
+													>
 														{booking.status}
 													</Badge>
 												</div>
-												<div className="text-sm text-gray-600 space-y-1">
+												<div className="text-xs sm:text-sm text-muted-foreground space-y-1">
 													<div className="flex items-center gap-1">
 														<MapPinIcon className="h-3 w-3 flex-shrink-0" />
 														<span className="truncate">{booking.pickup} → {booking.destination}</span>
@@ -302,13 +328,14 @@ function DriverDashboardComponent() {
 												</div>
 											</div>
 										</div>
-										<div className="text-right">
-											<div className="font-semibold text-gray-900 text-lg">
+										<div className="text-right flex-shrink-0">
+											<div className="font-semibold text-foreground text-sm sm:text-lg">
 												${booking.amount.toFixed(2)}
 											</div>
 											{booking.status === 'completed' && (
-												<div className="text-xs text-green-600">
-													Earned ✨
+												<div className="text-xs text-green-600 flex items-center gap-1">
+													<TrendingUpIcon className="h-2 w-2" />
+													Earned
 												</div>
 											)}
 										</div>

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { Car, Calendar, Star, Package, Clock } from "lucide-react";
+import { Car, Calendar, Star, Package, Clock, TrendingUp, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/customer/_layout/")({
 	component: CustomerDashboard,
@@ -19,67 +19,118 @@ function CustomerDashboard() {
 				</p>
 			</div>
 
-			{/* Quick Stats */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Active Bookings</CardTitle>
-						<Clock className="h-4 w-4 text-muted-foreground" />
+			{/* Quick Stats - Mobile Optimized */}
+			<div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+				{/* Active Bookings Card */}
+				<Card className="p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+						<CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+							Active
+						</CardTitle>
+						<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+							<Clock className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
+						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">0</div>
-						<p className="text-xs text-muted-foreground">
-							No active bookings
+					<CardContent className="p-0 pt-1">
+						<div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">0</div>
+						<p className="text-xs text-muted-foreground leading-tight">
+							Bookings
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Upcoming Trips</CardTitle>
-						<Calendar className="h-4 w-4 text-muted-foreground" />
+				{/* Upcoming Trips Card */}
+				<Card className="p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+						<CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+							Upcoming
+						</CardTitle>
+						<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+							<Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">0</div>
-						<p className="text-xs text-muted-foreground">
-							No upcoming trips
+					<CardContent className="p-0 pt-1">
+						<div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">0</div>
+						<p className="text-xs text-muted-foreground leading-tight">
+							Trips
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Trips</CardTitle>
-						<Car className="h-4 w-4 text-muted-foreground" />
+				{/* Total Trips Card - Hidden on mobile, spans full width on larger screens */}
+				<Card className="hidden lg:block p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation col-span-2 lg:col-span-1">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+						<CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+							Total Trips
+						</CardTitle>
+						<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+							<Car className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">0</div>
-						<p className="text-xs text-muted-foreground">
-							Completed trips
+					<CardContent className="p-0 pt-1">
+						<div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">0</div>
+						<p className="text-xs text-muted-foreground flex items-center gap-1">
+							<TrendingUp className="h-2 w-2" />
+							Completed
 						</p>
+					</CardContent>
+				</Card>
+
+				{/* Mobile-specific Additional Stats */}
+				<Card className="lg:hidden col-span-2 p-3 sm:p-4 hover:shadow-md transition-shadow touch-manipulation">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-0">
+						<CardTitle className="text-sm font-medium text-foreground">
+							Travel Summary
+						</CardTitle>
+						<Activity className="h-4 w-4 text-muted-foreground" />
+					</CardHeader>
+					<CardContent className="p-0">
+						<div className="grid grid-cols-3 gap-3 text-center">
+							<div>
+								<div className="text-lg font-bold text-foreground">0</div>
+								<p className="text-xs text-muted-foreground">Total</p>
+							</div>
+							<div>
+								<div className="text-lg font-bold text-green-600">5.0</div>
+								<p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+									<Star className="h-2 w-2 fill-current" />
+									Rating
+								</p>
+							</div>
+							<div>
+								<div className="text-lg font-bold text-blue-600">$0</div>
+								<p className="text-xs text-muted-foreground">Spent</p>
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 			</div>
 
-			{/* Quick Actions */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto">
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center space-x-2">
-							<Package className="h-5 w-5" />
-							<span>Browse Luxury Services</span>
-						</CardTitle>
-						<CardDescription>
-							Discover our curated luxury travel services and book your next journey.
-						</CardDescription>
+			{/* Quick Actions - Mobile-First Design */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+				{/* Browse Services Card */}
+				<Card className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
+					<CardHeader className="pb-3">
+						<div className="flex items-start space-x-3">
+							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+								<Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<CardTitle className="text-lg sm:text-xl font-bold text-foreground leading-tight">
+									Luxury Services
+								</CardTitle>
+								<CardDescription className="text-sm text-muted-foreground mt-1 leading-relaxed">
+									Premium experiences
+								</CardDescription>
+							</div>
+						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="space-y-3 md:space-y-4">
-							<p className="text-sm text-muted-foreground leading-relaxed">
-								Choose from our premium services including airport transfers, 
-								city tours, wine country experiences, and special event transportation.
+						<div className="space-y-3">
+							<p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+								Airport transfers, city tours, wine country experiences, and event transportation.
 							</p>
-							<Button className="w-full h-11" asChild>
+							<Button className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium group-hover:bg-primary/90 transition-colors" asChild>
 								<a href="/customer/services">
 									<Package className="h-4 w-4 mr-2" />
 									Browse Services
@@ -89,26 +140,32 @@ function CustomerDashboard() {
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center space-x-2">
-							<Car className="h-5 w-5" />
-							<span>Custom Car Booking</span>
-						</CardTitle>
-						<CardDescription>
-							Get an instant quote for a custom car booking with flexible routes.
-						</CardDescription>
+				{/* Custom Quote Card */}
+				<Card className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
+					<CardHeader className="pb-3">
+						<div className="flex items-start space-x-3">
+							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+								<Car className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<CardTitle className="text-lg sm:text-xl font-bold text-foreground leading-tight">
+									Custom Quote
+								</CardTitle>
+								<CardDescription className="text-sm text-muted-foreground mt-1 leading-relaxed">
+									Flexible bookings
+								</CardDescription>
+							</div>
+						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="space-y-3 md:space-y-4">
-							<p className="text-sm text-muted-foreground leading-relaxed">
-								Need something specific? Create a custom booking with multiple stops, 
-								flexible timing, and personalized service requirements.
+						<div className="space-y-3">
+							<p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+								Custom routes, multiple stops, flexible timing, and personalized requirements.
 							</p>
-							<Button className="w-full h-11" variant="outline" asChild>
+							<Button className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium" variant="outline" asChild>
 								<a href="/customer/instant-quote">
 									<Car className="h-4 w-4 mr-2" />
-									Get Instant Quote
+									Get Quote
 								</a>
 							</Button>
 						</div>
@@ -116,29 +173,49 @@ function CustomerDashboard() {
 				</Card>
 			</div>
 
-			{/* Recent Bookings */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Recent Bookings</CardTitle>
-					<CardDescription>
-						Your latest bookings and their current status.
-					</CardDescription>
+			{/* Recent Activity - Mobile Optimized */}
+			<Card className="hover:shadow-md transition-shadow">
+				<CardHeader className="pb-4">
+					<div className="flex items-center justify-between">
+						<div>
+							<CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+								<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center">
+									<Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+								</div>
+								Recent Activity
+							</CardTitle>
+							<CardDescription className="text-sm text-muted-foreground mt-1">
+								Your latest bookings and status
+							</CardDescription>
+						</div>
+						<Button variant="ghost" size="sm" className="text-xs sm:text-sm" asChild>
+							<a href="/customer/bookings">View All</a>
+						</Button>
+					</div>
 				</CardHeader>
 				<CardContent>
-					<div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
-						<div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-							<Calendar className="h-6 w-6 text-muted-foreground" />
+					<div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+						<div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center mb-4 sm:mb-6">
+							<Calendar className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
 						</div>
-						<h3 className="font-semibold mb-2 text-base">No bookings yet</h3>
-						<p className="text-muted-foreground text-sm mb-4 max-w-sm leading-relaxed">
-							Your booking history will appear here once you make your first booking.
+						<h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">No bookings yet</h3>
+						<p className="text-muted-foreground text-sm sm:text-base mb-6 sm:mb-8 max-w-sm leading-relaxed px-4">
+							Start your luxury travel journey by booking your first service.
 						</p>
-						<Button variant="outline" className="h-10" asChild>
-							<a href="/customer/services">
-								<Package className="h-4 w-4 mr-2" />
-								Browse Services
-							</a>
-						</Button>
+						<div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+							<Button className="flex-1 h-11 sm:h-12 text-sm sm:text-base font-medium" asChild>
+								<a href="/customer/services">
+									<Package className="h-4 w-4 mr-2" />
+									Book Service
+								</a>
+							</Button>
+							<Button variant="outline" className="flex-1 h-11 sm:h-12 text-sm sm:text-base font-medium" asChild>
+								<a href="/customer/instant-quote">
+									<Car className="h-4 w-4 mr-2" />
+									Get Quote
+								</a>
+							</Button>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
