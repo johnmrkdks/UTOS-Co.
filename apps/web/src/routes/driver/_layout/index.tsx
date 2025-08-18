@@ -2,28 +2,22 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { Progress } from "@workspace/ui/components/progress";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
+import { DriverStatusAccordion } from '@/features/driver/_components/driver-status-accordion';
 import {
 	CarIcon,
 	DollarSignIcon,
 	ClockIcon,
 	StarIcon,
 	TrendingUpIcon,
-	AlertCircleIcon,
 	CheckCircleIcon,
 	UserIcon,
 	ArrowRightIcon,
 	CalendarIcon,
 	MapPinIcon,
-	PhoneIcon,
-	ShieldCheckIcon,
-	FileTextIcon,
-	BellIcon,
 	ActivityIcon,
-	TargetIcon,
-	AwardIcon
+	TargetIcon
 } from "lucide-react";
 
 export const Route = createFileRoute('/driver/_layout/')({
@@ -120,14 +114,14 @@ function DriverDashboardComponent() {
 	}
 
 	return (
-		<div className="space-y-4 lg:space-y-6">
+		<div className="space-y-3 lg:space-y-4">
 			{/* Welcome Header */}
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 				<div>
-					<h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+					<h1 className="text-xl lg:text-2xl font-bold text-gray-900">
 						Welcome back, {session?.user?.name}! 👋
 					</h1>
-					<p className="text-gray-600 mt-1 text-sm lg:text-base">
+					<p className="text-gray-600 mt-1 text-sm">
 						{isFullyOnboarded 
 							? "You're all set! Start accepting rides and earning money." 
 							: "Let's get your driver profile ready for action."
@@ -136,261 +130,92 @@ function DriverDashboardComponent() {
 				</div>
 				{isFullyOnboarded && (
 					<div className="flex items-center gap-2">
-						<Badge variant="default" className="bg-green-100 text-green-800 border-green-300 px-3 py-1">
-							<CheckCircleIcon className="h-4 w-4 mr-1" />
+						<Badge variant="default" className="bg-green-100 text-green-800 border-green-300 px-3 py-1 text-xs">
+							<CheckCircleIcon className="h-3 w-3 mr-1" />
 							Active Driver
 						</Badge>
 					</div>
 				)}
 			</div>
 
-			{/* Enhanced Driver Status Card */}
-			{!isFullyOnboarded && (
-				<Card className={`${
-					currentStage.stage === 'not_registered' ? 'border-red-200 bg-red-50' :
-					currentStage.stage === 'profile_incomplete' ? 'border-yellow-200 bg-yellow-50' :
-					currentStage.stage === 'pending_approval' ? 'border-blue-200 bg-blue-50' :
-					'border-green-200 bg-green-50'
-				}`}>
-					<CardHeader>
+			{/* Driver Status Accordion */}
+			<DriverStatusAccordion 
+				currentStage={currentStage}
+				driverStatus={driverStatus}
+				isFullyOnboarded={isFullyOnboarded}
+			/>
+
+			{/* Compact Stats Cards */}
+			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+				<Card className="p-3">
+					<CardHeader className="p-0 pb-2">
 						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-3">
-								<div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-									currentStage.stage === 'not_registered' ? 'bg-red-100' :
-									currentStage.stage === 'profile_incomplete' ? 'bg-yellow-100' :
-									currentStage.stage === 'pending_approval' ? 'bg-blue-100' :
-									'bg-green-100'
-								}`}>
-									{currentStage.stage === 'not_registered' ? <AlertCircleIcon className="h-6 w-6 text-red-600" /> :
-									 currentStage.stage === 'profile_incomplete' ? <UserIcon className="h-6 w-6 text-yellow-600" /> :
-									 currentStage.stage === 'pending_approval' ? <ClockIcon className="h-6 w-6 text-blue-600" /> :
-									 <ShieldCheckIcon className="h-6 w-6 text-green-600" />}
-								</div>
-								<div>
-									<CardTitle className={
-										currentStage.stage === 'not_registered' ? 'text-red-900' :
-										currentStage.stage === 'profile_incomplete' ? 'text-yellow-900' :
-										currentStage.stage === 'pending_approval' ? 'text-blue-900' :
-										'text-green-900'
-									}>
-										{currentStage.stage === 'not_registered' ? 'Driver Profile Required' :
-										 currentStage.stage === 'profile_incomplete' ? 'Complete Your Profile' :
-										 currentStage.stage === 'pending_approval' ? 'Application Under Review' :
-										 'Almost Ready to Drive!'}
-									</CardTitle>
-									<CardDescription className={
-										currentStage.stage === 'not_registered' ? 'text-red-700' :
-										currentStage.stage === 'profile_incomplete' ? 'text-yellow-700' :
-										currentStage.stage === 'pending_approval' ? 'text-blue-700' :
-										'text-green-700'
-									}>
-										{currentStage.stage === 'not_registered' ? 'Create your driver profile to get started' :
-										 currentStage.stage === 'profile_incomplete' ? 'Add required information to submit for approval' :
-										 currentStage.stage === 'pending_approval' ? 'Our team is reviewing your application' :
-										 'Activate your account to start accepting rides'}
-									</CardDescription>
-								</div>
-							</div>
-							<Badge variant="outline" className={`${
-								currentStage.stage === 'not_registered' ? 'bg-red-100 text-red-800 border-red-300' :
-								currentStage.stage === 'profile_incomplete' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' :
-								currentStage.stage === 'pending_approval' ? 'bg-blue-100 text-blue-800 border-blue-300' :
-								'bg-green-100 text-green-800 border-green-300'
-							} px-3 py-1 font-medium`}>
-								{currentStage.progress}% Complete
-							</Badge>
+							<span className="text-xs font-medium text-gray-600">Total Earnings</span>
+							<DollarSignIcon className="h-3 w-3 text-green-600" />
 						</div>
 					</CardHeader>
-					<CardContent className="space-y-6">
-						<Progress value={currentStage.progress} className="w-full h-2" />
-
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							{/* Profile Status */}
-							<div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-								<div className="flex items-center gap-3">
-									{driverStatus.profileComplete ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
-									) : (
-										<AlertCircleIcon className="h-5 w-5 text-yellow-600" />
-									)}
-									<div>
-										<p className="font-medium text-sm">Profile Complete</p>
-										<p className="text-xs text-gray-600">License & Contact Info</p>
-									</div>
-								</div>
-								<Badge variant={driverStatus.profileComplete ? "default" : "secondary"} className={
-									driverStatus.profileComplete ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-								}>
-									{driverStatus.profileComplete ? "Done" : "Required"}
-								</Badge>
-							</div>
-
-							{/* Admin Approval Status */}
-							<div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-								<div className="flex items-center gap-3">
-									{driverStatus.adminApproved ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
-									) : (
-										<ClockIcon className="h-5 w-5 text-blue-600" />
-									)}
-									<div>
-										<p className="font-medium text-sm">Admin Approval</p>
-										<p className="text-xs text-gray-600">Background Check</p>
-									</div>
-								</div>
-								<Badge variant={driverStatus.adminApproved ? "default" : "outline"} className={
-									driverStatus.adminApproved ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700 border-blue-300"
-								}>
-									{driverStatus.adminApproved ? "Approved" : "Pending"}
-								</Badge>
-							</div>
-
-							{/* Documents Status */}
-							<div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-								<div className="flex items-center gap-3">
-									{driverStatus.documentsUploaded ? (
-										<CheckCircleIcon className="h-5 w-5 text-green-600" />
-									) : (
-										<FileTextIcon className="h-5 w-5 text-gray-400" />
-									)}
-									<div>
-										<p className="font-medium text-sm">Documents</p>
-										<p className="text-xs text-gray-600">License & Insurance</p>
-									</div>
-								</div>
-								<Badge variant="outline" className="bg-gray-100 text-gray-600">
-									{driverStatus.documentsUploaded ? "Uploaded" : "Optional"}
-								</Badge>
-							</div>
-						</div>
-
-						{/* Action Buttons */}
-						<div className="flex flex-col sm:flex-row gap-3">
-							{currentStage.stage === 'profile_incomplete' && (
-								<Button 
-									className="bg-yellow-600 hover:bg-yellow-700 text-white"
-									onClick={() => navigate({ to: "/driver/onboarding" })}
-								>
-									<UserIcon className="h-4 w-4 mr-2" />
-									Complete Profile Now
-								</Button>
-							)}
-							{currentStage.stage === 'approved_inactive' && (
-								<Button 
-									className="bg-green-600 hover:bg-green-700 text-white"
-									onClick={() => {/* TODO: Implement activate account */}}
-								>
-									<CarIcon className="h-4 w-4 mr-2" />
-									Activate & Go Online
-								</Button>
-							)}
-							<Button 
-								variant="outline"
-								onClick={() => navigate({ to: "/driver/profile" })}
-							>
-								<UserIcon className="h-4 w-4 mr-2" />
-								View Profile
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
-			)}
-
-			{/* Enhanced Stats Cards */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-				<Card className="relative overflow-hidden">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-gray-700">Total Earnings</CardTitle>
-						<div className="p-2 bg-green-100 rounded-full">
-							<DollarSignIcon className="h-4 w-4 text-green-600" />
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="text-3xl font-bold text-gray-900">
+					<CardContent className="p-0">
+						<div className="text-lg font-bold text-gray-900">
 							${driverStats.totalEarnings.toFixed(0)}
 						</div>
-						<p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-							<TrendingUpIcon className="h-3 w-3" />
-							+${driverStats.thisWeekEarnings.toFixed(0)} this week
+						<p className="text-xs text-green-600 flex items-center gap-1">
+							<TrendingUpIcon className="h-2 w-2" />
+							+${driverStats.thisWeekEarnings.toFixed(0)} week
 						</p>
-						{!isFullyOnboarded && (
-							<div className="text-xs text-gray-500 mt-2">
-								💡 Complete setup to start earning
-							</div>
-						)}
 					</CardContent>
-					<div className="absolute top-0 right-0 w-20 h-20 bg-green-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 
-				<Card className="relative overflow-hidden">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-gray-700">Total Trips</CardTitle>
-						<div className="p-2 bg-blue-100 rounded-full">
-							<CarIcon className="h-4 w-4 text-blue-600" />
+				<Card className="p-3">
+					<CardHeader className="p-0 pb-2">
+						<div className="flex items-center justify-between">
+							<span className="text-xs font-medium text-gray-600">Total Trips</span>
+							<CarIcon className="h-3 w-3 text-blue-600" />
 						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="text-3xl font-bold text-gray-900">{driverStats.totalTrips}</div>
-						<p className="text-sm text-blue-600 flex items-center gap-1 mt-1">
-							<ActivityIcon className="h-3 w-3" />
-							+{driverStats.thisWeekTrips} this week
+					<CardContent className="p-0">
+						<div className="text-lg font-bold text-gray-900">{driverStats.totalTrips}</div>
+						<p className="text-xs text-blue-600 flex items-center gap-1">
+							<ActivityIcon className="h-2 w-2" />
+							+{driverStats.thisWeekTrips} week
 						</p>
-						{driverStats.totalTrips === 0 && (
-							<div className="text-xs text-gray-500 mt-2">
-								🚗 Ready for your first ride?
-							</div>
-						)}
 					</CardContent>
-					<div className="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 
-				<Card className="relative overflow-hidden">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-gray-700">Average Rating</CardTitle>
-						<div className="p-2 bg-yellow-100 rounded-full">
-							<StarIcon className="h-4 w-4 text-yellow-600" />
+				<Card className="p-3">
+					<CardHeader className="p-0 pb-2">
+						<div className="flex items-center justify-between">
+							<span className="text-xs font-medium text-gray-600">Rating</span>
+							<StarIcon className="h-3 w-3 text-yellow-600" />
 						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="text-3xl font-bold text-gray-900 flex items-center gap-1">
+					<CardContent className="p-0">
+						<div className="text-lg font-bold text-gray-900 flex items-center gap-1">
 							{driverStats.averageRating.toFixed(1)}
-							<StarIcon className="h-5 w-5 text-yellow-500 fill-current" />
+							<StarIcon className="h-3 w-3 text-yellow-500 fill-current" />
 						</div>
-						<p className="text-sm text-gray-600 mt-1">
+						<p className="text-xs text-gray-600">
 							{driverStats.completedTrips > 0 
-								? `Based on ${driverStats.completedTrips} trips`
+								? `${driverStats.completedTrips} trips`
 								: 'No ratings yet'
 							}
 						</p>
-						{driverStats.averageRating >= 4.8 && (
-							<div className="text-xs text-yellow-600 mt-2">
-								🌟 Excellent service!
-							</div>
-						)}
 					</CardContent>
-					<div className="absolute top-0 right-0 w-20 h-20 bg-yellow-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 
-				<Card className="relative overflow-hidden">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-gray-700">Active Hours</CardTitle>
-						<div className="p-2 bg-purple-100 rounded-full">
-							<ClockIcon className="h-4 w-4 text-purple-600" />
+				<Card className="p-3">
+					<CardHeader className="p-0 pb-2">
+						<div className="flex items-center justify-between">
+							<span className="text-xs font-medium text-gray-600">Hours</span>
+							<ClockIcon className="h-3 w-3 text-purple-600" />
 						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="text-3xl font-bold text-gray-900">{Math.floor(driverStats.activeHours)}h</div>
-						<p className="text-sm text-purple-600 flex items-center gap-1 mt-1">
-							<TargetIcon className="h-3 w-3" />
+					<CardContent className="p-0">
+						<div className="text-lg font-bold text-gray-900">{Math.floor(driverStats.activeHours)}h</div>
+						<p className="text-xs text-purple-600 flex items-center gap-1">
+							<TargetIcon className="h-2 w-2" />
 							This month
 						</p>
-						{driverStats.activeHours > 40 && (
-							<div className="text-xs text-purple-600 mt-2">
-								⚡ Great dedication!
-							</div>
-						)}
 					</CardContent>
-					<div className="absolute top-0 right-0 w-20 h-20 bg-purple-50 rounded-full transform translate-x-8 -translate-y-8"></div>
 				</Card>
 			</div>
 

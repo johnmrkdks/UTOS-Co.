@@ -275,8 +275,9 @@ export function DataTable<TData, TValue>({
 				/>
 			)}
 
-			<div className={cn("bg-white", tableClassName)}>
-				<Table aria-label={ariaLabel} aria-describedby={ariaDescribedBy}>
+			<div className={cn("rounded-md border bg-white", tableClassName)}>
+				<div className="overflow-x-auto">
+					<Table aria-label={ariaLabel} aria-describedby={ariaDescribedBy}>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
@@ -336,6 +337,7 @@ export function DataTable<TData, TValue>({
 						)}
 					</TableBody>
 				</Table>
+				</div>
 			</div>
 
 			{shouldShowPagination && (

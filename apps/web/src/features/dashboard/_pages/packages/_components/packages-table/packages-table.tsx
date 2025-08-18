@@ -68,7 +68,7 @@ export function PackagesTable() {
 				<DataTableColumnHeader column={column} title="Name" />
 			),
 			cell: ({ row }) => (
-				<div className="font-medium">{row.getValue("name")}</div>
+				<div className="font-medium min-w-[150px]">{row.getValue("name")}</div>
 			),
 		},
 		{
@@ -77,7 +77,7 @@ export function PackagesTable() {
 				<DataTableColumnHeader column={column} title="Description" />
 			),
 			cell: ({ row }) => (
-				<div className="max-w-[300px] truncate" title={row.getValue("description")}>
+				<div className="min-w-[200px] max-w-[300px] truncate" title={row.getValue("description")}>
 					{row.getValue("description")}
 				</div>
 			),
@@ -90,7 +90,7 @@ export function PackagesTable() {
 			),
 			cell: ({ row }) => {
 				const fixedPrice = row.getValue("fixedPrice") as number;
-				return <div>${(fixedPrice ? fixedPrice / 100 : 0).toFixed(2)}</div>;
+				return <div className="min-w-[100px] text-right font-mono">${(fixedPrice ? fixedPrice / 100 : 0).toFixed(2)}</div>;
 			},
 		},
 		{
@@ -101,9 +101,11 @@ export function PackagesTable() {
 			cell: ({ row }) => {
 				const pkg = row.original;
 				return (
-					<Badge variant={pkg.isAvailable ? "default" : "secondary"}>
-						{pkg.isAvailable ? "Available" : "Unavailable"}
-					</Badge>
+					<div className="min-w-[120px]">
+						<Badge variant={pkg.isAvailable ? "default" : "secondary"}>
+							{pkg.isAvailable ? "Available" : "Unavailable"}
+						</Badge>
+					</div>
 				);
 			},
 			filterFn: (row, id, value) => {
@@ -117,12 +119,13 @@ export function PackagesTable() {
 			),
 			cell: ({ row }) => {
 				const createdAt = row.getValue("createdAt") as string;
-				return <div>{new Date(createdAt).toLocaleDateString()}</div>;
+				return <div className="min-w-[100px] text-sm text-muted-foreground">{new Date(createdAt).toLocaleDateString()}</div>;
 			},
 		},
 		{
 			id: "actions",
 			header: "Actions",
+			size: 80,
 			cell: ({ row }) => {
 				const pkg = row.original;
 				

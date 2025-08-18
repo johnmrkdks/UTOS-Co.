@@ -41,30 +41,30 @@ function DriverLayoutComponent() {
 
 	// Navigation items for bottom navigation (primary items only)
 	const navigationItems = [
-		{ 
-			name: "Dashboard", 
-			href: "/driver", 
+		{
+			name: "Dashboard",
+			href: "/driver",
 			icon: LayoutDashboardIcon,
 			active: location.pathname === "/driver",
 			primary: true
 		},
-		{ 
-			name: "My Trips", 
-			href: "/driver/trips", 
+		{
+			name: "My Trips",
+			href: "/driver/trips",
 			icon: CarIcon,
 			active: location.pathname === "/driver/trips",
 			primary: true
 		},
-		{ 
-			name: "Profile", 
-			href: "/driver/profile", 
+		{
+			name: "Profile",
+			href: "/driver/profile",
 			icon: UserIcon,
 			active: location.pathname === "/driver/profile",
 			primary: true
 		},
-		{ 
-			name: "Settings", 
-			href: "/driver/settings", 
+		{
+			name: "Settings",
+			href: "/driver/settings",
 			icon: SettingsIcon,
 			active: location.pathname === "/driver/settings",
 			primary: true
@@ -95,7 +95,7 @@ function DriverLayoutComponent() {
 		isApproved: Boolean(currentDriver?.isApproved),
 		isActive: Boolean(currentDriver?.isActive),
 	};
-	
+
 	const needsOnboarding = !driverStatus.profileComplete;
 
 	return (
@@ -158,9 +158,9 @@ function DriverLayoutComponent() {
 													<h2 className="text-lg font-semibold">Driver Portal</h2>
 												</div>
 											</div>
-											<Button 
-												variant="ghost" 
-												size="sm" 
+											<Button
+												variant="ghost"
+												size="sm"
 												onClick={() => setIsMobileMenuOpen(false)}
 											>
 												<XIcon className="h-4 w-4" />
@@ -342,9 +342,9 @@ function DriverLayoutComponent() {
 			</div>
 
 			{/* Bottom Navigation for Mobile (Primary Items) */}
-			<div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200">
-				<nav className="container mx-auto px-2 py-2">
-					<div className="flex justify-around">
+			<div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 safe-area-pb">
+				<nav className="px-3 py-2">
+					<div className="flex justify-around items-center">
 						{navigationItems.filter(item => item.primary).map((item) => {
 							const Icon = item.icon;
 							return (
@@ -352,16 +352,16 @@ function DriverLayoutComponent() {
 									key={item.name}
 									to={item.href}
 									className={cn(
-										"flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1",
-										item.active 
-											? "text-primary" 
-											: "text-gray-500 hover:text-gray-700"
+										"flex flex-col items-center justify-center p-3 rounded-xl transition-all min-w-0 flex-1 max-w-20 touch-manipulation",
+										item.active
+											? "text-primary bg-primary/10"
+											: "text-gray-500 hover:text-gray-700 active:bg-gray-100"
 									)}
 								>
-									<Icon className="h-5 w-5 mb-1" />
-									<span className="text-xs font-medium truncate">
-										{item.name === "My Trips" ? "Trips" : 
-										 item.name}
+									<Icon className="h-6 w-6 mb-1" />
+									<span className="text-xs font-medium truncate leading-tight">
+										{item.name === "My Trips" ? "Trips" :
+											item.name}
 									</span>
 								</Link>
 							);
@@ -369,7 +369,7 @@ function DriverLayoutComponent() {
 					</div>
 				</nav>
 			</div>
-			
+
 			<SignOutConfirmationDialog
 				isOpen={signOutWithConfirmation.isDialogOpen}
 				onClose={signOutWithConfirmation.closeSignOutDialog}
