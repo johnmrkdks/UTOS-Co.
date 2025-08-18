@@ -26,6 +26,7 @@
 		"@types/react-dom": "catalog:",
 		"@vitejs/plugin-react": "^4.3.4",
 		"postcss": "catalog:",
+		"react-scan": "^0.4.3",
 		"server": "workspace:*",
 		"tailwindcss": "catalog:",
 		"vite": "^6.2.2",

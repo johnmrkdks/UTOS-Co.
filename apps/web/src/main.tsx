@@ -1,4 +1,5 @@
 import "@/styles/globals.css"
+import { scan } from "react-scan";
 
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
@@ -8,6 +9,10 @@ import { routeTree } from "./routeTree.gen";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/trpc";
 import { StrictMode } from "react";
+
+scan({
+	enabled: true,
+});
 
 const router = createRouter({
 	routeTree,

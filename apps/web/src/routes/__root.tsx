@@ -55,7 +55,9 @@ function RootComponent() {
 			<Toaster richColors />
 			<TanStackDevtools
 				config={{
-					position: "bottom-left"
+					position: "bottom-left",
+					requireUrlFlag: true,
+					urlFlag: "https://localhost:3001",
 				}}
 				plugins={[
 					{
