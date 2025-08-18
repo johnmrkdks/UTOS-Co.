@@ -282,7 +282,10 @@ export function BookingsListTable({ bookingType, status, filters }: BookingsList
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>Actions</DropdownMenuLabel>
 							<DropdownMenuItem
-								onClick={() => openBookingDetailsDialog(booking.id)}
+								onClick={() => {
+									console.log("🔍 Opening booking details for ID:", booking.id);
+									openBookingDetailsDialog(booking.id);
+								}}
 							>
 								<Eye className="mr-2 h-4 w-4" />
 								View details

@@ -28,10 +28,13 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	openCreateCustomBookingDialog: () => set({ isCreateCustomBookingDialogOpen: true }),
 	closeCreateCustomBookingDialog: () => set({ isCreateCustomBookingDialogOpen: false }),
 	
-	openBookingDetailsDialog: (bookingId: string) => set({ 
-		isBookingDetailsDialogOpen: true, 
-		selectedBookingId: bookingId 
-	}),
+	openBookingDetailsDialog: (bookingId: string) => {
+		console.log("🚀 Modal provider - opening booking details dialog for ID:", bookingId);
+		set({ 
+			isBookingDetailsDialogOpen: true, 
+			selectedBookingId: bookingId 
+		});
+	},
 	closeBookingDetailsDialog: () => set({ 
 		isBookingDetailsDialogOpen: false, 
 		selectedBookingId: null 

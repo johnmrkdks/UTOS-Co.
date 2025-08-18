@@ -13,8 +13,7 @@ export function useGetAvailableDriversQuery(options: UseGetAvailableDriversQuery
 	const { timeSlot, enabled = true } = options;
 
 	return useQuery({
-		queryKey: ["drivers", "available", timeSlot],
-		queryFn: () => trpc.drivers.available.query({ timeSlot }),
+		...trpc.drivers.available.queryOptions({ timeSlot }),
 		enabled,
 	});
 }

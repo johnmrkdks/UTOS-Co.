@@ -3,14 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
-import { 
-	Package, 
-	Car, 
-	Users, 
-	Calendar, 
-	DollarSign, 
-	TrendingUp, 
-	Activity, 
+import {
+	Package,
+	Car,
+	Users,
+	Calendar,
+	DollarSign,
+	TrendingUp,
+	Activity,
 	Clock,
 	Star,
 	MapPin,
@@ -88,7 +88,7 @@ function AdminDashboard() {
 			icon: Users,
 			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
 			iconBg: 'bg-orange-500',
-			changeText: `${stats.activeDrivers} online`,
+			changeText: `${stats.activeDrivers} active`,
 			changeType: 'positive',
 			showTrend: false,
 			showIcon: true,
@@ -100,8 +100,8 @@ function AdminDashboard() {
 		{
 			id: 1,
 			type: 'booking',
-			title: 'New booking from Sarah Chen',
-			description: 'Airport transfer - Premium service',
+			title: 'Lorem ipsum dolor sit amet',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 			time: '5 min ago',
 			status: 'pending',
 			amount: 125.50
@@ -109,8 +109,8 @@ function AdminDashboard() {
 		{
 			id: 2,
 			type: 'driver',
-			title: 'Michael Johnson completed trip',
-			description: 'City tour service completed',
+			title: 'Lorem ipsum dolor sit amet',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 			time: '12 min ago',
 			status: 'completed',
 			amount: 89.00
@@ -118,8 +118,8 @@ function AdminDashboard() {
 		{
 			id: 3,
 			type: 'booking',
-			title: 'Emma Wilson booking confirmed',
-			description: 'Wine country experience',
+			title: 'Lorem ipsum dolor sit amet',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 			time: '25 min ago',
 			status: 'confirmed',
 			amount: 245.00
@@ -138,22 +138,16 @@ function AdminDashboard() {
 						Monitor and manage your luxury chauffeur service
 					</p>
 				</div>
-				<div className="flex items-center gap-2">
-					<Badge variant="default" className="bg-green-100 text-green-800 border-green-300 px-3 py-1">
-						<Activity className="h-3 w-3 mr-1" />
-						System Online
-					</Badge>
-				</div>
 			</div>
 
 			{/* Key Metrics - Mobile First Grid */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 				{adminAnalyticsData.map((data) => (
-					<AnalyticsCard 
-						key={data.id} 
-						data={data} 
-						view="compact" 
-						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation" 
+					<AnalyticsCard
+						key={data.id}
+						data={data}
+						view="compact"
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
 					/>
 				))}
 			</div>
@@ -178,9 +172,9 @@ function AdminDashboard() {
 							<span className="text-2xl sm:text-3xl font-bold text-foreground">{stats.avgRating}</span>
 							<div className="flex items-center">
 								{[...Array(5)].map((_, i) => (
-									<Star 
-										key={i} 
-										className={`h-4 w-4 ${i < Math.floor(stats.avgRating) ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`} 
+									<Star
+										key={i}
+										className={`h-4 w-4 ${i < Math.floor(stats.avgRating) ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`}
 									/>
 								))}
 							</div>
@@ -256,9 +250,9 @@ function AdminDashboard() {
 								<CardDescription className="text-sm hidden sm:block">Latest system events and updates</CardDescription>
 							</div>
 						</div>
-						<Button variant="ghost" size="sm" className="text-xs sm:text-sm" asChild>
-							<a href="/dashboard/analytics">View Reports</a>
-						</Button>
+						{/* <Button variant="ghost" size="sm" className="text-xs sm:text-sm" asChild> */}
+						{/* 	<a href="/dashboard/analytics">View Reports</a> */}
+						{/* </Button> */}
 					</div>
 				</CardHeader>
 				<CardContent>
@@ -266,10 +260,9 @@ function AdminDashboard() {
 						{recentActivity.map((activity) => (
 							<div key={activity.id} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/30 transition-all duration-200 hover:shadow-sm">
 								<div className="flex items-center gap-3 flex-1 min-w-0">
-									<div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-										activity.type === 'booking' ? 'bg-blue-100' : 
+									<div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'booking' ? 'bg-blue-100' :
 										activity.type === 'driver' ? 'bg-green-100' : 'bg-muted'
-									}`}>
+										}`}>
 										{activity.type === 'booking' ? (
 											<Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
 										) : (
@@ -279,14 +272,13 @@ function AdminDashboard() {
 									<div className="flex-1 min-w-0">
 										<div className="flex items-center gap-2 mb-1 flex-wrap">
 											<h4 className="font-medium text-foreground text-sm sm:text-base truncate">{activity.title}</h4>
-											<Badge 
-												variant={activity.status === 'completed' ? 'default' : 'secondary'} 
-												className={`text-xs px-2 py-0.5 ${
-													activity.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
+											<Badge
+												variant={activity.status === 'completed' ? 'default' : 'secondary'}
+												className={`text-xs px-2 py-0.5 ${activity.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
 													activity.status === 'confirmed' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-													activity.status === 'pending' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-													'bg-muted text-muted-foreground'
-												}`}
+														activity.status === 'pending' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+															'bg-muted text-muted-foreground'
+													}`}
 											>
 												{activity.status}
 											</Badge>
