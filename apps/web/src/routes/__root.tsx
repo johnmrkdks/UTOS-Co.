@@ -1,14 +1,15 @@
 import { Toaster } from "@workspace/ui/components/sonner";
 import type { trpc } from "@/trpc";
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
 	HeadContent,
 	Outlet,
 	createRootRouteWithContext,
 	useRouterState,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { TanStackDevtools } from '@tanstack/react-devtools'
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { ModalProvider } from "@/hooks/use-modal";
 
 export type RouterAppContext = {
@@ -41,6 +42,8 @@ function RootComponent() {
 	const isFetching = useRouterState({
 		select: (s) => s.isLoading,
 	});
+	type ModifierKey = 'Alt' | 'Control' | 'Meta' | 'Shift';
+	type KeyboardKey = ModifierKey | (string & {});
 
 	return (
 		<ModalProvider>
@@ -50,8 +53,20 @@ function RootComponent() {
 				<Outlet />
 			</div>
 			<Toaster richColors />
-			<TanStackRouterDevtools position="bottom-left" />
-			<ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+			<TanStackDevtools
+				config={{
+					position: "bottom-left"
+				}}
+				plugins={[
+					{
+						name: 'TanStack Query',
+						render: <ReactQueryDevtoolsPanel />,
+					},
+					{
+						name: 'TanStack Router',
+						render: <TanStackRouterDevtoolsPanel />,
+					},
+				]} />
 		</ModalProvider>
 	);
 }
