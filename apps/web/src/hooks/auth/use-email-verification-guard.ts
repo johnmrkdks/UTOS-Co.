@@ -33,7 +33,7 @@ export function useEmailVerificationGuard(options: UseEmailVerificationGuardOpti
 					description: customMessage,
 				});
 			}
-			navigate({ to: "/driver/verify-email" });
+			navigate({ to: "/driver/settings" });
 		}
 	}, [user, isEmailVerified, redirectOnUnverified, customMessage, showToast, navigate]);
 
@@ -43,7 +43,7 @@ export function useEmailVerificationGuard(options: UseEmailVerificationGuardOpti
 				description: `Please verify your email address to ${action}`,
 				action: {
 					label: "Verify Email",
-					onClick: () => navigate({ to: "/driver/verify-email" }),
+					onClick: () => navigate({ to: "/driver/settings" }),
 				},
 			});
 			return false;
@@ -56,7 +56,7 @@ export function useEmailVerificationGuard(options: UseEmailVerificationGuardOpti
 			description: message || "Verify your email to unlock all driver features",
 			action: {
 				label: "Verify Now",
-				onClick: () => navigate({ to: "/driver/verify-email" }),
+				onClick: () => navigate({ to: "/driver/settings" }),
 			},
 		});
 	};
@@ -78,7 +78,7 @@ export function useEmailVerificationGuard(options: UseEmailVerificationGuardOpti
 						description: message,
 						action: {
 							label: "Verify Email",
-							onClick: () => navigate({ to: "/driver/verify-email" }),
+							onClick: () => navigate({ to: "/driver/settings" }),
 						},
 					});
 				}

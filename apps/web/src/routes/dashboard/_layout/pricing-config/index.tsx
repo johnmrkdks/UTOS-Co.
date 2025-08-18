@@ -3,10 +3,11 @@ import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/ui/components/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { PricingConfigForm } from "@/features/dashboard/_pages/pricing-config/_components/pricing-config-form";
 import { PricingConfigTable } from "@/features/dashboard/_pages/pricing-config/_components/pricing-config-table";
 import { QuoteTester } from "@/features/dashboard/_pages/pricing-config/_components/quote-tester";
-import { Settings, Plus, Calculator } from "lucide-react";
+import { Settings, Plus, Calculator, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { useGetPricingConfigsQuery } from "@/features/dashboard/_pages/pricing-config/_hooks/query/use-get-pricing-configs-query";
 import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
@@ -18,6 +19,63 @@ export const Route = createFileRoute('/dashboard/_layout/pricing-config/')({
 function RouteComponent() {
 	const [showCreateConfig, setShowCreateConfig] = useState(false);
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
+
+	const totalConfigs = pricingConfigsQuery.data?.totalItems || 0;
+	const activeConfigs = pricingConfigsQuery.data?.items?.filter((config: any) => config.isActive).length || 0;
+	const avgBaseFare = ((pricingConfigsQuery.data?.items?.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) || 0) / (pricingConfigsQuery.data?.items?.length || 1));
+	const avgPerKm = ((pricingConfigsQuery.data?.items?.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) || 0) / (pricingConfigsQuery.data?.items?.length || 1));
+
+	// Analytics card data for pricing config
+	const pricingStatsData: AnalyticsCardData[] = [
+		{
+			id: 'total-configs',
+			title: 'Total Configurations',
+			value: totalConfigs,
+			icon: Settings,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: 'Pricing models available',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'active-configs',
+			title: 'Active Configs',
+			value: activeConfigs,
+			icon: Settings,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: 'Currently in use',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'avg-base-fare',
+			title: 'Average Base Fare',
+			value: `$${avgBaseFare.toFixed(0)}`,
+			icon: DollarSign,
+			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
+			iconBg: 'bg-purple-500',
+			changeText: 'Across all configurations',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'avg-per-km',
+			title: 'Average Per KM',
+			value: `$${avgPerKm.toFixed(2)}`,
+			icon: Calculator,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: 'Per kilometer rate',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
@@ -43,71 +101,13 @@ function RouteComponent() {
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Configurations</CardTitle>
-						<Settings className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">
-							{pricingConfigsQuery.data?.totalItems || 0}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							Pricing models available
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Active Configs</CardTitle>
-						<Settings className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">
-							{pricingConfigsQuery.data?.items?.filter((config: any) => config.isActive).length || 0}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							Currently in use
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Average Base Fare</CardTitle>
-						<Settings className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">
-							${(
-								(pricingConfigsQuery.data?.items?.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) || 0) /
-								(pricingConfigsQuery.data?.items?.length || 1)
-							).toFixed(0)}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							Across all configurations
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Average Per KM</CardTitle>
-						<Settings className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">
-							${(
-								(pricingConfigsQuery.data?.items?.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) || 0) /
-								(pricingConfigsQuery.data?.items?.length || 1)
-							).toFixed(2)}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							Per kilometer rate
-						</p>
-					</CardContent>
-				</Card>
+				{pricingStatsData.map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="compact" 
+					/>
+				))}
 			</div>
 
 			<Tabs defaultValue="configurations" className="space-y-4">

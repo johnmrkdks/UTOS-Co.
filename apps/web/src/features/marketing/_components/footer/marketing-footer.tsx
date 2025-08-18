@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Logo } from "@/components/logo";
-import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	Phone,
 	Mail,
@@ -17,6 +16,7 @@ import {
 	Linkedin,
 	MessageCircle
 } from "lucide-react";
+import { BUSINESS_INFO } from "@/constants/business-info";
 
 type FooterProps = {
 	className?: string;
@@ -40,7 +40,7 @@ const footerLinks = {
 	],
 	support: [
 		{ label: "Customer Support", href: "/contact-us" },
-		{ label: "Emergency Hotline", href: CONTACT_INFO.phone.link },
+		{ label: "Emergency Hotline", href: BUSINESS_INFO.phone.link },
 		{ label: "Track Your Ride", href: "/booking" },
 		{ label: "Payment Options", href: "/faqs" },
 		{ label: "Cancellation Policy", href: "/faqs" }
@@ -48,8 +48,8 @@ const footerLinks = {
 };
 
 const socialLinks = [
-	{ icon: Facebook, href: CONTACT_INFO.social.facebook.url, label: CONTACT_INFO.social.facebook.label },
-	{ icon: Instagram, href: CONTACT_INFO.social.instagram.url, label: CONTACT_INFO.social.instagram.label },
+	{ icon: Facebook, href: BUSINESS_INFO.social.facebook.url, label: BUSINESS_INFO.social.facebook.label },
+	{ icon: Instagram, href: BUSINESS_INFO.social.instagram.url, label: BUSINESS_INFO.social.instagram.label },
 ];
 
 export function MarketingFooter({ className, ...props }: FooterProps) {
@@ -64,10 +64,10 @@ export function MarketingFooter({ className, ...props }: FooterProps) {
 							<Logo />
 							<div>
 								<h2 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-									{CONTACT_INFO.business.name}
+									{BUSINESS_INFO.business.name}
 								</h2>
 								<p className="text-xs text-muted-foreground">
-									Sydney's Premier Luxury Service
+									{BUSINESS_INFO.business.slogan}
 								</p>
 							</div>
 						</Link>
@@ -81,8 +81,8 @@ export function MarketingFooter({ className, ...props }: FooterProps) {
 						<div className="space-y-3 mb-6">
 							<div className="flex items-center gap-3">
 								<Phone className="w-4 h-4 text-primary flex-shrink-0" />
-								<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors">
-									{CONTACT_INFO.phone.display}
+								<a href={BUSINESS_INFO.phone.link} className="hover:text-primary transition-colors">
+									{BUSINESS_INFO.phone.display}
 								</a>
 							</div>
 							<div className="flex items-start gap-3">
@@ -184,7 +184,7 @@ export function MarketingFooter({ className, ...props }: FooterProps) {
 				<div className="container mx-auto px-6 py-6">
 					<div className="flex flex-col md:flex-row items-center justify-between gap-4">
 						<div className="text-muted-foreground text-sm text-center md:text-left">
-							<p>&copy; {CONTACT_INFO.business.foundedYear === 2020 ? `${CONTACT_INFO.business.foundedYear}-${new Date().getFullYear()}` : new Date().getFullYear()} {CONTACT_INFO.business.name}. All rights reserved.</p>
+							<p>&copy; {BUSINESS_INFO.business.foundedYear === 2020 ? `${BUSINESS_INFO.business.foundedYear}-${new Date().getFullYear()}` : new Date().getFullYear()} {BUSINESS_INFO.business.name}. All rights reserved.</p>
 							<p className="mt-1">
 								<Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
 								{" | "}

@@ -1,7 +1,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
+import { BUSINESS_INFO } from "@/constants/business-info";
 import {
 	ChevronDown,
 	ChevronUp,
@@ -187,7 +187,7 @@ export function FAQs({ className, ...props }: FAQsProps) {
 									Contact Support
 								</Button>
 							</Link>
-							<a href={CONTACT_INFO.phone.link}>
+							<a href={BUSINESS_INFO.phone.link}>
 								<Button
 									variant="outline"
 									size="lg"
@@ -252,8 +252,8 @@ export function FAQs({ className, ...props }: FAQsProps) {
 								icon: Phone,
 								title: "Call Us",
 								description: "Speak with our team 24/7",
-								action: CONTACT_INFO.phone.link,
-								label: CONTACT_INFO.phone.display
+								action: BUSINESS_INFO.phone.link,
+								label: BUSINESS_INFO.phone.display
 							},
 							{
 								icon: MapPin,

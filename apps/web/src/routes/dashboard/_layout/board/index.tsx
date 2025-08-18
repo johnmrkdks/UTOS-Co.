@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { 
 	Package, 
 	Car, 
@@ -39,6 +40,62 @@ function AdminDashboard() {
 		completionRate: 96
 	};
 
+	// Analytics card data for admin dashboard
+	const adminAnalyticsData: AnalyticsCardData[] = [
+		{
+			id: 'bookings',
+			title: 'Bookings',
+			value: stats.totalBookings,
+			icon: Calendar,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: `+${stats.activeBookings} active`,
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'revenue',
+			title: 'Revenue',
+			value: `$${(stats.totalRevenue / 1000).toFixed(1)}k`,
+			icon: DollarSign,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: `+$${(stats.monthlyRevenue / 1000).toFixed(1)}k month`,
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'packages',
+			title: 'Packages',
+			value: stats.totalPackages,
+			icon: Package,
+			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
+			iconBg: 'bg-purple-500',
+			changeText: `${stats.activePackages} active`,
+			changeType: 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'drivers',
+			title: 'Drivers',
+			value: stats.totalDrivers,
+			icon: Users,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: `${stats.activeDrivers} online`,
+			changeType: 'positive',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
+
 	const recentActivity = [
 		{
 			id: 1,
@@ -70,7 +127,7 @@ function AdminDashboard() {
 	];
 
 	return (
-		<div className="space-y-4 sm:space-y-6">
+		<div className="space-y-4 sm:space-y-6 p-4">
 			{/* Welcome Header */}
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 				<div>
@@ -91,83 +148,14 @@ function AdminDashboard() {
 
 			{/* Key Metrics - Mobile First Grid */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-				{/* Total Bookings */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Bookings</span>
-							<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-								<Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{stats.totalBookings}</div>
-						<p className="text-xs text-blue-600 flex items-center gap-1">
-							<TrendingUp className="h-2 w-2" />
-							+{stats.activeBookings} active
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Revenue */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Revenue</span>
-							<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-								<DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">
-							${(stats.totalRevenue / 1000).toFixed(1)}k
-						</div>
-						<p className="text-xs text-green-600 flex items-center gap-1">
-							<TrendingUp className="h-2 w-2" />
-							+${(stats.monthlyRevenue / 1000).toFixed(1)}k month
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Packages */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Packages</span>
-							<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-								<Package className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{stats.totalPackages}</div>
-						<p className="text-xs text-purple-600 flex items-center gap-1">
-							<CheckCircle className="h-2 w-2" />
-							{stats.activePackages} active
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Drivers */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Drivers</span>
-							<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-								<Users className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{stats.totalDrivers}</div>
-						<p className="text-xs text-orange-600 flex items-center gap-1">
-							<Activity className="h-2 w-2" />
-							{stats.activeDrivers} online
-						</p>
-					</CardContent>
-				</Card>
+				{adminAnalyticsData.map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="compact" 
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation" 
+					/>
+				))}
 			</div>
 
 			{/* Performance Overview - Mobile Optimized */}

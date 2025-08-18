@@ -53,6 +53,7 @@ import { Route as DashboardLayoutAnalyticsIndexRouteImport } from './routes/dash
 import { Route as DashboardLayoutAdminTestingIndexRouteImport } from './routes/dashboard/_layout/admin-testing/index'
 import { Route as DashboardLayoutDriversOnboardingRouteImport } from './routes/dashboard/_layout/drivers/onboarding'
 import { Route as DashboardLayoutCarsAddCarRouteImport } from './routes/dashboard/_layout/cars/add-car'
+import { Route as CustomerLayoutBookServiceServiceIdRouteImport } from './routes/customer/_layout/book-service/$serviceId'
 import { Route as CustomerLayoutAccountSettingsRouteImport } from './routes/customer/_layout/account/settings'
 
 const DriverRouteImport = createFileRoute('/driver')()
@@ -299,6 +300,12 @@ const DashboardLayoutCarsAddCarRoute =
     path: '/cars/add-car',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const CustomerLayoutBookServiceServiceIdRoute =
+  CustomerLayoutBookServiceServiceIdRouteImport.update({
+    id: '/book-service/$serviceId',
+    path: '/book-service/$serviceId',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 const CustomerLayoutAccountSettingsRoute =
   CustomerLayoutAccountSettingsRouteImport.update({
     id: '/account/settings',
@@ -332,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardLayoutIndexRoute
   '/driver/': typeof DriverLayoutIndexRoute
   '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
+  '/customer/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -373,6 +381,7 @@ export interface FileRoutesByTo {
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
   '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
+  '/customer/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
@@ -422,6 +431,7 @@ export interface FileRoutesById {
   '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/driver/_layout/': typeof DriverLayoutIndexRoute
   '/customer/_layout/account/settings': typeof CustomerLayoutAccountSettingsRoute
+  '/customer/_layout/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
   '/dashboard/_layout/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
   '/dashboard/_layout/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
   '/dashboard/_layout/admin-testing/': typeof DashboardLayoutAdminTestingIndexRoute
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/driver/'
     | '/customer/account/settings'
+    | '/customer/book-service/$serviceId'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/driver/settings'
     | '/driver/trips'
     | '/customer/account/settings'
+    | '/customer/book-service/$serviceId'
     | '/dashboard/cars/add-car'
     | '/dashboard/drivers/onboarding'
     | '/dashboard/admin-testing'
@@ -557,6 +569,7 @@ export interface FileRouteTypes {
     | '/dashboard/_layout/'
     | '/driver/_layout/'
     | '/customer/_layout/account/settings'
+    | '/customer/_layout/book-service/$serviceId'
     | '/dashboard/_layout/cars/add-car'
     | '/dashboard/_layout/drivers/onboarding'
     | '/dashboard/_layout/admin-testing/'
@@ -902,6 +915,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutCarsAddCarRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
+    '/customer/_layout/book-service/$serviceId': {
+      id: '/customer/_layout/book-service/$serviceId'
+      path: '/book-service/$serviceId'
+      fullPath: '/customer/book-service/$serviceId'
+      preLoaderRoute: typeof CustomerLayoutBookServiceServiceIdRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
     '/customer/_layout/account/settings': {
       id: '/customer/_layout/account/settings'
       path: '/account/settings'
@@ -945,6 +965,7 @@ interface CustomerLayoutRouteChildren {
   CustomerLayoutServicesRoute: typeof CustomerLayoutServicesRoute
   CustomerLayoutIndexRoute: typeof CustomerLayoutIndexRoute
   CustomerLayoutAccountSettingsRoute: typeof CustomerLayoutAccountSettingsRoute
+  CustomerLayoutBookServiceServiceIdRoute: typeof CustomerLayoutBookServiceServiceIdRoute
 }
 
 const CustomerLayoutRouteChildren: CustomerLayoutRouteChildren = {
@@ -954,6 +975,8 @@ const CustomerLayoutRouteChildren: CustomerLayoutRouteChildren = {
   CustomerLayoutServicesRoute: CustomerLayoutServicesRoute,
   CustomerLayoutIndexRoute: CustomerLayoutIndexRoute,
   CustomerLayoutAccountSettingsRoute: CustomerLayoutAccountSettingsRoute,
+  CustomerLayoutBookServiceServiceIdRoute:
+    CustomerLayoutBookServiceServiceIdRoute,
 }
 
 const CustomerLayoutRouteWithChildren = CustomerLayoutRoute._addFileChildren(

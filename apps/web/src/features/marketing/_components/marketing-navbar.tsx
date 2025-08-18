@@ -6,7 +6,6 @@ import { Logo } from "@/components/logo";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
 import { AuthCTA } from "./navbar/auth-cta";
 import { MARKETING_ROUTES } from "@/constants/marketing-routes";
-import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
 import {
 	Phone,
 	Menu,
@@ -19,6 +18,7 @@ import {
 	MailIcon,
 	CalendarIcon
 } from "lucide-react";
+import { BUSINESS_INFO } from "@/constants/business-info";
 
 type HeaderProps = {
 	className?: string;
@@ -36,14 +36,14 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 			{/* 			<div className="flex items-center gap-6 text-beige"> */}
 			{/* 				<div className="flex items-center gap-2"> */}
 			{/* 					<Phone className="w-4 h-4 text-primary" /> */}
-			{/* 					<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors"> */}
-			{/* 						{CONTACT_INFO.phone.display} */}
+			{/* 					<a href={BUSINESS_INFO.phone.link} className="hover:text-primary transition-colors"> */}
+			{/* 						{BUSINESS_INFO.phone.display} */}
 			{/* 					</a> */}
 			{/* 				</div> */}
 			{/* 				<div className="flex items-center gap-2"> */}
 			{/* 					<MailIcon className="w-4 h-4 text-primary" /> */}
-			{/* 					<a href={CONTACT_INFO.email.link} className="hover:text-primary transition-colors"> */}
-			{/* 						{CONTACT_INFO.email.display} */}
+			{/* 					<a href={BUSINESS_INFO.email.link} className="hover:text-primary transition-colors"> */}
+			{/* 						{BUSINESS_INFO.email.display} */}
 			{/* 					</a> */}
 			{/* 				</div> */}
 			{/**/}
@@ -51,14 +51,14 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 			{/* 			<div className="hidden md:flex items-center gap-4 text-beige text-xs md:text-sm"> */}
 			{/* 				<div className="flex items-center gap-1"> */}
 			{/* 					<FacebookIcon className="w-4 h-4 fill-primary text-primary" /> */}
-			{/* 					<a href={CONTACT_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" > */}
-			{/* 						{CONTACT_INFO.social.facebook.label} */}
+			{/* 					<a href={BUSINESS_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" > */}
+			{/* 						{BUSINESS_INFO.social.facebook.label} */}
 			{/* 					</a> */}
 			{/* 				</div> */}
 			{/* 				<div className="flex items-center gap-1"> */}
 			{/* 					<InstagramIcon className="w-4 h-4 text-primary" /> */}
-			{/* 					<a href={CONTACT_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer"> */}
-			{/* 						{CONTACT_INFO.social.instagram.label} */}
+			{/* 					<a href={BUSINESS_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer"> */}
+			{/* 						{BUSINESS_INFO.social.instagram.label} */}
 			{/* 					</a> */}
 			{/* 				</div> */}
 			{/* 			</div> */}
@@ -74,10 +74,10 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 						<Logo />
 						<div className="hidden sm:block">
 							<h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-								{CONTACT_INFO.business.name}
+								{BUSINESS_INFO.business.name}
 							</h1>
 							<p className="text-xs text-muted-foreground -mt-1">
-								Sydney's Premier Luxury Service
+								{BUSINESS_INFO.business.slogan}
 							</p>
 						</div>
 					</Link>
@@ -130,27 +130,27 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 						<div className="flex flex-col items-center gap-4 text-beige text-xs md:text-sm py-4">
 							<div className="flex items-center gap-2">
 								<Phone className="w-4 h-4 text-primary" />
-								<a href={CONTACT_INFO.phone.link} className="hover:text-primary transition-colors">
-									{CONTACT_INFO.phone.display}
+								<a href={BUSINESS_INFO.phone.link} className="hover:text-primary transition-colors">
+									{BUSINESS_INFO.phone.display}
 								</a>
 							</div>
 							<div className="flex items-center gap-2">
 								<MailIcon className="w-4 h-4 text-primary" />
-								<a href={CONTACT_INFO.email.link} className="hover:text-primary transition-colors">
-									{CONTACT_INFO.email.display}
+								<a href={BUSINESS_INFO.email.link} className="hover:text-primary transition-colors">
+									{BUSINESS_INFO.email.display}
 								</a>
 							</div>
 							<div className="flex items-center gap-2">
 								<div className="flex items-center gap-1">
 									<FacebookIcon className="w-4 h-4 fill-primary text-primary" />
-									<a href={CONTACT_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" >
-										{CONTACT_INFO.social.facebook.label}
+									<a href={BUSINESS_INFO.social.facebook.url} target="_blank" rel="noopener noreferrer" >
+										{BUSINESS_INFO.social.facebook.label}
 									</a>
 								</div>
 								<div className="flex items-center gap-1">
 									<InstagramIcon className="w-4 h-4 text-primary" />
-									<a href={CONTACT_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer">
-										{CONTACT_INFO.social.instagram.label}
+									<a href={BUSINESS_INFO.social.instagram.url} target="_blank" rel="noopener noreferrer">
+										{BUSINESS_INFO.social.instagram.label}
 									</a>
 								</div>
 							</div>

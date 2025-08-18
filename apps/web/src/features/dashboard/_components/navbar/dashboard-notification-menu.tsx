@@ -76,7 +76,7 @@ function Dot({ className }: { className?: string }) {
 	);
 }
 
-export function NotificationMenu() {
+export function DashboardNotificationMenu() {
 	const [notifications, setNotifications] = useState(initialNotifications);
 	const unreadCount = notifications.filter((n) => n.unread).length;
 

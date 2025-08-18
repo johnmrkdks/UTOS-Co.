@@ -15,9 +15,17 @@ export function ProfileCompletenessBanner({
 	className, 
 	showOnComplete = false 
 }: ProfileCompletenessBannerProps) {
-	const { data: completeness, isLoading } = useProfileCompletenessQuery();
+	const { data: rawCompleteness, isLoading } = useProfileCompletenessQuery();
 
-	if (isLoading || !completeness) {
+	// Provide default values if the query returns empty object
+	const completeness = {
+		isComplete: false,
+		completeness: 0,
+		missingFields: [] as string[],
+		...(rawCompleteness && typeof rawCompleteness === 'object' ? rawCompleteness : {})
+	};
+
+	if (isLoading) {
 		return null;
 	}
 
@@ -79,7 +87,7 @@ export function ProfileCompletenessBanner({
 								<div className="mt-3">
 									<p className="text-xs text-muted-foreground mb-2">Missing information:</p>
 									<div className="flex flex-wrap gap-1">
-										{completeness.missingFields.map((field) => (
+										{completeness.missingFields.map((field: string) => (
 											<span 
 												key={field}
 												className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-muted text-muted-foreground capitalize"
@@ -95,7 +103,7 @@ export function ProfileCompletenessBanner({
 
 					{/* Action Button */}
 					<div className="ml-4">
-						<Link to="/profile">
+						<Link to="/customer/profile">
 							<Button variant="outline" size="sm" className="text-xs">
 								<User className="h-3 w-3 mr-1" />
 								{completeness.isComplete ? "View Profile" : "Complete Profile"}

@@ -1,4 +1,4 @@
-export const CONTACT_INFO = {
+export const BUSINESS_INFO = {
 	phone: {
 		display: "+61 422 693 233",
 		link: "tel:+61422693233"
@@ -19,6 +19,8 @@ export const CONTACT_INFO = {
 	},
 	business: {
 		name: "Down Under Chauffeurs",
+		slogan: "Sydney's Premier Luxury Service",
+		description: "Down Under Chauffeurs is a luxury travel agency based in Sydney, Australia. We offer a wide range of luxury travel services, including car hire, travel packages, and personalized travel experiences.",
 		websiteUrl: "https://downunderchauffeurs.com",
 		foundedYear: 2020
 	}

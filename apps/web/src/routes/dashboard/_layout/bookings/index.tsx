@@ -2,6 +2,7 @@ import { Loader } from "@/components/loader";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { BookingManagementModalProviders } from "@/features/dashboard/_pages/booking-management/_providers/booking-management-modal-providers";
 import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
 import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
@@ -13,7 +14,7 @@ import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-m
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, PackageIcon, RouteIcon } from "lucide-react";
+import { CalendarPlus, PackageIcon, RouteIcon, Clock, Activity } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
@@ -54,6 +55,58 @@ function BookingManagementContent() {
 		["driver_assigned", "in_progress"].includes(b.status)
 	).length;
 
+	// Analytics card data for booking management
+	const bookingManagementStatsData: AnalyticsCardData[] = [
+		{
+			id: 'total-bookings',
+			title: 'Total Bookings',
+			value: totalBookings,
+			icon: CalendarPlus,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: 'All time bookings',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'pending',
+			title: 'Pending',
+			value: pendingBookings,
+			icon: Clock,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: 'Awaiting confirmation',
+			changeType: 'warning',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'todays-bookings',
+			title: "Today's Bookings",
+			value: todaysBookings,
+			icon: CalendarPlus,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: 'Scheduled for today',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'active',
+			title: 'Active',
+			value: activeBookings,
+			icon: Activity,
+			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
+			iconBg: 'bg-purple-500',
+			changeText: 'Currently in progress',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
+
 	const clearFilters = () => {
 		setFilters({});
 	}
@@ -82,59 +135,13 @@ function BookingManagementContent() {
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">
-							{totalBookings}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							All time bookings
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Pending</CardTitle>
-						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{pendingBookings}</div>
-						<p className="text-xs text-muted-foreground">
-							Awaiting confirmation
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Today's Bookings</CardTitle>
-						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{todaysBookings}</div>
-						<p className="text-xs text-muted-foreground">
-							Scheduled for today
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Active</CardTitle>
-						<CalendarPlus className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{activeBookings}</div>
-						<p className="text-xs text-muted-foreground">
-							Currently in progress
-						</p>
-					</CardContent>
-				</Card>
+				{bookingManagementStatsData.map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="compact" 
+					/>
+				))}
 			</div>
 
 			{/* Advanced Filters */}

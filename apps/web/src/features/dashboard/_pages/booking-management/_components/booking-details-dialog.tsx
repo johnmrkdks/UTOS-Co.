@@ -20,6 +20,7 @@ import { useGetBookingByIdQuery } from "../_hooks/query/use-get-booking-by-id-qu
 import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
 import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import { AssignDriverDialog } from "./assign-driver-dialog";
 import { format } from "date-fns";
 import {
 	User,
@@ -32,7 +33,8 @@ import {
 	Package,
 	Route,
 	Calendar,
-	Users
+	Users,
+	UserPlus
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -54,6 +56,7 @@ export function BookingDetailsDialog() {
 	} = useBookingManagementModalProvider();
 
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
+	const [isAssignDriverDialogOpen, setIsAssignDriverDialogOpen] = useState(false);
 
 	const bookingQuery = useGetBookingByIdQuery(
 		{ id: selectedBookingId! },
@@ -74,10 +77,22 @@ export function BookingDetailsDialog() {
 
 	const booking = bookingQuery.data;
 
+	// Debug booking data
+	console.log("📋 Dialog state:", { 
+		isOpen: isBookingDetailsDialogOpen, 
+		selectedBookingId, 
+		bookingData: booking,
+		isLoading: bookingQuery.isLoading,
+		error: bookingQuery.error
+	});
+	console.log("📋 Has driverId:", booking?.driverId);
+	console.log("📋 Assign driver dialog open:", isAssignDriverDialogOpen);
+
 	if (!booking) return null;
 
 	return (
-		<Dialog open={isBookingDetailsDialogOpen} onOpenChange={closeBookingDetailsDialog}>
+		<>
+			<Dialog open={isBookingDetailsDialogOpen} onOpenChange={closeBookingDetailsDialog}>
 			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
@@ -284,17 +299,52 @@ export function BookingDetailsDialog() {
 									</Button>
 								</div>
 
-								{booking.driverId && (
-									<div className="pt-2">
-										<div className="text-sm font-medium mb-1">Assigned Driver</div>
-										<div className="text-sm text-muted-foreground">Driver ID: {booking.driverId}</div>
-										{booking.driverAssignedAt && (
-											<div className="text-xs text-muted-foreground">
-												Assigned: {format(new Date(booking.driverAssignedAt), "MMM dd, HH:mm")}
+								{/* Driver Assignment Section */}
+								<Separator />
+								<div className="space-y-3">
+									<div className="text-sm font-medium">Driver Assignment</div>
+									{booking.driverId ? (
+										<div className="space-y-2">
+											<div className="flex items-center justify-between">
+												<div>
+													<div className="text-sm font-medium">Assigned Driver</div>
+													<div className="text-sm text-muted-foreground">Driver ID: {booking.driverId}</div>
+													{booking.driverAssignedAt && (
+														<div className="text-xs text-muted-foreground">
+															Assigned: {format(new Date(booking.driverAssignedAt), "MMM dd, HH:mm")}
+														</div>
+													)}
+												</div>
+												<Button
+													size="sm"
+													variant="outline"
+													onClick={() => {
+														console.log("🔄 Reassign driver button clicked");
+														setIsAssignDriverDialogOpen(true);
+													}}
+												>
+													<UserPlus className="h-4 w-4" />
+													Reassign
+												</Button>
 											</div>
-										)}
-									</div>
-								)}
+										</div>
+									) : (
+										<div className="space-y-2">
+											<div className="text-sm text-muted-foreground">No driver assigned</div>
+											<Button
+												size="sm"
+												onClick={() => {
+													console.log("🚗 Assign driver button clicked");
+													setIsAssignDriverDialogOpen(true);
+												}}
+												className="w-full"
+											>
+												<UserPlus className="h-4 w-4 mr-2" />
+												Assign Driver
+											</Button>
+										</div>
+									)}
+								</div>
 							</CardContent>
 						</Card>
 
@@ -389,6 +439,14 @@ export function BookingDetailsDialog() {
 					</div>
 				</div>
 			</DialogContent>
-		</Dialog>
+			</Dialog>
+
+			{/* Assign Driver Dialog - Outside main dialog to avoid z-index issues */}
+			<AssignDriverDialog
+				booking={booking}
+				open={isAssignDriverDialogOpen}
+				onOpenChange={setIsAssignDriverDialogOpen}
+			/>
+		</>
 	);
 }

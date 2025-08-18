@@ -1,6 +1,6 @@
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { DashboardUserMenu } from "@/features/dashboard/_components/navbar/dashhboard-user-menu";
-import { NotificationMenu } from "@/features/dashboard/_components/navbar/notification-menu";
+import { DashboardNotificationMenu } from "@/features/dashboard/_components/navbar/dashboard-notification-menu";
 import { cn } from "@workspace/ui/lib/utils";
 import { ModalProviders } from "@/features/dashboard/_providers/modal-providers";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -23,7 +23,7 @@ export function DashboardNavbar({ className, ...props }: DashboardNavbarProps) {
 			<div className="flex items-center gap-4">
 				<div className="flex items-center gap-2">
 					<ModalProviders />
-					<NotificationMenu />
+					<DashboardNotificationMenu />
 				</div>
 				<DashboardUserMenu />
 			</div>

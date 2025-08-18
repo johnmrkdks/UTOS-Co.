@@ -1,7 +1,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
+import { BUSINESS_INFO } from "@/constants/business-info";
 import {
 	FileText,
 	Clock,
@@ -48,7 +48,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 			<div className="py-24 bg-beige">
 				<div className="container mx-auto px-6">
 					<div className="max-w-4xl mx-auto">
-						
+
 						{/* Booking Responsibilities */}
 						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border mb-8">
 							<div className="flex items-start mb-6">
@@ -60,7 +60,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 										Booking Responsibilities
 									</h2>
 									<p className="text-muted-foreground leading-relaxed">
-										Please note it is the customer's responsibility to verify that the booking details are accurate. 
+										Please note it is the customer's responsibility to verify that the booking details are accurate.
 										We recommend reviewing all information including pickup times, locations, and passenger details before confirming your reservation.
 									</p>
 								</div>
@@ -77,7 +77,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 									<h2 className="text-2xl font-bold text-card-foreground mb-6">
 										Cancellation Policy
 									</h2>
-									
+
 									<div className="space-y-6">
 										<div className="border border-border rounded-xl p-6 bg-soft-beige">
 											<div className="flex items-center mb-3">
@@ -129,7 +129,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 									<h2 className="text-2xl font-bold text-card-foreground mb-6">
 										Additional Charges
 									</h2>
-									
+
 									<div className="grid md:grid-cols-3 gap-4">
 										<div className="border border-border rounded-xl p-4 bg-soft-beige text-center">
 											<MapPin className="w-8 h-8 text-primary mx-auto mb-3" />
@@ -162,13 +162,13 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 								<p className="text-muted-foreground mb-6">
 									If you have any questions about these terms and conditions, please don't hesitate to contact us.
 								</p>
-								
+
 								<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
 									<div className="flex items-center text-muted-foreground">
 										<Phone className="w-5 h-5 mr-2 text-primary" />
-										<span className="font-medium">{CONTACT_INFO.phone.display}</span>
+										<span className="font-medium">{BUSINESS_INFO.phone.display}</span>
 									</div>
-									
+
 									<div className="flex gap-4">
 										<Link to="/contact-us">
 											<Button
@@ -185,7 +185,7 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 
 						{/* Legal Footer */}
 						<div className="mt-12 text-center text-sm text-muted-foreground">
-							<p>© {CONTACT_INFO.business.foundedYear === 2020 ? `${CONTACT_INFO.business.foundedYear}-${new Date().getFullYear()}` : new Date().getFullYear()} {CONTACT_INFO.business.name}. All rights reserved.</p>
+							<p>© {BUSINESS_INFO.business.foundedYear === 2020 ? `${BUSINESS_INFO.business.foundedYear}-${new Date().getFullYear()}` : new Date().getFullYear()} {BUSINESS_INFO.business.name}. All rights reserved.</p>
 							<p className="mt-2">
 								These terms and conditions are effective as of the date of your booking and may be updated from time to time.
 							</p>

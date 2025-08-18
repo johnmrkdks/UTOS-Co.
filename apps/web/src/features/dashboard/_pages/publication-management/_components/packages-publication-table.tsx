@@ -2,7 +2,8 @@ import { useState } from "react";
 import { DataTable } from "@workspace/ui/components/data-table";
 import { Input } from "@workspace/ui/components/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Search, Filter } from "lucide-react";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
+import { Search, Filter, Package2, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
 
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
 import { useTogglePublishPackageMutation } from "@/features/dashboard/_pages/packages/_hooks/query/use-toggle-publish-package-mutation";
@@ -58,6 +59,58 @@ export function PackagesPublicationTable() {
 		});
 	};
 
+	// Analytics data for packages publication stats
+	const packagesStatsData: AnalyticsCardData[] = [
+		{
+			id: 'published-packages',
+			title: 'Published',
+			value: packages.filter(pkg => pkg.isPublished && pkg.isAvailable).length,
+			icon: Package2,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: 'Publicly visible',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'unpublished-packages',
+			title: 'Unpublished',
+			value: packages.filter(pkg => !pkg.isPublished).length,
+			icon: EyeOff,
+			bgGradient: 'bg-gradient-to-br from-gray-50 to-gray-100',
+			iconBg: 'bg-gray-500',
+			changeText: 'Not visible to customers',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'ready-packages',
+			title: 'Ready',
+			value: packages.filter(pkg => !pkg.isPublished && pkg.isAvailable).length,
+			icon: CheckCircle,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: 'Ready to publish',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'issues-packages',
+			title: 'Issues',
+			value: packages.filter(pkg => pkg.isPublished && !pkg.isAvailable).length,
+			icon: AlertCircle,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: 'Need attention',
+			changeType: 'warning',
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
+
 	const columns = getPackagesPublicationColumns({
 		onTogglePublish: handleTogglePublish,
 		isToggling: togglePublishMutation.isPending
@@ -97,30 +150,13 @@ export function PackagesPublicationTable() {
 
 			{/* Stats Summary */}
 			<div className="grid grid-cols-4 gap-4">
-				<div className="border text-center p-3 bg-green-50 rounded-lg">
-					<div className="text-2xl font-bold text-green-600">
-						{packages.filter(pkg => pkg.isPublished && pkg.isAvailable).length}
-					</div>
-					<div className="text-sm text-green-700">Published</div>
-				</div>
-				<div className="border text-center p-3 bg-gray-50 rounded-lg">
-					<div className="text-2xl font-bold text-gray-600">
-						{packages.filter(pkg => !pkg.isPublished).length}
-					</div>
-					<div className="text-sm text-gray-700">Unpublished</div>
-				</div>
-				<div className="border text-center p-3 bg-blue-50 rounded-lg">
-					<div className="text-2xl font-bold text-blue-600">
-						{packages.filter(pkg => !pkg.isPublished && pkg.isAvailable).length}
-					</div>
-					<div className="text-sm text-blue-700">Ready</div>
-				</div>
-				<div className="border text-center p-3 bg-orange-50 rounded-lg">
-					<div className="text-2xl font-bold text-orange-600">
-						{packages.filter(pkg => pkg.isPublished && !pkg.isAvailable).length}
-					</div>
-					<div className="text-sm text-orange-700">Issues</div>
-				</div>
+				{packagesStatsData.map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="compact" 
+					/>
+				))}
 			</div>
 
 			{/* Table */}

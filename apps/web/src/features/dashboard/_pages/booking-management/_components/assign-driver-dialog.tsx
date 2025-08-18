@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { useGetAvailableDriversQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-available-drivers-query";
-import { useAssignDriverMutation } from "@/features/dashboard/_pages/drivers/_hooks/query/use-assign-driver-mutation";
+import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
 import { Loader2, User, Car, Phone, MapPin } from "lucide-react";
 
 const assignDriverSchema = z.object({
@@ -36,10 +36,13 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const assignDriverMutation = useAssignDriverMutation();
 
+	// Debug props
+	console.log("🚗 AssignDriverDialog props:", { booking: booking?.id, open, bookingData: booking });
+
 	// Calculate time slot for availability check
 	const timeSlot = booking?.scheduledPickupTime ? {
-		start: new Date(booking.scheduledPickupTime * 1000),
-		end: new Date((booking.scheduledPickupTime * 1000) + (booking.estimatedDuration || 3600) * 1000),
+		start: new Date(booking.scheduledPickupTime),
+		end: new Date(new Date(booking.scheduledPickupTime).getTime() + (booking.estimatedDuration || 3600) * 1000),
 	} : undefined;
 
 	const availableDriversQuery = useGetAvailableDriversQuery({ timeSlot });
@@ -103,7 +106,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 							<span className="font-medium">Scheduled:</span>
 							<span>
 								{booking?.scheduledPickupTime 
-									? new Date(booking.scheduledPickupTime * 1000).toLocaleString()
+									? new Date(booking.scheduledPickupTime).toLocaleString()
 									: "Not scheduled"
 								}
 							</span>

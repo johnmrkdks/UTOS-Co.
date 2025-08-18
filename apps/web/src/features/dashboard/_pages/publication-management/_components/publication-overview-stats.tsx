@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { Car, Package2, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 
@@ -28,77 +28,105 @@ export function PublicationOverviewStats() {
 	const readyToPublishPackages = packages.filter(pkg => !pkg.isPublished && pkg.isAvailable);
 	const needsAttentionPackages = packages.filter(pkg => pkg.isPublished && !pkg.isAvailable);
 
-	const statsCards = [
+	const statsCardsData: AnalyticsCardData[] = [
 		{
+			id: "published-cars",
 			title: "Published Cars",
 			value: publishedCars.length,
-			total: cars.length,
 			icon: Car,
-			color: "text-green-600",
-			bgColor: "bg-green-50",
-			description: "Publicly visible cars"
+			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
+			iconBg: "bg-green-500",
+			changeText: `${cars.length > 0 ? Math.round((publishedCars.length / cars.length) * 100) : 0}% of total`,
+			changeType: "positive",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 		{
+			id: "unpublished-cars",
 			title: "Unpublished Cars",
 			value: unpublishedCars,
-			total: cars.length,
 			icon: EyeOff,
-			color: "text-gray-600",
-			bgColor: "bg-gray-50",
-			description: "Not visible to customers"
+			bgGradient: "bg-gradient-to-br from-gray-50 to-gray-100",
+			iconBg: "bg-gray-500",
+			changeText: "Not visible to customers",
+			changeType: "neutral",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 		{
+			id: "published-packages",
 			title: "Published Packages",
 			value: publishedPackages.length,
-			total: packages.length,
 			icon: Package2,
-			color: "text-green-600",
-			bgColor: "bg-green-50",
-			description: "Publicly visible packages"
+			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
+			iconBg: "bg-green-500",
+			changeText: `${packages.length > 0 ? Math.round((publishedPackages.length / packages.length) * 100) : 0}% of total`,
+			changeType: "positive",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 		{
+			id: "unpublished-packages",
 			title: "Unpublished Packages",
 			value: unpublishedPackages,
-			total: packages.length,
 			icon: EyeOff,
-			color: "text-gray-600",
-			bgColor: "bg-gray-50",
-			description: "Not visible to customers"
+			bgGradient: "bg-gradient-to-br from-gray-50 to-gray-100",
+			iconBg: "bg-gray-500",
+			changeText: "Not visible to customers",
+			changeType: "neutral",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 	];
 
-	const actionCards = [
+	const actionCardsData: AnalyticsCardData[] = [
 		{
+			id: "cars-ready-publish",
 			title: "Cars Ready to Publish",
 			value: readyToPublishCars.length,
 			icon: CheckCircle,
-			color: "text-blue-600",
-			bgColor: "bg-blue-50",
-			description: "Cars meeting all publication criteria"
+			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
+			iconBg: "bg-blue-500",
+			changeText: "Meeting all criteria",
+			changeType: readyToPublishCars.length > 0 ? "positive" : "neutral",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 		{
+			id: "cars-need-attention",
 			title: "Cars Needing Attention",
 			value: needsAttentionCars.length,
 			icon: AlertCircle,
-			color: "text-orange-600",
-			bgColor: "bg-orange-50",
-			description: "Published cars with issues"
+			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
+			iconBg: "bg-orange-500",
+			changeText: "Published with issues",
+			changeType: needsAttentionCars.length > 0 ? "warning" : "neutral",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 		{
+			id: "packages-ready-publish",
 			title: "Packages Ready to Publish",
 			value: readyToPublishPackages.length,
 			icon: CheckCircle,
-			color: "text-blue-600",
-			bgColor: "bg-blue-50",
-			description: "Packages ready for publication"
+			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
+			iconBg: "bg-blue-500",
+			changeText: "Ready for publication",
+			changeType: readyToPublishPackages.length > 0 ? "positive" : "neutral",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 		{
+			id: "packages-need-attention",
 			title: "Packages Needing Attention",
 			value: needsAttentionPackages.length,
 			icon: AlertCircle,
-			color: "text-orange-600",
-			bgColor: "bg-orange-50",
-			description: "Published packages that are unavailable"
+			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
+			iconBg: "bg-orange-500",
+			changeText: "Published but unavailable",
+			changeType: needsAttentionPackages.length > 0 ? "warning" : "neutral",
+			showIcon: true,
+			showBackgroundIcon: true
 		},
 	];
 
@@ -107,30 +135,12 @@ export function PublicationOverviewStats() {
 			<div>
 				<h2 className="text-xl font-semibold mb-4">Publication Overview</h2>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-					{statsCards.map((stat) => (
-						<Card key={stat.title}>
-							<CardContent className="p-4">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-muted-foreground">
-											{stat.title}
-										</p>
-										<div className="flex items-baseline gap-2">
-											<p className="text-2xl font-bold">{stat.value}</p>
-											<p className="text-sm text-muted-foreground">
-												of {stat.total}
-											</p>
-										</div>
-										<p className="text-xs text-muted-foreground mt-1">
-											{stat.description}
-										</p>
-									</div>
-									<div className={`p-2 rounded-lg ${stat.bgColor}`}>
-										<stat.icon className={`h-5 w-5 ${stat.color}`} />
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+					{statsCardsData.map((data) => (
+						<AnalyticsCard 
+							key={data.id} 
+							data={data} 
+							view="compact" 
+						/>
 					))}
 				</div>
 			</div>
@@ -138,30 +148,18 @@ export function PublicationOverviewStats() {
 			<div>
 				<h2 className="text-xl font-semibold mb-4">Action Required</h2>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-					{actionCards.map((card) => (
-						<Card key={card.title}>
-							<CardContent className="p-4">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-muted-foreground">
-											{card.title}
-										</p>
-										<p className="text-2xl font-bold">{card.value}</p>
-										<p className="text-xs text-muted-foreground mt-1">
-											{card.description}
-										</p>
-									</div>
-									<div className={`p-2 rounded-lg ${card.bgColor}`}>
-										<card.icon className={`h-5 w-5 ${card.color}`} />
-									</div>
-								</div>
-								{card.value > 0 && (
-									<Badge variant="secondary" className="mt-2 text-xs">
-										Requires Review
-									</Badge>
-								)}
-							</CardContent>
-						</Card>
+					{actionCardsData.map((data) => (
+						<div key={data.id} className="relative">
+							<AnalyticsCard 
+								data={data} 
+								view="compact" 
+							/>
+							{data.value > 0 && (
+								<Badge variant="secondary" className="absolute -top-2 -right-2 text-xs">
+									Requires Review
+								</Badge>
+							)}
+						</div>
 					))}
 				</div>
 			</div>

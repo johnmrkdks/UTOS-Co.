@@ -1,7 +1,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
+import { BUSINESS_INFO } from "@/constants/business-info";
 import {
 	Shield,
 	Award,
@@ -112,7 +112,7 @@ export function AboutUs({ className, ...props }: AboutProps) {
 
 						<p className="text-lg md:text-xl text-background/80 leading-relaxed max-w-3xl mx-auto">
 							Founded on the principles of luxury, reliability, and exceptional service,
-							{CONTACT_INFO.business.name} has become Sydney's most trusted premium transportation partner.
+							{BUSINESS_INFO.business.name} has become Sydney's most trusted premium transportation partner.
 						</p>
 					</div>
 				</div>
@@ -138,7 +138,7 @@ export function AboutUs({ className, ...props }: AboutProps) {
 							</h3>
 							<div className="space-y-4 text-muted-foreground leading-relaxed">
 								<p>
-									Founded in {CONTACT_INFO.business.foundedYear}, {CONTACT_INFO.business.name.toLowerCase()} started as a small transportation service for local events. Over the years, we have expanded our services to include airport transportation and corporate travel.
+									Founded in {BUSINESS_INFO.business.foundedYear}, {BUSINESS_INFO.business.name.toLowerCase()} started as a small transportation service for local events. Over the years, we have expanded our services to include airport transportation and corporate travel.
 								</p>
 								<p className="font-medium text-primary">
 									Airport transfers Sydney luxury chauffeur service
@@ -305,7 +305,7 @@ export function AboutUs({ className, ...props }: AboutProps) {
 							Experience the Down Under Difference
 						</h2>
 						<p className="text-xl text-primary-foreground/80 mb-8 leading-relaxed">
-							Join thousands of satisfied clients who have discovered why {CONTACT_INFO.business.name}
+							Join thousands of satisfied clients who have discovered why {BUSINESS_INFO.business.name}
 							is Sydney's premier choice for luxury transportation.
 						</p>
 

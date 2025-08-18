@@ -7,7 +7,7 @@ export function useLinkGoogleAccount() {
 		mutationFn: async () => {
 			await authClient.linkSocial({
 				provider: "google",
-				callbackURL: "/driver/verify-email?linked=true",
+				callbackURL: "/driver/settings?linked=true",
 			});
 		},
 		onSuccess: () => {

@@ -95,7 +95,7 @@ export function EmailVerificationBanner({
 					<div className="flex flex-col sm:flex-row gap-2">
 						<Button
 							size="sm"
-							onClick={() => navigate({ to: "/driver/verify-email" })}
+							onClick={() => navigate({ to: "/driver/settings" })}
 							className="bg-yellow-600 hover:bg-yellow-700 text-white"
 						>
 							<Mail className="h-4 w-4 mr-1" />
@@ -106,7 +106,7 @@ export function EmailVerificationBanner({
 							<Button
 								variant="outline"
 								size="sm"
-								onClick={() => navigate({ to: "/driver/verify-email" })}
+								onClick={() => navigate({ to: "/driver/settings" })}
 								className="border-yellow-300 text-yellow-700 hover:bg-yellow-50"
 							>
 								Learn More

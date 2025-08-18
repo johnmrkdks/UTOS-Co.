@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import { useDriverBookingsQuery } from '@/hooks/query/use-driver-bookings-query';
 import {
@@ -34,13 +35,19 @@ export const Route = createFileRoute('/driver/_layout/trips')({
 });
 
 function DriverTripsComponent() {
-	const { data: currentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
+	const { data: rawCurrentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
 	const [activeTab, setActiveTab] = useState<'all' | 'active' | 'upcoming' | 'completed'>('all');
 	const [searchQuery, setSearchQuery] = useState('');
 
+	// Driver data with fallback values
+	const currentDriver = {
+		id: null,
+		...rawCurrentDriver
+	};
+
 	// Fetch bookings for current driver
 	const { data: bookingsData, isLoading: isBookingsLoading, refetch } = useDriverBookingsQuery({
-		driverId: currentDriver?.id || "",
+		driverId: currentDriver.id || "",
 		limit: 50,
 		offset: 0,
 	});
@@ -72,6 +79,62 @@ function DriverTripsComponent() {
 			.filter(b => b.status === 'completed')
 			.reduce((sum, b) => sum + (b.finalAmount || b.quotedAmount || 0), 0) / 100, // Convert from cents
 	};
+
+	// Analytics card data for driver trips
+	const driverStatsData: AnalyticsCardData[] = [
+		{
+			id: 'total-trips',
+			title: 'Total Trips',
+			value: stats.totalTrips,
+			icon: CheckCircleIcon,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: '+0 this week',
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'trips-done',
+			title: 'Trips Done',
+			value: stats.totalTrips,
+			icon: CheckCircleIcon,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: `+${stats.totalTrips} this week`,
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'upcoming',
+			title: 'Upcoming',
+			value: stats.upcomingTrips,
+			icon: CalendarIcon,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: `+${stats.upcomingTrips} this week`,
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'active',
+			title: 'Active',
+			value: stats.activeTrips,
+			icon: CarIcon,
+			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
+			iconBg: 'bg-purple-500',
+			changeText: `+${stats.activeTrips} this week`,
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -136,63 +199,16 @@ function DriverTripsComponent() {
 				</Button>
 			</div>
 
-			{/* Stats Cards - Modern Style */}
+			{/* Stats Cards - Using AnalyticsCard */}
 			<div className="grid grid-cols-2 gap-3">
-				<div className="bg-white rounded-xl border border-gray-200 p-4">
-					<div className="flex items-center justify-between mb-3">
-						<div className="text-sm font-medium text-gray-700">Total Trips</div>
-						<div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-							<CheckCircleIcon className="h-4 w-4 text-blue-600" />
-						</div>
-					</div>
-					<div className="text-2xl font-bold text-gray-900 mb-1">{stats.totalTrips}</div>
-					<div className="flex items-center gap-1 text-xs text-blue-600">
-						<TrendingUpIcon className="h-3 w-3" />
-						<span>+0 this week</span>
-					</div>
-				</div>
-
-				<div className="bg-white rounded-xl border border-gray-200 p-4">
-					<div className="flex items-center justify-between mb-3">
-						<div className="text-sm font-medium text-gray-700">Trips Done</div>
-						<div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
-							<CheckCircleIcon className="h-4 w-4 text-green-600" />
-						</div>
-					</div>
-					<div className="text-2xl font-bold text-gray-900 mb-1">{stats.totalTrips}</div>
-					<div className="flex items-center gap-1 text-xs text-green-600">
-						<TrendingUpIcon className="h-3 w-3" />
-						<span>+{stats.totalTrips} this week</span>
-					</div>
-				</div>
-
-				<div className="bg-white rounded-xl border border-gray-200 p-4">
-					<div className="flex items-center justify-between mb-3">
-						<div className="text-sm font-medium text-gray-700">Upcoming</div>
-						<div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
-							<CalendarIcon className="h-4 w-4 text-orange-600" />
-						</div>
-					</div>
-					<div className="text-2xl font-bold text-gray-900 mb-1">{stats.upcomingTrips}</div>
-					<div className="flex items-center gap-1 text-xs text-orange-600">
-						<TrendingUpIcon className="h-3 w-3" />
-						<span>+{stats.upcomingTrips} this week</span>
-					</div>
-				</div>
-
-				<div className="bg-white rounded-xl border border-gray-200 p-4">
-					<div className="flex items-center justify-between mb-3">
-						<div className="text-sm font-medium text-gray-700">Active</div>
-						<div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
-							<CarIcon className="h-4 w-4 text-purple-600" />
-						</div>
-					</div>
-					<div className="text-2xl font-bold text-gray-900 mb-1">{stats.activeTrips}</div>
-					<div className="flex items-center gap-1 text-xs text-purple-600">
-						<TrendingUpIcon className="h-3 w-3" />
-						<span>+{stats.activeTrips} this week</span>
-					</div>
-				</div>
+				{driverStatsData.map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="compact"
+						className="rounded-xl border border-gray-200" 
+					/>
+				))}
 			</div>
 
 			{/* Search */}

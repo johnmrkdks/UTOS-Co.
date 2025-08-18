@@ -38,8 +38,8 @@ export const driversRouter = router({
 	available: protectedProcedure
 		.input(z.object({
 			timeSlot: z.object({
-				start: z.date(),
-				end: z.date(),
+				start: z.coerce.date(),
+				end: z.coerce.date(),
 			}).optional(),
 		}).optional())
 		.query(async ({ ctx: { db }, input }) => {

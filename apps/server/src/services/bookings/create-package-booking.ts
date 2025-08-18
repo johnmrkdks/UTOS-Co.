@@ -19,7 +19,7 @@ export const CreatePackageBookingSchema = z.object({
 	destinationLongitude: z.number().optional(),
 	
 	// Timing
-	scheduledPickupTime: z.date(),
+	scheduledPickupTime: z.coerce.date(),
 	
 	// Customer details
 	customerName: z.string(),

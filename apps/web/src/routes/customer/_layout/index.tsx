@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { Car, Calendar, Star, Package, Clock, TrendingUp, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/customer/_layout/")({
@@ -8,6 +9,55 @@ export const Route = createFileRoute("/customer/_layout/")({
 });
 
 function CustomerDashboard() {
+	// Analytics card data for customer stats
+	const customerStatsData: AnalyticsCardData[] = [
+		{
+			id: 'active-bookings',
+			title: 'Active',
+			value: 0,
+			icon: Clock,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: 'Bookings',
+			changeType: 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'upcoming-trips',
+			title: 'Upcoming',
+			value: 0,
+			icon: Calendar,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: 'Trips',
+			changeType: 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'total-trips',
+			title: 'Total Trips',
+			value: 0,
+			icon: Car,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: 'Completed',
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
+
+	// Mobile travel summary data
+	const travelSummaryData = {
+		total: 0,
+		rating: 5.0,
+		spent: 0
+	};
 
 	return (
 		<div className="space-y-6 md:space-y-8">
@@ -21,60 +71,24 @@ function CustomerDashboard() {
 
 			{/* Quick Stats - Mobile Optimized */}
 			<div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-				{/* Active Bookings Card */}
-				<Card className="p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
-						<CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
-							Active
-						</CardTitle>
-						<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-							<Clock className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
-						</div>
-					</CardHeader>
-					<CardContent className="p-0 pt-1">
-						<div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">0</div>
-						<p className="text-xs text-muted-foreground leading-tight">
-							Bookings
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Upcoming Trips Card */}
-				<Card className="p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
-						<CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
-							Upcoming
-						</CardTitle>
-						<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-							<Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-						</div>
-					</CardHeader>
-					<CardContent className="p-0 pt-1">
-						<div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">0</div>
-						<p className="text-xs text-muted-foreground leading-tight">
-							Trips
-						</p>
-					</CardContent>
-				</Card>
+				{/* First two analytics cards */}
+				{customerStatsData.slice(0, 2).map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="default" 
+						className="p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation" 
+					/>
+				))}
 
 				{/* Total Trips Card - Hidden on mobile, spans full width on larger screens */}
-				<Card className="hidden lg:block p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation col-span-2 lg:col-span-1">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
-						<CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-							Total Trips
-						</CardTitle>
-						<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-							<Car className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-						</div>
-					</CardHeader>
-					<CardContent className="p-0 pt-1">
-						<div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">0</div>
-						<p className="text-xs text-muted-foreground flex items-center gap-1">
-							<TrendingUp className="h-2 w-2" />
-							Completed
-						</p>
-					</CardContent>
-				</Card>
+				<div className="hidden lg:block col-span-2 lg:col-span-1">
+					<AnalyticsCard 
+						data={customerStatsData[2]} 
+						view="default" 
+						className="p-3 sm:p-4 md:p-6 hover:shadow-md transition-shadow touch-manipulation" 
+					/>
+				</div>
 
 				{/* Mobile-specific Additional Stats */}
 				<Card className="lg:hidden col-span-2 p-3 sm:p-4 hover:shadow-md transition-shadow touch-manipulation">
@@ -87,18 +101,18 @@ function CustomerDashboard() {
 					<CardContent className="p-0">
 						<div className="grid grid-cols-3 gap-3 text-center">
 							<div>
-								<div className="text-lg font-bold text-foreground">0</div>
+								<div className="text-lg font-bold text-foreground">{travelSummaryData.total}</div>
 								<p className="text-xs text-muted-foreground">Total</p>
 							</div>
 							<div>
-								<div className="text-lg font-bold text-green-600">5.0</div>
+								<div className="text-lg font-bold text-green-600">{travelSummaryData.rating}</div>
 								<p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
 									<Star className="h-2 w-2 fill-current" />
 									Rating
 								</p>
 							</div>
 							<div>
-								<div className="text-lg font-bold text-blue-600">$0</div>
+								<div className="text-lg font-bold text-blue-600">${travelSummaryData.spent}</div>
 								<p className="text-xs text-muted-foreground">Spent</p>
 							</div>
 						</div>

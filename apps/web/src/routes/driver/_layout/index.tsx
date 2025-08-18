@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import { DriverStatusAccordion } from '@/features/driver/_components/driver-status-accordion';
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import {
 	CarIcon,
 	DollarSignIcon,
@@ -29,17 +30,85 @@ function DriverDashboardComponent() {
 	const { data: currentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
 	const navigate = useNavigate();
 
+	// Driver data with fallback values
+	const driver = {
+		totalRides: 0,
+		rating: 5.0,
+		licenseNumber: null,
+		phoneNumber: null,
+		licenseDocumentUrl: null,
+		isApproved: false,
+		isActive: false,
+		...currentDriver
+	};
+
 	// Calculate driver statistics based on real data
 	const driverStats = {
-		totalEarnings: currentDriver?.totalRides ? currentDriver.totalRides * 45.5 : 0,
-		thisWeekEarnings: currentDriver?.totalRides ? Math.floor(currentDriver.totalRides * 0.15) * 45.5 : 0,
-		totalTrips: currentDriver?.totalRides || 0,
-		thisWeekTrips: currentDriver?.totalRides ? Math.floor(currentDriver.totalRides * 0.15) : 0,
-		averageRating: currentDriver?.rating || 5.0,
-		activeHours: currentDriver?.totalRides ? currentDriver.totalRides * 1.8 : 0,
-		completedTrips: currentDriver?.totalRides || 0,
+		totalEarnings: driver.totalRides ? driver.totalRides * 45.5 : 0,
+		thisWeekEarnings: driver.totalRides ? Math.floor(driver.totalRides * 0.15) * 45.5 : 0,
+		totalTrips: driver.totalRides || 0,
+		thisWeekTrips: driver.totalRides ? Math.floor(driver.totalRides * 0.15) : 0,
+		averageRating: driver.rating || 5.0,
+		activeHours: driver.totalRides ? driver.totalRides * 1.8 : 0,
+		completedTrips: driver.totalRides || 0,
 		cancelledTrips: 0,
 	};
+
+	// Analytics card data
+	const analyticsData: AnalyticsCardData[] = [
+		{
+			id: 'earnings',
+			title: 'Earnings',
+			value: `$${driverStats.totalEarnings.toFixed(0)}`,
+			icon: DollarSignIcon,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: `+$${driverStats.thisWeekEarnings.toFixed(0)}`,
+			changeType: 'positive',
+			showTrend: true,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'trips',
+			title: 'Trips',
+			value: driverStats.totalTrips,
+			icon: CarIcon,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: `+${driverStats.thisWeekTrips} week`,
+			changeType: 'positive',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'rating',
+			title: 'Rating',
+			value: driverStats.averageRating.toFixed(1),
+			icon: StarIcon,
+			bgGradient: 'bg-gradient-to-br from-yellow-50 to-yellow-100',
+			iconBg: 'bg-yellow-500',
+			changeText: driverStats.completedTrips > 0 ? `${driverStats.completedTrips} trips` : 'No ratings',
+			changeType: 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'hours',
+			title: 'Hours',
+			value: `${Math.floor(driverStats.activeHours)}h`,
+			icon: ClockIcon,
+			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
+			iconBg: 'bg-purple-500',
+			changeText: 'Month',
+			changeType: 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
 
 	const recentBookings = [
 		{
@@ -73,10 +142,10 @@ function DriverDashboardComponent() {
 
 	// Enhanced driver status tracking
 	const driverStatus = {
-		profileComplete: Boolean(currentDriver?.licenseNumber && currentDriver?.phoneNumber),
-		documentsUploaded: Boolean(currentDriver?.licenseDocumentUrl),
-		adminApproved: Boolean(currentDriver?.isApproved),
-		isActive: Boolean(currentDriver?.isActive),
+		profileComplete: Boolean(driver.licenseNumber && driver.phoneNumber),
+		documentsUploaded: Boolean(driver.licenseDocumentUrl),
+		adminApproved: Boolean(driver.isApproved),
+		isActive: Boolean(driver.isActive),
 	};
 
 	// Determine driver's current onboarding stage
@@ -147,88 +216,14 @@ function DriverDashboardComponent() {
 
 			{/* Mobile-Optimized Stats Cards */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-				{/* Total Earnings Card */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Earnings</span>
-							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-								<DollarSignIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl font-bold text-foreground">
-							${driverStats.totalEarnings.toFixed(0)}
-						</div>
-						<p className="text-xs text-green-600 flex items-center gap-1">
-							<TrendingUpIcon className="h-2 w-2" />
-							+${driverStats.thisWeekEarnings.toFixed(0)}
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Total Trips Card */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Trips</span>
-							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-								<CarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl font-bold text-foreground">{driverStats.totalTrips}</div>
-						<p className="text-xs text-blue-600 flex items-center gap-1">
-							<ActivityIcon className="h-2 w-2" />
-							+{driverStats.thisWeekTrips} week
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Rating Card */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Rating</span>
-							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-								<StarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-yellow-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-1">
-							{driverStats.averageRating.toFixed(1)}
-							<StarIcon className="h-3 w-3 text-yellow-500 fill-current" />
-						</div>
-						<p className="text-xs text-muted-foreground truncate">
-							{driverStats.completedTrips > 0 
-								? `${driverStats.completedTrips} trips`
-								: 'No ratings'
-							}
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Hours Card */}
-				<Card className="p-3 sm:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
-					<CardHeader className="p-0 pb-2">
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-muted-foreground truncate">Hours</span>
-							<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-								<ClockIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="text-lg sm:text-xl font-bold text-foreground">{Math.floor(driverStats.activeHours)}h</div>
-						<p className="text-xs text-purple-600 flex items-center gap-1">
-							<TargetIcon className="h-2 w-2" />
-							Month
-						</p>
-					</CardContent>
-				</Card>
+				{analyticsData.map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="compact" 
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation" 
+					/>
+				))}
 			</div>
 
 			{/* Recent Activity Section - Mobile Optimized */}

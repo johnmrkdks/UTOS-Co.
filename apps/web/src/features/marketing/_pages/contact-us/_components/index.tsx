@@ -3,7 +3,7 @@ import { ContactUsForm } from "./contact-us-form";
 import { ContactUsMap } from "./map";
 import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import { CONTACT_INFO } from "@/features/marketing/_constants/contact-info";
+import { BUSINESS_INFO } from "@/constants/business-info";
 import {
 	Phone,
 	Mail,
@@ -21,16 +21,16 @@ const contactMethods = [
 		icon: Phone,
 		title: "Call Us",
 		description: "Speak directly with our team",
-		contact: CONTACT_INFO.phone.display,
-		action: CONTACT_INFO.phone.link,
+		contact: BUSINESS_INFO.phone.display,
+		action: BUSINESS_INFO.phone.link,
 		available: "00:00 – 23:45"
 	},
 	{
 		icon: Mail,
 		title: "Email Us",
 		description: "Send us a detailed message",
-		contact: CONTACT_INFO.email.display,
-		action: CONTACT_INFO.email.link,
+		contact: BUSINESS_INFO.email.display,
+		action: BUSINESS_INFO.email.link,
 		available: "24 hours response"
 	},
 ];
@@ -83,7 +83,7 @@ export function ContactUs({ className, ...props }: ContactUsProps) {
 						</p>
 
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<a href={CONTACT_INFO.phone.link}>
+							<a href={BUSINESS_INFO.phone.link}>
 								<Button
 									size="lg"
 									className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
