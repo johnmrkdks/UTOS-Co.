@@ -1,15 +1,12 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
 import { Progress } from "@workspace/ui/components/progress";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { 
 	CheckCircle, 
 	XCircle, 
 	AlertTriangle, 
-	Eye, 
-	EyeOff, 
 	Info,
 	TrendingUp 
 } from "lucide-react";
@@ -28,18 +25,12 @@ import {
 export interface PublicationValidationPanelProps {
 	data: CarValidationData | PackageValidationData;
 	type: "car" | "package";
-	isPublished: boolean;
-	onTogglePublish: (shouldPublish: boolean) => void;
-	isLoading?: boolean;
 	className?: string;
 }
 
 export function PublicationValidationPanel({
 	data,
 	type,
-	isPublished,
-	onTogglePublish,
-	isLoading = false,
 	className,
 }: PublicationValidationPanelProps) {
 	const validation = useMemo(() => {
@@ -153,75 +144,7 @@ export function PublicationValidationPanel({
 					</Alert>
 				)}
 
-				{/* Publication Controls */}
-				<div className="flex items-center justify-between pt-4 border-t">
-					<div className="flex items-center gap-2">
-						{isPublished ? (
-							<Badge variant="default">
-								<Eye className="h-3 w-3 mr-1" />
-								Published
-							</Badge>
-						) : (
-							<Badge variant="secondary">
-								<EyeOff className="h-3 w-3 mr-1" />
-								Unpublished
-							</Badge>
-						)}
-						
-						{!canPublish && (
-							<Badge variant="destructive" className="text-xs">
-								<Info className="h-3 w-3 mr-1" />
-								Blocked
-							</Badge>
-						)}
-					</div>
 
-					<div className="flex gap-2">
-						{isPublished ? (
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => onTogglePublish(false)}
-								disabled={isLoading}
-							>
-								<EyeOff className="h-4 w-4 mr-2" />
-								Unpublish
-							</Button>
-						) : (
-							<Button
-								variant={canPublish ? "default" : "secondary"}
-								size="sm"
-								onClick={() => onTogglePublish(true)}
-								disabled={!canPublish || isLoading}
-							>
-								<Eye className="h-4 w-4 mr-2" />
-								{canPublish ? "Publish" : "Fix Issues to Publish"}
-							</Button>
-						)}
-					</div>
-				</div>
-
-				{/* Publication Blocked Notice */}
-				{!canPublish && !isPublished && (
-					<Alert variant="destructive">
-						<XCircle className="h-4 w-4" />
-						<AlertDescription>
-							Publication is blocked due to validation issues. 
-							Please address the errors above before publishing.
-						</AlertDescription>
-					</Alert>
-				)}
-
-				{/* Published with Issues Warning */}
-				{isPublished && (validation.errors.length > 0 || validation.score < 60) && (
-					<Alert>
-						<AlertTriangle className="h-4 w-4" />
-						<AlertDescription>
-							This {type} is published but has validation issues. 
-							Consider unpublishing and fixing these issues for better customer experience.
-						</AlertDescription>
-					</Alert>
-				)}
 			</CardContent>
 		</Card>
 	);

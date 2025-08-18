@@ -38,7 +38,7 @@ export function ImagesForm({ control, className, ...props }: ImagesFormProps) {
 			<CardHeader className="pb-4">
 				<CardTitle className="text-lg">Car Images</CardTitle>
 				<CardDescription className="text-sm">
-					Upload up to {UPLOAD_CONFIG.maxFiles} images of the car. The first image will be used as the main image.
+					Upload at least 1 image (up to {UPLOAD_CONFIG.maxFiles} maximum). At least one image is required to add a car.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>

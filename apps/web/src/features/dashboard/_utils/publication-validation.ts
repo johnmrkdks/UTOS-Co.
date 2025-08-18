@@ -78,24 +78,28 @@ export function validateCarForPublication(car: CarValidationData): ValidationRes
 		score -= 5;
 	}
 
-	// Legal compliance validation
-	if (!car.insuranceExpiry) {
-		errors.push("Insurance expiry date is required");
-		score -= 20;
-	} else if (car.insuranceExpiry < new Date()) {
-		errors.push("Insurance has expired");
-		score -= 30;
-	} else if (car.insuranceExpiry < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) {
-		warnings.push("Insurance expires within 30 days");
+	// Legal compliance validation (optional fields)
+	if (car.insuranceExpiry) {
+		if (car.insuranceExpiry < new Date()) {
+			errors.push("Insurance has expired");
+			score -= 30;
+		} else if (car.insuranceExpiry < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) {
+			warnings.push("Insurance expires within 30 days");
+			score -= 5;
+		}
+	} else {
+		warnings.push("Insurance expiry date not provided");
 		score -= 5;
 	}
 
-	if (!car.registrationExpiry) {
-		errors.push("Registration expiry date is required");
-		score -= 20;
-	} else if (car.registrationExpiry < new Date()) {
-		errors.push("Registration has expired");
-		score -= 30;
+	if (car.registrationExpiry) {
+		if (car.registrationExpiry < new Date()) {
+			errors.push("Registration has expired");
+			score -= 30;
+		}
+	} else {
+		warnings.push("Registration expiry date not provided");
+		score -= 5;
 	}
 
 	// Service history

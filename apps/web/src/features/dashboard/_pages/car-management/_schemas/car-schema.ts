@@ -63,9 +63,16 @@ export const CarFormSchema = z.object({
 	// Arrays for related data
 	features: z.array(z.string()).optional(),
 	images: z.array(CarImageSchema)
-		.optional()
+		.min(1, "At least one image is required")
 		.superRefine((images, ctx) => {
-			if (!images || images.length === 0) return true; // Allow empty array
+			if (!images || images.length === 0) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "At least one image is required to add a car",
+					path: []
+				});
+				return;
+			}
 
 			// Check for valid URLs
 			images.forEach((img, index) => {

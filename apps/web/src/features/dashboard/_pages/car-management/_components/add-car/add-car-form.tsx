@@ -26,10 +26,9 @@ import {
 	DraftDialog,
 } from "@/features/dashboard/_pages/car-management/_components/draft/draft-dialogs"
 import {
-	FormStatusIndicator,
 	StatusBadge,
 } from "@/features/dashboard/_pages/car-management/_components/draft/draft-indicators"
-import { PublicationValidationPanel, useTogglePublishCarMutation } from "@/features/dashboard/_components/publication"
+import { PublicationValidationPanel } from "@/features/dashboard/_components/publication"
 
 export type AddCarFormValues = z.infer<typeof CarFormSchema>
 
@@ -168,8 +167,6 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		mode: "onChange",
 	})
 
-	const togglePublishMutation = useTogglePublishCarMutation()
-
 	// Watch form data for validation
 	const currentFormData = form.watch()
 
@@ -194,17 +191,6 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		category: currentFormData.categoryId ? { name: "Category" } : undefined,
 		model: currentFormData.modelId ? { name: "Model", brand: { name: "Brand" } } : undefined,
 	}), [currentFormData, initialData])
-
-	const handleTogglePublish = useCallback((shouldPublish: boolean) => {
-		if (initialData?.id) {
-			togglePublishMutation.mutate({
-				id: initialData.id,
-				isPublished: shouldPublish,
-			})
-		} else {
-			toast.info("Save the car first before publishing")
-		}
-	}, [initialData?.id, togglePublishMutation])
 
 	const errorCount = errors ? Object.keys(errors).length : 0
 	const hasErrors = errorCount > 0
@@ -256,40 +242,38 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		<>
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(handleSubmit)} className={`flex flex-col h-full ${className || ""}`}>
-					<PaddingLayout className="flex-1 overflow-y-auto pb-10 pt-0">
-						<FormStatusIndicator isDirty={isDirty} onSaveDraft={handleSaveDraft} />
-						<ValidationErrors errors={errors} errorCount={errorCount} />
+					<div className="flex-1 overflow-y-auto">
+						<PaddingLayout className="pt-0 pb-4">
+							<ValidationErrors errors={errors} errorCount={errorCount} />
 
-						<div className="grid grid-cols-10 gap-4">
-							<div className="col-span-6 flex flex-col gap-4">
-								<BasicInfoForm control={form.control} />
-								<Separator />
-								<SpecificationsForm control={form.control} />
-								<Separator />
-								<DetailsForm control={form.control} />
-								<Separator />
-								<MaintenanceForm control={form.control} />
-								<Separator />
-								<OperationalStatusForm control={form.control} />
+							<div className="grid grid-cols-10 gap-4">
+								<div className="col-span-6 flex flex-col gap-4">
+									<BasicInfoForm control={form.control} />
+									<Separator />
+									<SpecificationsForm control={form.control} />
+									<Separator />
+									<DetailsForm control={form.control} />
+									<Separator />
+									<MaintenanceForm control={form.control} />
+									<Separator />
+									<OperationalStatusForm control={form.control} />
+								</div>
+								<div className="col-span-4 flex flex-col gap-4">
+									<FeaturesForm control={form.control} />
+									<ImagesForm control={form.control} />
+
+									{/* Publication Validation Panel */}
+									<PublicationValidationPanel
+										data={carValidationData}
+										type="car"
+									/>
+								</div>
 							</div>
-							<div className="col-span-4 flex flex-col gap-4">
-								<FeaturesForm control={form.control} />
-								<ImagesForm control={form.control} />
+						</PaddingLayout>
+					</div>
 
-								{/* Publication Validation Panel */}
-								<PublicationValidationPanel
-									data={carValidationData}
-									type="car"
-									isPublished={initialData?.isPublished ?? false}
-									onTogglePublish={handleTogglePublish}
-									isLoading={togglePublishMutation.isPending}
-								/>
-							</div>
-						</div>
-					</PaddingLayout>
-
-					{/* Footer Actions */}
-					<div className="sticky bottom-0 w-full bg-background/95 backdrop-blur-sm border-t shadow-lg">
+					{/* Footer Actions - Sticky within form container */}
+					<div className="sticky bottom-0 w-full bg-background/95 backdrop-blur-sm border-t shadow-lg z-10">
 						<PaddingLayout className="flex items-center justify-between gap-2 py-3">
 							<div className="flex items-center gap-2">
 								<Button
@@ -310,6 +294,17 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 									)}
 								</Button>
 
+								<Button 
+									type="button" 
+									variant="secondary" 
+									onClick={handleSaveDraft} 
+									disabled={isPending || !isDirty}
+									className="min-w-[100px]"
+								>
+									<FileTextIcon className="w-4 h-4" />
+									Save Draft
+								</Button>
+
 								<Button type="button" variant="outline" onClick={handleDiscard} disabled={isPending}>
 									Cancel
 								</Button>
@@ -319,11 +314,11 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 										type="button"
 										variant="ghost"
 										size="sm"
-										onClick={handleSaveDraft}
+										onClick={() => setShowDraftDialog(true)}
 										className="text-muted-foreground"
 									>
 										<FileTextIcon className="w-4 h-4" />
-										Draft available
+										Load Draft
 									</Button>
 								)}
 							</div>
