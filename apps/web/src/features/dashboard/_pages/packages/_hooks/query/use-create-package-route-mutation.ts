@@ -6,9 +6,9 @@ export const useCreatePackageRouteMutation = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation(trpc.packageRoutes.create.mutationOptions({
-		onSuccess: (_, variables) => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: trpc.packageRoutes.list.queryKey()
+				queryKey: trpc.packageRoutes.getByPackageId.queryKey()
 			});
 			toast.success("Package route added successfully");
 		},

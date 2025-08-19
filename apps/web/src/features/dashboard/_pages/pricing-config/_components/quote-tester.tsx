@@ -42,7 +42,7 @@ export function QuoteTester() {
 	});
 
 	const onSubmit = (data: QuoteTesterForm) => {
-		const config = pricingConfigsQuery.data?.items?.find(
+		const config = pricingConfigsQuery.data?.data?.find(
 			(c: any) => c.id === data.pricingConfigId
 		);
 
@@ -151,7 +151,7 @@ export function QuoteTester() {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{pricingConfigsQuery.data?.items?.map((config: any) => (
+												{pricingConfigsQuery.data?.data?.map((config: any) => (
 													<SelectItem key={config.id} value={config.id}>
 														{config.name} {config.isActive && <Badge variant="secondary" className="ml-2">Active</Badge>}
 													</SelectItem>

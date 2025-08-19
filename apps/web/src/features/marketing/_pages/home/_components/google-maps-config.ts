@@ -9,7 +9,7 @@
 export const GOOGLE_MAPS_CONFIG = {
 	// In a real app, this would come from environment variables
 	// For now, we're using a placeholder that will need to be replaced
-	apiKey: process.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY_HERE",
+	apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY_HERE",
 	libraries: ["places"] as const,
 	// Restrict autocomplete to Australia only
 	componentRestrictions: {

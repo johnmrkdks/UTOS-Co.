@@ -1,16 +1,22 @@
 import type { DB } from "@/db";
 import { z } from "zod";
+import { getDistanceMatrix, calculateHaversineDistance } from "@/lib/google-maps";
+import { eq } from "drizzle-orm";
+import { pricingConfig } from "@/db/sqlite/schema/price-config";
 
 export const CalculateInstantQuoteSchema = z.object({
-	originLatitude: z.number(),
-	originLongitude: z.number(),
-	destinationLatitude: z.number(),
-	destinationLongitude: z.number(),
-	carId: z.string(),
-	scheduledPickupTime: z.date(),
+	originAddress: z.string().min(1, "Origin address is required"),
+	destinationAddress: z.string().min(1, "Destination address is required"),
+	originLatitude: z.number().optional(),
+	originLongitude: z.number().optional(),
+	destinationLatitude: z.number().optional(),
+	destinationLongitude: z.number().optional(),
+	carId: z.string().optional(),
+	scheduledPickupTime: z.coerce.date().optional().default(new Date()),
 	stops: z.array(z.object({
-		latitude: z.number(),
-		longitude: z.number(),
+		address: z.string(),
+		latitude: z.number().optional(),
+		longitude: z.number().optional(),
 		waitingTime: z.number().int().default(0), // in minutes
 	})).optional(),
 });
@@ -37,64 +43,142 @@ export interface InstantQuote {
 
 export async function calculateInstantQuoteService(
 	db: DB, 
-	data: CalculateInstantQuoteParams
+	data: CalculateInstantQuoteParams,
+	env?: { GOOGLE_MAPS_API_KEY?: string }
 ): Promise<InstantQuote> {
-	// Calculate distance using Haversine formula
-	const distance = calculateDistance(
-		data.originLatitude,
-		data.originLongitude,
-		data.destinationLatitude,
-		data.destinationLongitude
-	);
-	
-	// Add distance for stops if provided
-	let totalDistance = distance;
+	let totalDistance = 0;
+	let totalDuration = 0;
 	let totalWaitingTime = 0;
-	
-	if (data.stops && data.stops.length > 0) {
-		let currentLat = data.originLatitude;
-		let currentLng = data.originLongitude;
+
+	try {
+		// Try to use Google Maps Distance Matrix API first
+		const origins = [data.originAddress];
+		const destinations = [data.destinationAddress];
 		
-		for (const stop of data.stops) {
-			totalDistance += calculateDistance(currentLat, currentLng, stop.latitude, stop.longitude);
-			totalWaitingTime += stop.waitingTime;
-			currentLat = stop.latitude;
-			currentLng = stop.longitude;
+		// Add stops if provided
+		if (data.stops && data.stops.length > 0) {
+			// Create a route: origin -> stops -> destination
+			const waypoints = data.stops.map(stop => stop.address);
+			
+			// For multi-stop routes, we need to calculate each segment
+			let currentOrigin = data.originAddress;
+			
+			for (const stop of data.stops) {
+				const response = await getDistanceMatrix({
+					origins: [currentOrigin],
+					destinations: [stop.address],
+					mode: "driving",
+					units: "metric",
+					avoidHighways: false,
+					avoidTolls: false,
+				}, env);
+				
+				if (response.rows[0]?.elements[0]?.status === "OK") {
+					const element = response.rows[0].elements[0];
+					totalDistance += element.distance?.value || 0; // meters
+					totalDuration += element.duration?.value || 0; // seconds
+					totalWaitingTime += stop.waitingTime; // minutes
+				}
+				
+				currentOrigin = stop.address;
+			}
+			
+			// Final segment from last stop to destination
+			const finalResponse = await getDistanceMatrix({
+				origins: [currentOrigin],
+				destinations: [data.destinationAddress],
+				mode: "driving",
+				units: "metric",
+				avoidHighways: false,
+				avoidTolls: false,
+			}, env);
+			
+			if (finalResponse.rows[0]?.elements[0]?.status === "OK") {
+				const element = finalResponse.rows[0].elements[0];
+				totalDistance += element.distance?.value || 0;
+				totalDuration += element.duration?.value || 0;
+			}
+		} else {
+			// Simple origin to destination
+			const response = await getDistanceMatrix({
+				origins,
+				destinations,
+				mode: "driving",
+				units: "metric",
+				avoidHighways: false,
+				avoidTolls: false,
+			}, env);
+
+			if (response.rows[0]?.elements[0]?.status === "OK") {
+				const element = response.rows[0].elements[0];
+				totalDistance = element.distance?.value || 0; // meters
+				totalDuration = element.duration?.value || 0; // seconds
+			}
 		}
+	} catch (error) {
+		console.warn("Google Maps API failed, using fallback calculation:", error);
 		
-		// Distance from last stop to destination
-		totalDistance += calculateDistance(
-			currentLat,
-			currentLng,
-			data.destinationLatitude,
-			data.destinationLongitude
-		);
+		// Fallback to Haversine formula if coordinates are available
+		if (data.originLatitude && data.originLongitude && 
+			data.destinationLatitude && data.destinationLongitude) {
+			
+			const fallback = calculateHaversineDistance(
+				data.originLatitude,
+				data.originLongitude,
+				data.destinationLatitude,
+				data.destinationLongitude
+			);
+			
+			totalDistance = fallback.distanceKm * 1000; // convert to meters
+			totalDuration = fallback.durationSeconds;
+		} else {
+			// Last resort: estimate based on typical Australian city distances
+			totalDistance = 15000; // 15km default
+			totalDuration = 1800; // 30 minutes default
+		}
 	}
-	
-	// Base pricing configuration (these should be configurable in the database)
-	const pricing = {
-		baseRate: 500, // $5.00 in cents
-		perKmRate: 150, // $1.50 per km in cents
-		perMinuteRate: 50, // $0.50 per minute in cents
-		minimumFare: 1000, // $10.00 minimum in cents
-		waitingTimeRate: 100, // $1.00 per minute in cents
-	};
-	
-	// Calculate estimated duration (assuming average speed of 30 km/h in city)
-	const estimatedDurationHours = totalDistance / 30; // in hours
-	const estimatedDurationMinutes = estimatedDurationHours * 60; // in minutes
-	const estimatedDurationSeconds = estimatedDurationMinutes * 60; // in seconds
-	
+
+	// Get active pricing configuration from database
+	const activePricingConfig = await db
+		.select()
+		.from(pricingConfig)
+		.where(eq(pricingConfig.isActive, true))
+		.limit(1);
+
+	let pricing;
+	if (activePricingConfig.length > 0) {
+		const config = activePricingConfig[0];
+		pricing = {
+			baseRate: config.baseFare,
+			perKmRate: config.pricePerKm,
+			perMinuteRate: config.pricePerMinute || 50,
+			minimumFare: config.baseFare, // Use base fare as minimum
+			waitingTimeRate: config.waitingChargePerMinute || 100,
+		};
+	} else {
+		// Fallback pricing if no configuration exists
+		pricing = {
+			baseRate: 500, // $5.00 in cents
+			perKmRate: 150, // $1.50 per km in cents
+			perMinuteRate: 50, // $0.50 per minute in cents
+			minimumFare: 1000, // $10.00 minimum in cents
+			waitingTimeRate: 100, // $1.00 per minute in cents
+		};
+	}
+
 	// Apply surge pricing based on time of day
 	const surgePricing = calculateSurgePricing(data.scheduledPickupTime);
 	
 	// Calculate fare components
 	const baseFare = pricing.baseRate;
-	const distanceFare = Math.round(totalDistance * pricing.perKmRate * surgePricing);
-	const timeFare = Math.round(estimatedDurationMinutes * pricing.perMinuteRate * surgePricing);
+	const distanceKm = totalDistance / 1000; // convert meters to km
+	const durationMinutes = totalDuration / 60; // convert seconds to minutes
+	
+	const distanceFare = Math.round(distanceKm * pricing.perKmRate * surgePricing);
+	const timeFare = 0; // Time fare excluded from calculation
 	const waitingTimeCharges = totalWaitingTime * pricing.waitingTimeRate;
 	
-	let totalAmount = baseFare + distanceFare + timeFare + waitingTimeCharges;
+	let totalAmount = baseFare + distanceFare + waitingTimeCharges;
 	
 	// Apply minimum fare
 	if (totalAmount < pricing.minimumFare) {
@@ -107,8 +191,8 @@ export async function calculateInstantQuoteService(
 		timeFare,
 		extraCharges: waitingTimeCharges,
 		totalAmount,
-		estimatedDistance: Math.round(totalDistance * 1000), // convert to meters
-		estimatedDuration: Math.round(estimatedDurationSeconds),
+		estimatedDistance: Math.round(totalDistance), // in meters
+		estimatedDuration: Math.round(totalDuration), // in seconds
 		breakdown: {
 			baseRate: pricing.baseRate,
 			perKmRate: pricing.perKmRate,

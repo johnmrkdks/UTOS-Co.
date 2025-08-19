@@ -20,10 +20,11 @@ function RouteComponent() {
 	const [showCreateConfig, setShowCreateConfig] = useState(false);
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 
-	const totalConfigs = pricingConfigsQuery.data?.totalItems || 0;
-	const activeConfigs = pricingConfigsQuery.data?.items?.filter((config: any) => config.isActive).length || 0;
-	const avgBaseFare = ((pricingConfigsQuery.data?.items?.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) || 0) / (pricingConfigsQuery.data?.items?.length || 1));
-	const avgPerKm = ((pricingConfigsQuery.data?.items?.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) || 0) / (pricingConfigsQuery.data?.items?.length || 1));
+	const configs = pricingConfigsQuery.data?.data || [];
+	const totalConfigs = configs.length;
+	const activeConfigs = configs.filter((config: any) => config.isActive).length;
+	const avgBaseFare = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) / configs.length) : 0;
+	const avgPerKm = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) / configs.length) : 0;
 
 	// Analytics card data for pricing config
 	const pricingStatsData: AnalyticsCardData[] = [
@@ -88,7 +89,7 @@ function RouteComponent() {
 							New Configuration
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+					<DialogContent className="!max-w-6xl max-h-[95vh] overflow-y-auto">
 						<DialogHeader>
 							<DialogTitle>Create Pricing Configuration</DialogTitle>
 							<DialogDescription>
@@ -102,10 +103,10 @@ function RouteComponent() {
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{pricingStatsData.map((data) => (
-					<AnalyticsCard 
-						key={data.id} 
-						data={data} 
-						view="compact" 
+					<AnalyticsCard
+						key={data.id}
+						data={data}
+						view="compact"
 					/>
 				))}
 			</div>

@@ -88,374 +88,382 @@ export function PricingConfigForm({ initialData, onSuccess, mode = "create" }: P
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				{/* Basic Configuration */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<DollarSign className="h-5 w-5" />
-							Basic Configuration
-						</CardTitle>
-						<CardDescription>Set up the core pricing structure</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Configuration Name</FormLabel>
-									<FormControl>
-										<Input placeholder="e.g., Standard Pricing, Premium Rates" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					{/* Left Column */}
+					<div className="space-y-6">
+						{/* Basic Configuration */}
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<DollarSign className="h-5 w-5" />
+									Basic Configuration
+								</CardTitle>
+								<CardDescription>Set up the core pricing structure</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Configuration Name</FormLabel>
+											<FormControl>
+												<Input placeholder="e.g., Standard Pricing, Premium Rates" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<FormField
-								control={form.control}
-								name="baseFare"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Base Fare (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormDescription>Minimum charge for any booking</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="pricePerKm"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Price per KM (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormDescription>Rate charged per kilometer</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="pricePerMinute"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Price per Minute (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormDescription>Time-based rate (optional)</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-					</CardContent>
-				</Card>
-
-				{/* Distance Tiers */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Distance Tiers (Optional)</CardTitle>
-						<CardDescription>Set different rates for initial distance</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<FormField
-								control={form.control}
-								name="firstKmRate"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>First KM Rate (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-											/>
-										</FormControl>
-										<FormDescription>Special rate for first kilometers</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="firstKmLimit"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>First KM Limit</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												min="1"
-												placeholder="5" 
-												{...field} 
-												onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
-											/>
-										</FormControl>
-										<FormDescription>How many km at first km rate</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-					</CardContent>
-				</Card>
-
-				{/* Time-based Multipliers */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<Clock className="h-5 w-5" />
-							Time-based Multipliers
-						</CardTitle>
-						<CardDescription>Adjust pricing for different times</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<FormField
-								control={form.control}
-								name="peakHourMultiplier"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Peak Hour Multiplier</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.1" 
-												min="0.1"
-												placeholder="1.0" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.0)}
-											/>
-										</FormControl>
-										<FormDescription>Rush hour rate multiplier</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="nightMultiplier"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Night Multiplier</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.1" 
-												min="0.1"
-												placeholder="1.2" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.2)}
-											/>
-										</FormControl>
-										<FormDescription>Night time rate multiplier</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="weekendMultiplier"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Weekend Multiplier</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.1" 
-												min="0.1"
-												placeholder="1.0" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.0)}
-											/>
-										</FormControl>
-										<FormDescription>Weekend rate multiplier</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-
-						<Separator />
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<FormLabel>Peak Hours</FormLabel>
-								<div className="grid grid-cols-2 gap-2">
+								<div className="grid grid-cols-1 gap-4">
 									<FormField
 										control={form.control}
-										name="peakHourStart"
+										name="baseFare"
 										render={({ field }) => (
 											<FormItem>
+												<FormLabel>Base Fare (AUD)</FormLabel>
 												<FormControl>
-													<Input type="time" {...field} />
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
 												</FormControl>
+												<FormDescription>Minimum charge for any booking</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
+
 									<FormField
 										control={form.control}
-										name="peakHourEnd"
+										name="pricePerKm"
 										render={({ field }) => (
 											<FormItem>
+												<FormLabel>Price per KM (AUD)</FormLabel>
 												<FormControl>
-													<Input type="time" {...field} />
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
 												</FormControl>
+												<FormDescription>Rate charged per kilometer</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="pricePerMinute"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Price per Minute (AUD)</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<FormDescription>Time-based rate (optional)</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
 								</div>
-							</div>
+							</CardContent>
+						</Card>
 
-							<div className="space-y-2">
-								<FormLabel>Night Hours</FormLabel>
-								<div className="grid grid-cols-2 gap-2">
+						{/* Distance Tiers */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Distance Tiers (Optional)</CardTitle>
+								<CardDescription>Set different rates for initial distance</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="grid grid-cols-1 gap-4">
 									<FormField
 										control={form.control}
-										name="nightHourStart"
+										name="firstKmRate"
 										render={({ field }) => (
 											<FormItem>
+												<FormLabel>First KM Rate (AUD)</FormLabel>
 												<FormControl>
-													<Input type="time" {...field} />
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+													/>
 												</FormControl>
+												<FormDescription>Special rate for first kilometers</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
+
 									<FormField
 										control={form.control}
-										name="nightHourEnd"
+										name="firstKmLimit"
 										render={({ field }) => (
 											<FormItem>
+												<FormLabel>First KM Limit</FormLabel>
 												<FormControl>
-													<Input type="time" {...field} />
+													<Input 
+														type="number" 
+														min="1"
+														placeholder="5" 
+														{...field} 
+														onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
+													/>
 												</FormControl>
+												<FormDescription>How many km at first km rate</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
 								</div>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
+							</CardContent>
+						</Card>
+					</div>
 
-				{/* Additional Charges */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Additional Charges</CardTitle>
-						<CardDescription>Extra fees and charges</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<FormField
-								control={form.control}
-								name="waitingChargePerMinute"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Waiting Charge/Min (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormDescription>Charge for waiting time</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+					{/* Right Column */}
+					<div className="space-y-6">
+						{/* Time-based Multipliers */}
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Clock className="h-5 w-5" />
+									Time-based Multipliers
+								</CardTitle>
+								<CardDescription>Adjust pricing for different times</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="grid grid-cols-1 gap-4">
+									<FormField
+										control={form.control}
+										name="peakHourMultiplier"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Peak Hour Multiplier</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.1" 
+														min="0.1"
+														placeholder="1.0" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.0)}
+													/>
+												</FormControl>
+												<FormDescription>Rush hour rate multiplier</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-							<FormField
-								control={form.control}
-								name="stopCharge"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Stop Charge (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormDescription>Fee per additional stop</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+									<FormField
+										control={form.control}
+										name="nightMultiplier"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Night Multiplier</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.1" 
+														min="0.1"
+														placeholder="1.2" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.2)}
+													/>
+												</FormControl>
+												<FormDescription>Night time rate multiplier</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-							<FormField
-								control={form.control}
-								name="cancellationFee"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Cancellation Fee (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+									<FormField
+										control={form.control}
+										name="weekendMultiplier"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Weekend Multiplier</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.1" 
+														min="0.1"
+														placeholder="1.0" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.0)}
+													/>
+												</FormControl>
+												<FormDescription>Weekend rate multiplier</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+
+								<Separator />
+
+								<div className="grid grid-cols-1 gap-4">
+									<div className="space-y-2">
+										<FormLabel>Peak Hours</FormLabel>
+										<div className="grid grid-cols-2 gap-2">
+											<FormField
+												control={form.control}
+												name="peakHourStart"
+												render={({ field }) => (
+													<FormItem>
+														<FormControl>
+															<Input type="time" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
 											/>
-										</FormControl>
-										<FormDescription>Fee for cancelled bookings</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-					</CardContent>
-				</Card>
+											<FormField
+												control={form.control}
+												name="peakHourEnd"
+												render={({ field }) => (
+													<FormItem>
+														<FormControl>
+															<Input type="time" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+
+									<div className="space-y-2">
+										<FormLabel>Night Hours</FormLabel>
+										<div className="grid grid-cols-2 gap-2">
+											<FormField
+												control={form.control}
+												name="nightHourStart"
+												render={({ field }) => (
+													<FormItem>
+														<FormControl>
+															<Input type="time" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+											<FormField
+												control={form.control}
+												name="nightHourEnd"
+												render={({ field }) => (
+													<FormItem>
+														<FormControl>
+															<Input type="time" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Additional Charges */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Additional Charges</CardTitle>
+								<CardDescription>Extra fees and charges</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="grid grid-cols-1 gap-4">
+									<FormField
+										control={form.control}
+										name="waitingChargePerMinute"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Waiting Charge/Min (AUD)</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<FormDescription>Charge for waiting time</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="stopCharge"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Stop Charge (AUD)</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<FormDescription>Fee per additional stop</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="cancellationFee"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Cancellation Fee (AUD)</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.01" 
+														min="0"
+														placeholder="0.00" 
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<FormDescription>Fee for cancelled bookings</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+				</div>
 
 				{/* Status */}
 				<Card>

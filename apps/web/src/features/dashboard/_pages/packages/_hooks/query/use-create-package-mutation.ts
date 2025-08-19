@@ -9,7 +9,7 @@ export const useCreatePackageMutation = () => {
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: trpc.packages.list.queryKey() });
 			toast.success("Package created successfully", {
-				description: `"${data.name}" has been added to your packages.`,
+				description: `"${data?.name}" has been added to your packages.`,
 			});
 		},
 		onError: (error) => {

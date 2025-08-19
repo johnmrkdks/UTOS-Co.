@@ -2,8 +2,7 @@ import { Button } from "@workspace/ui/components/button";
 import { DataTable } from "@workspace/ui/components/data-table";
 import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
 import { BookingFilters } from "./booking-filters";
-import { getAllBookingsColumns, getCompactBookingsColumns, type Booking } from "./booking-table-columns";
-import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import { bookingTableColumns, compactBookingTableColumns, type Booking } from "./booking-table-columns";
 import { useState, useMemo } from "react";
 import { UserCheck, Ban } from "lucide-react";
 
@@ -15,7 +14,6 @@ interface BookingsListTableProps {
 }
 
 export function BookingsListTable({ bookingType, status, filters, compact = false }: BookingsListTableProps) {
-	const { openBookingDetailsDialog, openAssignDriverDialog } = useBookingManagementModalProvider();
 	const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
 	
 	const bookingsQuery = useGetBookingsQuery({
@@ -98,29 +96,22 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		console.log("Cancel booking:", booking.id);
 	};
 
-	const handleAssignDriver = (booking: Booking) => {
-		console.log("🚗 Opening assign driver dialog for booking:", booking.id);
-		openAssignDriverDialog(booking);
-	};
-
 	// Use appropriate column configuration based on compact mode
 	const columns = compact 
-		? getCompactBookingsColumns(
+		? compactBookingTableColumns({
 			selectedBookings,
-			toggleBookingSelection,
-			toggleAllSelection,
-			openBookingDetailsDialog,
-			handleAssignDriver
-		)
-		: getAllBookingsColumns(
+			onToggleBookingSelection: toggleBookingSelection,
+			onToggleAllSelection: toggleAllSelection,
+			onEditBooking: handleEditBooking,
+			onCancelBooking: handleCancelBooking
+		})
+		: bookingTableColumns({
 			selectedBookings,
-			toggleBookingSelection,
-			toggleAllSelection,
-			openBookingDetailsDialog,
-			handleAssignDriver,
-			handleEditBooking,
-			handleCancelBooking
-		);
+			onToggleBookingSelection: toggleBookingSelection,
+			onToggleAllSelection: toggleAllSelection,
+			onEditBooking: handleEditBooking,
+			onCancelBooking: handleCancelBooking
+		});
 
 	if (bookingsQuery.isLoading) {
 		return <div>Loading bookings...</div>;
@@ -179,6 +170,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 				data={filteredData}
 				searchKey="customerName"
 				searchPlaceholder="Search by customer name..."
+				isLoading={bookingsQuery.isLoading}
 			/>
 		</div>
 	);

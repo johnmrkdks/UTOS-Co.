@@ -152,7 +152,7 @@ export function PricingConfigTable() {
 		},
 	];
 
-	const configs = pricingConfigsQuery.data?.items || [];
+	const configs = pricingConfigsQuery.data?.data || [];
 
 	return (
 		<>

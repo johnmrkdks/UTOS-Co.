@@ -9,7 +9,7 @@ import {
 import { publicProcedure, router } from "@/trpc/init";
 
 export const packageCategoriesRouter = router({
-	getAll: publicProcedure.query(async ({ ctx }) => {
+	list: publicProcedure.query(async ({ ctx }) => {
 		return getAllPackageCategories(ctx.db);
 	}),
 

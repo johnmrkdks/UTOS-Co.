@@ -37,10 +37,10 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 
 		// Create script tag to load Google Maps API
 		const script = document.createElement("script")
-		script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE"}&libraries=places`
+		script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE"}&libraries=places`
 		script.async = true
 		script.defer = true
-		
+
 		script.onload = () => {
 			setIsLoaded(true)
 		}
@@ -68,8 +68,8 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 			// Configure autocomplete options
 			const autocompleteOptions = {
 				componentRestrictions: options.componentRestrictions || { country: "au" },
-				types: options.types || ["geocode"],
-				fields: ["place_id", "formatted_address", "name", "address_components"],
+				types: options.types || ["geocode", "establishment"],
+				fields: ["place_id", "formatted_address", "name", "address_components", "geometry"],
 			}
 
 			// Initialize autocomplete
@@ -81,7 +81,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 			// Add place selection listener
 			const listener = autocompleteRef.current.addListener("place_changed", () => {
 				const place = autocompleteRef.current?.getPlace()
-				
+
 				if (place && place.place_id && options.onPlaceSelect) {
 					const placeResult: PlaceResult = {
 						placeId: place.place_id,
@@ -114,16 +114,16 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 
 		return new Promise((resolve) => {
 			const service = new (window as any).google.maps.places.AutocompleteService()
-			
+
 			service.getPlacePredictions(
 				{
 					input: input.trim(),
 					componentRestrictions: options.componentRestrictions || { country: "au" },
-					types: options.types || ["geocode"],
+					types: options.types || ["geocode", "establishment"],
 				},
 				(predictions: any[] | null, status: any) => {
 					setIsLoading(false)
-					
+
 					if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
 						const results: PlaceResult[] = predictions.map((prediction) => ({
 							placeId: prediction.place_id,
@@ -131,7 +131,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 							mainText: prediction.structured_formatting.main_text,
 							secondaryText: prediction.structured_formatting.secondary_text || "",
 						}))
-						
+
 						setPredictions(results)
 						resolve(results)
 					} else {

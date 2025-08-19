@@ -6,6 +6,7 @@ import {
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
+	DialogClose,
 } from "@workspace/ui/components/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
@@ -132,11 +133,19 @@ export function BookingDetailsDialog() {
 							{booking.status.replace("_", " ").toUpperCase()}
 						</Badge>
 					</div>
-					<div className="text-right">
-						<div className="text-lg font-bold text-primary">
-							${(booking.quotedAmount / 100).toFixed(2)}
+					<div className="flex items-center gap-3">
+						<div className="text-right">
+							<div className="text-lg font-bold text-primary">
+								${(booking.quotedAmount / 100).toFixed(2)}
+							</div>
+							<div className="text-xs text-gray-500 font-mono">{booking.id}</div>
 						</div>
-						<div className="text-xs text-gray-500 font-mono">{booking.id}</div>
+						<DialogClose asChild>
+							<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+								<X className="h-4 w-4" />
+								<span className="sr-only">Close</span>
+							</Button>
+						</DialogClose>
 					</div>
 				</div>
 

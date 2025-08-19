@@ -9,10 +9,10 @@ export const useTogglePublishPackageMutation = () => {
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: trpc.packages.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.packages.listPublished.queryKey() });
-			
-			const action = data.isPublished ? "published" : "unpublished";
+
+			const action = data?.isPublished ? "published" : "unpublished";
 			toast.success(`Package ${action} successfully`, {
-				description: `"${data.name}" has been ${action}.`,
+				description: `"${data?.name}" has been ${action}.`,
 			});
 		},
 		onError: (error) => {
