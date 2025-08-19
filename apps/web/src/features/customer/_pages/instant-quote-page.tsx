@@ -2,16 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Textarea } from "@workspace/ui/components/textarea";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@workspace/ui/components/form";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Badge } from "@workspace/ui/components/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { 
-	MapPin, 
-	Plus, 
-	Calendar, 
-	Clock, 
-	Users, 
+import {
+	MapPin,
+	Plus,
 	Calculator,
 	Car,
 	Route,
@@ -19,10 +17,50 @@ import {
 	Bookmark,
 	History,
 	Star,
-	Package
+	Package,
+	ArrowRight,
+	ArrowLeft,
+	ChevronDown,
+	ChevronRight,
+	AlertCircle
 } from "lucide-react";
 import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
+import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/home/_hooks/query/use-calculate-instant-quote-mutation";
+import { useCheckInstantQuoteAvailabilityQuery } from "@/features/marketing/_pages/home/_hooks/query/use-check-instant-quote-availability-query";
+
+const instantQuoteSchema = z.object({
+	originAddress: z.string().min(1, "Origin address is required"),
+	destinationAddress: z.string().min(1, "Destination address is required"),
+	stops: z.array(z.object({
+		address: z.string().min(1, "Stop address is required"),
+	})).optional().default([]),
+})
+
+type InstantQuoteForm = z.infer<typeof instantQuoteSchema>
+
+interface QuoteResult {
+	baseFare: number
+	distanceFare: number
+	timeFare: number
+	extraCharges: number
+	totalAmount: number
+	estimatedDistance: number
+	estimatedDuration: number
+	breakdown: {
+		baseRate: number
+		perKmRate: number
+		perMinuteRate: number
+		minimumFare: number
+		surgePricing?: number
+	}
+}
+
+type Step = "input" | "results"
 
 interface Stop {
 	id: string;
@@ -33,17 +71,35 @@ interface Stop {
 export function InstantQuotePage() {
 	const { session } = useUserQuery();
 	const [activeTab, setActiveTab] = useState("new-quote");
-	const [pickupAddress, setPickupAddress] = useState("");
-	const [dropoffAddress, setDropoffAddress] = useState("");
-	const [stops, setStops] = useState<Stop[]>([]);
-	const [passengers, setPassengers] = useState(1);
-	const [date, setDate] = useState("");
-	const [time, setTime] = useState("");
-	const [serviceType, setServiceType] = useState("");
-	const [specialRequests, setSpecialRequests] = useState("");
-	const [quote, setQuote] = useState<any>(null);
+	const [currentStep, setCurrentStep] = useState<Step>("input");
+	const [quote, setQuote] = useState<QuoteResult | null>(null);
+	const [originGeometry, setOriginGeometry] = useState<any>(null);
+	const [destinationGeometry, setDestinationGeometry] = useState<any>(null);
+	const [stopsGeometry, setStopsGeometry] = useState<any[]>([]);
+	const [showBreakdown, setShowBreakdown] = useState(false);
 
-	// Mock data - replace with real tRPC calls
+	const calculateQuoteMutation = useCalculateInstantQuoteMutation();
+	const availabilityQuery = useCheckInstantQuoteAvailabilityQuery();
+
+	const form = useForm({
+		resolver: zodResolver(instantQuoteSchema),
+		defaultValues: {
+			originAddress: "",
+			destinationAddress: "",
+			stops: [],
+		},
+	});
+
+	const { fields: stopFields, append: appendStop, remove: removeStop } = useFieldArray({
+		control: form.control,
+		name: "stops",
+	});
+
+	const watchedValues = form.watch(["originAddress", "destinationAddress"]);
+	const isAvailable = availabilityQuery.data?.available;
+	const canCalculateQuote = watchedValues[0] && watchedValues[1] && isAvailable;
+
+	// Mock data for saved routes and history (keeping these for the other tabs)
 	const savedRoutes = [
 		{ id: 1, name: "Home to Airport", from: "123 Main St, Sydney", to: "Sydney Airport", used: 5 },
 		{ id: 2, name: "Office to Hotel", from: "456 Business Ave", to: "Luxury Hotel Downtown", used: 2 },
@@ -55,71 +111,112 @@ export function InstantQuotePage() {
 		{ id: 2, from: "Airport", to: "CBD", price: "$65", date: "1 week ago" },
 	];
 
+	// Loading state for availability check
+	if (availabilityQuery.isLoading) {
+		return (
+			<div className="max-w-6xl mx-auto space-y-6">
+				<div className="text-center space-y-2">
+					<h1 className="text-3xl font-bold text-gray-900">Fare Estimator</h1>
+					<p className="text-gray-600">Get instant fare estimates for your custom trips</p>
+				</div>
+				<Card>
+					<CardContent className="space-y-4 p-6">
+						<Skeleton className="h-20 w-full" />
+						<Skeleton className="h-20 w-full" />
+						<Skeleton className="h-10 w-full" />
+					</CardContent>
+				</Card>
+			</div>
+		)
+	}
+
+	const handleOriginSelect = (place: { placeId: string; description: string; geometry?: any }) => {
+		setOriginGeometry(place.geometry)
+		form.setValue("originAddress", place.description)
+	}
+
+	const handleDestinationSelect = (place: { placeId: string; description: string; geometry?: any }) => {
+		setDestinationGeometry(place.geometry)
+		form.setValue("destinationAddress", place.description)
+	}
+
+	const handleStopSelect = (index: number, place: { placeId: string; description: string; geometry?: any }) => {
+		const newStopsGeometry = [...stopsGeometry]
+		newStopsGeometry[index] = place.geometry
+		setStopsGeometry(newStopsGeometry)
+		form.setValue(`stops.${index}.address`, place.description)
+	}
+
 	const addStop = () => {
-		setStops([...stops, { id: Math.random().toString(), address: "" }]);
-	};
+		appendStop({ address: "" })
+		setStopsGeometry([...stopsGeometry, null])
+	}
 
-	const removeStop = (id: string) => {
-		setStops(stops.filter(stop => stop.id !== id));
-	};
-
-	const updateStop = (id: string, address: string) => {
-		setStops(stops.map(stop => stop.id === id ? { ...stop, address } : stop));
-	};
+	const removeStopAt = (index: number) => {
+		removeStop(index)
+		const newStopsGeometry = [...stopsGeometry]
+		newStopsGeometry.splice(index, 1)
+		setStopsGeometry(newStopsGeometry)
+	}
 
 	const loadSavedRoute = (route: any) => {
-		setPickupAddress(route.from);
-		setDropoffAddress(route.to);
+		form.setValue("originAddress", route.from);
+		form.setValue("destinationAddress", route.to);
 		setActiveTab("new-quote");
 	};
 
-	const calculateQuote = () => {
-		// Enhanced quote calculation with service type considerations
-		const basePrice = 50;
-		const distancePrice = Math.random() * 100 + 50;
-		const stopPrice = stops.length * 15;
-		const serviceMultiplier = serviceType === "premium" ? 1.5 : serviceType === "luxury" ? 2 : 1;
-		const total = (basePrice + distancePrice + stopPrice) * serviceMultiplier;
+	const handleCalculateQuote = async () => {
+		const formData = form.getValues()
 
-		setQuote({
-			baseFare: basePrice,
-			distanceFare: distancePrice.toFixed(2),
-			stopsFare: stopPrice,
-			serviceTypeFare: serviceType ? (total - (basePrice + distancePrice + stopPrice)).toFixed(2) : 0,
-			total: total.toFixed(2),
-			estimatedDuration: "45-60 minutes",
-			serviceType: serviceType || "standard",
-			carOptions: [
-				{ 
-					name: "Premium Sedan", 
-					price: total.toFixed(2), 
-					capacity: "1-4 passengers",
-					features: ["WiFi", "Water", "Phone Charger"],
-					rating: 4.8
-				},
-				{ 
-					name: "Executive SUV", 
-					price: (total * 1.2).toFixed(2), 
-					capacity: "1-6 passengers",
-					features: ["WiFi", "Refreshments", "Premium Audio"],
-					rating: 4.9
-				},
-				{ 
-					name: "Luxury Van", 
-					price: (total * 1.4).toFixed(2), 
-					capacity: "1-8 passengers",
-					features: ["WiFi", "Full Bar", "Entertainment System"],
-					rating: 4.7
-				}
-			]
-		});
-	};
+		// Extract coordinates from geometry if available
+		const originLat = originGeometry?.location?.lat?.();
+		const originLng = originGeometry?.location?.lng?.();
+		const destinationLat = destinationGeometry?.location?.lat?.();
+		const destinationLng = destinationGeometry?.location?.lng?.();
+
+		// Extract stops coordinates
+		const stopsData = formData.stops?.map((stop, index) => ({
+			address: stop.address,
+			latitude: stopsGeometry[index]?.location?.lat?.(),
+			longitude: stopsGeometry[index]?.location?.lng?.(),
+		})) || [];
+
+		const result = await calculateQuoteMutation.mutateAsync({
+			originAddress: formData.originAddress,
+			destinationAddress: formData.destinationAddress,
+			originLatitude: originLat,
+			originLongitude: originLng,
+			destinationLatitude: destinationLat,
+			destinationLongitude: destinationLng,
+			stops: stopsData,
+			// scheduledPickupTime is optional and defaults to current time for surge pricing
+		})
+		setQuote(result)
+		setCurrentStep("results")
+	}
+
+	const resetQuote = () => {
+		setQuote(null)
+		setOriginGeometry(null)
+		setDestinationGeometry(null)
+		setStopsGeometry([])
+		setCurrentStep("input")
+		setShowBreakdown(false)
+		form.reset()
+	}
+
+	const goBackToInput = () => {
+		setCurrentStep("input")
+		setShowBreakdown(false)
+	}
+
+	const isCalculating = calculateQuoteMutation.isPending;
 
 	return (
 		<div className="max-w-6xl mx-auto space-y-6">
 			{/* Header */}
 			<div className="text-center space-y-2">
-				<h1 className="text-3xl font-bold text-gray-900">Fare Estimator</h1>
+				<h1 className="text-3xl font-bold text-gray-900">Instant Quote</h1>
 				<p className="text-gray-600">Get instant fare estimates for your custom trips</p>
 			</div>
 
@@ -140,184 +237,169 @@ export function InstantQuotePage() {
 				</TabsList>
 
 				<TabsContent value="new-quote" className="space-y-6">
-					<div className="grid gap-6 lg:grid-cols-2">
-						{/* Enhanced Quote Form */}
+					{/* Service unavailable state */}
+					{availabilityQuery.data && !availabilityQuery.data.available ? (
 						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<Calculator className="h-5 w-5" />
-									Trip Details
-								</CardTitle>
-								<CardDescription>
-									Enter your pickup and destination for fare estimate
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-6">
-
-								{/* Pickup and Dropoff */}
-								<div className="space-y-4">
-									<div className="space-y-2">
-										<Label htmlFor="pickup" className="flex items-center gap-2">
-											<MapPin className="h-4 w-4 text-green-600" />
-											Pickup Location
-										</Label>
-										<Input
-											id="pickup"
-											placeholder="Enter pickup address"
-											value={pickupAddress}
-											onChange={(e) => setPickupAddress(e.target.value)}
-										/>
-									</div>
-
-									{/* Stops */}
-									{stops.map((stop, index) => (
-										<div key={stop.id} className="space-y-2">
-											<Label className="flex items-center gap-2">
-												<Route className="h-4 w-4 text-blue-600" />
-												Stop {index + 1}
-											</Label>
-											<div className="flex gap-2">
-												<Input
-													placeholder="Enter stop address"
-													value={stop.address}
-													onChange={(e) => updateStop(stop.id, e.target.value)}
-													className="flex-1"
-												/>
-												<Button
-													variant="outline"
-													size="icon"
-													onClick={() => removeStop(stop.id)}
-												>
-													<X className="h-4 w-4" />
-												</Button>
-											</div>
-										</div>
-									))}
-
-									<Button
-										variant="outline"
-										onClick={addStop}
-										className="w-full flex items-center gap-2"
-									>
-										<Plus className="h-4 w-4" />
-										Add Stop
+							<CardContent className="p-6">
+								<Alert>
+									<AlertCircle className="h-4 w-4" />
+									<AlertDescription>
+										Instant quote service is temporarily unavailable. Please contact us directly for pricing information or check back later.
+									</AlertDescription>
+								</Alert>
+								<div className="mt-4 text-center">
+									<Button variant="outline" onClick={() => availabilityQuery.refetch()}>
+										Try Again
 									</Button>
-
-									<div className="space-y-2">
-										<Label htmlFor="dropoff" className="flex items-center gap-2">
-											<MapPin className="h-4 w-4 text-red-600" />
-											Dropoff Location
-										</Label>
-										<Input
-											id="dropoff"
-											placeholder="Enter dropoff address"
-											value={dropoffAddress}
-											onChange={(e) => setDropoffAddress(e.target.value)}
-										/>
-									</div>
 								</div>
-
-
-
-
-								{/* Calculate Button */}
-								<Button
-									onClick={calculateQuote}
-									className="w-full"
-									disabled={!pickupAddress || !dropoffAddress}
-								>
-									<Calculator className="h-4 w-4 mr-2" />
-									Estimate Fare
-								</Button>
 							</CardContent>
 						</Card>
-
-						{/* Enhanced Quote Results */}
-						{quote ? (
+					) : currentStep === "input" ? (
+						<div className="grid gap-6 lg:grid-cols-2">
+							{/* Enhanced Quote Form with GooglePlacesInput */}
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
-										<Car className="h-5 w-5" />
-										Your Fare Estimate
+										<Calculator className="h-5 w-5" />
+										Trip Details
 									</CardTitle>
 									<CardDescription>
-										Estimated pricing for your trip
+										Enter your pickup and destination for fare estimate
 									</CardDescription>
 								</CardHeader>
-								<CardContent className="space-y-6">
-									{/* Price Breakdown */}
-									<div className="space-y-3">
-										<div className="flex justify-between">
-											<span className="text-gray-600">Base Fare</span>
-											<span>${quote.baseFare}</span>
-										</div>
-										<div className="flex justify-between">
-											<span className="text-gray-600">Distance</span>
-											<span>${quote.distanceFare}</span>
-										</div>
-										{stops.length > 0 && (
-											<div className="flex justify-between">
-												<span className="text-gray-600">Stops ({stops.length})</span>
-												<span>${quote.stopsFare}</span>
-											</div>
-										)}
-										<hr />
-										<div className="flex justify-between text-lg font-semibold">
-											<span>Total</span>
-											<span className="text-primary">${quote.total}</span>
-										</div>
-									</div>
+								<CardContent>
+									<Form {...form}>
+										<form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+											{/* Origin Address */}
+											<FormField
+												control={form.control}
+												name="originAddress"
+												render={({ field }) => (
+													<FormItem>
+														<div className="flex items-center gap-2 mb-2">
+															<MapPin className="h-4 w-4 text-green-600" />
+															<span className="text-sm font-medium">Pickup Location</span>
+														</div>
+														<FormControl>
+															<GooglePlacesInput
+																disabled={!isAvailable}
+																value={field.value || ""}
+																onChange={field.onChange}
+																onPlaceSelect={handleOriginSelect}
+																placeholder="Enter pickup location in Australia..."
+																className="text-sm bg-background"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									{/* Enhanced Car Options */}
-									<div className="space-y-3">
-										<h4 className="font-medium">Available Vehicles</h4>
-										{quote.carOptions.map((car: any, index: number) => (
-											<div key={index} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-												<div className="flex justify-between items-start mb-2">
-													<div className="flex-1">
-														<div className="flex items-center gap-2 mb-1">
-															<p className="font-medium">{car.name}</p>
-															<div className="flex items-center gap-1">
-																<Star className="h-3 w-3 text-yellow-400 fill-current" />
-																<span className="text-xs text-gray-600">{car.rating}</span>
+											{/* Stops Section */}
+											{stopFields.map((field, index) => (
+												<FormField
+													key={field.id}
+													control={form.control}
+													name={`stops.${index}.address`}
+													render={({ field: stopField }) => (
+														<FormItem>
+															<div className="flex items-center gap-2 mb-2">
+																<Route className="h-4 w-4 text-blue-600" />
+																<span className="text-sm font-medium">Stop {index + 1}</span>
 															</div>
-														</div>
-														<p className="text-sm text-gray-600 mb-2">{car.capacity}</p>
-														<div className="flex flex-wrap gap-1">
-															{car.features.map((feature: string, i: number) => (
-																<Badge key={i} variant="outline" className="text-xs">
-																	{feature}
-																</Badge>
-															))}
-														</div>
-													</div>
-													<div className="text-right">
-														<p className="font-semibold text-primary text-lg">${car.price}</p>
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
+															<FormControl>
+																<GooglePlacesInput
+																	disabled={!isAvailable}
+																	value={stopField.value || ""}
+																	onChange={stopField.onChange}
+																	onPlaceSelect={(place) => handleStopSelect(index, place)}
+																	placeholder={`Enter stop address in Australia...`}
+																	className="text-sm bg-background"
+																	showRemoveButton={true}
+																	onRemove={() => removeStopAt(index)}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											))}
 
-									{/* Action Buttons */}
-									<div className="space-y-2">
-										<Button className="w-full">
-											<Car className="h-4 w-4 mr-2" />
-											Book This Trip
-										</Button>
-										<div className="grid grid-cols-2 gap-2">
-											<Button variant="outline">
-												<Bookmark className="h-4 w-4 mr-2" />
-												Save Route
+											{/* Destination Address */}
+											<FormField
+												control={form.control}
+												name="destinationAddress"
+												render={({ field }) => (
+													<FormItem>
+														<div className="flex items-center gap-2 mb-2">
+															<MapPin className="h-4 w-4 text-red-600" />
+															<span className="text-sm font-medium">Dropoff Location</span>
+														</div>
+														<FormControl>
+															<GooglePlacesInput
+																disabled={!isAvailable}
+																value={field.value || ""}
+																onChange={field.onChange}
+																onPlaceSelect={handleDestinationSelect}
+																placeholder="Enter destination in Australia..."
+																className="text-sm bg-background"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											{/* Add Stop Button */}
+											{stopFields.length < 3 && (
+												<Button
+													type="button"
+													variant="outline"
+													onClick={addStop}
+													disabled={!isAvailable}
+													className="w-full flex items-center gap-2"
+												>
+													<Plus className="h-4 w-4" />
+													Add Stop
+												</Button>
+											)}
+
+											{/* Calculate Button */}
+											<Button
+												type="button"
+												onClick={handleCalculateQuote}
+												disabled={!canCalculateQuote || isCalculating}
+												className="w-full"
+											>
+												{isCalculating ? (
+													<>
+														<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+														Calculating...
+													</>
+												) : (
+													<>
+														<Calculator className="mr-2 h-4 w-4" />
+														Estimate Fare
+														<ArrowRight className="ml-2 h-4 w-4" />
+													</>
+												)}
 											</Button>
-											<Button variant="outline">
-												Save Quote
-											</Button>
-										</div>
-									</div>
+
+											{!isAvailable ? (
+												<p className="text-xs text-destructive text-center">
+													* Service temporarily unavailable
+												</p>
+											) : !watchedValues[0] || !watchedValues[1] ? (
+												<p className="text-xs text-muted-foreground text-center">
+													* Regular Transfers Only - extras may apply
+												</p>
+											) : null}
+										</form>
+									</Form>
 								</CardContent>
 							</Card>
-						) : (
+
+							{/* Empty Results State */}
 							<Card className="flex items-center justify-center h-96">
 								<CardContent className="text-center">
 									<Calculator className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -327,8 +409,153 @@ export function InstantQuotePage() {
 									</p>
 								</CardContent>
 							</Card>
-						)}
-					</div>
+						</div>
+					) : (
+						/* Quote Results */
+						<div className="space-y-4">
+							{/* Back Button */}
+							<Button
+								variant="outline"
+								onClick={goBackToInput}
+								className="flex items-center gap-2"
+								size="sm"
+							>
+								<ArrowLeft className="h-4 w-4" />
+								Back to Form
+							</Button>
+
+							<div className="grid gap-6 lg:grid-cols-2">
+								{/* Trip Summary */}
+								<Card>
+									<CardHeader>
+										<CardTitle className="flex items-center gap-2">
+											<Car className="h-5 w-5" />
+											Trip Details
+										</CardTitle>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="bg-muted/30 p-3 rounded-lg">
+											<h3 className="font-medium mb-2 text-sm">Route Summary</h3>
+											<div className="space-y-1.5 text-xs">
+												<div className="flex items-start gap-2">
+													<div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
+													<div className="flex-1">
+														<div className="font-medium">From</div>
+														<div className="text-muted-foreground">{form.getValues("originAddress")}</div>
+													</div>
+												</div>
+												{form.getValues("stops")?.map((stop, index) => (
+													<div key={index} className="flex items-start gap-2">
+														<div className="w-3 h-3 rounded-full bg-orange-500 mt-1.5 flex-shrink-0" />
+														<div className="flex-1">
+															<div className="font-medium">Stop {index + 1}</div>
+															<div className="text-muted-foreground">{stop.address}</div>
+														</div>
+													</div>
+												))}
+												<div className="flex items-start gap-2">
+													<div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+													<div className="flex-1">
+														<div className="font-medium">To</div>
+														<div className="text-muted-foreground">{form.getValues("destinationAddress")}</div>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										{/* Journey Info */}
+										{quote && (
+											<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg">
+												<MapPin className="h-3 w-3" />
+												<span>
+													{(quote.estimatedDistance / 1000).toFixed(1)} km • {Math.round(quote.estimatedDuration / 60)} min journey
+												</span>
+											</div>
+										)}
+									</CardContent>
+								</Card>
+
+								{/* Fare Results */}
+								{quote && (
+									<Card>
+										<CardHeader>
+											<CardTitle className="flex items-center gap-2">
+												<Calculator className="h-5 w-5" />
+												Your Fare Estimate
+											</CardTitle>
+											<CardDescription>
+												Calculated fare breakdown
+											</CardDescription>
+										</CardHeader>
+										<CardContent className="space-y-4">
+											{/* Total Fare Display */}
+											<div className="bg-background border rounded-lg p-3">
+												<div className="flex justify-between items-center font-bold text-lg">
+													<span>Total Fare</span>
+													<span className="text-primary">${(quote.totalAmount / 100).toFixed(2)}</span>
+												</div>
+
+												{/* Collapsible Cost Breakdown */}
+												<button
+													onClick={() => setShowBreakdown(!showBreakdown)}
+													className="flex items-center gap-2 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+												>
+													{showBreakdown ? (
+														<ChevronDown className="h-3 w-3" />
+													) : (
+														<ChevronRight className="h-3 w-3" />
+													)}
+													View breakdown
+												</button>
+
+												{showBreakdown && (
+													<div className="mt-2 pt-2 border-t space-y-1">
+														<div className="flex justify-between text-xs">
+															<span>Base fare</span>
+															<span>${(quote.baseFare / 100).toFixed(2)}</span>
+														</div>
+														<div className="flex justify-between text-xs">
+															<span>Distance fare</span>
+															<span>${(quote.distanceFare / 100).toFixed(2)}</span>
+														</div>
+														{quote.extraCharges > 0 && (
+															<div className="flex justify-between text-xs">
+																<span>Extra charges</span>
+																<span>${(quote.extraCharges / 100).toFixed(2)}</span>
+															</div>
+														)}
+													</div>
+												)}
+											</div>
+
+											{/* Action Buttons */}
+											<div className="flex flex-col gap-2">
+												<Button className="w-full">
+													<Car className="h-4 w-4 mr-2" />
+													Book This Journey
+													<ArrowRight className="ml-2 h-4 w-4" />
+												</Button>
+
+												<div className="grid grid-cols-2 gap-2">
+													<Button variant="outline" onClick={resetQuote}>
+														Get New Quote
+													</Button>
+													<Button variant="outline">
+														<Bookmark className="h-4 w-4 mr-2" />
+														Save Route
+													</Button>
+												</div>
+											</div>
+
+											<p className="text-xs text-muted-foreground text-center">
+												* Prices are estimates and may vary based on traffic and other factors
+											</p>
+										</CardContent>
+									</Card>
+								)}
+							</div>
+						</div>
+					)}
 				</TabsContent>
 
 				<TabsContent value="saved-routes" className="space-y-4">

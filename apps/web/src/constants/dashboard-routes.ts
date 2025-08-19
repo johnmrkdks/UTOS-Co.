@@ -26,7 +26,6 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 		// Hide these pages in production
 		const developmentOnlyPaths = [
 			"/dashboard/analytics",
-			"/dashboard/pricing-config",
 			"/dashboard/admin-testing",
 		];
 

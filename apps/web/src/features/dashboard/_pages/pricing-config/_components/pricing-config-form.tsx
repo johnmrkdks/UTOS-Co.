@@ -87,8 +87,10 @@ export function PricingConfigForm({ initialData, onSuccess, mode = "create" }: P
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div className="flex flex-col h-full min-h-0">
+				<div className="flex-1 overflow-y-auto px-6 pb-4">
+					<div className="space-y-6">
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Left Column */}
 					<div className="space-y-6">
 						{/* Basic Configuration */}
@@ -494,13 +496,25 @@ export function PricingConfigForm({ initialData, onSuccess, mode = "create" }: P
 					</CardContent>
 				</Card>
 
-				<div className="flex justify-end space-x-2">
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-						{mode === "edit" ? "Update Configuration" : "Create Configuration"}
-					</Button>
+					</div>
 				</div>
-			</form>
+				
+				{/* Sticky Footer */}
+				<div className="flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6 mt-6">
+					<form onSubmit={form.handleSubmit(onSubmit)}>
+						<div className="flex justify-end space-x-2">
+							<Button 
+								type="submit" 
+								disabled={isSubmitting}
+								size="lg"
+							>
+								{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+								{mode === "edit" ? "Update Configuration" : "Create Configuration"}
+							</Button>
+						</div>
+					</form>
+				</div>
+			</div>
 		</Form>
 	);
 }

@@ -21,8 +21,8 @@ type ViewPricingConfigDialogProps = {
 export function ViewPricingConfigDialog({ config, open, onOpenChange }: ViewPricingConfigDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-				<DialogHeader>
+			<DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+				<DialogHeader className="flex-shrink-0">
 					<DialogTitle className="flex items-center gap-2">
 						<DollarSign className="h-5 w-5" />
 						{config?.name}
@@ -30,7 +30,8 @@ export function ViewPricingConfigDialog({ config, open, onOpenChange }: ViewPric
 					<DialogDescription>Pricing configuration details</DialogDescription>
 				</DialogHeader>
 				
-				<div className="space-y-4">
+				<div className="flex-1 overflow-y-auto px-1">
+					<div className="space-y-4">
 					<div className="flex items-center justify-between">
 						<span className="text-sm font-medium">Status</span>
 						<Badge variant={config?.isActive ? "default" : "secondary"}>
@@ -173,9 +174,10 @@ export function ViewPricingConfigDialog({ config, open, onOpenChange }: ViewPric
 							</p>
 						</div>
 					</div>
+					</div>
 				</div>
 
-				<DialogFooter>
+				<DialogFooter className="flex-shrink-0 border-t bg-background">
 					<Button onClick={() => onOpenChange(false)}>Close</Button>
 				</DialogFooter>
 			</DialogContent>

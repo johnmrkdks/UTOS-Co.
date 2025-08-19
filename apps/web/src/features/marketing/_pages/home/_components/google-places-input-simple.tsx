@@ -11,6 +11,8 @@ interface GooglePlacesInputProps {
 	placeholder?: string
 	className?: string
 	disabled?: boolean
+	onRemove?: () => void
+	showRemoveButton?: boolean
 }
 
 interface PlaceResult {
@@ -27,12 +29,14 @@ export function GooglePlacesInput({
 	placeholder = "Enter location in Australia...",
 	className,
 	disabled = false,
+	onRemove,
+	showRemoveButton = false,
 }: GooglePlacesInputProps) {
 	const [showSuggestions, setShowSuggestions] = useState(false)
 	const [selectedIndex, setSelectedIndex] = useState(-1)
 	const suggestionsRef = useRef<HTMLDivElement>(null)
 	const inputRef = useRef<HTMLInputElement>(null)
-	
+
 	const {
 		isLoaded,
 		predictions,
@@ -47,7 +51,7 @@ export function GooglePlacesInput({
 		const newValue = e.target.value
 		onChange(newValue)
 		setSelectedIndex(-1)
-		
+
 		if (newValue.trim() && isLoaded) {
 			await getPlacePredictions(newValue)
 			setShowSuggestions(true)
@@ -66,7 +70,7 @@ export function GooglePlacesInput({
 			const service = new (window as any).google.maps.places.PlacesService(
 				document.createElement('div')
 			)
-			
+
 			service.getDetails(
 				{
 					placeId,
@@ -111,12 +115,6 @@ export function GooglePlacesInput({
 		}
 	}, [showSuggestions, predictions, selectedIndex, handlePlaceSelect])
 
-	const clearInput = useCallback(() => {
-		onChange("")
-		setShowSuggestions(false)
-		setSelectedIndex(-1)
-		inputRef.current?.focus()
-	}, [onChange])
 
 	// Close suggestions when clicking outside
 	useEffect(() => {
@@ -133,34 +131,39 @@ export function GooglePlacesInput({
 
 	return (
 		<div className="relative" ref={suggestionsRef}>
-			<Input
-				ref={inputRef}
-				value={value}
-				onChange={handleInputChange}
-				onKeyDown={handleKeyDown}
-				placeholder={placeholder}
-				className={cn("pr-16", className)}
-				disabled={disabled}
-			/>
-			
-			<div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-				{value && (
-					<button
-						type="button"
-						onClick={clearInput}
-						className="p-0.5 hover:bg-muted rounded-full transition-colors"
-						tabIndex={-1}
-					>
-						<X className="h-3 w-3 text-muted-foreground" />
-					</button>
-				)}
-				{isLoading ? (
-					<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-				) : (
-					<MapPin className="h-4 w-4 text-muted-foreground" />
+			<div className="relative">
+				<div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center">
+					{isLoading ? (
+						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+					) : (
+						<MapPin className="h-4 w-4 text-muted-foreground" />
+					)}
+				</div>
+
+				<Input
+					ref={inputRef}
+					value={value}
+					onChange={handleInputChange}
+					onKeyDown={handleKeyDown}
+					placeholder={placeholder}
+					className={cn("pl-8", showRemoveButton ? "pr-8" : "pr-4", className)}
+					disabled={disabled}
+				/>
+
+				{showRemoveButton && onRemove && (
+					<div className="absolute right-2 top-1/2 -translate-y-1/2">
+						<button
+							type="button"
+							onClick={onRemove}
+							className="p-0.5 hover:bg-muted rounded-full transition-colors"
+							tabIndex={-1}
+						>
+							<X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+						</button>
+					</div>
 				)}
 			</div>
-			
+
 			{/* Suggestions dropdown */}
 			{showSuggestions && predictions.length > 0 && (
 				<div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">

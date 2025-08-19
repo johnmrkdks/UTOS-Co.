@@ -9,6 +9,9 @@ import {
 	updatePricingConfigService,
 	UpdatePricingConfigServiceSchema,
 } from "@/services/pricing-config/update-pricing-config";
+import {
+	togglePricingConfigActiveService,
+} from "@/services/pricing-config/toggle-pricing-config-active";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -40,6 +43,16 @@ export const pricingConfigRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const updatedConfig = await updatePricingConfigService(db, input);
+				return updatedConfig;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	toggleActive: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const updatedConfig = await togglePricingConfigActiveService(db, input.id);
 				return updatedConfig;
 			} catch (error) {
 				handleTRPCError(error);

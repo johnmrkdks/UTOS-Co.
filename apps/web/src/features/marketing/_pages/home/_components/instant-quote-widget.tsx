@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Calculator, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, AlertCircle } from "lucide-react"
+import { Calculator, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, AlertCircle, Plus, X } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
@@ -16,6 +16,9 @@ import { useCheckInstantQuoteAvailabilityQuery } from "../_hooks/query/use-check
 const instantQuoteSchema = z.object({
 	originAddress: z.string().min(1, "Origin address is required"),
 	destinationAddress: z.string().min(1, "Destination address is required"),
+	stops: z.array(z.object({
+		address: z.string().min(1, "Stop address is required"),
+	})).optional().default([]),
 })
 
 type InstantQuoteForm = z.infer<typeof instantQuoteSchema>
@@ -44,6 +47,7 @@ export function InstantQuoteWidget() {
 	const [quote, setQuote] = useState<QuoteResult | null>(null)
 	const [originGeometry, setOriginGeometry] = useState<any>(null)
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null)
+	const [stopsGeometry, setStopsGeometry] = useState<any[]>([])
 	const [showBreakdown, setShowBreakdown] = useState(false)
 
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation()
@@ -54,7 +58,13 @@ export function InstantQuoteWidget() {
 		defaultValues: {
 			originAddress: "",
 			destinationAddress: "",
+			stops: [],
 		},
+	})
+
+	const { fields: stopFields, append: appendStop, remove: removeStop } = useFieldArray({
+		control: form.control,
+		name: "stops",
 	})
 
 	const watchedValues = form.watch(["originAddress", "destinationAddress"])
@@ -117,6 +127,25 @@ export function InstantQuoteWidget() {
 		form.setValue("destinationAddress", place.description)
 	}
 
+	const handleStopSelect = (index: number, place: { placeId: string; description: string; geometry?: any }) => {
+		const newStopsGeometry = [...stopsGeometry]
+		newStopsGeometry[index] = place.geometry
+		setStopsGeometry(newStopsGeometry)
+		form.setValue(`stops.${index}.address`, place.description)
+	}
+
+	const addStop = () => {
+		appendStop({ address: "" })
+		setStopsGeometry([...stopsGeometry, null])
+	}
+
+	const removeStopAt = (index: number) => {
+		removeStop(index)
+		const newStopsGeometry = [...stopsGeometry]
+		newStopsGeometry.splice(index, 1)
+		setStopsGeometry(newStopsGeometry)
+	}
+
 	const handleCalculateQuote = async () => {
 		const formData = form.getValues()
 
@@ -126,6 +155,13 @@ export function InstantQuoteWidget() {
 		const destinationLat = destinationGeometry?.location?.lat?.();
 		const destinationLng = destinationGeometry?.location?.lng?.();
 
+		// Extract stops coordinates
+		const stopsData = formData.stops?.map((stop, index) => ({
+			address: stop.address,
+			latitude: stopsGeometry[index]?.location?.lat?.(),
+			longitude: stopsGeometry[index]?.location?.lng?.(),
+		})) || [];
+
 		const result = await calculateQuoteMutation.mutateAsync({
 			originAddress: formData.originAddress,
 			destinationAddress: formData.destinationAddress,
@@ -133,6 +169,7 @@ export function InstantQuoteWidget() {
 			originLongitude: originLng,
 			destinationLatitude: destinationLat,
 			destinationLongitude: destinationLng,
+			stops: stopsData,
 			// scheduledPickupTime is optional and defaults to current time for surge pricing
 		})
 		setQuote(result)
@@ -143,6 +180,7 @@ export function InstantQuoteWidget() {
 		setQuote(null)
 		setOriginGeometry(null)
 		setDestinationGeometry(null)
+		setStopsGeometry([])
 		setCurrentStep("input")
 		setShowBreakdown(false)
 		form.reset()
@@ -181,17 +219,13 @@ export function InstantQuoteWidget() {
 										name="originAddress"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel className="flex items-center gap-2">
-													<MapPin className="h-4 w-4" />
-													From (Origin)
-												</FormLabel>
 												<FormControl>
 													<GooglePlacesInput
 														disabled={!isAvailable}
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleOriginSelect}
-														placeholder="Enter pickup location in Australia..."
+														placeholder="Origin - Enter pickup location in Australia..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>
@@ -200,22 +234,44 @@ export function InstantQuoteWidget() {
 										)}
 									/>
 
+									{/* Stops Section */}
+									{stopFields.map((field, index) => (
+										<FormField
+											key={field.id}
+											control={form.control}
+											name={`stops.${index}.address`}
+											render={({ field: stopField }) => (
+												<FormItem>
+													<FormControl>
+														<GooglePlacesInput
+															disabled={!isAvailable}
+															value={stopField.value || ""}
+															onChange={stopField.onChange}
+															onPlaceSelect={(place) => handleStopSelect(index, place)}
+															placeholder={`Stop ${index + 1} - Enter stop address in Australia...`}
+															className="text-xs md:text-sm bg-background"
+															showRemoveButton={true}
+															onRemove={() => removeStopAt(index)}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									))}
+
 									<FormField
 										control={form.control}
 										name="destinationAddress"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel className="flex items-center gap-2">
-													<MapPin className="h-4 w-4" />
-													To (Destination)
-												</FormLabel>
 												<FormControl>
 													<GooglePlacesInput
 														disabled={!isAvailable}
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleDestinationSelect}
-														placeholder="Enter destination in Australia..."
+														placeholder="Destination - Enter destination in Australia..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>
@@ -223,6 +279,21 @@ export function InstantQuoteWidget() {
 											</FormItem>
 										)}
 									/>
+
+									{/* Add Stop Button */}
+									{stopFields.length < 3 && (
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={addStop}
+											disabled={!isAvailable}
+											className="text-xs border-dashed"
+										>
+											<Plus className="h-3 w-3" />
+											Add Stop
+										</Button>
+									)}
 								</div>
 
 								{/* Quote Calculation Button */}
@@ -241,7 +312,7 @@ export function InstantQuoteWidget() {
 									) : (
 										<>
 											<Calculator className="mr-2 h-5 w-5" />
-											Estimate Fare
+											Get Instant Quote
 											<ArrowRight className="ml-2 h-4 w-4" />
 										</>
 									)}
@@ -286,6 +357,15 @@ export function InstantQuoteWidget() {
 											<div className="text-muted-foreground">{form.getValues("originAddress")}</div>
 										</div>
 									</div>
+									{form.getValues("stops")?.map((stop, index) => (
+										<div key={index} className="flex items-start gap-2">
+											<div className="w-3 h-3 rounded-full bg-orange-500 mt-1.5 flex-shrink-0" />
+											<div className="flex-1">
+												<div className="font-medium">Stop {index + 1}</div>
+												<div className="text-muted-foreground">{stop.address}</div>
+											</div>
+										</div>
+									))}
 									<div className="flex items-start gap-2">
 										<div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
 										<div className="flex-1">

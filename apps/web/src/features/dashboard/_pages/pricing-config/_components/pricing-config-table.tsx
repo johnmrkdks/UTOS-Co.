@@ -2,7 +2,7 @@ import { DataTable } from "@workspace/ui/components/data-table";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Eye, Power } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { useGetPricingConfigsQuery } from "../_hooks/query/use-get-pricing-configs-query";
+import { useTogglePricingConfigActiveMutation } from "../_hooks/query/use-toggle-pricing-config-active-mutation";
 import { useState } from "react";
 import { EditPricingConfigDialog } from "./edit-pricing-config-dialog";
 import { ViewPricingConfigDialog } from "./view-pricing-config-dialog";
@@ -31,6 +32,7 @@ export function PricingConfigTable() {
 	const [viewingConfig, setViewingConfig] = useState<PricingConfig | null>(null);
 	
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
+	const toggleActiveMutation = useTogglePricingConfigActiveMutation();
 
 	const columns: ColumnDef<PricingConfig>[] = [
 		{
@@ -112,6 +114,9 @@ export function PricingConfigTable() {
 		{
 			id: "actions",
 			header: "Actions",
+			meta: {
+				sticky: "right",
+			},
 			cell: ({ row }) => {
 				const config = row.original;
 				
@@ -131,6 +136,13 @@ export function PricingConfigTable() {
 							<DropdownMenuItem onClick={() => setEditingConfig(config)}>
 								<Pencil className="mr-2 h-4 w-4" />
 								Edit
+							</DropdownMenuItem>
+							<DropdownMenuItem 
+								onClick={() => toggleActiveMutation.mutate({ id: config.id })}
+								disabled={toggleActiveMutation.isPending}
+							>
+								<Power className="mr-2 h-4 w-4" />
+								{config.isActive ? "Deactivate" : "Activate"}
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

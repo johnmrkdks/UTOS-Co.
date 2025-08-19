@@ -16,18 +16,20 @@ type EditPricingConfigDialogProps = {
 export function EditPricingConfigDialog({ config, open, onOpenChange }: EditPricingConfigDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-				<DialogHeader>
+			<DialogContent className="!max-w-6xl h-[95vh] flex flex-col p-0">
+				<DialogHeader className="flex-shrink-0 p-6 pb-4">
 					<DialogTitle>Edit Pricing Configuration</DialogTitle>
 					<DialogDescription>
 						Update the pricing configuration. Changes will apply to future bookings.
 					</DialogDescription>
 				</DialogHeader>
-				<PricingConfigForm 
-					initialData={config} 
-					mode="edit"
-					onSuccess={() => onOpenChange(false)} 
-				/>
+				<div className="flex-1 min-h-0">
+					<PricingConfigForm 
+						initialData={config} 
+						mode="edit"
+						onSuccess={() => onOpenChange(false)} 
+					/>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

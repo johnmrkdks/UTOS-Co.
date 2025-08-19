@@ -20,8 +20,6 @@ export async function createContext({
 		headers: context.req.raw.headers,
 	});
 
-	console.log("Session: ", session);
-
 	return {
 		session,
 		db,

@@ -89,14 +89,16 @@ function RouteComponent() {
 							New Configuration
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="!max-w-6xl max-h-[95vh] overflow-y-auto">
-						<DialogHeader>
+					<DialogContent className="!max-w-6xl h-[95vh] flex flex-col p-0">
+						<DialogHeader className="flex-shrink-0 p-6 pb-4">
 							<DialogTitle>Create Pricing Configuration</DialogTitle>
 							<DialogDescription>
 								Set up a new pricing model for custom bookings. Configure base rates, multipliers, and additional charges.
 							</DialogDescription>
 						</DialogHeader>
-						<PricingConfigForm onSuccess={() => setShowCreateConfig(false)} />
+						<div className="flex-1 min-h-0">
+							<PricingConfigForm onSuccess={() => setShowCreateConfig(false)} />
+						</div>
 					</DialogContent>
 				</Dialog>
 			</div>
