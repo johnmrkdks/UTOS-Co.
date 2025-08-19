@@ -38,7 +38,8 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 	});
 };
 
-const ALL_DASHBOARD_ROUTES: RouteConfig[] = [
+// Core dashboard and insights
+const ALL_DASHBOARD_OVERVIEW_ROUTES: RouteConfig[] = [
 	{
 		label: "Dashboard",
 		path: "/dashboard/board",
@@ -49,56 +50,24 @@ const ALL_DASHBOARD_ROUTES: RouteConfig[] = [
 		path: "/dashboard/analytics",
 		icon: BarChart3Icon,
 	},
+	{
+		label: "Reports",
+		path: "/dashboard/report",
+		icon: ClipboardListIcon,
+	},
 ];
 
-const ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES: RouteConfig[] = [
-	{
-		label: "Packages",
-		path: "/dashboard/packages",
-		icon: Package2Icon,
-	},
-	{
-		label: "Pricing Config",
-		path: "/dashboard/pricing-config",
-		icon: DollarSignIcon,
-	},
-	{
-		label: "Cars",
-		path: "/dashboard/cars",
-		icon: CarIcon,
-	},
-	{
-		label: "Drivers",
-		path: "/dashboard/drivers",
-		icon: UsersIcon,
-	},
+// Daily operational activities - booking lifecycle
+const ALL_DASHBOARD_OPERATIONS_ROUTES: RouteConfig[] = [
 	{
 		label: "Bookings",
 		path: "/dashboard/bookings",
 		icon: CalendarIcon,
 	},
 	{
-		label: "Publications",
-		path: "/dashboard/publications",
-		icon: EyeIcon,
-	},
-];
-
-const ALL_DASHBOARD_SUB_ROUTES: RouteConfig[] = [
-	{
-		label: "Admin Testing",
-		path: "/dashboard/admin-testing",
-		icon: FlaskConicalIcon,
-	},
-	{
-		label: "Settings",
-		path: "/dashboard/settings",
-		icon: SettingsIcon,
-	},
-	{
-		label: "Report",
-		path: "/dashboard/report",
-		icon: ClipboardListIcon,
+		label: "Drivers",
+		path: "/dashboard/drivers",
+		icon: UsersIcon,
 	},
 	{
 		label: "Inbox",
@@ -107,14 +76,59 @@ const ALL_DASHBOARD_SUB_ROUTES: RouteConfig[] = [
 	},
 ];
 
+// Business setup and configuration
+const ALL_DASHBOARD_INVENTORY_ROUTES: RouteConfig[] = [
+	{
+		label: "Cars",
+		path: "/dashboard/cars",
+		icon: CarIcon,
+	},
+	{
+		label: "Packages",
+		path: "/dashboard/packages",
+		icon: Package2Icon,
+	},
+	{
+		label: "Publications",
+		path: "/dashboard/publications",
+		icon: EyeIcon,
+	},
+];
+
+// System configuration and tools
+const ALL_DASHBOARD_SYSTEM_ROUTES: RouteConfig[] = [
+	{
+		label: "Pricing Config",
+		path: "/dashboard/pricing-config",
+		icon: DollarSignIcon,
+	},
+	{
+		label: "Settings",
+		path: "/dashboard/settings",
+		icon: SettingsIcon,
+	},
+	{
+		label: "Admin Testing",
+		path: "/dashboard/admin-testing",
+		icon: FlaskConicalIcon,
+	},
+];
+
 // Export filtered routes based on environment
-export const DASHBOARD_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_ROUTES);
-export const DASHBOARD_MANAGEMENT_SUB_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_MANAGEMENT_SUB_ROUTES);
-export const DASHBOARD_SUB_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_SUB_ROUTES);
+export const DASHBOARD_OVERVIEW_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_OVERVIEW_ROUTES);
+export const DASHBOARD_OPERATIONS_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_OPERATIONS_ROUTES);
+export const DASHBOARD_INVENTORY_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_INVENTORY_ROUTES);
+export const DASHBOARD_SYSTEM_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_SYSTEM_ROUTES);
+
+// Backward compatibility - deprecated, use specific route groups above
+export const DASHBOARD_ROUTES = DASHBOARD_OVERVIEW_ROUTES;
+export const DASHBOARD_MANAGEMENT_SUB_ROUTES = [...DASHBOARD_OPERATIONS_ROUTES, ...DASHBOARD_INVENTORY_ROUTES];
+export const DASHBOARD_SUB_ROUTES = DASHBOARD_SYSTEM_ROUTES;
 
 // Export all dashboard routes combined for breadcrumbs
 export const ALL_DASHBOARD_ROUTES_COMBINED = [
-	...DASHBOARD_ROUTES,
-	...DASHBOARD_MANAGEMENT_SUB_ROUTES,
-	...DASHBOARD_SUB_ROUTES,
+	...DASHBOARD_OVERVIEW_ROUTES,
+	...DASHBOARD_OPERATIONS_ROUTES,
+	...DASHBOARD_INVENTORY_ROUTES,
+	...DASHBOARD_SYSTEM_ROUTES,
 ];

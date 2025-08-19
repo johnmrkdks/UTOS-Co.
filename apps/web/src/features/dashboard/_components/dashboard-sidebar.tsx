@@ -13,9 +13,10 @@ import {
 import type { RouteConfig } from "@/types/route-config";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
-	DASHBOARD_ROUTES,
-	DASHBOARD_SUB_ROUTES,
-	DASHBOARD_MANAGEMENT_SUB_ROUTES,
+	DASHBOARD_OVERVIEW_ROUTES,
+	DASHBOARD_OPERATIONS_ROUTES,
+	DASHBOARD_INVENTORY_ROUTES,
+	DASHBOARD_SYSTEM_ROUTES,
 } from "@/constants/dashboard-routes";
 import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
 import { cn } from "@workspace/ui/lib/utils";
@@ -30,17 +31,22 @@ const links: LinkProps[] = [
 	{
 		title: "Overview",
 		url: "#",
-		items: DASHBOARD_ROUTES,
+		items: DASHBOARD_OVERVIEW_ROUTES,
 	},
 	{
 		title: "Operations",
 		url: "#",
-		items: DASHBOARD_MANAGEMENT_SUB_ROUTES,
+		items: DASHBOARD_OPERATIONS_ROUTES,
 	},
 	{
-		title: "Tools & Settings",
+		title: "Inventory",
 		url: "#",
-		items: DASHBOARD_SUB_ROUTES,
+		items: DASHBOARD_INVENTORY_ROUTES,
+	},
+	{
+		title: "System",
+		url: "#",
+		items: DASHBOARD_SYSTEM_ROUTES,
 	},
 ];
 
