@@ -275,9 +275,9 @@ export function DataTable<TData, TValue>({
 				/>
 			)}
 
-			<div className={cn("rounded-md border bg-white", tableClassName)}>
-				<div className="overflow-x-auto">
-					<Table aria-label={ariaLabel} aria-describedby={ariaDescribedBy}>
+			<div className={cn("rounded-md border bg-white w-full min-w-0", tableClassName)}>
+				<div className="overflow-x-auto w-full">
+					<Table aria-label={ariaLabel} aria-describedby={ariaDescribedBy} className="w-full table-fixed">
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
@@ -288,7 +288,10 @@ export function DataTable<TData, TValue>({
 											key={header.id} 
 											colSpan={header.colSpan}
 											style={pinningStyles}
-											className={cn(header.column.getIsPinned() && "bg-background")}
+											className={cn(
+												header.column.getIsPinned() && "bg-background",
+												(header.column.columnDef.meta as any)?.className
+											)}
 										>
 											{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
 										</TableHead>
@@ -319,7 +322,10 @@ export function DataTable<TData, TValue>({
 												<TableCell 
 													key={cell.id} 
 													style={pinningStyles}
-													className={cn(cell.column.getIsPinned() && "bg-background")}
+													className={cn(
+														cell.column.getIsPinned() && "bg-background",
+														(cell.column.columnDef.meta as any)?.className
+													)}
 												>
 													{flexRender(cell.column.columnDef.cell, cell.getContext())}
 												</TableCell>

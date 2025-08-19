@@ -55,154 +55,125 @@ export function BookingFilters({ filters, onFiltersChange, onClearFilters }: Boo
 	const activeFiltersCount = getActiveFiltersCount();
 
 	return (
-		<Card>
-			<CardHeader className="pb-3">
-				<div className="flex items-center justify-between">
-					<CardTitle className="text-lg flex items-center gap-2">
-						<FilterIcon className="h-4 w-4" />
-						Advanced Filters
-						{activeFiltersCount > 0 && (
-							<Badge variant="secondary" className="ml-2">
-								{activeFiltersCount} active
-							</Badge>
-						)}
-					</CardTitle>
-					<div className="flex items-center gap-2">
-						{activeFiltersCount > 0 && (
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={onClearFilters}
-								className="h-8"
-							>
-								<X className="h-3 w-3 mr-1" />
-								Clear All
-							</Button>
-						)}
+		<div className="bg-muted/30 rounded-lg border p-4">
+			<div className="flex items-center justify-between mb-4">
+				<div className="flex items-center gap-2">
+					<FilterIcon className="h-4 w-4" />
+					<span className="font-medium">Filters</span>
+					{activeFiltersCount > 0 && (
+						<Badge variant="secondary" className="h-5">
+							{activeFiltersCount}
+						</Badge>
+					)}
+				</div>
+				<div className="flex items-center gap-2">
+					{activeFiltersCount > 0 && (
 						<Button
-							variant="ghost"
+							variant="outline"
 							size="sm"
-							onClick={() => setIsExpanded(!isExpanded)}
-							className="h-8"
+							onClick={onClearFilters}
+							className="h-7 px-2"
 						>
-							{isExpanded ? "Collapse" : "Expand"}
+							<X className="h-3 w-3 mr-1" />
+							Clear
 						</Button>
+					)}
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => setIsExpanded(!isExpanded)}
+						className="h-7 px-2"
+					>
+						{isExpanded ? "Less" : "More"}
+					</Button>
+				</div>
+			</div>
+
+			{/* Compact main filters - always visible */}
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+				<Select 
+					value={filters.status || "all"} 
+					onValueChange={(value) => updateFilter("status", value === "all" ? undefined : value)}
+				>
+					<SelectTrigger className="h-8">
+						<SelectValue placeholder="Status" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All Status</SelectItem>
+						{statusOptions.map(status => (
+							<SelectItem key={status.value} value={status.value}>
+								{status.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+
+				<Select 
+					value={filters.bookingType || "all"} 
+					onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom")}
+				>
+					<SelectTrigger className="h-8">
+						<SelectValue placeholder="Type" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All Types</SelectItem>
+						<SelectItem value="package">Package</SelectItem>
+						<SelectItem value="custom">Custom</SelectItem>
+					</SelectContent>
+				</Select>
+
+				<Input
+					placeholder="Customer name..."
+					className="h-8"
+					value={filters.customerName || ""}
+					onChange={(e) => updateFilter("customerName", e.target.value)}
+				/>
+
+				<div className="flex gap-1">
+					<Input
+						type="date"
+						className="h-8"
+						value={filters.dateFrom || ""}
+						onChange={(e) => updateFilter("dateFrom", e.target.value)}
+						title="Date From"
+					/>
+				</div>
+			</div>
+
+			{/* Advanced filters - collapsible */}
+			{isExpanded && (
+				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 pt-3 border-t">
+					<Input
+						type="date"
+						placeholder="Date to"
+						className="h-8"
+						value={filters.dateTo || ""}
+						onChange={(e) => updateFilter("dateTo", e.target.value)}
+						title="Date To"
+					/>
+					<Input
+						type="number"
+						placeholder="Min amount"
+						className="h-8"
+						min="0"
+						step="0.01"
+						value={filters.minAmount || ""}
+						onChange={(e) => updateFilter("minAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
+					/>
+					<Input
+						type="number"
+						placeholder="Max amount"
+						className="h-8"
+						min="0"
+						step="0.01"
+						value={filters.maxAmount || ""}
+						onChange={(e) => updateFilter("maxAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
+					/>
+					<div className="flex items-center text-sm text-muted-foreground">
+						More filters available
 					</div>
 				</div>
-			</CardHeader>
-
-			<CardContent className="space-y-4">
-				{/* Quick filters - always visible */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="status">Status</Label>
-						<Select 
-							value={filters.status || "all"} 
-							onValueChange={(value) => updateFilter("status", value === "all" ? undefined : value)}
-						>
-							<SelectTrigger>
-								<SelectValue placeholder="All statuses" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All statuses</SelectItem>
-								{statusOptions.map(status => (
-									<SelectItem key={status.value} value={status.value}>
-										{status.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="bookingType">Booking Type</Label>
-						<Select 
-							value={filters.bookingType || "all"} 
-							onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom")}
-						>
-							<SelectTrigger>
-								<SelectValue placeholder="All types" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All types</SelectItem>
-								<SelectItem value="package">Package</SelectItem>
-								<SelectItem value="custom">Custom</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="customerName">Customer Name</Label>
-						<Input
-							id="customerName"
-							placeholder="Search by customer..."
-							value={filters.customerName || ""}
-							onChange={(e) => updateFilter("customerName", e.target.value)}
-						/>
-					</div>
-				</div>
-
-				{/* Advanced filters - collapsible */}
-				{isExpanded && (
-					<div className="space-y-4 pt-4 border-t">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<Label htmlFor="dateFrom">Date From</Label>
-								<div className="relative">
-									<Input
-										id="dateFrom"
-										type="date"
-										value={filters.dateFrom || ""}
-										onChange={(e) => updateFilter("dateFrom", e.target.value)}
-									/>
-									<CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-								</div>
-							</div>
-
-							<div className="space-y-2">
-								<Label htmlFor="dateTo">Date To</Label>
-								<div className="relative">
-									<Input
-										id="dateTo"
-										type="date"
-										value={filters.dateTo || ""}
-										onChange={(e) => updateFilter("dateTo", e.target.value)}
-									/>
-									<CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-								</div>
-							</div>
-						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<Label htmlFor="minAmount">Min Amount ($)</Label>
-								<Input
-									id="minAmount"
-									type="number"
-									placeholder="0.00"
-									min="0"
-									step="0.01"
-									value={filters.minAmount || ""}
-									onChange={(e) => updateFilter("minAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
-								/>
-							</div>
-
-							<div className="space-y-2">
-								<Label htmlFor="maxAmount">Max Amount ($)</Label>
-								<Input
-									id="maxAmount"
-									type="number"
-									placeholder="1000.00"
-									min="0"
-									step="0.01"
-									value={filters.maxAmount || ""}
-									onChange={(e) => updateFilter("maxAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
-								/>
-							</div>
-						</div>
-					</div>
-				)}
-			</CardContent>
-		</Card>
+			)}
+		</div>
 	);
 }

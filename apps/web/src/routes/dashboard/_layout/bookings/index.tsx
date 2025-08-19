@@ -7,11 +7,10 @@ import { BookingManagementModalProviders } from "@/features/dashboard/_pages/boo
 import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
 import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
 import { BookingFilters, type BookingFilters as BookingFiltersType } from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
-import { BookingStatusPipeline } from "@/features/dashboard/_pages/booking-management/_components/booking-status-pipeline";
-import { BookingRevenueReport } from "@/features/dashboard/_pages/booking-management/_components/booking-revenue-report";
 import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-package-booking-dialog";
 import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
+import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-driver-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarPlus, PackageIcon, RouteIcon, Clock, Activity } from "lucide-react";
@@ -33,7 +32,10 @@ function RouteComponent() {
 function BookingManagementContent() {
 	const {
 		openCreatePackageBookingDialog,
-		openCreateCustomBookingDialog
+		openCreateCustomBookingDialog,
+		isAssignDriverDialogOpen,
+		selectedBookingForDriver,
+		closeAssignDriverDialog
 	} = useBookingManagementModalProvider();
 
 	const [filters, setFilters] = useState<BookingFiltersType>({});
@@ -154,11 +156,9 @@ function BookingManagementContent() {
 			<Tabs defaultValue="all" className="space-y-4">
 				<TabsList>
 					<TabsTrigger value="all">All Bookings</TabsTrigger>
-					<TabsTrigger value="pipeline">Status Pipeline</TabsTrigger>
-					<TabsTrigger value="revenue">Revenue Report</TabsTrigger>
+					<TabsTrigger value="pending">Pending</TabsTrigger>
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
 					<TabsTrigger value="custom">Custom Bookings</TabsTrigger>
-					<TabsTrigger value="pending">Pending</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
@@ -177,33 +177,6 @@ function BookingManagementContent() {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="pipeline" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Real-time Status Pipeline</CardTitle>
-							<CardDescription>
-								Drag and drop bookings to update their status in real-time.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<BookingStatusPipeline filters={filters} />
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				<TabsContent value="revenue" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Revenue Analysis & Profit Reporting</CardTitle>
-							<CardDescription>
-								Comprehensive revenue breakdown with profit analysis insights.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<BookingRevenueReport filters={filters} />
-						</CardContent>
-					</Card>
-				</TabsContent>
 
 				<TabsContent value="package" className="space-y-4">
 					<Card>
@@ -257,6 +230,11 @@ function BookingManagementContent() {
 			<CreatePackageBookingDialog />
 			<CreateCustomBookingDialog />
 			<BookingDetailsDialog />
+			<AssignDriverDialog 
+				booking={selectedBookingForDriver}
+				open={isAssignDriverDialogOpen}
+				onOpenChange={closeAssignDriverDialog}
+			/>
 		</PaddingLayout>
 	)
 }

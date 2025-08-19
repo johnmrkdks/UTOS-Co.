@@ -7,7 +7,7 @@ type PaddingLayoutProps = {
 
 export function PaddingLayout({ children, className, ...props }: PaddingLayoutProps) {
 	return (
-		<div className={cn("p-4", className)} {...props}>
+		<div className={cn("p-4 w-full min-w-0", className)} {...props}>
 			{children}
 		</div>
 	)

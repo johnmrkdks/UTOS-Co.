@@ -1,59 +1,21 @@
-import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { DataTable } from "@workspace/ui/components/data-table";
-import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
-import { Checkbox } from "@workspace/ui/components/checkbox";
 import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
 import { BookingFilters } from "./booking-filters";
-import type { ColumnDef, Row } from "@tanstack/react-table";
-import { format } from "date-fns";
-import { Eye, MoreHorizontal, User, Car, UserCheck, Edit, Ban } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
+import { getAllBookingsColumns, getCompactBookingsColumns, type Booking } from "./booking-table-columns";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { useState, useMemo } from "react";
+import { UserCheck, Ban } from "lucide-react";
 
 interface BookingsListTableProps {
 	bookingType?: "package" | "custom";
 	status?: string;
 	filters?: BookingFilters;
+	compact?: boolean;
 }
 
-// Type from server response
-interface Booking {
-	id: string;
-	bookingType: string;
-	status: string;
-	customerName: string;
-	customerPhone: string;
-	originAddress: string;
-	destinationAddress: string;
-	scheduledPickupTime: string;
-	quotedAmount: number;
-	carId: string;
-	userId: string;
-	car?: {
-		id: string;
-		name: string;
-		[key: string]: any;
-	};
-	user?: {
-		name: string;
-		email: string;
-		[key: string]: any;
-	};
-	createdAt: string;
-	[key: string]: any;
-}
-
-export function BookingsListTable({ bookingType, status, filters }: BookingsListTableProps) {
-	const { openBookingDetailsDialog } = useBookingManagementModalProvider();
+export function BookingsListTable({ bookingType, status, filters, compact = false }: BookingsListTableProps) {
+	const { openBookingDetailsDialog, openAssignDriverDialog } = useBookingManagementModalProvider();
 	const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
 	
 	const bookingsQuery = useGetBookingsQuery({
@@ -125,191 +87,40 @@ export function BookingsListTable({ bookingType, status, filters }: BookingsList
 		}
 	};
 
-	const columns: ColumnDef<Booking>[] = [
-		{
-			id: "select",
-			header: ({ table }) => (
-				<Checkbox
-					checked={table.getIsAllPageRowsSelected()}
-					onCheckedChange={(value) => {
-						table.toggleAllPageRowsSelected(!!value);
-						toggleAllSelection();
-					}}
-					aria-label="Select all"
-				/>
-			),
-			cell: ({ row }) => (
-				<Checkbox
-					checked={selectedBookings.includes(row.original.id)}
-					onCheckedChange={() => toggleBookingSelection(row.original.id)}
-					aria-label="Select row"
-				/>
-			),
-			enableSorting: false,
-			enableHiding: false,
-		},
-		{
-			accessorKey: "id",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Booking ID" />
-			),
-			cell: ({ row }) => (
-				<div className="font-mono text-sm">
-					{row.getValue("id")?.toString().slice(-8)}
-				</div>
-			),
-		},
-		{
-			accessorKey: "bookingType",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Type" />
-			),
-			cell: ({ row }) => {
-				const type = row.getValue("bookingType") as string;
-				return (
-					<Badge variant={type === "package" ? "default" : "secondary"}>
-						{type === "package" ? "Package" : "Custom"}
-					</Badge>
-				);
-			},
-		},
-		{
-			accessorKey: "status",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Status" />
-			),
-			cell: ({ row }) => {
-				const status = row.getValue("status") as string;
-				const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-					pending: "secondary",
-					confirmed: "default",
-					driver_assigned: "outline",
-					in_progress: "default",
-					completed: "default",
-					cancelled: "destructive",
-				};
-				return (
-					<Badge variant={statusColors[status] || "secondary"}>
-						{status.replace("_", " ").toUpperCase()}
-					</Badge>
-				);
-			},
-		},
-		{
-			accessorKey: "customerName",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Customer" />
-			),
-			cell: ({ row }) => (
-				<div className="flex items-center space-x-2">
-					<User className="h-4 w-4 text-muted-foreground" />
-					<div>
-						<div className="font-medium">{row.getValue("customerName")}</div>
-						<div className="text-sm text-muted-foreground">
-							{row.original.customerPhone}
-						</div>
-					</div>
-				</div>
-			),
-		},
-		{
-			accessorKey: "route",
-			header: "Route",
-			cell: ({ row }) => (
-				<div className="max-w-[200px]">
-					<div className="text-sm font-medium truncate">
-						{row.original.originAddress}
-					</div>
-					<div className="text-sm text-muted-foreground truncate">
-						→ {row.original.destinationAddress}
-					</div>
-				</div>
-			),
-		},
-		{
-			accessorKey: "scheduledPickupTime",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Pickup Time" />
-			),
-			cell: ({ row }) => {
-				const date = new Date(row.getValue("scheduledPickupTime"));
-				return (
-					<div className="text-sm">
-						<div>{format(date, "MMM dd, yyyy")}</div>
-						<div className="text-muted-foreground">{format(date, "HH:mm")}</div>
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "quotedAmount",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Amount" />
-			),
-			cell: ({ row }) => {
-				const amount = row.getValue("quotedAmount") as number;
-				return (
-					<div className="font-medium">
-						${(amount / 100).toFixed(2)}
-					</div>
-				);
-			},
-		},
-		{
-			accessorKey: "car",
-			header: "Vehicle",
-			cell: ({ row }) => (
-				<div className="flex items-center space-x-2">
-					<Car className="h-4 w-4 text-muted-foreground" />
-					<div className="text-sm">
-						{row.original.car?.name || "Not assigned"}
-					</div>
-				</div>
-			),
-		},
-		{
-			id: "actions",
-			cell: ({ row }) => {
-				const booking = row.original;
-				return (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="h-8 w-8 p-0">
-								<span className="sr-only">Open menu</span>
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuLabel>Actions</DropdownMenuLabel>
-							<DropdownMenuItem
-								onClick={() => {
-									console.log("🔍 Opening booking details for ID:", booking.id);
-									openBookingDetailsDialog(booking.id);
-								}}
-							>
-								<Eye className="mr-2 h-4 w-4" />
-								View details
-							</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem>
-								<Edit className="mr-2 h-4 w-4" />
-								Edit booking
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<UserCheck className="mr-2 h-4 w-4" />
-								Assign driver
-							</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem className="text-destructive">
-								<Ban className="mr-2 h-4 w-4" />
-								Cancel booking
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				);
-			},
-		},
-	];
+	// Action handlers
+	const handleEditBooking = (booking: Booking) => {
+		// TODO: Implement edit booking functionality
+		console.log("Edit booking:", booking.id);
+	};
+
+	const handleCancelBooking = (booking: Booking) => {
+		// TODO: Implement cancel booking functionality
+		console.log("Cancel booking:", booking.id);
+	};
+
+	const handleAssignDriver = (booking: Booking) => {
+		console.log("🚗 Opening assign driver dialog for booking:", booking.id);
+		openAssignDriverDialog(booking);
+	};
+
+	// Use appropriate column configuration based on compact mode
+	const columns = compact 
+		? getCompactBookingsColumns(
+			selectedBookings,
+			toggleBookingSelection,
+			toggleAllSelection,
+			openBookingDetailsDialog,
+			handleAssignDriver
+		)
+		: getAllBookingsColumns(
+			selectedBookings,
+			toggleBookingSelection,
+			toggleAllSelection,
+			openBookingDetailsDialog,
+			handleAssignDriver,
+			handleEditBooking,
+			handleCancelBooking
+		);
 
 	if (bookingsQuery.isLoading) {
 		return <div>Loading bookings...</div>;

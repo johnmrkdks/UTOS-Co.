@@ -22,8 +22,8 @@ function RouteComponent() {
 			<DashboardSidebar />
 			<SidebarInset className="relative">
 				<DashboardNavbar className="sticky top-0 z-10" />
-				<div className="flex w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 min-h-[calc(100vh-var(--navbar-height,60px))] overflow-y-auto">
-					<div className="flex-1 relative">
+				<div className="flex w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 min-h-[calc(100vh-var(--navbar-height,60px))] overflow-hidden">
+					<div className="flex-1 relative overflow-y-auto overflow-x-hidden">
 						{routerState.status === 'pending' && (
 							<div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
 								<Loader />

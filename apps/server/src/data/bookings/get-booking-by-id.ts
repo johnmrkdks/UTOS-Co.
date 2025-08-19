@@ -9,6 +9,11 @@ export async function getBookingById(
 	const record = await db.query.bookings.findFirst({
 		where: eq(bookings.id, id),
 		with: {
+			driver: {
+				with: {
+					user: true,
+				},
+			},
 			car: true,
 			user: true,
 			package: true,

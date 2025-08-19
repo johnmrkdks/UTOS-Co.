@@ -4,7 +4,9 @@ interface BookingManagementModalState {
 	isCreatePackageBookingDialogOpen: boolean;
 	isCreateCustomBookingDialogOpen: boolean;
 	isBookingDetailsDialogOpen: boolean;
+	isAssignDriverDialogOpen: boolean;
 	selectedBookingId: string | null;
+	selectedBookingForDriver: any | null;
 	
 	openCreatePackageBookingDialog: () => void;
 	closeCreatePackageBookingDialog: () => void;
@@ -14,13 +16,18 @@ interface BookingManagementModalState {
 	
 	openBookingDetailsDialog: (bookingId: string) => void;
 	closeBookingDetailsDialog: () => void;
+	
+	openAssignDriverDialog: (booking: any) => void;
+	closeAssignDriverDialog: () => void;
 }
 
 export const useBookingManagementModalProvider = create<BookingManagementModalState>((set) => ({
 	isCreatePackageBookingDialogOpen: false,
 	isCreateCustomBookingDialogOpen: false,
 	isBookingDetailsDialogOpen: false,
+	isAssignDriverDialogOpen: false,
 	selectedBookingId: null,
+	selectedBookingForDriver: null,
 	
 	openCreatePackageBookingDialog: () => set({ isCreatePackageBookingDialogOpen: true }),
 	closeCreatePackageBookingDialog: () => set({ isCreatePackageBookingDialogOpen: false }),
@@ -38,5 +45,17 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	closeBookingDetailsDialog: () => set({ 
 		isBookingDetailsDialogOpen: false, 
 		selectedBookingId: null 
+	}),
+	
+	openAssignDriverDialog: (booking: any) => {
+		console.log("🚗 Modal provider - opening assign driver dialog for booking:", booking.id);
+		set({ 
+			isAssignDriverDialogOpen: true, 
+			selectedBookingForDriver: booking 
+		});
+	},
+	closeAssignDriverDialog: () => set({ 
+		isAssignDriverDialogOpen: false, 
+		selectedBookingForDriver: null 
 	}),
 }));

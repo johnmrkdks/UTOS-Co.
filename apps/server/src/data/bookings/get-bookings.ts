@@ -8,7 +8,18 @@ import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getBookings(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.bookings.findMany(),
+		baseQuery: () => db.query.bookings.findMany({
+			with: {
+				driver: {
+					with: {
+						user: true,
+					},
+				},
+				car: true,
+				user: true,
+				package: true,
+			},
+		}),
 		filterBuilder: new RQBFilterBuilder(bookings),
 		queryType: "rqb",
 	};

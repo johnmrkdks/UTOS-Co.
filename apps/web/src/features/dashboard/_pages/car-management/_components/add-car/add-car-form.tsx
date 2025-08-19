@@ -242,7 +242,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		<>
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(handleSubmit)} className={`flex flex-col h-full ${className || ""}`}>
-					<div className="flex-1 overflow-y-auto">
+					<div className="flex-1">
 						<PaddingLayout className="pt-0 pb-4">
 							<ValidationErrors errors={errors} errorCount={errorCount} />
 

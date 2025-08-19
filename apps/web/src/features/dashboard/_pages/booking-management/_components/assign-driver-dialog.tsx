@@ -84,35 +84,6 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 					</DialogDescription>
 				</DialogHeader>
 				
-				{/* Booking Info */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-lg">Booking Details</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-2">
-						<div className="flex justify-between text-sm">
-							<span className="font-medium">Customer:</span>
-							<span>{booking?.customerName}</span>
-						</div>
-						<div className="flex justify-between text-sm">
-							<span className="font-medium">Pickup:</span>
-							<span className="text-right">{booking?.originAddress}</span>
-						</div>
-						<div className="flex justify-between text-sm">
-							<span className="font-medium">Destination:</span>
-							<span className="text-right">{booking?.destinationAddress}</span>
-						</div>
-						<div className="flex justify-between text-sm">
-							<span className="font-medium">Scheduled:</span>
-							<span>
-								{booking?.scheduledPickupTime 
-									? new Date(booking.scheduledPickupTime).toLocaleString()
-									: "Not scheduled"
-								}
-							</span>
-						</div>
-					</CardContent>
-				</Card>
 
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

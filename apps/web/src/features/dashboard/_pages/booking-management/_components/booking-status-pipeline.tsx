@@ -3,46 +3,74 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import { Button } from "@workspace/ui/components/button";
 import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
-import { Clock, User, Car, MapPin, DollarSign } from "lucide-react";
+import { Clock, User, Car, MapPin, DollarSign, Grid3X3, Table2 } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { BookingFilters } from "./booking-filters";
+import { KanbanProvider, KanbanBoard, KanbanCards, KanbanCard } from "@/components/kanban";
+import type { KanbanItemProps, KanbanColumnProps } from "@/components/kanban";
 
 interface BookingStatusPipelineProps {
 	filters?: BookingFilters;
 }
 
-const statusColumns = [
+// Booking interface for kanban
+interface BookingKanbanItem extends KanbanItemProps {
+	customerName: string;
+	customerPhone: string;
+	originAddress: string;
+	destinationAddress: string;
+	scheduledPickupTime: string;
+	quotedAmount: number;
+	bookingType: string;
+	car?: { name: string };
+	createdAt: string;
+}
+
+// Status column interface
+interface StatusColumn extends KanbanColumnProps {
+	title: string;
+	description: string;
+	color: string;
+	headerColor: string;
+}
+
+const statusColumns: StatusColumn[] = [
 	{ 
-		status: "pending", 
+		id: "pending",
+		name: "Pending",
 		title: "Pending", 
 		description: "Awaiting confirmation",
 		color: "bg-yellow-50 border-yellow-200",
 		headerColor: "bg-yellow-100"
 	},
 	{ 
-		status: "confirmed", 
+		id: "confirmed",
+		name: "Confirmed",
 		title: "Confirmed", 
 		description: "Ready for driver assignment",
 		color: "bg-blue-50 border-blue-200",
 		headerColor: "bg-blue-100"
 	},
 	{ 
-		status: "driver_assigned", 
+		id: "driver_assigned",
+		name: "Driver Assigned",
 		title: "Driver Assigned", 
 		description: "Driver en route to pickup",
 		color: "bg-purple-50 border-purple-200",
 		headerColor: "bg-purple-100"
 	},
 	{ 
-		status: "in_progress", 
+		id: "in_progress",
+		name: "In Progress",
 		title: "In Progress", 
 		description: "Service in progress",
 		color: "bg-orange-50 border-orange-200",
 		headerColor: "bg-orange-100"
 	},
 	{ 
-		status: "completed", 
+		id: "completed",
+		name: "Completed",
 		title: "Completed", 
 		description: "Service completed",
 		color: "bg-green-50 border-green-200",
@@ -51,56 +79,59 @@ const statusColumns = [
 ];
 
 export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
-	const [draggedBooking, setDraggedBooking] = useState<string | null>(null);
+	const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
 	
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
 	});
 
-	// Apply filters to bookings
-	const filteredBookings = (bookingsQuery.data?.data || []).filter(booking => {
-		if (!filters) return true;
+	// Apply filters and convert to kanban format
+	const kanbanData: BookingKanbanItem[] = useMemo(() => {
+		if (!bookingsQuery.data?.data) return [];
 		
-		if (filters.bookingType && booking.bookingType !== filters.bookingType) return false;
-		if (filters.customerName && !booking.customerName.toLowerCase().includes(filters.customerName.toLowerCase())) return false;
-		if (filters.dateFrom) {
-			const fromDate = new Date(filters.dateFrom);
-			if (new Date(booking.scheduledPickupTime) < fromDate) return false;
-		}
-		if (filters.dateTo) {
-			const toDate = new Date(filters.dateTo);
-			toDate.setHours(23, 59, 59, 999);
-			if (new Date(booking.scheduledPickupTime) > toDate) return false;
-		}
-		if (filters.minAmount && (booking.quotedAmount / 100) < filters.minAmount) return false;
-		if (filters.maxAmount && (booking.quotedAmount / 100) > filters.maxAmount) return false;
-		
-		return true;
-	});
+		return bookingsQuery.data.data
+			.filter(booking => {
+				if (!filters) return true;
+				
+				if (filters.bookingType && booking.bookingType !== filters.bookingType) return false;
+				if (filters.customerName && !booking.customerName.toLowerCase().includes(filters.customerName.toLowerCase())) return false;
+				if (filters.dateFrom) {
+					const fromDate = new Date(filters.dateFrom);
+					if (new Date(booking.scheduledPickupTime) < fromDate) return false;
+				}
+				if (filters.dateTo) {
+					const toDate = new Date(filters.dateTo);
+					toDate.setHours(23, 59, 59, 999);
+					if (new Date(booking.scheduledPickupTime) > toDate) return false;
+				}
+				if (filters.minAmount && (booking.quotedAmount / 100) < filters.minAmount) return false;
+				if (filters.maxAmount && (booking.quotedAmount / 100) > filters.maxAmount) return false;
+				
+				return true;
+			})
+			.map(booking => ({
+				id: booking.id,
+				name: booking.customerName,
+				column: booking.status,
+				customerName: booking.customerName,
+				customerPhone: booking.customerPhone,
+				originAddress: booking.originAddress,
+				destinationAddress: booking.destinationAddress,
+				scheduledPickupTime: booking.scheduledPickupTime,
+				quotedAmount: booking.quotedAmount,
+				bookingType: booking.bookingType,
+				car: booking.car,
+				createdAt: booking.createdAt,
+			}));
+	}, [bookingsQuery.data?.data, filters]);
 
-	const getBookingsByStatus = (status: string) => {
-		return filteredBookings.filter(booking => booking.status === status);
+	const handleDataChange = (newData: BookingKanbanItem[]) => {
+		// TODO: Implement status update API call
+		console.log('Status update needed:', newData);
 	};
 
-	const handleDragStart = (bookingId: string) => {
-		setDraggedBooking(bookingId);
-	};
-
-	const handleDragEnd = () => {
-		setDraggedBooking(null);
-	};
-
-	const handleDragOver = (e: React.DragEvent) => {
-		e.preventDefault();
-	};
-
-	const handleDrop = (e: React.DragEvent, newStatus: string) => {
-		e.preventDefault();
-		if (draggedBooking) {
-			// TODO: Implement status update API call
-			console.log(`Update booking ${draggedBooking} to status: ${newStatus}`);
-		}
-		setDraggedBooking(null);
+	const getColumnBookings = (columnId: string) => {
+		return kanbanData.filter(item => item.column === columnId);
 	};
 
 	if (bookingsQuery.isLoading) {
@@ -115,155 +146,178 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h3 className="text-lg font-semibold">Booking Status Pipeline</h3>
-				<Badge variant="outline">
-					{filteredBookings.length} booking{filteredBookings.length !== 1 ? 's' : ''}
-				</Badge>
-			</div>
-
-			<div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[600px]">
-				{statusColumns.map(column => {
-					const bookings = getBookingsByStatus(column.status);
-					
-					return (
-						<Card 
-							key={column.status} 
-							className={`${column.color} transition-colors`}
-							onDragOver={handleDragOver}
-							onDrop={(e) => handleDrop(e, column.status)}
+				<div className="flex items-center gap-3">
+					<Badge variant="outline">
+						{kanbanData.length} booking{kanbanData.length !== 1 ? 's' : ''}
+					</Badge>
+					<div className="flex items-center border rounded-lg p-1">
+						<Button
+							variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+							size="sm"
+							className="h-7 px-2"
+							onClick={() => setViewMode('kanban')}
 						>
-							<CardHeader className={`${column.headerColor} rounded-t-lg`}>
-								<div className="flex items-center justify-between">
-									<CardTitle className="text-sm font-medium">
-										{column.title}
-									</CardTitle>
-									<Badge variant="secondary">
-										{bookings.length}
-									</Badge>
-								</div>
-								<p className="text-xs text-muted-foreground">
-									{column.description}
-								</p>
-							</CardHeader>
-							<CardContent className="p-2 space-y-2">
-								{bookings.map(booking => (
-									<div
-										key={booking.id}
-										draggable
-										onDragStart={() => handleDragStart(booking.id)}
-										onDragEnd={handleDragEnd}
-										className={`
-											bg-white rounded-lg border p-3 shadow-sm cursor-move
-											hover:shadow-md transition-shadow
-											${draggedBooking === booking.id ? 'opacity-50' : ''}
-										`}
-									>
-										<div className="space-y-2">
-											<div className="flex items-start justify-between">
-												<div className="flex items-center space-x-2">
-													<Avatar className="h-6 w-6">
-														<AvatarFallback className="text-xs">
-															{booking.customerName.charAt(0).toUpperCase()}
-														</AvatarFallback>
-													</Avatar>
-													<div>
-														<p className="text-sm font-medium truncate">
-															{booking.customerName}
-														</p>
-														<p className="text-xs text-muted-foreground">
-															#{booking.id.slice(-6)}
-														</p>
-													</div>
-												</div>
-												<Badge variant={booking.bookingType === "package" ? "default" : "secondary"} className="text-xs">
-													{booking.bookingType}
-												</Badge>
-											</div>
-
-											<div className="space-y-1">
-												<div className="flex items-center text-xs text-muted-foreground">
-													<Clock className="h-3 w-3 mr-1" />
-													{format(new Date(booking.scheduledPickupTime), "MMM dd, HH:mm")}
-												</div>
-												
-												<div className="flex items-center text-xs text-muted-foreground">
-													<MapPin className="h-3 w-3 mr-1" />
-													<span className="truncate">
-														{booking.originAddress.slice(0, 20)}...
-													</span>
-												</div>
-
-												{booking.car && (
-													<div className="flex items-center text-xs text-muted-foreground">
-														<Car className="h-3 w-3 mr-1" />
-														<span className="truncate">
-															{booking.car.name}
-														</span>
-													</div>
-												)}
-
-												<div className="flex items-center text-xs">
-													<DollarSign className="h-3 w-3 mr-1" />
-													<span className="font-medium">
-														${(booking.quotedAmount / 100).toFixed(2)}
-													</span>
-												</div>
-											</div>
-
-											<div className="flex items-center justify-between pt-1">
-												<Button 
-													variant="ghost" 
-													size="sm" 
-													className="h-6 px-2 text-xs"
-													onClick={(e) => {
-														e.stopPropagation();
-														// TODO: Open booking details
-													}}
-												>
-													View
-												</Button>
-												
-												{booking.status === "pending" && (
-													<Button 
-														variant="ghost" 
-														size="sm" 
-														className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
-														onClick={(e) => {
-															e.stopPropagation();
-															// TODO: Quick confirm action
-														}}
-													>
-														Confirm
-													</Button>
-												)}
-												
-												{booking.status === "confirmed" && (
-													<Button 
-														variant="ghost" 
-														size="sm" 
-														className="h-6 px-2 text-xs text-purple-600 hover:text-purple-700"
-														onClick={(e) => {
-															e.stopPropagation();
-															// TODO: Quick assign driver action
-														}}
-													>
-														Assign
-													</Button>
-												)}
-											</div>
-										</div>
-									</div>
-								))}
-
-								{bookings.length === 0 && (
-									<div className="text-center py-8 text-muted-foreground">
-										<p className="text-sm">No {column.title.toLowerCase()} bookings</p>
-									</div>
-								)}
-							</CardContent>
-						</Card>
-					);
-				})}
+							<Grid3X3 className="h-4 w-4 mr-1" />
+							Kanban
+						</Button>
+						<Button
+							variant={viewMode === 'table' ? 'default' : 'ghost'}
+							size="sm"
+							className="h-7 px-2"
+							onClick={() => setViewMode('table')}
+						>
+							<Table2 className="h-4 w-4 mr-1" />
+							Table
+						</Button>
+					</div>
+				</div>
 			</div>
+
+			{viewMode === 'kanban' ? (
+				<KanbanProvider
+					columns={statusColumns}
+					data={kanbanData}
+					onDataChange={handleDataChange}
+					className="min-h-[600px]"
+				>
+					{(column) => (
+						<KanbanBoard key={column.id} id={column.id}>
+							<Card className={`${column.color} h-full`}>
+								<CardHeader className={`${column.headerColor} rounded-t-lg pb-3`}>
+									<div className="flex items-center justify-between">
+										<CardTitle className="text-sm font-medium">
+											{column.title}
+										</CardTitle>
+										<Badge variant="secondary">
+											{getColumnBookings(column.id).length}
+										</Badge>
+									</div>
+									<p className="text-xs text-muted-foreground">
+										{column.description}
+									</p>
+								</CardHeader>
+								<CardContent className="p-2">
+									<KanbanCards items={getColumnBookings(column.id)}>
+										{(booking) => (
+											<KanbanCard key={booking.id} id={booking.id} name={booking.name}>
+												<div className="space-y-2">
+													<div className="flex items-start justify-between">
+														<div className="flex items-center space-x-2">
+															<Avatar className="h-6 w-6">
+																<AvatarFallback className="text-xs">
+																	{booking.customerName.charAt(0).toUpperCase()}
+																</AvatarFallback>
+															</Avatar>
+															<div>
+																<p className="text-sm font-medium truncate">
+																	{booking.customerName}
+																</p>
+																<p className="text-xs text-muted-foreground">
+																	#{booking.id.slice(-6)}
+																</p>
+															</div>
+														</div>
+														<Badge variant={booking.bookingType === "package" ? "default" : "secondary"} className="text-xs">
+															{booking.bookingType}
+														</Badge>
+													</div>
+
+													<div className="space-y-1">
+														<div className="flex items-center text-xs text-muted-foreground">
+															<Clock className="h-3 w-3 mr-1" />
+															{format(new Date(booking.scheduledPickupTime), "MMM dd, HH:mm")}
+														</div>
+														
+														<div className="flex items-center text-xs text-muted-foreground">
+															<MapPin className="h-3 w-3 mr-1" />
+															<span className="truncate">
+																{booking.originAddress.slice(0, 20)}...
+															</span>
+														</div>
+
+														{booking.car && (
+															<div className="flex items-center text-xs text-muted-foreground">
+																<Car className="h-3 w-3 mr-1" />
+																<span className="truncate">
+																	{booking.car.name}
+																</span>
+															</div>
+														)}
+
+														<div className="flex items-center text-xs">
+															<DollarSign className="h-3 w-3 mr-1" />
+															<span className="font-medium">
+																${(booking.quotedAmount / 100).toFixed(2)}
+															</span>
+														</div>
+													</div>
+
+													<div className="flex items-center justify-between pt-1">
+														<Button 
+															variant="ghost" 
+															size="sm" 
+															className="h-6 px-2 text-xs"
+															onClick={(e) => {
+																e.stopPropagation();
+																// TODO: Open booking details
+															}}
+														>
+															View
+														</Button>
+														
+														{booking.column === "pending" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Quick confirm action
+																}}
+															>
+																Confirm
+															</Button>
+														)}
+														
+														{booking.column === "confirmed" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-purple-600 hover:text-purple-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Quick assign driver action
+																}}
+															>
+																Assign
+															</Button>
+														)}
+													</div>
+												</div>
+											</KanbanCard>
+										)}
+									</KanbanCards>
+									{getColumnBookings(column.id).length === 0 && (
+										<div className="text-center py-8 text-muted-foreground">
+											<p className="text-sm">No {column.title.toLowerCase()} bookings</p>
+										</div>
+									)}
+								</CardContent>
+							</Card>
+						</KanbanBoard>
+					)}
+				</KanbanProvider>
+			) : (
+				<Card>
+					<CardContent className="p-4">
+						<div className="text-center py-8 text-muted-foreground">
+							<Table2 className="h-8 w-8 mx-auto mb-2" />
+							<p>Table view coming soon...</p>
+							<p className="text-sm">Use the booking tables in other tabs for now.</p>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }
