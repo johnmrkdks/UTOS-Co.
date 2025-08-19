@@ -48,7 +48,14 @@ export function DashboardSidebar() {
 	const { pathname } = useLocation();
 
 	const isActive = (path: string) => {
-		return pathname === path;
+		// Exact match for the main dashboard page
+		if (path === "/dashboard" && pathname === "/dashboard") {
+			return true;
+		}
+		
+		// For other routes, check if the current pathname starts with the route path
+		// This handles nested routes like /dashboard/cars/add-car matching /dashboard/cars
+		return pathname === path || pathname.startsWith(`${path}/`);
 	};
 
 	return (
