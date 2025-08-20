@@ -33,19 +33,19 @@ export function MarketingUserMenu() {
 	return (
 		<div className="flex items-center gap-4">
 			{isAdmin && (
-				<Button className="rounded-xl shadow-none" asChild>
+				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
 					<Link to="/dashboard">Admin Dashboard</Link>
 				</Button>
 			)}
 			
 			{isDriver && (
-				<Button className="rounded-xl shadow-none" asChild>
+				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
 					<Link to="/driver">Driver Dashboard</Link>
 				</Button>
 			)}
 
 			{isCustomer && (
-				<Button className="rounded-xl shadow-none" asChild>
+				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
 					<Link to="/customer">My Dashboard</Link>
 				</Button>
 			)}

@@ -16,9 +16,12 @@ import {
 	FacebookIcon,
 	InstagramIcon,
 	MailIcon,
-	CalendarIcon
+	CalendarIcon,
+	UserIcon,
+	SettingsIcon
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 
 type HeaderProps = {
 	className?: string;
@@ -26,6 +29,7 @@ type HeaderProps = {
 
 export function MarketingNavbar({ className, ...props }: HeaderProps) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const { session } = useUserQuery();
 
 	return (
 		<div className={cn("bg-beige shadow-lg relative z-50", className)} {...props}>
@@ -122,10 +126,22 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 							<MobileNavLinks onClose={() => setIsMenuOpen(false)} />
 						</nav>
 					</div>
-					<div className="flex items-center justify-center gap-2 p-4 border-t border-border">
-						<AuthCTA />
-					</div>
+					
+					{/* User Actions Section */}
+					{session ? (
+						<div className="border-t border-border p-4">
+							<div className="flex flex-col gap-3">
+								<MobileDashboardLinks session={session} onClose={() => setIsMenuOpen(false)} />
+								<MobileUserProfile session={session} onClose={() => setIsMenuOpen(false)} />
+							</div>
+						</div>
+					) : (
+						<div className="flex items-center justify-center gap-2 p-4 border-t border-border">
+							<AuthCTA />
+						</div>
+					)}
 
+					{/* Contact & Social Section */}
 					<div className="bg-foreground border-t border-border">
 						<div className="flex flex-col items-center gap-4 text-beige text-xs md:text-sm py-4">
 							<div className="flex items-center gap-2">
@@ -197,4 +213,90 @@ function MobileNavLinks({ onClose }: { onClose: () => void }) {
 	});
 
 	return <>{links}</>;
+}
+
+function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () => void }) {
+	const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
+	const isDriver = session.user.role === "driver";
+	const isCustomer = session.user.role === "user";
+
+	return (
+		<div className="flex flex-col gap-2">
+			{isAdmin && (
+				<Button 
+					className="w-full justify-start gap-2 rounded-xl shadow-none" 
+					onClick={onClose}
+					asChild
+				>
+					<Link to="/dashboard">
+						<SettingsIcon className="w-4 h-4" />
+						Admin Dashboard
+					</Link>
+				</Button>
+			)}
+			
+			{isDriver && (
+				<Button 
+					className="w-full justify-start gap-2 rounded-xl shadow-none" 
+					onClick={onClose}
+					asChild
+				>
+					<Link to="/driver">
+						<UserIcon className="w-4 h-4" />
+						Driver Dashboard
+					</Link>
+				</Button>
+			)}
+
+			{isCustomer && (
+				<Button 
+					className="w-full justify-start gap-2 rounded-xl shadow-none" 
+					onClick={onClose}
+					asChild
+				>
+					<Link to="/customer">
+						<UserIcon className="w-4 h-4" />
+						My Dashboard
+					</Link>
+				</Button>
+			)}
+		</div>
+	);
+}
+
+function MobileUserProfile({ session, onClose }: { session: any; onClose: () => void }) {
+	const isCustomer = session.user.role === "user";
+
+	if (!isCustomer) return null;
+
+	return (
+		<div className="flex flex-col gap-2 pt-2 border-t border-border">
+			<div className="px-2 py-1">
+				<p className="text-sm font-medium text-foreground truncate">
+					{session.user.name}
+				</p>
+				<p className="text-xs text-muted-foreground truncate">
+					{session.user.email}
+				</p>
+			</div>
+			
+			<Link
+				to="/customer/profile"
+				onClick={onClose}
+				className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-primary hover:bg-primary/5 transition-all rounded-lg"
+			>
+				<UserIcon className="w-4 h-4" />
+				Profile
+			</Link>
+			
+			<Link
+				to="/customer/account/settings"
+				onClick={onClose}
+				className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-primary hover:bg-primary/5 transition-all rounded-lg"
+			>
+				<SettingsIcon className="w-4 h-4" />
+				Account Settings
+			</Link>
+		</div>
+	);
 }
