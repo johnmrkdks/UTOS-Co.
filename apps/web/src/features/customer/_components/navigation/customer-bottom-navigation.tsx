@@ -26,10 +26,11 @@ export function CustomerBottomNavigation({ navigationItems }: CustomerBottomNavi
 							>
 								<Icon className="h-5 w-5 mb-1" />
 								<span className="text-xs font-medium truncate">
-									{item.name === "My Bookings" ? "Bookings" :
+									{item.name === "My Bookings" ? "Trips" :
 										item.name === "Browse Services" ? "Services" :
-											item.name === "Instant Quote" ? "Quote" :
-												item.name}
+											item.name === "Browse Cars" ? "Cars" :
+												item.name === "Instant Quote" ? "Quote" :
+													item.name}
 								</span>
 							</Link>
 						);

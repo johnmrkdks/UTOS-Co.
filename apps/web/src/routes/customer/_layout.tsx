@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { requireCustomer } from "@/utils/auth";
-import { CustomerLayout } from "@/features/customer/_components/layout";
+import { CustomerLayout } from "@/features/customer/_components/layout/customer-layout";
 
 export const Route = createFileRoute("/customer/_layout")({
 	beforeLoad: async () => {

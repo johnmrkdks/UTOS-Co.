@@ -5,6 +5,7 @@ import {
 import { createBookingService, CreateBookingServiceSchema } from "@/services/bookings/create-booking";
 import { createPackageBookingService, CreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
 import { createCustomBookingService, CreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
+import { createCustomBookingFromQuoteService, CreateCustomBookingFromQuoteSchema } from "@/services/bookings/create-custom-booking-from-quote";
 import { calculateInstantQuoteService, CalculateInstantQuoteSchema } from "@/services/bookings/calculate-instant-quote";
 import { updateBookingStatusService, UpdateBookingStatusSchema, assignDriverService, AssignDriverSchema } from "@/services/bookings/update-booking-status";
 import { DeleteBookingServiceSchema, deleteBookingService } from "@/services/bookings/delete-booking";
@@ -89,6 +90,18 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const newBooking = await createCustomBookingService(db, input);
+				return newBooking;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Create custom booking from instant quote
+	createCustomBookingFromQuote: protectedProcedure
+		.input(CreateCustomBookingFromQuoteSchema)
+		.mutation(async ({ ctx: { db }, input }) => {
+			try {
+				const newBooking = await createCustomBookingFromQuoteService(db, input);
 				return newBooking;
 			} catch (error) {
 				handleTRPCError(error);

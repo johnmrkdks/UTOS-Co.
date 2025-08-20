@@ -9,6 +9,7 @@ import {
 	ClipboardListIcon
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
+import { DriverUserMenu } from "./driver-user-menu";
 
 interface DriverTopNavigationProps {
 	session: any;
@@ -56,18 +57,7 @@ export function DriverTopNavigation({
 
 						{/* Desktop User Menu */}
 						<div className="hidden lg:flex items-center space-x-3">
-							<div className="text-right">
-								<p className="text-sm font-medium text-gray-900">{session?.user.name}</p>
-								<p className="text-xs text-gray-500">{session?.user.email}</p>
-							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={onSignOut}
-								className="text-gray-500 hover:text-gray-700"
-							>
-								<LogOutIcon className="h-4 w-4" />
-							</Button>
+							<DriverUserMenu />
 						</div>
 
 						{/* Mobile Menu Button - Now on the right */}

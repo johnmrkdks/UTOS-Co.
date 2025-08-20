@@ -10,6 +10,7 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { GooglePlacesInput } from "./google-places-input-simple"
+import { QuoteToBookingDialog } from "./quote-to-booking-dialog"
 import { useCalculateInstantQuoteMutation } from "../_hooks/query/use-calculate-instant-quote-mutation"
 import { useCheckInstantQuoteAvailabilityQuery } from "../_hooks/query/use-check-instant-quote-availability-query"
 
@@ -49,6 +50,7 @@ export function InstantQuoteWidget() {
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null)
 	const [stopsGeometry, setStopsGeometry] = useState<any[]>([])
 	const [showBreakdown, setShowBreakdown] = useState(false)
+	const [showBookingDialog, setShowBookingDialog] = useState(false)
 
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation()
 	const availabilityQuery = useCheckInstantQuoteAvailabilityQuery()
@@ -183,7 +185,35 @@ export function InstantQuoteWidget() {
 		setStopsGeometry([])
 		setCurrentStep("input")
 		setShowBreakdown(false)
+		setShowBookingDialog(false)
 		form.reset()
+	}
+
+	const handleBookThisJourney = () => {
+		setShowBookingDialog(true)
+	}
+
+	const handleBookingConfirmed = (bookingId: string) => {
+		console.log("Booking confirmed:", bookingId)
+		// Could navigate to booking confirmation page or customer dashboard
+		resetQuote()
+	}
+
+	const getCurrentRouteData = () => {
+		const formData = form.getValues()
+		return {
+			originAddress: formData.originAddress,
+			destinationAddress: formData.destinationAddress,
+			originLatitude: originGeometry?.location?.lat?.(),
+			originLongitude: originGeometry?.location?.lng?.(),
+			destinationLatitude: destinationGeometry?.location?.lat?.(),
+			destinationLongitude: destinationGeometry?.location?.lng?.(),
+			stops: formData.stops?.map((stop, index) => ({
+				address: stop.address,
+				latitude: stopsGeometry[index]?.location?.lat?.(),
+				longitude: stopsGeometry[index]?.location?.lng?.(),
+			})) || [],
+		}
 	}
 
 	const goBackToInput = () => {
@@ -426,7 +456,10 @@ export function InstantQuoteWidget() {
 
 							{/* Action Buttons */}
 							<div className="flex flex-col gap-2">
-								<Button className="w-full h-10 text-sm font-semibold">
+								<Button 
+									onClick={handleBookThisJourney}
+									className="w-full h-10 text-sm font-semibold"
+								>
 									Book This Journey
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
@@ -443,6 +476,17 @@ export function InstantQuoteWidget() {
 					</div>
 				)}
 			</CardContent>
+
+			{/* Booking Dialog */}
+			{quote && (
+				<QuoteToBookingDialog
+					open={showBookingDialog}
+					onOpenChange={setShowBookingDialog}
+					quote={quote}
+					routeData={getCurrentRouteData()}
+					onBookingConfirmed={handleBookingConfirmed}
+				/>
+			)}
 		</Card>
 	)
 }

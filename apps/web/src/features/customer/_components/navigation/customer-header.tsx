@@ -6,6 +6,7 @@ import { LogOut, BellIcon, Menu, X } from "lucide-react";
 import type { CustomerNavigationItem } from "./types";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { CustomerNotificationMenu } from "./customer-notification-menu";
+import { CustomerUserMenu } from "./customer-user-menu";
 
 interface CustomerHeaderProps {
 	session: any;
@@ -60,18 +61,7 @@ export function CustomerHeader({
 
 						{/* User Menu */}
 						<div className="flex items-center space-x-3">
-							<div className="text-right">
-								<p className="text-sm font-medium text-foreground">{session?.user.name}</p>
-								<p className="text-xs text-muted-foreground">{session?.user.email}</p>
-							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={onSignOut}
-								className="text-muted-foreground hover:text-foreground"
-							>
-								<LogOut className="h-4 w-4" />
-							</Button>
+							<CustomerUserMenu />
 						</div>
 					</div>
 				</div>

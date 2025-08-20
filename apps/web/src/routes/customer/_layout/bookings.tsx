@@ -4,10 +4,11 @@ import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
-import { Calendar, Package, Car, Clock, MapPin, Users, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
+import { Calendar, Package, Car, Clock, MapPin, Users, Loader2, CheckCircle, AlertTriangle, ArrowRightIcon } from "lucide-react";
 import { useGetUserBookingsQuery } from "@/features/customer/_hooks/query/use-get-user-bookings-query";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useMemo } from "react";
+import { cn } from "@workspace/ui/lib/utils";
 
 export const Route = createFileRoute("/customer/_layout/bookings")({
 	component: CustomerBookingsPage,
@@ -26,7 +27,7 @@ function CustomerBookingsPage() {
 
 	// Helper functions
 	const formatPrice = (priceInCents: number) => `$${(priceInCents / 100).toFixed(0)}`;
-	
+
 	const formatDate = (date: string | Date) => {
 		return new Date(date).toLocaleDateString("en-US", {
 			month: "short",
@@ -70,11 +71,11 @@ function CustomerBookingsPage() {
 
 	// Calculate stats
 	const stats = useMemo(() => {
-		const upcoming = bookings.filter(b => 
-			new Date(b.scheduledPickupTime) > new Date() && 
+		const upcoming = bookings.filter(b =>
+			new Date(b.scheduledPickupTime) > new Date() &&
 			!["completed", "cancelled"].includes(b.status)
 		).length;
-		
+
 		const inProgress = bookings.filter(b => b.status === "in_progress").length;
 		const completed = bookings.filter(b => b.status === "completed").length;
 		const total = bookings.length;
@@ -158,23 +159,23 @@ function CustomerBookingsPage() {
 					{/* Booking Stats */}
 					<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
 						{bookingStatsData.map((data) => (
-							<AnalyticsCard 
-								key={data.id} 
-								data={data} 
-								view="compact" 
+							<AnalyticsCard
+								key={data.id}
+								data={data}
+								view="compact"
 							/>
 						))}
 					</div>
 
 					{/* Bookings List */}
-					<Card>
-						<CardHeader>
-							<CardTitle>Booking History</CardTitle>
-							<CardDescription>
+					<div>
+						<div>
+							<h2 className="font-semibold text-lg">Booking History</h2>
+							<p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed">
 								All your past and upcoming bookings with real-time status tracking.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
+							</p>
+						</div>
+						<div className="flex flex-col gap-4">
 							{bookings.length === 0 ? (
 								<div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
 									<div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -182,7 +183,7 @@ function CustomerBookingsPage() {
 									</div>
 									<h3 className="font-semibold text-base md:text-lg mb-2">No bookings yet</h3>
 									<p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed px-4 md:px-0">
-										You haven't made any bookings yet. Start by browsing our 
+										You haven't made any bookings yet. Start by browsing our
 										luxury services to book your next journey.
 									</p>
 									<Button className="h-10 md:h-11 w-full max-w-xs" asChild>
@@ -193,66 +194,69 @@ function CustomerBookingsPage() {
 									</Button>
 								</div>
 							) : (
-								<div className="space-y-4">
+								<div className="flex flex-col gap-4 mb-8">
 									{bookings.map((booking) => (
-										<Card key={booking.id} className="border-l-4 border-l-primary/20">
-											<CardContent className="pt-6">
-												<div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+										<div key={booking.id} className={cn("border border-l-4 border-l-primary/20 rounded-lg")}>
+											<div className="p-4">
+												<div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
 													{/* Booking Info */}
 													<div className="lg:col-span-2 space-y-2">
 														<div className="flex items-center gap-2">
-															<Badge className={getStatusColor(booking.status)}>
+															<Badge className={cn("text-xs", getStatusColor(booking.status))}>
 																{getStatusIcon(booking.status)}
 																<span className="ml-1 capitalize">{booking.status.replace('_', ' ')}</span>
 															</Badge>
 															<Badge variant="outline">{booking.bookingType}</Badge>
-														</div>
-														<h3 className="font-semibold text-lg">
-															{booking.bookingType === "package" ? "Service Booking" : "Custom Trip"}
-														</h3>
-														<div className="space-y-1 text-sm text-gray-600">
-															<div className="flex items-center gap-2">
-																<MapPin className="h-4 w-4" />
-																<span>{booking.originAddress}</span>
-															</div>
-															<div className="flex items-center gap-2 pl-6">
-																→ {booking.destinationAddress}
-															</div>
-															<div className="flex items-center gap-2">
-																<Users className="h-4 w-4" />
-																<span>{booking.passengerCount} passenger{booking.passengerCount !== 1 ? 's' : ''}</span>
+															<div className="flex gap-2">
 															</div>
 														</div>
-													</div>
-
-													{/* Date & Time */}
-													<div className="space-y-2">
-														<div>
-															<span className="text-sm font-medium text-gray-900">Pickup Date</span>
-															<p className="text-sm text-gray-600">{formatDate(booking.scheduledPickupTime)}</p>
-														</div>
-														<div>
-															<span className="text-sm font-medium text-gray-900">Time</span>
-															<p className="text-sm text-gray-600">{formatTime(booking.scheduledPickupTime)}</p>
-														</div>
-													</div>
-
-													{/* Price & Actions */}
-													<div className="flex flex-col justify-between space-y-2">
-														<div className="text-right">
-															<div className="text-2xl font-bold text-primary">
-																{formatPrice(booking.finalAmount || booking.quotedAmount)}
-															</div>
-															{booking.finalAmount && booking.finalAmount !== booking.quotedAmount && (
-																<div className="text-sm text-gray-500 line-through">
-																	{formatPrice(booking.quotedAmount)}
-																</div>
-															)}
-														</div>
-														<div className="flex gap-2">
-															<Button variant="outline" size="sm" className="flex-1">
-																View Details
+														<div className="flex items-center justify-between gap-2">
+															<h3 className="font-semibold text-lg">
+																{booking.bookingType === "package" ? "Premium Service" : "Custom Journey"}
+															</h3>
+															<Button
+																variant="ghost"
+																size="sm"
+																className="text-primary hover:text-primary/80 self-start sm:self-auto"
+															>
+																<span className="hidden sm:inline">View Details</span>
+																<span className="sm:hidden">Details</span>
+																<ArrowRightIcon className="h-4 w-4 ml-1" />
 															</Button>
+														</div>
+														<div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+															<div className="xl:col-span-2 space-y-3 sm:space-y-4">
+																<div className="space-y-2 sm:space-y-3">
+																	{/* Route information */}
+																	<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-muted/50 rounded-lg">
+																		<div className="flex items-center gap-2 text-xs font-medium min-w-0">
+																			<MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+																			<span className="truncate">{booking.originAddress}</span>
+																		</div>
+																		<div className="flex-shrink-0 self-center">
+																			<ArrowRightIcon className="h-4 w-4 text-muted-foreground rotate-90 sm:rotate-0" />
+																		</div>
+																		<div className="flex items-center gap-2 text-xs font-medium min-w-0">
+																			<MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+																			<span className="truncate">{booking.destinationAddress}</span>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+
+													<div className="flex flex-row justify-between items-center">
+														{/* Date & Time */}
+														<div className="flex flex-row gap-2">
+															<div>
+																<span className="text-xs font-medium text-gray-900">Pickup Date</span>
+																<p className="text-xs text-gray-600">{formatDate(booking.scheduledPickupTime)}</p>
+															</div>
+															<div>
+																<span className="text-xs font-medium text-gray-900">Time</span>
+																<p className="text-xs text-gray-600">{formatTime(booking.scheduledPickupTime)}</p>
+															</div>
 														</div>
 													</div>
 												</div>
@@ -267,13 +271,13 @@ function CustomerBookingsPage() {
 														</div>
 													</>
 												)}
-											</CardContent>
-										</Card>
+											</div>
+										</div>
 									))}
 								</div>
 							)}
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</>
 			)}
 		</div>
