@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { DriverUserMenu } from "./driver-user-menu";
+import { BrandLogo } from "@/components/brand-logo";
 
 interface DriverTopNavigationProps {
 	session: any;
@@ -32,16 +33,7 @@ export function DriverTopNavigation({
 		<div className="sticky top-0 z-10 bg-white border-b border-gray-200">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex justify-between items-center h-16">
-					{/* Logo and Title */}
-					<div className="flex items-center">
-						<Logo className="lg:block" />
-						<div className="ml-3 hidden sm:block">
-							<h1 className="text-xl font-semibold text-gray-900">{BUSINESS_INFO.business.name}</h1>
-							<p className="text-[10px] text-gray-500">
-								{BUSINESS_INFO.business.slogan}
-							</p>
-						</div>
-					</div>
+					<BrandLogo />
 
 					{/* Right side - Mobile Menu Button and User Info */}
 					<div className="flex items-center space-x-2 sm:space-x-4">

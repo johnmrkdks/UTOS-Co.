@@ -13,6 +13,7 @@ import { bookingsRouter } from "./bookings";
 import { packagesRouter } from "./packages";
 import { packageCategoriesRouter } from "./package-categories";
 import { packageRoutesRouter } from "./package-routes";
+import { packageServiceTypesRouter } from "./package-service-types";
 import { ratingsRouter } from "./ratings";
 import { carCategoriesRouter } from "./car-categories";
 import { fileRouter } from "./file";
@@ -49,6 +50,7 @@ export const appRouter = router({
 	packages: packagesRouter,
 	packageCategories: packageCategoriesRouter,
 	packageRoutes: packageRoutesRouter,
+	packageServiceTypes: packageServiceTypesRouter,
 	pricingConfig: pricingConfigRouter,
 	ratings: ratingsRouter,
 	admin: adminRouter,

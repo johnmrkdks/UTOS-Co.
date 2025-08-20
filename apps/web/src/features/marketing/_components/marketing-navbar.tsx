@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { BrandLogo } from "@/components/brand-logo";
 
 type HeaderProps = {
 	className?: string;
@@ -73,18 +74,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 			{/* Main Navigation */}
 			<div className="container mx-auto px-6">
 				<div className="flex items-center justify-between py-2 md:py-4">
-					{/* Logo */}
-					<Link to="/" className="flex items-center gap-3 group">
-						<Logo />
-						<div className="hidden sm:block">
-							<h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-								{BUSINESS_INFO.business.name}
-							</h1>
-							<p className="text-xs text-muted-foreground -mt-1">
-								{BUSINESS_INFO.business.slogan}
-							</p>
-						</div>
-					</Link>
+					<BrandLogo />
 
 					{/* Desktop Navigation */}
 					<nav className="hidden lg:flex items-center gap-8">
@@ -126,7 +116,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 							<MobileNavLinks onClose={() => setIsMenuOpen(false)} />
 						</nav>
 					</div>
-					
+
 					{/* User Actions Section */}
 					{session ? (
 						<div className="border-t border-border p-4">
@@ -223,8 +213,8 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 	return (
 		<div className="flex flex-col gap-2">
 			{isAdmin && (
-				<Button 
-					className="w-full justify-start gap-2 rounded-xl shadow-none" 
+				<Button
+					className="w-full justify-start gap-2 rounded-xl shadow-none"
 					onClick={onClose}
 					asChild
 				>
@@ -234,10 +224,10 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 					</Link>
 				</Button>
 			)}
-			
+
 			{isDriver && (
-				<Button 
-					className="w-full justify-start gap-2 rounded-xl shadow-none" 
+				<Button
+					className="w-full justify-start gap-2 rounded-xl shadow-none"
 					onClick={onClose}
 					asChild
 				>
@@ -249,8 +239,8 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 			)}
 
 			{isCustomer && (
-				<Button 
-					className="w-full justify-start gap-2 rounded-xl shadow-none" 
+				<Button
+					className="w-full justify-start gap-2 rounded-xl shadow-none"
 					onClick={onClose}
 					asChild
 				>
@@ -279,7 +269,7 @@ function MobileUserProfile({ session, onClose }: { session: any; onClose: () => 
 					{session.user.email}
 				</p>
 			</div>
-			
+
 			<Link
 				to="/customer/profile"
 				onClick={onClose}
@@ -288,7 +278,7 @@ function MobileUserProfile({ session, onClose }: { session: any; onClose: () => 
 				<UserIcon className="w-4 h-4" />
 				Profile
 			</Link>
-			
+
 			<Link
 				to="/customer/account/settings"
 				onClick={onClose}

@@ -35,7 +35,7 @@
 		"@workspace/mail": "workspace:*",
 		"better-auth": "catalog:",
 		"dotenv": "^16.4.7",
-		"drizzle-orm": "^0.44.3",
+		"drizzle-orm": "^0.44.4",
 		"drizzle-seed": "^0.3.1",
 		"drizzle-zod": "^0.8.3",
 		"hono": "^4.8.2",

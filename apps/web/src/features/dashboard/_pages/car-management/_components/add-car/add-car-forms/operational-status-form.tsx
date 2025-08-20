@@ -3,6 +3,7 @@ import type { Control } from "react-hook-form"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
+import { Input } from "@workspace/ui/components/input"
 import type { AddCarFormValues } from "../add-car-form"
 import { CarStatusEnum } from "server/types"
 
@@ -79,6 +80,41 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 				</div>
 				<div className="space-y-4">
 					<h4 className="font-medium">Service Availability</h4>
+					
+					<FormField
+						control={control}
+						name="baseFare"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Base Fare *</FormLabel>
+								<FormControl>
+									<div className="relative">
+										<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+										<Input
+											{...field}
+											type="number"
+											min="1"
+											max="1000"
+											step="0.01"
+											placeholder="30.00"
+											className="pl-7"
+											onChange={(e) => {
+												// Convert dollars to cents
+												const dollars = parseFloat(e.target.value) || 0;
+												const cents = Math.round(dollars * 100);
+												field.onChange(cents);
+											}}
+											value={field.value ? (field.value / 100).toFixed(2) : ""}
+										/>
+									</div>
+								</FormControl>
+								<FormDescription className="text-xs">
+									Starting fare for this specific car (used for custom bookings)
+								</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 					<FormField
 						control={control}
 						name="availableForPackages"

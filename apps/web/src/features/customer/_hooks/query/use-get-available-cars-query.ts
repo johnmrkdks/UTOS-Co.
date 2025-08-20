@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useGetAvailableCarsQuery = () => {
 	return useQuery(trpc.cars.listPublished.queryOptions({
-		limit: 1, // Just get the first available car for now
+		limit: 10, // Get more cars for selection
 		offset: 0,
 	}));
 };

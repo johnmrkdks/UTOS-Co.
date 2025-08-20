@@ -30,26 +30,7 @@ function CarBookingPage() {
 	const { data: session } = authClient.useSession()
 	const { data: car, isLoading: carLoading, error: carError } = useGetCarQuery({ id: carId })
 
-	const createCustomBookingMutation = useCreateCustomBookingMutation({
-		onSuccess: (data) => {
-			toast.success("Appointment booked successfully!", {
-				description: `Your luxury chauffeur appointment has been confirmed. Booking ID: ${data.id}`,
-			})
-			setBookingId(data.id)
-			setCurrentStep("success")
-
-			// Redirect to bookings page after success
-			setTimeout(() => {
-				navigate({ to: "/customer/bookings" })
-			}, 3000)
-		},
-		onError: (error) => {
-			toast.error("Failed to book appointment", {
-				description: error.message || "Please try again or contact support if the problem persists.",
-			})
-			setCurrentStep("details")
-		},
-	})
+	const createCustomBookingMutation = useCreateCustomBookingMutation()
 
 	const handleFormSubmit = (data: CarAppointmentForm, originGeo: any, destinationGeo: any) => {
 		setFormData(data)
@@ -74,8 +55,8 @@ function CarBookingPage() {
 			const totalAmount = baseFare + distanceFare
 
 			// Ensure scheduledPickupTime is a proper Date object and convert to ISO string for tRPC
-			const pickupTime = formData.scheduledPickupTime instanceof Date 
-				? formData.scheduledPickupTime 
+			const pickupTime = formData.scheduledPickupTime instanceof Date
+				? formData.scheduledPickupTime
 				: new Date(formData.scheduledPickupTime)
 
 			await createCustomBookingMutation.mutateAsync({
@@ -105,6 +86,26 @@ function CarBookingPage() {
 				customerEmail: formData.customerEmail || undefined,
 				passengerCount: formData.passengerCount,
 				specialRequests: formData.specialRequests,
+			}, {
+				onSuccess: (data) => {
+					toast.success("Appointment booked successfully!", {
+						description: `Your luxury chauffeur appointment has been confirmed. Booking ID: ${data.id}`,
+					})
+					setBookingId(data.id)
+					setCurrentStep("success")
+
+					// Redirect to bookings page after success
+					setTimeout(() => {
+						navigate({ to: "/customer/bookings" })
+					}, 3000)
+				},
+				onError: (error) => {
+					toast.error("Failed to book appointment", {
+						description: error.message || "Please try again or contact support if the problem persists.",
+					})
+					setCurrentStep("details")
+				},
+
 			})
 		} catch (error) {
 			console.error("Appointment booking failed:", error)

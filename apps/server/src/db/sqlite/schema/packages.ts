@@ -2,6 +2,7 @@ import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { packageCategories } from "./packages/package-categories";
+import { packageServiceTypes } from "./packages/package-service-types";
 
 export const packages = sqliteTable("packages", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
@@ -9,12 +10,12 @@ export const packages = sqliteTable("packages", {
 	description: text("description").notNull(),
 
 	categoryId: text("category_id").references(() => packageCategories.id),
+	serviceTypeId: text("service_type_id").references(() => packageServiceTypes.id).notNull(),
 
 	// Package image
 	bannerImageUrl: text("banner_image_url"), // URL for package banner image
 
 	// Service specifications
-	serviceType: text("service_type").notNull(), // "transfer", "tour", "event", "hourly"
 	duration: integer("duration"), // in minutes (null for transfers)
 	maxDistance: integer("max_distance"), // in km (null if unlimited)
 

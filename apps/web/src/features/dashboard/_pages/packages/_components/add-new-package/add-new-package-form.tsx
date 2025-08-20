@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { useCreatePackageMutation } from "../../_hooks/query/use-create-package-mutation";
+import { useGetPackageServiceTypesQuery } from "../../_hooks/query/use-get-package-service-types-query";
 import { Loader2, Upload, X } from "lucide-react";
 import { Progress } from "@workspace/ui/components/progress";
 import { useFileUpload } from "@/hooks/use-file-upload";
@@ -19,7 +20,7 @@ import { useUploadMutation } from "@/hooks/query/file/use-upload-mutation";
 const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
 	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
-	serviceType: z.string().min(1, "Service type is required"),
+	serviceTypeId: z.string().min(1, "Service type is required"),
 	fixedPrice: z.number().min(0, "Price must be positive"),
 	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
 	isAvailable: z.boolean().default(true),
@@ -57,6 +58,9 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 	const createPackageMutation = useCreatePackageMutation();
 	const createPresignedUrlMutation = useCreatePresignedUrlMutation();
 	const uploadMutation = useUploadMutation();
+	const { data: serviceTypesData } = useGetPackageServiceTypesQuery();
+
+	const serviceTypes = serviceTypesData?.data || [];
 	
 	const [{ files: imageFiles }, { addFiles, removeFile, openFileDialog, getInputProps }] = useFileUpload({
 		maxFiles: 1,
@@ -75,7 +79,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 		defaultValues: {
 			name: "",
 			description: "",
-			serviceType: "",
+			serviceTypeId: "",
 			fixedPrice: 0,
 			maxPassengers: 4,
 			isAvailable: true,
@@ -198,7 +202,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 
 						<FormField
 							control={form.control}
-							name="serviceType"
+							name="serviceTypeId"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Service Type</FormLabel>
@@ -208,15 +212,20 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 												<SelectValue placeholder="Select service type" />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="transfer">Transfer</SelectItem>
-												<SelectItem value="tour">Tour</SelectItem>
-												<SelectItem value="event">Event</SelectItem>
-												<SelectItem value="hourly">Hourly</SelectItem>
+												{serviceTypes
+													.filter(type => type.isActive)
+													.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+													.map((serviceType) => (
+														<SelectItem key={serviceType.id} value={serviceType.id}>
+															{serviceType.icon && `${serviceType.icon} `}{serviceType.name}
+														</SelectItem>
+													))
+												}
 											</SelectContent>
 										</Select>
 									</FormControl>
 									<div className="text-sm text-muted-foreground mt-1">
-										Service Type defines the operational model: Transfer (A to B), Tour (guided sightseeing), Event (special occasions), or Hourly (time-based rental).
+										Service Type defines the operational model for how this package functions.
 									</div>
 									<FormMessage />
 								</FormItem>

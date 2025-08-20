@@ -34,9 +34,9 @@ import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout
 import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
 import { Route as CustomerLayoutServicesRouteImport } from './routes/customer/_layout/services'
 import { Route as CustomerLayoutProfileRouteImport } from './routes/customer/_layout/profile'
-import { Route as CustomerLayoutInstantQuoteRouteImport } from './routes/customer/_layout/instant-quote'
 import { Route as CustomerLayoutCarsRouteImport } from './routes/customer/_layout/cars'
 import { Route as CustomerLayoutBookingsRouteImport } from './routes/customer/_layout/bookings'
+import { Route as CustomerLayoutBookAppointmentRouteImport } from './routes/customer/_layout/book-appointment'
 import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './routes/dashboard/_layout/todays-scheduled/index'
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
@@ -190,12 +190,6 @@ const CustomerLayoutProfileRoute = CustomerLayoutProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => CustomerLayoutRoute,
 } as any)
-const CustomerLayoutInstantQuoteRoute =
-  CustomerLayoutInstantQuoteRouteImport.update({
-    id: '/instant-quote',
-    path: '/instant-quote',
-    getParentRoute: () => CustomerLayoutRoute,
-  } as any)
 const CustomerLayoutCarsRoute = CustomerLayoutCarsRouteImport.update({
   id: '/cars',
   path: '/cars',
@@ -206,6 +200,12 @@ const CustomerLayoutBookingsRoute = CustomerLayoutBookingsRouteImport.update({
   path: '/bookings',
   getParentRoute: () => CustomerLayoutRoute,
 } as any)
+const CustomerLayoutBookAppointmentRoute =
+  CustomerLayoutBookAppointmentRouteImport.update({
+    id: '/book-appointment',
+    path: '/book-appointment',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 const DashboardLayoutTodaysScheduledIndexRoute =
   DashboardLayoutTodaysScheduledIndexRouteImport.update({
     id: '/todays-scheduled/',
@@ -322,9 +322,9 @@ const CustomerLayoutBookServiceServiceIdRoute =
   } as any)
 const CustomerLayoutBookAppointmentCarIdRoute =
   CustomerLayoutBookAppointmentCarIdRouteImport.update({
-    id: '/book-appointment/$carId',
-    path: '/book-appointment/$carId',
-    getParentRoute: () => CustomerLayoutRoute,
+    id: '/$carId',
+    path: '/$carId',
+    getParentRoute: () => CustomerLayoutBookAppointmentRoute,
   } as any)
 const CustomerLayoutAccountSettingsRoute =
   CustomerLayoutAccountSettingsRouteImport.update({
@@ -347,9 +347,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
+  '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/bookings': typeof CustomerLayoutBookingsRoute
   '/customer/cars': typeof CustomerLayoutCarsRoute
-  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
   '/customer/profile': typeof CustomerLayoutProfileRoute
   '/customer/services': typeof CustomerLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
@@ -395,9 +395,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/driver': typeof DriverLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/bookings': typeof CustomerLayoutBookingsRoute
   '/customer/cars': typeof CustomerLayoutCarsRoute
-  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
   '/customer/profile': typeof CustomerLayoutProfileRoute
   '/customer/services': typeof CustomerLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
@@ -445,9 +445,9 @@ export interface FileRoutesById {
   '/driver': typeof DriverRouteWithChildren
   '/driver/_layout': typeof DriverLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
+  '/customer/_layout/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/_layout/bookings': typeof CustomerLayoutBookingsRoute
   '/customer/_layout/cars': typeof CustomerLayoutCarsRoute
-  '/customer/_layout/instant-quote': typeof CustomerLayoutInstantQuoteRoute
   '/customer/_layout/profile': typeof CustomerLayoutProfileRoute
   '/customer/_layout/services': typeof CustomerLayoutServicesRoute
   '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
@@ -495,9 +495,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/driver'
     | '/'
+    | '/customer/book-appointment'
     | '/customer/bookings'
     | '/customer/cars'
-    | '/customer/instant-quote'
     | '/customer/profile'
     | '/customer/services'
     | '/driver/onboarding'
@@ -543,9 +543,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/driver'
     | '/'
+    | '/customer/book-appointment'
     | '/customer/bookings'
     | '/customer/cars'
-    | '/customer/instant-quote'
     | '/customer/profile'
     | '/customer/services'
     | '/driver/onboarding'
@@ -592,9 +592,9 @@ export interface FileRouteTypes {
     | '/driver'
     | '/driver/_layout'
     | '/_marketing/'
+    | '/customer/_layout/book-appointment'
     | '/customer/_layout/bookings'
     | '/customer/_layout/cars'
-    | '/customer/_layout/instant-quote'
     | '/customer/_layout/profile'
     | '/customer/_layout/services'
     | '/driver/_layout/onboarding'
@@ -820,13 +820,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLayoutProfileRouteImport
       parentRoute: typeof CustomerLayoutRoute
     }
-    '/customer/_layout/instant-quote': {
-      id: '/customer/_layout/instant-quote'
-      path: '/instant-quote'
-      fullPath: '/customer/instant-quote'
-      preLoaderRoute: typeof CustomerLayoutInstantQuoteRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
     '/customer/_layout/cars': {
       id: '/customer/_layout/cars'
       path: '/cars'
@@ -839,6 +832,13 @@ declare module '@tanstack/react-router' {
       path: '/bookings'
       fullPath: '/customer/bookings'
       preLoaderRoute: typeof CustomerLayoutBookingsRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
+    '/customer/_layout/book-appointment': {
+      id: '/customer/_layout/book-appointment'
+      path: '/book-appointment'
+      fullPath: '/customer/book-appointment'
+      preLoaderRoute: typeof CustomerLayoutBookAppointmentRouteImport
       parentRoute: typeof CustomerLayoutRoute
     }
     '/dashboard/_layout/todays-scheduled/': {
@@ -976,10 +976,10 @@ declare module '@tanstack/react-router' {
     }
     '/customer/_layout/book-appointment/$carId': {
       id: '/customer/_layout/book-appointment/$carId'
-      path: '/book-appointment/$carId'
+      path: '/$carId'
       fullPath: '/customer/book-appointment/$carId'
       preLoaderRoute: typeof CustomerLayoutBookAppointmentCarIdRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      parentRoute: typeof CustomerLayoutBookAppointmentRoute
     }
     '/customer/_layout/account/settings': {
       id: '/customer/_layout/account/settings'
@@ -1017,29 +1017,42 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
+interface CustomerLayoutBookAppointmentRouteChildren {
+  CustomerLayoutBookAppointmentCarIdRoute: typeof CustomerLayoutBookAppointmentCarIdRoute
+}
+
+const CustomerLayoutBookAppointmentRouteChildren: CustomerLayoutBookAppointmentRouteChildren =
+  {
+    CustomerLayoutBookAppointmentCarIdRoute:
+      CustomerLayoutBookAppointmentCarIdRoute,
+  }
+
+const CustomerLayoutBookAppointmentRouteWithChildren =
+  CustomerLayoutBookAppointmentRoute._addFileChildren(
+    CustomerLayoutBookAppointmentRouteChildren,
+  )
+
 interface CustomerLayoutRouteChildren {
+  CustomerLayoutBookAppointmentRoute: typeof CustomerLayoutBookAppointmentRouteWithChildren
   CustomerLayoutBookingsRoute: typeof CustomerLayoutBookingsRoute
   CustomerLayoutCarsRoute: typeof CustomerLayoutCarsRoute
-  CustomerLayoutInstantQuoteRoute: typeof CustomerLayoutInstantQuoteRoute
   CustomerLayoutProfileRoute: typeof CustomerLayoutProfileRoute
   CustomerLayoutServicesRoute: typeof CustomerLayoutServicesRoute
   CustomerLayoutIndexRoute: typeof CustomerLayoutIndexRoute
   CustomerLayoutAccountSettingsRoute: typeof CustomerLayoutAccountSettingsRoute
-  CustomerLayoutBookAppointmentCarIdRoute: typeof CustomerLayoutBookAppointmentCarIdRoute
   CustomerLayoutBookServiceServiceIdRoute: typeof CustomerLayoutBookServiceServiceIdRoute
   CustomerLayoutCarDetailsCarIdRoute: typeof CustomerLayoutCarDetailsCarIdRoute
 }
 
 const CustomerLayoutRouteChildren: CustomerLayoutRouteChildren = {
+  CustomerLayoutBookAppointmentRoute:
+    CustomerLayoutBookAppointmentRouteWithChildren,
   CustomerLayoutBookingsRoute: CustomerLayoutBookingsRoute,
   CustomerLayoutCarsRoute: CustomerLayoutCarsRoute,
-  CustomerLayoutInstantQuoteRoute: CustomerLayoutInstantQuoteRoute,
   CustomerLayoutProfileRoute: CustomerLayoutProfileRoute,
   CustomerLayoutServicesRoute: CustomerLayoutServicesRoute,
   CustomerLayoutIndexRoute: CustomerLayoutIndexRoute,
   CustomerLayoutAccountSettingsRoute: CustomerLayoutAccountSettingsRoute,
-  CustomerLayoutBookAppointmentCarIdRoute:
-    CustomerLayoutBookAppointmentCarIdRoute,
   CustomerLayoutBookServiceServiceIdRoute:
     CustomerLayoutBookServiceServiceIdRoute,
   CustomerLayoutCarDetailsCarIdRoute: CustomerLayoutCarDetailsCarIdRoute,

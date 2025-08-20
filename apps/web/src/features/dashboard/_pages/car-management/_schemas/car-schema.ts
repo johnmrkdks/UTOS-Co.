@@ -47,6 +47,8 @@ export const CarFormSchema = z.object({
 	// Passenger capacity
 	seatingCapacity: z.coerce.number().min(1, "Seating capacity must be at least 1"),
 	luggageCapacity: z.string().optional(),
+	// Pricing
+	baseFare: z.coerce.number().min(100, "Base fare must be at least $1.00 (100 cents)").max(100000, "Base fare cannot exceed $1000.00"),
 	// Service availability
 	availableForPackages: z.boolean(),
 	availableForCustom: z.boolean(),

@@ -57,6 +57,9 @@ export const cars = sqliteTable(
 		seatingCapacity: integer("seating_capacity").notNull().default(4),
 		luggageCapacity: text("luggage_capacity"),
 
+		// Pricing (base fare per vehicle)
+		baseFare: real("base_fare").notNull(),
+
 		// Service availability
 		availableForPackages: integer("available_for_packages", { mode: "boolean" })
 			.notNull()

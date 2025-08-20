@@ -9,10 +9,13 @@ import { PackageCategoriesTable } from "@/features/dashboard/_pages/packages/_co
 import { AddPackageCategoryDialog } from "@/features/dashboard/_pages/packages/_components/package-categories/add-package-category-dialog";
 import { PackageAnalyticsCards } from "@/features/dashboard/_pages/packages/_components/package-analytics/package-analytics-cards";
 import { CategoryAnalyticsCards } from "@/features/dashboard/_pages/packages/_components/package-categories/category-analytics-cards";
-import { Package, Plus, FolderOpen } from "lucide-react";
+import { PackageServiceTypesTable } from "@/features/dashboard/_pages/packages/_components/package-service-types/package-service-types-table";
+import { AddPackageServiceTypeDialog } from "@/features/dashboard/_pages/packages/_components/package-service-types/add-package-service-type-dialog";
+import { Package, Plus, FolderOpen, Tags } from "lucide-react";
 import { useState } from "react";
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
 import { useGetPackageCategoriesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-package-categories-query";
+import { useGetPackageServiceTypesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-package-service-types-query";
 import { useModal } from "@/hooks/use-modal";
 import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
@@ -29,7 +32,10 @@ function RouteComponent() {
 
 	const packagesQuery = useGetPackagesQuery({});
 	const { data: categories = [], isLoading: categoriesLoading } = useGetPackageCategoriesQuery();
+	const { data: serviceTypesData, isLoading: serviceTypesLoading } = useGetPackageServiceTypesQuery();
 	const { openModal } = useModal();
+
+	const serviceTypes = serviceTypesData?.data || [];
 
 	const packages = packagesQuery.data?.data || [];
 
@@ -40,7 +46,7 @@ function RouteComponent() {
 					<div className="flex items-center justify-between space-y-2">
 						<h2 className="text-3xl font-bold tracking-tight">Package Management</h2>
 					</div>
-					<TabsList className="grid grid-cols-2">
+					<TabsList className="grid grid-cols-3">
 						<TabsTrigger value="packages" className="flex items-center gap-2">
 							<Package className="h-4 w-4" />
 							Packages
@@ -48,6 +54,10 @@ function RouteComponent() {
 						<TabsTrigger value="categories" className="flex items-center gap-2">
 							<FolderOpen className="h-4 w-4" />
 							Categories
+						</TabsTrigger>
+						<TabsTrigger value="service-types" className="flex items-center gap-2">
+							<Tags className="h-4 w-4" />
+							Service Types
 						</TabsTrigger>
 					</TabsList>
 				</PaddingLayout>
@@ -123,6 +133,39 @@ function RouteComponent() {
 						</Card>
 
 						<AddPackageCategoryDialog />
+					</TabsContent>
+
+					<TabsContent value="service-types" className="space-y-4">
+						<div className="flex items-center justify-between">
+							<div>
+								<h3 className="text-lg font-semibold">Service Types</h3>
+								<p className="text-sm text-muted-foreground">
+									Define operational service models that determine how packages are delivered (Transfer, Tour, Event, Hourly).
+									Service Types define the core operational structure of your packages.
+								</p>
+							</div>
+							<Button
+								onClick={() => openModal("add-package-service-type")}
+								className="flex items-center gap-2"
+							>
+								<Plus className="h-4 w-4" />
+								Add Service Type
+							</Button>
+						</div>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>All Service Types</CardTitle>
+								<CardDescription>
+									Manage the operational models that define how your packages function.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<PackageServiceTypesTable data={serviceTypes} isLoading={serviceTypesLoading} />
+							</CardContent>
+						</Card>
+
+						<AddPackageServiceTypeDialog />
 					</TabsContent>
 				</PaddingLayout>
 			</Tabs>

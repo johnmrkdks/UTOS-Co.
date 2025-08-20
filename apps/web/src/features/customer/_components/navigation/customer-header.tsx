@@ -7,6 +7,7 @@ import type { CustomerNavigationItem } from "./types";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { CustomerNotificationMenu } from "./customer-notification-menu";
 import { CustomerUserMenu } from "./customer-user-menu";
+import { BrandLogo } from "@/components/brand-logo";
 
 interface CustomerHeaderProps {
 	session: any;
@@ -28,17 +29,7 @@ export function CustomerHeader({
 			<div className="container mx-auto px-4 py-3 md:py-4">
 				{/* Desktop Header */}
 				<div className="hidden md:flex items-center justify-between">
-					<div className="flex items-center space-x-4">
-						<Logo />
-						<div>
-							<h1 className="text-2xl font-bold text-foreground">
-								Down Under Chauffeur
-							</h1>
-							<p className="text-sm text-muted-foreground">
-								Sydney's Premier Luxury Service
-							</p>
-						</div>
-					</div>
+					<BrandLogo />
 
 					<div className="flex items-center space-x-6">
 						{/* Desktop Navigation */}

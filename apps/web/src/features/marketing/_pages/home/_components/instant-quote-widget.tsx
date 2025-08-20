@@ -2,7 +2,8 @@ import { useState } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Calculator, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, AlertCircle, Plus, X } from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
+import { Calculator, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, AlertCircle, Plus, X, LogIn } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
@@ -10,9 +11,9 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { GooglePlacesInput } from "./google-places-input-simple"
-import { QuoteToBookingDialog } from "./quote-to-booking-dialog"
 import { useCalculateInstantQuoteMutation } from "../_hooks/query/use-calculate-instant-quote-mutation"
 import { useCheckInstantQuoteAvailabilityQuery } from "../_hooks/query/use-check-instant-quote-availability-query"
+import { useUserQuery } from "@/hooks/query/use-user-query"
 
 const instantQuoteSchema = z.object({
 	originAddress: z.string().min(1, "Origin address is required"),
@@ -50,8 +51,9 @@ export function InstantQuoteWidget() {
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null)
 	const [stopsGeometry, setStopsGeometry] = useState<any[]>([])
 	const [showBreakdown, setShowBreakdown] = useState(false)
-	const [showBookingDialog, setShowBookingDialog] = useState(false)
-
+	
+	const navigate = useNavigate()
+	const { session, isLoading: userLoading } = useUserQuery()
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation()
 	const availabilityQuery = useCheckInstantQuoteAvailabilityQuery()
 
@@ -185,23 +187,16 @@ export function InstantQuoteWidget() {
 		setStopsGeometry([])
 		setCurrentStep("input")
 		setShowBreakdown(false)
-		setShowBookingDialog(false)
 		form.reset()
 	}
 
 	const handleBookThisJourney = () => {
-		setShowBookingDialog(true)
-	}
-
-	const handleBookingConfirmed = (bookingId: string) => {
-		console.log("Booking confirmed:", bookingId)
-		// Could navigate to booking confirmation page or customer dashboard
-		resetQuote()
-	}
-
-	const getCurrentRouteData = () => {
+		if (!quote) return
+		
 		const formData = form.getValues()
-		return {
+		
+		// Prepare route data for URL params
+		const routeData = {
 			originAddress: formData.originAddress,
 			destinationAddress: formData.destinationAddress,
 			originLatitude: originGeometry?.location?.lat?.(),
@@ -214,7 +209,18 @@ export function InstantQuoteWidget() {
 				longitude: stopsGeometry[index]?.location?.lng?.(),
 			})) || [],
 		}
+
+		// Navigate to customer booking flow with secure quote token
+		// The customer route has authentication protection, so users will be redirected to login if not authenticated
+		navigate({
+			to: "/customer/book-appointment",
+			search: {
+				from: "instant-quote",
+				token: (quote as any).quoteToken || "", // Use secure token instead of exposing data
+			}
+		})
 	}
+
 
 	const goBackToInput = () => {
 		setCurrentStep("input")
@@ -459,9 +465,24 @@ export function InstantQuoteWidget() {
 								<Button 
 									onClick={handleBookThisJourney}
 									className="w-full h-10 text-sm font-semibold"
+									disabled={userLoading}
 								>
-									Book This Journey
-									<ArrowRight className="ml-2 h-4 w-4" />
+									{userLoading ? (
+										<>
+											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+											Loading...
+										</>
+									) : session?.user ? (
+										<>
+											Book This Journey
+											<ArrowRight className="ml-2 h-4 w-4" />
+										</>
+									) : (
+										<>
+											<LogIn className="mr-2 h-4 w-4" />
+											Sign In to Book
+										</>
+									)}
 								</Button>
 
 								<Button variant="outline" onClick={resetQuote} className="w-full h-9 text-xs">
@@ -469,24 +490,20 @@ export function InstantQuoteWidget() {
 								</Button>
 							</div>
 
-							<p className="text-xs text-muted-foreground text-center">
-								* Prices are estimates and may vary based on traffic and other factors
-							</p>
+							<div className="space-y-2">
+								<p className="text-xs text-muted-foreground text-center">
+									* Prices are estimates and may vary based on traffic and other factors
+								</p>
+								{!session?.user && !userLoading && (
+									<p className="text-xs text-primary text-center">
+										Sign in required to book luxury chauffeur services
+									</p>
+								)}
+							</div>
 						</div>
 					</div>
 				)}
 			</CardContent>
-
-			{/* Booking Dialog */}
-			{quote && (
-				<QuoteToBookingDialog
-					open={showBookingDialog}
-					onOpenChange={setShowBookingDialog}
-					quote={quote}
-					routeData={getCurrentRouteData()}
-					onBookingConfirmed={handleBookingConfirmed}
-				/>
-			)}
 		</Card>
 	)
 }
