@@ -1,8 +1,9 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
+import { useLocation } from "@tanstack/react-router";
 import {
 	DriverTopNavigation,
 	DriverMobileMenuContent,
@@ -13,10 +14,16 @@ import {
 
 export function DriverLayout() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { session, signOutWithConfirmation } = useUserQuery();
 	const { data: currentDriver } = useCurrentDriverQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const navigationItems = useDriverNavigation();
+
+	// Scroll to top when route changes (for browser viewport)
+	useEffect(() => {
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	}, [location.pathname]);
 
 	const user = session?.user;
 

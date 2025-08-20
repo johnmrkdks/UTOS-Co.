@@ -8,6 +8,7 @@ import { DashboardSidebar } from "@/features/dashboard/_components/dashboard-sid
 import { requireAdmin } from "@/utils/auth";
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { Suspense } from "react";
+import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 
 export const Route = createFileRoute("/dashboard/_layout")({
 	component: RouteComponent,
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/dashboard/_layout")({
 
 function RouteComponent() {
 	const routerState = useRouterState();
+	const scrollContainerRef = useScrollToTop();
 
 	return (
 		<SidebarProvider>
@@ -23,7 +25,7 @@ function RouteComponent() {
 			<SidebarInset className="relative">
 				<DashboardNavbar className="sticky top-0 z-10" />
 				<div className="flex w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 min-h-[calc(100vh-var(--navbar-height,60px))] overflow-hidden">
-					<div className="flex-1 relative overflow-y-auto overflow-x-hidden">
+					<div ref={scrollContainerRef} className="flex-1 relative overflow-y-auto overflow-x-hidden">
 						{routerState.status === 'pending' && (
 							<div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
 								<Loader />

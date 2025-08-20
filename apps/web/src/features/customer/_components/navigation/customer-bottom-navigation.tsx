@@ -8,9 +8,9 @@ interface CustomerBottomNavigationProps {
 
 export function CustomerBottomNavigation({ navigationItems }: CustomerBottomNavigationProps) {
 	return (
-		<div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border">
-			<nav className="container mx-auto px-2 py-2">
-				<div className="flex justify-around">
+		<div className="md:hidden bg-background border-t border-border shadow-lg z-40">
+			<nav className="pb-safe">
+				<div className="flex justify-around px-2 py-3">
 					{navigationItems.filter(item => item.primary).map((item) => {
 						const Icon = item.icon;
 						return (
@@ -18,10 +18,10 @@ export function CustomerBottomNavigation({ navigationItems }: CustomerBottomNavi
 								key={item.name}
 								to={item.href}
 								className={cn(
-									"flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1",
+									"flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1 touch-manipulation active:scale-95",
 									item.active
-										? "text-primary"
-										: "text-muted-foreground hover:text-foreground"
+										? "text-primary bg-primary/10"
+										: "text-muted-foreground hover:text-foreground hover:bg-muted/50"
 								)}
 							>
 								<Icon className="h-5 w-5 mb-1" />

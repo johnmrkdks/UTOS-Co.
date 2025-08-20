@@ -61,8 +61,12 @@ function CustomerCarsPage() {
 	}
 
 	const handleViewDetails = (car: any) => {
-		// Could open a detailed car view modal
-		console.log("View car details:", car)
+		console.log("Navigating to car details:", car.id)
+		try {
+			navigate({ to: "/customer/car-details/$carId", params: { carId: car.id } })
+		} catch (error) {
+			console.error("Navigation error:", error)
+		}
 	}
 
 	return (

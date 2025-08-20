@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, X } from "lucide-react";
 import type { CustomerNavigationItem } from "./types";
 
 interface CustomerMobileMenuProps {
@@ -22,10 +22,23 @@ export function CustomerMobileMenu({
 	if (!isOpen) return null;
 
 	return (
-		<div className="absolute left-0 right-0 top-full bg-background border-b border-border shadow-lg z-50 max-h-[80vh] overflow-y-auto">
-			<div className="container mx-auto px-4 py-4">
-				{/* User Info Section */}
-				<div className="flex items-center space-x-3 mb-6 p-4 bg-muted/30 rounded-lg">
+		<div className="w-full max-w-sm bg-background rounded-r-lg shadow-xl ml-0 h-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+			<div className="h-full overflow-y-auto">
+				{/* Close Button */}
+				<div className="flex justify-end p-4 border-b border-border">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={onClose}
+						className="h-8 w-8"
+					>
+						<X className="h-4 w-4" />
+					</Button>
+				</div>
+				
+				<div className="px-4 pb-6">
+					{/* User Info Section */}
+					<div className="flex items-center space-x-3 mb-6 p-4 bg-muted/30 rounded-lg mt-4">
 					<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
 						<User className="h-6 w-6 text-primary" />
 					</div>
@@ -106,6 +119,7 @@ export function CustomerMobileMenu({
 						<span className="font-medium text-sm">Sign Out</span>
 					</Button>
 				</nav>
+				</div>
 			</div>
 		</div>
 	);
