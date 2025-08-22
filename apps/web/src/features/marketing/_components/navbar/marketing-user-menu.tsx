@@ -26,9 +26,9 @@ export function MarketingUserMenu() {
 	}
 
 	// Check user role for appropriate dashboard access
-	const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
-	const isDriver = session.user.role === "driver";
-	const isCustomer = session.user.role === "user";
+	const isAdmin = session.user?.role === "admin" || session.user?.role === "super_admin";
+	const isDriver = session.user?.role === "driver";
+	const isCustomer = session.user?.role === "user";
 
 	return (
 		<div className="flex items-center gap-4">
@@ -37,7 +37,7 @@ export function MarketingUserMenu() {
 					<Link to="/dashboard">Admin Dashboard</Link>
 				</Button>
 			)}
-			
+
 			{isDriver && (
 				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
 					<Link to="/driver">Driver Dashboard</Link>
@@ -60,36 +60,36 @@ export function MarketingUserMenu() {
 						<UserIcon className="h-5 w-5 transition-transform duration-200" />
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent 
-					className="max-w-64 animate-in slide-in-from-top-2 duration-200" 
+				<DropdownMenuContent
+					className="max-w-64 animate-in slide-in-from-top-2 duration-200"
 					align="end"
 				>
 					<DropdownMenuLabel className="flex min-w-0 flex-col">
 						<span className="text-foreground truncate text-sm font-medium">
-							{session.user.name}
+							{session.user?.name}
 						</span>
 						<span className="text-muted-foreground truncate text-xs font-normal">
-							{session.user.email}
+							{session.user?.email}
 						</span>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
-					
+
 					{/* Profile & Account Management Section - Only for customers */}
 					{isCustomer && (
 						<>
 							<DropdownMenuItem asChild>
-								<Link 
-									to="/customer/profile" 
+								<Link
+									to="/customer/profile"
 									className="cursor-pointer transition-colors duration-150"
 								>
 									<UserCircleIcon size={16} className="opacity-60 transition-opacity duration-150" aria-hidden="true" />
 									<span>Profile</span>
 								</Link>
 							</DropdownMenuItem>
-							
+
 							<DropdownMenuItem asChild>
-								<Link 
-									to="/customer/account/settings" 
+								<Link
+									to="/customer/account/settings"
 									className="cursor-pointer transition-colors duration-150"
 								>
 									<SettingsIcon size={16} className="opacity-60 transition-opacity duration-150" aria-hidden="true" />
@@ -98,10 +98,10 @@ export function MarketingUserMenu() {
 							</DropdownMenuItem>
 						</>
 					)}
-					
+
 					<DropdownMenuSeparator />
-					
-					<DropdownMenuItem 
+
+					<DropdownMenuItem
 						onClick={signOutWithConfirmation.openSignOutDialog}
 						className="cursor-pointer transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
 					>
@@ -110,13 +110,13 @@ export function MarketingUserMenu() {
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-			
+
 			<SignOutConfirmationDialog
 				isOpen={signOutWithConfirmation.isDialogOpen}
 				onClose={signOutWithConfirmation.closeSignOutDialog}
 				onConfirm={signOutWithConfirmation.confirmSignOut}
-				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
-				userName={session?.user.name}
+				userRole={session?.user?.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userName={session?.user?.name}
 				isLoading={signOutWithConfirmation.isSigningOut}
 			/>
 		</div>

@@ -1,5 +1,6 @@
 import { createCar } from "@/data/cars/create-car";
 import { getCarByName } from "@/data/cars/get-car-by-name";
+import { getCarByLicensePlate } from "@/data/cars/get-car-by-license-plate";
 import { createCarImage } from "@/data/cars-images/create-car-image";
 import type { DB } from "@/db";
 import { InsertCarSchema, type InsertCar } from "@/schemas/shared";
@@ -17,6 +18,12 @@ export async function createCarService(db: DB, data: CreateCarParams) {
 
 	if (car) {
 		throw ErrorFactory.duplicateEntry('Car', "name");
+	}
+
+	const existingCarByLicensePlate = await getCarByLicensePlate(db, data.licensePlate);
+
+	if (existingCarByLicensePlate) {
+		throw ErrorFactory.duplicateEntry('Car', "license plate");
 	}
 
 	const values = {
