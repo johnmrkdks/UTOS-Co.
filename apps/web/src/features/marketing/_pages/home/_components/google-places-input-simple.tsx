@@ -26,7 +26,7 @@ export function GooglePlacesInput({
 	value,
 	onChange,
 	onPlaceSelect,
-	placeholder = "Enter location in Australia...",
+	placeholder = "Enter location in NSW...",
 	className,
 	disabled = false,
 	onRemove,

@@ -11,6 +11,7 @@ interface UseGooglePlacesAutocompleteOptions {
 	onPlaceSelect?: (place: PlaceResult) => void
 	componentRestrictions?: {
 		country: string
+		administrative_area?: string
 	}
 	types?: string[]
 }
@@ -125,7 +126,20 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 					setIsLoading(false)
 
 					if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
-						const results: PlaceResult[] = predictions.map((prediction) => ({
+						// Filter results to only include NSW locations
+						const filteredPredictions = predictions.filter((prediction) => {
+							const description = prediction.description || ""
+							// Check if the description contains NSW, New South Wales, or common NSW abbreviations
+							return description.includes("NSW") || 
+								description.includes("New South Wales") ||
+								description.includes("Sydney") ||
+								description.includes("Newcastle") ||
+								description.includes("Wollongong") ||
+								description.includes("Blue Mountains") ||
+								description.includes("Central Coast")
+						})
+
+						const results: PlaceResult[] = filteredPredictions.map((prediction) => ({
 							placeId: prediction.place_id,
 							description: prediction.description,
 							mainText: prediction.structured_formatting.main_text,

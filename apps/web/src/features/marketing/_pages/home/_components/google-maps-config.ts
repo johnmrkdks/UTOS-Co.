@@ -12,6 +12,7 @@ export const GOOGLE_MAPS_CONFIG = {
 	apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY_HERE",
 	libraries: ["places"] as const,
 	// Restrict autocomplete to Australia only
+	// Note: NSW filtering will be handled in application logic
 	componentRestrictions: {
 		country: "au" as const,
 	},

@@ -238,7 +238,7 @@ export function InstantQuoteWidget() {
 						Get Instant Quote
 					</CardTitle>
 					<div className="flex flex-col gap-1 text-xs">
-						<p>Calculate your fare instantly for luxury chauffeur service across Australia.</p>
+						<p>Calculate your fare instantly for luxury chauffeur service across NSW.</p>
 						<span className="font-semibold">Available Mon-Sun 00:00 – 23:45</span>
 					</div>
 				</CardHeader>
@@ -261,7 +261,7 @@ export function InstantQuoteWidget() {
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleOriginSelect}
-														placeholder="Origin - Enter pickup location in Australia..."
+														placeholder="Origin - Enter pickup location in NSW..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>
@@ -284,7 +284,7 @@ export function InstantQuoteWidget() {
 															value={stopField.value || ""}
 															onChange={stopField.onChange}
 															onPlaceSelect={(place) => handleStopSelect(index, place)}
-															placeholder={`Stop ${index + 1} - Enter stop address in Australia...`}
+															placeholder={`Stop ${index + 1} - Enter stop address in NSW...`}
 															className="text-xs md:text-sm bg-background"
 															showRemoveButton={true}
 															onRemove={() => removeStopAt(index)}
@@ -307,7 +307,7 @@ export function InstantQuoteWidget() {
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleDestinationSelect}
-														placeholder="Destination - Enter destination in Australia..."
+														placeholder="Destination - Enter destination in NSW..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>
