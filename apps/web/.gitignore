@@ -58,3 +58,5 @@ dev-dist
 
 .open-next
 
+/src/routeTree.gen.ts
+worker-configuration.d.ts
