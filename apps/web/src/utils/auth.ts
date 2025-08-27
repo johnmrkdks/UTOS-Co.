@@ -67,3 +67,32 @@ export async function requireDriver() {
 	}
 	return session;
 }
+
+// Guest session functions - allows both authenticated and anonymous users
+export async function requireGuestSession() {
+	const session = await authClient.getSession();
+	if (!session) {
+		// Create an anonymous session if none exists
+		const anonymousSession = await authClient.signIn.anonymous();
+		if (!anonymousSession.data) {
+			throw new Error("Failed to create anonymous session");
+		}
+		return anonymousSession.data;
+	}
+	return session.data;
+}
+
+export async function getOrCreateGuestSession() {
+	const session = await authClient.getSession();
+	if (!session) {
+		// Create an anonymous session if none exists
+		try {
+			const anonymousSession = await authClient.signIn.anonymous();
+			return anonymousSession.data;
+		} catch (error) {
+			console.error("Failed to create anonymous session:", error);
+			throw error;
+		}
+	}
+	return session.data;
+}

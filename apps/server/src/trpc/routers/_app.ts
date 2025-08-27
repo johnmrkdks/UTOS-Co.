@@ -51,7 +51,7 @@ export const appRouter = router({
 	packageCategories: packageCategoriesRouter,
 	packageRoutes: packageRoutesRouter,
 	packageServiceTypes: packageServiceTypesRouter,
-	pricingConfig: pricingConfigRouter,
+	pricingConfigs: pricingConfigRouter,
 	ratings: ratingsRouter,
 	admin: adminRouter,
 	mail: mailRouter,

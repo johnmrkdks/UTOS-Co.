@@ -43,6 +43,7 @@ export function Services({ className, ...props }: ServicesProps) {
 	});
 	
 	const services = packagesData?.data?.map((pkg: any) => ({
+		id: pkg.id,
 		icon: serviceIcons[pkg.serviceType] || Building,
 		title: pkg.name,
 		description: pkg.description,
@@ -57,6 +58,7 @@ export function Services({ className, ...props }: ServicesProps) {
 	})) || [];
 	
 	const fleetHighlights = carsData?.data?.map((car: any) => ({
+		id: car.id,
 		name: car.name,
 		type: car.category?.name || "Luxury Vehicle",
 		passengers: `1-${car.seatingCapacity}`,
@@ -188,7 +190,7 @@ export function Services({ className, ...props }: ServicesProps) {
 									))}
 								</ul>
 
-								<Link to="/booking">
+								<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
 									<Button
 										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300"
 									>
@@ -269,7 +271,7 @@ export function Services({ className, ...props }: ServicesProps) {
 								</div>
 
 								<div className="p-6">
-									<div className="flex justify-between items-start mb-3">
+									<div className="flex justify-between items-start mb-4">
 										<div>
 											<h3 className="text-xl font-bold text-card-foreground">
 												{vehicle.name}
@@ -285,6 +287,15 @@ export function Services({ className, ...props }: ServicesProps) {
 											</div>
 										</div>
 									</div>
+									
+									<Link to="/book-car/$carId" params={{ carId: vehicle.id }}>
+										<Button
+											variant="outline"
+											className="w-full border-primary/20 text-primary hover:bg-primary/10 transition-all duration-300"
+										>
+											Book This Car
+										</Button>
+									</Link>
 								</div>
 							</div>
 						))

@@ -57,10 +57,6 @@ export const cars = sqliteTable(
 		seatingCapacity: integer("seating_capacity").notNull().default(4),
 		luggageCapacity: text("luggage_capacity"),
 
-		// TEMPORARY: Base fare for backward compatibility (will be moved to pricing config)
-		baseFare: real("base_fare").notNull().default(5000),
-
-
 		// Service availability
 		availableForPackages: integer("available_for_packages", { mode: "boolean" })
 			.notNull()

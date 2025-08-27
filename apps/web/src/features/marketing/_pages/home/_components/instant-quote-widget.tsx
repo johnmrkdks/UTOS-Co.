@@ -209,29 +209,19 @@ export function InstantQuoteWidget() {
 		
 		const formData = form.getValues()
 		
-		// Prepare route data for URL params
-		const routeData = {
-			originAddress: formData.originAddress,
-			destinationAddress: formData.destinationAddress,
-			originLatitude: originGeometry?.location?.lat?.(),
-			originLongitude: originGeometry?.location?.lng?.(),
-			destinationLatitude: destinationGeometry?.location?.lat?.(),
-			destinationLongitude: destinationGeometry?.location?.lng?.(),
-			stops: formData.stops?.map((stop, index) => ({
-				address: stop.address,
-				latitude: stopsGeometry[index]?.location?.lat?.(),
-				longitude: stopsGeometry[index]?.location?.lng?.(),
-			})) || [],
+		// Prepare route data for URL params for guest booking
+		const quoteParams = {
+			origin: formData.originAddress,
+			destination: formData.destinationAddress,
+			distance: ((quote.estimatedDistance || 0) / 1000).toString(), // Convert to km
+			duration: Math.round((quote.estimatedDuration || 0) / 60).toString(), // Convert to minutes
+			totalFare: (quote.totalAmount / 100).toFixed(2), // Convert from cents to dollars
 		}
 
-		// Navigate to customer booking flow with secure quote token
-		// The customer route has authentication protection, so users will be redirected to login if not authenticated
+		// Navigate to guest booking flow (no authentication required)
 		navigate({
-			to: "/customer/book-appointment",
-			search: {
-				from: "instant-quote",
-				token: (quote as any).quoteToken || "", // Use secure token instead of exposing data
-			}
+			to: "/book-quote",
+			search: quoteParams
 		})
 	}
 
@@ -584,24 +574,9 @@ export function InstantQuoteWidget() {
 								<Button 
 									onClick={handleBookThisJourney}
 									className="w-full h-10 text-sm font-semibold"
-									disabled={userLoading}
 								>
-									{userLoading ? (
-										<>
-											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-											Loading...
-										</>
-									) : session?.user ? (
-										<>
-											Book This Journey
-											<ArrowRight className="ml-2 h-4 w-4" />
-										</>
-									) : (
-										<>
-											<LogIn className="mr-2 h-4 w-4" />
-											Sign In to Book
-										</>
-									)}
+									Book This Journey
+									<ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
 
 								<Button variant="outline" onClick={resetQuote} className="w-full h-9 text-xs">
@@ -613,11 +588,9 @@ export function InstantQuoteWidget() {
 								<p className="text-xs text-muted-foreground text-center">
 									* Prices are estimates and may vary based on traffic and other factors
 								</p>
-								{!session?.user && !userLoading && (
-									<p className="text-xs text-primary text-center">
-										Sign in required to book luxury chauffeur services
-									</p>
-								)}
+								<p className="text-xs text-primary text-center">
+									No account required - book as a guest
+								</p>
 							</div>
 						</div>
 					</div>

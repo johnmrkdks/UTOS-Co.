@@ -22,6 +22,7 @@ import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privac
 import { Route as MarketingFaqsRouteImport } from './routes/_marketing/faqs'
 import { Route as MarketingContactUsRouteImport } from './routes/_marketing/contact-us'
 import { Route as MarketingBookingRouteImport } from './routes/_marketing/booking'
+import { Route as MarketingBookQuoteRouteImport } from './routes/_marketing/book-quote'
 import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-us'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
@@ -37,6 +38,8 @@ import { Route as CustomerLayoutProfileRouteImport } from './routes/customer/_la
 import { Route as CustomerLayoutCarsRouteImport } from './routes/customer/_layout/cars'
 import { Route as CustomerLayoutBookingsRouteImport } from './routes/customer/_layout/bookings'
 import { Route as CustomerLayoutBookAppointmentRouteImport } from './routes/customer/_layout/book-appointment'
+import { Route as MarketingBookServiceServiceIdRouteImport } from './routes/_marketing/book-service.$serviceId'
+import { Route as MarketingBookCarCarIdRouteImport } from './routes/_marketing/book-car.$carId'
 import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './routes/dashboard/_layout/todays-scheduled/index'
 import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
 import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
@@ -130,6 +133,11 @@ const MarketingBookingRoute = MarketingBookingRouteImport.update({
   path: '/booking',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingBookQuoteRoute = MarketingBookQuoteRouteImport.update({
+  id: '/book-quote',
+  path: '/book-quote',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingAboutUsRoute = MarketingAboutUsRouteImport.update({
   id: '/about-us',
   path: '/about-us',
@@ -206,6 +214,17 @@ const CustomerLayoutBookAppointmentRoute =
     path: '/book-appointment',
     getParentRoute: () => CustomerLayoutRoute,
   } as any)
+const MarketingBookServiceServiceIdRoute =
+  MarketingBookServiceServiceIdRouteImport.update({
+    id: '/book-service/$serviceId',
+    path: '/book-service/$serviceId',
+    getParentRoute: () => MarketingRoute,
+  } as any)
+const MarketingBookCarCarIdRoute = MarketingBookCarCarIdRouteImport.update({
+  id: '/book-car/$carId',
+  path: '/book-car/$carId',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const DashboardLayoutTodaysScheduledIndexRoute =
   DashboardLayoutTodaysScheduledIndexRouteImport.update({
     id: '/todays-scheduled/',
@@ -337,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/about-us': typeof MarketingAboutUsRoute
+  '/book-quote': typeof MarketingBookQuoteRoute
   '/booking': typeof MarketingBookingRoute
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
@@ -347,6 +367,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
+  '/book-car/$carId': typeof MarketingBookCarCarIdRoute
+  '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
   '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/bookings': typeof CustomerLayoutBookingsRoute
   '/customer/cars': typeof CustomerLayoutCarsRoute
@@ -385,6 +407,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/about-us': typeof MarketingAboutUsRoute
+  '/book-quote': typeof MarketingBookQuoteRoute
   '/booking': typeof MarketingBookingRoute
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
@@ -395,6 +418,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutIndexRoute
   '/driver': typeof DriverLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/book-car/$carId': typeof MarketingBookCarCarIdRoute
+  '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
   '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/bookings': typeof CustomerLayoutBookingsRoute
   '/customer/cars': typeof CustomerLayoutCarsRoute
@@ -432,6 +457,7 @@ export interface FileRoutesById {
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_marketing/about-us': typeof MarketingAboutUsRoute
+  '/_marketing/book-quote': typeof MarketingBookQuoteRoute
   '/_marketing/booking': typeof MarketingBookingRoute
   '/_marketing/contact-us': typeof MarketingContactUsRoute
   '/_marketing/faqs': typeof MarketingFaqsRoute
@@ -445,6 +471,8 @@ export interface FileRoutesById {
   '/driver': typeof DriverRouteWithChildren
   '/driver/_layout': typeof DriverLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
+  '/_marketing/book-car/$carId': typeof MarketingBookCarCarIdRoute
+  '/_marketing/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
   '/customer/_layout/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/_layout/bookings': typeof CustomerLayoutBookingsRoute
   '/customer/_layout/cars': typeof CustomerLayoutCarsRoute
@@ -485,6 +513,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/about-us'
+    | '/book-quote'
     | '/booking'
     | '/contact-us'
     | '/faqs'
@@ -495,6 +524,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/driver'
     | '/'
+    | '/book-car/$carId'
+    | '/book-service/$serviceId'
     | '/customer/book-appointment'
     | '/customer/bookings'
     | '/customer/cars'
@@ -533,6 +564,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/about-us'
+    | '/book-quote'
     | '/booking'
     | '/contact-us'
     | '/faqs'
@@ -543,6 +575,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/driver'
     | '/'
+    | '/book-car/$carId'
+    | '/book-service/$serviceId'
     | '/customer/book-appointment'
     | '/customer/bookings'
     | '/customer/cars'
@@ -579,6 +613,7 @@ export interface FileRouteTypes {
     | '/_auth/sign-in'
     | '/_auth/sign-up'
     | '/_marketing/about-us'
+    | '/_marketing/book-quote'
     | '/_marketing/booking'
     | '/_marketing/contact-us'
     | '/_marketing/faqs'
@@ -592,6 +627,8 @@ export interface FileRouteTypes {
     | '/driver'
     | '/driver/_layout'
     | '/_marketing/'
+    | '/_marketing/book-car/$carId'
+    | '/_marketing/book-service/$serviceId'
     | '/customer/_layout/book-appointment'
     | '/customer/_layout/bookings'
     | '/customer/_layout/cars'
@@ -736,6 +773,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingBookingRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/book-quote': {
+      id: '/_marketing/book-quote'
+      path: '/book-quote'
+      fullPath: '/book-quote'
+      preLoaderRoute: typeof MarketingBookQuoteRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/about-us': {
       id: '/_marketing/about-us'
       path: '/about-us'
@@ -840,6 +884,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/customer/book-appointment'
       preLoaderRoute: typeof CustomerLayoutBookAppointmentRouteImport
       parentRoute: typeof CustomerLayoutRoute
+    }
+    '/_marketing/book-service/$serviceId': {
+      id: '/_marketing/book-service/$serviceId'
+      path: '/book-service/$serviceId'
+      fullPath: '/book-service/$serviceId'
+      preLoaderRoute: typeof MarketingBookServiceServiceIdRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/book-car/$carId': {
+      id: '/_marketing/book-car/$carId'
+      path: '/book-car/$carId'
+      fullPath: '/book-car/$carId'
+      preLoaderRoute: typeof MarketingBookCarCarIdRouteImport
+      parentRoute: typeof MarketingRoute
     }
     '/dashboard/_layout/todays-scheduled/': {
       id: '/dashboard/_layout/todays-scheduled/'
@@ -993,6 +1051,7 @@ declare module '@tanstack/react-router' {
 
 interface MarketingRouteChildren {
   MarketingAboutUsRoute: typeof MarketingAboutUsRoute
+  MarketingBookQuoteRoute: typeof MarketingBookQuoteRoute
   MarketingBookingRoute: typeof MarketingBookingRoute
   MarketingContactUsRoute: typeof MarketingContactUsRoute
   MarketingFaqsRoute: typeof MarketingFaqsRoute
@@ -1000,10 +1059,13 @@ interface MarketingRouteChildren {
   MarketingServicesRoute: typeof MarketingServicesRoute
   MarketingTermsAndConditionsRoute: typeof MarketingTermsAndConditionsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
+  MarketingBookCarCarIdRoute: typeof MarketingBookCarCarIdRoute
+  MarketingBookServiceServiceIdRoute: typeof MarketingBookServiceServiceIdRoute
 }
 
 const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingAboutUsRoute: MarketingAboutUsRoute,
+  MarketingBookQuoteRoute: MarketingBookQuoteRoute,
   MarketingBookingRoute: MarketingBookingRoute,
   MarketingContactUsRoute: MarketingContactUsRoute,
   MarketingFaqsRoute: MarketingFaqsRoute,
@@ -1011,6 +1073,8 @@ const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingServicesRoute: MarketingServicesRoute,
   MarketingTermsAndConditionsRoute: MarketingTermsAndConditionsRoute,
   MarketingIndexRoute: MarketingIndexRoute,
+  MarketingBookCarCarIdRoute: MarketingBookCarCarIdRoute,
+  MarketingBookServiceServiceIdRoute: MarketingBookServiceServiceIdRoute,
 }
 
 const MarketingRouteWithChildren = MarketingRoute._addFileChildren(

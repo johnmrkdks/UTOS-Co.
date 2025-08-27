@@ -5,9 +5,9 @@ import { toast } from "sonner";
 export const useUpdatePricingConfigMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.pricingConfig.update.mutationOptions({
+	return useMutation(trpc.pricingConfigs.update.mutationOptions({
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: trpc.pricingConfig.list.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.pricingConfigs.list.queryKey() });
 			toast.success("Pricing configuration updated", {
 				description: `"${data?.name || 'Configuration'}" has been updated.`,
 			});

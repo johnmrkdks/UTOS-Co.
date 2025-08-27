@@ -2,8 +2,7 @@ import type { DB } from "@/db";
 import { z } from "zod";
 import { getDistanceMatrix, calculateHaversineDistance } from "@/lib/google-maps";
 import { eq, and } from "drizzle-orm";
-import { pricingConfig } from "@/db/sqlite/schema/price-config";
-import { cars } from "@/db/sqlite/schema/cars";
+import { pricingConfig, cars } from "@/db/schema";
 
 export const CalculateCarSpecificQuoteSchema = z.object({
 	carId: z.string().min(1, "Car ID is required"),

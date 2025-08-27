@@ -3,7 +3,7 @@ import { sql, relations } from "drizzle-orm";
 import { integer, real, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
 import { cars } from "./cars";
 
-export const pricingConfig = sqliteTable("pricing_config", {
+export const pricingConfig = sqliteTable("pricing_configs", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
 
 	// Pricing model name
@@ -44,8 +44,8 @@ export const pricingConfig = sqliteTable("pricing_config", {
 	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 }, (table) => ({
-	carIdIdx: index("pricing_config_car_id_idx").on(table.carId),
-	carActiveIdx: index("pricing_config_car_active_idx").on(table.carId, table.isActive),
+	carIdIdx: index("pricing_configs_car_id_idx").on(table.carId),
+	carActiveIdx: index("pricing_configs_car_active_idx").on(table.carId, table.isActive),
 }));
 
 export const pricingConfigRelations = relations(pricingConfig, ({ one }) => ({

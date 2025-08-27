@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin } from "better-auth/plugins";
+import { admin, anonymous } from "better-auth/plugins";
 import { env } from "cloudflare:workers";
 import * as schema from "@/db/sqlite/schema";
 import {
@@ -19,6 +19,7 @@ const plugins: BetterAuthOptions["plugins"] = [
 		ac,
 		roles: { userRole, driverRole, adminRole, superAdminRole },
 	}),
+	anonymous(),
 ];
 
 const configs = {};

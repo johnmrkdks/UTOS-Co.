@@ -12,7 +12,7 @@ import { DeleteBookingServiceSchema, deleteBookingService } from "@/services/boo
 import { GetBookingServiceSchema, getBookingService } from "@/services/bookings/get-booking";
 import { getBookingsService } from "@/services/bookings/get-bookings";
 import { updateBookingService, UpdateBookingServiceSchema } from "@/services/bookings/update-booking";
-import { protectedProcedure, router, publicProcedure } from "@/trpc/init";
+import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
 import { z } from "zod";
@@ -72,36 +72,42 @@ export const bookingsRouter = router({
 			}
 		}),
 
-	// Package booking procedures
-	createPackageBooking: protectedProcedure
+	// Package booking procedures (allow guest users)
+	createPackageBooking: guestProcedure
 		.input(CreatePackageBookingSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				const newBooking = await createPackageBookingService(db, input);
+				// Use session.user for authenticated users, or session data for anonymous users
+				const userId = session.user?.id || session.id;
+				const newBooking = await createPackageBookingService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 
-	// Custom booking procedures
-	createCustomBooking: protectedProcedure
+	// Custom booking procedures (allow guest users)
+	createCustomBooking: guestProcedure
 		.input(CreateCustomBookingSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				const newBooking = await createCustomBookingService(db, input);
+				// Use session.user for authenticated users, or session data for anonymous users
+				const userId = session.user?.id || session.id;
+				const newBooking = await createCustomBookingService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 
-	// Create custom booking from instant quote
-	createCustomBookingFromQuote: protectedProcedure
+	// Create custom booking from instant quote (allow guest users)
+	createCustomBookingFromQuote: guestProcedure
 		.input(CreateCustomBookingFromQuoteSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				const newBooking = await createCustomBookingFromQuoteService(db, input);
+				// Use session.user for authenticated users, or session data for anonymous users
+				const userId = session.user?.id || session.id;
+				const newBooking = await createCustomBookingFromQuoteService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
 				handleTRPCError(error);

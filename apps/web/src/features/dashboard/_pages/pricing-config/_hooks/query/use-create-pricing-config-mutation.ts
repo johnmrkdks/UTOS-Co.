@@ -5,9 +5,9 @@ import { toast } from "sonner";
 export const useCreatePricingConfigMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.pricingConfig.create.mutationOptions({
+	return useMutation(trpc.pricingConfigs.create.mutationOptions({
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: trpc.pricingConfig.list.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.pricingConfigs.list.queryKey() });
 			toast.success("Pricing configuration created", {
 				description: `"${data?.name || 'Configuration'}" has been added.`,
 			});

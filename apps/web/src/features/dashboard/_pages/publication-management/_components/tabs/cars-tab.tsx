@@ -1,10 +1,21 @@
-import { CarIcon } from "lucide-react";
+import { CarIcon, ExternalLink } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
+import { Link } from "@tanstack/react-router";
 import { CarsPublicationTable } from "../cars-publication-table";
 
 export function CarsTab() {
 	return (
 		<div className="space-y-4">
-			<h2 className="text-lg font-semibold">Cars Publication Status</h2>
+			<div className="flex items-center justify-between">
+				<h2 className="text-lg font-semibold">Cars Publication Status</h2>
+				<Button asChild size="sm" variant="outline">
+					<Link to="/dashboard/cars" className="flex items-center gap-2">
+						<CarIcon className="h-4 w-4" />
+						Manage Cars
+						<ExternalLink className="h-3 w-3" />
+					</Link>
+				</Button>
+			</div>
 			<CarsPublicationTable />
 		</div>
 	);

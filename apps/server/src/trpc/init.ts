@@ -22,3 +22,20 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 		},
 	});
 });
+
+export const guestProcedure = t.procedure.use(({ ctx, next }) => {
+	// Allow both authenticated and anonymous sessions
+	if (!ctx.session) {
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "Session required (authenticated or guest)",
+			cause: "No session",
+		});
+	}
+	return next({
+		ctx: {
+			...ctx,
+			session: ctx.session,
+		},
+	});
+});
