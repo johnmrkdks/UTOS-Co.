@@ -139,48 +139,67 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 									)}
 								/>
 
-								<FormField
-									control={form.control}
-									name="carId"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Select Car</FormLabel>
-											<Select onValueChange={field.onChange} value={field.value}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Choose a car for this pricing configuration" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													{carsLoading ? (
-														<SelectItem value="loading" disabled>Loading cars...</SelectItem>
-													) : carsError ? (
-														<SelectItem value="error" disabled>
-															Error loading cars. Please refresh the page.
-														</SelectItem>
-													) : cars?.data?.length ? (
-														cars.data.map((car) => (
-															<SelectItem key={car.id} value={car.id}>
-																<div className="flex items-center gap-2">
-																	<Car className="h-4 w-4" />
-																	<span>{car.name}</span>
-																	<span className="text-muted-foreground">({car.licensePlate})</span>
-																</div>
+								{/* Car Selection - Show selector only if not from publication management */}
+								{contextData?.fromPublicationManagement ? (
+									<div className="space-y-2">
+										<FormLabel>Selected Car</FormLabel>
+										<div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
+											<Car className="h-4 w-4" />
+											<span className="font-medium">{contextData.carName}</span>
+											{contextData.carBrand && contextData.carModel && (
+												<span className="text-muted-foreground">
+													({contextData.carBrand} {contextData.carModel})
+												</span>
+											)}
+										</div>
+										<p className="text-sm text-muted-foreground">
+											This pricing configuration will be applied to the selected car from Publication Management.
+										</p>
+									</div>
+								) : (
+									<FormField
+										control={form.control}
+										name="carId"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Select Car</FormLabel>
+												<Select onValueChange={field.onChange} value={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Choose a car for this pricing configuration" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														{carsLoading ? (
+															<SelectItem value="loading" disabled>Loading cars...</SelectItem>
+														) : carsError ? (
+															<SelectItem value="error" disabled>
+																Error loading cars. Please refresh the page.
 															</SelectItem>
-														))
-													) : (
-														<SelectItem value="no-cars" disabled>No cars available</SelectItem>
-													)}
-												</SelectContent>
-											</Select>
-											<FormDescription>
-												Each car can have its own pricing configuration. This allows different base fares for luxury vs economy vehicles.
-												{carsError && <span className="text-red-500"> (Currently unavailable - database schema update required)</span>}
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+														) : cars?.data?.length ? (
+															cars.data.map((car) => (
+																<SelectItem key={car.id} value={car.id}>
+																	<div className="flex items-center gap-2">
+																		<Car className="h-4 w-4" />
+																		<span>{car.name}</span>
+																		<span className="text-muted-foreground">({car.licensePlate})</span>
+																	</div>
+																</SelectItem>
+															))
+														) : (
+															<SelectItem value="no-cars" disabled>No cars available</SelectItem>
+														)}
+													</SelectContent>
+												</Select>
+												<FormDescription>
+													Each car can have its own pricing configuration. This allows different base fares for luxury vs economy vehicles.
+													{carsError && <span className="text-red-500"> (Currently unavailable - database schema update required)</span>}
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								)}
 
 								<div className="grid grid-cols-1 gap-4">
 									<FormField

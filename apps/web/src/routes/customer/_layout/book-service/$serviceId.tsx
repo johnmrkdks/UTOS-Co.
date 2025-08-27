@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookServicePage } from "@/features/customer/_pages/book-service-page";
+import { UnifiedBookServicePage } from "@/features/customer/_pages/unified-book-service-page";
 
 export const Route = createFileRoute("/customer/_layout/book-service/$serviceId")({
-	component: BookServicePage,
+	component: () => {
+		const { serviceId } = Route.useParams();
+		return <UnifiedBookServicePage serviceId={serviceId} />;
+	},
 });

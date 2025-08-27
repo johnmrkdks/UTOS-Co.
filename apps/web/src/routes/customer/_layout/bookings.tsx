@@ -5,8 +5,8 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { Calendar, Package, Car, Clock, MapPin, Users, Loader2, CheckCircle, AlertTriangle, ArrowRightIcon } from "lucide-react";
-import { useGetUserBookingsQuery } from "@/features/customer/_hooks/query/use-get-user-bookings-query";
-import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-bookings-query";
+import { useUnifiedUserQuery, extractUserInfo } from "@/hooks/query/use-unified-user-query";
 import { useMemo } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -15,10 +15,9 @@ export const Route = createFileRoute("/customer/_layout/bookings")({
 });
 
 function CustomerBookingsPage() {
-	const { session } = useUserQuery();
-	const user = session?.user;
-	const { data: bookingsData, isLoading, error } = useGetUserBookingsQuery({
-		userId: user?.id,
+	const { data: sessionData, isLoading: sessionLoading } = useUnifiedUserQuery();
+	const userInfo = extractUserInfo(sessionData);
+	const { data: bookingsData, isLoading, error } = useUnifiedUserBookingsQuery({
 		limit: 50,
 		offset: 0,
 	});
@@ -131,17 +130,27 @@ function CustomerBookingsPage() {
 		<div className="space-y-6">
 			{/* Page Header */}
 			<div className="space-y-2 text-center md:text-left">
-				<h1 className="text-2xl md:text-3xl font-bold tracking-tight">My Bookings</h1>
+				<h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+					My Bookings
+					{userInfo?.isGuest && <span className="text-base text-blue-600 ml-2">(Guest Session)</span>}
+				</h1>
 				<p className="text-muted-foreground text-sm md:text-base">
 					View and manage your luxury travel bookings.
+					{userInfo?.isGuest && (
+						<span className="block text-blue-600 mt-1">
+							💡 Create an account to permanently save your booking history
+						</span>
+					)}
 				</p>
 			</div>
 
 			{/* Loading State */}
-			{isLoading && (
+			{(isLoading || sessionLoading) && (
 				<div className="flex justify-center items-center py-12">
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<span className="ml-2 text-gray-600">Loading your bookings...</span>
+					<span className="ml-2 text-gray-600">
+						{sessionLoading ? "Setting up session..." : "Loading your bookings..."}
+					</span>
 				</div>
 			)}
 
@@ -154,7 +163,7 @@ function CustomerBookingsPage() {
 				</div>
 			)}
 
-			{!isLoading && !error && (
+			{!isLoading && !sessionLoading && !error && (
 				<>
 					{/* Booking Stats */}
 					<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

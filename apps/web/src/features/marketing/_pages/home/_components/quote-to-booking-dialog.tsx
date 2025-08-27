@@ -243,7 +243,7 @@ export function QuoteToBookingDialog({
 									</div>
 									<div className="flex items-center gap-1">
 										<CreditCard className="h-4 w-4" />
-										${(quote.totalAmount / 100).toFixed(2)}
+										${quote.totalAmount.toFixed(2)}
 									</div>
 								</div>
 							</CardContent>
@@ -466,7 +466,7 @@ export function QuoteToBookingDialog({
 										<Separator />
 										<div className="flex justify-between font-bold text-lg">
 											<span>Total Amount</span>
-											<span className="text-primary">${(quote.totalAmount / 100).toFixed(2)}</span>
+											<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
 										</div>
 									</div>
 								</div>

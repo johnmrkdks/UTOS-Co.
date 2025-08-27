@@ -28,7 +28,6 @@ import { useEffect } from "react";
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
 	description: z.string().optional(),
-	icon: z.string().optional(),
 	isActive: z.boolean(),
 	displayOrder: z.number().int().min(0),
 });
@@ -36,15 +35,17 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function EditPackageServiceTypeDialog() {
-	const { isOpen, closeModal, data } = useModal("edit-package-service-type");
+	const { isModalOpen, closeModal, modalState } = useModal();
 	const updateMutation = useUpdatePackageServiceTypeMutation();
+	
+	const isOpen = isModalOpen("edit-package-service-type");
+	const data = modalState.data;
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: "",
 			description: "",
-			icon: "",
 			isActive: true,
 			displayOrder: 0,
 		},
@@ -55,7 +56,6 @@ export function EditPackageServiceTypeDialog() {
 			form.reset({
 				name: data.name || "",
 				description: data.description || "",
-				icon: data.icon || "",
 				isActive: data.isActive ?? true,
 				displayOrder: data.displayOrder || 0,
 			});
@@ -119,22 +119,6 @@ export function EditPackageServiceTypeDialog() {
 							)}
 						/>
 
-						<FormField
-							control={form.control}
-							name="icon"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Icon</FormLabel>
-									<FormControl>
-										<Input placeholder="e.g. 🚗, 🗺️, 🎉, ⏰" {...field} />
-									</FormControl>
-									<FormDescription>
-										Optional icon or emoji to display with this service type
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
 
 						<FormField
 							control={form.control}

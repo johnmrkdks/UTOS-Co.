@@ -188,7 +188,7 @@ export function BookingConfirmationStep({
 						<Separator />
 						<div className="flex justify-between font-bold">
 							<span>Total Amount</span>
-							<span className="text-primary">${(quote.totalAmount / 100).toFixed(2)}</span>
+							<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
 						</div>
 					</div>
 				</div>

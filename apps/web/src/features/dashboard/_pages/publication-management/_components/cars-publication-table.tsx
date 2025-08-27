@@ -17,7 +17,7 @@ export function CarsPublicationTable() {
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
 	const { openModal } = useModal();
-	const { hasCarPricingConfig, isLoading: pricingStatusLoading } = useCarPricingStatusSafe();
+	const { hasCarPricingConfig, getCarPricingConfig, isLoading: pricingStatusLoading } = useCarPricingStatusSafe();
 
 	const { data: carsData, isLoading } = useGetCarsQuery({
 		limit: 50,
@@ -134,6 +134,7 @@ export function CarsPublicationTable() {
 		onTogglePublish: handleTogglePublish,
 		onManagePricing: handleManagePricing,
 		hasCarPricingConfig,
+		getCarPricingConfig,
 		isToggling: togglePublishMutation.isPending
 	});
 

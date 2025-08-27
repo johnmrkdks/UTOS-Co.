@@ -18,6 +18,7 @@ import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as CustomerLayoutRouteImport } from './routes/customer/_layout'
 import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
 import { Route as MarketingServicesRouteImport } from './routes/_marketing/services'
+import { Route as MarketingSelectVehicleRouteImport } from './routes/_marketing/select-vehicle'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { Route as MarketingFaqsRouteImport } from './routes/_marketing/faqs'
 import { Route as MarketingContactUsRouteImport } from './routes/_marketing/contact-us'
@@ -111,6 +112,11 @@ const MarketingTermsAndConditionsRoute =
 const MarketingServicesRoute = MarketingServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingSelectVehicleRoute = MarketingSelectVehicleRouteImport.update({
+  id: '/select-vehicle',
+  path: '/select-vehicle',
   getParentRoute: () => MarketingRoute,
 } as any)
 const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
@@ -361,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
   '/privacy': typeof MarketingPrivacyRoute
+  '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/customer': typeof CustomerLayoutRouteWithChildren
@@ -412,6 +419,7 @@ export interface FileRoutesByTo {
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
   '/privacy': typeof MarketingPrivacyRoute
+  '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/customer': typeof CustomerLayoutIndexRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/_marketing/contact-us': typeof MarketingContactUsRoute
   '/_marketing/faqs': typeof MarketingFaqsRoute
   '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_marketing/select-vehicle': typeof MarketingSelectVehicleRoute
   '/_marketing/services': typeof MarketingServicesRoute
   '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/customer': typeof CustomerRouteWithChildren
@@ -518,6 +527,7 @@ export interface FileRouteTypes {
     | '/contact-us'
     | '/faqs'
     | '/privacy'
+    | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
     | '/customer'
@@ -569,6 +579,7 @@ export interface FileRouteTypes {
     | '/contact-us'
     | '/faqs'
     | '/privacy'
+    | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
     | '/customer'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/_marketing/contact-us'
     | '/_marketing/faqs'
     | '/_marketing/privacy'
+    | '/_marketing/select-vehicle'
     | '/_marketing/services'
     | '/_marketing/terms-and-conditions'
     | '/customer'
@@ -743,6 +755,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof MarketingServicesRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/select-vehicle': {
+      id: '/_marketing/select-vehicle'
+      path: '/select-vehicle'
+      fullPath: '/select-vehicle'
+      preLoaderRoute: typeof MarketingSelectVehicleRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/privacy': {
@@ -1056,6 +1075,7 @@ interface MarketingRouteChildren {
   MarketingContactUsRoute: typeof MarketingContactUsRoute
   MarketingFaqsRoute: typeof MarketingFaqsRoute
   MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingSelectVehicleRoute: typeof MarketingSelectVehicleRoute
   MarketingServicesRoute: typeof MarketingServicesRoute
   MarketingTermsAndConditionsRoute: typeof MarketingTermsAndConditionsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
@@ -1070,6 +1090,7 @@ const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingContactUsRoute: MarketingContactUsRoute,
   MarketingFaqsRoute: MarketingFaqsRoute,
   MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingSelectVehicleRoute: MarketingSelectVehicleRoute,
   MarketingServicesRoute: MarketingServicesRoute,
   MarketingTermsAndConditionsRoute: MarketingTermsAndConditionsRoute,
   MarketingIndexRoute: MarketingIndexRoute,

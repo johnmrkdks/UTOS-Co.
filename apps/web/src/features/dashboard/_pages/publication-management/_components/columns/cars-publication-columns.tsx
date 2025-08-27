@@ -8,6 +8,7 @@ interface CarsPublicationColumnsProps {
 	onTogglePublish: (carId: string) => void;
 	onManagePricing: (carId: string) => void;
 	hasCarPricingConfig: (carId: string) => boolean;
+	getCarPricingConfig: (carId: string) => any | null;
 	isToggling: boolean;
 }
 
@@ -15,6 +16,7 @@ export const getCarsPublicationColumns = ({
 	onTogglePublish,
 	onManagePricing,
 	hasCarPricingConfig,
+	getCarPricingConfig,
 	isToggling
 }: CarsPublicationColumnsProps): ColumnDef<any>[] => [
 	{
@@ -44,6 +46,40 @@ export const getCarsPublicationColumns = ({
 				<Badge variant="outline">
 					{row.original.category?.name || "No Category"}
 				</Badge>
+			);
+		},
+	},
+	{
+		accessorKey: "pricing",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Pricing" sortable={false} />
+		),
+		cell: ({ row }) => {
+			const car = row.original;
+			const pricingConfig = getCarPricingConfig(car.id);
+			
+			if (!pricingConfig) {
+				return (
+					<div className="space-y-1">
+						<Badge variant="destructive" className="text-xs">
+							No Pricing
+						</Badge>
+						<div className="text-xs text-muted-foreground">
+							Configure pricing to publish
+						</div>
+					</div>
+				);
+			}
+			
+			return (
+				<div className="space-y-1">
+					<div className="font-medium">
+						${(pricingConfig.baseFare / 100).toFixed(2)}
+					</div>
+					<div className="text-xs text-muted-foreground">
+						Base Fare + ${(pricingConfig.pricePerKm / 100).toFixed(2)}/km
+					</div>
+				</div>
 			);
 		},
 	},

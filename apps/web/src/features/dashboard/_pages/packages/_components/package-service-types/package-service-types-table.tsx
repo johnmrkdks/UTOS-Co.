@@ -34,7 +34,7 @@ interface PackageServiceTypesTableProps {
 }
 
 export function PackageServiceTypesTable({ data, isLoading }: PackageServiceTypesTableProps) {
-	const { openModal, setModalData } = useModal();
+	const { openModal } = useModal();
 
 	if (isLoading) {
 		return <div className="p-8 text-center">Loading service types...</div>;
@@ -55,7 +55,6 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 					<TableRow>
 						<TableHead>Name</TableHead>
 						<TableHead>Description</TableHead>
-						<TableHead>Icon</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Order</TableHead>
 						<TableHead className="text-right">Actions</TableHead>
@@ -70,7 +69,6 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 								<TableCell className="text-sm text-muted-foreground">
 									{serviceType.description || "No description"}
 								</TableCell>
-								<TableCell>{serviceType.icon || "-"}</TableCell>
 								<TableCell>
 									<Badge variant={serviceType.isActive ? "default" : "secondary"}>
 										{serviceType.isActive ? "Active" : "Inactive"}
@@ -87,8 +85,7 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 										<DropdownMenuContent align="end">
 											<DropdownMenuItem
 												onClick={() => {
-													setModalData(serviceType);
-													openModal("edit-package-service-type");
+													openModal("edit-package-service-type", serviceType);
 												}}
 												className="cursor-pointer"
 											>
@@ -97,8 +94,7 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												onClick={() => {
-													setModalData(serviceType);
-													openModal("delete-package-service-type");
+													openModal("delete-package-service-type", serviceType);
 												}}
 												className="cursor-pointer text-red-600 focus:text-red-600"
 											>

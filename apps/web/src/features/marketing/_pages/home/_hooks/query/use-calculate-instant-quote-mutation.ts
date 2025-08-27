@@ -1,23 +1,23 @@
 import { trpc } from "@/trpc";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const useCalculateInstantQuoteMutation = () => {
+	const queryClient = useQueryClient();
+
 	return useMutation({
 		mutationFn: async (input: any) => {
-			// Use car-specific endpoint if carId is provided, otherwise use general endpoint
-			if (input.carId) {
-				return await trpc.instantQuote.calculateCarSpecific.mutate(input);
-			} else {
-				return await trpc.instantQuote.calculate.mutate(input);
-			}
+			// Create a manual query client call for the calculateInstantQuote query
+			return await queryClient.fetchQuery(
+				trpc.bookings.calculateInstantQuote.queryOptions(input)
+			);
 		},
-		onSuccess: (data: any) => {
+		onSuccess: (data) => {
 			toast.success("Quote Calculated", {
-				description: `Total fare: $${(data.totalAmount / 100).toFixed(2)}`,
+				description: `Total fare: $${(data?.totalAmount ? data.totalAmount.toFixed(2) : '0.00')}`,
 			});
 		},
-		onError: (error: any) => {
+		onError: (error) => {
 			console.error("Error calculating quote:", error);
 			toast.error("Failed to calculate quote", {
 				description: "Please try again or check your addresses.",

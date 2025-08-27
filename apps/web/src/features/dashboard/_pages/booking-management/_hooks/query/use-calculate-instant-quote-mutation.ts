@@ -5,7 +5,7 @@ import { toast } from "sonner";
 export const useCalculateInstantQuoteMutation = () => {
 	return useMutation(trpc.bookings.calculateInstantQuote.mutationOptions({
 		onSuccess: (data) => {
-			toast.success(`Quote calculated: $${(data.totalAmount / 100).toFixed(2)}`);
+			toast.success(`Quote calculated: $${data.totalAmount.toFixed(2)}`);
 		},
 		onError: (error) => {
 			toast.error("Error while calculating quote", {

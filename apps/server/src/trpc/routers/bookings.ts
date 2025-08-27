@@ -77,8 +77,8 @@ export const bookingsRouter = router({
 		.input(CreatePackageBookingSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session data for anonymous users
-				const userId = session.user?.id || session.id;
+				// Use session.user for authenticated users, or session userId for anonymous users
+				const userId = session.user?.id || session.session?.userId;
 				const newBooking = await createPackageBookingService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
@@ -91,8 +91,8 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session data for anonymous users
-				const userId = session.user?.id || session.id;
+				// Use session.user for authenticated users, or session userId for anonymous users
+				const userId = session.user?.id || session.session?.userId;
 				const newBooking = await createCustomBookingService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
@@ -105,8 +105,8 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingFromQuoteSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session data for anonymous users
-				const userId = session.user?.id || session.id;
+				// Use session.user for authenticated users, or session userId for anonymous users
+				const userId = session.user?.id || session.session?.userId;
 				const newBooking = await createCustomBookingFromQuoteService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
@@ -172,6 +172,30 @@ export const bookingsRouter = router({
 		.query(async ({ ctx: { db }, input }) => {
 			try {
 				const bookings = await getBookingsService(db, input);
+				return bookings;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Get unified bookings for both authenticated and guest users
+	getUnifiedUserBookings: guestProcedure
+		.input(ResourceListSchema.extend({
+			userId: z.string().optional(),
+		}))
+		.query(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Use session.user for authenticated users, or session userId for anonymous users
+				const userId = session.user?.id || session.session?.userId;
+				
+				// Filter bookings by userId using the filters parameter
+				const bookings = await getBookingsService(db, {
+					...input,
+					filters: {
+						...input.filters,
+						userId: userId || "",
+					},
+				});
 				return bookings;
 			} catch (error) {
 				handleTRPCError(error);

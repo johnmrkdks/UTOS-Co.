@@ -27,7 +27,6 @@ import { useCreatePackageServiceTypeMutation } from "../../_hooks/query/use-crea
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
 	description: z.string().optional(),
-	icon: z.string().optional(),
 	isActive: z.boolean().default(true),
 	displayOrder: z.number().int().min(0).default(0),
 });
@@ -35,7 +34,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function AddPackageServiceTypeDialog() {
-	const { isOpen, closeModal } = useModal("add-package-service-type");
+	const { isModalOpen, closeModal } = useModal();
 	const createMutation = useCreatePackageServiceTypeMutation();
 
 	const form = useForm<FormValues>({
@@ -43,7 +42,6 @@ export function AddPackageServiceTypeDialog() {
 		defaultValues: {
 			name: "",
 			description: "",
-			icon: "",
 			isActive: true,
 			displayOrder: 0,
 		},
@@ -59,7 +57,7 @@ export function AddPackageServiceTypeDialog() {
 	};
 
 	return (
-		<Dialog open={isOpen} onOpenChange={closeModal}>
+		<Dialog open={isModalOpen("add-package-service-type")} onOpenChange={closeModal}>
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
 					<DialogTitle>Add Service Type</DialogTitle>
@@ -101,22 +99,6 @@ export function AddPackageServiceTypeDialog() {
 							)}
 						/>
 
-						<FormField
-							control={form.control}
-							name="icon"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Icon</FormLabel>
-									<FormControl>
-										<Input placeholder="e.g. 🚗, 🗺️, 🎉, ⏰" {...field} />
-									</FormControl>
-									<FormDescription>
-										Optional icon or emoji to display with this service type
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
 
 						<FormField
 							control={form.control}

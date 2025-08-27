@@ -1,35 +1,48 @@
 import { drizzle } from "drizzle-orm/d1";
+import { createClient } from "@libsql/client/http";
 import * as schema from "../../src/db/sqlite/schema";
 import seed from "./seed";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 // This script runs the seeder against your D1 database
 async function runSeed() {
 	console.log("🚀 Initializing seeder...");
-	
-	// Note: You'll need to provide your D1 database instance here
-	// This is just a template - you'll need to adapt it to your specific D1 setup
-	
-	// Example for local development:
-	// const db = drizzle(/* your D1 database instance */, { schema });
-	
-	console.log("ℹ️  To run this seeder:");
-	console.log("1. Make sure your database is set up and running");
-	console.log("2. Update this file with your D1 database connection");
-	console.log("3. Run: pnpm tsx drizzle/seed/run-seed.ts");
-	console.log("");
-	console.log("Or integrate the seed function into your existing database setup:");
-	console.log("import seed from './drizzle/seed/seed';");
-	console.log("await seed(yourDbInstance);");
-	
-	// Uncomment and modify this when you have your DB instance:
-	// try {
-	// 	await seed(db);
-	// 	console.log("🎉 Seeding completed successfully!");
-	// 	process.exit(0);
-	// } catch (error) {
-	// 	console.error("💥 Seeding failed:", error);
-	// 	process.exit(1);
-	// }
+
+	// Check for required environment variables
+	const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+	const databaseId = process.env.CLOUDFLARE_DATABASE_ID;
+	const token = process.env.CLOUDFLARE_D1_TOKEN;
+
+	if (!accountId || !databaseId || !token) {
+		console.error("❌ Missing required environment variables:");
+		console.error("- CLOUDFLARE_ACCOUNT_ID");
+		console.error("- CLOUDFLARE_DATABASE_ID");
+		console.error("- CLOUDFLARE_D1_TOKEN");
+		console.log("\nPlease add these to your .env file");
+		process.exit(1);
+	}
+
+	// Create D1 HTTP client
+	const client = createClient({
+		url: `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`,
+		authToken: token,
+	});
+
+	// Create Drizzle instance with D1 HTTP client
+	const db = drizzle(client, { schema });
+
+	try {
+		await seed(db);
+		console.log("🎉 Seeding completed successfully!");
+		process.exit(0);
+	} catch (error) {
+		console.error("💥 Seeding failed:", error);
+		console.error(error);
+		process.exit(1);
+	}
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

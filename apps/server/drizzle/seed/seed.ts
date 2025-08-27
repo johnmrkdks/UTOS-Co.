@@ -7,10 +7,11 @@ import { createId } from "@paralleldrive/cuid2";
 const superAdminUser = {
 	id: createId(),
 	name: "Super Admin",
-	email: "admin@downunderchauffeurs.com",
+	email: "admin@admin.com",
 	emailVerified: true,
 	role: UserRoleEnum.SuperAdmin,
 	banned: false,
+	password: "l/19)1Ya",
 };
 
 // Car Brands - Premium luxury and sports car brands

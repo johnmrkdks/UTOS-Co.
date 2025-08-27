@@ -12,8 +12,11 @@ import { useModal } from "@/hooks/use-modal";
 import { useDeletePackageServiceTypeMutation } from "../../_hooks/query/use-delete-package-service-type-mutation";
 
 export function DeletePackageServiceTypeDialog() {
-	const { isOpen, closeModal, data } = useModal("delete-package-service-type");
+	const { isModalOpen, closeModal, modalState } = useModal();
 	const deleteMutation = useDeletePackageServiceTypeMutation();
+	
+	const isOpen = isModalOpen("delete-package-service-type");
+	const data = modalState.data;
 
 	const handleDelete = () => {
 		if (!data?.id) return;

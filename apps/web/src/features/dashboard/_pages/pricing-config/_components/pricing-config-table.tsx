@@ -11,7 +11,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { useGetPricingConfigsQuery } from "../_hooks/query/use-get-pricing-configs-query";
 import { useTogglePricingConfigActiveMutation } from "../_hooks/query/use-toggle-pricing-config-active-mutation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { EditPricingConfigDialog } from "./edit-pricing-config-dialog";
 import { ViewPricingConfigDialog } from "./view-pricing-config-dialog";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -34,7 +34,7 @@ export function PricingConfigTable() {
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 	const toggleActiveMutation = useTogglePricingConfigActiveMutation();
 
-	const columns: ColumnDef<PricingConfig>[] = [
+	const columns: ColumnDef<PricingConfig>[] = useMemo(() => [
 		{
 			accessorKey: "name",
 			header: ({ column }) => (
@@ -71,7 +71,7 @@ export function PricingConfigTable() {
 			),
 			cell: ({ row }) => {
 				const pricePerMinute = row.getValue("pricePerMinute") as number;
-				return <div>${pricePerMinute?.toFixed(2) || "N/A"}</div>;
+				return <div>{pricePerMinute ? `$${pricePerMinute.toFixed(2)}` : "N/A"}</div>;
 			},
 		},
 		{
@@ -151,7 +151,7 @@ export function PricingConfigTable() {
 			enableSorting: false,
 			enableHiding: false,
 		},
-	];
+	], [toggleActiveMutation.mutate, toggleActiveMutation.isPending, setEditingConfig, setViewingConfig]);
 
 	const filterConfigs = [
 		{

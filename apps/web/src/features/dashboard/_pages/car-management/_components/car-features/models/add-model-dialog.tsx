@@ -105,11 +105,13 @@ export function AddModelDialog() {
 	const canSubmit = () => {
 		const values = form.getValues()
 		const hasErrors = Object.keys(form.formState.errors).length > 0
-		const isNameUnavailable = nameValidation.nameAvailability === false
 		const isCheckingName = nameValidation.isChecking
 		const hasRequiredFields = values.name?.trim() && values.brandId && values.year
+		
+		// Name validation is OK if it's either true (available) or null (not checked yet)
+		const nameValidationOk = nameValidation.nameAvailability !== false
 
-		return hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
+		return hasRequiredFields && !hasErrors && nameValidationOk && !isCheckingName && !mutation.isPending
 	}
 
 	return (

@@ -98,7 +98,7 @@ export function InstantQuoteResults({
 					<div className="bg-background border rounded-lg p-3">
 						<div className="flex justify-between items-center font-bold text-lg">
 							<span>Total Fare</span>
-							<span className="text-primary">${(quote.totalAmount / 100).toFixed(2)}</span>
+							<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
 						</div>
 
 						{/* Collapsible Cost Breakdown */}

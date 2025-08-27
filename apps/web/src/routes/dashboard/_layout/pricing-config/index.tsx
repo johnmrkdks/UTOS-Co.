@@ -24,8 +24,8 @@ function RouteComponent() {
 	const configs = pricingConfigsQuery.data?.data || [];
 	const totalConfigs = configs.length;
 	const activeConfigs = configs.filter((config: any) => config.isActive).length;
-	const avgBaseFare = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) / configs.length) : 0;
-	const avgPerKm = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) / configs.length) : 0;
+	const avgBaseFare = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) / configs.length / 100) : 0;
+	const avgPerKm = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) / configs.length / 100) : 0;
 
 	// Analytics card data for pricing config
 	const pricingStatsData: AnalyticsCardData[] = [

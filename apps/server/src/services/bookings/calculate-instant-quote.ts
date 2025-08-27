@@ -152,7 +152,11 @@ export async function calculateInstantQuoteService(
 			)
 		);
 
-	const averageBaseFare = Number(avgBaseFareResult[0]?.avgBaseFare) || 3000; // Default $30.00
+	const averageBaseFare = Number(avgBaseFareResult[0]?.avgBaseFare);
+	
+	if (!averageBaseFare || averageBaseFare <= 0) {
+		throw new Error("No published cars with active pricing configurations found. Please ensure at least one car is published and has active pricing configuration.");
+	}
 
 	// Get active pricing configuration from database (for other rates)
 	const activePricingConfig = await db
@@ -161,26 +165,18 @@ export async function calculateInstantQuoteService(
 		.where(eq(pricingConfig.isActive, true))
 		.limit(1);
 
-	let pricing;
-	if (activePricingConfig.length > 0) {
-		const config = activePricingConfig[0];
-		pricing = {
-			baseRate: Math.round(averageBaseFare), // Use average car base fare
-			perKmRate: config.pricePerKm,
-			perMinuteRate: config.pricePerMinute || 50,
-			minimumFare: Math.round(averageBaseFare), // Use average base fare as minimum
-			waitingTimeRate: config.waitingChargePerMinute || 100,
-		};
-	} else {
-		// Fallback pricing if no configuration exists
-		pricing = {
-			baseRate: Math.round(averageBaseFare), // Use average car base fare
-			perKmRate: 150, // $1.50 per km in cents
-			perMinuteRate: 50, // $0.50 per minute in cents
-			minimumFare: Math.round(averageBaseFare), // Use average base fare as minimum
-			waitingTimeRate: 100, // $1.00 per minute in cents
-		};
+	if (activePricingConfig.length === 0) {
+		throw new Error("No active pricing configuration found. Please contact support or set up pricing configuration.");
 	}
+
+	const config = activePricingConfig[0];
+	const pricing = {
+		baseRate: averageBaseFare, // Use average car base fare as decimal
+		perKmRate: config.pricePerKm, // Real value from database - no fallback
+		perMinuteRate: config.pricePerMinute, // Real value from database - no fallback
+		minimumFare: averageBaseFare, // Use average base fare as minimum
+		waitingTimeRate: config.waitingChargePerMinute, // Real value from database - no fallback
+	};
 
 	// Apply surge pricing based on time of day
 	const surgePricing = calculateSurgePricing(data.scheduledPickupTime);
@@ -190,11 +186,11 @@ export async function calculateInstantQuoteService(
 	const distanceKm = totalDistance / 1000; // convert meters to km
 	const durationMinutes = totalDuration / 60; // convert seconds to minutes
 	
-	const distanceFare = Math.round(distanceKm * pricing.perKmRate * surgePricing);
+	const distanceFare = parseFloat((distanceKm * pricing.perKmRate * surgePricing).toFixed(2));
 	const timeFare = 0; // Time fare excluded from calculation
-	const waitingTimeCharges = totalWaitingTime * pricing.waitingTimeRate;
+	const waitingTimeCharges = parseFloat((totalWaitingTime * pricing.waitingTimeRate).toFixed(2));
 	
-	let totalAmount = baseFare + distanceFare + waitingTimeCharges;
+	let totalAmount = parseFloat((baseFare + distanceFare + waitingTimeCharges).toFixed(2));
 	
 	// Apply minimum fare
 	if (totalAmount < pricing.minimumFare) {

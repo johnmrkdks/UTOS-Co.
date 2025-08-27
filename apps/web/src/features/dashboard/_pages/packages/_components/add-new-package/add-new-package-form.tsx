@@ -212,15 +212,20 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 												<SelectValue placeholder="Select service type" />
 											</SelectTrigger>
 											<SelectContent>
-												{serviceTypes
-													.filter(type => type.isActive)
-													.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-													.map((serviceType) => (
-														<SelectItem key={serviceType.id} value={serviceType.id}>
-															{serviceType.icon && `${serviceType.icon} `}{serviceType.name}
-														</SelectItem>
-													))
-												}
+												{serviceTypes.filter(type => type.isActive).length > 0 ? (
+													serviceTypes
+														.filter(type => type.isActive)
+														.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+														.map((serviceType) => (
+															<SelectItem key={serviceType.id} value={serviceType.id}>
+																{serviceType.name}
+															</SelectItem>
+														))
+												) : (
+													<div className="py-2 px-3 text-sm text-muted-foreground text-center">
+														No active service types available
+													</div>
+												)}
 											</SelectContent>
 										</Select>
 									</FormControl>

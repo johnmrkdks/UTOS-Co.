@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GuestQuoteBookingPage } from "@/features/guest/_pages/guest-quote-booking-page";
+import { QuoteBookingPage } from "@/features/marketing/_pages/quote-booking/quote-booking-page";
 import { getOrCreateGuestSession } from "@/utils/auth";
 import { z } from "zod";
 
@@ -19,5 +19,5 @@ export const Route = createFileRoute("/_marketing/book-quote")({
 		const session = await getOrCreateGuestSession();
 		return { session };
 	},
-	component: GuestQuoteBookingPage,
+	component: QuoteBookingPage,
 });
