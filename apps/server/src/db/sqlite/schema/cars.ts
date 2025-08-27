@@ -57,8 +57,9 @@ export const cars = sqliteTable(
 		seatingCapacity: integer("seating_capacity").notNull().default(4),
 		luggageCapacity: text("luggage_capacity"),
 
-		// Pricing (base fare per vehicle)
-		baseFare: real("base_fare").notNull(),
+		// TEMPORARY: Base fare for backward compatibility (will be moved to pricing config)
+		baseFare: real("base_fare").notNull().default(5000),
+
 
 		// Service availability
 		availableForPackages: integer("available_for_packages", { mode: "boolean" })
@@ -145,6 +146,9 @@ export const carsRelations = relations(cars, ({ one, many }) => ({
 	images: many(carImages),
 	carsToFeatures: many(carsToFeatures),
 }));
+
+// Relations for pricing config should be added to prevent circular imports
+// The pricingConfig relation will be added from the pricing config side
 
 export const carCategoriesRelations = relations(carCategories, ({ many }) => ({
 	cars: many(cars),

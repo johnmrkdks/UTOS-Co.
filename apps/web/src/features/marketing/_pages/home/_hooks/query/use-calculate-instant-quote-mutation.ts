@@ -3,7 +3,15 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const useCalculateInstantQuoteMutation = () => {
-	return useMutation(trpc.instantQuote.calculate.mutationOptions({
+	return useMutation({
+		mutationFn: async (input: any) => {
+			// Use car-specific endpoint if carId is provided, otherwise use general endpoint
+			if (input.carId) {
+				return await trpc.instantQuote.calculateCarSpecific.mutate(input);
+			} else {
+				return await trpc.instantQuote.calculate.mutate(input);
+			}
+		},
 		onSuccess: (data: any) => {
 			toast.success("Quote Calculated", {
 				description: `Total fare: $${(data.totalAmount / 100).toFixed(2)}`,
@@ -15,5 +23,5 @@ export const useCalculateInstantQuoteMutation = () => {
 				description: "Please try again or check your addresses.",
 			});
 		},
-	}));
+	});
 };

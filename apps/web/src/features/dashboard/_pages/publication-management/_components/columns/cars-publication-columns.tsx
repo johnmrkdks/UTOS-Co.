@@ -2,14 +2,19 @@ import { Badge } from "@workspace/ui/components/badge";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PublicationStatusBadge, PublicationToggleButton } from "@/features/dashboard/_components/publication";
+import { PublicationRowActions } from "../publication-row-actions";
 
 interface CarsPublicationColumnsProps {
 	onTogglePublish: (carId: string) => void;
+	onManagePricing: (carId: string) => void;
+	hasCarPricingConfig: (carId: string) => boolean;
 	isToggling: boolean;
 }
 
 export const getCarsPublicationColumns = ({
 	onTogglePublish,
+	onManagePricing,
+	hasCarPricingConfig,
 	isToggling
 }: CarsPublicationColumnsProps): ColumnDef<any>[] => [
 	{
@@ -121,19 +126,29 @@ export const getCarsPublicationColumns = ({
 		),
 		cell: ({ row }) => {
 			const car = row.original;
-			const canPublish = car.isActive && car.isAvailable && car.status === 'available';
+			const hasPricingConfig = hasCarPricingConfig(car.id);
+			const canPublish = car.isActive && car.isAvailable && car.status === 'available' && hasPricingConfig;
 
 			return (
-				<PublicationToggleButton
-					isPublished={car.isPublished}
-					isActive={car.isActive}
-					isAvailable={car.isAvailable}
-					status={car.status}
-					type="car"
-					onTogglePublish={() => onTogglePublish(car.id)}
-					disabled={!canPublish && !car.isPublished}
-					isLoading={isToggling}
-				/>
+				<div className="flex items-center gap-2">
+					<PublicationToggleButton
+						isPublished={car.isPublished}
+						isActive={car.isActive}
+						isAvailable={car.isAvailable}
+						status={car.status}
+						type="car"
+						onTogglePublish={() => onTogglePublish(car.id)}
+						hasPricingConfig={hasPricingConfig}
+						disabled={false} // Let the button handle its own disabled logic
+						isLoading={isToggling}
+					/>
+					<PublicationRowActions
+						carId={car.id}
+						carName={car.name}
+						hasPricingConfig={hasPricingConfig}
+						onManagePricing={() => onManagePricing(car.id)}
+					/>
+				</div>
 			);
 		},
 	},

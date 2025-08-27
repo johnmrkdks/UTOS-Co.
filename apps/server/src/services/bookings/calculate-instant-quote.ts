@@ -139,19 +139,21 @@ export async function calculateInstantQuoteService(
 		}
 	}
 
-	// Get average base fare from available cars for instant quote estimate
+	// Get average base fare from car-specific pricing configurations for instant quote estimate
 	const avgBaseFareResult = await db
-		.select({ avgBaseFare: avg(cars.baseFare) })
-		.from(cars)
+		.select({ avgBaseFare: avg(pricingConfig.baseFare) })
+		.from(pricingConfig)
+		.innerJoin(cars, eq(cars.id, pricingConfig.carId))
 		.where(
 			and(
 				eq(cars.isPublished, true),
 				eq(cars.isActive, true),
-				eq(cars.isAvailable, true)
+				eq(cars.isAvailable, true),
+				eq(pricingConfig.isActive, true)
 			)
 		);
 
-	const averageBaseFare = avgBaseFareResult[0]?.avgBaseFare || 3000; // Default $30.00
+	const averageBaseFare = Number(avgBaseFareResult[0]?.avgBaseFare) || 3000; // Default $30.00
 
 	// Get active pricing configuration from database (for other rates)
 	const activePricingConfig = await db

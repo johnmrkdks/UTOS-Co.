@@ -54,13 +54,11 @@ export async function calculateCarSpecificQuoteService(
 	data: CalculateCarSpecificQuoteParams,
 	env?: { GOOGLE_MAPS_API_KEY?: string }
 ): Promise<CarSpecificQuote> {
-	// Get the specific car details including base fare
+	// Get the specific car details
 	const carResult = await db
 		.select({
 			id: cars.id,
 			name: cars.name,
-			baseFare: cars.baseFare,
-			// We need to join with related tables for full car info
 		})
 		.from(cars)
 		.where(
@@ -78,6 +76,24 @@ export async function calculateCarSpecificQuoteService(
 	}
 
 	const car = carResult[0];
+
+	// Get car-specific pricing configuration
+	const carPricingResult = await db
+		.select()
+		.from(pricingConfig)
+		.where(
+			and(
+				eq(pricingConfig.carId, data.carId),
+				eq(pricingConfig.isActive, true)
+			)
+		)
+		.limit(1);
+
+	if (carPricingResult.length === 0) {
+		throw new Error("No pricing configuration found for this car");
+	}
+
+	const carPricing = carPricingResult[0];
 
 	let totalDistance = 0;
 	let totalDuration = 0;
@@ -166,33 +182,14 @@ export async function calculateCarSpecificQuoteService(
 		}
 	}
 
-	// Get active pricing configuration for distance and time rates
-	const activePricingConfig = await db
-		.select()
-		.from(pricingConfig)
-		.where(eq(pricingConfig.isActive, true))
-		.limit(1);
-
-	let pricing;
-	if (activePricingConfig.length > 0) {
-		const config = activePricingConfig[0];
-		pricing = {
-			baseRate: car.baseFare, // Use car's specific base fare
-			perKmRate: config.pricePerKm,
-			perMinuteRate: config.pricePerMinute || 50,
-			minimumFare: car.baseFare, // Use car's base fare as minimum
-			waitingTimeRate: config.waitingChargePerMinute || 100,
-		};
-	} else {
-		// Fallback pricing
-		pricing = {
-			baseRate: car.baseFare, // Use car's specific base fare
-			perKmRate: 150, // $1.50 per km
-			perMinuteRate: 50, // $0.50 per minute
-			minimumFare: car.baseFare, // Use car's base fare as minimum
-			waitingTimeRate: 100, // $1.00 per minute
-		};
-	}
+	// Use car-specific pricing configuration
+	const pricing = {
+		baseRate: carPricing.baseFare, // Use car's specific base fare from pricing config
+		perKmRate: carPricing.pricePerKm,
+		perMinuteRate: carPricing.pricePerMinute || 50,
+		minimumFare: carPricing.baseFare, // Use car's base fare as minimum
+		waitingTimeRate: carPricing.waitingChargePerMinute || 100,
+	};
 
 	// Apply surge pricing
 	const surgePricing = calculateSurgePricing(data.scheduledPickupTime);
@@ -224,7 +221,7 @@ export async function calculateCarSpecificQuoteService(
 		car: {
 			id: car.id,
 			name: car.name,
-			baseFare: car.baseFare,
+			baseFare: carPricing.baseFare,
 		},
 		breakdown: {
 			baseRate: pricing.baseRate,

@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { sql } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sql, relations } from "drizzle-orm";
+import { integer, real, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
+import { cars } from "./cars";
 
 export const pricingConfig = sqliteTable("pricing_config", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
@@ -8,8 +9,11 @@ export const pricingConfig = sqliteTable("pricing_config", {
 	// Pricing model name
 	name: text("name").notNull(), // "Standard", "Premium", "Night"
 
+	// Car-specific pricing (null = global config, specific carId = per-car config)
+	carId: text("car_id").references(() => cars.id, { onDelete: "cascade" }),
+	
 	// Base pricing
-	baseFare: integer("base_fare").notNull(), // minimum charge
+	baseFare: integer("base_fare").notNull(), // minimum charge per car or global
 	pricePerKm: integer("price_per_km").notNull(), // per kilometer
 	pricePerMinute: integer("price_per_minute"), // time-based component
 
@@ -39,4 +43,14 @@ export const pricingConfig = sqliteTable("pricing_config", {
 
 	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-});
+}, (table) => ({
+	carIdIdx: index("pricing_config_car_id_idx").on(table.carId),
+	carActiveIdx: index("pricing_config_car_active_idx").on(table.carId, table.isActive),
+}));
+
+export const pricingConfigRelations = relations(pricingConfig, ({ one }) => ({
+	car: one(cars, {
+		fields: [pricingConfig.carId],
+		references: [cars.id],
+	}),
+}));

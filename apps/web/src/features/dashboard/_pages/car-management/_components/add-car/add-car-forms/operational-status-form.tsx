@@ -83,40 +83,6 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 					
 					<FormField
 						control={control}
-						name="baseFare"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Base Fare *</FormLabel>
-								<FormControl>
-									<div className="relative">
-										<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-										<Input
-											{...field}
-											type="number"
-											min="1"
-											max="1000"
-											step="0.01"
-											placeholder="30.00"
-											className="pl-7"
-											onChange={(e) => {
-												// Convert dollars to cents
-												const dollars = parseFloat(e.target.value) || 0;
-												const cents = Math.round(dollars * 100);
-												field.onChange(cents);
-											}}
-											value={field.value ? (field.value / 100).toFixed(2) : ""}
-										/>
-									</div>
-								</FormControl>
-								<FormDescription className="text-xs">
-									Starting fare for this specific car (used for custom bookings)
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={control}
 						name="availableForPackages"
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-start space-x-3 space-y-0">

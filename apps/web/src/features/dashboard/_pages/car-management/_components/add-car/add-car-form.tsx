@@ -52,7 +52,6 @@ const DEFAULT_VALUES: Partial<AddCarFormValues> = {
 	cylinders: 4,
 	seatingCapacity: 4,
 	luggageCapacity: "",
-	baseFare: 3000, // Default $30.00 in cents
 	availableForPackages: true,
 	availableForCustom: true,
 	isActive: true,

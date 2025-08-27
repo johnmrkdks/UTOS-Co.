@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/ui/components/dialog";
+// Removed Dialog imports - now using UnifiedPricingConfigDialog
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { PricingConfigForm } from "@/features/dashboard/_pages/pricing-config/_components/pricing-config-form";
+import { UnifiedPricingConfigDialog } from "@/features/dashboard/_pages/pricing-config/_components/unified-pricing-config-dialog";
 import { PricingConfigTable } from "@/features/dashboard/_pages/pricing-config/_components/pricing-config-table";
 import { QuoteTester } from "@/features/dashboard/_pages/pricing-config/_components/quote-tester";
 import { Settings, Plus, Calculator, DollarSign } from "lucide-react";
@@ -82,25 +83,22 @@ function RouteComponent() {
 		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Pricing Configuration</h2>
-				<Dialog open={showCreateConfig} onOpenChange={setShowCreateConfig}>
-					<DialogTrigger asChild>
-						<Button className="flex items-center gap-2">
-							<Plus className="h-4 w-4" />
-							New Configuration
-						</Button>
-					</DialogTrigger>
-					<DialogContent className="!max-w-6xl h-[95vh] flex flex-col p-0">
-						<DialogHeader className="flex-shrink-0 p-6 pb-4">
-							<DialogTitle>Create Pricing Configuration</DialogTitle>
-							<DialogDescription>
-								Set up a new pricing model for custom bookings. Configure base rates, multipliers, and additional charges.
-							</DialogDescription>
-						</DialogHeader>
-						<div className="flex-1 min-h-0">
-							<PricingConfigForm onSuccess={() => setShowCreateConfig(false)} />
-						</div>
-					</DialogContent>
-				</Dialog>
+				<Button 
+					className="flex items-center gap-2"
+					onClick={() => setShowCreateConfig(true)}
+				>
+					<Plus className="h-4 w-4" />
+					New Configuration
+				</Button>
+
+				{/* Unified pricing config dialog */}
+				<UnifiedPricingConfigDialog
+					open={showCreateConfig}
+					onOpenChange={setShowCreateConfig}
+					mode="create"
+					title="Create Pricing Configuration"
+					description="Set up a new pricing model for custom bookings. Configure base rates, multipliers, and additional charges."
+				/>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

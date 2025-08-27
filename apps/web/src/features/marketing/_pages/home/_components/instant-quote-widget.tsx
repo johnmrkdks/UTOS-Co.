@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useNavigate } from "@tanstack/react-router"
-import { Calculator, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, AlertCircle, Plus, X, LogIn } from "lucide-react"
+import { Calculator, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, AlertCircle, Plus, X, LogIn, Car } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
@@ -14,10 +14,12 @@ import { GooglePlacesInput } from "./google-places-input-simple"
 import { useCalculateInstantQuoteMutation } from "../_hooks/query/use-calculate-instant-quote-mutation"
 import { useCheckInstantQuoteAvailabilityQuery } from "../_hooks/query/use-check-instant-quote-availability-query"
 import { useUserQuery } from "@/hooks/query/use-user-query"
+import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query"
 
 const instantQuoteSchema = z.object({
 	originAddress: z.string().min(1, "Origin address is required"),
 	destinationAddress: z.string().min(1, "Destination address is required"),
+	carId: z.string().optional(), // Optional for backward compatibility, required for accurate quotes
 	stops: z.array(z.object({
 		address: z.string().min(1, "Stop address is required"),
 	})).optional().default([]),
@@ -42,7 +44,7 @@ interface QuoteResult {
 	}
 }
 
-type Step = "input" | "results"
+type Step = "input" | "car-selection" | "results"
 
 export function InstantQuoteWidget() {
 	const [currentStep, setCurrentStep] = useState<Step>("input")
@@ -56,12 +58,14 @@ export function InstantQuoteWidget() {
 	const { session, isLoading: userLoading } = useUserQuery()
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation()
 	const availabilityQuery = useCheckInstantQuoteAvailabilityQuery()
+	const { data: publishedCars, isLoading: carsLoading } = useGetPublishedCarsQuery({})
 
 	const form = useForm({
 		resolver: zodResolver(instantQuoteSchema),
 		defaultValues: {
 			originAddress: "",
 			destinationAddress: "",
+			carId: "",
 			stops: [],
 		},
 	})
@@ -71,9 +75,10 @@ export function InstantQuoteWidget() {
 		name: "stops",
 	})
 
-	const watchedValues = form.watch(["originAddress", "destinationAddress"])
+	const watchedValues = form.watch(["originAddress", "destinationAddress", "carId"])
 	const isAvailable = availabilityQuery.data?.available
-	const canCalculateQuote = watchedValues[0] && watchedValues[1] && isAvailable
+	const canProceedToCarSelection = watchedValues[0] && watchedValues[1] && isAvailable
+	const canCalculateQuote = watchedValues[0] && watchedValues[1] && watchedValues[2] && isAvailable
 
 	// Loading state for availability check
 	if (availabilityQuery.isLoading) {
@@ -150,6 +155,14 @@ export function InstantQuoteWidget() {
 		setStopsGeometry(newStopsGeometry)
 	}
 
+	const proceedToCarSelection = () => {
+		setCurrentStep("car-selection")
+	}
+
+	const backToRouteInput = () => {
+		setCurrentStep("input")
+	}
+
 	const handleCalculateQuote = async () => {
 		const formData = form.getValues()
 
@@ -169,6 +182,7 @@ export function InstantQuoteWidget() {
 		const result = await calculateQuoteMutation.mutateAsync({
 			originAddress: formData.originAddress,
 			destinationAddress: formData.destinationAddress,
+			carId: formData.carId, // Pass selected car ID for accurate pricing
 			originLatitude: originLat,
 			originLongitude: originLng,
 			destinationLatitude: destinationLat,
@@ -335,23 +349,14 @@ export function InstantQuoteWidget() {
 								{/* Quote Calculation Button */}
 								<Button
 									type="button"
-									onClick={handleCalculateQuote}
-									disabled={!canCalculateQuote || isCalculating}
+									onClick={proceedToCarSelection}
+									disabled={!canProceedToCarSelection}
 									className="w-full h-10 text-sm font-semibold"
 									size="default"
 								>
-									{isCalculating ? (
-										<>
-											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-											Calculating...
-										</>
-									) : (
-										<>
-											<Calculator className="mr-2 h-5 w-5" />
-											Get Instant Quote
-											<ArrowRight className="ml-2 h-4 w-4" />
-										</>
-									)}
+									<Car className="mr-2 h-5 w-5" />
+									Choose Vehicle & Get Quote
+									<ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
 
 								{!isAvailable ? (
@@ -365,6 +370,120 @@ export function InstantQuoteWidget() {
 								) : null}
 							</form>
 						</Form>
+					</div>
+				)}
+
+				{currentStep === "car-selection" && (
+					<div className="space-y-4">
+						{/* Header for car selection step */}
+						<div className="text-center pb-4">
+							<h3 className="text-lg font-semibold flex items-center justify-center gap-2">
+								<Car className="h-5 w-5 text-primary" />
+								Choose Your Vehicle
+							</h3>
+							<p className="text-sm text-muted-foreground mt-2">
+								Select a vehicle to get accurate pricing for your journey
+							</p>
+						</div>
+
+						{/* Back Button */}
+						<Button
+							variant="outline"
+							onClick={backToRouteInput}
+							className="flex items-center gap-2"
+							size="sm"
+						>
+							<ArrowLeft className="h-4 w-4" />
+							Back to Route
+						</Button>
+
+						{/* Car Selection Grid */}
+						<Form {...form}>
+							<FormField
+								control={form.control}
+								name="carId"
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<div className="grid grid-cols-1 gap-3">
+												{carsLoading ? (
+													<>
+														<Skeleton className="h-20 w-full" />
+														<Skeleton className="h-20 w-full" />
+														<Skeleton className="h-20 w-full" />
+													</>
+												) : publishedCars?.data?.length ? (
+													publishedCars.data.map((car) => (
+														<Card
+															key={car.id}
+															className={`cursor-pointer transition-all hover:shadow-md ${
+																field.value === car.id 
+																	? "ring-2 ring-primary bg-primary/5" 
+																	: "hover:bg-muted/50"
+															}`}
+															onClick={() => field.onChange(car.id)}
+														>
+															<CardContent className="p-4">
+																<div className="flex items-center justify-between">
+																	<div className="flex items-center gap-3">
+																		<div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+																			<Car className="h-6 w-6 text-muted-foreground" />
+																		</div>
+																		<div>
+																			<h4 className="font-medium">{car.name}</h4>
+																			<div className="flex items-center gap-2 text-sm text-muted-foreground">
+																				<span>{car.category?.name}</span>
+																				<span>•</span>
+																				<span>{car.seatingCapacity} seats</span>
+																			</div>
+																		</div>
+																	</div>
+																	<div className="text-right">
+																		<div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
+																			Select for pricing
+																		</div>
+																	</div>
+																</div>
+															</CardContent>
+														</Card>
+													))
+												) : (
+													<Alert>
+														<AlertCircle className="h-4 w-4" />
+														<AlertDescription>
+															No vehicles available at the moment. Please try again later.
+														</AlertDescription>
+													</Alert>
+												)}
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</Form>
+
+						{/* Get Quote Button */}
+						<Button
+							type="button"
+							onClick={handleCalculateQuote}
+							disabled={!canCalculateQuote || isCalculating}
+							className="w-full h-10 text-sm font-semibold"
+							size="default"
+						>
+							{isCalculating ? (
+								<>
+									<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+									Calculating Quote...
+								</>
+							) : (
+								<>
+									<Calculator className="mr-2 h-5 w-5" />
+									Get Accurate Quote
+									<ArrowRight className="ml-2 h-4 w-4" />
+								</>
+							)}
+						</Button>
 					</div>
 				)}
 

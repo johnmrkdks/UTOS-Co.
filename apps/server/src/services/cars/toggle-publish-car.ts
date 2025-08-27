@@ -1,5 +1,5 @@
 import type { DB } from "@/db";
-import { cars } from "@/db/schema";
+import { cars, pricingConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -14,6 +14,19 @@ export async function togglePublishCarService(
 	db: DB,
 	{ id, isPublished }: TogglePublishCarService,
 ) {
+	// If trying to publish (isPublished = true), check for pricing config
+	if (isPublished) {
+		const existingPricingConfig = await db
+			.select()
+			.from(pricingConfig)
+			.where(eq(pricingConfig.carId, id))
+			.limit(1);
+
+		if (existingPricingConfig.length === 0) {
+			throw new Error("Cannot publish car: Pricing configuration is required before publishing a vehicle. Please create a pricing configuration for this car first.");
+		}
+	}
+
 	const [updatedCar] = await db
 		.update(cars)
 		.set({ 

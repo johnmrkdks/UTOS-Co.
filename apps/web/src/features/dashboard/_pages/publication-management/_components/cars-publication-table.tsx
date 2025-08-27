@@ -9,11 +9,15 @@ import { useGetCarsQuery } from "@/features/dashboard/_pages/car-management/_hoo
 import { useTogglePublishCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/use-toggle-publish-car-mutation";
 import { getCarsPublicationColumns } from "./columns";
 import { TableSkeleton } from "./skeletons";
+import { useModal } from "@/hooks/use-modal";
+import { useCarPricingStatusSafe } from "../_hooks/use-car-pricing-status-safe";
 
 
 export function CarsPublicationTable() {
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
+	const { openModal } = useModal();
+	const { hasCarPricingConfig, isLoading: pricingStatusLoading } = useCarPricingStatusSafe();
 
 	const { data: carsData, isLoading } = useGetCarsQuery({
 		limit: 50,
@@ -57,6 +61,20 @@ export function CarsPublicationTable() {
 		togglePublishMutation.mutate({
 			id: carId,
 			isPublished: !car.isPublished
+		});
+	};
+
+	const handleManagePricing = (carId: string) => {
+		const car = filteredCars.find(c => c.id === carId);
+		if (!car) return;
+
+		// Open pricing config modal/dialog with comprehensive car data
+		openModal("create-pricing-config", { 
+			carId, 
+			carName: car.name,
+			carBrand: car.model?.brand?.name,
+			carModel: car.model?.name,
+			fromPublicationManagement: true
 		});
 	};
 
@@ -114,6 +132,8 @@ export function CarsPublicationTable() {
 
 	const columns = getCarsPublicationColumns({
 		onTogglePublish: handleTogglePublish,
+		onManagePricing: handleManagePricing,
+		hasCarPricingConfig,
 		isToggling: togglePublishMutation.isPending
 	});
 
