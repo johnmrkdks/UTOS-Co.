@@ -20,4 +20,7 @@ export const users = sqliteTable("users", {
 	banned: integer("banned", { mode: "boolean" }).default(false),
 	banReason: text("ban_reason"),
 	banExpires: integer("ban_expires", { mode: "timestamp" }),
+
+	// Anonymous plugin fields
+	isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
 });

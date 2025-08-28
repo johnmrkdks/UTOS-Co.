@@ -1,11 +1,13 @@
 import {
 	calculateInstantQuoteService,
+	calculateAndStoreSecureQuote,
 	CalculateInstantQuoteSchema,
 } from "@/services/bookings/calculate-instant-quote";
 import {
 	calculateCarSpecificQuoteService,
 	CalculateCarSpecificQuoteSchema,
 } from "@/services/bookings/calculate-car-specific-quote";
+import { retrieveSecureQuoteWithCar } from "@/services/quotes/instant-quote-storage";
 import { publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { eq } from "drizzle-orm";
@@ -19,7 +21,7 @@ function generateSecureToken(): string {
 	return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-// In-memory quote storage (in production, use Redis or database)
+// Temporary in-memory quote storage until database schema is fixed
 const quoteStorage = new Map<string, { quote: any; routeData: any; expiresAt: number }>();
 
 // Clean expired quotes when accessed (no global intervals in Cloudflare Workers)
@@ -35,18 +37,17 @@ function cleanExpiredQuotes() {
 export const instantQuoteRouter = router({
 	calculate: publicProcedure
 		.input(CalculateInstantQuoteSchema)
-		.mutation(async ({ ctx: { db, env }, input }) => {
+		.mutation(async ({ ctx: { db, env, req }, input }) => {
 			try {
-				// Clean expired quotes periodically
-				cleanExpiredQuotes();
-				
+				// For now, use the old calculation method until database schema is fixed
+				// This still provides security by generating a temporary secure ID
 				const quote = await calculateInstantQuoteService(db, input, env);
 				
-				// Generate secure token for quote
-				const quoteToken = generateSecureToken();
+				// Generate a temporary secure quote ID (will be replaced with database storage)
+				const quoteId = generateSecureToken();
 				
-				// Store quote data securely (expires in 1 hour)
-				quoteStorage.set(quoteToken, {
+				// Store in memory temporarily (30 minutes expiry)
+				quoteStorage.set(quoteId, {
 					quote,
 					routeData: {
 						originAddress: input.originAddress,
@@ -56,13 +57,15 @@ export const instantQuoteRouter = router({
 						destinationLatitude: input.destinationLatitude,
 						destinationLongitude: input.destinationLongitude,
 						stops: input.stops || [],
+						carId: input.carId,
 					},
-					expiresAt: Date.now() + (60 * 60 * 1000) // 1 hour
+					expiresAt: Date.now() + (30 * 60 * 1000) // 30 minutes
 				});
 				
+				// Return quote with secure ID
 				return {
 					...quote,
-					quoteToken // Return secure token instead of exposing all data in URL
+					quoteId,
 				};
 			} catch (error) {
 				handleTRPCError(error);
@@ -86,29 +89,47 @@ export const instantQuoteRouter = router({
 			}
 		}),
 	
-	getQuoteByToken: publicProcedure
+	getQuoteById: publicProcedure
 		.input(z.object({
-			quoteToken: z.string().min(1, "Quote token is required")
+			quoteId: z.string().min(1, "Quote ID is required")
 		}))
 		.query(async ({ input }) => {
 			try {
 				// Clean expired quotes periodically
 				cleanExpiredQuotes();
 				
-				const quoteData = quoteStorage.get(input.quoteToken);
+				const quoteData = quoteStorage.get(input.quoteId);
 				
 				if (!quoteData) {
 					throw new Error("Quote not found or expired. Please generate a new quote.");
 				}
 				
 				if (quoteData.expiresAt < Date.now()) {
-					quoteStorage.delete(input.quoteToken);
+					quoteStorage.delete(input.quoteId);
 					throw new Error("Quote has expired. Please generate a new quote.");
 				}
 				
+				// Return the stored quote data in the format expected by the frontend
 				return {
-					quote: quoteData.quote,
-					routeData: quoteData.routeData
+					id: input.quoteId,
+					originAddress: quoteData.routeData.originAddress,
+					destinationAddress: quoteData.routeData.destinationAddress,
+					originLatitude: quoteData.routeData.originLatitude,
+					originLongitude: quoteData.routeData.originLongitude,
+					destinationLatitude: quoteData.routeData.destinationLatitude,
+					destinationLongitude: quoteData.routeData.destinationLongitude,
+					stops: quoteData.routeData.stops,
+					carId: quoteData.routeData.carId,
+					baseFare: quoteData.quote.baseFare,
+					distanceFare: quoteData.quote.distanceFare,
+					timeFare: quoteData.quote.timeFare,
+					extraCharges: quoteData.quote.extraCharges,
+					totalAmount: quoteData.quote.totalAmount,
+					estimatedDistance: quoteData.quote.estimatedDistance,
+					estimatedDuration: quoteData.quote.estimatedDuration,
+					breakdown: quoteData.quote.breakdown,
+					expiresAt: new Date(quoteData.expiresAt),
+					createdAt: new Date(Date.now() - (30 * 60 * 1000) + (quoteData.expiresAt - Date.now())),
 				};
 			} catch (error) {
 				handleTRPCError(error);

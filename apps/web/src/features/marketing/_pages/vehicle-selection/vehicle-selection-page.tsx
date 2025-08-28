@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
+import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query";
+import { CarPriceDisplay } from "./_components/car-price-display";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
@@ -29,9 +29,7 @@ export function VehicleSelectionPage() {
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
 	// Fetch published cars
-	const { data: carsData, isLoading } = useQuery(
-		trpc.cars.listPublished.queryOptions({ limit: 50 })
-	);
+	const { data: carsData, isLoading } = useGetPublishedCarsQuery({ limit: 50 });
 
 	const cars = carsData?.data || [];
 
@@ -49,7 +47,7 @@ export function VehicleSelectionPage() {
 	const handleContinue = () => {
 		if (!selectedCarId) return;
 
-		// Navigate back to instant quote with selected car
+		// Navigate to calculate quote page with selected car
 		const params = new URLSearchParams();
 		params.set("selectedCarId", selectedCarId);
 		if (search.origin) params.set("origin", search.origin);
@@ -60,7 +58,10 @@ export function VehicleSelectionPage() {
 		if (search.destinationLng) params.set("destinationLng", search.destinationLng);
 		if (search.stops) params.set("stops", search.stops);
 
-		navigate({ to: "/", search: Object.fromEntries(params) });
+		navigate({ 
+			to: "/calculate-quote", 
+			search: Object.fromEntries(params) as any
+		});
 	};
 
 	const selectedCar = cars.find(car => car.id === selectedCarId);
@@ -281,12 +282,10 @@ export function VehicleSelectionPage() {
 												<h3 className="font-semibold text-sm sm:text-base lg:text-lg truncate">{car.name}</h3>
 												<p className="text-muted-foreground text-xs sm:text-sm truncate">{car.model?.name || 'Luxury Vehicle'}</p>
 											</div>
-											<div className="text-right flex-shrink-0">
-												<div className="text-sm sm:text-lg lg:text-xl font-bold text-primary">
-													Contact for Price
-												</div>
-												<div className="text-xs text-muted-foreground hidden sm:block">per day</div>
-											</div>
+											<CarPriceDisplay 
+												carId={car.id}
+												className="text-right flex-shrink-0"
+											/>
 										</div>
 
 										{/* Specs */}
@@ -398,7 +397,7 @@ export function VehicleSelectionPage() {
 							)}
 							
 							<Button onClick={handleContinue} className="w-full gap-2 h-11">
-								<span>Continue with Selection</span>
+								<span>Calculate Quote</span>
 								<ArrowRight className="w-4 h-4" />
 							</Button>
 						</div>
@@ -420,12 +419,16 @@ export function VehicleSelectionPage() {
 									</div>
 									<div className="flex-1 min-w-0">
 										<p className="font-medium truncate">{selectedCar.name}</p>
-										<p className="text-sm text-muted-foreground">Contact for pricing</p>
+										<CarPriceDisplay 
+											carId={selectedCar.id}
+											variant="summary"
+											className="text-sm text-muted-foreground"
+										/>
 									</div>
 								</div>
 							)}
 							<Button onClick={handleContinue} className="gap-2">
-								Continue with Selection
+								Calculate Quote
 								<ArrowRight className="w-4 h-4" />
 							</Button>
 						</div>

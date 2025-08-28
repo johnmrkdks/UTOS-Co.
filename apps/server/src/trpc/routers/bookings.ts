@@ -77,8 +77,13 @@ export const bookingsRouter = router({
 		.input(CreatePackageBookingSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session userId for anonymous users
-				const userId = session.user?.id || session.session?.userId;
+				// Better Auth anonymous plugin - check both user and session structures
+				const userId = session.user?.id || session.userId;
+				
+				if (!userId) {
+					throw new Error("User session is required. Please sign in or create a guest account.");
+				}
+				
 				const newBooking = await createPackageBookingService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
@@ -91,8 +96,13 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session userId for anonymous users
-				const userId = session.user?.id || session.session?.userId;
+				// Better Auth anonymous plugin - check both user and session structures
+				const userId = session.user?.id || session.userId;
+				
+				if (!userId) {
+					throw new Error("User session is required. Please sign in or create a guest account.");
+				}
+				
 				const newBooking = await createCustomBookingService(db, { ...input, userId });
 				return newBooking;
 			} catch (error) {
@@ -105,11 +115,24 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingFromQuoteSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session userId for anonymous users
-				const userId = session.user?.id || session.session?.userId;
+				// Better Auth anonymous plugin - check both user and session structures
+				const userId = session.user?.id || session.userId;
+				
+				if (!userId) {
+					console.log("🔍 Session structure:", JSON.stringify(session, null, 2));
+					throw new Error("User session is required. Please sign in or create a guest account.");
+				}
+				
+				console.log("🚀 Creating custom booking from quote for userId:", userId);
 				const newBooking = await createCustomBookingFromQuoteService(db, { ...input, userId });
+				console.log("✅ Custom booking created successfully:", newBooking.id);
 				return newBooking;
 			} catch (error) {
+				console.error("❌ TRPC Error in createCustomBookingFromQuote:", {
+					error: error.message,
+					stack: error.stack,
+					input: JSON.stringify(input, null, 2)
+				});
 				handleTRPCError(error);
 			}
 		}),
@@ -185,8 +208,8 @@ export const bookingsRouter = router({
 		}))
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
-				// Use session.user for authenticated users, or session userId for anonymous users
-				const userId = session.user?.id || session.session?.userId;
+				// Better Auth anonymous plugin - check both user and session structures
+				const userId = session.user?.id || session.userId;
 				
 				// Filter bookings by userId using the filters parameter
 				const bookings = await getBookingsService(db, {

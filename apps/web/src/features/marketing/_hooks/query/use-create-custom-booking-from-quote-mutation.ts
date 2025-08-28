@@ -7,31 +7,10 @@ import { getOrCreateGuestSession } from "@/utils/auth";
  * Create custom booking from quote mutation for both authenticated and guest users
  */
 export const useCreateCustomBookingFromQuoteMutation = () => {
-	return useMutation({
-		mutationFn: async (input: {
-			userId: string;
-			originAddress: string;
-			destinationAddress: string;
-			scheduledPickupTime: Date;
-			estimatedDuration?: number;
-			estimatedDistance?: number;
-			baseFare: number;
-			distanceFare: number;
-			timeFare?: number;
-			extraCharges: number;
-			quotedAmount: number;
-			customerName: string;
-			customerPhone: string;
-			customerEmail?: string;
-			passengerCount: number;
-			specialRequests?: string;
-			preferredCategoryId?: string;
-		}) => {
-			// Ensure we have a session (either authenticated or guest)
-			await getOrCreateGuestSession();
-			
-			// Call the backend createCustomBookingFromQuote endpoint
-			return await trpc.bookings.createCustomBookingFromQuote.mutate(input);
+	// Follow the exact pattern from car management hooks (use-create-car-mutation.ts)
+	return useMutation(trpc.bookings.createCustomBookingFromQuote.mutationOptions({
+		onMutate: (variables) => {
+			console.log("🔄 Custom booking from quote starting with data:", variables);
 		},
 		onSuccess: (data) => {
 			console.log("✅ Custom booking from quote successful:", data);
@@ -46,8 +25,5 @@ export const useCreateCustomBookingFromQuoteMutation = () => {
 				description: error.message || "An unexpected error occurred. Please try again.",
 			});
 		},
-		onMutate: (variables) => {
-			console.log("🔄 Custom booking from quote starting with data:", variables);
-		}
-	});
+	}));
 };

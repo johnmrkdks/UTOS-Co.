@@ -15,6 +15,8 @@ export * from "./bookings/booking-reviews";
 export * from "./bookings/booking-stops";
 export * from "./bookings";
 
+export * from "./instant-quotes";
+
 export * from "./packages/package-categories";
 export * from "./packages/package-routes";
 export * from "./packages/package-service-types";

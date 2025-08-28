@@ -19,7 +19,9 @@ const plugins: BetterAuthOptions["plugins"] = [
 		ac,
 		roles: { userRole, driverRole, adminRole, superAdminRole },
 	}),
-	anonymous(),
+	anonymous({
+		emailDomainName: "downunderchauffeur.com"
+	}),
 ];
 
 const configs = {};

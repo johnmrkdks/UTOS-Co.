@@ -4,6 +4,7 @@ import { deleteCarService, DeleteCarServiceSchema } from "@/services/cars/delete
 import { getCarService, GetCarServiceSchema } from "@/services/cars/get-car";
 import { getCarsService } from "@/services/cars/get-cars";
 import { getPublishedCarsService } from "@/services/cars/get-published-cars";
+import { getCarPricingEstimateService, GetCarPricingEstimateSchema } from "@/services/cars/get-car-pricing-estimate";
 import { togglePublishCarService, TogglePublishCarServiceSchema } from "@/services/cars/toggle-publish-car";
 import { updateCarService, UpdateCarServiceSchema } from "@/services/cars/update-car";
 import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
@@ -82,6 +83,17 @@ export const carsRouter = router({
 			try {
 				const cars = await getPublishedCarsService(db, input);
 				return cars;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	
+	getPricingEstimate: publicProcedure
+		.input(GetCarPricingEstimateSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const pricing = await getCarPricingEstimateService(db, input);
+				return pricing;
 			} catch (error) {
 				handleTRPCError(error);
 			}

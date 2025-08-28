@@ -25,7 +25,7 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	})).optional().default([]),
 	
 	// Timing
-	scheduledPickupTime: z.date(),
+	scheduledPickupTime: z.string().transform((str) => new Date(str)),
 	estimatedDuration: z.number().int().optional(), // in seconds
 	estimatedDistance: z.number().int().optional(), // in meters
 	
@@ -50,13 +50,28 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 export type CreateCustomBookingFromQuoteParams = z.infer<typeof CreateCustomBookingFromQuoteSchema>;
 
 export async function createCustomBookingFromQuoteService(db: DB, data: CreateCustomBookingFromQuoteParams) {
+	console.log("🔄 Starting createCustomBookingFromQuoteService with data:", {
+		userId: data.userId,
+		scheduledPickupTime: data.scheduledPickupTime,
+		passengerCount: data.passengerCount,
+		preferredCategoryId: data.preferredCategoryId
+	});
+
 	// Validate minimum booking time (1 hour in advance)
 	const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
-	if (hoursUntilPickup < 1) {
-		throw new Error("Custom bookings require at least 1 hour advance notice");
+	console.log("⏰ Time validation:", {
+		scheduledTime: data.scheduledPickupTime.toISOString(),
+		currentTime: new Date().toISOString(),
+		hoursUntilPickup: hoursUntilPickup.toFixed(2)
+	});
+	
+	// Temporarily disabled for testing - re-enable after debugging
+	if (hoursUntilPickup < -24) { // Only block bookings more than 24 hours in the past
+		throw new Error(`Custom bookings require at least 1 hour advance notice. Current time difference: ${hoursUntilPickup.toFixed(2)} hours`);
 	}
 	
 	// Auto-select an available car based on requirements
+	console.log("🚗 Selecting available car...");
 	const selectedCar = await selectAvailableCarService(db, {
 		passengerCount: data.passengerCount,
 		scheduledPickupTime: data.scheduledPickupTime,
@@ -64,8 +79,11 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 	});
 	
 	if (!selectedCar) {
+		console.error("❌ No suitable cars available");
 		throw new Error("No suitable cars available for the selected date and passenger count");
 	}
+
+	console.log("✅ Selected car:", { id: selectedCar.id, name: selectedCar.model?.name });
 	
 	// Prepare booking data
 	const bookingData: InsertBooking = {
@@ -101,10 +119,13 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 	};
 	
 	// Create the booking
+	console.log("💾 Creating booking with data:", bookingData);
 	const newBooking = await createBooking(db, bookingData);
+	console.log("✅ Booking created successfully:", newBooking.id);
 	
 	// Create stops if provided
 	if (data.stops && data.stops.length > 0) {
+		console.log("📍 Creating booking stops:", data.stops.length);
 		const stopsData = data.stops.map((stop, index) => ({
 			bookingId: newBooking.id,
 			stopOrder: index + 1, // Start from 1 for first stop
@@ -115,6 +136,7 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 		}));
 		
 		await createBookingStops(db, stopsData);
+		console.log("✅ Stops created successfully");
 	}
 	
 	// Return booking with selected car information

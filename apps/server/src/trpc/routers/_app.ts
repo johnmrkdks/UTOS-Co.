@@ -1,5 +1,5 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
+import { protectedProcedure, publicProcedure, router, guestProcedure } from "@/trpc/init";
 import { carsRouter } from "./cars";
 import { carBodyTypesRouter } from "./car-body-types";
 import { carBrandsRouter } from "./car-brands";
@@ -32,6 +32,15 @@ export const appRouter = router({
 		return {
 			message: "This is private",
 			user: ctx.session.user,
+		};
+	}),
+	sessionDebug: guestProcedure.query(({ ctx }) => {
+		return {
+			message: "Session debug info",
+			hasSession: !!ctx.session,
+			user: ctx.session?.user || null,
+			sessionInfo: ctx.session?.session || null,
+			userId: ctx.session?.user?.id || ctx.session?.session?.userId || null,
 		};
 	}),
 	files: fileRouter,

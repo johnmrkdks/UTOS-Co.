@@ -28,6 +28,7 @@ import { useUnifiedUserQuery, extractUserInfo } from "@/hooks/query/use-unified-
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
 import { useCreateCustomBookingFromQuoteMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { getOrCreateGuestSession } from "@/utils/auth";
+import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
 import { z } from "zod";
 
 // Booking form schema for quote-based booking
@@ -54,38 +55,51 @@ export function QuoteBookingPage() {
 	// Fetch available cars
 	const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAvailableCarsQuery();
 	
+	// Fetch secure quote if quoteId is provided
+	const { data: secureQuoteData, isLoading: secureQuoteLoading, error: secureQuoteError } = useGetSecureQuoteQuery(
+		search?.quoteId || "",
+		{ enabled: !!search?.quoteId }
+	);
+	
 	// Mutation for creating booking from quote
 	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
 	
-	// Form state - pre-populate with user info if available
+	// Form state - let users fill their own information
 	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({
-		customerName: userInfo?.name || "",
-		customerEmail: userInfo?.email || "",
 		passengerCount: 1,
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
 	const [selectedCarId, setSelectedCarId] = useState<string>("");
 
-	// Extract quote data from URL search params
-	const quoteData = {
+	// Extract quote data - prioritize secure quote, fallback to URL params
+	const quoteData = secureQuoteData ? {
+		origin: secureQuoteData.originAddress,
+		destination: secureQuoteData.destinationAddress,
+		distance: (secureQuoteData.estimatedDistance || 0) / 1000, // Convert meters to km
+		duration: Math.round((secureQuoteData.estimatedDuration || 0) / 60), // Convert seconds to minutes
+		totalFare: secureQuoteData.totalAmount,
+		carId: secureQuoteData.carId, // Pre-selected car from quote
+	} : {
 		origin: search?.origin || "",
 		destination: search?.destination || "",
 		distance: parseFloat(search?.distance || "0"),
 		duration: parseInt(search?.duration || "0"),
 		totalFare: parseFloat(search?.totalFare || "0"),
+		carId: search?.carId, // Pre-selected car from legacy URL
 	};
 
-	// Update form data when user info is available
+
+	// Pre-select car from quote data
 	useEffect(() => {
-		if (userInfo && !formData.customerName) {
-			setFormData(prev => ({
-				...prev,
-				customerName: userInfo.name || "",
-				customerEmail: userInfo.email || "",
-			}));
+		if (quoteData.carId && carsData?.data && !selectedCarId) {
+			const carExists = carsData.data.find(car => car.id === quoteData.carId);
+			if (carExists) {
+				console.log("🚗 Pre-selecting car from quote:", quoteData.carId);
+				setSelectedCarId(quoteData.carId);
+			}
 		}
-	}, [userInfo, formData.customerName]);
+	}, [quoteData.carId, carsData?.data, selectedCarId]);
 
 	console.log("🔍 QUOTE BOOKING DEBUG:");
 	console.log("Search params:", search);
@@ -93,6 +107,7 @@ export function QuoteBookingPage() {
 	console.log("User info:", userInfo);
 	console.log("Cars data:", carsData);
 	console.log("Selected car ID:", selectedCarId);
+
 
 	const updateFormData = (field: keyof QuoteBookingFormData, value: any) => {
 		setFormData(prev => ({ ...prev, [field]: value }));
@@ -138,10 +153,16 @@ export function QuoteBookingPage() {
 			return;
 		}
 
-		if (!userInfo) {
-			toast.error("Session not available. Please refresh and try again.");
-			return;
-		}
+		// Session should already exist (created in widget or via authentication)
+		// For anonymous users (Better Auth anonymous plugin handles guest sessions)
+		const effectiveUserInfo = userInfo || {
+			id: sessionData?.session?.userId || sessionData?.user?.id, // Use anonymous user ID from Better Auth
+			name: formData.customerName || 'Anonymous User',
+			email: formData.customerEmail || '',
+			isGuest: !sessionData?.user, // True if anonymous, false if authenticated
+		};
+
+		console.log("👤 Effective user info for booking:", effectiveUserInfo);
 
 		if (!quoteData.origin || !quoteData.destination) {
 			toast.error("Quote information is missing. Please start a new quote.");
@@ -149,7 +170,14 @@ export function QuoteBookingPage() {
 		}
 
 		try {
-			const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}`);
+			// Create proper Date object from date and time inputs
+			const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}:00.000Z`);
+			
+			// Validate that the date is valid
+			if (isNaN(scheduledPickupTime.getTime())) {
+				toast.error("Invalid pickup date or time");
+				return;
+			}
 			
 			// Calculate pricing based on quote data
 			const baseFare = Math.round(quoteData.totalFare * 0.3 * 100); // 30% base
@@ -158,10 +186,10 @@ export function QuoteBookingPage() {
 			const quotedAmount = Math.round(quoteData.totalFare * 100); // Convert to cents
 			
 			const bookingPayload = {
-				userId: userInfo.id,
+				userId: effectiveUserInfo.id,
 				originAddress: quoteData.origin,
 				destinationAddress: quoteData.destination,
-				scheduledPickupTime,
+				scheduledPickupTime: scheduledPickupTime.toISOString(),
 				estimatedDuration: quoteData.duration * 60, // Convert minutes to seconds
 				estimatedDistance: quoteData.distance * 1000, // Convert km to meters
 				baseFare,
@@ -189,12 +217,28 @@ export function QuoteBookingPage() {
 		}
 	};
 
-	// Show loading state while session is being established
-	if (sessionLoading) {
+	// Show loading state while session or secure quote is being loaded
+	if (sessionLoading || secureQuoteLoading) {
 		return (
 			<div className="flex justify-center items-center py-12">
 				<Loader2 className="h-8 w-8 animate-spin text-primary" />
-				<span className="ml-2 text-gray-600">Setting up session...</span>
+				<span className="ml-2 text-gray-600">
+					{sessionLoading ? "Setting up session..." : "Loading quote details..."}
+				</span>
+			</div>
+		);
+	}
+
+	// Handle secure quote errors
+	if (search?.quoteId && secureQuoteError) {
+		return (
+			<div className="text-center py-12">
+				<AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+				<h3 className="text-lg font-medium text-gray-900 mb-2">Quote Expired or Invalid</h3>
+				<p className="text-gray-600 mb-4">Your quote has expired or could not be found. Please generate a new quote to continue.</p>
+				<Button asChild>
+					<Link to="/">Get New Quote</Link>
+				</Button>
 			</div>
 		);
 	}
@@ -222,7 +266,7 @@ export function QuoteBookingPage() {
 					<div>
 						<h1 className="text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
 						<p className="text-gray-600">Your custom booking has been submitted successfully</p>
-						{userInfo?.isGuest && (
+						{(userInfo?.isGuest || !sessionData?.user) && (
 							<p className="text-sm text-blue-600 mt-2">
 								💡 Tip: Create an account to easily manage your bookings
 							</p>
@@ -327,7 +371,7 @@ export function QuoteBookingPage() {
 							Our team will review your booking and contact you within 24 hours to confirm details and assign a driver.
 						</p>
 						<div className="space-y-2">
-							{!userInfo?.isGuest ? (
+							{sessionData?.user && !userInfo?.isGuest ? (
 								<>
 									<Button className="w-full" asChild>
 										<Link to="/customer/bookings">View My Bookings</Link>
@@ -366,7 +410,7 @@ export function QuoteBookingPage() {
 					<h1 className="text-3xl font-bold text-gray-900">Complete Your Booking</h1>
 					<p className="text-gray-600">
 						Based on your instant quote
-						{userInfo?.isGuest && <span className="text-blue-600"> (Booking as guest)</span>}
+						{(userInfo?.isGuest || !sessionData?.user) && <span className="text-blue-600"> (Anonymous booking)</span>}
 					</p>
 				</div>
 			</div>

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getDistanceMatrix, calculateHaversineDistance } from "@/lib/google-maps";
 import { eq, avg, and } from "drizzle-orm";
 import { pricingConfig, cars } from "@/db/schema";
+import { storeSecureQuote, type SecureQuoteData } from "@/services/quotes/instant-quote-storage";
 
 export const CalculateInstantQuoteSchema = z.object({
 	originAddress: z.string().min(1, "Origin address is required"),
@@ -39,6 +40,10 @@ export interface InstantQuote {
 		surgePricing?: number;
 		waitingTimeCharges?: number;
 	};
+}
+
+export interface SecureInstantQuote extends InstantQuote {
+	quoteId: string; // Secure reference to stored quote
 }
 
 export async function calculateInstantQuoteService(
@@ -259,4 +264,49 @@ function calculateSurgePricing(scheduledTime: Date): number {
 	}
 	
 	return 1.0; // No surge
+}
+
+/**
+ * Calculate instant quote and store securely for booking conversion
+ * Returns quote data with secure reference ID
+ */
+export async function calculateAndStoreSecureQuote(
+	db: DB, 
+	data: CalculateInstantQuoteParams,
+	env?: { GOOGLE_MAPS_API_KEY?: string },
+	clientInfo?: { ip?: string; userAgent?: string }
+): Promise<SecureInstantQuote> {
+	// Calculate the quote using the existing service
+	const quote = await calculateInstantQuoteService(db, data, env);
+	
+	// Prepare secure quote data for storage
+	const secureQuoteData: SecureQuoteData = {
+		originAddress: data.originAddress,
+		destinationAddress: data.destinationAddress,
+		originLatitude: data.originLatitude,
+		originLongitude: data.originLongitude,
+		destinationLatitude: data.destinationLatitude,
+		destinationLongitude: data.destinationLongitude,
+		stops: data.stops,
+		carId: data.carId,
+		baseFare: quote.baseFare,
+		distanceFare: quote.distanceFare,
+		timeFare: quote.timeFare,
+		extraCharges: quote.extraCharges,
+		totalAmount: quote.totalAmount,
+		estimatedDistance: quote.estimatedDistance,
+		estimatedDuration: quote.estimatedDuration,
+		breakdown: quote.breakdown,
+		surgePricing: quote.breakdown.surgePricing,
+		scheduledPickupTime: data.scheduledPickupTime,
+	};
+	
+	// Store the quote securely and get the reference ID
+	const quoteId = await storeSecureQuote(db, secureQuoteData, clientInfo);
+	
+	// Return quote with secure reference
+	return {
+		...quote,
+		quoteId,
+	};
 }

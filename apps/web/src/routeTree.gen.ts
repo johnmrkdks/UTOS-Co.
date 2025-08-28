@@ -19,9 +19,11 @@ import { Route as CustomerLayoutRouteImport } from './routes/customer/_layout'
 import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
 import { Route as MarketingServicesRouteImport } from './routes/_marketing/services'
 import { Route as MarketingSelectVehicleRouteImport } from './routes/_marketing/select-vehicle'
+import { Route as MarketingQuoteResultsRouteImport } from './routes/_marketing/quote-results'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { Route as MarketingFaqsRouteImport } from './routes/_marketing/faqs'
 import { Route as MarketingContactUsRouteImport } from './routes/_marketing/contact-us'
+import { Route as MarketingCalculateQuoteRouteImport } from './routes/_marketing/calculate-quote'
 import { Route as MarketingBookingRouteImport } from './routes/_marketing/booking'
 import { Route as MarketingBookQuoteRouteImport } from './routes/_marketing/book-quote'
 import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-us'
@@ -119,6 +121,11 @@ const MarketingSelectVehicleRoute = MarketingSelectVehicleRouteImport.update({
   path: '/select-vehicle',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingQuoteResultsRoute = MarketingQuoteResultsRouteImport.update({
+  id: '/quote-results',
+  path: '/quote-results',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -132,6 +139,11 @@ const MarketingFaqsRoute = MarketingFaqsRouteImport.update({
 const MarketingContactUsRoute = MarketingContactUsRouteImport.update({
   id: '/contact-us',
   path: '/contact-us',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingCalculateQuoteRoute = MarketingCalculateQuoteRouteImport.update({
+  id: '/calculate-quote',
+  path: '/calculate-quote',
   getParentRoute: () => MarketingRoute,
 } as any)
 const MarketingBookingRoute = MarketingBookingRouteImport.update({
@@ -364,9 +376,11 @@ export interface FileRoutesByFullPath {
   '/about-us': typeof MarketingAboutUsRoute
   '/book-quote': typeof MarketingBookQuoteRoute
   '/booking': typeof MarketingBookingRoute
+  '/calculate-quote': typeof MarketingCalculateQuoteRoute
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
   '/privacy': typeof MarketingPrivacyRoute
+  '/quote-results': typeof MarketingQuoteResultsRoute
   '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
@@ -416,9 +430,11 @@ export interface FileRoutesByTo {
   '/about-us': typeof MarketingAboutUsRoute
   '/book-quote': typeof MarketingBookQuoteRoute
   '/booking': typeof MarketingBookingRoute
+  '/calculate-quote': typeof MarketingCalculateQuoteRoute
   '/contact-us': typeof MarketingContactUsRoute
   '/faqs': typeof MarketingFaqsRoute
   '/privacy': typeof MarketingPrivacyRoute
+  '/quote-results': typeof MarketingQuoteResultsRoute
   '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
@@ -467,9 +483,11 @@ export interface FileRoutesById {
   '/_marketing/about-us': typeof MarketingAboutUsRoute
   '/_marketing/book-quote': typeof MarketingBookQuoteRoute
   '/_marketing/booking': typeof MarketingBookingRoute
+  '/_marketing/calculate-quote': typeof MarketingCalculateQuoteRoute
   '/_marketing/contact-us': typeof MarketingContactUsRoute
   '/_marketing/faqs': typeof MarketingFaqsRoute
   '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_marketing/quote-results': typeof MarketingQuoteResultsRoute
   '/_marketing/select-vehicle': typeof MarketingSelectVehicleRoute
   '/_marketing/services': typeof MarketingServicesRoute
   '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
@@ -524,9 +542,11 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/book-quote'
     | '/booking'
+    | '/calculate-quote'
     | '/contact-us'
     | '/faqs'
     | '/privacy'
+    | '/quote-results'
     | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
@@ -576,9 +596,11 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/book-quote'
     | '/booking'
+    | '/calculate-quote'
     | '/contact-us'
     | '/faqs'
     | '/privacy'
+    | '/quote-results'
     | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
@@ -626,9 +648,11 @@ export interface FileRouteTypes {
     | '/_marketing/about-us'
     | '/_marketing/book-quote'
     | '/_marketing/booking'
+    | '/_marketing/calculate-quote'
     | '/_marketing/contact-us'
     | '/_marketing/faqs'
     | '/_marketing/privacy'
+    | '/_marketing/quote-results'
     | '/_marketing/select-vehicle'
     | '/_marketing/services'
     | '/_marketing/terms-and-conditions'
@@ -764,6 +788,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingSelectVehicleRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/quote-results': {
+      id: '/_marketing/quote-results'
+      path: '/quote-results'
+      fullPath: '/quote-results'
+      preLoaderRoute: typeof MarketingQuoteResultsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/privacy': {
       id: '/_marketing/privacy'
       path: '/privacy'
@@ -783,6 +814,13 @@ declare module '@tanstack/react-router' {
       path: '/contact-us'
       fullPath: '/contact-us'
       preLoaderRoute: typeof MarketingContactUsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/calculate-quote': {
+      id: '/_marketing/calculate-quote'
+      path: '/calculate-quote'
+      fullPath: '/calculate-quote'
+      preLoaderRoute: typeof MarketingCalculateQuoteRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/booking': {
@@ -1072,9 +1110,11 @@ interface MarketingRouteChildren {
   MarketingAboutUsRoute: typeof MarketingAboutUsRoute
   MarketingBookQuoteRoute: typeof MarketingBookQuoteRoute
   MarketingBookingRoute: typeof MarketingBookingRoute
+  MarketingCalculateQuoteRoute: typeof MarketingCalculateQuoteRoute
   MarketingContactUsRoute: typeof MarketingContactUsRoute
   MarketingFaqsRoute: typeof MarketingFaqsRoute
   MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingQuoteResultsRoute: typeof MarketingQuoteResultsRoute
   MarketingSelectVehicleRoute: typeof MarketingSelectVehicleRoute
   MarketingServicesRoute: typeof MarketingServicesRoute
   MarketingTermsAndConditionsRoute: typeof MarketingTermsAndConditionsRoute
@@ -1087,9 +1127,11 @@ const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingAboutUsRoute: MarketingAboutUsRoute,
   MarketingBookQuoteRoute: MarketingBookQuoteRoute,
   MarketingBookingRoute: MarketingBookingRoute,
+  MarketingCalculateQuoteRoute: MarketingCalculateQuoteRoute,
   MarketingContactUsRoute: MarketingContactUsRoute,
   MarketingFaqsRoute: MarketingFaqsRoute,
   MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingQuoteResultsRoute: MarketingQuoteResultsRoute,
   MarketingSelectVehicleRoute: MarketingSelectVehicleRoute,
   MarketingServicesRoute: MarketingServicesRoute,
   MarketingTermsAndConditionsRoute: MarketingTermsAndConditionsRoute,
