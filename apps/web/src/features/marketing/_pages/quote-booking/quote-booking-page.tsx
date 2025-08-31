@@ -25,10 +25,12 @@ import {
 import { toast } from "sonner";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useUnifiedUserQuery, extractUserInfo } from "@/hooks/query/use-unified-user-query";
+import { queryClient } from "@/trpc";
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
 import { useCreateCustomBookingFromQuoteMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { getOrCreateGuestSession } from "@/utils/auth";
 import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
+import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 
 // Booking form schema for quote-based booking
@@ -153,16 +155,77 @@ export function QuoteBookingPage() {
 			return;
 		}
 
-		// Session should already exist (created in widget or via authentication)
-		// For anonymous users (Better Auth anonymous plugin handles guest sessions)
-		const effectiveUserInfo = userInfo || {
-			id: sessionData?.session?.userId || sessionData?.user?.id, // Use anonymous user ID from Better Auth
-			name: formData.customerName || 'Anonymous User',
-			email: formData.customerEmail || '',
-			isGuest: !sessionData?.user, // True if anonymous, false if authenticated
-		};
+		// Handle guest booking - create anonymous session at booking confirmation time
+		let effectiveUserInfo = userInfo;
+		
+		if (!sessionData?.user) {
+			// User is not authenticated - create anonymous session with passenger information
+			try {
+				console.log("🔐 Creating anonymous session...");
+				// Better Auth anonymous plugin - create basic anonymous session first
+				const anonymousSession = await authClient.signIn.anonymous();
+				
+				console.log("✅ Anonymous session created:", JSON.stringify(anonymousSession, null, 2));
+				
+				// Check what cookies are set after anonymous sign-in
+				console.log("🍪 Current cookies:", document.cookie);
+				
+				// Check if Better Auth set any session headers
+				console.log("📄 Session token:", anonymousSession.token || anonymousSession.sessionToken);
+				
+				// Extract userId from various possible locations in the anonymous session
+				const userId = anonymousSession.user?.id || 
+							  anonymousSession.session?.userId || 
+							  anonymousSession.data?.user?.id ||
+							  anonymousSession.data?.session?.userId ||
+							  anonymousSession.userId;
+				
+				if (!userId) {
+					console.error("❌ No userId found in anonymous session:", anonymousSession);
+					toast.error("Failed to create guest session. Please try again.");
+					return;
+				}
+				
+				effectiveUserInfo = {
+					id: userId,
+					name: formData.customerName!,
+					email: formData.customerEmail!,
+					isGuest: true,
+				};
+				
+				console.log("✅ Extracted userId:", userId);
+				
+				// Force refresh the user session to ensure backend has the new session
+				console.log("🔄 Refreshing user session...");
+				queryClient.invalidateQueries({ queryKey: ["user"] });
+				
+				// Wait a moment for the session to be established server-side
+				console.log("⏳ Waiting for session to be established...");
+				await new Promise(resolve => setTimeout(resolve, 1500));
+				
+			} catch (error) {
+				console.error("❌ Failed to create anonymous session:", error);
+				toast.error("Failed to create guest session. Please try again.");
+				return;
+			}
+		} else {
+			// User is authenticated - use existing session
+			effectiveUserInfo = userInfo || {
+				id: sessionData.user.id,
+				name: sessionData.user.name || formData.customerName || 'User',
+				email: sessionData.user.email || formData.customerEmail || '',
+				isGuest: false,
+			};
+		}
 
 		console.log("👤 Effective user info for booking:", effectiveUserInfo);
+
+		// Final validation to ensure we have a valid userId
+		if (!effectiveUserInfo?.id) {
+			console.error("❌ No valid userId available for booking");
+			toast.error("Authentication error. Please try again.");
+			return;
+		}
 
 		if (!quoteData.origin || !quoteData.destination) {
 			toast.error("Quote information is missing. Please start a new quote.");

@@ -78,21 +78,14 @@ export function QuoteResultsPage() {
 	const selectedCar = quote?.carId && carsData?.data ? 
 		carsData.data.find(car => car.id === quote.carId) : null;
 
-	const handleBookAsGuest = async () => {
+	const handleBookAsGuest = () => {
 		if (!quote) return;
 		
-		try {
-			console.log("🔐 Creating anonymous session for guest booking...");
-			const anonymousUser = await authClient.signIn.anonymous();
-			console.log("✅ Anonymous session created:", anonymousUser);
-			
-			navigate({
-				to: "/book-quote",
-				search: { quoteId: search.quoteId }
-			});
-		} catch (error) {
-			console.error("❌ Failed to create anonymous session:", error);
-		}
+		// Navigate directly to booking page - anonymous session will be created on confirm booking
+		navigate({
+			to: "/book-quote",
+			search: { quoteId: search.quoteId }
+		});
 	};
 
 	const handleBookAuthenticated = () => {

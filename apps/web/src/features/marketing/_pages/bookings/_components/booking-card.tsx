@@ -10,16 +10,14 @@ import { Badge } from "@workspace/ui/components/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import placeHolder from "@/assets/placeholder.svg";
 import { Check, Crown, Users, Clock } from "lucide-react";
+import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
+import { Link } from "@tanstack/react-router";
 
 export type BookingProps = {
+	id: string; // Add carId for pricing lookup
 	model: string;
 	description: string;
 	features: string[];
-	pricing: {
-		airport: string;
-		hourly: string;
-		minimum: string;
-	};
 	image?: string;
 	popular?: boolean;
 }
@@ -29,10 +27,10 @@ type BookingCardProps = BookingProps & {
 };
 
 export function BookingCard({
+	id,
 	model,
 	description,
 	features,
-	pricing,
 	image,
 	popular,
 	className,
@@ -79,24 +77,20 @@ export function BookingCard({
 					</div>
 				</div>
 				
-				{/* Pricing */}
+				{/* Dynamic Pricing */}
 				<div className="bg-beige/50 rounded-lg p-4 space-y-3">
-					<h4 className="font-semibold text-foreground text-sm mb-3">Pricing:</h4>
-					<div className="space-y-2">
-						<div className="flex justify-between items-center">
-							<span className="text-muted-foreground text-sm">Airport Transfer:</span>
-							<span className="font-bold text-primary">{pricing.airport}</span>
-						</div>
-						<div className="flex justify-between items-center">
-							<span className="text-muted-foreground text-sm">Hourly Rate:</span>
-							<span className="font-bold text-primary">{pricing.hourly}</span>
-						</div>
-						<div className="flex justify-between items-center">
-							<span className="text-muted-foreground text-sm flex items-center gap-1">
-								<Clock className="w-3 h-3" />
-								Minimum:
-							</span>
-							<span className="font-medium text-foreground text-sm">{pricing.minimum}</span>
+					<h4 className="font-semibold text-foreground text-sm mb-3">Starting From:</h4>
+					<div className="flex justify-center">
+						<CarPriceDisplay 
+							carId={id}
+							variant="card"
+							className="text-center"
+						/>
+					</div>
+					<div className="text-center">
+						<div className="flex justify-center items-center gap-1 text-muted-foreground text-xs">
+							<Clock className="w-3 h-3" />
+							<span>2 hour minimum booking</span>
 						</div>
 					</div>
 				</div>
@@ -104,18 +98,22 @@ export function BookingCard({
 			
 			<CardFooter className="pt-6">
 				<div className="w-full space-y-3">
-					<Button 
-						className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-						size="lg"
-					>
-						Book Now
-					</Button>
-					<Button 
-						variant="outline"
-						className="w-full border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary py-3 text-sm font-medium rounded-lg"
-					>
-						Get Quote
-					</Button>
+					<Link to="/" search={{ directBooking: true, carId: id }}>
+						<Button 
+							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+							size="lg"
+						>
+							Book Now
+						</Button>
+					</Link>
+					<Link to="/">
+						<Button 
+							variant="outline"
+							className="w-full border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary py-3 text-sm font-medium rounded-lg"
+						>
+							Get Quote
+						</Button>
+					</Link>
 				</div>
 			</CardFooter>
 		</Card>

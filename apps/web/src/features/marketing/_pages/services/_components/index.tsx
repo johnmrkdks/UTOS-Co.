@@ -3,6 +3,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useGetPublishedPackagesQuery } from "../_hooks/query/use-get-published-packages-query";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
+import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
 import {
 	Plane,
 	Building,
@@ -286,6 +287,15 @@ export function Services({ className, ...props }: ServicesProps) {
 												{vehicle.passengers}
 											</div>
 										</div>
+									</div>
+									
+									{/* Transparent Pricing */}
+									<div className="mb-4 p-3 bg-muted/50 rounded-lg">
+										<CarPriceDisplay 
+											carId={vehicle.id}
+											variant="card"
+											className="text-center"
+										/>
 									</div>
 									
 									<Link to="/book-car/$carId" params={{ carId: vehicle.id }}>

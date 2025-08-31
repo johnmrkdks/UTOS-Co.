@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 import { BookingCard } from "./booking-card";
 import { Link } from "@tanstack/react-router";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
+import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
 import {
 	Car,
 	Calendar,
@@ -53,6 +54,7 @@ export function Booking({ className, ...props }: BookingProps) {
 	});
 
 	const bookingCards = carsData?.data?.map((car: any, index: number) => ({
+		id: car.id, // Add carId for pricing lookup
 		model: car.name,
 		description: car.description,
 		features: [
@@ -61,11 +63,6 @@ export function Booking({ className, ...props }: BookingProps) {
 			car.fuelType?.name || "Premium fuel",
 			car.transmissionType?.name || "Automatic"
 		].filter(Boolean),
-		pricing: {
-			airport: "Contact for pricing",
-			hourly: "Contact for pricing", 
-			minimum: "2 hours"
-		},
 		image: car.images?.find((img: any) => img.isMain)?.url || "placeholder.svg",
 		popular: index === 1 // Mark second car as popular
 	})) || [];

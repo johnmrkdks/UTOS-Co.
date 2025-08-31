@@ -9,6 +9,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { Separator } from "@workspace/ui/components/separator"
 import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query"
+import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display"
 
 export const Route = createFileRoute("/customer/_layout/cars")({
 	component: CustomerCarsPage,
@@ -277,6 +278,16 @@ function CarCard({
 						)}
 					</div>
 				)}
+
+				{/* Transparent Pricing */}
+				<div className="bg-muted/50 rounded-lg p-3 text-center">
+					<div className="text-xs font-medium text-muted-foreground mb-1">Starting from</div>
+					<CarPriceDisplay 
+						carId={car.id}
+						variant="card"
+						className="justify-center"
+					/>
+				</div>
 
 				<Separator />
 
