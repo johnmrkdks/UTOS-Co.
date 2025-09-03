@@ -12,6 +12,7 @@ import placeHolder from "@/assets/placeholder.svg";
 import { Check, Crown, Users, Clock } from "lucide-react";
 import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
 import { Link } from "@tanstack/react-router";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 
 export type BookingProps = {
 	id: string; // Add carId for pricing lookup
@@ -36,6 +37,7 @@ export function BookingCard({
 	className,
 	...props
 }: BookingCardProps) {
+	const { session } = useUserQuery();
 	return (
 		<Card className={cn(
 			"relative bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group",
@@ -98,14 +100,27 @@ export function BookingCard({
 			
 			<CardFooter className="pt-6">
 				<div className="w-full space-y-3">
-					<Link to="/" search={{ directBooking: true, carId: id }}>
-						<Button 
-							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-							size="lg"
-						>
-							Book Now
-						</Button>
-					</Link>
+					{session?.user ? (
+						// Authenticated user: route to customer instant quote with pre-selected car
+						<Link to="/customer/instant-quote" search={{ selectedCarId: id }}>
+							<Button 
+								className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+								size="lg"
+							>
+								Book Now
+							</Button>
+						</Link>
+					) : (
+						// Guest user: use existing public flow
+						<Link to="/" search={{ directBooking: true, carId: id }}>
+							<Button 
+								className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+								size="lg"
+							>
+								Book Now
+							</Button>
+						</Link>
+					)}
 					<Link to="/">
 						<Button 
 							variant="outline"

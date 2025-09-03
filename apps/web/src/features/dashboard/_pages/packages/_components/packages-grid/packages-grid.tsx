@@ -67,9 +67,9 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 				data: {
 					name: pkg.name,
 					description: pkg.description,
-					pricePerDay: pkg.fixedPrice / 100, // Convert from cents for the API
+					fixedPrice: pkg.fixedPrice, // Keep price in cents
 					isAvailable: !pkg.isAvailable,
-					isPublished: false, // Default value
+					isPublished: pkg.isPublished ?? false,
 				}
 			});
 		} catch (error) {

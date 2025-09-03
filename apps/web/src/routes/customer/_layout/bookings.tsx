@@ -7,8 +7,9 @@ import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-ca
 import { Calendar, Package, Car, Clock, MapPin, Users, Loader2, CheckCircle, AlertTriangle, ArrowRightIcon } from "lucide-react";
 import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-bookings-query";
 import { useUnifiedUserQuery, extractUserInfo } from "@/hooks/query/use-unified-user-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import { BookingDetailsModal } from "@/features/customer/_components/booking-details-modal";
 
 export const Route = createFileRoute("/customer/_layout/bookings")({
 	component: CustomerBookingsPage,
@@ -23,6 +24,18 @@ function CustomerBookingsPage() {
 	});
 
 	const bookings = bookingsData?.data || [];
+	const [selectedBooking, setSelectedBooking] = useState<any>(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const handleViewDetails = (booking: any) => {
+		setSelectedBooking(booking);
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+		setSelectedBooking(null);
+	};
 
 	// Helper functions
 	const formatPrice = (priceInCents: number) => `$${(priceInCents / 100).toFixed(0)}`;
@@ -227,6 +240,7 @@ function CustomerBookingsPage() {
 																variant="ghost"
 																size="sm"
 																className="text-primary hover:text-primary/80 self-start sm:self-auto"
+																onClick={() => handleViewDetails(booking)}
 															>
 																<span className="hidden sm:inline">View Details</span>
 																<span className="sm:hidden">Details</span>
@@ -289,6 +303,13 @@ function CustomerBookingsPage() {
 					</div>
 				</>
 			)}
+
+			{/* Booking Details Modal */}
+			<BookingDetailsModal
+				booking={selectedBooking}
+				isOpen={isModalOpen}
+				onClose={handleCloseModal}
+			/>
 		</div>
 	);
 }

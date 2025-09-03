@@ -30,6 +30,10 @@ export function InstantQuoteWidget() {
 	
 	const availabilityQuery = useCheckInstantQuoteAvailabilityQuery()
 
+	// Show special UI for direct booking from /booking page (car already selected)
+	// but still need to collect route information
+	const isDirectBooking = search.directBooking === "true" && search.carId;
+
 	const form = useForm({
 		resolver: zodResolver(instantQuoteSchema),
 		defaultValues: {
@@ -97,10 +101,20 @@ export function InstantQuoteWidget() {
 			params.set("stops", JSON.stringify(formData.stops));
 		}
 
-		navigate({ 
-			to: "/select-vehicle", 
-			search: Object.fromEntries(params) 
-		});
+		if (isDirectBooking) {
+			// Direct booking from /booking - car already selected, go directly to calculate quote (public route)
+			params.set("selectedCarId", search.carId);
+			navigate({ 
+				to: "/calculate-quote", 
+				search: Object.fromEntries(params) 
+			});
+		} else {
+			// Normal flow - need to select vehicle first
+			navigate({ 
+				to: "/select-vehicle", 
+				search: Object.fromEntries(params) 
+			});
+		}
 	}
 
 	// Removed unused functions since we're using a simplified flow

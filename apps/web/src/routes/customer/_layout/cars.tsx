@@ -58,7 +58,13 @@ function CustomerCarsPage() {
 	})
 
 	const handleBookAppointment = (car: any) => {
-		navigate({ to: "/customer/book-appointment/$carId", params: { carId: car.id } })
+		// Navigate to customer instant quote to collect route information
+		navigate({ 
+			to: "/customer/instant-quote",
+			search: { 
+				selectedCarId: car.id
+			} 
+		})
 	}
 
 	const handleViewDetails = (car: any) => {

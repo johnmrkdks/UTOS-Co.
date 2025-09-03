@@ -59,7 +59,7 @@ export const instantQuoteRouter = router({
 						stops: input.stops || [],
 						carId: input.carId,
 					},
-					expiresAt: Date.now() + (30 * 60 * 1000) // 30 minutes
+					expiresAt: Date.now() + (2 * 60 * 60 * 1000) // 2 hours
 				});
 				
 				// Return quote with secure ID

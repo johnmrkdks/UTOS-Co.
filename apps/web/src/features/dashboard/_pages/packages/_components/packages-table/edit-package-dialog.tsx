@@ -21,7 +21,7 @@ import { Loader2 } from "lucide-react";
 const editPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
 	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
-	pricePerDay: z.number().min(0, "Price must be positive"),
+	fixedPrice: z.number().min(0, "Price must be positive"),
 	isAvailable: z.boolean(),
 	isPublished: z.boolean(),
 });
@@ -43,7 +43,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 		defaultValues: {
 			name: pkg?.name || "",
 			description: pkg?.description || "",
-			pricePerDay: pkg?.pricePerDay || 0,
+			fixedPrice: pkg?.fixedPrice ? pkg.fixedPrice / 100 : 0, // Convert from cents to dollars for display
 			isAvailable: pkg?.isAvailable ?? true,
 			isPublished: pkg?.isPublished ?? false,
 		},
@@ -56,7 +56,10 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 		try {
 			await updatePackageMutation.mutateAsync({
 				id: pkg.id,
-				data: data,
+				data: {
+					...data,
+					fixedPrice: Math.round(data.fixedPrice * 100), // Convert from dollars to cents for backend
+				},
 			});
 			onOpenChange(false);
 		} catch (error) {
@@ -116,10 +119,10 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 
 								<FormField
 									control={form.control}
-									name="pricePerDay"
+									name="fixedPrice"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Price Per Day (AUD)</FormLabel>
+											<FormLabel>Fixed Price (AUD)</FormLabel>
 											<FormControl>
 												<Input
 													type="number"

@@ -46,7 +46,12 @@ const QuoteBookingFormSchema = z.object({
 
 type QuoteBookingFormData = z.infer<typeof QuoteBookingFormSchema>;
 
-export function QuoteBookingPage() {
+interface QuoteBookingPageProps {
+	isCustomerArea?: boolean;
+	pathQuoteId?: string; // For customer routes that use path parameters
+}
+
+export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteBookingPageProps) {
 	const search = useSearch({ strict: false }) as any;
 	const navigate = useNavigate();
 	
@@ -57,22 +62,36 @@ export function QuoteBookingPage() {
 	// Fetch available cars
 	const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAvailableCarsQuery();
 	
+	// Get quote ID from either path parameter (customer routes) or search parameter (public routes)
+	const quoteId = pathQuoteId || search?.quoteId || "";
+	
 	// Fetch secure quote if quoteId is provided
 	const { data: secureQuoteData, isLoading: secureQuoteLoading, error: secureQuoteError } = useGetSecureQuoteQuery(
-		search?.quoteId || "",
-		{ enabled: !!search?.quoteId }
+		quoteId,
+		{ enabled: !!quoteId }
 	);
 	
 	// Mutation for creating booking from quote
 	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
 	
-	// Form state - let users fill their own information
+	// Form state - pre-populate for authenticated users
 	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({
 		passengerCount: 1,
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
 	const [selectedCarId, setSelectedCarId] = useState<string>("");
+
+	// Pre-populate form data for authenticated users
+	useEffect(() => {
+		if (sessionData?.user && isCustomerArea) {
+			setFormData(prev => ({
+				...prev,
+				customerName: sessionData.user.name || "",
+				customerEmail: sessionData.user.email || "",
+			}));
+		}
+	}, [sessionData, isCustomerArea]);
 
 	// Extract quote data - prioritize secure quote, fallback to URL params
 	const quoteData = secureQuoteData ? {
@@ -756,7 +775,10 @@ export function QuoteBookingPage() {
 								) : (
 									<>
 										<Package className="h-4 w-4" />
-										Confirm Booking
+										{sessionData?.user && !userInfo?.isGuest && isCustomerArea
+											? "Book"
+											: "Confirm Booking"
+										}
 									</>
 								)}
 							</Button>

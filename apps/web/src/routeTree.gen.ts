@@ -37,8 +37,11 @@ import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layou
 import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
 import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
 import { Route as CustomerLayoutServicesRouteImport } from './routes/customer/_layout/services'
+import { Route as CustomerLayoutQuoteResultsRouteImport } from './routes/customer/_layout/quote-results'
 import { Route as CustomerLayoutProfileRouteImport } from './routes/customer/_layout/profile'
+import { Route as CustomerLayoutInstantQuoteRouteImport } from './routes/customer/_layout/instant-quote'
 import { Route as CustomerLayoutCarsRouteImport } from './routes/customer/_layout/cars'
+import { Route as CustomerLayoutCalculateQuoteRouteImport } from './routes/customer/_layout/calculate-quote'
 import { Route as CustomerLayoutBookingsRouteImport } from './routes/customer/_layout/bookings'
 import { Route as CustomerLayoutBookAppointmentRouteImport } from './routes/customer/_layout/book-appointment'
 import { Route as MarketingBookServiceServiceIdRouteImport } from './routes/_marketing/book-service.$serviceId'
@@ -62,6 +65,7 @@ import { Route as DashboardLayoutDriversOnboardingRouteImport } from './routes/d
 import { Route as DashboardLayoutCarsAddCarRouteImport } from './routes/dashboard/_layout/cars/add-car'
 import { Route as CustomerLayoutCarDetailsCarIdRouteImport } from './routes/customer/_layout/car-details.$carId'
 import { Route as CustomerLayoutBookServiceServiceIdRouteImport } from './routes/customer/_layout/book-service/$serviceId'
+import { Route as CustomerLayoutBookQuoteQuoteIdRouteImport } from './routes/customer/_layout/book-quote.$quoteId'
 import { Route as CustomerLayoutBookAppointmentCarIdRouteImport } from './routes/customer/_layout/book-appointment.$carId'
 import { Route as CustomerLayoutAccountSettingsRouteImport } from './routes/customer/_layout/account/settings'
 
@@ -211,16 +215,34 @@ const CustomerLayoutServicesRoute = CustomerLayoutServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => CustomerLayoutRoute,
 } as any)
+const CustomerLayoutQuoteResultsRoute =
+  CustomerLayoutQuoteResultsRouteImport.update({
+    id: '/quote-results',
+    path: '/quote-results',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 const CustomerLayoutProfileRoute = CustomerLayoutProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => CustomerLayoutRoute,
 } as any)
+const CustomerLayoutInstantQuoteRoute =
+  CustomerLayoutInstantQuoteRouteImport.update({
+    id: '/instant-quote',
+    path: '/instant-quote',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 const CustomerLayoutCarsRoute = CustomerLayoutCarsRouteImport.update({
   id: '/cars',
   path: '/cars',
   getParentRoute: () => CustomerLayoutRoute,
 } as any)
+const CustomerLayoutCalculateQuoteRoute =
+  CustomerLayoutCalculateQuoteRouteImport.update({
+    id: '/calculate-quote',
+    path: '/calculate-quote',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 const CustomerLayoutBookingsRoute = CustomerLayoutBookingsRouteImport.update({
   id: '/bookings',
   path: '/bookings',
@@ -357,6 +379,12 @@ const CustomerLayoutBookServiceServiceIdRoute =
     path: '/book-service/$serviceId',
     getParentRoute: () => CustomerLayoutRoute,
   } as any)
+const CustomerLayoutBookQuoteQuoteIdRoute =
+  CustomerLayoutBookQuoteQuoteIdRouteImport.update({
+    id: '/book-quote/$quoteId',
+    path: '/book-quote/$quoteId',
+    getParentRoute: () => CustomerLayoutRoute,
+  } as any)
 const CustomerLayoutBookAppointmentCarIdRoute =
   CustomerLayoutBookAppointmentCarIdRouteImport.update({
     id: '/$carId',
@@ -392,8 +420,11 @@ export interface FileRoutesByFullPath {
   '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
   '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/bookings': typeof CustomerLayoutBookingsRoute
+  '/customer/calculate-quote': typeof CustomerLayoutCalculateQuoteRoute
   '/customer/cars': typeof CustomerLayoutCarsRoute
+  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
   '/customer/profile': typeof CustomerLayoutProfileRoute
+  '/customer/quote-results': typeof CustomerLayoutQuoteResultsRoute
   '/customer/services': typeof CustomerLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
@@ -404,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/driver/': typeof DriverLayoutIndexRoute
   '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
   '/customer/book-appointment/$carId': typeof CustomerLayoutBookAppointmentCarIdRoute
+  '/customer/book-quote/$quoteId': typeof CustomerLayoutBookQuoteQuoteIdRoute
   '/customer/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
   '/customer/car-details/$carId': typeof CustomerLayoutCarDetailsCarIdRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
@@ -446,8 +478,11 @@ export interface FileRoutesByTo {
   '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
   '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/bookings': typeof CustomerLayoutBookingsRoute
+  '/customer/calculate-quote': typeof CustomerLayoutCalculateQuoteRoute
   '/customer/cars': typeof CustomerLayoutCarsRoute
+  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
   '/customer/profile': typeof CustomerLayoutProfileRoute
+  '/customer/quote-results': typeof CustomerLayoutQuoteResultsRoute
   '/customer/services': typeof CustomerLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
@@ -455,6 +490,7 @@ export interface FileRoutesByTo {
   '/driver/trips': typeof DriverLayoutTripsRoute
   '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
   '/customer/book-appointment/$carId': typeof CustomerLayoutBookAppointmentCarIdRoute
+  '/customer/book-quote/$quoteId': typeof CustomerLayoutBookQuoteQuoteIdRoute
   '/customer/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
   '/customer/car-details/$carId': typeof CustomerLayoutCarDetailsCarIdRoute
   '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
@@ -502,8 +538,11 @@ export interface FileRoutesById {
   '/_marketing/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
   '/customer/_layout/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
   '/customer/_layout/bookings': typeof CustomerLayoutBookingsRoute
+  '/customer/_layout/calculate-quote': typeof CustomerLayoutCalculateQuoteRoute
   '/customer/_layout/cars': typeof CustomerLayoutCarsRoute
+  '/customer/_layout/instant-quote': typeof CustomerLayoutInstantQuoteRoute
   '/customer/_layout/profile': typeof CustomerLayoutProfileRoute
+  '/customer/_layout/quote-results': typeof CustomerLayoutQuoteResultsRoute
   '/customer/_layout/services': typeof CustomerLayoutServicesRoute
   '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/_layout/profile': typeof DriverLayoutProfileRoute
@@ -514,6 +553,7 @@ export interface FileRoutesById {
   '/driver/_layout/': typeof DriverLayoutIndexRoute
   '/customer/_layout/account/settings': typeof CustomerLayoutAccountSettingsRoute
   '/customer/_layout/book-appointment/$carId': typeof CustomerLayoutBookAppointmentCarIdRoute
+  '/customer/_layout/book-quote/$quoteId': typeof CustomerLayoutBookQuoteQuoteIdRoute
   '/customer/_layout/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
   '/customer/_layout/car-details/$carId': typeof CustomerLayoutCarDetailsCarIdRoute
   '/dashboard/_layout/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
@@ -558,8 +598,11 @@ export interface FileRouteTypes {
     | '/book-service/$serviceId'
     | '/customer/book-appointment'
     | '/customer/bookings'
+    | '/customer/calculate-quote'
     | '/customer/cars'
+    | '/customer/instant-quote'
     | '/customer/profile'
+    | '/customer/quote-results'
     | '/customer/services'
     | '/driver/onboarding'
     | '/driver/profile'
@@ -570,6 +613,7 @@ export interface FileRouteTypes {
     | '/driver/'
     | '/customer/account/settings'
     | '/customer/book-appointment/$carId'
+    | '/customer/book-quote/$quoteId'
     | '/customer/book-service/$serviceId'
     | '/customer/car-details/$carId'
     | '/dashboard/cars/add-car'
@@ -612,8 +656,11 @@ export interface FileRouteTypes {
     | '/book-service/$serviceId'
     | '/customer/book-appointment'
     | '/customer/bookings'
+    | '/customer/calculate-quote'
     | '/customer/cars'
+    | '/customer/instant-quote'
     | '/customer/profile'
+    | '/customer/quote-results'
     | '/customer/services'
     | '/driver/onboarding'
     | '/driver/profile'
@@ -621,6 +668,7 @@ export interface FileRouteTypes {
     | '/driver/trips'
     | '/customer/account/settings'
     | '/customer/book-appointment/$carId'
+    | '/customer/book-quote/$quoteId'
     | '/customer/book-service/$serviceId'
     | '/customer/car-details/$carId'
     | '/dashboard/cars/add-car'
@@ -667,8 +715,11 @@ export interface FileRouteTypes {
     | '/_marketing/book-service/$serviceId'
     | '/customer/_layout/book-appointment'
     | '/customer/_layout/bookings'
+    | '/customer/_layout/calculate-quote'
     | '/customer/_layout/cars'
+    | '/customer/_layout/instant-quote'
     | '/customer/_layout/profile'
+    | '/customer/_layout/quote-results'
     | '/customer/_layout/services'
     | '/driver/_layout/onboarding'
     | '/driver/_layout/profile'
@@ -679,6 +730,7 @@ export interface FileRouteTypes {
     | '/driver/_layout/'
     | '/customer/_layout/account/settings'
     | '/customer/_layout/book-appointment/$carId'
+    | '/customer/_layout/book-quote/$quoteId'
     | '/customer/_layout/book-service/$serviceId'
     | '/customer/_layout/car-details/$carId'
     | '/dashboard/_layout/cars/add-car'
@@ -914,6 +966,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLayoutServicesRouteImport
       parentRoute: typeof CustomerLayoutRoute
     }
+    '/customer/_layout/quote-results': {
+      id: '/customer/_layout/quote-results'
+      path: '/quote-results'
+      fullPath: '/customer/quote-results'
+      preLoaderRoute: typeof CustomerLayoutQuoteResultsRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
     '/customer/_layout/profile': {
       id: '/customer/_layout/profile'
       path: '/profile'
@@ -921,11 +980,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLayoutProfileRouteImport
       parentRoute: typeof CustomerLayoutRoute
     }
+    '/customer/_layout/instant-quote': {
+      id: '/customer/_layout/instant-quote'
+      path: '/instant-quote'
+      fullPath: '/customer/instant-quote'
+      preLoaderRoute: typeof CustomerLayoutInstantQuoteRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
     '/customer/_layout/cars': {
       id: '/customer/_layout/cars'
       path: '/cars'
       fullPath: '/customer/cars'
       preLoaderRoute: typeof CustomerLayoutCarsRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
+    '/customer/_layout/calculate-quote': {
+      id: '/customer/_layout/calculate-quote'
+      path: '/calculate-quote'
+      fullPath: '/customer/calculate-quote'
+      preLoaderRoute: typeof CustomerLayoutCalculateQuoteRouteImport
       parentRoute: typeof CustomerLayoutRoute
     }
     '/customer/_layout/bookings': {
@@ -1089,6 +1162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerLayoutBookServiceServiceIdRouteImport
       parentRoute: typeof CustomerLayoutRoute
     }
+    '/customer/_layout/book-quote/$quoteId': {
+      id: '/customer/_layout/book-quote/$quoteId'
+      path: '/book-quote/$quoteId'
+      fullPath: '/customer/book-quote/$quoteId'
+      preLoaderRoute: typeof CustomerLayoutBookQuoteQuoteIdRouteImport
+      parentRoute: typeof CustomerLayoutRoute
+    }
     '/customer/_layout/book-appointment/$carId': {
       id: '/customer/_layout/book-appointment/$carId'
       path: '/$carId'
@@ -1162,11 +1242,15 @@ const CustomerLayoutBookAppointmentRouteWithChildren =
 interface CustomerLayoutRouteChildren {
   CustomerLayoutBookAppointmentRoute: typeof CustomerLayoutBookAppointmentRouteWithChildren
   CustomerLayoutBookingsRoute: typeof CustomerLayoutBookingsRoute
+  CustomerLayoutCalculateQuoteRoute: typeof CustomerLayoutCalculateQuoteRoute
   CustomerLayoutCarsRoute: typeof CustomerLayoutCarsRoute
+  CustomerLayoutInstantQuoteRoute: typeof CustomerLayoutInstantQuoteRoute
   CustomerLayoutProfileRoute: typeof CustomerLayoutProfileRoute
+  CustomerLayoutQuoteResultsRoute: typeof CustomerLayoutQuoteResultsRoute
   CustomerLayoutServicesRoute: typeof CustomerLayoutServicesRoute
   CustomerLayoutIndexRoute: typeof CustomerLayoutIndexRoute
   CustomerLayoutAccountSettingsRoute: typeof CustomerLayoutAccountSettingsRoute
+  CustomerLayoutBookQuoteQuoteIdRoute: typeof CustomerLayoutBookQuoteQuoteIdRoute
   CustomerLayoutBookServiceServiceIdRoute: typeof CustomerLayoutBookServiceServiceIdRoute
   CustomerLayoutCarDetailsCarIdRoute: typeof CustomerLayoutCarDetailsCarIdRoute
 }
@@ -1175,11 +1259,15 @@ const CustomerLayoutRouteChildren: CustomerLayoutRouteChildren = {
   CustomerLayoutBookAppointmentRoute:
     CustomerLayoutBookAppointmentRouteWithChildren,
   CustomerLayoutBookingsRoute: CustomerLayoutBookingsRoute,
+  CustomerLayoutCalculateQuoteRoute: CustomerLayoutCalculateQuoteRoute,
   CustomerLayoutCarsRoute: CustomerLayoutCarsRoute,
+  CustomerLayoutInstantQuoteRoute: CustomerLayoutInstantQuoteRoute,
   CustomerLayoutProfileRoute: CustomerLayoutProfileRoute,
+  CustomerLayoutQuoteResultsRoute: CustomerLayoutQuoteResultsRoute,
   CustomerLayoutServicesRoute: CustomerLayoutServicesRoute,
   CustomerLayoutIndexRoute: CustomerLayoutIndexRoute,
   CustomerLayoutAccountSettingsRoute: CustomerLayoutAccountSettingsRoute,
+  CustomerLayoutBookQuoteQuoteIdRoute: CustomerLayoutBookQuoteQuoteIdRoute,
   CustomerLayoutBookServiceServiceIdRoute:
     CustomerLayoutBookServiceServiceIdRoute,
   CustomerLayoutCarDetailsCarIdRoute: CustomerLayoutCarDetailsCarIdRoute,

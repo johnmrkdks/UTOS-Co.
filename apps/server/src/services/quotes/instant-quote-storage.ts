@@ -72,7 +72,7 @@ export async function storeSecureQuote(
 	clientInfo?: { ip?: string; userAgent?: string }
 ): Promise<string> {
 	const quoteId = createId();
-	const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+	const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
 	
 	await db.insert(instantQuotes).values({
 		id: quoteId,

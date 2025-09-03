@@ -15,5 +15,5 @@ const calculateQuoteSearchSchema = z.object({
 
 export const Route = createFileRoute("/_marketing/calculate-quote")({
 	validateSearch: calculateQuoteSearchSchema,
-	component: CalculateQuotePage,
+	component: () => <CalculateQuotePage isCustomerArea={false} />,
 });

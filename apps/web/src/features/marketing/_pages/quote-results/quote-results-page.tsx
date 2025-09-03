@@ -43,9 +43,13 @@ interface QuoteResult {
 	stops?: Array<{ address: string }>
 }
 
-export function QuoteResultsPage() {
+interface QuoteResultsPageProps {
+	isCustomerArea?: boolean;
+}
+
+export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPageProps) {
 	const navigate = useNavigate();
-	const search = useSearch({ from: "/_marketing/quote-results" });
+	const search = useSearch({ strict: false }) as any;
 	const [showBreakdown, setShowBreakdown] = useState(false);
 	const [quote, setQuote] = useState<QuoteResult | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +86,7 @@ export function QuoteResultsPage() {
 		if (!quote) return;
 		
 		// Navigate directly to booking page - anonymous session will be created on confirm booking
+		// Guest users always use the public route, not the customer area
 		navigate({
 			to: "/book-quote",
 			search: { quoteId: search.quoteId }
@@ -92,18 +97,32 @@ export function QuoteResultsPage() {
 		if (!quote) return;
 		
 		if (session?.user) {
-			// User is authenticated, proceed to booking
-			navigate({
-				to: "/book-quote",
-				search: { quoteId: search.quoteId }
-			});
+			// User is authenticated, check if from customer area
+			const isFromCustomerArea = search.fromCustomerArea === "true";
+			
+			if (isFromCustomerArea) {
+				// Customer area uses path parameter
+				navigate({
+					to: "/customer/book-quote/$quoteId",
+					params: { quoteId: search.quoteId }
+				});
+			} else {
+				// Public route uses search parameter
+				navigate({
+					to: "/book-quote",
+					search: { quoteId: search.quoteId }
+				});
+			}
 		} else {
 			// User not authenticated, redirect to sign-in
+			const isFromCustomerArea = search.fromCustomerArea === "true";
+			const redirectPath = isFromCustomerArea 
+				? `/customer/book-quote/${search.quoteId}`
+				: `/book-quote?quoteId=${search.quoteId}`;
+				
 			navigate({
 				to: "/sign-in",
-				search: {
-					redirect: `/book-quote?quoteId=${search.quoteId}` 
-				}
+				search: { redirect: redirectPath }
 			});
 		}
 	};
@@ -405,7 +424,7 @@ export function QuoteResultsPage() {
 								onClick={handleBookAuthenticated}
 								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
 							>
-								Book with Account
+								Book
 								<LogIn className="ml-2 h-5 w-5" />
 							</Button>
 						) : (

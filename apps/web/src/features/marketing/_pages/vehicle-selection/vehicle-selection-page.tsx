@@ -24,7 +24,7 @@ import {
 export function VehicleSelectionPage() {
 	const navigate = useNavigate();
 	const search = useSearch({ from: "/_marketing/select-vehicle" });
-	const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
+	const [selectedCarId, setSelectedCarId] = useState<string | null>(search.selectedCarId || null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
@@ -57,9 +57,15 @@ export function VehicleSelectionPage() {
 		if (search.destinationLat) params.set("destinationLat", search.destinationLat);
 		if (search.destinationLng) params.set("destinationLng", search.destinationLng);
 		if (search.stops) params.set("stops", search.stops);
+		if (search.fromCustomerArea) params.set("fromCustomerArea", search.fromCustomerArea);
 
+		// Use customer route if coming from customer area
+		const calculateQuotePath = search.fromCustomerArea === "true" 
+			? "/customer/calculate-quote" 
+			: "/calculate-quote";
+		
 		navigate({ 
-			to: "/calculate-quote", 
+			to: calculateQuotePath, 
 			search: Object.fromEntries(params) as any
 		});
 	};
@@ -76,11 +82,13 @@ export function VehicleSelectionPage() {
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => navigate({ to: "/" })}
+								onClick={() => navigate({ 
+									to: search.fromCustomerArea ? "/customer/cars" : "/" 
+								})}
 								className="gap-2"
 							>
 								<ArrowLeft className="w-4 h-4" />
-								Back to Quote
+								{search.fromCustomerArea ? "Back to Cars" : "Back to Quote"}
 							</Button>
 							<div className="hidden sm:block h-6 w-px bg-border" />
 							<div className="hidden sm:block">

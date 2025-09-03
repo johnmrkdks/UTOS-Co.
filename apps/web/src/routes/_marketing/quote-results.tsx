@@ -8,5 +8,5 @@ const quoteResultsSearchSchema = z.object({
 
 export const Route = createFileRoute("/_marketing/quote-results")({
 	validateSearch: quoteResultsSearchSchema,
-	component: QuoteResultsPage,
+	component: () => <QuoteResultsPage isCustomerArea={false} />,
 });

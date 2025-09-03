@@ -16,9 +16,13 @@ import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/home/_hooks/query/use-calculate-instant-quote-mutation";
 import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query";
 
-export function CalculateQuotePage() {
+interface CalculateQuotePageProps {
+	isCustomerArea?: boolean;
+}
+
+export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePageProps) {
 	const navigate = useNavigate();
-	const search = useSearch({ from: "/_marketing/calculate-quote" });
+	const search = useSearch({ strict: false }) as any;
 	const [isCalculating, setIsCalculating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	
@@ -81,9 +85,19 @@ export function CalculateQuotePage() {
 
 			// Navigate to results page with secure quote ID
 			if (result && (result as any).quoteId) {
+				const searchParams: any = { quoteId: (result as any).quoteId };
+				
+				// Pass through fromCustomerArea parameter
+				if (search.fromCustomerArea || isCustomerArea) {
+					searchParams.fromCustomerArea = "true";
+				}
+				
+				// Use customer route if in customer area, otherwise public route
+				const quoteResultsPath = isCustomerArea ? "/customer/quote-results" : "/quote-results";
+				
 				navigate({
-					to: "/quote-results",
-					search: { quoteId: (result as any).quoteId }
+					to: quoteResultsPath,
+					search: searchParams
 				});
 			} else {
 				throw new Error("Quote calculation succeeded but no secure quote ID was returned");

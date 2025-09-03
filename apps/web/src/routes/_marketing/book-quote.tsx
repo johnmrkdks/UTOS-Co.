@@ -24,5 +24,5 @@ export const Route = createFileRoute("/_marketing/book-quote")({
 		const session = await getOrCreateGuestSession();
 		return { session };
 	},
-	component: QuoteBookingPage,
+	component: () => <QuoteBookingPage isCustomerArea={false} />,
 });
