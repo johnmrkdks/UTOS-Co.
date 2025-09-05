@@ -7,6 +7,7 @@ import { getDriversByStatusService, GetDriversByStatusServiceSchema } from "@/se
 import { deleteDriverService, DeleteDriverServiceSchema } from "@/services/drivers/delete-driver";
 import { assignDriverService, AssignDriverServiceSchema } from "@/services/bookings/assign-driver";
 import { getCurrentDriverService, GetCurrentDriverServiceSchema } from "@/services/drivers/get-current-driver";
+import { verifyDriverDocumentsService, VerifyDriverDocumentsServiceSchema } from "@/services/drivers/verify-driver-documents";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -105,6 +106,22 @@ export const driversRouter = router({
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
 				const result = await deleteDriverService(db, input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	verifyDocuments: protectedProcedure
+		.input(VerifyDriverDocumentsServiceSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				if (!session?.user?.id) {
+					throw new Error("Unauthorized: Admin access required");
+				}
+				const result = await verifyDriverDocumentsService(db, {
+					...input,
+					verifiedBy: session.user.id,
+				});
 				return result;
 			} catch (error) {
 				handleTRPCError(error);

@@ -84,7 +84,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 					{/* CTA & Mobile Menu */}
 					<div className="flex items-center gap-4 md:gap-8">
 						<div className="flex items-center gap-3">
-							<Link to="/booking">
+							<Link to="/fleet">
 								<Button
 									size="sm"
 									variant="dark"
@@ -170,7 +170,15 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 }
 
 function NavLinks() {
-	const links = MARKETING_ROUTES.map(({ path, label }) => {
+	const { session } = useUserQuery();
+	const isCustomer = session?.user?.role === "user";
+	
+	// Add My Bookings for authenticated customers
+	const routes = isCustomer 
+		? [...MARKETING_ROUTES, { path: "/my-bookings", label: "My Bookings" }]
+		: MARKETING_ROUTES;
+	
+	const links = routes.map(({ path, label }) => {
 		return (
 			<Link
 				key={path}
@@ -188,7 +196,15 @@ function NavLinks() {
 }
 
 function MobileNavLinks({ onClose }: { onClose: () => void }) {
-	const links = MARKETING_ROUTES.map(({ path, label }) => {
+	const { session } = useUserQuery();
+	const isCustomer = session?.user?.role === "user";
+	
+	// Add My Bookings for authenticated customers
+	const routes = isCustomer 
+		? [...MARKETING_ROUTES, { path: "/my-bookings", label: "My Bookings" }]
+		: MARKETING_ROUTES;
+	
+	const links = routes.map(({ path, label }) => {
 		return (
 			<Link
 				key={path}
@@ -208,7 +224,6 @@ function MobileNavLinks({ onClose }: { onClose: () => void }) {
 function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () => void }) {
 	const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
 	const isDriver = session.user.role === "driver";
-	const isCustomer = session.user.role === "user";
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -218,7 +233,7 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 					onClick={onClose}
 					asChild
 				>
-					<Link to="/dashboard">
+					<Link to="/admin/dashboard">
 						<SettingsIcon className="w-4 h-4" />
 						Admin Dashboard
 					</Link>
@@ -234,19 +249,6 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 					<Link to="/driver">
 						<UserIcon className="w-4 h-4" />
 						Driver Dashboard
-					</Link>
-				</Button>
-			)}
-
-			{isCustomer && (
-				<Button
-					className="w-full justify-start gap-2 rounded-xl shadow-none"
-					onClick={onClose}
-					asChild
-				>
-					<Link to="/customer">
-						<UserIcon className="w-4 h-4" />
-						My Dashboard
 					</Link>
 				</Button>
 			)}
@@ -271,7 +273,7 @@ function MobileUserProfile({ session, onClose }: { session: any; onClose: () => 
 			</div>
 
 			<Link
-				to="/customer/profile"
+				to="/profile"
 				onClick={onClose}
 				className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-primary hover:bg-primary/5 transition-all rounded-lg"
 			>
@@ -280,7 +282,7 @@ function MobileUserProfile({ session, onClose }: { session: any; onClose: () => 
 			</Link>
 
 			<Link
-				to="/customer/account/settings"
+				to="/account/settings"
 				onClick={onClose}
 				className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-primary hover:bg-primary/5 transition-all rounded-lg"
 			>

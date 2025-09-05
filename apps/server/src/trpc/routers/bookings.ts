@@ -78,7 +78,7 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Better Auth anonymous plugin - check both user and session structures
-				const userId = session.user?.id || session.userId;
+				const userId = session?.user?.id || session?.session?.userId;
 				
 				if (!userId) {
 					throw new Error("User session is required. Please sign in or create a guest account.");
@@ -97,7 +97,7 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Better Auth anonymous plugin - check both user and session structures
-				const userId = session.user?.id || session.userId;
+				const userId = session?.user?.id || session?.session?.userId;
 				
 				if (!userId) {
 					throw new Error("User session is required. Please sign in or create a guest account.");
@@ -116,7 +116,7 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Better Auth anonymous plugin - check both user and session structures
-				const userId = session.user?.id || session.userId;
+				const userId = session?.user?.id || session?.session?.userId;
 				
 				if (!userId) {
 					console.log("🔍 Session structure:", JSON.stringify(session, null, 2));
@@ -129,8 +129,8 @@ export const bookingsRouter = router({
 				return newBooking;
 			} catch (error) {
 				console.error("❌ TRPC Error in createCustomBookingFromQuote:", {
-					error: error.message,
-					stack: error.stack,
+					error: error instanceof Error ? error.message : String(error),
+					stack: error instanceof Error ? error.stack : undefined,
 					input: JSON.stringify(input, null, 2)
 				});
 				handleTRPCError(error);
@@ -209,7 +209,7 @@ export const bookingsRouter = router({
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Better Auth anonymous plugin - check both user and session structures
-				const userId = session.user?.id || session.userId;
+				const userId = session?.user?.id || session?.session?.userId;
 				
 				// Filter bookings by userId using the filters parameter
 				const bookings = await getBookingsService(db, {

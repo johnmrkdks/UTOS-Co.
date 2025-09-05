@@ -1,7 +1,6 @@
 import { trpc } from "@/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getOrCreateGuestSession } from "@/utils/auth";
 
 /**
  * Create custom booking from quote mutation for both authenticated and guest users

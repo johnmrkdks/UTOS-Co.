@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Loader } from "@/components/loader";
 import { useState } from "react";
 import { companyIcons } from "@/features/auth/_utils/icons";
@@ -10,6 +10,7 @@ export function SignInWithOAuth() {
 	const navigate = useNavigate({
 		from: "/",
 	});
+	const search = useSearch({ strict: false }) as any;
 	const [isRedirecting, setIsRedirecting] = useState(false);
 	const mutation = useSignInWitGoogleOAuthMutation();
 	const { isPending } = authClient.useSession();
@@ -21,15 +22,17 @@ export function SignInWithOAuth() {
 	const signInWithGoogle = async () => {
 		setIsRedirecting(true);
 
-		mutation.mutate(void 0, {
+		const redirectPath = search.redirect;
+		mutation.mutate(redirectPath, {
 			onSuccess: ({ data }) => {
 				if (data && data.redirect) {
 					setIsRedirecting(true);
 				}
 
 				if (data && !data.redirect) {
+					const finalRedirect = redirectPath || "/";
 					navigate({
-						to: "/",
+						to: finalRedirect,
 					});
 				}
 			},

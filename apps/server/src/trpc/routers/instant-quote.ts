@@ -37,7 +37,7 @@ function cleanExpiredQuotes() {
 export const instantQuoteRouter = router({
 	calculate: publicProcedure
 		.input(CalculateInstantQuoteSchema)
-		.mutation(async ({ ctx: { db, env, req }, input }) => {
+		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
 				// For now, use the old calculation method until database schema is fixed
 				// This still provides security by generating a temporary secure ID

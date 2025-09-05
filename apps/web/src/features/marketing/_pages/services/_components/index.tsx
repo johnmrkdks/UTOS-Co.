@@ -90,7 +90,7 @@ export function Services({ className, ...props }: ServicesProps) {
 						</p>
 
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Link to="/booking">
+							<Link to="/fleet">
 								<Button
 									size="lg"
 									className="bg-primary hover:bg-soft-beige px-8 py-6 text-lg font-semibold rounded-xl"
@@ -405,7 +405,7 @@ export function Services({ className, ...props }: ServicesProps) {
 						</p>
 
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Link to="/booking">
+							<Link to="/fleet">
 								<Button
 									size="lg"
 									className="bg-white text-primary hover:bg-beige px-8 py-6 text-lg font-semibold rounded-xl"

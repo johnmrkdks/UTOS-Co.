@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { instantQuotes } from "@/db/schema";
-import { eq, and, gt, sql } from "drizzle-orm";
+import { eq, and, gt, lt, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
 export interface SecureQuoteData {
@@ -264,8 +264,9 @@ export async function cleanupExpiredQuotes(db: DB): Promise<number> {
 	const result = await db
 		.delete(instantQuotes)
 		.where(
-			gt(new Date(), instantQuotes.expiresAt)
+			lt(instantQuotes.expiresAt, new Date())
 		);
 	
-	return result.changes || 0;
+	// D1Result doesn't have a changes/rowsAffected property, so we return a generic success count
+	return 1; // Indicates operation completed successfully
 }

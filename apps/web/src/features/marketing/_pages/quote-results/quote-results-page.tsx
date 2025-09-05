@@ -82,43 +82,19 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 	const selectedCar = quote?.carId && carsData?.data ? 
 		carsData.data.find(car => car.id === quote.carId) : null;
 
-	const handleBookAsGuest = () => {
-		if (!quote) return;
-		
-		// Navigate directly to booking page - anonymous session will be created on confirm booking
-		// Guest users always use the public route, not the customer area
-		navigate({
-			to: "/book-quote",
-			search: { quoteId: search.quoteId }
-		});
-	};
 
 	const handleBookAuthenticated = () => {
 		if (!quote) return;
 		
 		if (session?.user) {
-			// User is authenticated, check if from customer area
-			const isFromCustomerArea = search.fromCustomerArea === "true";
-			
-			if (isFromCustomerArea) {
-				// Customer area uses path parameter
-				navigate({
-					to: "/customer/book-quote/$quoteId",
-					params: { quoteId: search.quoteId }
-				});
-			} else {
-				// Public route uses search parameter
-				navigate({
-					to: "/book-quote",
-					search: { quoteId: search.quoteId }
-				});
-			}
+			// User is authenticated - route to book-quote
+			navigate({
+				to: "/book-quote/$quoteId",
+				params: { quoteId: search.quoteId }
+			});
 		} else {
-			// User not authenticated, redirect to sign-in
-			const isFromCustomerArea = search.fromCustomerArea === "true";
-			const redirectPath = isFromCustomerArea 
-				? `/customer/book-quote/${search.quoteId}`
-				: `/book-quote?quoteId=${search.quoteId}`;
+			// User not authenticated, redirect to sign-in with appropriate redirect
+			const redirectPath = `/book-quote/${search.quoteId}`;
 				
 			navigate({
 				to: "/sign-in",
@@ -402,13 +378,19 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 										<span>${quote.baseFare.toFixed(2)}</span>
 									</div>
 									<div className="flex justify-between text-xs">
-										<span>Distance fare</span>
+										<span>Distance fare ({(quote.estimatedDistance / 1000).toFixed(1)} km)</span>
 										<span>${quote.distanceFare.toFixed(2)}</span>
 									</div>
 									{quote.extraCharges > 0 && (
 										<div className="flex justify-between text-xs">
-											<span>Extra charges</span>
+											<span>Additional charges</span>
 											<span>${quote.extraCharges.toFixed(2)}</span>
+										</div>
+									)}
+									{quote.breakdown?.surgePricing && quote.breakdown.surgePricing > 1 && (
+										<div className="flex justify-between text-xs text-orange-600">
+											<span>Peak time surcharge ({((quote.breakdown.surgePricing - 1) * 100).toFixed(0)}%)</span>
+											<span>Applied</span>
 										</div>
 									)}
 								</div>
@@ -428,25 +410,14 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<LogIn className="ml-2 h-5 w-5" />
 							</Button>
 						) : (
-							// User is not authenticated - show both options
-							<>
-								<Button 
-									onClick={handleBookAsGuest}
-									className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
-								>
-									Book as Guest
-									<Users className="ml-2 h-5 w-5" />
-								</Button>
-								
-								<Button 
-									onClick={handleBookAuthenticated}
-									variant="outline"
-									className="w-full h-12 text-base font-semibold"
-								>
-									Sign In & Book
-									<LogIn className="ml-2 h-5 w-5" />
-								</Button>
-							</>
+							// User is not authenticated - only show sign in option
+							<Button 
+								onClick={handleBookAuthenticated}
+								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
+							>
+								Sign In & Book
+								<LogIn className="ml-2 h-5 w-5" />
+							</Button>
 						)}
 
 						<Button 
@@ -463,7 +434,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							* Prices are estimates and may vary based on traffic and other factors
 						</p>
 						<p className="text-xs text-primary">
-							No account required - book as a guest
+							Sign in required to complete booking
 						</p>
 					</div>
 				</div>

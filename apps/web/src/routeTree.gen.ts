@@ -15,63 +15,62 @@ import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as DriverLayoutRouteImport } from './routes/driver/_layout'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
-import { Route as CustomerLayoutRouteImport } from './routes/customer/_layout'
 import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
 import { Route as MarketingServicesRouteImport } from './routes/_marketing/services'
 import { Route as MarketingSelectVehicleRouteImport } from './routes/_marketing/select-vehicle'
 import { Route as MarketingQuoteResultsRouteImport } from './routes/_marketing/quote-results'
+import { Route as MarketingProfileRouteImport } from './routes/_marketing/profile'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
+import { Route as MarketingMyBookingsRouteImport } from './routes/_marketing/my-bookings'
+import { Route as MarketingFleetRouteImport } from './routes/_marketing/fleet'
 import { Route as MarketingFaqsRouteImport } from './routes/_marketing/faqs'
+import { Route as MarketingDashboardRouteImport } from './routes/_marketing/dashboard'
 import { Route as MarketingContactUsRouteImport } from './routes/_marketing/contact-us'
 import { Route as MarketingCalculateQuoteRouteImport } from './routes/_marketing/calculate-quote'
-import { Route as MarketingBookingRouteImport } from './routes/_marketing/booking'
-import { Route as MarketingBookQuoteRouteImport } from './routes/_marketing/book-quote'
 import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-us'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as DriverLayoutIndexRouteImport } from './routes/driver/_layout/index'
-import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout/index'
-import { Route as CustomerLayoutIndexRouteImport } from './routes/customer/_layout/index'
 import { Route as DriverLayoutTripsRouteImport } from './routes/driver/_layout/trips'
 import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layout/settings'
 import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
 import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
-import { Route as CustomerLayoutServicesRouteImport } from './routes/customer/_layout/services'
-import { Route as CustomerLayoutQuoteResultsRouteImport } from './routes/customer/_layout/quote-results'
-import { Route as CustomerLayoutProfileRouteImport } from './routes/customer/_layout/profile'
-import { Route as CustomerLayoutInstantQuoteRouteImport } from './routes/customer/_layout/instant-quote'
-import { Route as CustomerLayoutCarsRouteImport } from './routes/customer/_layout/cars'
-import { Route as CustomerLayoutCalculateQuoteRouteImport } from './routes/customer/_layout/calculate-quote'
-import { Route as CustomerLayoutBookingsRouteImport } from './routes/customer/_layout/bookings'
-import { Route as CustomerLayoutBookAppointmentRouteImport } from './routes/customer/_layout/book-appointment'
+import { Route as DashboardLayoutServicesRouteImport } from './routes/dashboard/_layout/services'
+import { Route as DashboardLayoutQuoteResultsRouteImport } from './routes/dashboard/_layout/quote-results'
+import { Route as DashboardLayoutInstantQuoteRouteImport } from './routes/dashboard/_layout/instant-quote'
+import { Route as DashboardLayoutCarsRouteImport } from './routes/dashboard/_layout/cars'
+import { Route as DashboardLayoutCalculateQuoteRouteImport } from './routes/dashboard/_layout/calculate-quote'
+import { Route as DashboardLayoutBookAppointmentRouteImport } from './routes/dashboard/_layout/book-appointment'
+import { Route as AdminDashboardLayoutRouteImport } from './routes/admin/dashboard/_layout'
 import { Route as MarketingBookServiceServiceIdRouteImport } from './routes/_marketing/book-service.$serviceId'
+import { Route as MarketingBookQuoteQuoteIdRouteImport } from './routes/_marketing/book-quote.$quoteId'
 import { Route as MarketingBookCarCarIdRouteImport } from './routes/_marketing/book-car.$carId'
-import { Route as DashboardLayoutTodaysScheduledIndexRouteImport } from './routes/dashboard/_layout/todays-scheduled/index'
-import { Route as DashboardLayoutSettingsIndexRouteImport } from './routes/dashboard/_layout/settings/index'
-import { Route as DashboardLayoutReportIndexRouteImport } from './routes/dashboard/_layout/report/index'
-import { Route as DashboardLayoutPublishedIndexRouteImport } from './routes/dashboard/_layout/published/index'
-import { Route as DashboardLayoutPublicationsIndexRouteImport } from './routes/dashboard/_layout/publications/index'
-import { Route as DashboardLayoutPricingConfigIndexRouteImport } from './routes/dashboard/_layout/pricing-config/index'
-import { Route as DashboardLayoutPackagesIndexRouteImport } from './routes/dashboard/_layout/packages/index'
-import { Route as DashboardLayoutInboxIndexRouteImport } from './routes/dashboard/_layout/inbox/index'
-import { Route as DashboardLayoutDriversIndexRouteImport } from './routes/dashboard/_layout/drivers/index'
-import { Route as DashboardLayoutCarsIndexRouteImport } from './routes/dashboard/_layout/cars/index'
-import { Route as DashboardLayoutBookmarksIndexRouteImport } from './routes/dashboard/_layout/bookmarks/index'
-import { Route as DashboardLayoutBookingsIndexRouteImport } from './routes/dashboard/_layout/bookings/index'
-import { Route as DashboardLayoutBoardIndexRouteImport } from './routes/dashboard/_layout/board/index'
-import { Route as DashboardLayoutAnalyticsIndexRouteImport } from './routes/dashboard/_layout/analytics/index'
-import { Route as DashboardLayoutAdminTestingIndexRouteImport } from './routes/dashboard/_layout/admin-testing/index'
-import { Route as DashboardLayoutDriversOnboardingRouteImport } from './routes/dashboard/_layout/drivers/onboarding'
-import { Route as DashboardLayoutCarsAddCarRouteImport } from './routes/dashboard/_layout/cars/add-car'
-import { Route as CustomerLayoutCarDetailsCarIdRouteImport } from './routes/customer/_layout/car-details.$carId'
-import { Route as CustomerLayoutBookServiceServiceIdRouteImport } from './routes/customer/_layout/book-service/$serviceId'
-import { Route as CustomerLayoutBookQuoteQuoteIdRouteImport } from './routes/customer/_layout/book-quote.$quoteId'
-import { Route as CustomerLayoutBookAppointmentCarIdRouteImport } from './routes/customer/_layout/book-appointment.$carId'
-import { Route as CustomerLayoutAccountSettingsRouteImport } from './routes/customer/_layout/account/settings'
+import { Route as MarketingAccountSettingsRouteImport } from './routes/_marketing/account/settings'
+import { Route as AdminDashboardLayoutIndexRouteImport } from './routes/admin/dashboard/_layout/index'
+import { Route as DashboardLayoutCarDetailsCarIdRouteImport } from './routes/dashboard/_layout/car-details.$carId'
+import { Route as DashboardLayoutBookServiceServiceIdRouteImport } from './routes/dashboard/_layout/book-service/$serviceId'
+import { Route as DashboardLayoutBookAppointmentCarIdRouteImport } from './routes/dashboard/_layout/book-appointment.$carId'
+import { Route as AdminDashboardLayoutTodaysScheduledIndexRouteImport } from './routes/admin/dashboard/_layout/todays-scheduled/index'
+import { Route as AdminDashboardLayoutSettingsIndexRouteImport } from './routes/admin/dashboard/_layout/settings/index'
+import { Route as AdminDashboardLayoutReportIndexRouteImport } from './routes/admin/dashboard/_layout/report/index'
+import { Route as AdminDashboardLayoutPublishedIndexRouteImport } from './routes/admin/dashboard/_layout/published/index'
+import { Route as AdminDashboardLayoutPublicationsIndexRouteImport } from './routes/admin/dashboard/_layout/publications/index'
+import { Route as AdminDashboardLayoutPricingConfigIndexRouteImport } from './routes/admin/dashboard/_layout/pricing-config/index'
+import { Route as AdminDashboardLayoutPackagesIndexRouteImport } from './routes/admin/dashboard/_layout/packages/index'
+import { Route as AdminDashboardLayoutInboxIndexRouteImport } from './routes/admin/dashboard/_layout/inbox/index'
+import { Route as AdminDashboardLayoutDriversIndexRouteImport } from './routes/admin/dashboard/_layout/drivers/index'
+import { Route as AdminDashboardLayoutCarsIndexRouteImport } from './routes/admin/dashboard/_layout/cars/index'
+import { Route as AdminDashboardLayoutBookmarksIndexRouteImport } from './routes/admin/dashboard/_layout/bookmarks/index'
+import { Route as AdminDashboardLayoutBookingsIndexRouteImport } from './routes/admin/dashboard/_layout/bookings/index'
+import { Route as AdminDashboardLayoutBoardIndexRouteImport } from './routes/admin/dashboard/_layout/board/index'
+import { Route as AdminDashboardLayoutAnalyticsIndexRouteImport } from './routes/admin/dashboard/_layout/analytics/index'
+import { Route as AdminDashboardLayoutAdminTestingIndexRouteImport } from './routes/admin/dashboard/_layout/admin-testing/index'
+import { Route as AdminDashboardLayoutDriversOnboardingRouteImport } from './routes/admin/dashboard/_layout/drivers/onboarding'
+import { Route as AdminDashboardLayoutCarsAddCarRouteImport } from './routes/admin/dashboard/_layout/cars/add-car'
 
 const DriverRouteImport = createFileRoute('/driver')()
 const DashboardRouteImport = createFileRoute('/dashboard')()
-const CustomerRouteImport = createFileRoute('/customer')()
+const AdminDashboardRouteImport = createFileRoute('/admin/dashboard')()
 
 const DriverRoute = DriverRouteImport.update({
   id: '/driver',
@@ -83,13 +82,13 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CustomerRoute = CustomerRouteImport.update({
-  id: '/customer',
-  path: '/customer',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MarketingRoute = MarketingRouteImport.update({
   id: '/_marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
@@ -104,10 +103,6 @@ const DriverLayoutRoute = DriverLayoutRouteImport.update({
 const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => DashboardRoute,
-} as any)
-const CustomerLayoutRoute = CustomerLayoutRouteImport.update({
-  id: '/_layout',
-  getParentRoute: () => CustomerRoute,
 } as any)
 const MarketingTermsAndConditionsRoute =
   MarketingTermsAndConditionsRouteImport.update({
@@ -130,14 +125,34 @@ const MarketingQuoteResultsRoute = MarketingQuoteResultsRouteImport.update({
   path: '/quote-results',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingProfileRoute = MarketingProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingMyBookingsRoute = MarketingMyBookingsRouteImport.update({
+  id: '/my-bookings',
+  path: '/my-bookings',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingFleetRoute = MarketingFleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingFaqsRoute = MarketingFaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingDashboardRoute = MarketingDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => MarketingRoute,
 } as any)
 const MarketingContactUsRoute = MarketingContactUsRouteImport.update({
@@ -148,16 +163,6 @@ const MarketingContactUsRoute = MarketingContactUsRouteImport.update({
 const MarketingCalculateQuoteRoute = MarketingCalculateQuoteRouteImport.update({
   id: '/calculate-quote',
   path: '/calculate-quote',
-  getParentRoute: () => MarketingRoute,
-} as any)
-const MarketingBookingRoute = MarketingBookingRouteImport.update({
-  id: '/booking',
-  path: '/booking',
-  getParentRoute: () => MarketingRoute,
-} as any)
-const MarketingBookQuoteRoute = MarketingBookQuoteRouteImport.update({
-  id: '/book-quote',
-  path: '/book-quote',
   getParentRoute: () => MarketingRoute,
 } as any)
 const MarketingAboutUsRoute = MarketingAboutUsRouteImport.update({
@@ -180,16 +185,6 @@ const DriverLayoutIndexRoute = DriverLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DriverLayoutRoute,
 } as any)
-const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardLayoutRoute,
-} as any)
-const CustomerLayoutIndexRoute = CustomerLayoutIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => CustomerLayoutRoute,
-} as any)
 const DriverLayoutTripsRoute = DriverLayoutTripsRouteImport.update({
   id: '/trips',
   path: '/trips',
@@ -210,54 +205,54 @@ const DriverLayoutOnboardingRoute = DriverLayoutOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => DriverLayoutRoute,
 } as any)
-const CustomerLayoutServicesRoute = CustomerLayoutServicesRouteImport.update({
+const DashboardLayoutServicesRoute = DashboardLayoutServicesRouteImport.update({
   id: '/services',
   path: '/services',
-  getParentRoute: () => CustomerLayoutRoute,
+  getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const CustomerLayoutQuoteResultsRoute =
-  CustomerLayoutQuoteResultsRouteImport.update({
+const DashboardLayoutQuoteResultsRoute =
+  DashboardLayoutQuoteResultsRouteImport.update({
     id: '/quote-results',
     path: '/quote-results',
-    getParentRoute: () => CustomerLayoutRoute,
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const CustomerLayoutProfileRoute = CustomerLayoutProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => CustomerLayoutRoute,
-} as any)
-const CustomerLayoutInstantQuoteRoute =
-  CustomerLayoutInstantQuoteRouteImport.update({
+const DashboardLayoutInstantQuoteRoute =
+  DashboardLayoutInstantQuoteRouteImport.update({
     id: '/instant-quote',
     path: '/instant-quote',
-    getParentRoute: () => CustomerLayoutRoute,
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const CustomerLayoutCarsRoute = CustomerLayoutCarsRouteImport.update({
+const DashboardLayoutCarsRoute = DashboardLayoutCarsRouteImport.update({
   id: '/cars',
   path: '/cars',
-  getParentRoute: () => CustomerLayoutRoute,
+  getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const CustomerLayoutCalculateQuoteRoute =
-  CustomerLayoutCalculateQuoteRouteImport.update({
+const DashboardLayoutCalculateQuoteRoute =
+  DashboardLayoutCalculateQuoteRouteImport.update({
     id: '/calculate-quote',
     path: '/calculate-quote',
-    getParentRoute: () => CustomerLayoutRoute,
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const CustomerLayoutBookingsRoute = CustomerLayoutBookingsRouteImport.update({
-  id: '/bookings',
-  path: '/bookings',
-  getParentRoute: () => CustomerLayoutRoute,
-} as any)
-const CustomerLayoutBookAppointmentRoute =
-  CustomerLayoutBookAppointmentRouteImport.update({
+const DashboardLayoutBookAppointmentRoute =
+  DashboardLayoutBookAppointmentRouteImport.update({
     id: '/book-appointment',
     path: '/book-appointment',
-    getParentRoute: () => CustomerLayoutRoute,
+    getParentRoute: () => DashboardLayoutRoute,
   } as any)
+const AdminDashboardLayoutRoute = AdminDashboardLayoutRouteImport.update({
+  id: '/_layout',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
 const MarketingBookServiceServiceIdRoute =
   MarketingBookServiceServiceIdRouteImport.update({
     id: '/book-service/$serviceId',
     path: '/book-service/$serviceId',
+    getParentRoute: () => MarketingRoute,
+  } as any)
+const MarketingBookQuoteQuoteIdRoute =
+  MarketingBookQuoteQuoteIdRouteImport.update({
+    id: '/book-quote/$quoteId',
+    path: '/book-quote/$quoteId',
     getParentRoute: () => MarketingRoute,
   } as any)
 const MarketingBookCarCarIdRoute = MarketingBookCarCarIdRouteImport.update({
@@ -265,251 +260,248 @@ const MarketingBookCarCarIdRoute = MarketingBookCarCarIdRouteImport.update({
   path: '/book-car/$carId',
   getParentRoute: () => MarketingRoute,
 } as any)
-const DashboardLayoutTodaysScheduledIndexRoute =
-  DashboardLayoutTodaysScheduledIndexRouteImport.update({
-    id: '/todays-scheduled/',
-    path: '/todays-scheduled/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutSettingsIndexRoute =
-  DashboardLayoutSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutReportIndexRoute =
-  DashboardLayoutReportIndexRouteImport.update({
-    id: '/report/',
-    path: '/report/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutPublishedIndexRoute =
-  DashboardLayoutPublishedIndexRouteImport.update({
-    id: '/published/',
-    path: '/published/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutPublicationsIndexRoute =
-  DashboardLayoutPublicationsIndexRouteImport.update({
-    id: '/publications/',
-    path: '/publications/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutPricingConfigIndexRoute =
-  DashboardLayoutPricingConfigIndexRouteImport.update({
-    id: '/pricing-config/',
-    path: '/pricing-config/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutPackagesIndexRoute =
-  DashboardLayoutPackagesIndexRouteImport.update({
-    id: '/packages/',
-    path: '/packages/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutInboxIndexRoute =
-  DashboardLayoutInboxIndexRouteImport.update({
-    id: '/inbox/',
-    path: '/inbox/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutDriversIndexRoute =
-  DashboardLayoutDriversIndexRouteImport.update({
-    id: '/drivers/',
-    path: '/drivers/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutCarsIndexRoute =
-  DashboardLayoutCarsIndexRouteImport.update({
-    id: '/cars/',
-    path: '/cars/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutBookmarksIndexRoute =
-  DashboardLayoutBookmarksIndexRouteImport.update({
-    id: '/bookmarks/',
-    path: '/bookmarks/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutBookingsIndexRoute =
-  DashboardLayoutBookingsIndexRouteImport.update({
-    id: '/bookings/',
-    path: '/bookings/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutBoardIndexRoute =
-  DashboardLayoutBoardIndexRouteImport.update({
-    id: '/board/',
-    path: '/board/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutAnalyticsIndexRoute =
-  DashboardLayoutAnalyticsIndexRouteImport.update({
-    id: '/analytics/',
-    path: '/analytics/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutAdminTestingIndexRoute =
-  DashboardLayoutAdminTestingIndexRouteImport.update({
-    id: '/admin-testing/',
-    path: '/admin-testing/',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutDriversOnboardingRoute =
-  DashboardLayoutDriversOnboardingRouteImport.update({
-    id: '/drivers/onboarding',
-    path: '/drivers/onboarding',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutCarsAddCarRoute =
-  DashboardLayoutCarsAddCarRouteImport.update({
-    id: '/cars/add-car',
-    path: '/cars/add-car',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const CustomerLayoutCarDetailsCarIdRoute =
-  CustomerLayoutCarDetailsCarIdRouteImport.update({
-    id: '/car-details/$carId',
-    path: '/car-details/$carId',
-    getParentRoute: () => CustomerLayoutRoute,
-  } as any)
-const CustomerLayoutBookServiceServiceIdRoute =
-  CustomerLayoutBookServiceServiceIdRouteImport.update({
-    id: '/book-service/$serviceId',
-    path: '/book-service/$serviceId',
-    getParentRoute: () => CustomerLayoutRoute,
-  } as any)
-const CustomerLayoutBookQuoteQuoteIdRoute =
-  CustomerLayoutBookQuoteQuoteIdRouteImport.update({
-    id: '/book-quote/$quoteId',
-    path: '/book-quote/$quoteId',
-    getParentRoute: () => CustomerLayoutRoute,
-  } as any)
-const CustomerLayoutBookAppointmentCarIdRoute =
-  CustomerLayoutBookAppointmentCarIdRouteImport.update({
-    id: '/$carId',
-    path: '/$carId',
-    getParentRoute: () => CustomerLayoutBookAppointmentRoute,
-  } as any)
-const CustomerLayoutAccountSettingsRoute =
-  CustomerLayoutAccountSettingsRouteImport.update({
+const MarketingAccountSettingsRoute =
+  MarketingAccountSettingsRouteImport.update({
     id: '/account/settings',
     path: '/account/settings',
-    getParentRoute: () => CustomerLayoutRoute,
+    getParentRoute: () => MarketingRoute,
+  } as any)
+const AdminDashboardLayoutIndexRoute =
+  AdminDashboardLayoutIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const DashboardLayoutCarDetailsCarIdRoute =
+  DashboardLayoutCarDetailsCarIdRouteImport.update({
+    id: '/car-details/$carId',
+    path: '/car-details/$carId',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutBookServiceServiceIdRoute =
+  DashboardLayoutBookServiceServiceIdRouteImport.update({
+    id: '/book-service/$serviceId',
+    path: '/book-service/$serviceId',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutBookAppointmentCarIdRoute =
+  DashboardLayoutBookAppointmentCarIdRouteImport.update({
+    id: '/$carId',
+    path: '/$carId',
+    getParentRoute: () => DashboardLayoutBookAppointmentRoute,
+  } as any)
+const AdminDashboardLayoutTodaysScheduledIndexRoute =
+  AdminDashboardLayoutTodaysScheduledIndexRouteImport.update({
+    id: '/todays-scheduled/',
+    path: '/todays-scheduled/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutSettingsIndexRoute =
+  AdminDashboardLayoutSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutReportIndexRoute =
+  AdminDashboardLayoutReportIndexRouteImport.update({
+    id: '/report/',
+    path: '/report/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutPublishedIndexRoute =
+  AdminDashboardLayoutPublishedIndexRouteImport.update({
+    id: '/published/',
+    path: '/published/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutPublicationsIndexRoute =
+  AdminDashboardLayoutPublicationsIndexRouteImport.update({
+    id: '/publications/',
+    path: '/publications/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutPricingConfigIndexRoute =
+  AdminDashboardLayoutPricingConfigIndexRouteImport.update({
+    id: '/pricing-config/',
+    path: '/pricing-config/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutPackagesIndexRoute =
+  AdminDashboardLayoutPackagesIndexRouteImport.update({
+    id: '/packages/',
+    path: '/packages/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutInboxIndexRoute =
+  AdminDashboardLayoutInboxIndexRouteImport.update({
+    id: '/inbox/',
+    path: '/inbox/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutDriversIndexRoute =
+  AdminDashboardLayoutDriversIndexRouteImport.update({
+    id: '/drivers/',
+    path: '/drivers/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutCarsIndexRoute =
+  AdminDashboardLayoutCarsIndexRouteImport.update({
+    id: '/cars/',
+    path: '/cars/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutBookmarksIndexRoute =
+  AdminDashboardLayoutBookmarksIndexRouteImport.update({
+    id: '/bookmarks/',
+    path: '/bookmarks/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutBookingsIndexRoute =
+  AdminDashboardLayoutBookingsIndexRouteImport.update({
+    id: '/bookings/',
+    path: '/bookings/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutBoardIndexRoute =
+  AdminDashboardLayoutBoardIndexRouteImport.update({
+    id: '/board/',
+    path: '/board/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutAnalyticsIndexRoute =
+  AdminDashboardLayoutAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutAdminTestingIndexRoute =
+  AdminDashboardLayoutAdminTestingIndexRouteImport.update({
+    id: '/admin-testing/',
+    path: '/admin-testing/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutDriversOnboardingRoute =
+  AdminDashboardLayoutDriversOnboardingRouteImport.update({
+    id: '/drivers/onboarding',
+    path: '/drivers/onboarding',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
+const AdminDashboardLayoutCarsAddCarRoute =
+  AdminDashboardLayoutCarsAddCarRouteImport.update({
+    id: '/cars/add-car',
+    path: '/cars/add-car',
+    getParentRoute: () => AdminDashboardLayoutRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/about-us': typeof MarketingAboutUsRoute
-  '/book-quote': typeof MarketingBookQuoteRoute
-  '/booking': typeof MarketingBookingRoute
   '/calculate-quote': typeof MarketingCalculateQuoteRoute
   '/contact-us': typeof MarketingContactUsRoute
+  '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/faqs': typeof MarketingFaqsRoute
+  '/fleet': typeof MarketingFleetRoute
+  '/my-bookings': typeof MarketingMyBookingsRoute
   '/privacy': typeof MarketingPrivacyRoute
+  '/profile': typeof MarketingProfileRoute
   '/quote-results': typeof MarketingQuoteResultsRoute
   '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
-  '/customer': typeof CustomerLayoutRouteWithChildren
-  '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
+  '/account/settings': typeof MarketingAccountSettingsRoute
   '/book-car/$carId': typeof MarketingBookCarCarIdRoute
+  '/book-quote/$quoteId': typeof MarketingBookQuoteQuoteIdRoute
   '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
-  '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
-  '/customer/bookings': typeof CustomerLayoutBookingsRoute
-  '/customer/calculate-quote': typeof CustomerLayoutCalculateQuoteRoute
-  '/customer/cars': typeof CustomerLayoutCarsRoute
-  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
-  '/customer/profile': typeof CustomerLayoutProfileRoute
-  '/customer/quote-results': typeof CustomerLayoutQuoteResultsRoute
-  '/customer/services': typeof CustomerLayoutServicesRoute
+  '/admin/dashboard': typeof AdminDashboardLayoutRouteWithChildren
+  '/dashboard/book-appointment': typeof DashboardLayoutBookAppointmentRouteWithChildren
+  '/dashboard/calculate-quote': typeof DashboardLayoutCalculateQuoteRoute
+  '/dashboard/cars': typeof DashboardLayoutCarsRoute
+  '/dashboard/instant-quote': typeof DashboardLayoutInstantQuoteRoute
+  '/dashboard/quote-results': typeof DashboardLayoutQuoteResultsRoute
+  '/dashboard/services': typeof DashboardLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
-  '/customer/': typeof CustomerLayoutIndexRoute
-  '/dashboard/': typeof DashboardLayoutIndexRoute
   '/driver/': typeof DriverLayoutIndexRoute
-  '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
-  '/customer/book-appointment/$carId': typeof CustomerLayoutBookAppointmentCarIdRoute
-  '/customer/book-quote/$quoteId': typeof CustomerLayoutBookQuoteQuoteIdRoute
-  '/customer/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
-  '/customer/car-details/$carId': typeof CustomerLayoutCarDetailsCarIdRoute
-  '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
-  '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
-  '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
-  '/dashboard/analytics': typeof DashboardLayoutAnalyticsIndexRoute
-  '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
-  '/dashboard/bookings': typeof DashboardLayoutBookingsIndexRoute
-  '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
-  '/dashboard/cars': typeof DashboardLayoutCarsIndexRoute
-  '/dashboard/drivers': typeof DashboardLayoutDriversIndexRoute
-  '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
-  '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
-  '/dashboard/pricing-config': typeof DashboardLayoutPricingConfigIndexRoute
-  '/dashboard/publications': typeof DashboardLayoutPublicationsIndexRoute
-  '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
-  '/dashboard/report': typeof DashboardLayoutReportIndexRoute
-  '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
-  '/dashboard/todays-scheduled': typeof DashboardLayoutTodaysScheduledIndexRoute
+  '/dashboard/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
+  '/dashboard/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
+  '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
+  '/admin/dashboard/': typeof AdminDashboardLayoutIndexRoute
+  '/admin/dashboard/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
+  '/admin/dashboard/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
+  '/admin/dashboard/admin-testing': typeof AdminDashboardLayoutAdminTestingIndexRoute
+  '/admin/dashboard/analytics': typeof AdminDashboardLayoutAnalyticsIndexRoute
+  '/admin/dashboard/board': typeof AdminDashboardLayoutBoardIndexRoute
+  '/admin/dashboard/bookings': typeof AdminDashboardLayoutBookingsIndexRoute
+  '/admin/dashboard/bookmarks': typeof AdminDashboardLayoutBookmarksIndexRoute
+  '/admin/dashboard/cars': typeof AdminDashboardLayoutCarsIndexRoute
+  '/admin/dashboard/drivers': typeof AdminDashboardLayoutDriversIndexRoute
+  '/admin/dashboard/inbox': typeof AdminDashboardLayoutInboxIndexRoute
+  '/admin/dashboard/packages': typeof AdminDashboardLayoutPackagesIndexRoute
+  '/admin/dashboard/pricing-config': typeof AdminDashboardLayoutPricingConfigIndexRoute
+  '/admin/dashboard/publications': typeof AdminDashboardLayoutPublicationsIndexRoute
+  '/admin/dashboard/published': typeof AdminDashboardLayoutPublishedIndexRoute
+  '/admin/dashboard/report': typeof AdminDashboardLayoutReportIndexRoute
+  '/admin/dashboard/settings': typeof AdminDashboardLayoutSettingsIndexRoute
+  '/admin/dashboard/todays-scheduled': typeof AdminDashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/about-us': typeof MarketingAboutUsRoute
-  '/book-quote': typeof MarketingBookQuoteRoute
-  '/booking': typeof MarketingBookingRoute
   '/calculate-quote': typeof MarketingCalculateQuoteRoute
   '/contact-us': typeof MarketingContactUsRoute
+  '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/faqs': typeof MarketingFaqsRoute
+  '/fleet': typeof MarketingFleetRoute
+  '/my-bookings': typeof MarketingMyBookingsRoute
   '/privacy': typeof MarketingPrivacyRoute
+  '/profile': typeof MarketingProfileRoute
   '/quote-results': typeof MarketingQuoteResultsRoute
   '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
-  '/customer': typeof CustomerLayoutIndexRoute
-  '/dashboard': typeof DashboardLayoutIndexRoute
   '/driver': typeof DriverLayoutIndexRoute
   '/': typeof MarketingIndexRoute
+  '/account/settings': typeof MarketingAccountSettingsRoute
   '/book-car/$carId': typeof MarketingBookCarCarIdRoute
+  '/book-quote/$quoteId': typeof MarketingBookQuoteQuoteIdRoute
   '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
-  '/customer/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
-  '/customer/bookings': typeof CustomerLayoutBookingsRoute
-  '/customer/calculate-quote': typeof CustomerLayoutCalculateQuoteRoute
-  '/customer/cars': typeof CustomerLayoutCarsRoute
-  '/customer/instant-quote': typeof CustomerLayoutInstantQuoteRoute
-  '/customer/profile': typeof CustomerLayoutProfileRoute
-  '/customer/quote-results': typeof CustomerLayoutQuoteResultsRoute
-  '/customer/services': typeof CustomerLayoutServicesRoute
+  '/admin/dashboard': typeof AdminDashboardLayoutIndexRoute
+  '/dashboard/book-appointment': typeof DashboardLayoutBookAppointmentRouteWithChildren
+  '/dashboard/calculate-quote': typeof DashboardLayoutCalculateQuoteRoute
+  '/dashboard/cars': typeof DashboardLayoutCarsRoute
+  '/dashboard/instant-quote': typeof DashboardLayoutInstantQuoteRoute
+  '/dashboard/quote-results': typeof DashboardLayoutQuoteResultsRoute
+  '/dashboard/services': typeof DashboardLayoutServicesRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
-  '/customer/account/settings': typeof CustomerLayoutAccountSettingsRoute
-  '/customer/book-appointment/$carId': typeof CustomerLayoutBookAppointmentCarIdRoute
-  '/customer/book-quote/$quoteId': typeof CustomerLayoutBookQuoteQuoteIdRoute
-  '/customer/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
-  '/customer/car-details/$carId': typeof CustomerLayoutCarDetailsCarIdRoute
-  '/dashboard/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
-  '/dashboard/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
-  '/dashboard/admin-testing': typeof DashboardLayoutAdminTestingIndexRoute
-  '/dashboard/analytics': typeof DashboardLayoutAnalyticsIndexRoute
-  '/dashboard/board': typeof DashboardLayoutBoardIndexRoute
-  '/dashboard/bookings': typeof DashboardLayoutBookingsIndexRoute
-  '/dashboard/bookmarks': typeof DashboardLayoutBookmarksIndexRoute
-  '/dashboard/cars': typeof DashboardLayoutCarsIndexRoute
-  '/dashboard/drivers': typeof DashboardLayoutDriversIndexRoute
-  '/dashboard/inbox': typeof DashboardLayoutInboxIndexRoute
-  '/dashboard/packages': typeof DashboardLayoutPackagesIndexRoute
-  '/dashboard/pricing-config': typeof DashboardLayoutPricingConfigIndexRoute
-  '/dashboard/publications': typeof DashboardLayoutPublicationsIndexRoute
-  '/dashboard/published': typeof DashboardLayoutPublishedIndexRoute
-  '/dashboard/report': typeof DashboardLayoutReportIndexRoute
-  '/dashboard/settings': typeof DashboardLayoutSettingsIndexRoute
-  '/dashboard/todays-scheduled': typeof DashboardLayoutTodaysScheduledIndexRoute
+  '/dashboard/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
+  '/dashboard/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
+  '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
+  '/admin/dashboard/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
+  '/admin/dashboard/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
+  '/admin/dashboard/admin-testing': typeof AdminDashboardLayoutAdminTestingIndexRoute
+  '/admin/dashboard/analytics': typeof AdminDashboardLayoutAnalyticsIndexRoute
+  '/admin/dashboard/board': typeof AdminDashboardLayoutBoardIndexRoute
+  '/admin/dashboard/bookings': typeof AdminDashboardLayoutBookingsIndexRoute
+  '/admin/dashboard/bookmarks': typeof AdminDashboardLayoutBookmarksIndexRoute
+  '/admin/dashboard/cars': typeof AdminDashboardLayoutCarsIndexRoute
+  '/admin/dashboard/drivers': typeof AdminDashboardLayoutDriversIndexRoute
+  '/admin/dashboard/inbox': typeof AdminDashboardLayoutInboxIndexRoute
+  '/admin/dashboard/packages': typeof AdminDashboardLayoutPackagesIndexRoute
+  '/admin/dashboard/pricing-config': typeof AdminDashboardLayoutPricingConfigIndexRoute
+  '/admin/dashboard/publications': typeof AdminDashboardLayoutPublicationsIndexRoute
+  '/admin/dashboard/published': typeof AdminDashboardLayoutPublishedIndexRoute
+  '/admin/dashboard/report': typeof AdminDashboardLayoutReportIndexRoute
+  '/admin/dashboard/settings': typeof AdminDashboardLayoutSettingsIndexRoute
+  '/admin/dashboard/todays-scheduled': typeof AdminDashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -517,62 +509,61 @@ export interface FileRoutesById {
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_marketing/about-us': typeof MarketingAboutUsRoute
-  '/_marketing/book-quote': typeof MarketingBookQuoteRoute
-  '/_marketing/booking': typeof MarketingBookingRoute
   '/_marketing/calculate-quote': typeof MarketingCalculateQuoteRoute
   '/_marketing/contact-us': typeof MarketingContactUsRoute
+  '/_marketing/dashboard': typeof MarketingDashboardRoute
   '/_marketing/faqs': typeof MarketingFaqsRoute
+  '/_marketing/fleet': typeof MarketingFleetRoute
+  '/_marketing/my-bookings': typeof MarketingMyBookingsRoute
   '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_marketing/profile': typeof MarketingProfileRoute
   '/_marketing/quote-results': typeof MarketingQuoteResultsRoute
   '/_marketing/select-vehicle': typeof MarketingSelectVehicleRoute
   '/_marketing/services': typeof MarketingServicesRoute
   '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
-  '/customer': typeof CustomerRouteWithChildren
-  '/customer/_layout': typeof CustomerLayoutRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverRouteWithChildren
   '/driver/_layout': typeof DriverLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
+  '/_marketing/account/settings': typeof MarketingAccountSettingsRoute
   '/_marketing/book-car/$carId': typeof MarketingBookCarCarIdRoute
+  '/_marketing/book-quote/$quoteId': typeof MarketingBookQuoteQuoteIdRoute
   '/_marketing/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
-  '/customer/_layout/book-appointment': typeof CustomerLayoutBookAppointmentRouteWithChildren
-  '/customer/_layout/bookings': typeof CustomerLayoutBookingsRoute
-  '/customer/_layout/calculate-quote': typeof CustomerLayoutCalculateQuoteRoute
-  '/customer/_layout/cars': typeof CustomerLayoutCarsRoute
-  '/customer/_layout/instant-quote': typeof CustomerLayoutInstantQuoteRoute
-  '/customer/_layout/profile': typeof CustomerLayoutProfileRoute
-  '/customer/_layout/quote-results': typeof CustomerLayoutQuoteResultsRoute
-  '/customer/_layout/services': typeof CustomerLayoutServicesRoute
+  '/admin/dashboard': typeof AdminDashboardRouteWithChildren
+  '/admin/dashboard/_layout': typeof AdminDashboardLayoutRouteWithChildren
+  '/dashboard/_layout/book-appointment': typeof DashboardLayoutBookAppointmentRouteWithChildren
+  '/dashboard/_layout/calculate-quote': typeof DashboardLayoutCalculateQuoteRoute
+  '/dashboard/_layout/cars': typeof DashboardLayoutCarsRoute
+  '/dashboard/_layout/instant-quote': typeof DashboardLayoutInstantQuoteRoute
+  '/dashboard/_layout/quote-results': typeof DashboardLayoutQuoteResultsRoute
+  '/dashboard/_layout/services': typeof DashboardLayoutServicesRoute
   '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/_layout/profile': typeof DriverLayoutProfileRoute
   '/driver/_layout/settings': typeof DriverLayoutSettingsRoute
   '/driver/_layout/trips': typeof DriverLayoutTripsRoute
-  '/customer/_layout/': typeof CustomerLayoutIndexRoute
-  '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
   '/driver/_layout/': typeof DriverLayoutIndexRoute
-  '/customer/_layout/account/settings': typeof CustomerLayoutAccountSettingsRoute
-  '/customer/_layout/book-appointment/$carId': typeof CustomerLayoutBookAppointmentCarIdRoute
-  '/customer/_layout/book-quote/$quoteId': typeof CustomerLayoutBookQuoteQuoteIdRoute
-  '/customer/_layout/book-service/$serviceId': typeof CustomerLayoutBookServiceServiceIdRoute
-  '/customer/_layout/car-details/$carId': typeof CustomerLayoutCarDetailsCarIdRoute
-  '/dashboard/_layout/cars/add-car': typeof DashboardLayoutCarsAddCarRoute
-  '/dashboard/_layout/drivers/onboarding': typeof DashboardLayoutDriversOnboardingRoute
-  '/dashboard/_layout/admin-testing/': typeof DashboardLayoutAdminTestingIndexRoute
-  '/dashboard/_layout/analytics/': typeof DashboardLayoutAnalyticsIndexRoute
-  '/dashboard/_layout/board/': typeof DashboardLayoutBoardIndexRoute
-  '/dashboard/_layout/bookings/': typeof DashboardLayoutBookingsIndexRoute
-  '/dashboard/_layout/bookmarks/': typeof DashboardLayoutBookmarksIndexRoute
-  '/dashboard/_layout/cars/': typeof DashboardLayoutCarsIndexRoute
-  '/dashboard/_layout/drivers/': typeof DashboardLayoutDriversIndexRoute
-  '/dashboard/_layout/inbox/': typeof DashboardLayoutInboxIndexRoute
-  '/dashboard/_layout/packages/': typeof DashboardLayoutPackagesIndexRoute
-  '/dashboard/_layout/pricing-config/': typeof DashboardLayoutPricingConfigIndexRoute
-  '/dashboard/_layout/publications/': typeof DashboardLayoutPublicationsIndexRoute
-  '/dashboard/_layout/published/': typeof DashboardLayoutPublishedIndexRoute
-  '/dashboard/_layout/report/': typeof DashboardLayoutReportIndexRoute
-  '/dashboard/_layout/settings/': typeof DashboardLayoutSettingsIndexRoute
-  '/dashboard/_layout/todays-scheduled/': typeof DashboardLayoutTodaysScheduledIndexRoute
+  '/dashboard/_layout/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
+  '/dashboard/_layout/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
+  '/dashboard/_layout/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
+  '/admin/dashboard/_layout/': typeof AdminDashboardLayoutIndexRoute
+  '/admin/dashboard/_layout/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
+  '/admin/dashboard/_layout/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
+  '/admin/dashboard/_layout/admin-testing/': typeof AdminDashboardLayoutAdminTestingIndexRoute
+  '/admin/dashboard/_layout/analytics/': typeof AdminDashboardLayoutAnalyticsIndexRoute
+  '/admin/dashboard/_layout/board/': typeof AdminDashboardLayoutBoardIndexRoute
+  '/admin/dashboard/_layout/bookings/': typeof AdminDashboardLayoutBookingsIndexRoute
+  '/admin/dashboard/_layout/bookmarks/': typeof AdminDashboardLayoutBookmarksIndexRoute
+  '/admin/dashboard/_layout/cars/': typeof AdminDashboardLayoutCarsIndexRoute
+  '/admin/dashboard/_layout/drivers/': typeof AdminDashboardLayoutDriversIndexRoute
+  '/admin/dashboard/_layout/inbox/': typeof AdminDashboardLayoutInboxIndexRoute
+  '/admin/dashboard/_layout/packages/': typeof AdminDashboardLayoutPackagesIndexRoute
+  '/admin/dashboard/_layout/pricing-config/': typeof AdminDashboardLayoutPricingConfigIndexRoute
+  '/admin/dashboard/_layout/publications/': typeof AdminDashboardLayoutPublicationsIndexRoute
+  '/admin/dashboard/_layout/published/': typeof AdminDashboardLayoutPublishedIndexRoute
+  '/admin/dashboard/_layout/report/': typeof AdminDashboardLayoutReportIndexRoute
+  '/admin/dashboard/_layout/settings/': typeof AdminDashboardLayoutSettingsIndexRoute
+  '/admin/dashboard/_layout/todays-scheduled/': typeof AdminDashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -580,185 +571,181 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/about-us'
-    | '/book-quote'
-    | '/booking'
     | '/calculate-quote'
     | '/contact-us'
+    | '/dashboard'
     | '/faqs'
+    | '/fleet'
+    | '/my-bookings'
     | '/privacy'
+    | '/profile'
     | '/quote-results'
     | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
-    | '/customer'
-    | '/dashboard'
     | '/driver'
     | '/'
+    | '/account/settings'
     | '/book-car/$carId'
+    | '/book-quote/$quoteId'
     | '/book-service/$serviceId'
-    | '/customer/book-appointment'
-    | '/customer/bookings'
-    | '/customer/calculate-quote'
-    | '/customer/cars'
-    | '/customer/instant-quote'
-    | '/customer/profile'
-    | '/customer/quote-results'
-    | '/customer/services'
+    | '/admin/dashboard'
+    | '/dashboard/book-appointment'
+    | '/dashboard/calculate-quote'
+    | '/dashboard/cars'
+    | '/dashboard/instant-quote'
+    | '/dashboard/quote-results'
+    | '/dashboard/services'
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
     | '/driver/trips'
-    | '/customer/'
-    | '/dashboard/'
     | '/driver/'
-    | '/customer/account/settings'
-    | '/customer/book-appointment/$carId'
-    | '/customer/book-quote/$quoteId'
-    | '/customer/book-service/$serviceId'
-    | '/customer/car-details/$carId'
-    | '/dashboard/cars/add-car'
-    | '/dashboard/drivers/onboarding'
-    | '/dashboard/admin-testing'
-    | '/dashboard/analytics'
-    | '/dashboard/board'
-    | '/dashboard/bookings'
-    | '/dashboard/bookmarks'
-    | '/dashboard/cars'
-    | '/dashboard/drivers'
-    | '/dashboard/inbox'
-    | '/dashboard/packages'
-    | '/dashboard/pricing-config'
-    | '/dashboard/publications'
-    | '/dashboard/published'
-    | '/dashboard/report'
-    | '/dashboard/settings'
-    | '/dashboard/todays-scheduled'
+    | '/dashboard/book-appointment/$carId'
+    | '/dashboard/book-service/$serviceId'
+    | '/dashboard/car-details/$carId'
+    | '/admin/dashboard/'
+    | '/admin/dashboard/cars/add-car'
+    | '/admin/dashboard/drivers/onboarding'
+    | '/admin/dashboard/admin-testing'
+    | '/admin/dashboard/analytics'
+    | '/admin/dashboard/board'
+    | '/admin/dashboard/bookings'
+    | '/admin/dashboard/bookmarks'
+    | '/admin/dashboard/cars'
+    | '/admin/dashboard/drivers'
+    | '/admin/dashboard/inbox'
+    | '/admin/dashboard/packages'
+    | '/admin/dashboard/pricing-config'
+    | '/admin/dashboard/publications'
+    | '/admin/dashboard/published'
+    | '/admin/dashboard/report'
+    | '/admin/dashboard/settings'
+    | '/admin/dashboard/todays-scheduled'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
     | '/sign-up'
     | '/about-us'
-    | '/book-quote'
-    | '/booking'
     | '/calculate-quote'
     | '/contact-us'
+    | '/dashboard'
     | '/faqs'
+    | '/fleet'
+    | '/my-bookings'
     | '/privacy'
+    | '/profile'
     | '/quote-results'
     | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
-    | '/customer'
-    | '/dashboard'
     | '/driver'
     | '/'
+    | '/account/settings'
     | '/book-car/$carId'
+    | '/book-quote/$quoteId'
     | '/book-service/$serviceId'
-    | '/customer/book-appointment'
-    | '/customer/bookings'
-    | '/customer/calculate-quote'
-    | '/customer/cars'
-    | '/customer/instant-quote'
-    | '/customer/profile'
-    | '/customer/quote-results'
-    | '/customer/services'
+    | '/admin/dashboard'
+    | '/dashboard/book-appointment'
+    | '/dashboard/calculate-quote'
+    | '/dashboard/cars'
+    | '/dashboard/instant-quote'
+    | '/dashboard/quote-results'
+    | '/dashboard/services'
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
     | '/driver/trips'
-    | '/customer/account/settings'
-    | '/customer/book-appointment/$carId'
-    | '/customer/book-quote/$quoteId'
-    | '/customer/book-service/$serviceId'
-    | '/customer/car-details/$carId'
-    | '/dashboard/cars/add-car'
-    | '/dashboard/drivers/onboarding'
-    | '/dashboard/admin-testing'
-    | '/dashboard/analytics'
-    | '/dashboard/board'
-    | '/dashboard/bookings'
-    | '/dashboard/bookmarks'
-    | '/dashboard/cars'
-    | '/dashboard/drivers'
-    | '/dashboard/inbox'
-    | '/dashboard/packages'
-    | '/dashboard/pricing-config'
-    | '/dashboard/publications'
-    | '/dashboard/published'
-    | '/dashboard/report'
-    | '/dashboard/settings'
-    | '/dashboard/todays-scheduled'
+    | '/dashboard/book-appointment/$carId'
+    | '/dashboard/book-service/$serviceId'
+    | '/dashboard/car-details/$carId'
+    | '/admin/dashboard/cars/add-car'
+    | '/admin/dashboard/drivers/onboarding'
+    | '/admin/dashboard/admin-testing'
+    | '/admin/dashboard/analytics'
+    | '/admin/dashboard/board'
+    | '/admin/dashboard/bookings'
+    | '/admin/dashboard/bookmarks'
+    | '/admin/dashboard/cars'
+    | '/admin/dashboard/drivers'
+    | '/admin/dashboard/inbox'
+    | '/admin/dashboard/packages'
+    | '/admin/dashboard/pricing-config'
+    | '/admin/dashboard/publications'
+    | '/admin/dashboard/published'
+    | '/admin/dashboard/report'
+    | '/admin/dashboard/settings'
+    | '/admin/dashboard/todays-scheduled'
   id:
     | '__root__'
     | '/_marketing'
     | '/_auth/sign-in'
     | '/_auth/sign-up'
     | '/_marketing/about-us'
-    | '/_marketing/book-quote'
-    | '/_marketing/booking'
     | '/_marketing/calculate-quote'
     | '/_marketing/contact-us'
+    | '/_marketing/dashboard'
     | '/_marketing/faqs'
+    | '/_marketing/fleet'
+    | '/_marketing/my-bookings'
     | '/_marketing/privacy'
+    | '/_marketing/profile'
     | '/_marketing/quote-results'
     | '/_marketing/select-vehicle'
     | '/_marketing/services'
     | '/_marketing/terms-and-conditions'
-    | '/customer'
-    | '/customer/_layout'
     | '/dashboard'
     | '/dashboard/_layout'
     | '/driver'
     | '/driver/_layout'
     | '/_marketing/'
+    | '/_marketing/account/settings'
     | '/_marketing/book-car/$carId'
+    | '/_marketing/book-quote/$quoteId'
     | '/_marketing/book-service/$serviceId'
-    | '/customer/_layout/book-appointment'
-    | '/customer/_layout/bookings'
-    | '/customer/_layout/calculate-quote'
-    | '/customer/_layout/cars'
-    | '/customer/_layout/instant-quote'
-    | '/customer/_layout/profile'
-    | '/customer/_layout/quote-results'
-    | '/customer/_layout/services'
+    | '/admin/dashboard'
+    | '/admin/dashboard/_layout'
+    | '/dashboard/_layout/book-appointment'
+    | '/dashboard/_layout/calculate-quote'
+    | '/dashboard/_layout/cars'
+    | '/dashboard/_layout/instant-quote'
+    | '/dashboard/_layout/quote-results'
+    | '/dashboard/_layout/services'
     | '/driver/_layout/onboarding'
     | '/driver/_layout/profile'
     | '/driver/_layout/settings'
     | '/driver/_layout/trips'
-    | '/customer/_layout/'
-    | '/dashboard/_layout/'
     | '/driver/_layout/'
-    | '/customer/_layout/account/settings'
-    | '/customer/_layout/book-appointment/$carId'
-    | '/customer/_layout/book-quote/$quoteId'
-    | '/customer/_layout/book-service/$serviceId'
-    | '/customer/_layout/car-details/$carId'
-    | '/dashboard/_layout/cars/add-car'
-    | '/dashboard/_layout/drivers/onboarding'
-    | '/dashboard/_layout/admin-testing/'
-    | '/dashboard/_layout/analytics/'
-    | '/dashboard/_layout/board/'
-    | '/dashboard/_layout/bookings/'
-    | '/dashboard/_layout/bookmarks/'
-    | '/dashboard/_layout/cars/'
-    | '/dashboard/_layout/drivers/'
-    | '/dashboard/_layout/inbox/'
-    | '/dashboard/_layout/packages/'
-    | '/dashboard/_layout/pricing-config/'
-    | '/dashboard/_layout/publications/'
-    | '/dashboard/_layout/published/'
-    | '/dashboard/_layout/report/'
-    | '/dashboard/_layout/settings/'
-    | '/dashboard/_layout/todays-scheduled/'
+    | '/dashboard/_layout/book-appointment/$carId'
+    | '/dashboard/_layout/book-service/$serviceId'
+    | '/dashboard/_layout/car-details/$carId'
+    | '/admin/dashboard/_layout/'
+    | '/admin/dashboard/_layout/cars/add-car'
+    | '/admin/dashboard/_layout/drivers/onboarding'
+    | '/admin/dashboard/_layout/admin-testing/'
+    | '/admin/dashboard/_layout/analytics/'
+    | '/admin/dashboard/_layout/board/'
+    | '/admin/dashboard/_layout/bookings/'
+    | '/admin/dashboard/_layout/bookmarks/'
+    | '/admin/dashboard/_layout/cars/'
+    | '/admin/dashboard/_layout/drivers/'
+    | '/admin/dashboard/_layout/inbox/'
+    | '/admin/dashboard/_layout/packages/'
+    | '/admin/dashboard/_layout/pricing-config/'
+    | '/admin/dashboard/_layout/publications/'
+    | '/admin/dashboard/_layout/published/'
+    | '/admin/dashboard/_layout/report/'
+    | '/admin/dashboard/_layout/settings/'
+    | '/admin/dashboard/_layout/todays-scheduled/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRouteWithChildren
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
-  CustomerRoute: typeof CustomerRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   DriverRoute: typeof DriverRouteWithChildren
+  AdminDashboardRoute: typeof AdminDashboardRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -777,18 +764,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/customer': {
-      id: '/customer'
-      path: '/customer'
-      fullPath: '/customer'
-      preLoaderRoute: typeof CustomerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_marketing': {
       id: '/_marketing'
       path: ''
       fullPath: ''
       preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing/': {
@@ -811,13 +798,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardLayoutRouteImport
       parentRoute: typeof DashboardRoute
-    }
-    '/customer/_layout': {
-      id: '/customer/_layout'
-      path: '/customer'
-      fullPath: '/customer'
-      preLoaderRoute: typeof CustomerLayoutRouteImport
-      parentRoute: typeof CustomerRoute
     }
     '/_marketing/terms-and-conditions': {
       id: '/_marketing/terms-and-conditions'
@@ -847,6 +827,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingQuoteResultsRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/profile': {
+      id: '/_marketing/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof MarketingProfileRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/privacy': {
       id: '/_marketing/privacy'
       path: '/privacy'
@@ -854,11 +841,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingPrivacyRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/my-bookings': {
+      id: '/_marketing/my-bookings'
+      path: '/my-bookings'
+      fullPath: '/my-bookings'
+      preLoaderRoute: typeof MarketingMyBookingsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/fleet': {
+      id: '/_marketing/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof MarketingFleetRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/faqs': {
       id: '/_marketing/faqs'
       path: '/faqs'
       fullPath: '/faqs'
       preLoaderRoute: typeof MarketingFaqsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/dashboard': {
+      id: '/_marketing/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof MarketingDashboardRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/contact-us': {
@@ -873,20 +881,6 @@ declare module '@tanstack/react-router' {
       path: '/calculate-quote'
       fullPath: '/calculate-quote'
       preLoaderRoute: typeof MarketingCalculateQuoteRouteImport
-      parentRoute: typeof MarketingRoute
-    }
-    '/_marketing/booking': {
-      id: '/_marketing/booking'
-      path: '/booking'
-      fullPath: '/booking'
-      preLoaderRoute: typeof MarketingBookingRouteImport
-      parentRoute: typeof MarketingRoute
-    }
-    '/_marketing/book-quote': {
-      id: '/_marketing/book-quote'
-      path: '/book-quote'
-      fullPath: '/book-quote'
-      preLoaderRoute: typeof MarketingBookQuoteRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/about-us': {
@@ -917,20 +911,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DriverLayoutIndexRouteImport
       parentRoute: typeof DriverLayoutRoute
     }
-    '/dashboard/_layout/': {
-      id: '/dashboard/_layout/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardLayoutIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/customer/_layout/': {
-      id: '/customer/_layout/'
-      path: '/'
-      fullPath: '/customer/'
-      preLoaderRoute: typeof CustomerLayoutIndexRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
     '/driver/_layout/trips': {
       id: '/driver/_layout/trips'
       path: '/trips'
@@ -959,67 +939,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DriverLayoutOnboardingRouteImport
       parentRoute: typeof DriverLayoutRoute
     }
-    '/customer/_layout/services': {
-      id: '/customer/_layout/services'
+    '/dashboard/_layout/services': {
+      id: '/dashboard/_layout/services'
       path: '/services'
-      fullPath: '/customer/services'
-      preLoaderRoute: typeof CustomerLayoutServicesRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/dashboard/services'
+      preLoaderRoute: typeof DashboardLayoutServicesRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/customer/_layout/quote-results': {
-      id: '/customer/_layout/quote-results'
+    '/dashboard/_layout/quote-results': {
+      id: '/dashboard/_layout/quote-results'
       path: '/quote-results'
-      fullPath: '/customer/quote-results'
-      preLoaderRoute: typeof CustomerLayoutQuoteResultsRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/dashboard/quote-results'
+      preLoaderRoute: typeof DashboardLayoutQuoteResultsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/customer/_layout/profile': {
-      id: '/customer/_layout/profile'
-      path: '/profile'
-      fullPath: '/customer/profile'
-      preLoaderRoute: typeof CustomerLayoutProfileRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
-    '/customer/_layout/instant-quote': {
-      id: '/customer/_layout/instant-quote'
+    '/dashboard/_layout/instant-quote': {
+      id: '/dashboard/_layout/instant-quote'
       path: '/instant-quote'
-      fullPath: '/customer/instant-quote'
-      preLoaderRoute: typeof CustomerLayoutInstantQuoteRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/dashboard/instant-quote'
+      preLoaderRoute: typeof DashboardLayoutInstantQuoteRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/customer/_layout/cars': {
-      id: '/customer/_layout/cars'
+    '/dashboard/_layout/cars': {
+      id: '/dashboard/_layout/cars'
       path: '/cars'
-      fullPath: '/customer/cars'
-      preLoaderRoute: typeof CustomerLayoutCarsRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/dashboard/cars'
+      preLoaderRoute: typeof DashboardLayoutCarsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/customer/_layout/calculate-quote': {
-      id: '/customer/_layout/calculate-quote'
+    '/dashboard/_layout/calculate-quote': {
+      id: '/dashboard/_layout/calculate-quote'
       path: '/calculate-quote'
-      fullPath: '/customer/calculate-quote'
-      preLoaderRoute: typeof CustomerLayoutCalculateQuoteRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/dashboard/calculate-quote'
+      preLoaderRoute: typeof DashboardLayoutCalculateQuoteRouteImport
+      parentRoute: typeof DashboardLayoutRoute
     }
-    '/customer/_layout/bookings': {
-      id: '/customer/_layout/bookings'
-      path: '/bookings'
-      fullPath: '/customer/bookings'
-      preLoaderRoute: typeof CustomerLayoutBookingsRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
-    '/customer/_layout/book-appointment': {
-      id: '/customer/_layout/book-appointment'
+    '/dashboard/_layout/book-appointment': {
+      id: '/dashboard/_layout/book-appointment'
       path: '/book-appointment'
-      fullPath: '/customer/book-appointment'
-      preLoaderRoute: typeof CustomerLayoutBookAppointmentRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/dashboard/book-appointment'
+      preLoaderRoute: typeof DashboardLayoutBookAppointmentRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout': {
+      id: '/admin/dashboard/_layout'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardLayoutRouteImport
+      parentRoute: typeof AdminDashboardRoute
     }
     '/_marketing/book-service/$serviceId': {
       id: '/_marketing/book-service/$serviceId'
       path: '/book-service/$serviceId'
       fullPath: '/book-service/$serviceId'
       preLoaderRoute: typeof MarketingBookServiceServiceIdRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/book-quote/$quoteId': {
+      id: '/_marketing/book-quote/$quoteId'
+      path: '/book-quote/$quoteId'
+      fullPath: '/book-quote/$quoteId'
+      preLoaderRoute: typeof MarketingBookQuoteQuoteIdRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/book-car/$carId': {
@@ -1029,194 +1009,202 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingBookCarCarIdRouteImport
       parentRoute: typeof MarketingRoute
     }
-    '/dashboard/_layout/todays-scheduled/': {
-      id: '/dashboard/_layout/todays-scheduled/'
-      path: '/todays-scheduled'
-      fullPath: '/dashboard/todays-scheduled'
-      preLoaderRoute: typeof DashboardLayoutTodaysScheduledIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/settings/': {
-      id: '/dashboard/_layout/settings/'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardLayoutSettingsIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/report/': {
-      id: '/dashboard/_layout/report/'
-      path: '/report'
-      fullPath: '/dashboard/report'
-      preLoaderRoute: typeof DashboardLayoutReportIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/published/': {
-      id: '/dashboard/_layout/published/'
-      path: '/published'
-      fullPath: '/dashboard/published'
-      preLoaderRoute: typeof DashboardLayoutPublishedIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/publications/': {
-      id: '/dashboard/_layout/publications/'
-      path: '/publications'
-      fullPath: '/dashboard/publications'
-      preLoaderRoute: typeof DashboardLayoutPublicationsIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/pricing-config/': {
-      id: '/dashboard/_layout/pricing-config/'
-      path: '/pricing-config'
-      fullPath: '/dashboard/pricing-config'
-      preLoaderRoute: typeof DashboardLayoutPricingConfigIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/packages/': {
-      id: '/dashboard/_layout/packages/'
-      path: '/packages'
-      fullPath: '/dashboard/packages'
-      preLoaderRoute: typeof DashboardLayoutPackagesIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/inbox/': {
-      id: '/dashboard/_layout/inbox/'
-      path: '/inbox'
-      fullPath: '/dashboard/inbox'
-      preLoaderRoute: typeof DashboardLayoutInboxIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/drivers/': {
-      id: '/dashboard/_layout/drivers/'
-      path: '/drivers'
-      fullPath: '/dashboard/drivers'
-      preLoaderRoute: typeof DashboardLayoutDriversIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/cars/': {
-      id: '/dashboard/_layout/cars/'
-      path: '/cars'
-      fullPath: '/dashboard/cars'
-      preLoaderRoute: typeof DashboardLayoutCarsIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/bookmarks/': {
-      id: '/dashboard/_layout/bookmarks/'
-      path: '/bookmarks'
-      fullPath: '/dashboard/bookmarks'
-      preLoaderRoute: typeof DashboardLayoutBookmarksIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/bookings/': {
-      id: '/dashboard/_layout/bookings/'
-      path: '/bookings'
-      fullPath: '/dashboard/bookings'
-      preLoaderRoute: typeof DashboardLayoutBookingsIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/board/': {
-      id: '/dashboard/_layout/board/'
-      path: '/board'
-      fullPath: '/dashboard/board'
-      preLoaderRoute: typeof DashboardLayoutBoardIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/analytics/': {
-      id: '/dashboard/_layout/analytics/'
-      path: '/analytics'
-      fullPath: '/dashboard/analytics'
-      preLoaderRoute: typeof DashboardLayoutAnalyticsIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/admin-testing/': {
-      id: '/dashboard/_layout/admin-testing/'
-      path: '/admin-testing'
-      fullPath: '/dashboard/admin-testing'
-      preLoaderRoute: typeof DashboardLayoutAdminTestingIndexRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/drivers/onboarding': {
-      id: '/dashboard/_layout/drivers/onboarding'
-      path: '/drivers/onboarding'
-      fullPath: '/dashboard/drivers/onboarding'
-      preLoaderRoute: typeof DashboardLayoutDriversOnboardingRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/cars/add-car': {
-      id: '/dashboard/_layout/cars/add-car'
-      path: '/cars/add-car'
-      fullPath: '/dashboard/cars/add-car'
-      preLoaderRoute: typeof DashboardLayoutCarsAddCarRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/customer/_layout/car-details/$carId': {
-      id: '/customer/_layout/car-details/$carId'
-      path: '/car-details/$carId'
-      fullPath: '/customer/car-details/$carId'
-      preLoaderRoute: typeof CustomerLayoutCarDetailsCarIdRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
-    '/customer/_layout/book-service/$serviceId': {
-      id: '/customer/_layout/book-service/$serviceId'
-      path: '/book-service/$serviceId'
-      fullPath: '/customer/book-service/$serviceId'
-      preLoaderRoute: typeof CustomerLayoutBookServiceServiceIdRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
-    '/customer/_layout/book-quote/$quoteId': {
-      id: '/customer/_layout/book-quote/$quoteId'
-      path: '/book-quote/$quoteId'
-      fullPath: '/customer/book-quote/$quoteId'
-      preLoaderRoute: typeof CustomerLayoutBookQuoteQuoteIdRouteImport
-      parentRoute: typeof CustomerLayoutRoute
-    }
-    '/customer/_layout/book-appointment/$carId': {
-      id: '/customer/_layout/book-appointment/$carId'
-      path: '/$carId'
-      fullPath: '/customer/book-appointment/$carId'
-      preLoaderRoute: typeof CustomerLayoutBookAppointmentCarIdRouteImport
-      parentRoute: typeof CustomerLayoutBookAppointmentRoute
-    }
-    '/customer/_layout/account/settings': {
-      id: '/customer/_layout/account/settings'
+    '/_marketing/account/settings': {
+      id: '/_marketing/account/settings'
       path: '/account/settings'
-      fullPath: '/customer/account/settings'
-      preLoaderRoute: typeof CustomerLayoutAccountSettingsRouteImport
-      parentRoute: typeof CustomerLayoutRoute
+      fullPath: '/account/settings'
+      preLoaderRoute: typeof MarketingAccountSettingsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/admin/dashboard/_layout/': {
+      id: '/admin/dashboard/_layout/'
+      path: '/'
+      fullPath: '/admin/dashboard/'
+      preLoaderRoute: typeof AdminDashboardLayoutIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/dashboard/_layout/car-details/$carId': {
+      id: '/dashboard/_layout/car-details/$carId'
+      path: '/car-details/$carId'
+      fullPath: '/dashboard/car-details/$carId'
+      preLoaderRoute: typeof DashboardLayoutCarDetailsCarIdRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/book-service/$serviceId': {
+      id: '/dashboard/_layout/book-service/$serviceId'
+      path: '/book-service/$serviceId'
+      fullPath: '/dashboard/book-service/$serviceId'
+      preLoaderRoute: typeof DashboardLayoutBookServiceServiceIdRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/book-appointment/$carId': {
+      id: '/dashboard/_layout/book-appointment/$carId'
+      path: '/$carId'
+      fullPath: '/dashboard/book-appointment/$carId'
+      preLoaderRoute: typeof DashboardLayoutBookAppointmentCarIdRouteImport
+      parentRoute: typeof DashboardLayoutBookAppointmentRoute
+    }
+    '/admin/dashboard/_layout/todays-scheduled/': {
+      id: '/admin/dashboard/_layout/todays-scheduled/'
+      path: '/todays-scheduled'
+      fullPath: '/admin/dashboard/todays-scheduled'
+      preLoaderRoute: typeof AdminDashboardLayoutTodaysScheduledIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/settings/': {
+      id: '/admin/dashboard/_layout/settings/'
+      path: '/settings'
+      fullPath: '/admin/dashboard/settings'
+      preLoaderRoute: typeof AdminDashboardLayoutSettingsIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/report/': {
+      id: '/admin/dashboard/_layout/report/'
+      path: '/report'
+      fullPath: '/admin/dashboard/report'
+      preLoaderRoute: typeof AdminDashboardLayoutReportIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/published/': {
+      id: '/admin/dashboard/_layout/published/'
+      path: '/published'
+      fullPath: '/admin/dashboard/published'
+      preLoaderRoute: typeof AdminDashboardLayoutPublishedIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/publications/': {
+      id: '/admin/dashboard/_layout/publications/'
+      path: '/publications'
+      fullPath: '/admin/dashboard/publications'
+      preLoaderRoute: typeof AdminDashboardLayoutPublicationsIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/pricing-config/': {
+      id: '/admin/dashboard/_layout/pricing-config/'
+      path: '/pricing-config'
+      fullPath: '/admin/dashboard/pricing-config'
+      preLoaderRoute: typeof AdminDashboardLayoutPricingConfigIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/packages/': {
+      id: '/admin/dashboard/_layout/packages/'
+      path: '/packages'
+      fullPath: '/admin/dashboard/packages'
+      preLoaderRoute: typeof AdminDashboardLayoutPackagesIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/inbox/': {
+      id: '/admin/dashboard/_layout/inbox/'
+      path: '/inbox'
+      fullPath: '/admin/dashboard/inbox'
+      preLoaderRoute: typeof AdminDashboardLayoutInboxIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/drivers/': {
+      id: '/admin/dashboard/_layout/drivers/'
+      path: '/drivers'
+      fullPath: '/admin/dashboard/drivers'
+      preLoaderRoute: typeof AdminDashboardLayoutDriversIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/cars/': {
+      id: '/admin/dashboard/_layout/cars/'
+      path: '/cars'
+      fullPath: '/admin/dashboard/cars'
+      preLoaderRoute: typeof AdminDashboardLayoutCarsIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/bookmarks/': {
+      id: '/admin/dashboard/_layout/bookmarks/'
+      path: '/bookmarks'
+      fullPath: '/admin/dashboard/bookmarks'
+      preLoaderRoute: typeof AdminDashboardLayoutBookmarksIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/bookings/': {
+      id: '/admin/dashboard/_layout/bookings/'
+      path: '/bookings'
+      fullPath: '/admin/dashboard/bookings'
+      preLoaderRoute: typeof AdminDashboardLayoutBookingsIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/board/': {
+      id: '/admin/dashboard/_layout/board/'
+      path: '/board'
+      fullPath: '/admin/dashboard/board'
+      preLoaderRoute: typeof AdminDashboardLayoutBoardIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/analytics/': {
+      id: '/admin/dashboard/_layout/analytics/'
+      path: '/analytics'
+      fullPath: '/admin/dashboard/analytics'
+      preLoaderRoute: typeof AdminDashboardLayoutAnalyticsIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/admin-testing/': {
+      id: '/admin/dashboard/_layout/admin-testing/'
+      path: '/admin-testing'
+      fullPath: '/admin/dashboard/admin-testing'
+      preLoaderRoute: typeof AdminDashboardLayoutAdminTestingIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/drivers/onboarding': {
+      id: '/admin/dashboard/_layout/drivers/onboarding'
+      path: '/drivers/onboarding'
+      fullPath: '/admin/dashboard/drivers/onboarding'
+      preLoaderRoute: typeof AdminDashboardLayoutDriversOnboardingRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/cars/add-car': {
+      id: '/admin/dashboard/_layout/cars/add-car'
+      path: '/cars/add-car'
+      fullPath: '/admin/dashboard/cars/add-car'
+      preLoaderRoute: typeof AdminDashboardLayoutCarsAddCarRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
     }
   }
 }
 
 interface MarketingRouteChildren {
   MarketingAboutUsRoute: typeof MarketingAboutUsRoute
-  MarketingBookQuoteRoute: typeof MarketingBookQuoteRoute
-  MarketingBookingRoute: typeof MarketingBookingRoute
   MarketingCalculateQuoteRoute: typeof MarketingCalculateQuoteRoute
   MarketingContactUsRoute: typeof MarketingContactUsRoute
+  MarketingDashboardRoute: typeof MarketingDashboardRoute
   MarketingFaqsRoute: typeof MarketingFaqsRoute
+  MarketingFleetRoute: typeof MarketingFleetRoute
+  MarketingMyBookingsRoute: typeof MarketingMyBookingsRoute
   MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingProfileRoute: typeof MarketingProfileRoute
   MarketingQuoteResultsRoute: typeof MarketingQuoteResultsRoute
   MarketingSelectVehicleRoute: typeof MarketingSelectVehicleRoute
   MarketingServicesRoute: typeof MarketingServicesRoute
   MarketingTermsAndConditionsRoute: typeof MarketingTermsAndConditionsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
+  MarketingAccountSettingsRoute: typeof MarketingAccountSettingsRoute
   MarketingBookCarCarIdRoute: typeof MarketingBookCarCarIdRoute
+  MarketingBookQuoteQuoteIdRoute: typeof MarketingBookQuoteQuoteIdRoute
   MarketingBookServiceServiceIdRoute: typeof MarketingBookServiceServiceIdRoute
 }
 
 const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingAboutUsRoute: MarketingAboutUsRoute,
-  MarketingBookQuoteRoute: MarketingBookQuoteRoute,
-  MarketingBookingRoute: MarketingBookingRoute,
   MarketingCalculateQuoteRoute: MarketingCalculateQuoteRoute,
   MarketingContactUsRoute: MarketingContactUsRoute,
+  MarketingDashboardRoute: MarketingDashboardRoute,
   MarketingFaqsRoute: MarketingFaqsRoute,
+  MarketingFleetRoute: MarketingFleetRoute,
+  MarketingMyBookingsRoute: MarketingMyBookingsRoute,
   MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingProfileRoute: MarketingProfileRoute,
   MarketingQuoteResultsRoute: MarketingQuoteResultsRoute,
   MarketingSelectVehicleRoute: MarketingSelectVehicleRoute,
   MarketingServicesRoute: MarketingServicesRoute,
   MarketingTermsAndConditionsRoute: MarketingTermsAndConditionsRoute,
   MarketingIndexRoute: MarketingIndexRoute,
+  MarketingAccountSettingsRoute: MarketingAccountSettingsRoute,
   MarketingBookCarCarIdRoute: MarketingBookCarCarIdRoute,
+  MarketingBookQuoteQuoteIdRoute: MarketingBookQuoteQuoteIdRoute,
   MarketingBookServiceServiceIdRoute: MarketingBookServiceServiceIdRoute,
 }
 
@@ -1224,113 +1212,43 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
-interface CustomerLayoutBookAppointmentRouteChildren {
-  CustomerLayoutBookAppointmentCarIdRoute: typeof CustomerLayoutBookAppointmentCarIdRoute
+interface DashboardLayoutBookAppointmentRouteChildren {
+  DashboardLayoutBookAppointmentCarIdRoute: typeof DashboardLayoutBookAppointmentCarIdRoute
 }
 
-const CustomerLayoutBookAppointmentRouteChildren: CustomerLayoutBookAppointmentRouteChildren =
+const DashboardLayoutBookAppointmentRouteChildren: DashboardLayoutBookAppointmentRouteChildren =
   {
-    CustomerLayoutBookAppointmentCarIdRoute:
-      CustomerLayoutBookAppointmentCarIdRoute,
+    DashboardLayoutBookAppointmentCarIdRoute:
+      DashboardLayoutBookAppointmentCarIdRoute,
   }
 
-const CustomerLayoutBookAppointmentRouteWithChildren =
-  CustomerLayoutBookAppointmentRoute._addFileChildren(
-    CustomerLayoutBookAppointmentRouteChildren,
+const DashboardLayoutBookAppointmentRouteWithChildren =
+  DashboardLayoutBookAppointmentRoute._addFileChildren(
+    DashboardLayoutBookAppointmentRouteChildren,
   )
 
-interface CustomerLayoutRouteChildren {
-  CustomerLayoutBookAppointmentRoute: typeof CustomerLayoutBookAppointmentRouteWithChildren
-  CustomerLayoutBookingsRoute: typeof CustomerLayoutBookingsRoute
-  CustomerLayoutCalculateQuoteRoute: typeof CustomerLayoutCalculateQuoteRoute
-  CustomerLayoutCarsRoute: typeof CustomerLayoutCarsRoute
-  CustomerLayoutInstantQuoteRoute: typeof CustomerLayoutInstantQuoteRoute
-  CustomerLayoutProfileRoute: typeof CustomerLayoutProfileRoute
-  CustomerLayoutQuoteResultsRoute: typeof CustomerLayoutQuoteResultsRoute
-  CustomerLayoutServicesRoute: typeof CustomerLayoutServicesRoute
-  CustomerLayoutIndexRoute: typeof CustomerLayoutIndexRoute
-  CustomerLayoutAccountSettingsRoute: typeof CustomerLayoutAccountSettingsRoute
-  CustomerLayoutBookQuoteQuoteIdRoute: typeof CustomerLayoutBookQuoteQuoteIdRoute
-  CustomerLayoutBookServiceServiceIdRoute: typeof CustomerLayoutBookServiceServiceIdRoute
-  CustomerLayoutCarDetailsCarIdRoute: typeof CustomerLayoutCarDetailsCarIdRoute
-}
-
-const CustomerLayoutRouteChildren: CustomerLayoutRouteChildren = {
-  CustomerLayoutBookAppointmentRoute:
-    CustomerLayoutBookAppointmentRouteWithChildren,
-  CustomerLayoutBookingsRoute: CustomerLayoutBookingsRoute,
-  CustomerLayoutCalculateQuoteRoute: CustomerLayoutCalculateQuoteRoute,
-  CustomerLayoutCarsRoute: CustomerLayoutCarsRoute,
-  CustomerLayoutInstantQuoteRoute: CustomerLayoutInstantQuoteRoute,
-  CustomerLayoutProfileRoute: CustomerLayoutProfileRoute,
-  CustomerLayoutQuoteResultsRoute: CustomerLayoutQuoteResultsRoute,
-  CustomerLayoutServicesRoute: CustomerLayoutServicesRoute,
-  CustomerLayoutIndexRoute: CustomerLayoutIndexRoute,
-  CustomerLayoutAccountSettingsRoute: CustomerLayoutAccountSettingsRoute,
-  CustomerLayoutBookQuoteQuoteIdRoute: CustomerLayoutBookQuoteQuoteIdRoute,
-  CustomerLayoutBookServiceServiceIdRoute:
-    CustomerLayoutBookServiceServiceIdRoute,
-  CustomerLayoutCarDetailsCarIdRoute: CustomerLayoutCarDetailsCarIdRoute,
-}
-
-const CustomerLayoutRouteWithChildren = CustomerLayoutRoute._addFileChildren(
-  CustomerLayoutRouteChildren,
-)
-
-interface CustomerRouteChildren {
-  CustomerLayoutRoute: typeof CustomerLayoutRouteWithChildren
-}
-
-const CustomerRouteChildren: CustomerRouteChildren = {
-  CustomerLayoutRoute: CustomerLayoutRouteWithChildren,
-}
-
-const CustomerRouteWithChildren = CustomerRoute._addFileChildren(
-  CustomerRouteChildren,
-)
-
 interface DashboardLayoutRouteChildren {
-  DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
-  DashboardLayoutCarsAddCarRoute: typeof DashboardLayoutCarsAddCarRoute
-  DashboardLayoutDriversOnboardingRoute: typeof DashboardLayoutDriversOnboardingRoute
-  DashboardLayoutAdminTestingIndexRoute: typeof DashboardLayoutAdminTestingIndexRoute
-  DashboardLayoutAnalyticsIndexRoute: typeof DashboardLayoutAnalyticsIndexRoute
-  DashboardLayoutBoardIndexRoute: typeof DashboardLayoutBoardIndexRoute
-  DashboardLayoutBookingsIndexRoute: typeof DashboardLayoutBookingsIndexRoute
-  DashboardLayoutBookmarksIndexRoute: typeof DashboardLayoutBookmarksIndexRoute
-  DashboardLayoutCarsIndexRoute: typeof DashboardLayoutCarsIndexRoute
-  DashboardLayoutDriversIndexRoute: typeof DashboardLayoutDriversIndexRoute
-  DashboardLayoutInboxIndexRoute: typeof DashboardLayoutInboxIndexRoute
-  DashboardLayoutPackagesIndexRoute: typeof DashboardLayoutPackagesIndexRoute
-  DashboardLayoutPricingConfigIndexRoute: typeof DashboardLayoutPricingConfigIndexRoute
-  DashboardLayoutPublicationsIndexRoute: typeof DashboardLayoutPublicationsIndexRoute
-  DashboardLayoutPublishedIndexRoute: typeof DashboardLayoutPublishedIndexRoute
-  DashboardLayoutReportIndexRoute: typeof DashboardLayoutReportIndexRoute
-  DashboardLayoutSettingsIndexRoute: typeof DashboardLayoutSettingsIndexRoute
-  DashboardLayoutTodaysScheduledIndexRoute: typeof DashboardLayoutTodaysScheduledIndexRoute
+  DashboardLayoutBookAppointmentRoute: typeof DashboardLayoutBookAppointmentRouteWithChildren
+  DashboardLayoutCalculateQuoteRoute: typeof DashboardLayoutCalculateQuoteRoute
+  DashboardLayoutCarsRoute: typeof DashboardLayoutCarsRoute
+  DashboardLayoutInstantQuoteRoute: typeof DashboardLayoutInstantQuoteRoute
+  DashboardLayoutQuoteResultsRoute: typeof DashboardLayoutQuoteResultsRoute
+  DashboardLayoutServicesRoute: typeof DashboardLayoutServicesRoute
+  DashboardLayoutBookServiceServiceIdRoute: typeof DashboardLayoutBookServiceServiceIdRoute
+  DashboardLayoutCarDetailsCarIdRoute: typeof DashboardLayoutCarDetailsCarIdRoute
 }
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
-  DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
-  DashboardLayoutCarsAddCarRoute: DashboardLayoutCarsAddCarRoute,
-  DashboardLayoutDriversOnboardingRoute: DashboardLayoutDriversOnboardingRoute,
-  DashboardLayoutAdminTestingIndexRoute: DashboardLayoutAdminTestingIndexRoute,
-  DashboardLayoutAnalyticsIndexRoute: DashboardLayoutAnalyticsIndexRoute,
-  DashboardLayoutBoardIndexRoute: DashboardLayoutBoardIndexRoute,
-  DashboardLayoutBookingsIndexRoute: DashboardLayoutBookingsIndexRoute,
-  DashboardLayoutBookmarksIndexRoute: DashboardLayoutBookmarksIndexRoute,
-  DashboardLayoutCarsIndexRoute: DashboardLayoutCarsIndexRoute,
-  DashboardLayoutDriversIndexRoute: DashboardLayoutDriversIndexRoute,
-  DashboardLayoutInboxIndexRoute: DashboardLayoutInboxIndexRoute,
-  DashboardLayoutPackagesIndexRoute: DashboardLayoutPackagesIndexRoute,
-  DashboardLayoutPricingConfigIndexRoute:
-    DashboardLayoutPricingConfigIndexRoute,
-  DashboardLayoutPublicationsIndexRoute: DashboardLayoutPublicationsIndexRoute,
-  DashboardLayoutPublishedIndexRoute: DashboardLayoutPublishedIndexRoute,
-  DashboardLayoutReportIndexRoute: DashboardLayoutReportIndexRoute,
-  DashboardLayoutSettingsIndexRoute: DashboardLayoutSettingsIndexRoute,
-  DashboardLayoutTodaysScheduledIndexRoute:
-    DashboardLayoutTodaysScheduledIndexRoute,
+  DashboardLayoutBookAppointmentRoute:
+    DashboardLayoutBookAppointmentRouteWithChildren,
+  DashboardLayoutCalculateQuoteRoute: DashboardLayoutCalculateQuoteRoute,
+  DashboardLayoutCarsRoute: DashboardLayoutCarsRoute,
+  DashboardLayoutInstantQuoteRoute: DashboardLayoutInstantQuoteRoute,
+  DashboardLayoutQuoteResultsRoute: DashboardLayoutQuoteResultsRoute,
+  DashboardLayoutServicesRoute: DashboardLayoutServicesRoute,
+  DashboardLayoutBookServiceServiceIdRoute:
+    DashboardLayoutBookServiceServiceIdRoute,
+  DashboardLayoutCarDetailsCarIdRoute: DashboardLayoutCarDetailsCarIdRoute,
 }
 
 const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(
@@ -1380,13 +1298,81 @@ const DriverRouteChildren: DriverRouteChildren = {
 const DriverRouteWithChildren =
   DriverRoute._addFileChildren(DriverRouteChildren)
 
+interface AdminDashboardLayoutRouteChildren {
+  AdminDashboardLayoutIndexRoute: typeof AdminDashboardLayoutIndexRoute
+  AdminDashboardLayoutCarsAddCarRoute: typeof AdminDashboardLayoutCarsAddCarRoute
+  AdminDashboardLayoutDriversOnboardingRoute: typeof AdminDashboardLayoutDriversOnboardingRoute
+  AdminDashboardLayoutAdminTestingIndexRoute: typeof AdminDashboardLayoutAdminTestingIndexRoute
+  AdminDashboardLayoutAnalyticsIndexRoute: typeof AdminDashboardLayoutAnalyticsIndexRoute
+  AdminDashboardLayoutBoardIndexRoute: typeof AdminDashboardLayoutBoardIndexRoute
+  AdminDashboardLayoutBookingsIndexRoute: typeof AdminDashboardLayoutBookingsIndexRoute
+  AdminDashboardLayoutBookmarksIndexRoute: typeof AdminDashboardLayoutBookmarksIndexRoute
+  AdminDashboardLayoutCarsIndexRoute: typeof AdminDashboardLayoutCarsIndexRoute
+  AdminDashboardLayoutDriversIndexRoute: typeof AdminDashboardLayoutDriversIndexRoute
+  AdminDashboardLayoutInboxIndexRoute: typeof AdminDashboardLayoutInboxIndexRoute
+  AdminDashboardLayoutPackagesIndexRoute: typeof AdminDashboardLayoutPackagesIndexRoute
+  AdminDashboardLayoutPricingConfigIndexRoute: typeof AdminDashboardLayoutPricingConfigIndexRoute
+  AdminDashboardLayoutPublicationsIndexRoute: typeof AdminDashboardLayoutPublicationsIndexRoute
+  AdminDashboardLayoutPublishedIndexRoute: typeof AdminDashboardLayoutPublishedIndexRoute
+  AdminDashboardLayoutReportIndexRoute: typeof AdminDashboardLayoutReportIndexRoute
+  AdminDashboardLayoutSettingsIndexRoute: typeof AdminDashboardLayoutSettingsIndexRoute
+  AdminDashboardLayoutTodaysScheduledIndexRoute: typeof AdminDashboardLayoutTodaysScheduledIndexRoute
+}
+
+const AdminDashboardLayoutRouteChildren: AdminDashboardLayoutRouteChildren = {
+  AdminDashboardLayoutIndexRoute: AdminDashboardLayoutIndexRoute,
+  AdminDashboardLayoutCarsAddCarRoute: AdminDashboardLayoutCarsAddCarRoute,
+  AdminDashboardLayoutDriversOnboardingRoute:
+    AdminDashboardLayoutDriversOnboardingRoute,
+  AdminDashboardLayoutAdminTestingIndexRoute:
+    AdminDashboardLayoutAdminTestingIndexRoute,
+  AdminDashboardLayoutAnalyticsIndexRoute:
+    AdminDashboardLayoutAnalyticsIndexRoute,
+  AdminDashboardLayoutBoardIndexRoute: AdminDashboardLayoutBoardIndexRoute,
+  AdminDashboardLayoutBookingsIndexRoute:
+    AdminDashboardLayoutBookingsIndexRoute,
+  AdminDashboardLayoutBookmarksIndexRoute:
+    AdminDashboardLayoutBookmarksIndexRoute,
+  AdminDashboardLayoutCarsIndexRoute: AdminDashboardLayoutCarsIndexRoute,
+  AdminDashboardLayoutDriversIndexRoute: AdminDashboardLayoutDriversIndexRoute,
+  AdminDashboardLayoutInboxIndexRoute: AdminDashboardLayoutInboxIndexRoute,
+  AdminDashboardLayoutPackagesIndexRoute:
+    AdminDashboardLayoutPackagesIndexRoute,
+  AdminDashboardLayoutPricingConfigIndexRoute:
+    AdminDashboardLayoutPricingConfigIndexRoute,
+  AdminDashboardLayoutPublicationsIndexRoute:
+    AdminDashboardLayoutPublicationsIndexRoute,
+  AdminDashboardLayoutPublishedIndexRoute:
+    AdminDashboardLayoutPublishedIndexRoute,
+  AdminDashboardLayoutReportIndexRoute: AdminDashboardLayoutReportIndexRoute,
+  AdminDashboardLayoutSettingsIndexRoute:
+    AdminDashboardLayoutSettingsIndexRoute,
+  AdminDashboardLayoutTodaysScheduledIndexRoute:
+    AdminDashboardLayoutTodaysScheduledIndexRoute,
+}
+
+const AdminDashboardLayoutRouteWithChildren =
+  AdminDashboardLayoutRoute._addFileChildren(AdminDashboardLayoutRouteChildren)
+
+interface AdminDashboardRouteChildren {
+  AdminDashboardLayoutRoute: typeof AdminDashboardLayoutRouteWithChildren
+}
+
+const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
+  AdminDashboardLayoutRoute: AdminDashboardLayoutRouteWithChildren,
+}
+
+const AdminDashboardRouteWithChildren = AdminDashboardRoute._addFileChildren(
+  AdminDashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRouteWithChildren,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
-  CustomerRoute: CustomerRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   DriverRoute: DriverRouteWithChildren,
+  AdminDashboardRoute: AdminDashboardRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

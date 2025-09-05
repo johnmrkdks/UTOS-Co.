@@ -25,7 +25,7 @@ import { Link, useParams, useRouter } from "@tanstack/react-router";
 import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/query/use-get-published-service-by-id-query";
 import { useCreateUnifiedServiceBookingMutation } from "@/features/customer/_hooks/query/use-create-unified-service-booking-mutation";
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
-import { useUnifiedUserQuery, extractUserInfo } from "@/hooks/query/use-unified-user-query";
+import { useUserQuery } from "@/hooks/query/use-unified-user-query";
 import { z } from "zod";
 
 // Booking form schema
@@ -54,9 +54,8 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 	
 	const router = useRouter();
 	
-	// Use unified user query that handles both authenticated and guest users
-	const { data: sessionData, isLoading: sessionLoading } = useUnifiedUserQuery();
-	const userInfo = extractUserInfo(sessionData);
+	// Use user query for authenticated users
+	const { data: sessionData, isLoading: sessionLoading } = useUserQuery();
 	
 	// Fetch service details and available cars
 	const { data: service, isLoading, error } = useGetPublishedServiceByIdQuery(serviceId);
@@ -67,14 +66,14 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 	console.log("🔍 UNIFIED BOOKING DEBUG:");
 	console.log("Service ID:", serviceId);
 	console.log("Session data:", sessionData);
-	console.log("User info:", userInfo);
+	console.log("User info:", sessionData?.user);
 	console.log("Service data:", service);
 	console.log("Cars data:", carsData);
 	
 	// Form state - pre-populate with user info if available
 	const [formData, setFormData] = useState<Partial<BookingFormData>>({
-		customerName: userInfo?.name || "",
-		customerEmail: userInfo?.email || "",
+		customerName: sessionData?.user?.name || "",
+		customerEmail: sessionData?.user?.email || "",
 		passengerCount: 1,
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -138,7 +137,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 		console.log("🚀 Starting unified booking submission...");
 		console.log("Form data:", formData);
 		console.log("Service:", service);
-		console.log("User info:", userInfo);
+		console.log("User info:", sessionData?.user);
 		console.log("Cars data:", carsData);
 
 		if (!validateForm()) {
@@ -157,7 +156,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 			return;
 		}
 
-		if (!userInfo) {
+		if (!sessionData?.user) {
 			console.error("❌ No user session available");
 			toast.error("Session not available", {
 				description: "Please refresh the page and try again."
@@ -227,7 +226,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 				<h3 className="text-lg font-medium text-gray-900 mb-2">Service not found</h3>
 				<p className="text-gray-600 mb-4">The service you're looking for doesn't exist or is no longer available</p>
 				<Button asChild>
-					<Link to="/customer/services">Browse Services</Link>
+					<Link to="/dashboard/services">Browse Services</Link>
 				</Button>
 			</div>
 		);
@@ -242,11 +241,6 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 					<div>
 						<h1 className="text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
 						<p className="text-gray-600">Your service booking has been submitted successfully</p>
-						{userInfo?.isGuest && (
-							<p className="text-sm text-blue-600 mt-2">
-								💡 Tip: Create an account to easily manage your bookings
-							</p>
-						)}
 					</div>
 				</div>
 
@@ -290,25 +284,12 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							Our team will review your booking and contact you within 24 hours to confirm details and assign a driver.
 						</p>
 						<div className="space-y-2">
-							{!userInfo?.isGuest ? (
-								<>
-									<Button className="w-full" asChild>
-										<Link to="/customer/bookings">View My Bookings</Link>
-									</Button>
-									<Button variant="outline" className="w-full" asChild>
-										<Link to="/customer/services">Browse More Services</Link>
-									</Button>
-								</>
-							) : (
-								<>
-									<Button className="w-full" asChild>
-										<Link to="/auth/register">Create Account to Track Bookings</Link>
-									</Button>
-									<Button variant="outline" className="w-full" asChild>
-										<Link to="/">Continue as Guest</Link>
-									</Button>
-								</>
-							)}
+							<Button className="w-full" asChild>
+								<Link to="/dashboard/bookings">View My Bookings</Link>
+							</Button>
+							<Button variant="outline" className="w-full" asChild>
+								<Link to="/dashboard/services">Browse More Services</Link>
+							</Button>
 						</div>
 					</CardContent>
 				</Card>
@@ -321,7 +302,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 			{/* Header */}
 			<div className="flex items-center gap-4">
 				<Button variant="outline" size="icon" asChild>
-					<Link to="/customer/services">
+					<Link to="/dashboard/services">
 						<ArrowLeft className="h-4 w-4" />
 					</Link>
 				</Button>
@@ -329,7 +310,6 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 					<h1 className="text-3xl font-bold text-gray-900">Book {service.name}</h1>
 					<p className="text-gray-600">
 						Complete your booking details below
-						{userInfo?.isGuest && <span className="text-blue-600"> (Booking as guest)</span>}
 					</p>
 				</div>
 			</div>
@@ -579,7 +559,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							<Button 
 								className="w-full" 
 								onClick={handleSubmit}
-								disabled={createBookingMutation.isPending || !service || !userInfo || !carsData?.data?.length}
+								disabled={createBookingMutation.isPending || !service || !sessionData?.user || !carsData?.data?.length}
 							>
 								{createBookingMutation.isPending ? (
 									<>
@@ -595,10 +575,10 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							</Button>
 							
 							{/* Debug/Help Messages */}
-							{(!service || !userInfo || !carsData?.data?.length) && !createBookingMutation.isPending && (
+							{(!service || !sessionData?.user || !carsData?.data?.length) && !createBookingMutation.isPending && (
 								<div className="mt-2 p-2 bg-yellow-50 rounded text-sm text-yellow-800">
 									{!service && <div>⚠️ Service information is still loading...</div>}
-									{!userInfo && <div>⚠️ Setting up session...</div>}
+									{!sessionData?.user && <div>⚠️ Setting up session...</div>}
 									{!carsData?.data?.length && (
 										<div>
 											⚠️ No vehicles are currently available

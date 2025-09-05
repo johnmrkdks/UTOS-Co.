@@ -1,5 +1,5 @@
 import { Home } from "@/features/marketing/_pages/home/_components";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useEffect } from "react";
 import { z } from "zod";
@@ -13,6 +13,7 @@ const homeSearchSchema = z.object({
 	destinationLat: z.string().optional(),
 	destinationLng: z.string().optional(),
 	stops: z.string().optional(),
+	redirect: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_marketing/")({
@@ -22,16 +23,25 @@ export const Route = createFileRoute("/_marketing/")({
 
 function RouteComponent() {
 	const navigate = useNavigate();
+	const search = useSearch({ from: "/_marketing/" });
 	const { session } = useUserQuery();
 
-	// Auto-redirect drivers to their dashboard
+	// Handle OAuth callback redirect
 	useEffect(() => {
+		if (session?.user && search.redirect) {
+			navigate({
+				to: search.redirect,
+			});
+			return;
+		}
+
+		// Auto-redirect drivers to their dashboard
 		if (session?.user?.role === "driver") {
 			navigate({ to: "/driver" });
 		} else if (session?.user?.role === "admin" || session?.user?.role === "super_admin") {
-			navigate({ to: "/dashboard" });
+			navigate({ to: "/admin/dashboard" });
 		}
-	}, [session, navigate]);
+	}, [session, search.redirect, navigate]);
 
 	return <Home />;
 }

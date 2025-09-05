@@ -4,8 +4,14 @@ import { SignInForm } from "@/features/auth/_components/sign-in-form";
 import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Car, Shield, Star, Clock } from "lucide-react";
+import { z } from "zod";
+
+const signInSearchSchema = z.object({
+	redirect: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_auth/sign-in")({
+	validateSearch: signInSearchSchema,
 	component: RouteComponent,
 });
 

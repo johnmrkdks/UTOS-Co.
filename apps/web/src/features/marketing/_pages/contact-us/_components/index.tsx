@@ -91,7 +91,7 @@ export function ContactUs({ className, ...props }: ContactUsProps) {
 									Call Now
 								</Button>
 							</a>
-							<Link to="/booking">
+							<Link to="/fleet">
 								<Button
 									variant="outline"
 									size="lg"

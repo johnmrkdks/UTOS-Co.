@@ -8,7 +8,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Eye, UserCheck, UserX, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Eye, UserCheck, UserX, Trash2, Shield } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -24,6 +24,7 @@ import { EditDriverDialog } from "./edit-driver-dialog";
 import { ViewDriverDialog } from "./view-driver-dialog";
 import { DeleteDriverConfirmationDialog } from "./delete-driver-confirmation-dialog";
 import { DriverActionConfirmationDialog } from "./driver-action-confirmation-dialog";
+import { DriverDocumentVerificationDialog } from "./driver-document-verification-dialog";
 
 type DriversTableProps = {
 	filter?: "all" | "active" | "inactive" | "pending" | "approved-active" | "approved-inactive";
@@ -33,6 +34,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 	const [editingDriver, setEditingDriver] = useState<any>(null);
 	const [viewingDriver, setViewingDriver] = useState<any>(null);
 	const [deletingDriver, setDeletingDriver] = useState<any>(null);
+	const [verifyingDriver, setVerifyingDriver] = useState<any>(null);
 	const [actionDriver, setActionDriver] = useState<{ driver: any; action: "approve" | "reject" | "activate" | "deactivate" } | null>(null);
 	
 	const driversQuery = useGetDriversQuery({});
@@ -140,6 +142,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 						<TableHead>Assigned Car</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Approval</TableHead>
+						<TableHead>Verification</TableHead>
 						<TableHead>Registered</TableHead>
 						<TableHead className="w-[50px]">Actions</TableHead>
 					</TableRow>
@@ -175,6 +178,28 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 								</Badge>
 							</TableCell>
 							<TableCell>
+								<Badge 
+									variant={
+										driver.verificationStatus === "verified" ? "default" :
+										driver.verificationStatus === "rejected" ? "destructive" :
+										driver.verificationStatus === "needs_revision" ? "secondary" :
+										"outline"
+									}
+									className={
+										driver.verificationStatus === "verified" ? "bg-green-100 text-green-700 border-green-200" :
+										driver.verificationStatus === "rejected" ? "bg-red-100 text-red-700 border-red-200" :
+										driver.verificationStatus === "needs_revision" ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+										"bg-gray-100 text-gray-700 border-gray-200"
+									}
+								>
+									{driver.verificationStatus === "verified" ? "Verified" :
+									 driver.verificationStatus === "rejected" ? "Rejected" :
+									 driver.verificationStatus === "needs_revision" ? "Needs Revision" :
+									 driver.verificationStatus === "pending_documents" ? "Pending Docs" :
+									 "Pending"}
+								</Badge>
+							</TableCell>
+							<TableCell>
 								{new Date(driver.createdAt).toLocaleDateString()}
 							</TableCell>
 							<TableCell>
@@ -192,6 +217,10 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 										<DropdownMenuItem onClick={() => setEditingDriver(driver)}>
 											<Pencil className="mr-2 h-4 w-4" />
 											Edit
+										</DropdownMenuItem>
+										<DropdownMenuItem onClick={() => setVerifyingDriver(driver)}>
+											<Shield className="mr-2 h-4 w-4" />
+											Verify Documents
 										</DropdownMenuItem>
 										{!driver.isApproved && (
 											<DropdownMenuItem 
@@ -280,6 +309,14 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 					isLoading={updateDriverMutation.isPending}
 				/>
 			)}
+
+			{verifyingDriver && (
+				<DriverDocumentVerificationDialog
+					driver={verifyingDriver}
+					isOpen={!!verifyingDriver}
+					onClose={() => setVerifyingDriver(null)}
+				/>
+			)}
 		</>
 	);
 }
@@ -294,6 +331,7 @@ function DriversTableSkeleton() {
 					<TableHead>Assigned Car</TableHead>
 					<TableHead>Status</TableHead>
 					<TableHead>Approval</TableHead>
+					<TableHead>Verification</TableHead>
 					<TableHead>Registered</TableHead>
 					<TableHead className="w-[50px]">Actions</TableHead>
 				</TableRow>
@@ -316,6 +354,7 @@ function DriversTableSkeleton() {
 						</TableCell>
 						<TableCell><Skeleton className="h-6 w-16" /></TableCell>
 						<TableCell><Skeleton className="h-6 w-20" /></TableCell>
+						<TableCell><Skeleton className="h-6 w-24" /></TableCell>
 						<TableCell><Skeleton className="h-4 w-20" /></TableCell>
 						<TableCell><Skeleton className="h-8 w-8" /></TableCell>
 					</TableRow>

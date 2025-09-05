@@ -4,11 +4,15 @@ import { toast } from "sonner";
 
 export const useSignInWitGoogleOAuthMutation = () => {
 	return useMutation({
-		mutationFn: async () => {
+		mutationFn: async (redirectPath?: string) => {
+			const callbackURL = redirectPath 
+				? `${import.meta.env.VITE_CLIENT_URL}?redirect=${encodeURIComponent(redirectPath)}`
+				: import.meta.env.VITE_CLIENT_URL;
+				
 			return await authClient.signIn.social(
 				{
 					provider: "google",
-					callbackURL: import.meta.env.VITE_CLIENT_URL,
+					callbackURL,
 				}
 			);
 		},

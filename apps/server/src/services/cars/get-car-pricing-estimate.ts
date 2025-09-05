@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { pricingConfig, cars } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 export const GetCarPricingEstimateSchema = z.object({
@@ -40,7 +40,7 @@ export async function getCarPricingEstimateService(
 				.from(pricingConfig)
 				.where(
 					and(
-						eq(pricingConfig.carId, null), // Global pricing has null carId
+						isNull(pricingConfig.carId), // Global pricing has null carId
 						eq(pricingConfig.isActive, true)
 					)
 				)

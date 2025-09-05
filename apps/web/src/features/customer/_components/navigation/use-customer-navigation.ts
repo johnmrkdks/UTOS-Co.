@@ -8,37 +8,37 @@ export function useCustomerNavigation(): CustomerNavigationItem[] {
 	return [
 		{
 			name: "Dashboard",
-			href: "/customer",
+			href: "/dashboard",
 			icon: Home,
-			active: location.pathname === "/customer",
+			active: location.pathname === "/dashboard",
 			primary: true
 		},
 		{
 			name: "My Bookings",
-			href: "/customer/bookings",
+			href: "/my-bookings",
 			icon: Calendar,
-			active: location.pathname === "/customer/bookings",
+			active: location.pathname === "/my-bookings",
 			primary: true
 		},
 		{
 			name: "Browse Services",
-			href: "/customer/services",
+			href: "/services",
 			icon: Package,
-			active: location.pathname === "/customer/services",
+			active: location.pathname === "/services",
 			primary: true
 		},
 		{
 			name: "Browse Cars",
-			href: "/customer/cars",
+			href: "/fleet",
 			icon: Car,
-			active: location.pathname === "/customer/cars",
+			active: location.pathname === "/fleet",
 			primary: true
 		},
 		{
 			name: "Instant Quote",
-			href: "/customer/instant-quote",
+			href: "/",
 			icon: Calculator,
-			active: location.pathname === "/customer/instant-quote",
+			active: location.pathname === "/" && location.search?.includes("instant-quote"),
 			primary: true
 		},
 	];

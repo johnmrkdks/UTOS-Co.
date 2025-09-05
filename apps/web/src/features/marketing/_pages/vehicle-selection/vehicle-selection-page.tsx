@@ -61,7 +61,7 @@ export function VehicleSelectionPage() {
 
 		// Use customer route if coming from customer area
 		const calculateQuotePath = search.fromCustomerArea === "true" 
-			? "/customer/calculate-quote" 
+			? "/dashboard/calculate-quote" 
 			: "/calculate-quote";
 		
 		navigate({ 
@@ -83,7 +83,7 @@ export function VehicleSelectionPage() {
 								variant="ghost"
 								size="sm"
 								onClick={() => navigate({ 
-									to: search.fromCustomerArea ? "/customer/cars" : "/" 
+									to: search.fromCustomerArea ? "/dashboard/cars" : "/" 
 								})}
 								className="gap-2"
 							>

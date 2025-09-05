@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
 	ArrowLeft, 
 	Car, 
@@ -7,14 +10,26 @@ import {
 	MapPin, 
 	Calculator,
 	Loader2,
-	CheckCircle
+	CheckCircle,
+	Plus,
+	X
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/home/_hooks/query/use-calculate-instant-quote-mutation";
 import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query";
+import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
+
+const quoteFormSchema = z.object({
+	originAddress: z.string().min(1, "Please enter your pickup location"),
+	destinationAddress: z.string().min(1, "Please enter your destination"),
+	stops: z.array(z.object({
+		address: z.string().min(1, "Stop address is required"),
+	})).optional().default([]),
+});
 
 interface CalculateQuotePageProps {
 	isCustomerArea?: boolean;
@@ -25,12 +40,33 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 	const search = useSearch({ strict: false }) as any;
 	const [isCalculating, setIsCalculating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [originGeometry, setOriginGeometry] = useState<any>(null);
+	const [destinationGeometry, setDestinationGeometry] = useState<any>(null);
+	const [stopsGeometry, setStopsGeometry] = useState<any[]>([]);
 	
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation();
 	const { data: carsData } = useGetPublishedCarsQuery({ limit: 50 });
 
 	const selectedCar = search.selectedCarId && carsData?.data ? 
 		carsData.data.find(car => car.id === search.selectedCarId) : null;
+
+	// Form for route input
+	const form = useForm({
+		resolver: zodResolver(quoteFormSchema),
+		defaultValues: {
+			originAddress: search.origin || "",
+			destinationAddress: search.destination || "",
+			stops: [],
+		},
+	});
+
+	const { fields: stopFields, append: appendStop, remove: removeStop } = useFieldArray({
+		control: form.control,
+		name: "stops",
+	});
+
+	// Check if we have route data already
+	const hasRouteData = search.origin && search.destination;
 
 	// Parse stops if provided
 	const stops = search.stops ? (() => {
@@ -42,12 +78,75 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 		}
 	})() : [];
 
+	// Form submission handler
+	const handleFormSubmit = async (data: z.infer<typeof quoteFormSchema>) => {
+		if (!search.selectedCarId) {
+			setError("No vehicle selected");
+			return;
+		}
+
+		setIsCalculating(true);
+		setError(null);
+
+		try {
+			// Extract coordinates from geometry objects
+			const originLat = originGeometry?.location?.lat();
+			const originLng = originGeometry?.location?.lng();
+			const destinationLat = destinationGeometry?.location?.lat();
+			const destinationLng = destinationGeometry?.location?.lng();
+
+			// Prepare stops data
+			const stopsData = data.stops?.map((stop, index) => ({
+				address: stop.address,
+				latitude: stopsGeometry[index]?.location?.lat(),
+				longitude: stopsGeometry[index]?.location?.lng(),
+			})) || [];
+
+			const result = await calculateQuoteMutation.mutateAsync({
+				originAddress: data.originAddress,
+				destinationAddress: data.destinationAddress,
+				carId: search.selectedCarId,
+				originLatitude: originLat,
+				originLongitude: originLng,
+				destinationLatitude: destinationLat,
+				destinationLongitude: destinationLng,
+				stops: stopsData,
+			});
+
+			// Navigate to booking or results page with secure quote ID
+			if (result && (result as any).quoteId) {
+				const quoteId = (result as any).quoteId;
+				
+				// If coming from fleet (has selectedCarId but no prior route data), skip quote results and go directly to booking
+				if (search.selectedCarId && !search.origin) {
+					navigate({
+						to: "/book-quote/$quoteId",
+						params: { quoteId }
+					});
+				} else {
+					// Otherwise, go to quote results
+					navigate({
+						to: "/quote-results",
+						search: { quoteId }
+					});
+				}
+			} else {
+				throw new Error("Quote calculation succeeded but no secure quote ID was returned");
+			}
+		} catch (error: any) {
+			console.error("Quote calculation failed:", error);
+			setError(error.message || "Failed to calculate quote. Please try again.");
+		} finally {
+			setIsCalculating(false);
+		}
+	};
+
 	useEffect(() => {
-		// Auto-start calculation when component mounts
-		if (search.origin && search.destination && search.selectedCarId) {
+		// Auto-start calculation when component mounts if we have all data
+		if (hasRouteData && search.selectedCarId) {
 			handleCalculateQuote();
 		}
-	}, [search]);
+	}, [search, hasRouteData]);
 
 	const handleCalculateQuote = async () => {
 		if (!search.origin || !search.destination || !search.selectedCarId) {
@@ -83,22 +182,23 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 				stops: stopsData,
 			});
 
-			// Navigate to results page with secure quote ID
+			// Navigate to booking or results page with secure quote ID
 			if (result && (result as any).quoteId) {
-				const searchParams: any = { quoteId: (result as any).quoteId };
+				const quoteId = (result as any).quoteId;
 				
-				// Pass through fromCustomerArea parameter
-				if (search.fromCustomerArea || isCustomerArea) {
-					searchParams.fromCustomerArea = "true";
+				// If coming from fleet (has selectedCarId but no prior route data), skip quote results and go directly to booking
+				if (search.selectedCarId && !search.origin) {
+					navigate({
+						to: "/book-quote/$quoteId",
+						params: { quoteId }
+					});
+				} else {
+					// Otherwise, go to quote results
+					navigate({
+						to: "/quote-results",
+						search: { quoteId }
+					});
 				}
-				
-				// Use customer route if in customer area, otherwise public route
-				const quoteResultsPath = isCustomerArea ? "/customer/quote-results" : "/quote-results";
-				
-				navigate({
-					to: quoteResultsPath,
-					search: searchParams
-				});
 			} else {
 				throw new Error("Quote calculation succeeded but no secure quote ID was returned");
 			}
@@ -111,20 +211,25 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 	};
 
 	const handleGoBack = () => {
-		// Go back to vehicle selection with route data
-		const params = new URLSearchParams();
-		if (search.origin) params.set("origin", search.origin);
-		if (search.destination) params.set("destination", search.destination);
-		if (search.originLat) params.set("originLat", search.originLat);
-		if (search.originLng) params.set("originLng", search.originLng);
-		if (search.destinationLat) params.set("destinationLat", search.destinationLat);
-		if (search.destinationLng) params.set("destinationLng", search.destinationLng);
-		if (search.stops) params.set("stops", search.stops);
+		// If we have a selected car but no route data, we came from fleet
+		if (search.selectedCarId && !hasRouteData) {
+			navigate({ to: "/fleet" });
+		} else {
+			// Go back to vehicle selection with route data
+			const params = new URLSearchParams();
+			if (search.origin) params.set("origin", search.origin);
+			if (search.destination) params.set("destination", search.destination);
+			if (search.originLat) params.set("originLat", search.originLat);
+			if (search.originLng) params.set("originLng", search.originLng);
+			if (search.destinationLat) params.set("destinationLat", search.destinationLat);
+			if (search.destinationLng) params.set("destinationLng", search.destinationLng);
+			if (search.stops) params.set("stops", search.stops);
 
-		navigate({ 
-			to: "/select-vehicle", 
-			search: Object.fromEntries(params) 
-		});
+			navigate({ 
+				to: "/select-vehicle", 
+				search: Object.fromEntries(params) 
+			});
+		}
 	};
 
 	return (
@@ -142,7 +247,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 								disabled={isCalculating}
 							>
 								<ArrowLeft className="w-4 h-4" />
-								Back to Vehicles
+								{search.selectedCarId && !hasRouteData ? "Back to Fleet" : "Back to Vehicles"}
 							</Button>
 							<div className="hidden sm:block h-6 w-px bg-border" />
 							<div className="hidden sm:block">
@@ -162,13 +267,14 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 			{/* Main Content */}
 			<div className="container mx-auto px-4 py-6">
 				<div className="max-w-2xl mx-auto space-y-6">
-					{/* Route Summary */}
-					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-						<CardContent className="p-4">
-							<h3 className="font-medium mb-3 text-sm flex items-center gap-2">
-								<MapPin className="h-4 w-4 text-primary" />
-								Your Journey
-							</h3>
+					{hasRouteData ? (
+						/* Route Summary - Only show when we have route data */
+						<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+							<CardContent className="p-4">
+								<h3 className="font-medium mb-3 text-sm flex items-center gap-2">
+									<MapPin className="h-4 w-4 text-primary" />
+									Your Journey
+								</h3>
 							
 							{/* Route Visual Display */}
 							<div className="space-y-3">
@@ -214,12 +320,140 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 								</div>
 							</div>
 							
-							{/* Route Status Indicator */}
-							<div className="absolute top-2 right-2">
-								<div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-							</div>
-						</CardContent>
-					</Card>
+								{/* Route Status Indicator */}
+								<div className="absolute top-2 right-2">
+									<div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+								</div>
+							</CardContent>
+						</Card>
+					) : (
+						/* Route Input Form - Show when no route data */
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<MapPin className="h-5 w-5 text-primary" />
+									Enter Your Journey Details
+								</CardTitle>
+								<CardDescription>
+									Please provide your pickup and destination locations to calculate your fare.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<Form {...form}>
+									<form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+										{/* Origin */}
+										<FormField
+											control={form.control}
+											name="originAddress"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Pickup Location</FormLabel>
+													<FormControl>
+														<GooglePlacesInput
+															value={field.value}
+															onChange={field.onChange}
+															onPlaceSelected={setOriginGeometry}
+															placeholder="Enter pickup address"
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										{/* Destination */}
+										<FormField
+											control={form.control}
+											name="destinationAddress"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Destination</FormLabel>
+													<FormControl>
+														<GooglePlacesInput
+															value={field.value}
+															onChange={field.onChange}
+															onPlaceSelected={setDestinationGeometry}
+															placeholder="Enter destination address"
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										{/* Stops */}
+										{stopFields.map((field, index) => (
+											<div key={field.id} className="flex gap-2">
+												<FormField
+													control={form.control}
+													name={`stops.${index}.address`}
+													render={({ field: stopField }) => (
+														<FormItem className="flex-1">
+															<FormLabel>Stop {index + 1}</FormLabel>
+															<FormControl>
+																<GooglePlacesInput
+																	value={stopField.value}
+																	onChange={stopField.onChange}
+																	onPlaceSelected={(geometry) => {
+																		const newStopsGeometry = [...stopsGeometry];
+																		newStopsGeometry[index] = geometry;
+																		setStopsGeometry(newStopsGeometry);
+																	}}
+																	placeholder={`Stop ${index + 1} address`}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<Button
+													type="button"
+													variant="outline"
+													size="sm"
+													onClick={() => removeStop(index)}
+													className="mt-8"
+												>
+													<X className="h-4 w-4" />
+												</Button>
+											</div>
+										))}
+
+										{/* Add Stop Button */}
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={() => appendStop({ address: "" })}
+											className="w-full"
+										>
+											<Plus className="h-4 w-4 mr-2" />
+											Add Stop
+										</Button>
+
+										{/* Submit Button */}
+										<Button 
+											type="submit" 
+											className="w-full" 
+											size="lg"
+											disabled={isCalculating}
+										>
+											{isCalculating ? (
+												<>
+													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+													Calculating...
+												</>
+											) : (
+												<>
+													<Calculator className="h-4 w-4 mr-2" />
+													Calculate Quote
+												</>
+											)}
+										</Button>
+									</form>
+								</Form>
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Selected Vehicle */}
 					{selectedCar && (
@@ -272,74 +506,85 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 						</Card>
 					)}
 
-					{/* Calculation Status */}
-					<Card>
-						<CardContent className="p-6">
-							{isCalculating ? (
-								<div className="text-center space-y-4">
-									<Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-									<div>
-										<h3 className="text-lg font-semibold">Calculating Your Quote</h3>
-										<p className="text-sm text-muted-foreground mt-1">
-											We're getting real-time distance data and applying our pricing to give you an accurate estimate...
-										</p>
+					{/* Calculation Status - Only show when we have route data */}
+					{hasRouteData && (
+						<Card>
+							<CardContent className="p-6">
+								{isCalculating ? (
+									<div className="text-center space-y-4">
+										<Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+										<div>
+											<h3 className="text-lg font-semibold">Calculating Your Quote</h3>
+											<p className="text-sm text-muted-foreground mt-1">
+												We're getting real-time distance data and applying our pricing to give you an accurate estimate...
+											</p>
+										</div>
+										<div className="space-y-2 text-sm text-muted-foreground">
+											<div className="flex items-center justify-center gap-2">
+												<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+												<span>Calculating distance and duration</span>
+											</div>
+											<div className="flex items-center justify-center gap-2">
+												<div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+												<span>Applying pricing rates</span>
+											</div>
+											<div className="flex items-center justify-center gap-2">
+												<div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+												<span>Checking for surge pricing</span>
+											</div>
+										</div>
 									</div>
-									<div className="space-y-2 text-sm text-muted-foreground">
-										<div className="flex items-center justify-center gap-2">
-											<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-											<span>Calculating distance and duration</span>
-										</div>
-										<div className="flex items-center justify-center gap-2">
-											<div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-											<span>Applying pricing rates</span>
-										</div>
-										<div className="flex items-center justify-center gap-2">
-											<div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
-											<span>Checking for surge pricing</span>
+								) : error ? (
+									<div className="space-y-4">
+										<Alert>
+											<AlertDescription>
+												{error}
+											</AlertDescription>
+										</Alert>
+										<div className="text-center">
+											<Button 
+												onClick={handleCalculateQuote}
+												className="gap-2"
+												disabled={isCalculating}
+											>
+												<Calculator className="w-4 h-4" />
+												Try Again
+											</Button>
 										</div>
 									</div>
-								</div>
-							) : error ? (
-								<div className="space-y-4">
-									<Alert>
-										<AlertDescription>
-											{error}
-										</AlertDescription>
-									</Alert>
-									<div className="text-center">
+								) : (
+									<div className="text-center space-y-4">
+										<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+											<Calculator className="w-6 h-6 text-primary" />
+										</div>
+										<div>
+											<h3 className="text-lg font-semibold">Ready to Calculate</h3>
+											<p className="text-sm text-muted-foreground">
+												We have your route and vehicle selection. Click below to get your personalized quote.
+											</p>
+										</div>
 										<Button 
 											onClick={handleCalculateQuote}
 											className="gap-2"
-											disabled={isCalculating}
+											size="lg"
 										>
-											<Calculator className="w-4 h-4" />
-											Try Again
+											<Calculator className="w-5 h-5" />
+											Calculate Quote
 										</Button>
 									</div>
-								</div>
-							) : (
-								<div className="text-center space-y-4">
-									<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-										<Calculator className="w-6 h-6 text-primary" />
-									</div>
-									<div>
-										<h3 className="text-lg font-semibold">Ready to Calculate</h3>
-										<p className="text-sm text-muted-foreground">
-											We have your route and vehicle selection. Click below to get your personalized quote.
-										</p>
-									</div>
-									<Button 
-										onClick={handleCalculateQuote}
-										className="gap-2"
-										size="lg"
-									>
-										<Calculator className="w-5 h-5" />
-										Calculate Quote
-									</Button>
-								</div>
-							)}
-						</CardContent>
-					</Card>
+								)}
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Error Alert - Show for form submission errors when no route data */}
+					{!hasRouteData && error && (
+						<Alert>
+							<AlertDescription>
+								{error}
+							</AlertDescription>
+						</Alert>
+					)}
 
 					{/* Info */}
 					<div className="text-center text-xs text-muted-foreground space-y-1">

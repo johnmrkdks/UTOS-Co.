@@ -29,6 +29,12 @@ export const drivers = sqliteTable("drivers", {
 	approvedAt: integer("approved_at", { mode: "timestamp" }),
 	approvedBy: text("approved_by").references(() => users.id),
 	
+	// Document verification
+	documentVerification: text("document_verification"), // JSON string storing individual document verification status
+	verificationStatus: text("verification_status").default("pending"), // pending, pending_documents, verified, rejected, needs_revision
+	verifiedAt: integer("verified_at", { mode: "timestamp" }),
+	verifiedBy: text("verified_by").references(() => users.id),
+	
 	// Email verification tracking
 	emailVerificationSentAt: integer("email_verification_sent_at", { mode: "timestamp" }),
 	emailVerifiedAt: integer("email_verified_at", { mode: "timestamp" }),

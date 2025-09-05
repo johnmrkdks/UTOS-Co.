@@ -73,7 +73,7 @@ export function Home({ className, ...props }: HomeProps) {
 							</div>
 
 							<div className="flex flex-col sm:flex-row gap-4">
-								<Link to="/booking">
+								<Link to="/fleet">
 									<Button
 										className="bg-primary hover:bg-primary/90 text-primary-foreground px-4.5 py-5 text-base md:px-8 md:py-6 md:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
 									>

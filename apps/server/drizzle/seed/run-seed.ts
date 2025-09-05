@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/d1";
+import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client/http";
 import * as schema from "../../src/db/sqlite/schema";
 import seed from "./seed";

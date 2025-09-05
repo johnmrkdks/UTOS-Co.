@@ -25,8 +25,8 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 	return routes.filter((route) => {
 		// Hide these pages in production
 		const developmentOnlyPaths = [
-			"/dashboard/analytics",
-			"/dashboard/admin-testing",
+			"/admin/dashboard/analytics",
+			"/admin/dashboard/admin-testing",
 		];
 
 		if (developmentOnlyPaths.includes(route.path) && !isDevelopment) {
@@ -41,17 +41,17 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 const ALL_DASHBOARD_OVERVIEW_ROUTES: RouteConfig[] = [
 	{
 		label: "Dashboard",
-		path: "/dashboard/board",
+		path: "/admin/dashboard/board",
 		icon: LayoutDashboardIcon,
 	},
 	{
 		label: "Analytics",
-		path: "/dashboard/analytics",
+		path: "/admin/dashboard/analytics",
 		icon: BarChart3Icon,
 	},
 	{
 		label: "Reports",
-		path: "/dashboard/report",
+		path: "/admin/dashboard/report",
 		icon: ClipboardListIcon,
 	},
 ];
@@ -60,17 +60,17 @@ const ALL_DASHBOARD_OVERVIEW_ROUTES: RouteConfig[] = [
 const ALL_DASHBOARD_OPERATIONS_ROUTES: RouteConfig[] = [
 	{
 		label: "Bookings",
-		path: "/dashboard/bookings",
+		path: "/admin/dashboard/bookings",
 		icon: CalendarIcon,
 	},
 	{
 		label: "Drivers",
-		path: "/dashboard/drivers",
+		path: "/admin/dashboard/drivers",
 		icon: UsersIcon,
 	},
 	{
 		label: "Inbox",
-		path: "/dashboard/inbox",
+		path: "/admin/dashboard/inbox",
 		icon: InboxIcon,
 	},
 ];
@@ -79,17 +79,17 @@ const ALL_DASHBOARD_OPERATIONS_ROUTES: RouteConfig[] = [
 const ALL_DASHBOARD_INVENTORY_ROUTES: RouteConfig[] = [
 	{
 		label: "Cars",
-		path: "/dashboard/cars",
+		path: "/admin/dashboard/cars",
 		icon: CarIcon,
 	},
 	{
 		label: "Packages",
-		path: "/dashboard/packages",
+		path: "/admin/dashboard/packages",
 		icon: Package2Icon,
 	},
 	{
 		label: "Publications",
-		path: "/dashboard/publications",
+		path: "/admin/dashboard/publications",
 		icon: EyeIcon,
 	},
 ];
@@ -98,17 +98,17 @@ const ALL_DASHBOARD_INVENTORY_ROUTES: RouteConfig[] = [
 const ALL_DASHBOARD_SYSTEM_ROUTES: RouteConfig[] = [
 	{
 		label: "Pricing Config",
-		path: "/dashboard/pricing-config",
+		path: "/admin/dashboard/pricing-config",
 		icon: DollarSignIcon,
 	},
 	{
 		label: "Settings",
-		path: "/dashboard/settings",
+		path: "/admin/dashboard/settings",
 		icon: SettingsIcon,
 	},
 	{
 		label: "Admin Testing",
-		path: "/dashboard/admin-testing",
+		path: "/admin/dashboard/admin-testing",
 		icon: FlaskConicalIcon,
 	},
 ];

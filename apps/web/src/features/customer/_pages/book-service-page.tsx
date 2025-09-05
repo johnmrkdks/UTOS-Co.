@@ -44,7 +44,7 @@ const BookingFormSchema = z.object({
 type BookingFormData = z.infer<typeof BookingFormSchema>;
 
 export function BookServicePage() {
-	const { serviceId } = useParams({ from: "/customer/_layout/book-service/$serviceId" });
+	const { serviceId } = useParams({ from: "/dashboard/_layout/book-service/$serviceId" });
 	const router = useRouter();
 	const { session } = useUserQuery();
 	const user = session?.user;
@@ -226,7 +226,7 @@ export function BookServicePage() {
 				<h3 className="text-lg font-medium text-gray-900 mb-2">Service not found</h3>
 				<p className="text-gray-600 mb-4">The service you're looking for doesn't exist or is no longer available</p>
 				<Button asChild>
-					<Link to="/customer/services">Browse Services</Link>
+					<Link to="/dashboard/services">Browse Services</Link>
 				</Button>
 			</div>
 		);
@@ -285,10 +285,10 @@ export function BookServicePage() {
 						</p>
 						<div className="space-y-2">
 							<Button className="w-full" asChild>
-								<Link to="/customer/bookings">View My Bookings</Link>
+								<Link to="/dashboard/bookings">View My Bookings</Link>
 							</Button>
 							<Button variant="outline" className="w-full" asChild>
-								<Link to="/customer/services">Browse More Services</Link>
+								<Link to="/dashboard/services">Browse More Services</Link>
 							</Button>
 						</div>
 					</CardContent>
@@ -302,7 +302,7 @@ export function BookServicePage() {
 			{/* Header */}
 			<div className="flex items-center gap-4">
 				<Button variant="outline" size="icon" asChild>
-					<Link to="/customer/services">
+					<Link to="/dashboard/services">
 						<ArrowLeft className="h-4 w-4" />
 					</Link>
 				</Button>

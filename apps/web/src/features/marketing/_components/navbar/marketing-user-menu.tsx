@@ -7,7 +7,7 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { Link } from "@tanstack/react-router";
-import { LogOutIcon, UserIcon, SettingsIcon, UserCircleIcon } from "lucide-react";
+import { LogOutIcon, UserIcon, SettingsIcon, UserCircleIcon, Calendar } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useUserQuery } from "@/hooks/query/use-user-query";
@@ -34,19 +34,13 @@ export function MarketingUserMenu() {
 		<div className="flex items-center gap-4">
 			{isAdmin && (
 				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
-					<Link to="/dashboard">Admin Dashboard</Link>
+					<Link to="/admin/dashboard">Admin Dashboard</Link>
 				</Button>
 			)}
 
 			{isDriver && (
 				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
 					<Link to="/driver">Driver Dashboard</Link>
-				</Button>
-			)}
-
-			{isCustomer && (
-				<Button className="rounded-xl shadow-none hidden md:flex" asChild>
-					<Link to="/customer">My Dashboard</Link>
 				</Button>
 			)}
 
@@ -79,7 +73,17 @@ export function MarketingUserMenu() {
 						<>
 							<DropdownMenuItem asChild>
 								<Link
-									to="/customer/profile"
+									to="/my-bookings"
+									className="cursor-pointer transition-colors duration-150"
+								>
+									<Calendar size={16} className="opacity-60 transition-opacity duration-150" aria-hidden="true" />
+									<span>My Bookings</span>
+								</Link>
+							</DropdownMenuItem>
+
+							<DropdownMenuItem asChild>
+								<Link
+									to="/profile"
 									className="cursor-pointer transition-colors duration-150"
 								>
 									<UserCircleIcon size={16} className="opacity-60 transition-opacity duration-150" aria-hidden="true" />
@@ -89,7 +93,7 @@ export function MarketingUserMenu() {
 
 							<DropdownMenuItem asChild>
 								<Link
-									to="/customer/account/settings"
+									to="/account/settings"
 									className="cursor-pointer transition-colors duration-150"
 								>
 									<SettingsIcon size={16} className="opacity-60 transition-opacity duration-150" aria-hidden="true" />

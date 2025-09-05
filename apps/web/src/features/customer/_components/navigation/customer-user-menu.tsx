@@ -49,13 +49,13 @@ export function CustomerUserMenu() {
 					<DropdownMenuSeparator />
 					<DropdownMenuGroup>
 						<DropdownMenuItem asChild>
-							<Link to="/customer/bookings" className="flex items-center w-full">
+							<Link to="/dashboard/bookings" className="flex items-center w-full">
 								<Calendar size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>My Bookings</span>
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
-							<Link to="/customer/cars" className="flex items-center w-full">
+							<Link to="/dashboard/cars" className="flex items-center w-full">
 								<Car size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>Browse Cars</span>
 							</Link>
@@ -64,13 +64,13 @@ export function CustomerUserMenu() {
 					<DropdownMenuSeparator />
 					<DropdownMenuGroup>
 						<DropdownMenuItem asChild>
-							<Link to="/customer/profile" className="flex items-center w-full">
+							<Link to="/dashboard/profile" className="flex items-center w-full">
 								<User size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>Profile</span>
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
-							<Link to="/customer/account/settings" className="flex items-center w-full">
+							<Link to="/dashboard/account/settings" className="flex items-center w-full">
 								<Settings size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>Settings</span>
 							</Link>

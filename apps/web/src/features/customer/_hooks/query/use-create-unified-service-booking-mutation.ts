@@ -1,7 +1,6 @@
 import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getOrCreateGuestSession } from "@/utils/auth";
 
 /**
  * Unified service booking mutation that works for both authenticated and guest users
@@ -26,10 +25,7 @@ export const useCreateUnifiedServiceBookingMutation = () => {
 			passengerCount: number;
 			specialRequests?: string;
 		}) => {
-			// Ensure we have a session (either authenticated or guest)
-			await getOrCreateGuestSession();
-			
-			// Call the backend createPackageBooking endpoint which already handles both user types
+			// Call the backend createPackageBooking endpoint for authenticated users
 			return await trpc.bookings.createPackageBooking.mutate(input);
 		},
 		onSuccess: (data) => {

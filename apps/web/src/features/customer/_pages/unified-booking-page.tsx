@@ -15,7 +15,7 @@ import { type QuoteResult, type RouteData, type Step } from "../_types/instant-q
 import { type BookingDetailsFormData } from "../_schemas/instant-quote";
 
 export function UnifiedBookingPage() {
-	const search = useSearch({ from: "/customer/_layout/book-appointment" });
+	const search = useSearch({ from: "/dashboard/_layout/book-appointment" });
 	const { from, token: quoteToken, carId } = search as { 
 		from?: "instant-quote", 
 		token?: string, 

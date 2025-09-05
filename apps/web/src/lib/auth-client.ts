@@ -1,7 +1,7 @@
 import { createAuthClient } from "better-auth/react";
-import { adminClient, anonymousClient } from "better-auth/client/plugins";
+import { adminClient } from "better-auth/client/plugins";
 
-const plugins = [adminClient(), anonymousClient()];
+const plugins = [adminClient()];
 
 console.log(import.meta.env.VITE_SERVER_URL);
 

@@ -193,7 +193,7 @@ export async function calculateInstantQuoteService(
 	
 	const distanceFare = parseFloat((distanceKm * pricing.perKmRate * surgePricing).toFixed(2));
 	const timeFare = 0; // Time fare excluded from calculation
-	const waitingTimeCharges = parseFloat((totalWaitingTime * pricing.waitingTimeRate).toFixed(2));
+	const waitingTimeCharges = parseFloat((totalWaitingTime * (pricing.waitingTimeRate || 0)).toFixed(2));
 	
 	let totalAmount = parseFloat((baseFare + distanceFare + waitingTimeCharges).toFixed(2));
 	
@@ -213,7 +213,7 @@ export async function calculateInstantQuoteService(
 		breakdown: {
 			baseRate: pricing.baseRate,
 			perKmRate: pricing.perKmRate,
-			perMinuteRate: pricing.perMinuteRate,
+			perMinuteRate: pricing.perMinuteRate || 0,
 			minimumFare: pricing.minimumFare,
 			surgePricing: surgePricing > 1 ? surgePricing : undefined,
 			waitingTimeCharges: waitingTimeCharges > 0 ? waitingTimeCharges : undefined,

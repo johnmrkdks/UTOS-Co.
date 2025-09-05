@@ -3,7 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { authClient } from "@/lib/auth-client";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -30,6 +30,7 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 	const navigate = useNavigate({
 		from: "/",
 	});
+	const search = useSearch({ strict: false }) as any;
 	const { isPending } = authClient.useSession();
 	const mutation = useSignInMutation();
 
@@ -49,8 +50,9 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 	const onSubmit = (data: FormValues) => {
 		mutation.mutate(data, {
 			onSuccess: () => {
+				const redirectPath = search.redirect || "/";
 				navigate({
-					to: "/",
+					to: redirectPath,
 				});
 			},
 		});

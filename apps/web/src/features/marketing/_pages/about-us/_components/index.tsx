@@ -310,7 +310,7 @@ export function AboutUs({ className, ...props }: AboutProps) {
 						</p>
 
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Link to="/booking">
+							<Link to="/fleet">
 								<Button
 									size="lg"
 									className="bg-beige text-foreground hover:bg-beige/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"

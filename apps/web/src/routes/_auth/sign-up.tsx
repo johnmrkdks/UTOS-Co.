@@ -4,8 +4,14 @@ import placeholder from "@/assets/placeholder.svg";
 import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
 import SignUpForm from "@/features/auth/_components/sign-up-form";
 import { Car, Shield, Star, Clock, Users } from "lucide-react";
+import { z } from "zod";
+
+const signUpSearchSchema = z.object({
+	redirect: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_auth/sign-up")({
+	validateSearch: signUpSearchSchema,
 	component: RouteComponent,
 });
 

@@ -36,12 +36,12 @@ const footerLinks = {
 		{ label: "Our Fleet", href: "/services" },
 		{ label: "Contact Us", href: "/contact-us" },
 		{ label: "FAQs", href: "/faqs" },
-		{ label: "Book Now", href: "/booking" }
+		{ label: "Book Now", href: "/fleet" }
 	],
 	support: [
 		{ label: "Customer Support", href: "/contact-us" },
 		{ label: "Emergency Hotline", href: BUSINESS_INFO.phone.link },
-		{ label: "Track Your Ride", href: "/booking" },
+		{ label: "Track Your Ride", href: "/fleet" },
 		{ label: "Payment Options", href: "/faqs" },
 		{ label: "Cancellation Policy", href: "/faqs" }
 	]

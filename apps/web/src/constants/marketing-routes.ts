@@ -2,27 +2,23 @@ import type { RouteConfig } from "@/types/route-config";
 
 export const MARKETING_ROUTES: RouteConfig[] = [
 	{
-		label: "Home",
-		path: "/",
+		label: "Our Fleet",
+		path: "/fleet",
+	},
+	{
+		label: "Services",
+		path: "/services",
 	},
 	{
 		label: "About Us",
 		path: "/about-us",
 	},
 	{
-		label: "Contact Us",
-		path: "/contact-us",
-	},
-	{
-		label: "Booking",
-		path: "/booking",
-	},
-	{
 		label: "FAQs",
 		path: "/faqs",
 	},
 	{
-		label: "Services",
-		path: "/services",
+		label: "Contact Us",
+		path: "/contact-us",
 	},
 ];
