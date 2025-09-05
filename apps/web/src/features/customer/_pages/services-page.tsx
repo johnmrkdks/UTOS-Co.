@@ -221,7 +221,7 @@ export function ServicesPage() {
 								{/* Action Buttons */}
 								<div className="flex gap-2 pt-2">
 									<Button className="flex-1" asChild>
-										<Link to="/dashboard/book-service/$serviceId" params={{ serviceId: service.id }}>
+										<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
 											<Package className="h-4 w-4 mr-2" />
 											Book Service
 										</Link>
@@ -245,7 +245,7 @@ export function ServicesPage() {
 						Can't find what you're looking for? Get an instant quote for a custom car booking.
 					</p>
 					<Button variant="outline" asChild>
-						<a href="/dashboard/instant-quote">Get Instant Quote</a>
+						<Link to="/calculate-quote">Get Instant Quote</Link>
 					</Button>
 				</CardContent>
 			</Card>

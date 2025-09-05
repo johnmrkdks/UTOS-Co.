@@ -14,11 +14,11 @@ function RouteComponent() {
 	const [mockUserId] = useState("user_mock_123"); // In real app, this would come from auth context
 
 	const handleSuccess = () => {
-		navigate({ to: '/dashboard/drivers' });
+		navigate({ to: '/admin/dashboard/drivers' });
 	}
 
 	const handleBack = () => {
-		navigate({ to: '/dashboard/drivers' });
+		navigate({ to: '/admin/dashboard/drivers' });
 	}
 
 	return (

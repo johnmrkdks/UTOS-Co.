@@ -1,19 +1,16 @@
 import { useParams, useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
-import { GuestServiceBookingForm } from "../_components/guest-service-booking-form";
+import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/query/use-get-published-service-by-id-query";
+import { ServiceBookingForm } from "../_components/service-booking-form";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { ArrowLeft, MapPin, Clock, Users, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-export function GuestServiceBookingPage() {
+export function ServiceBookingPage() {
 	const { serviceId } = useParams({ from: "/_marketing/book-service/$serviceId" });
 	const search = useSearch({ from: "/_marketing/book-service/$serviceId" });
 
-	const { data: service, isLoading } = useQuery(
-		trpc.packages.getPublished.queryOptions({ id: serviceId })
-	);
+	const { data: service, isLoading } = useGetPublishedServiceByIdQuery(serviceId);
 
 	if (isLoading) {
 		return (
@@ -118,11 +115,11 @@ export function GuestServiceBookingPage() {
 					<CardHeader>
 						<CardTitle>Book This Service</CardTitle>
 						<p className="text-sm text-gray-600">
-							No account required - book as a guest
+							Complete your service booking
 						</p>
 					</CardHeader>
 					<CardContent>
-						<GuestServiceBookingForm service={service} />
+						<ServiceBookingForm service={service} />
 					</CardContent>
 				</Card>
 			</div>

@@ -2,9 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
-import { toast } from "sonner";
+import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -14,7 +12,7 @@ import { CalendarIcon, Clock, Loader2 } from "lucide-react";
 import { format, isBefore, startOfDay } from "date-fns";
 import { cn } from "@workspace/ui/lib/utils";
 
-const guestBookingSchema = z.object({
+const serviceBookingSchema = z.object({
 	customerName: z.string().min(2, "Name must be at least 2 characters"),
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
@@ -26,9 +24,9 @@ const guestBookingSchema = z.object({
 	specialRequirements: z.string().optional(),
 });
 
-type GuestBookingFormData = z.infer<typeof guestBookingSchema>;
+type ServiceBookingFormData = z.infer<typeof serviceBookingSchema>;
 
-interface GuestServiceBookingFormProps {
+interface ServiceBookingFormProps {
 	service: {
 		id: string;
 		name: string;
@@ -38,12 +36,12 @@ interface GuestServiceBookingFormProps {
 	};
 }
 
-export function GuestServiceBookingForm({ service }: GuestServiceBookingFormProps) {
+export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 	const [date, setDate] = useState<Date>();
-	const queryClient = useQueryClient();
+	const createBookingMutation = useCreatePackageBookingMutation();
 
-	const form = useForm<GuestBookingFormData>({
-		resolver: zodResolver(guestBookingSchema),
+	const form = useForm<ServiceBookingFormData>({
+		resolver: zodResolver(serviceBookingSchema),
 		defaultValues: {
 			customerName: "",
 			customerEmail: "",
@@ -54,39 +52,25 @@ export function GuestServiceBookingForm({ service }: GuestServiceBookingFormProp
 		},
 	});
 
-	const createBookingMutation = useMutation({
-		mutationFn: async (data: GuestBookingFormData) => {
-			const bookingData = {
-				packageId: service.id,
-				customerName: data.customerName,
-				customerEmail: data.customerEmail,
-				customerPhone: data.customerPhone,
-				passengerCount: data.passengerCount,
-				bookingDate: data.bookingDate,
-				bookingTime: data.bookingTime,
-				specialRequirements: data.specialRequirements,
-			};
 
-			const utils = trpc.useUtils();
-			return await utils.bookings.createPackageBooking.mutate(bookingData);
-		},
-		onSuccess: () => {
-			toast.success("Booking created successfully!", {
-				description: "You will receive a confirmation email shortly.",
-			});
-			form.reset();
-			setDate(undefined);
-			queryClient.invalidateQueries();
-		},
-		onError: (error: any) => {
-			toast.error("Failed to create booking", {
-				description: error.message || "Please try again later",
-			});
-		},
-	});
+	const onSubmit = (data: ServiceBookingFormData) => {
+		const bookingData = {
+			packageId: service.id,
+			customerName: data.customerName,
+			customerEmail: data.customerEmail,
+			customerPhone: data.customerPhone,
+			passengerCount: data.passengerCount,
+			bookingDate: data.bookingDate,
+			bookingTime: data.bookingTime,
+			specialRequirements: data.specialRequirements,
+		};
 
-	const onSubmit = (data: GuestBookingFormData) => {
-		createBookingMutation.mutate(data);
+		createBookingMutation.mutate(bookingData, {
+			onSuccess: () => {
+				form.reset();
+				setDate(undefined);
+			},
+		});
 	};
 
 	// Calculate minimum booking date based on advance booking requirement

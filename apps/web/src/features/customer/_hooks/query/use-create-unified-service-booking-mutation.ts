@@ -8,26 +8,7 @@ import { toast } from "sonner";
 export const useCreateUnifiedServiceBookingMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: async (input: {
-			packageId: string;
-			carId: string;
-			originAddress: string;
-			originLatitude?: number;
-			originLongitude?: number;
-			destinationAddress: string;
-			destinationLatitude?: number;
-			destinationLongitude?: number;
-			scheduledPickupTime: Date;
-			customerName: string;
-			customerPhone: string;
-			customerEmail?: string;
-			passengerCount: number;
-			specialRequests?: string;
-		}) => {
-			// Call the backend createPackageBooking endpoint for authenticated users
-			return await trpc.bookings.createPackageBooking.mutate(input);
-		},
+	return useMutation(trpc.bookings.createPackageBooking.mutationOptions({
 		onSuccess: (data) => {
 			console.log("✅ Unified booking mutation successful:", data);
 			
@@ -47,5 +28,5 @@ export const useCreateUnifiedServiceBookingMutation = () => {
 		onMutate: (variables) => {
 			console.log("🔄 Unified booking mutation starting with data:", variables);
 		}
-	});
+	}));
 };

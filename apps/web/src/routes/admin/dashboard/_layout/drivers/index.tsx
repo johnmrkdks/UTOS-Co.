@@ -25,7 +25,7 @@ function RouteComponent() {
 	const inactiveDrivers = driversQuery.data?.items?.filter((driver: any) => driver.isApproved && !driver.isActive).length || 0;
 
 	const handleAddDriver = () => {
-		navigate({ to: '/dashboard/drivers/onboarding' });
+		navigate({ to: '/admin/dashboard/drivers/onboarding' });
 	}
 
 	return (

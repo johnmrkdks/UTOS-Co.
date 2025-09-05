@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GuestServiceBookingPage } from "@/features/guest/_pages/guest-service-booking-page";
+import { ServiceBookingPage } from "@/features/guest/_pages/service-booking-page";
 import { z } from "zod";
 
 const bookServiceSearchSchema = z.object({
@@ -8,5 +8,5 @@ const bookServiceSearchSchema = z.object({
 
 export const Route = createFileRoute("/_marketing/book-service/$serviceId")({
 	validateSearch: bookServiceSearchSchema,
-	component: GuestServiceBookingPage,
+	component: ServiceBookingPage,
 });
