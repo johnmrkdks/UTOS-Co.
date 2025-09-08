@@ -95,46 +95,46 @@ export function InstantQuoteResults({
 				</CardHeader>
 				<CardContent className="space-y-4">
 					{/* Total Fare Display */}
-					<div className="bg-background border rounded-lg p-3">
-						<div className="flex justify-between items-center font-bold text-lg">
-							<span>Total Fare</span>
-							<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
+					<div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
+						<div className="flex justify-between items-center">
+							<span className="text-lg font-semibold">Total Fare</span>
+							<span className="text-2xl font-bold text-primary">${quote.totalAmount.toFixed(2)}</span>
 						</div>
 
-						{/* Collapsible Cost Breakdown */}
-						<button
-							onClick={() => setShowBreakdown(!showBreakdown)}
-							className="flex items-center gap-2 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-						>
-							{showBreakdown ? (
-								<ChevronDown className="h-3 w-3" />
-							) : (
-								<ChevronRight className="h-3 w-3" />
-							)}
-							View breakdown
-						</button>
-
-						{showBreakdown && (
-							<div className="mt-2 pt-2 border-t space-y-1">
-								<div className="flex justify-between text-xs">
-									<span>First {Math.ceil(quote.breakdown.firstKmDistance)}km (Flat Rate)</span>
-									<span>${quote.firstKmFare.toFixed(2)}</span>
-								</div>
-								{quote.breakdown.additionalDistance > 0 && (
-									<div className="flex justify-between text-xs">
-										<span>Additional {quote.breakdown.additionalDistance.toFixed(1)}km × ${quote.breakdown.additionalKmRate.toFixed(2)}/km</span>
-										<span>${quote.additionalKmFare.toFixed(2)}</span>
-									</div>
-								)}
-								{quote.breakdown.additionalDistance === 0 && (
-									<div className="bg-blue-50 p-2 rounded-md mt-2">
-										<p className="text-xs text-blue-800">
-											<strong>Within flat rate limit:</strong> No additional charges since your {(quote.estimatedDistance / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance)}km tier.
-										</p>
-									</div>
-								)}
+						{/* Always Visible Breakdown */}
+						<div className="mt-4 pt-3 border-t border-primary/20 space-y-2">
+							<div className="text-sm font-medium text-foreground mb-2">Price Breakdown:</div>
+							
+							{/* Base Fare */}
+							<div className="flex justify-between items-center text-sm">
+								<span className="text-muted-foreground">
+									Base fare (first {quote.breakdown.firstKmDistance.toFixed(1)}km)
+								</span>
+								<span className="font-medium">${quote.firstKmFare.toFixed(2)}</span>
 							</div>
-						)}
+							
+							{/* Additional Distance Fare */}
+							{quote.breakdown.additionalDistance > 0 ? (
+								<div className="flex justify-between items-center text-sm">
+									<span className="text-muted-foreground">
+										Extra distance ({quote.breakdown.additionalDistance.toFixed(1)}km @ ${quote.breakdown.additionalKmRate.toFixed(2)}/km)
+									</span>
+									<span className="font-medium">${quote.additionalKmFare.toFixed(2)}</span>
+								</div>
+							) : (
+								<div className="bg-green-50 border border-green-200 rounded-md p-2 mt-2">
+									<p className="text-xs text-green-800">
+										✓ <strong>Great news!</strong> Your {(quote.estimatedDistance / 1000).toFixed(1)}km journey is within the base rate - no extra distance charges apply.
+									</p>
+								</div>
+							)}
+							
+							{/* Total Line */}
+							<div className="flex justify-between items-center text-sm pt-2 border-t border-primary/20">
+								<span className="font-semibold">Total Journey Cost</span>
+								<span className="font-bold text-primary">${quote.totalAmount.toFixed(2)}</span>
+							</div>
+						</div>
 					</div>
 
 					{/* Action Buttons */}

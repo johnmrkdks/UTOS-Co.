@@ -36,8 +36,41 @@ export const bookingsRouter = router({
 		}),
 	delete: protectedProcedure
 		.input(DeleteBookingServiceSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+				const userRole = session?.user?.role;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated to delete bookings",
+					});
+				}
+				
+				// Get the booking first to check ownership
+				const existingBooking = await getBookingService(db, input);
+				
+				if (!existingBooking) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Booking not found",
+					});
+				}
+				
+				// Apply role-based access control
+				if (userRole === 'admin' || userRole === 'super_admin') {
+					// Admins can delete any booking
+				} else {
+					// Regular users and drivers cannot delete bookings via this endpoint
+					// They should use the cancelBooking endpoint instead
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only admins can delete bookings. Use cancelBooking to cancel your bookings.",
+					});
+				}
+				
 				const deletedBooking = await deleteBookingService(db, input);
 				return deletedBooking;
 			} catch (error) {
@@ -46,32 +79,162 @@ export const bookingsRouter = router({
 		}),
 	get: protectedProcedure
 		.input(GetBookingServiceSchema)
-		.query(async ({ ctx: { db }, input }) => {
+		.query(async ({ ctx: { db, session }, input }) => {
 			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+				const userRole = session?.user?.role;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated to view bookings",
+					});
+				}
+				
 				const booking = await getBookingService(db, input);
-				return booking;
+				
+				if (!booking) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Booking not found",
+					});
+				}
+				
+				// Apply role-based access control
+				if (userRole === 'admin' || userRole === 'super_admin') {
+					// Admins can see any booking
+					return booking;
+				} else if (userRole === 'driver') {
+					// Drivers can only see bookings assigned to them
+					const driverProfile = await db.query.drivers.findFirst({
+						where: (drivers, { eq }) => eq(drivers.userId, userId),
+					});
+
+					if (!driverProfile) {
+						throw new TRPCError({
+							code: "FORBIDDEN", 
+							message: "User is not registered as a driver",
+						});
+					}
+
+					if (booking.driverId !== driverProfile.id) {
+						throw new TRPCError({
+							code: "FORBIDDEN",
+							message: "You can only view your assigned bookings",
+						});
+					}
+					
+					return booking;
+				} else {
+					// Regular users (customers) can only see their own bookings
+					if (booking.userId !== userId) {
+						throw new TRPCError({
+							code: "FORBIDDEN",
+							message: "You can only view your own bookings",
+						});
+					}
+					
+					return booking;
+				}
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
-		.query(async ({ ctx: { db }, input }) => {
+		.query(async ({ ctx: { db, session }, input }) => {
 			try {
-				const bookings = await getBookingsService(db, input);
-				return bookings;
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+				const userRole = session?.user?.role;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated to view bookings",
+					});
+				}
+				
+				// Apply role-based filtering
+				if (userRole === 'admin' || userRole === 'super_admin') {
+					// Admins can see all bookings
+					const bookings = await getBookingsService(db, input);
+					return bookings;
+				} else if (userRole === 'driver') {
+					// Drivers can only see their assigned bookings
+					const driverProfile = await db.query.drivers.findFirst({
+						where: (drivers, { eq }) => eq(drivers.userId, userId),
+					});
+
+					if (!driverProfile) {
+						throw new TRPCError({
+							code: "FORBIDDEN", 
+							message: "User is not registered as a driver",
+						});
+					}
+
+					const bookings = await getBookingsService(db, {
+						...input,
+						filters: {
+							...input.filters,
+							driverId: driverProfile.id,
+						},
+					});
+					return bookings;
+				} else {
+					// Regular users (customers) can only see their own bookings
+					const bookings = await getBookingsService(db, {
+						...input,
+						filters: {
+							...input.filters,
+							userId: userId,
+						},
+					});
+					return bookings;
+				}
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
 	update: protectedProcedure
 		.input(UpdateBookingServiceSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				const updatedBooking = await updateBookingService(
-					db,
-					input,
-				);
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+				const userRole = session?.user?.role;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated to update bookings",
+					});
+				}
+				
+				// Get the booking first to check ownership
+				const existingBooking = await getBookingService(db, { id: input.id });
+				
+				if (!existingBooking) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Booking not found",
+					});
+				}
+				
+				// Apply role-based access control
+				if (userRole === 'admin' || userRole === 'super_admin') {
+					// Admins can update any booking
+				} else {
+					// Regular users and drivers cannot update bookings via this endpoint
+					// They should use the specific editBooking endpoint which has proper validation
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only admins can use this update endpoint. Use editBooking for customer updates.",
+					});
+				}
+				
+				const updatedBooking = await updateBookingService(db, input);
 				return updatedBooking;
 			} catch (error) {
 				handleTRPCError(error);
@@ -207,10 +370,56 @@ export const bookingsRouter = router({
 		.input(ResourceListSchema.extend({
 			bookingType: z.enum(["package", "custom"]).optional(),
 		}))
-		.query(async ({ ctx: { db }, input }) => {
+		.query(async ({ ctx: { db, session }, input }) => {
 			try {
-				const bookings = await getBookingsService(db, input);
-				return bookings;
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+				const userRole = session?.user?.role;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated to view bookings",
+					});
+				}
+				
+				// Apply role-based filtering
+				if (userRole === 'admin' || userRole === 'super_admin') {
+					// Admins can see all bookings
+					const bookings = await getBookingsService(db, input);
+					return bookings;
+				} else if (userRole === 'driver') {
+					// Drivers can only see their assigned bookings
+					const driverProfile = await db.query.drivers.findFirst({
+						where: (drivers, { eq }) => eq(drivers.userId, userId),
+					});
+
+					if (!driverProfile) {
+						throw new TRPCError({
+							code: "FORBIDDEN", 
+							message: "User is not registered as a driver",
+						});
+					}
+
+					const bookings = await getBookingsService(db, {
+						...input,
+						filters: {
+							...input.filters,
+							driverId: driverProfile.id,
+						},
+					});
+					return bookings;
+				} else {
+					// Regular users (customers) can only see their own bookings
+					const bookings = await getBookingsService(db, {
+						...input,
+						filters: {
+							...input.filters,
+							userId: userId,
+						},
+					});
+					return bookings;
+				}
 			} catch (error) {
 				handleTRPCError(error);
 			}
