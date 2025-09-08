@@ -136,7 +136,7 @@ export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
 					<DialogTitle>Edit Category</DialogTitle>
 					<DialogDescription>Edit the details of the category.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

@@ -79,14 +79,14 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 					</DialogDescription>
 				</DialogHeader>
 
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						{/* Two-column layout */}
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							{/* Left Column - Main Form Inputs */}
 							<div className="space-y-4">
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="name"
 									render={({ field }) => (
 										<FormItem>
@@ -100,7 +100,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 								/>
 
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="description"
 									render={({ field }) => (
 										<FormItem>
@@ -118,7 +118,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 								/>
 
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="fixedPrice"
 									render={({ field }) => (
 										<FormItem>
@@ -145,7 +145,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 									<h4 className="text-sm font-medium mb-3">Package Settings</h4>
 									<div className="space-y-3">
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="isAvailable"
 											render={({ field }) => (
 												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -166,7 +166,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 										/>
 
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="isPublished"
 											render={({ field }) => (
 												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">

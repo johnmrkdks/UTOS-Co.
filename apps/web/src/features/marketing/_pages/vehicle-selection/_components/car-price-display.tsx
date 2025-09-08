@@ -19,7 +19,7 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 		);
 	}
 
-	if (!pricing || !pricing.hasActivePricing) {
+	if (!pricing || !pricing?.hasActivePricing) {
 		return (
 			<div className={className}>
 				{variant === "card" ? (
@@ -39,7 +39,7 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 	if (variant === "summary") {
 		return (
 			<div className={className}>
-				<span>From ${pricing.baseFare} + ${pricing.perKmRate}/km</span>
+				<span>From ${pricing?.firstKmRate || 0} + ${pricing?.additionalKmRate || 0}/km</span>
 			</div>
 		);
 	}
@@ -47,10 +47,10 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 	return (
 		<div className={className}>
 			<div className="text-sm sm:text-lg lg:text-xl font-bold text-primary">
-				${pricing.baseFare}
+				${pricing?.firstKmRate || 0}
 			</div>
 			<div className="text-xs text-muted-foreground hidden sm:block">
-				base + ${pricing.perKmRate}/km
+				first {pricing?.firstKmLimit || 10}km + ${pricing?.additionalKmRate || 0}/km
 			</div>
 		</div>
 	);

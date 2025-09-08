@@ -2,8 +2,18 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { EditIcon, MoreHorizontalIcon, TrashIcon, ToggleLeftIcon, ToggleRightIcon } from "lucide-react";
 import type { Car } from "server/types";
 import { CarDetailsDialog } from "./car-details-dialog";
+import { useModal } from "@/hooks/use-modal";
+import { useUpdateCarMutation } from "../../../_hooks/query/car/use-update-car-mutation";
 
 interface CarGridCardProps {
 	car: Car;
@@ -11,7 +21,30 @@ interface CarGridCardProps {
 
 const CarGridCard: React.FC<CarGridCardProps> = ({ car }) => {
 	const [showDetails, setShowDetails] = useState(false)
+	const { openModal } = useModal()
+	const updateCarMutation = useUpdateCarMutation()
 	const mainImage = car.images?.find((image) => image.isMain)
+
+	const handleEdit = () => {
+		openModal("edit-car", car)
+	}
+
+	const handleToggleAvailability = async () => {
+		try {
+			await updateCarMutation.mutateAsync({
+				id: car.id,
+				data: {
+					isAvailable: !car.isAvailable,
+				},
+			})
+		} catch (error) {
+			console.error("Failed to toggle availability:", error)
+		}
+	}
+
+	const handleDelete = () => {
+		openModal("delete-car", car)
+	}
 
 	return (
 		<>
@@ -52,11 +85,51 @@ const CarGridCard: React.FC<CarGridCardProps> = ({ car }) => {
 						</div>
 					)}
 				</CardContent>
-				<CardFooter className="flex justify-between items-center p-2 mt-auto">
+				<CardFooter className="flex justify-between items-center p-2 mt-auto gap-2">
 					{/* View Details Button */}
-					<Button variant="outline" className="w-full bg-transparent" onClick={() => setShowDetails(true)}>
+					<Button variant="outline" className="flex-1 bg-transparent" onClick={() => setShowDetails(true)}>
 						View Details
 					</Button>
+					{/* Actions menu */}
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								className="h-9 w-9 p-0"
+							>
+								<MoreHorizontalIcon className="h-4 w-4" />
+								<span className="sr-only">Open menu</span>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-[160px]">
+							<DropdownMenuItem onClick={handleEdit}>
+								<EditIcon className="mr-2 h-4 w-4" />
+								Edit Car
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem onClick={handleToggleAvailability}>
+								{car.isAvailable ? (
+									<>
+										<ToggleLeftIcon className="mr-2 h-4 w-4" />
+										Disable Car
+									</>
+								) : (
+									<>
+										<ToggleRightIcon className="mr-2 h-4 w-4" />
+										Enable Car
+									</>
+								)}
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								onClick={handleDelete}
+								className="text-red-600 focus:text-red-600"
+							>
+								<TrashIcon className="mr-2 h-4 w-4" />
+								Delete Car
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</CardFooter>
 			</Card>
 			<CarDetailsDialog car={car} open={showDetails} onOpenChange={setShowDetails} />

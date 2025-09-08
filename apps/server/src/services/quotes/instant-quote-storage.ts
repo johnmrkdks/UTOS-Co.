@@ -21,29 +21,25 @@ export interface SecureQuoteData {
 	// Selected car
 	carId?: string;
 	
-	// Quote calculations
-	baseFare: number;
-	distanceFare: number;
-	timeFare: number;
-	extraCharges: number;
+	// Flexible quote calculations
+	firstKmFare: number;
+	additionalKmFare: number;
 	totalAmount: number;
 	
 	// Trip metrics
 	estimatedDistance: number; // in meters
 	estimatedDuration: number; // in seconds
 	
-	// Pricing breakdown for transparency
+	// Flexible pricing breakdown for transparency
 	breakdown: {
-		baseRate: number;
-		perKmRate: number;
-		perMinuteRate: number;
-		minimumFare: number;
-		surgePricing?: number;
-		waitingTimeCharges?: number;
+		firstKmRate: number;
+		additionalKmRate: number;
+		totalDistance: number; // in km
+		firstKmDistance: number; // distance charged at first km rate
+		additionalDistance: number; // distance charged at per km rate
 	};
 	
 	// Quote metadata
-	surgePricing?: number;
 	scheduledPickupTime?: Date;
 }
 
@@ -84,15 +80,12 @@ export async function storeSecureQuote(
 		destinationLongitude: quoteData.destinationLongitude,
 		stops: quoteData.stops ? JSON.stringify(quoteData.stops) : null,
 		carId: quoteData.carId,
-		baseFare: quoteData.baseFare,
-		distanceFare: quoteData.distanceFare,
-		timeFare: quoteData.timeFare,
-		extraCharges: quoteData.extraCharges,
+		firstKmFare: quoteData.firstKmFare,
+		additionalKmFare: quoteData.additionalKmFare,
 		totalAmount: quoteData.totalAmount,
 		estimatedDistance: quoteData.estimatedDistance,
 		estimatedDuration: quoteData.estimatedDuration,
 		breakdown: JSON.stringify(quoteData.breakdown),
-		surgePricing: quoteData.surgePricing,
 		scheduledPickupTime: quoteData.scheduledPickupTime || new Date(),
 		expiresAt: expiresAt,
 		clientIp: clientInfo?.ip,
@@ -122,15 +115,12 @@ export async function retrieveSecureQuote(
 			destinationLongitude: instantQuotes.destinationLongitude,
 			stops: instantQuotes.stops,
 			carId: instantQuotes.carId,
-			baseFare: instantQuotes.baseFare,
-			distanceFare: instantQuotes.distanceFare,
-			timeFare: instantQuotes.timeFare,
-			extraCharges: instantQuotes.extraCharges,
+			firstKmFare: instantQuotes.firstKmFare,
+			additionalKmFare: instantQuotes.additionalKmFare,
 			totalAmount: instantQuotes.totalAmount,
 			estimatedDistance: instantQuotes.estimatedDistance,
 			estimatedDuration: instantQuotes.estimatedDuration,
 			breakdown: instantQuotes.breakdown,
-			surgePricing: instantQuotes.surgePricing,
 			scheduledPickupTime: instantQuotes.scheduledPickupTime,
 			expiresAt: instantQuotes.expiresAt,
 			createdAt: instantQuotes.createdAt,
@@ -164,15 +154,12 @@ export async function retrieveSecureQuote(
 		destinationLongitude: quote.destinationLongitude || undefined,
 		stops,
 		carId: quote.carId || undefined,
-		baseFare: quote.baseFare,
-		distanceFare: quote.distanceFare,
-		timeFare: quote.timeFare,
-		extraCharges: quote.extraCharges,
+		firstKmFare: quote.firstKmFare,
+		additionalKmFare: quote.additionalKmFare,
 		totalAmount: quote.totalAmount,
 		estimatedDistance: quote.estimatedDistance,
 		estimatedDuration: quote.estimatedDuration,
 		breakdown,
-		surgePricing: quote.surgePricing || undefined,
 		scheduledPickupTime: quote.scheduledPickupTime || undefined,
 		expiresAt: quote.expiresAt,
 		createdAt: quote.createdAt,
@@ -198,15 +185,12 @@ export async function retrieveSecureQuoteWithCar(
 			destinationLongitude: instantQuotes.destinationLongitude,
 			stops: instantQuotes.stops,
 			carId: instantQuotes.carId,
-			baseFare: instantQuotes.baseFare,
-			distanceFare: instantQuotes.distanceFare,
-			timeFare: instantQuotes.timeFare,
-			extraCharges: instantQuotes.extraCharges,
+			firstKmFare: instantQuotes.firstKmFare,
+			additionalKmFare: instantQuotes.additionalKmFare,
 			totalAmount: instantQuotes.totalAmount,
 			estimatedDistance: instantQuotes.estimatedDistance,
 			estimatedDuration: instantQuotes.estimatedDuration,
 			breakdown: instantQuotes.breakdown,
-			surgePricing: instantQuotes.surgePricing,
 			scheduledPickupTime: instantQuotes.scheduledPickupTime,
 			expiresAt: instantQuotes.expiresAt,
 			createdAt: instantQuotes.createdAt,
@@ -241,15 +225,12 @@ export async function retrieveSecureQuoteWithCar(
 		destinationLongitude: quote.destinationLongitude || undefined,
 		stops,
 		carId: quote.carId || undefined,
-		baseFare: quote.baseFare,
-		distanceFare: quote.distanceFare,
-		timeFare: quote.timeFare,
-		extraCharges: quote.extraCharges,
+		firstKmFare: quote.firstKmFare,
+		additionalKmFare: quote.additionalKmFare,
 		totalAmount: quote.totalAmount,
 		estimatedDistance: quote.estimatedDistance,
 		estimatedDuration: quote.estimatedDuration,
 		breakdown,
-		surgePricing: quote.surgePricing || undefined,
 		scheduledPickupTime: quote.scheduledPickupTime || undefined,
 		expiresAt: quote.expiresAt,
 		createdAt: quote.createdAt,

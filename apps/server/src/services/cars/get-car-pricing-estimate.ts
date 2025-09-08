@@ -10,8 +10,9 @@ export const GetCarPricingEstimateSchema = z.object({
 export type GetCarPricingEstimateParams = z.infer<typeof GetCarPricingEstimateSchema>;
 
 export interface CarPricingEstimate {
-	baseFare: number;
-	perKmRate: number;
+	firstKmRate: number;
+	firstKmLimit: number;
+	additionalKmRate: number;
 	estimatedDailyRate?: number; // rough daily estimate
 	hasActivePricing: boolean;
 }
@@ -25,12 +26,7 @@ export async function getCarPricingEstimateService(
 		const carPricingResult = await db
 			.select()
 			.from(pricingConfig)
-			.where(
-				and(
-					eq(pricingConfig.carId, data.carId),
-					eq(pricingConfig.isActive, true)
-				)
-			)
+			.where(eq(pricingConfig.carId, data.carId))
 			.limit(1);
 
 		if (carPricingResult.length === 0) {
@@ -38,12 +34,7 @@ export async function getCarPricingEstimateService(
 			const globalPricingResult = await db
 				.select()
 				.from(pricingConfig)
-				.where(
-					and(
-						isNull(pricingConfig.carId), // Global pricing has null carId
-						eq(pricingConfig.isActive, true)
-					)
-				)
+				.where(isNull(pricingConfig.carId)) // Global pricing has null carId
 				.limit(1);
 
 			if (globalPricingResult.length === 0) {
@@ -52,18 +43,20 @@ export async function getCarPricingEstimateService(
 
 			const globalConfig = globalPricingResult[0];
 			return {
-				baseFare: globalConfig.baseFare,
-				perKmRate: globalConfig.pricePerKm,
-				estimatedDailyRate: calculateEstimatedDailyRate(globalConfig.baseFare, globalConfig.pricePerKm),
+				firstKmRate: globalConfig.firstKmRate,
+				firstKmLimit: globalConfig.firstKmLimit || 10,
+				additionalKmRate: globalConfig.pricePerKm,
+				estimatedDailyRate: calculateEstimatedDailyRate(globalConfig.firstKmRate, globalConfig.firstKmLimit || 10, globalConfig.pricePerKm),
 				hasActivePricing: true,
 			};
 		}
 
 		const config = carPricingResult[0];
 		return {
-			baseFare: config.baseFare,
-			perKmRate: config.pricePerKm,
-			estimatedDailyRate: calculateEstimatedDailyRate(config.baseFare, config.pricePerKm),
+			firstKmRate: config.firstKmRate,
+			firstKmLimit: config.firstKmLimit || 10,
+			additionalKmRate: config.pricePerKm,
+			estimatedDailyRate: calculateEstimatedDailyRate(config.firstKmRate, config.firstKmLimit || 10, config.pricePerKm),
 			hasActivePricing: true,
 		};
 	} catch (error) {
@@ -72,8 +65,23 @@ export async function getCarPricingEstimateService(
 	}
 }
 
-// Simple daily rate estimation: base fare + average daily distance (100km)
-function calculateEstimatedDailyRate(baseFare: number, perKmRate: number): number {
+// Daily rate estimation using simplified two-tier pricing model
+function calculateEstimatedDailyRate(firstKmRate: number, firstKmLimit: number, additionalKmRate: number): number {
 	const averageDailyKm = 100; // Assumption for daily usage
-	return baseFare + (averageDailyKm * perKmRate);
+	
+	// Calculate using simplified two-tier pricing model
+	let firstKmFare = 0;
+	let additionalKmFare = 0;
+	
+	if (averageDailyKm <= firstKmLimit) {
+		// Distance is within first tier - pay flat rate
+		firstKmFare = firstKmRate;
+	} else {
+		// Distance exceeds first tier - flat rate + additional per km
+		firstKmFare = firstKmRate;
+		const additionalDistance = averageDailyKm - firstKmLimit;
+		additionalKmFare = additionalDistance * additionalKmRate;
+	}
+	
+	return parseFloat((firstKmFare + additionalKmFare).toFixed(2));
 }

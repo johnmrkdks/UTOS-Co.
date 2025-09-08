@@ -98,11 +98,11 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						{/* Origin */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="originAddress"
 							render={({ field }) => (
 								<FormItem>
@@ -127,7 +127,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 
 						{/* Destination */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="destinationAddress"
 							render={({ field }) => (
 								<FormItem>
@@ -154,7 +154,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 						{stops.map((stop, index) => (
 							<FormField
 								key={stop.id}
-								control={form.control}
+								control={form.control as any}
 								name={`stops.${index}.address`}
 								render={({ field }) => (
 									<FormItem>

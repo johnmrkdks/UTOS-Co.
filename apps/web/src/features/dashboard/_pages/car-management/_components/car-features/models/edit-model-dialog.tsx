@@ -160,7 +160,7 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 					<DialogTitle>Edit Model</DialogTitle>
 					<DialogDescription>Edit the details of the model.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<div className="flex flex-col gap-4">
 							<SelectField

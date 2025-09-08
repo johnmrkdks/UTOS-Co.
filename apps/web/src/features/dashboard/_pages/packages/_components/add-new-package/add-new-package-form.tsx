@@ -24,7 +24,6 @@ const addPackageSchema = z.object({
 	fixedPrice: z.number().min(0, "Price must be positive"),
 	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
 	isAvailable: z.boolean().default(true),
-	isPublished: z.boolean().default(false),
 	bannerImageUrl: z.string().optional(),
 	// Optional fields that can be null/undefined in database
 	categoryId: z.string().optional(),
@@ -83,7 +82,6 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			fixedPrice: 0,
 			maxPassengers: 4,
 			isAvailable: true,
-			isPublished: false,
 			bannerImageUrl: "",
 			// Set defaults for optional fields
 			advanceBookingHours: 24,
@@ -162,14 +160,14 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 	};
 
 	return (
-		<Form {...form}>
+		<Form {...form as any}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 				{/* Two-column layout */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Left Column - Main Form Inputs */}
 					<div className="space-y-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="name"
 							render={({ field }) => (
 								<FormItem>
@@ -183,7 +181,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 						/>
 						
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="description"
 							render={({ field }) => (
 								<FormItem>
@@ -201,7 +199,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 						/>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="serviceTypeId"
 							render={({ field }) => (
 								<FormItem>
@@ -239,7 +237,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="fixedPrice"
 								render={({ field }) => (
 									<FormItem>
@@ -260,7 +258,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="maxPassengers"
 								render={({ field }) => (
 									<FormItem>
@@ -286,7 +284,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 					<div className="space-y-4">
 						{/* Banner Image Upload */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="bannerImageUrl"
 							render={({ field }) => (
 								<FormItem>
@@ -347,7 +345,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 								<h4 className="text-sm font-medium mb-3">Package Settings</h4>
 								<div className="space-y-3">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="isAvailable"
 										render={({ field }) => (
 											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -367,26 +365,6 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 										)}
 									/>
 
-									<FormField
-										control={form.control}
-										name="isPublished"
-										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-												<div className="space-y-0.5">
-													<FormLabel className="text-sm font-medium">Publish to Customers</FormLabel>
-													<div className="text-xs text-muted-foreground">
-														Make this package visible to public customers
-													</div>
-												</div>
-												<FormControl>
-													<Switch 
-														checked={field.value} 
-														onCheckedChange={field.onChange} 
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
 								</div>
 							</div>
 						</div>

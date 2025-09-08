@@ -202,7 +202,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 		<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 			{/* Left Column - Form Inputs */}
 			<div className="space-y-6">
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						{/* Personal Information */}
 						<Card>
@@ -218,7 +218,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="phoneNumber"
 										render={({ field }) => (
 											<FormItem>
@@ -232,7 +232,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="dateOfBirth"
 										render={({ field }) => (
 											<FormItem>
@@ -247,7 +247,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 								</div>
 
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="address"
 									render={({ field }) => (
 										<FormItem>
@@ -279,7 +279,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="licenseNumber"
 										render={({ field }) => (
 											<FormItem>
@@ -293,7 +293,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="licenseExpiry"
 										render={({ field }) => (
 											<FormItem>
@@ -323,7 +323,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="emergencyContactName"
 										render={({ field }) => (
 											<FormItem>
@@ -337,7 +337,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="emergencyContactPhone"
 										render={({ field }) => (
 											<FormItem>

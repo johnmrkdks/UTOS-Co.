@@ -65,11 +65,7 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 			await updatePackageMutation.mutateAsync({
 				id: pkg.id,
 				data: {
-					name: pkg.name,
-					description: pkg.description,
-					fixedPrice: pkg.fixedPrice, // Keep price in cents
 					isAvailable: !pkg.isAvailable,
-					isPublished: pkg.isPublished ?? false,
 				}
 			});
 		} catch (error) {
@@ -166,65 +162,6 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 								</Badge>
 							</div>
 
-							{/* Actions Menu */}
-							<div className="absolute top-3 right-3">
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button
-											variant="secondary"
-											size="sm"
-											className="h-8 w-8 p-0 backdrop-blur-sm bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-										>
-											<span className="sr-only">Open menu</span>
-											<MoreHorizontal className="h-4 w-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuItem onClick={() => setViewingPackage(pkg)}>
-											<Eye className="mr-2 h-4 w-4" />
-											View Details
-										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setEditingPackage(pkg)}>
-											<Pencil className="mr-2 h-4 w-4" />
-											Edit
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem onClick={() => setRoutesPackage(pkg)}>
-											<RouteIcon className="mr-2 h-4 w-4" />
-											Manage Routes
-										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setSchedulingPackage(pkg)}>
-											<Calendar className="mr-2 h-4 w-4" />
-											Manage Schedule
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											onClick={() => handleToggleAvailable(pkg)}
-											disabled={updatePackageMutation.isPending}
-										>
-											{pkg.isAvailable ? (
-												<>
-													<PowerOff className="mr-2 h-4 w-4" />
-													Disable
-												</>
-											) : (
-												<>
-													<Power className="mr-2 h-4 w-4" />
-													Enable
-												</>
-											)}
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											onClick={() => setDeletingPackage(pkg)}
-											className="text-destructive"
-										>
-											<Trash2 className="mr-2 h-4 w-4" />
-											Delete
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
 
 							{/* Published Badge */}
 							{pkg.isPublished && (
@@ -278,17 +215,61 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 									className="flex-1"
 								>
 									<Eye className="mr-1 h-4 w-4" />
-									View
+									View Details
 								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setEditingPackage(pkg)}
-									className="flex-1"
-								>
-									<Pencil className="mr-1 h-4 w-4" />
-									Edit
-								</Button>
+								{/* Actions menu */}
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="ghost"
+											size="sm"
+											className="h-9 w-9 p-0"
+										>
+											<MoreHorizontal className="h-4 w-4" />
+											<span className="sr-only">Open menu</span>
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="w-[180px]">
+										<DropdownMenuItem onClick={() => setEditingPackage(pkg)}>
+											<Pencil className="mr-2 h-4 w-4" />
+											Edit Package
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem onClick={() => setRoutesPackage(pkg)}>
+											<RouteIcon className="mr-2 h-4 w-4" />
+											Manage Routes
+										</DropdownMenuItem>
+										<DropdownMenuItem onClick={() => setSchedulingPackage(pkg)}>
+											<Calendar className="mr-2 h-4 w-4" />
+											Manage Schedule
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											onClick={() => handleToggleAvailable(pkg)}
+											disabled={updatePackageMutation.isPending}
+										>
+											{pkg.isAvailable ? (
+												<>
+													<PowerOff className="mr-2 h-4 w-4" />
+													Disable Package
+												</>
+											) : (
+												<>
+													<Power className="mr-2 h-4 w-4" />
+													Enable Package
+												</>
+											)}
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											onClick={() => setDeletingPackage(pkg)}
+											className="text-red-600 focus:text-red-600"
+										>
+											<Trash2 className="mr-2 h-4 w-4" />
+											Delete Package
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						</CardContent>
 					</Card>

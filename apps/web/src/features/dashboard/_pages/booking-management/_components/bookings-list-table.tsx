@@ -19,6 +19,8 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 50,
 		offset: 0,
+		sortBy: 'createdAt',
+		sortOrder: 'desc',
 	});
 
 	// Apply filters to the data

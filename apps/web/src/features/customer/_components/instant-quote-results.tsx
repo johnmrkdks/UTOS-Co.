@@ -117,17 +117,20 @@ export function InstantQuoteResults({
 						{showBreakdown && (
 							<div className="mt-2 pt-2 border-t space-y-1">
 								<div className="flex justify-between text-xs">
-									<span>Base fare</span>
-									<span>${(quote.baseFare / 100).toFixed(2)}</span>
+									<span>First {Math.ceil(quote.breakdown.firstKmDistance)}km (Flat Rate)</span>
+									<span>${quote.firstKmFare.toFixed(2)}</span>
 								</div>
-								<div className="flex justify-between text-xs">
-									<span>Distance fare</span>
-									<span>${(quote.distanceFare / 100).toFixed(2)}</span>
-								</div>
-								{quote.extraCharges > 0 && (
+								{quote.breakdown.additionalDistance > 0 && (
 									<div className="flex justify-between text-xs">
-										<span>Extra charges</span>
-										<span>${(quote.extraCharges / 100).toFixed(2)}</span>
+										<span>Additional {quote.breakdown.additionalDistance.toFixed(1)}km × ${quote.breakdown.additionalKmRate.toFixed(2)}/km</span>
+										<span>${quote.additionalKmFare.toFixed(2)}</span>
+									</div>
+								)}
+								{quote.breakdown.additionalDistance === 0 && (
+									<div className="bg-blue-50 p-2 rounded-md mt-2">
+										<p className="text-xs text-blue-800">
+											<strong>Within flat rate limit:</strong> No additional charges since your {(quote.estimatedDistance / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance)}km tier.
+										</p>
 									</div>
 								)}
 							</div>

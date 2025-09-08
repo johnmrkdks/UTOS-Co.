@@ -240,7 +240,7 @@ export function CarAppointmentBookingDialog({
 				{/* Booking Details Step */}
 				{currentStep === "details" && (
 					<div className="space-y-6">
-						<Form {...form}>
+						<Form {...form as any}>
 							<form onSubmit={form.handleSubmit(goToConfirmation)} className="space-y-6">
 								{/* Route Details */}
 								<Card>
@@ -249,7 +249,7 @@ export function CarAppointmentBookingDialog({
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="originAddress"
 											render={({ field }) => (
 												<FormItem>
@@ -269,7 +269,7 @@ export function CarAppointmentBookingDialog({
 										/>
 
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="destinationAddress"
 											render={({ field }) => (
 												<FormItem>
@@ -298,7 +298,7 @@ export function CarAppointmentBookingDialog({
 									<CardContent className="space-y-4">
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="scheduledPickupTime"
 												render={({ field }) => (
 													<FormItem>
@@ -318,7 +318,7 @@ export function CarAppointmentBookingDialog({
 											/>
 
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="estimatedDuration"
 												render={({ field }) => (
 													<FormItem>
@@ -339,7 +339,7 @@ export function CarAppointmentBookingDialog({
 										</div>
 
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="passengerCount"
 											render={({ field }) => (
 												<FormItem>
@@ -371,7 +371,7 @@ export function CarAppointmentBookingDialog({
 									<CardContent className="space-y-4">
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="customerName"
 												render={({ field }) => (
 													<FormItem>
@@ -384,7 +384,7 @@ export function CarAppointmentBookingDialog({
 												)}
 											/>
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="customerPhone"
 												render={({ field }) => (
 													<FormItem>
@@ -399,7 +399,7 @@ export function CarAppointmentBookingDialog({
 										</div>
 
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="customerEmail"
 											render={({ field }) => (
 												<FormItem>
@@ -413,7 +413,7 @@ export function CarAppointmentBookingDialog({
 										/>
 
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="specialRequests"
 											render={({ field }) => (
 												<FormItem>

@@ -29,6 +29,7 @@ export function ServicesPage() {
 
 	const services = servicesData?.data || [];
 
+
 	// Helper function to format price
 	const formatPrice = (priceInCents: number) => {
 		return `$${(priceInCents / 100).toFixed(0)}`;
@@ -143,23 +144,63 @@ export function ServicesPage() {
 					filteredServices.map((service) => (
 						<Card key={service.id} className="overflow-hidden hover:shadow-lg transition-shadow">
 							{/* Service Image */}
-							<div className="h-48 bg-gray-200 relative">
-								{service.bannerImageUrl && (
-									<img 
-										src={service.bannerImageUrl} 
-										alt={service.name}
-										className="w-full h-full object-cover"
-									/>
+							<div className="h-48 relative overflow-hidden">
+								{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
+									<>
+										<img 
+											src={service.bannerImageUrl} 
+											alt={service.name}
+											className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+											onError={(e) => {
+												console.log(`❌ Failed to load image for ${service.name}:`, service.bannerImageUrl);
+												// Show fallback design on image error
+												e.currentTarget.parentElement!.innerHTML = `
+													<div class="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
+														<div class="text-center">
+															<div class="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
+																<svg class="w-8 h-8 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+																</svg>
+															</div>
+															<p class="text-gray-600 font-medium text-sm px-2">${service.name}</p>
+															<p class="text-gray-400 text-xs mt-1">Premium Service</p>
+														</div>
+													</div>
+												`;
+											}}
+										/>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+									</>
+								) : (
+									<div className="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
+										<div className="text-center">
+											<div className="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
+												<Package className="w-8 h-8 text-primary/60" />
+											</div>
+											<p className="text-gray-600 font-medium text-sm px-2">{service.name}</p>
+											<p className="text-gray-400 text-xs mt-1">Premium Service</p>
+										</div>
+									</div>
 								)}
-								<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-								<div className="absolute bottom-4 left-4 text-white">
-									<Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+								
+								{/* Service Type Badge */}
+								<div className="absolute bottom-4 left-4">
+									<Badge className="bg-primary/90 text-primary-foreground border-0 shadow-lg">
 										{getServiceTypeDisplay(service.serviceType)}
 									</Badge>
 								</div>
+								
+								{/* Price Badge */}
+								<div className="absolute top-4 left-4">
+									<Badge className="bg-white/95 text-primary font-bold shadow-lg">
+										{formatPrice(service.fixedPrice)}
+									</Badge>
+								</div>
+								
+								{/* Deposit Required Badge */}
 								{service.depositRequired && (
 									<div className="absolute top-4 right-4">
-										<Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+										<Badge variant="secondary" className="bg-orange-500/90 text-white border-0 shadow-lg">
 											Deposit Required
 										</Badge>
 									</div>
@@ -169,7 +210,6 @@ export function ServicesPage() {
 							<CardHeader className="pb-3">
 								<div className="flex justify-between items-start">
 									<CardTitle className="text-lg">{service.name}</CardTitle>
-									<span className="text-xl font-bold text-primary">{formatPrice(service.fixedPrice)}</span>
 								</div>
 								<CardDescription className="text-sm">{service.description}</CardDescription>
 							</CardHeader>

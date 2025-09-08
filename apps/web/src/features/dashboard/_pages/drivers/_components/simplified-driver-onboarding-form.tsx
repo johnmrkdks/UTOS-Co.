@@ -209,7 +209,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 			</div>
 
 			{/* Form Content */}
-			<Form {...form}>
+			<Form {...form as any}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 					{/* Step 1: Personal Information */}
 					{currentStep === 1 && (
@@ -226,7 +226,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 							<CardContent className="space-y-6">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="phoneNumber"
 										render={({ field }) => (
 											<FormItem>
@@ -243,7 +243,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="dateOfBirth"
 										render={({ field }) => (
 											<FormItem>
@@ -261,7 +261,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 								</div>
 
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="address"
 									render={({ field }) => (
 										<FormItem>
@@ -323,7 +323,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="licenseNumber"
 										render={({ field }) => (
 											<FormItem>
@@ -340,7 +340,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="licenseExpiry"
 										render={({ field }) => (
 											<FormItem>
@@ -400,7 +400,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="emergencyContactName"
 										render={({ field }) => (
 											<FormItem>
@@ -417,7 +417,7 @@ export function SimplifiedDriverOnboardingForm({ userId, onSuccess }: Simplified
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="emergencyContactPhone"
 										render={({ field }) => (
 											<FormItem>

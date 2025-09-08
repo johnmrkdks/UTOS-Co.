@@ -89,6 +89,17 @@
 
 ## 🚧 RECENT FIXES & IMPROVEMENTS
 
+### **🎉 Enhanced Car Publication System** *(Sep 8, 2025)*
+- [x] **Car Publication Workflow**: Cars can now only be published through pricing configuration system
+- [x] **Removed Creation Checkbox**: Removed "Publish to Customers" checkbox from car creation form  
+- [x] **Pricing-Based Publication**: Cars require active pricing configuration to be publicly visible
+- [x] **Schema Updates**: Updated car creation schema to prevent publication during creation
+- [x] **Fleet UI Simplification**: Streamlined fleet page by removing redundant "Get Quote" button
+- [x] **Type Safety Improvements**: Fixed boolean/integer type consistency in pricing queries
+- [x] **Publication Logic**: Cars are published only through pricing configuration interface
+- [x] **Database Consistency**: Fixed boolean type handling in pricing configuration queries
+- [x] **TypeScript Fixes**: Updated all pricing queries to use boolean comparisons consistently
+
 ### **🎉 Enhanced Vehicle Selection & Route Display System** *(Aug 27, 2025)*
 - [x] **Vehicle Selection Mobile Optimization**: Responsive car cards with mobile-first design
 - [x] **Enhanced Route Display**: Professional origin/destination visualization with gradient connections

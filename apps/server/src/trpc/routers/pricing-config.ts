@@ -3,15 +3,16 @@ import {
 	CreatePricingConfigServiceSchema,
 } from "@/services/pricing-config/create-pricing-config";
 import {
+	deletePricingConfigService,
+	DeletePricingConfigServiceSchema,
+} from "@/services/pricing-config/delete-pricing-config";
+import {
 	getPricingConfigsService,
 } from "@/services/pricing-config/get-pricing-configs";
 import {
 	updatePricingConfigService,
 	UpdatePricingConfigServiceSchema,
 } from "@/services/pricing-config/update-pricing-config";
-import {
-	togglePricingConfigActiveService,
-} from "@/services/pricing-config/toggle-pricing-config-active";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -48,12 +49,12 @@ export const pricingConfigRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	toggleActive: protectedProcedure
-		.input(z.object({ id: z.string() }))
+	delete: protectedProcedure
+		.input(DeletePricingConfigServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const updatedConfig = await togglePricingConfigActiveService(db, input.id);
-				return updatedConfig;
+				const deletedConfig = await deletePricingConfigService(db, input);
+				return deletedConfig;
 			} catch (error) {
 				handleTRPCError(error);
 			}

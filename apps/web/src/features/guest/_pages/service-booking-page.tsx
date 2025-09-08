@@ -45,83 +45,9 @@ export function ServiceBookingPage() {
 				Back to Services
 			</Link>
 
-			<div className="grid md:grid-cols-2 gap-8">
-				{/* Service Details */}
-				<Card>
-					<CardHeader>
-						<div className="flex items-start justify-between">
-							<div>
-								<CardTitle className="text-2xl">{service.name}</CardTitle>
-								<p className="text-sm text-gray-600 mt-1">{service.serviceType}</p>
-							</div>
-							<div className="text-right">
-								<p className="text-2xl font-bold text-green-600">
-									${service.price}
-								</p>
-								<p className="text-sm text-gray-500">per booking</p>
-							</div>
-						</div>
-					</CardHeader>
-					
-					<CardContent className="space-y-4">
-						{service.description && (
-							<p className="text-gray-700">{service.description}</p>
-						)}
-
-						<div className="grid grid-cols-2 gap-4">
-							{service.duration && (
-								<div className="flex items-center text-gray-600">
-									<Clock className="mr-2 h-4 w-4" />
-									<span className="text-sm">{service.duration} hours</span>
-								</div>
-							)}
-							
-							{service.maxPassengers && (
-								<div className="flex items-center text-gray-600">
-									<Users className="mr-2 h-4 w-4" />
-									<span className="text-sm">Up to {service.maxPassengers} passengers</span>
-								</div>
-							)}
-						</div>
-
-						{service.features && service.features.length > 0 && (
-							<div>
-								<h4 className="font-semibold mb-2">Features</h4>
-								<ul className="space-y-1">
-									{service.features.map((feature, index) => (
-										<li key={index} className="flex items-center text-sm text-gray-600">
-											<Star className="mr-2 h-3 w-3 text-yellow-500" />
-											{feature}
-										</li>
-									))}
-								</ul>
-							</div>
-						)}
-
-						{service.imageUrls && service.imageUrls.length > 0 && (
-							<div>
-								<img 
-									src={service.imageUrls[0]} 
-									alt={service.name}
-									className="w-full h-48 object-cover rounded-lg"
-								/>
-							</div>
-						)}
-					</CardContent>
-				</Card>
-
+			<div className="grid  gap-8">
 				{/* Booking Form */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Book This Service</CardTitle>
-						<p className="text-sm text-gray-600">
-							Complete your service booking
-						</p>
-					</CardHeader>
-					<CardContent>
-						<ServiceBookingForm service={service} />
-					</CardContent>
-				</Card>
+				<ServiceBookingForm service={service} />
 			</div>
 		</div>
 	);

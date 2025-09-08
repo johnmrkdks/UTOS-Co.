@@ -339,11 +339,11 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Form {...form}>
+								<Form {...form as any}>
 									<form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
 										{/* Origin */}
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="originAddress"
 											render={({ field }) => (
 												<FormItem>
@@ -363,7 +363,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 
 										{/* Destination */}
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="destinationAddress"
 											render={({ field }) => (
 												<FormItem>
@@ -385,7 +385,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 										{stopFields.map((field, index) => (
 											<div key={field.id} className="flex gap-2">
 												<FormField
-													control={form.control}
+													control={form.control as any}
 													name={`stops.${index}.address`}
 													render={({ field: stopField }) => (
 														<FormItem className="flex-1">

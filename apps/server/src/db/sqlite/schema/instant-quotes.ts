@@ -22,11 +22,9 @@ export const instantQuotes = sqliteTable(
 		// Selected car information
 		carId: text("car_id").references(() => cars.id),
 		
-		// Quote calculations
-		baseFare: real("base_fare").notNull(),
-		distanceFare: real("distance_fare").notNull(),
-		timeFare: real("time_fare").notNull(),
-		extraCharges: real("extra_charges").notNull().default(0),
+		// Flexible quote calculations
+		firstKmFare: real("first_km_fare").notNull(),
+		additionalKmFare: real("additional_km_fare").notNull(),
 		totalAmount: real("total_amount").notNull(),
 		
 		// Trip metrics
@@ -37,7 +35,6 @@ export const instantQuotes = sqliteTable(
 		breakdown: text("breakdown", { mode: "json" }),
 		
 		// Quote metadata
-		surgePricing: real("surge_pricing").default(1.0),
 		scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }),
 		
 		// Expiry and security

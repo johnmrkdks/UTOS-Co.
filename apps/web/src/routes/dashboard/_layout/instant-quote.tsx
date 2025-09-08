@@ -215,11 +215,11 @@ function CustomerInstantQuotePage() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<Form {...form}>
+					<Form {...form as any}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 							{/* Origin Address */}
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="originAddress"
 								render={({ field }) => (
 									<FormItem>
@@ -241,7 +241,7 @@ function CustomerInstantQuotePage() {
 
 							{/* Destination Address */}
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="destinationAddress"
 								render={({ field }) => (
 									<FormItem>
@@ -268,7 +268,7 @@ function CustomerInstantQuotePage() {
 									{stopFields.map((field, index) => (
 										<div key={field.id} className="flex gap-2">
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name={`stops.${index}.address`}
 												render={({ field: stopField }) => (
 													<FormItem className="flex-1">

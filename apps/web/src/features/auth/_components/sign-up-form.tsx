@@ -63,7 +63,7 @@ export default function SignUpForm({ className, ...props }: SignUpFromProps) {
 		<div className={cn("flex flex-col gap-4 mx-auto w-full max-w-md", className)} {...props}>
 			<h1 className="text-center text-2xl md:text-3xl font-bold">Sign Up</h1>
 
-			<Form {...form}>
+			<Form {...form as any}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<div>
 						<FormField

@@ -56,7 +56,6 @@ const DEFAULT_VALUES: Partial<AddCarFormValues> = {
 	availableForCustom: true,
 	isActive: true,
 	isAvailable: true,
-	isPublished: false,
 	status: CarStatusEnum.Available,
 	features: [],
 	images: [],
@@ -240,7 +239,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 
 	return (
 		<>
-			<Form {...form}>
+			<Form {...form as any}>
 				<form onSubmit={form.handleSubmit(handleSubmit)} className={`flex flex-col h-full ${className || ""}`}>
 					<div className="flex-1">
 						<PaddingLayout className="pt-0 pb-4">
@@ -248,19 +247,19 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 
 							<div className="grid grid-cols-10 gap-4">
 								<div className="col-span-6 flex flex-col gap-4">
-									<BasicInfoForm control={form.control} />
+									<BasicInfoForm control={form.control as any} />
 									<Separator />
-									<SpecificationsForm control={form.control} />
+									<SpecificationsForm control={form.control as any} />
 									<Separator />
-									<DetailsForm control={form.control} />
+									<DetailsForm control={form.control as any} />
 									<Separator />
-									<MaintenanceForm control={form.control} />
+									<MaintenanceForm control={form.control as any} />
 									<Separator />
-									<OperationalStatusForm control={form.control} />
+									<OperationalStatusForm control={form.control as any} />
 								</div>
 								<div className="col-span-4 flex flex-col gap-4">
-									<FeaturesForm control={form.control} />
-									<ImagesForm control={form.control} />
+									<FeaturesForm control={form.control as any} />
+									<ImagesForm control={form.control as any} />
 
 									{/* Publication Validation Panel */}
 									<PublicationValidationPanel

@@ -136,7 +136,7 @@ export function EditTransmissionTypeDialog({ transmissionType }: EditTransmissio
 					<DialogTitle>Edit Transmission Type</DialogTitle>
 					<DialogDescription>Edit the details of the transmission type.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

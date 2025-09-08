@@ -2,9 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
-import { toast } from "sonner";
+import { useCreateCustomBookingMutation } from "@/features/customer/_hooks/query/use-create-custom-booking-mutation";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -14,7 +12,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, isBefore, startOfDay, differenceInDays } from "date-fns";
 import { cn } from "@workspace/ui/lib/utils";
 
-const guestCarBookingSchema = z.object({
+const carBookingSchema = z.object({
 	customerName: z.string().min(2, "Name must be at least 2 characters"),
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
@@ -32,9 +30,9 @@ const guestCarBookingSchema = z.object({
 	path: ["endDate"],
 });
 
-type GuestCarBookingFormData = z.infer<typeof guestCarBookingSchema>;
+type CarBookingFormData = z.infer<typeof carBookingSchema>;
 
-interface GuestCarBookingFormProps {
+interface CarBookingFormProps {
 	car: {
 		id: string;
 		brand?: { name: string };
@@ -44,13 +42,13 @@ interface GuestCarBookingFormProps {
 	};
 }
 
-export function GuestCarBookingForm({ car }: GuestCarBookingFormProps) {
+export function CarBookingForm({ car }: CarBookingFormProps) {
 	const [startDate, setStartDate] = useState<Date>();
 	const [endDate, setEndDate] = useState<Date>();
-	const queryClient = useQueryClient();
+	const createBookingMutation = useCreateCustomBookingMutation();
 
-	const form = useForm<GuestCarBookingFormData>({
-		resolver: zodResolver(guestCarBookingSchema),
+	const form = useForm<CarBookingFormData>({
+		resolver: zodResolver(carBookingSchema),
 		defaultValues: {
 			customerName: "",
 			customerEmail: "",
@@ -61,43 +59,28 @@ export function GuestCarBookingForm({ car }: GuestCarBookingFormProps) {
 		},
 	});
 
-	const createBookingMutation = useMutation({
-		mutationFn: async (data: GuestCarBookingFormData) => {
-			const bookingData = {
-				carId: car.id,
-				customerName: data.customerName,
-				customerEmail: data.customerEmail,
-				customerPhone: data.customerPhone,
-				startDate: data.startDate,
-				endDate: data.endDate,
-				pickupLocation: data.pickupLocation,
-				dropoffLocation: data.dropoffLocation,
-				specialRequirements: data.specialRequirements,
-				// Calculate total amount
-				totalAmount: calculateTotalAmount(),
-			};
 
-			const utils = trpc.useUtils();
-			return await utils.bookings.createCustomBooking.mutate(bookingData);
-		},
-		onSuccess: () => {
-			toast.success("Car booking created successfully!", {
-				description: "You will receive a confirmation email shortly.",
-			});
-			form.reset();
-			setStartDate(undefined);
-			setEndDate(undefined);
-			queryClient.invalidateQueries();
-		},
-		onError: (error: any) => {
-			toast.error("Failed to create booking", {
-				description: error.message || "Please try again later",
-			});
-		},
-	});
+	const onSubmit = (data: CarBookingFormData) => {
+		const bookingData = {
+			carId: car.id,
+			customerName: data.customerName,
+			customerEmail: data.customerEmail,
+			customerPhone: data.customerPhone,
+			startDate: data.startDate,
+			endDate: data.endDate,
+			pickupLocation: data.pickupLocation,
+			dropoffLocation: data.dropoffLocation,
+			specialRequirements: data.specialRequirements,
+			totalAmount: calculateTotalAmount(),
+		};
 
-	const onSubmit = (data: GuestCarBookingFormData) => {
-		createBookingMutation.mutate(data);
+		createBookingMutation.mutate(bookingData, {
+			onSuccess: () => {
+				form.reset();
+				setStartDate(undefined);
+				setEndDate(undefined);
+			},
+		});
 	};
 
 	const calculateTotalAmount = (): number => {

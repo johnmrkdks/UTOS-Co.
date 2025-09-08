@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { 
-	ArrowLeft, 
-	Car, 
-	Users, 
-	MapPin, 
-	ChevronDown, 
-	ChevronRight, 
+import {
+	ArrowLeft,
+	Car,
+	Users,
+	MapPin,
+	ChevronDown,
+	ChevronRight,
 	LogIn,
 	Loader2
 } from "lucide-react";
@@ -21,19 +21,17 @@ import { useQuery } from "@tanstack/react-query";
 import { trpc } from "@/trpc";
 
 interface QuoteResult {
-	baseFare: number
-	distanceFare: number
-	timeFare: number
-	extraCharges: number
+	firstKmFare: number
+	additionalKmFare: number
 	totalAmount: number
 	estimatedDistance: number
 	estimatedDuration: number
 	breakdown: {
-		baseRate: number
-		perKmRate: number
-		perMinuteRate: number
-		minimumFare: number
-		surgePricing?: number
+		firstKmRate: number
+		additionalKmRate: number
+		totalDistance: number
+		firstKmDistance: number
+		additionalDistance: number
 	}
 	// Additional fields for secure quote
 	quoteId?: string
@@ -53,23 +51,19 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 	const [showBreakdown, setShowBreakdown] = useState(false);
 	const [quote, setQuote] = useState<QuoteResult | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	
+
 	const { session, isPending: userLoading } = useUserQuery();
 
 	// Fetch quote details using the secure quote ID - using manual approach due to type issues
-	const { data: quoteData, isLoading: quoteLoading, error: quoteError } = useQuery({
-		queryKey: ["instantQuote.getQuoteById", search.quoteId],
-		queryFn: async () => {
-			const response = await fetch(`http://localhost:3000/trpc/instantQuote.getQuoteById?batch=1&input=${encodeURIComponent(JSON.stringify({ "0": { quoteId: search.quoteId } }))}`);
-			const data = await response.json();
-			return data[0].result.data;
-		},
-		enabled: !!search.quoteId,
-	});
+	const { data: quoteData, isLoading: quoteLoading, error: quoteError } = useQuery(
+		trpc.instantQuote.getQuoteById.queryOptions({
+			quoteId: search.quoteId
+		})
+	);
 
 	// Get car details if we have a carId  
-	const { data: carsData } = useGetPublishedCarsQuery({ 
-		limit: 50 
+	const { data: carsData } = useGetPublishedCarsQuery({
+		limit: 50
 	});
 
 	useEffect(() => {
@@ -79,13 +73,13 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 		}
 	}, [quoteData]);
 
-	const selectedCar = quote?.carId && carsData?.data ? 
+	const selectedCar = quote?.carId && carsData?.data ?
 		carsData.data.find(car => car.id === quote.carId) : null;
 
 
 	const handleBookAuthenticated = () => {
 		if (!quote) return;
-		
+
 		if (session?.user) {
 			// User is authenticated - route to book-quote
 			navigate({
@@ -95,7 +89,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 		} else {
 			// User not authenticated, redirect to sign-in with appropriate redirect
 			const redirectPath = `/book-quote/${search.quoteId}`;
-				
+
 			navigate({
 				to: "/sign-in",
 				search: { redirect: redirectPath }
@@ -186,7 +180,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					<div className="max-w-2xl mx-auto">
 						<Alert>
 							<AlertDescription>
-								Unable to load quote details. This quote may have expired or the link is invalid. 
+								Unable to load quote details. This quote may have expired or the link is invalid.
 								Please try generating a new quote.
 							</AlertDescription>
 						</Alert>
@@ -242,7 +236,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<MapPin className="h-4 w-4 text-primary" />
 								Your Journey
 							</h3>
-							
+
 							{/* Route Visual Display */}
 							<div className="space-y-3">
 								{/* Origin */}
@@ -259,7 +253,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 										<div className="text-muted-foreground text-xs leading-tight break-words">{quote.originAddress}</div>
 									</div>
 								</div>
-								
+
 								{/* Stops */}
 								{quote.stops && quote.stops.length > 0 && quote.stops.map((stop, index) => (
 									<div key={index} className="flex items-start gap-3 text-xs">
@@ -274,7 +268,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 										</div>
 									</div>
 								))}
-								
+
 								{/* Destination */}
 								<div className="flex items-start gap-3 text-xs">
 									<div className="relative mt-1">
@@ -286,7 +280,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 									</div>
 								</div>
 							</div>
-							
+
 							{/* Route Status Indicator */}
 							<div className="absolute top-2 right-2">
 								<div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -374,23 +368,20 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							{showBreakdown && (
 								<div className="mt-2 pt-2 border-t space-y-1">
 									<div className="flex justify-between text-xs">
-										<span>Base fare</span>
-										<span>${quote.baseFare.toFixed(2)}</span>
+										<span>First {Math.ceil(quote.breakdown.firstKmDistance)}km (Flat Rate)</span>
+										<span>${quote.firstKmFare.toFixed(2)}</span>
 									</div>
-									<div className="flex justify-between text-xs">
-										<span>Distance fare ({(quote.estimatedDistance / 1000).toFixed(1)} km)</span>
-										<span>${quote.distanceFare.toFixed(2)}</span>
-									</div>
-									{quote.extraCharges > 0 && (
+									{quote.breakdown.additionalDistance > 0 && (
 										<div className="flex justify-between text-xs">
-											<span>Additional charges</span>
-											<span>${quote.extraCharges.toFixed(2)}</span>
+											<span>Additional {quote.breakdown.additionalDistance.toFixed(1)}km × ${quote.breakdown.additionalKmRate.toFixed(2)}/km</span>
+											<span>${quote.additionalKmFare.toFixed(2)}</span>
 										</div>
 									)}
-									{quote.breakdown?.surgePricing && quote.breakdown.surgePricing > 1 && (
-										<div className="flex justify-between text-xs text-orange-600">
-											<span>Peak time surcharge ({((quote.breakdown.surgePricing - 1) * 100).toFixed(0)}%)</span>
-											<span>Applied</span>
+									{quote.breakdown.additionalDistance === 0 && (
+										<div className="bg-blue-50 p-2 rounded-md mt-2">
+											<p className="text-xs text-blue-800">
+												<strong>Within flat rate limit:</strong> No additional charges since your {(quote.estimatedDistance / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance)}km tier.
+											</p>
 										</div>
 									)}
 								</div>
@@ -402,7 +393,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					<div className="space-y-3 pb-6">
 						{session?.user ? (
 							// User is authenticated - show only account booking
-							<Button 
+							<Button
 								onClick={handleBookAuthenticated}
 								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
 							>
@@ -411,7 +402,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							</Button>
 						) : (
 							// User is not authenticated - only show sign in option
-							<Button 
+							<Button
 								onClick={handleBookAuthenticated}
 								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
 							>
@@ -420,9 +411,9 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							</Button>
 						)}
 
-						<Button 
-							variant="outline" 
-							onClick={() => navigate({ to: "/" })} 
+						<Button
+							variant="outline"
+							onClick={() => navigate({ to: "/" })}
 							className="w-full h-10 text-sm"
 						>
 							Get New Quote

@@ -42,6 +42,8 @@ function BookingManagementContent() {
 
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
+		sortBy: 'createdAt',
+		sortOrder: 'desc',
 	})
 
 	// Calculate real-time metrics from bookings data

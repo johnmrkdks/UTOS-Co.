@@ -3,3 +3,4 @@ export type * from "./delete-car";
 export type * from "./get-car";
 export type * from "./get-cars";
 export type * from "./update-car";
+export type * from "./get-car-pricing-estimate";

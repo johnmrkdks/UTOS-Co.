@@ -180,6 +180,31 @@ This document outlines the development progress, completed features, and upcomin
 
 ## 🚧 **RECENT FIXES & IMPROVEMENTS**
 
+### **🎉 Enhanced Car Publication System** *(September 8, 2025)*
+**Status**: ✅ **IMPLEMENTED**
+- **Car Publication Workflow**: Cars can now only be published through pricing configuration system
+- **Removed Creation Checkbox**: Removed "Publish to Customers" checkbox from car creation form
+- **Pricing-Based Publication**: Cars require active pricing configuration to be publicly visible
+- **Schema Updates**: Updated car creation schema to prevent publication during creation
+- **Fleet UI Simplification**: Streamlined fleet page by removing redundant "Get Quote" button
+- **Type Safety Improvements**: Fixed boolean/integer type consistency in pricing queries
+
+#### **Technical Implementation:**
+- **Publication Logic**: Cars are published only through pricing configuration interface
+- **Form Updates**: Removed `isPublished` field from car creation form and schema  
+- **Database Consistency**: Fixed boolean type handling in pricing configuration queries
+- **UI Simplification**: Single "Book Now" button on fleet cards for cleaner interface
+- **TypeScript Fixes**: Updated all pricing queries to use boolean comparisons consistently
+- **Defensive Programming**: Added optional chaining for pricing data safety
+
+#### **Files Updated:**
+- `apps/web/src/features/dashboard/_pages/car-management/_components/add-car/add-car-forms/operational-status-form.tsx` - Removed checkbox
+- `apps/web/src/features/dashboard/_pages/car-management/_components/add-car/add-car-form.tsx` - Removed default value
+- `apps/web/src/features/dashboard/_pages/car-management/_schemas/car-schema.ts` - Updated schema
+- `apps/server/src/db/sqlite/schema/price-config.ts` - Fixed boolean type consistency
+- `apps/web/src/features/marketing/_pages/fleet/_components/booking-card.tsx` - Removed Get Quote button
+- Multiple server pricing services - Fixed boolean query consistency
+
 ### **🎉 Enhanced Vehicle Selection & Route Display System** *(August 27, 2025)*
 **Status**: ✅ **IMPLEMENTED**
 - **Vehicle Selection Mobile Optimization**: Responsive car cards with mobile-first design

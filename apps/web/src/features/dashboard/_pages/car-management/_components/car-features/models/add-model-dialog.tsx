@@ -127,7 +127,7 @@ export function AddModelDialog() {
 					<DialogTitle>Add New Model</DialogTitle>
 					<DialogDescription>Enter the name of the new car model.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<div className="flex flex-col gap-4">
 							<SelectField

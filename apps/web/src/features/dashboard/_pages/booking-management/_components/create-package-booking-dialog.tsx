@@ -107,11 +107,11 @@ export function CreatePackageBookingDialog() {
 					</DialogDescription>
 				</DialogHeader>
 
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="packageId"
 								render={({ field }) => (
 									<FormItem>
@@ -136,7 +136,7 @@ export function CreatePackageBookingDialog() {
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="carId"
 								render={({ field }) => (
 									<FormItem>
@@ -163,7 +163,7 @@ export function CreatePackageBookingDialog() {
 
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="customerName"
 								render={({ field }) => (
 									<FormItem>
@@ -177,7 +177,7 @@ export function CreatePackageBookingDialog() {
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="customerPhone"
 								render={({ field }) => (
 									<FormItem>
@@ -192,7 +192,7 @@ export function CreatePackageBookingDialog() {
 						</div>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="customerEmail"
 							render={({ field }) => (
 								<FormItem>
@@ -207,7 +207,7 @@ export function CreatePackageBookingDialog() {
 
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="originAddress"
 								render={({ field }) => (
 									<FormItem>
@@ -221,7 +221,7 @@ export function CreatePackageBookingDialog() {
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="destinationAddress"
 								render={({ field }) => (
 									<FormItem>
@@ -237,7 +237,7 @@ export function CreatePackageBookingDialog() {
 
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="scheduledPickupTime"
 								render={({ field }) => (
 									<FormItem className="flex flex-col">
@@ -279,7 +279,7 @@ export function CreatePackageBookingDialog() {
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="passengerCount"
 								render={({ field }) => (
 									<FormItem>
@@ -300,7 +300,7 @@ export function CreatePackageBookingDialog() {
 						</div>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="specialRequests"
 							render={({ field }) => (
 								<FormItem>

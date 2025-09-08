@@ -222,10 +222,9 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				return;
 			}
 			
-			// Calculate pricing based on quote data
-			const baseFare = Math.round(quoteData.totalFare * 0.3 * 100); // 30% base
-			const distanceFare = Math.round(quoteData.totalFare * 0.6 * 100); // 60% distance
-			const timeFare = Math.round(quoteData.totalFare * 0.1 * 100); // 10% time
+			// Use simplified pricing from secure quote data if available
+			const firstKmFareAmount = secureQuoteData?.firstKmFare || quoteData.totalFare * 0.7;
+			const additionalKmFareAmount = secureQuoteData?.additionalKmFare || quoteData.totalFare * 0.3;
 			const quotedAmount = Math.round(quoteData.totalFare * 100); // Convert to cents
 			
 			const bookingPayload = {
@@ -235,9 +234,10 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				scheduledPickupTime: scheduledPickupTime.toISOString(),
 				estimatedDuration: quoteData.duration * 60, // Convert minutes to seconds
 				estimatedDistance: quoteData.distance * 1000, // Convert km to meters
-				baseFare,
-				distanceFare,
-				timeFare,
+				// Map new pricing structure to existing database fields
+				baseFare: Math.round(firstKmFareAmount * 100), // Convert to cents
+				distanceFare: Math.round(additionalKmFareAmount * 100), // Convert to cents
+				timeFare: 0, // Not used in simplified pricing
 				extraCharges: 0,
 				quotedAmount,
 				customerName: formData.customerName!,
@@ -345,21 +345,21 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												</div>
 												
 												{/* Fare Breakdown */}
-												{(secureQuoteData?.baseFare || secureQuoteData?.distanceFare) && (
+												{(secureQuoteData?.firstKmFare || secureQuoteData?.additionalKmFare) && (
 													<>
 														<div className="border-t pt-2 mt-2">
 															<div className="text-xs font-medium text-gray-700 mb-2">Fare Breakdown:</div>
 															<div className="space-y-1">
-																{secureQuoteData?.baseFare && (
+																{secureQuoteData?.firstKmFare && (
 																	<div className="flex justify-between text-xs">
-																		<span className="text-gray-500">Base fare:</span>
-																		<span>${secureQuoteData.baseFare.toFixed(2)}</span>
+																		<span className="text-gray-500">First {Math.ceil(secureQuoteData.breakdown?.firstKmDistance || 10)}km (Flat Rate):</span>
+																		<span>${secureQuoteData.firstKmFare.toFixed(2)}</span>
 																	</div>
 																)}
-																{secureQuoteData?.distanceFare && (
+																{secureQuoteData?.additionalKmFare && secureQuoteData.additionalKmFare > 0 && (
 																	<div className="flex justify-between text-xs">
-																		<span className="text-gray-500">Distance ({quoteData.distance.toFixed(1)} km):</span>
-																		<span>${secureQuoteData.distanceFare.toFixed(2)}</span>
+																		<span className="text-gray-500">Additional {secureQuoteData.breakdown?.additionalDistance?.toFixed(1) || 0}km:</span>
+																		<span>${secureQuoteData.additionalKmFare.toFixed(2)}</span>
 																	</div>
 																)}
 																{secureQuoteData?.extraCharges && secureQuoteData.extraCharges > 0 && (
@@ -899,22 +899,16 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								<div className="mb-4 p-3 bg-gray-50 rounded-lg">
 									<div className="text-sm font-medium text-gray-700 mb-2">Fare Breakdown:</div>
 									<div className="space-y-1">
-										{secureQuoteData.baseFare && (
+										{(secureQuoteData.firstKmFare || secureQuoteData.baseFare) && (
 											<div className="flex justify-between text-sm">
-												<span className="text-gray-600">Base fare:</span>
-												<span>${secureQuoteData.baseFare.toFixed(2)}</span>
+												<span className="text-gray-600">First {quoteData.breakdown?.firstKmLimit || 10} km:</span>
+												<span>${((secureQuoteData.firstKmFare || secureQuoteData.baseFare || 0) / 100).toFixed(2)}</span>
 											</div>
 										)}
-										{secureQuoteData.distanceFare && (
+										{((secureQuoteData.additionalKmFare || secureQuoteData.distanceFare) && (secureQuoteData.additionalKmFare || secureQuoteData.distanceFare) > 0) && (
 											<div className="flex justify-between text-sm">
-												<span className="text-gray-600">Distance ({quoteData.distance.toFixed(1)} km):</span>
-												<span>${secureQuoteData.distanceFare.toFixed(2)}</span>
-											</div>
-										)}
-										{secureQuoteData.extraCharges && secureQuoteData.extraCharges > 0 && (
-											<div className="flex justify-between text-sm">
-												<span className="text-gray-600">Additional charges:</span>
-												<span>${secureQuoteData.extraCharges.toFixed(2)}</span>
+												<span className="text-gray-600">Additional distance:</span>
+												<span>${((secureQuoteData.additionalKmFare || secureQuoteData.distanceFare || 0) / 100).toFixed(2)}</span>
 											</div>
 										)}
 										{secureQuoteData.breakdown?.surgePricing && secureQuoteData.breakdown.surgePricing > 1 && (

@@ -108,7 +108,7 @@ export function AddConditionTypeDialog() {
 					<DialogTitle>Add New Condition Type</DialogTitle>
 					<DialogDescription>Enter the name of the new condition type.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

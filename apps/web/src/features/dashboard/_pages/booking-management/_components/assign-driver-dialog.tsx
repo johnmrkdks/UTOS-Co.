@@ -85,10 +85,10 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 				</DialogHeader>
 				
 
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="driverId"
 							render={({ field }) => (
 								<FormItem>
@@ -101,7 +101,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 										</FormControl>
 										<SelectContent className="max-h-[300px]">
 											{availableDriversQuery.isLoading && (
-												<SelectItem value="" disabled>
+												<SelectItem value="loading" disabled>
 													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 													Loading drivers...
 												</SelectItem>
@@ -120,7 +120,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 												</SelectItem>
 											))}
 											{availableDriversQuery.data?.length === 0 && (
-												<SelectItem value="" disabled>
+												<SelectItem value="no-drivers" disabled>
 													No available drivers found
 												</SelectItem>
 											)}

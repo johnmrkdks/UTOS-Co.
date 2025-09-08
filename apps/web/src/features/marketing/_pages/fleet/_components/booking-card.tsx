@@ -99,7 +99,7 @@ export function BookingCard({
 			</CardContent>
 			
 			<CardFooter className="pt-6">
-				<div className="w-full space-y-3">
+				<div className="w-full">
 					{/* Both authenticated and non-authenticated users start with public calculate-quote */}
 					<Link to="/calculate-quote" search={{ selectedCarId: id }}>
 						<Button 
@@ -107,14 +107,6 @@ export function BookingCard({
 							size="lg"
 						>
 							Book Now
-						</Button>
-					</Link>
-					<Link to="/">
-						<Button 
-							variant="outline"
-							className="w-full border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary py-3 text-sm font-medium rounded-lg"
-						>
-							Get Quote
 						</Button>
 					</Link>
 				</div>

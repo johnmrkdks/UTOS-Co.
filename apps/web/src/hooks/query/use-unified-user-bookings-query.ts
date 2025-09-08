@@ -3,5 +3,5 @@ import { useQuery } from "@tanstack/react-query";
 import type { ResourceList } from "server/types";
 
 export const useUnifiedUserBookingsQuery = (params?: ResourceList & { userId?: string }) => {
-	return useQuery(trpc.bookings.getUnifiedUserBookings.queryOptions(params || {}));
+	return useQuery(trpc.bookings.getUserBookings.queryOptions(params || {}));
 };

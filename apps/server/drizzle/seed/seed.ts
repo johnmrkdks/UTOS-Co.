@@ -348,14 +348,165 @@ export async function seed(db: any) {
 
 		// 11. Insert Package Categories
 		console.log("📂 Inserting package categories...");
-		await db.insert(schema.packageCategories).values(
+		const insertedPackageCategories = await db.insert(schema.packageCategories).values(
 			packageCategories.map(category => ({
 				id: createId(),
 				name: category.name,
 				description: category.description,
 				displayOrder: category.displayOrder,
 			}))
+		).returning();
+
+		// Create category lookup for packages
+		const categoryLookup = new Map(
+			insertedPackageCategories.map((category: { name: string; id: string }) => [category.name, category.id])
 		);
+
+		// Create service type lookup for packages
+		const insertedServiceTypes = await db.select().from(schema.packageServiceTypes);
+		const serviceTypeLookup = new Map(
+			insertedServiceTypes.map((serviceType: { name: string; id: string }) => [serviceType.name, serviceType.id])
+		);
+
+		// 12. Insert Sample Packages with Banner Images
+		console.log("📦 Inserting sample packages...");
+		const samplePackages = [
+			{
+				name: "Sydney Airport Transfer",
+				description: "Luxury airport pickup and drop-off service with professional chauffeur",
+				categoryName: "Airport Transfer",
+				serviceTypeName: "Transfer",
+				bannerImageUrl: "https://images.unsplash.com/photo-1563450392430-d3e4c2d30d12?w=800&h=400&fit=crop&crop=center",
+				duration: 60,
+				maxDistance: 50,
+				fixedPrice: 12000, // $120.00
+				maxPassengers: 4,
+				advanceBookingHours: 2,
+				includesDriver: true,
+				includesFuel: true,
+				includesTolls: true,
+			},
+			{
+				name: "Sydney Harbor Bridge Tour",
+				description: "Scenic 3-hour luxury tour of Sydney's iconic landmarks and harbor views",
+				categoryName: "Private Tours",
+				serviceTypeName: "Tours",
+				bannerImageUrl: "https://images.unsplash.com/photo-1528072164453-f4e8ef0d475a?w=800&h=400&fit=crop&crop=center",
+				duration: 180,
+				fixedPrice: 35000, // $350.00
+				maxPassengers: 6,
+				advanceBookingHours: 24,
+				includesDriver: true,
+				includesFuel: true,
+				includesTolls: false,
+			},
+			{
+				name: "Corporate Executive Transfer",
+				description: "Professional business transportation with luxury vehicles and experienced drivers",
+				categoryName: "Corporate Transfers",
+				serviceTypeName: "Transfer",
+				bannerImageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=400&fit=crop&crop=center",
+				duration: 120,
+				maxDistance: 100,
+				fixedPrice: 25000, // $250.00
+				maxPassengers: 4,
+				advanceBookingHours: 4,
+				includesDriver: true,
+				includesFuel: true,
+				includesTolls: true,
+				includesWaiting: true,
+				waitingTimeMinutes: 30,
+			},
+			{
+				name: "Wedding Day Luxury Transport",
+				description: "Elegant wedding transportation with premium vehicles for your special day",
+				categoryName: "Wedding/Special Events",
+				serviceTypeName: "Event",
+				bannerImageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c818?w=800&h=400&fit=crop&crop=center",
+				duration: 480,
+				fixedPrice: 80000, // $800.00
+				depositRequired: 20000, // $200.00 deposit
+				maxPassengers: 8,
+				advanceBookingHours: 168, // 1 week
+				includesDriver: true,
+				includesFuel: true,
+				includesTolls: true,
+			},
+			{
+				name: "Blue Mountains Day Tour",
+				description: "Full-day luxury tour to the scenic Blue Mountains with wine tasting",
+				categoryName: "Private Tours",
+				serviceTypeName: "Tours",
+				bannerImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&crop=center",
+				duration: 600, // 10 hours
+				maxDistance: 300,
+				fixedPrice: 95000, // $950.00
+				extraKmPrice: 300, // $3.00 per extra km
+				maxPassengers: 6,
+				advanceBookingHours: 48,
+				includesDriver: true,
+				includesFuel: true,
+				includesTolls: true,
+			},
+			{
+				name: "VIP City Transfer",
+				description: "Premium point-to-point transportation with luxury amenities",
+				categoryName: "Corporate Transfers",
+				serviceTypeName: "Transfer",
+				bannerImageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop&crop=center",
+				duration: 90,
+				maxDistance: 75,
+				fixedPrice: 18000, // $180.00
+				extraKmPrice: 250, // $2.50 per extra km
+				maxPassengers: 4,
+				advanceBookingHours: 1,
+				includesDriver: true,
+				includesFuel: true,
+				includesTolls: false,
+			}
+		];
+
+		await db.insert(schema.packages).values(
+			samplePackages.map(pkg => ({
+				id: createId(),
+				name: pkg.name,
+				description: pkg.description,
+				categoryId: categoryLookup.get(pkg.categoryName)!,
+				serviceTypeId: serviceTypeLookup.get(pkg.serviceTypeName)!,
+				bannerImageUrl: pkg.bannerImageUrl,
+				duration: pkg.duration,
+				maxDistance: pkg.maxDistance,
+				fixedPrice: pkg.fixedPrice,
+				extraKmPrice: pkg.extraKmPrice || null,
+				extraHourPrice: null,
+				depositRequired: pkg.depositRequired || null,
+				maxPassengers: pkg.maxPassengers,
+				advanceBookingHours: pkg.advanceBookingHours,
+				cancellationHours: 24,
+				includesDriver: pkg.includesDriver,
+				includesFuel: pkg.includesFuel,
+				includesTolls: pkg.includesTolls,
+				includesWaiting: pkg.includesWaiting || false,
+				waitingTimeMinutes: pkg.waitingTimeMinutes || 0,
+				isAvailable: true,
+				isPublished: true, // Make them visible to customers
+			}))
+		);
+
+		// 11. Create Default Booking Policy
+		console.log("📋 Creating default booking policy...");
+		await db.insert(schema.bookingPolicies).values({
+			id: createId(),
+			name: "Standard Booking Policy",
+			description: "Default policy allowing edits and cancellations 4 hours before pickup",
+			editAllowedHours: 4,
+			editDisabledAfterDriverAssignment: true,
+			cancellationAllowedHours: 4,
+			cancellationFeePercentage: 0,
+			cancellationDisabledAfterDriverAssignment: false,
+			isActive: true,
+			isDefault: true,
+		});
 
 		console.log("✅ Database seeding completed successfully!");
 		console.log(`
@@ -371,6 +522,8 @@ export async function seed(db: any) {
    🔧 Condition Types: ${carConditionTypes.length}
    📦 Service Types: ${packageServiceTypes.length}
    📂 Package Categories: ${packageCategories.length}
+   🎁 Sample Packages: ${samplePackages.length}
+   📋 Booking Policy: 1 default policy
 		`);
 
 	} catch (error) {

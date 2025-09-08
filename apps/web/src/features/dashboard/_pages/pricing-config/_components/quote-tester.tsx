@@ -18,11 +18,6 @@ import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/ho
 const quoteTesterSchema = z.object({
 	pricingConfigId: z.string().min(1, "Please select a pricing configuration"),
 	distance: z.number().min(0.1, "Distance must be at least 0.1 km"),
-	duration: z.number().min(1, "Duration must be at least 1 minute"),
-	additionalStops: z.number().min(0, "Additional stops cannot be negative"),
-	waitingTime: z.number().min(0, "Waiting time cannot be negative"),
-	timeOfDay: z.string().min(1, "Please select time of day"),
-	dayType: z.enum(["weekday", "weekend"]),
 });
 
 const realAddressTesterSchema = z.object({
@@ -32,9 +27,6 @@ const realAddressTesterSchema = z.object({
 	stops: z.array(z.object({
 		address: z.string().min(1, "Stop address is required"),
 	})).optional().default([]),
-	waitingTime: z.number().min(0, "Waiting time cannot be negative"),
-	timeOfDay: z.string().min(1, "Please select time of day"),
-	dayType: z.enum(["weekday", "weekend"]),
 });
 
 type QuoteTesterForm = z.infer<typeof quoteTesterSchema>;
@@ -55,11 +47,6 @@ export function QuoteTester() {
 		defaultValues: {
 			pricingConfigId: "",
 			distance: 10,
-			duration: 30,
-			additionalStops: 0,
-			waitingTime: 0,
-			timeOfDay: "10:00",
-			dayType: "weekday",
 		},
 	});
 
@@ -70,9 +57,6 @@ export function QuoteTester() {
 			originAddress: "",
 			destinationAddress: "",
 			stops: [],
-			waitingTime: 0,
-			timeOfDay: "10:00",
-			dayType: "weekday",
 		},
 	});
 
@@ -147,62 +131,23 @@ export function QuoteTester() {
 
 			if (!config) return;
 
-			// Calculate base fare
-			let totalFare = config.baseFare || 0;
-
-			// Calculate distance fare using real distance
-			let distanceFare = 0;
-			if (config.firstKmRate && distance > 0) {
-				const firstKmDistance = Math.min(distance, config.firstKmLimit || 5);
-				const remainingDistance = Math.max(0, distance - (config.firstKmLimit || 5));
-				
-				distanceFare = (firstKmDistance * (config.firstKmRate || 0)) + 
-							  (remainingDistance * (config.pricePerKm || 0));
+			// Calculate using simplified two-tier pricing
+			let firstKmFare = 0;
+			let additionalKmFare = 0;
+			
+			const firstKmLimit = config.firstKmLimit || 10;
+			
+			if (distance <= firstKmLimit) {
+				// Distance is within first tier - pay flat rate
+				firstKmFare = config.firstKmRate || 0;
 			} else {
-				distanceFare = distance * (config.pricePerKm || 0);
+				// Distance exceeds first tier - flat rate + additional per km
+				firstKmFare = config.firstKmRate || 0;
+				const additionalDistance = distance - firstKmLimit;
+				additionalKmFare = additionalDistance * (config.pricePerKm || 0);
 			}
 
-			// Calculate time fare using real duration
-			let timeFare = 0;
-			if (config.pricePerMinute) {
-				timeFare = duration * config.pricePerMinute;
-			}
-
-			// Calculate multiplier
-			let multiplier = 1.0;
-			const hour = parseInt(data.timeOfDay.split(':')[0]);
-			
-			// Check peak hours
-			if (config.peakHourStart && config.peakHourEnd) {
-				const peakStart = parseInt(config.peakHourStart.split(':')[0]);
-				const peakEnd = parseInt(config.peakHourEnd.split(':')[0]);
-				if (hour >= peakStart && hour <= peakEnd) {
-					multiplier = config.peakHourMultiplier || 1.0;
-				}
-			}
-			
-			// Check night hours
-			if (config.nightHourStart && config.nightHourEnd) {
-				const nightStart = parseInt(config.nightHourStart.split(':')[0]);
-				const nightEnd = parseInt(config.nightHourEnd.split(':')[0]);
-				if (hour >= nightStart || hour <= nightEnd) {
-					multiplier = Math.max(multiplier, config.nightMultiplier || 1.0);
-				}
-			}
-			
-			// Weekend multiplier
-			if (data.dayType === "weekend" && config.weekendMultiplier) {
-				multiplier = Math.max(multiplier, config.weekendMultiplier);
-			}
-
-			// Additional charges
-			const stopCharges = data.stops?.length * (config.stopCharge || 0) || 0;
-			const waitingCharges = data.waitingTime * (config.waitingChargePerMinute || 0);
-
-			// Calculate final amounts
-			const subtotal = totalFare + distanceFare + timeFare;
-			const subtotalWithMultiplier = subtotal * multiplier;
-			const finalTotal = subtotalWithMultiplier + stopCharges + waitingCharges;
+			const finalTotal = firstKmFare + additionalKmFare;
 
 			setQuote({
 				config: config.name,
@@ -216,15 +161,11 @@ export function QuoteTester() {
 					}
 				},
 				breakdown: {
-					baseFare: totalFare,
-					distanceFare: distanceFare,
-					timeFare: timeFare,
-					multiplier: multiplier,
-					stopCharges: stopCharges,
-					waitingCharges: waitingCharges,
-					subtotal: subtotal,
-					subtotalWithMultiplier: subtotalWithMultiplier,
+					firstKmFare: firstKmFare,
+					additionalKmFare: additionalKmFare,
 					total: finalTotal,
+					firstKmLimit: firstKmLimit,
+					additionalDistance: Math.max(0, distance - firstKmLimit),
 				},
 				parameters: data,
 				isRealTest: true,
@@ -242,75 +183,32 @@ export function QuoteTester() {
 
 		if (!config) return;
 
-		// Calculate base fare
-		let totalFare = config.baseFare || 0;
-
-		// Calculate distance fare
-		let distanceFare = 0;
-		if (config.firstKmRate && data.distance > 0) {
-			const firstKmDistance = Math.min(data.distance, config.firstKmLimit || 5);
-			const remainingDistance = Math.max(0, data.distance - (config.firstKmLimit || 5));
-			
-			distanceFare = (firstKmDistance * (config.firstKmRate || 0)) + 
-						  (remainingDistance * (config.pricePerKm || 0));
+		// Calculate using simplified two-tier pricing
+		let firstKmFare = 0;
+		let additionalKmFare = 0;
+		
+		const firstKmLimit = config.firstKmLimit || 10;
+		
+		if (data.distance <= firstKmLimit) {
+			// Distance is within first tier - pay flat rate
+			firstKmFare = config.firstKmRate || 0;
 		} else {
-			distanceFare = data.distance * (config.pricePerKm || 0);
+			// Distance exceeds first tier - flat rate + additional per km
+			firstKmFare = config.firstKmRate || 0;
+			const additionalDistance = data.distance - firstKmLimit;
+			additionalKmFare = additionalDistance * (config.pricePerKm || 0);
 		}
 
-		// Calculate time fare
-		let timeFare = 0;
-		if (config.pricePerMinute) {
-			timeFare = data.duration * config.pricePerMinute;
-		}
-
-		// Calculate multiplier
-		let multiplier = 1.0;
-		const hour = parseInt(data.timeOfDay.split(':')[0]);
-		
-		// Check peak hours
-		if (config.peakHourStart && config.peakHourEnd) {
-			const peakStart = parseInt(config.peakHourStart.split(':')[0]);
-			const peakEnd = parseInt(config.peakHourEnd.split(':')[0]);
-			if (hour >= peakStart && hour <= peakEnd) {
-				multiplier = config.peakHourMultiplier || 1.0;
-			}
-		}
-		
-		// Check night hours
-		if (config.nightHourStart && config.nightHourEnd) {
-			const nightStart = parseInt(config.nightHourStart.split(':')[0]);
-			const nightEnd = parseInt(config.nightHourEnd.split(':')[0]);
-			if (hour >= nightStart || hour <= nightEnd) {
-				multiplier = Math.max(multiplier, config.nightMultiplier || 1.0);
-			}
-		}
-		
-		// Weekend multiplier
-		if (data.dayType === "weekend" && config.weekendMultiplier) {
-			multiplier = Math.max(multiplier, config.weekendMultiplier);
-		}
-
-		// Additional charges
-		const stopCharges = data.additionalStops * (config.stopCharge || 0);
-		const waitingCharges = data.waitingTime * (config.waitingChargePerMinute || 0);
-
-		// Calculate final amounts
-		const subtotal = totalFare + distanceFare + timeFare;
-		const subtotalWithMultiplier = subtotal * multiplier;
-		const finalTotal = subtotalWithMultiplier + stopCharges + waitingCharges;
+		const finalTotal = firstKmFare + additionalKmFare;
 
 		setQuote({
 			config: config.name,
 			breakdown: {
-				baseFare: totalFare,
-				distanceFare: distanceFare,
-				timeFare: timeFare,
-				multiplier: multiplier,
-				stopCharges: stopCharges,
-				waitingCharges: waitingCharges,
-				subtotal: subtotal,
-				subtotalWithMultiplier: subtotalWithMultiplier,
+				firstKmFare: firstKmFare,
+				additionalKmFare: additionalKmFare,
 				total: finalTotal,
+				firstKmLimit: firstKmLimit,
+				additionalDistance: Math.max(0, data.distance - firstKmLimit),
 			},
 			parameters: data,
 		});
@@ -333,14 +231,14 @@ export function QuoteTester() {
 								Test Parameters
 							</CardTitle>
 							<CardDescription>
-								Enter booking details to calculate quote
+								Test simplified two-tier pricing with distance input
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<Form {...form}>
+							<Form {...form as any}>
 								<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="pricingConfigId"
 										render={({ field }) => (
 											<FormItem>
@@ -364,124 +262,26 @@ export function QuoteTester() {
 										)}
 									/>
 
-									<div className="grid grid-cols-2 gap-4">
-										<FormField
-											control={form.control}
-											name="distance"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Distance (km)</FormLabel>
-													<FormControl>
-														<Input 
-															type="number" 
-															step="0.1" 
-															min="0.1"
-															{...field} 
-															onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="duration"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Duration (minutes)</FormLabel>
-													<FormControl>
-														<Input 
-															type="number" 
-															min="1"
-															{...field} 
-															onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="grid grid-cols-2 gap-4">
-										<FormField
-											control={form.control}
-											name="additionalStops"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Additional Stops</FormLabel>
-													<FormControl>
-														<Input 
-															type="number" 
-															min="0"
-															{...field} 
-															onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="waitingTime"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Waiting Time (min)</FormLabel>
-													<FormControl>
-														<Input 
-															type="number" 
-															min="0"
-															{...field} 
-															onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="grid grid-cols-2 gap-4">
-										<FormField
-											control={form.control}
-											name="timeOfDay"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Time of Day</FormLabel>
-													<FormControl>
-														<Input type="time" {...field} />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="dayType"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Day Type</FormLabel>
-													<Select onValueChange={field.onChange} defaultValue={field.value}>
-														<FormControl>
-															<SelectTrigger>
-																<SelectValue placeholder="Select day type" />
-															</SelectTrigger>
-														</FormControl>
-														<SelectContent>
-															<SelectItem value="weekday">Weekday</SelectItem>
-															<SelectItem value="weekend">Weekend</SelectItem>
-														</SelectContent>
-													</Select>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
+									<FormField
+										control={form.control as any}
+										name="distance"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Distance (km)</FormLabel>
+												<FormControl>
+													<Input 
+														type="number" 
+														step="0.1" 
+														min="0.1"
+														placeholder="e.g., 15.5"
+														{...field} 
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
 									<Button type="submit" className="w-full">
 										Calculate Quote
@@ -531,48 +331,27 @@ export function QuoteTester() {
 									<div className="space-y-3">
 										<div className="flex justify-between">
 											<span className="flex items-center gap-2">
-												<MapPin className="h-4 w-4" />
-												Base Fare
+												<DollarSign className="h-4 w-4 text-blue-600" />
+												First {quote.breakdown.firstKmLimit}km (Flat Rate)
 											</span>
-											<span>${quote.breakdown.baseFare.toFixed(2)}</span>
+											<span className="font-semibold">${quote.breakdown.firstKmFare.toFixed(2)}</span>
 										</div>
 
-										<div className="flex justify-between">
-											<span className="flex items-center gap-2">
-												<MapPin className="h-4 w-4" />
-												Distance Fare ({quote.realData ? quote.realData.distance.toFixed(2) : quote.parameters.distance}km)
-											</span>
-											<span>${quote.breakdown.distanceFare.toFixed(2)}</span>
-										</div>
-
-										{quote.breakdown.timeFare > 0 && (
+										{quote.breakdown.additionalDistance > 0 && (
 											<div className="flex justify-between">
 												<span className="flex items-center gap-2">
-													<Clock className="h-4 w-4" />
-													Time Fare ({quote.realData ? quote.realData.duration.toFixed(0) : quote.parameters.duration}min)
+													<MapPin className="h-4 w-4 text-green-600" />
+													Additional {quote.breakdown.additionalDistance.toFixed(2)}km
 												</span>
-												<span>${quote.breakdown.timeFare.toFixed(2)}</span>
+												<span className="font-semibold">${quote.breakdown.additionalKmFare.toFixed(2)}</span>
 											</div>
 										)}
 
-										{quote.breakdown.multiplier !== 1.0 && (
-											<div className="flex justify-between text-orange-600">
-												<span>Time Multiplier ({quote.breakdown.multiplier}x)</span>
-												<span>+${(quote.breakdown.subtotalWithMultiplier - quote.breakdown.subtotal).toFixed(2)}</span>
-											</div>
-										)}
-
-										{quote.breakdown.stopCharges > 0 && (
-											<div className="flex justify-between">
-												<span>Stop Charges ({quote.realData ? quote.realData.addresses.stops.length : quote.parameters.additionalStops} stops)</span>
-												<span>${quote.breakdown.stopCharges.toFixed(2)}</span>
-											</div>
-										)}
-
-										{quote.breakdown.waitingCharges > 0 && (
-											<div className="flex justify-between">
-												<span>Waiting Charges ({quote.parameters.waitingTime}min)</span>
-												<span>${quote.breakdown.waitingCharges.toFixed(2)}</span>
+										{quote.breakdown.additionalDistance === 0 && (
+											<div className="bg-blue-50 p-3 rounded-lg">
+												<p className="text-sm text-blue-800">
+													<strong>Within flat rate limit:</strong> No additional charges apply since the distance ({quote.realData ? quote.realData.distance.toFixed(2) : quote.parameters.distance}km) is within the first {quote.breakdown.firstKmLimit}km tier.
+												</p>
 											</div>
 										)}
 									</div>
@@ -605,11 +384,11 @@ export function QuoteTester() {
 								Real Address Testing
 							</CardTitle>
 							<CardDescription>
-								Enter real addresses to test with Google Maps distance calculation
+								Test with real addresses using Google Maps for accurate distance calculation
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<Form {...addressForm}>
+							<Form {...addressForm as any}>
 								<form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4">
 									<FormField
 										control={addressForm.control}
@@ -726,62 +505,6 @@ export function QuoteTester() {
 										)}
 									/>
 
-									<div className="grid grid-cols-2 gap-4">
-										<FormField
-											control={addressForm.control}
-											name="waitingTime"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Waiting Time (min)</FormLabel>
-													<FormControl>
-														<Input 
-															type="number" 
-															min="0"
-															{...field} 
-															onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={addressForm.control}
-											name="timeOfDay"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Time of Day</FormLabel>
-													<FormControl>
-														<Input type="time" {...field} />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<FormField
-										control={addressForm.control}
-										name="dayType"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Day Type</FormLabel>
-												<Select onValueChange={field.onChange} defaultValue={field.value}>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Select day type" />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														<SelectItem value="weekday">Weekday</SelectItem>
-														<SelectItem value="weekend">Weekend</SelectItem>
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
 
 									<Button 
 										type="submit" 
@@ -845,48 +568,27 @@ export function QuoteTester() {
 									<div className="space-y-3">
 										<div className="flex justify-between">
 											<span className="flex items-center gap-2">
-												<MapPin className="h-4 w-4" />
-												Base Fare
+												<DollarSign className="h-4 w-4 text-blue-600" />
+												First {quote.breakdown.firstKmLimit}km (Flat Rate)
 											</span>
-											<span>${quote.breakdown.baseFare.toFixed(2)}</span>
+											<span className="font-semibold">${quote.breakdown.firstKmFare.toFixed(2)}</span>
 										</div>
 
-										<div className="flex justify-between">
-											<span className="flex items-center gap-2">
-												<MapPin className="h-4 w-4" />
-												Distance Fare ({quote.realData ? quote.realData.distance.toFixed(2) : quote.parameters.distance}km)
-											</span>
-											<span>${quote.breakdown.distanceFare.toFixed(2)}</span>
-										</div>
-
-										{quote.breakdown.timeFare > 0 && (
+										{quote.breakdown.additionalDistance > 0 && (
 											<div className="flex justify-between">
 												<span className="flex items-center gap-2">
-													<Clock className="h-4 w-4" />
-													Time Fare ({quote.realData ? quote.realData.duration.toFixed(0) : quote.parameters.duration}min)
+													<MapPin className="h-4 w-4 text-green-600" />
+													Additional {quote.breakdown.additionalDistance.toFixed(2)}km
 												</span>
-												<span>${quote.breakdown.timeFare.toFixed(2)}</span>
+												<span className="font-semibold">${quote.breakdown.additionalKmFare.toFixed(2)}</span>
 											</div>
 										)}
 
-										{quote.breakdown.multiplier !== 1.0 && (
-											<div className="flex justify-between text-orange-600">
-												<span>Time Multiplier ({quote.breakdown.multiplier}x)</span>
-												<span>+${(quote.breakdown.subtotalWithMultiplier - quote.breakdown.subtotal).toFixed(2)}</span>
-											</div>
-										)}
-
-										{quote.breakdown.stopCharges > 0 && (
-											<div className="flex justify-between">
-												<span>Stop Charges ({quote.realData ? quote.realData.addresses.stops.length : quote.parameters.additionalStops} stops)</span>
-												<span>${quote.breakdown.stopCharges.toFixed(2)}</span>
-											</div>
-										)}
-
-										{quote.breakdown.waitingCharges > 0 && (
-											<div className="flex justify-between">
-												<span>Waiting Charges ({quote.parameters.waitingTime}min)</span>
-												<span>${quote.breakdown.waitingCharges.toFixed(2)}</span>
+										{quote.breakdown.additionalDistance === 0 && (
+											<div className="bg-blue-50 p-3 rounded-lg">
+												<p className="text-sm text-blue-800">
+													<strong>Within flat rate limit:</strong> No additional charges apply since the distance ({quote.realData ? quote.realData.distance.toFixed(2) : quote.parameters.distance}km) is within the first {quote.breakdown.firstKmLimit}km tier.
+												</p>
 											</div>
 										)}
 									</div>

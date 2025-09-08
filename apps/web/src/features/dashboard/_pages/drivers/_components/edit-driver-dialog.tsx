@@ -70,7 +70,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 					</DialogDescription>
 				</DialogHeader>
 				
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<div className="space-y-2">
 							<p className="text-sm font-medium">Driver Information</p>
@@ -82,7 +82,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 						</div>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="licenseNumber"
 							render={({ field }) => (
 								<FormItem>
@@ -96,7 +96,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 						/>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="isApproved"
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -117,7 +117,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 						/>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="isActive"
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">

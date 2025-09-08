@@ -196,10 +196,10 @@ export function SecurityTab({ user }: SecurityTabProps) {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<Form {...form}>
+					<Form {...form as any}>
 						<form onSubmit={form.handleSubmit(handleChangePassword)} className="space-y-3">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="currentPassword"
 								render={({ field }) => (
 									<FormItem>
@@ -233,7 +233,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="newPassword"
 								render={({ field }) => (
 									<FormItem>
@@ -270,7 +270,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="confirmPassword"
 								render={({ field }) => (
 									<FormItem>

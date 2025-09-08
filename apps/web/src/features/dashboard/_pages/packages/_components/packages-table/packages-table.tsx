@@ -48,11 +48,7 @@ export function PackagesTable() {
 			await updatePackageMutation.mutateAsync({
 				id: pkg.id,
 				data: {
-					name: pkg.name,
-					description: pkg.description,
-					fixedPrice: pkg.fixedPrice, // Keep price in cents
 					isAvailable: !pkg.isAvailable,
-					isPublished: pkg.isPublished ?? false,
 				}
 			});
 		} catch (error) {

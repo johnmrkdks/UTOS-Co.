@@ -127,10 +127,10 @@ export function DeleteConditionTypeDialog({ conditionType, className }: DeleteCo
 
 				{/* Form - Only show if conditionType can be deleted */}
 				{canDelete && (
-					<Form {...form}>
+					<Form {...form as any}>
 						<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-6">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="confirmation"
 								render={({ field }) => (
 									<FormItem className="flex items-center gap-2">

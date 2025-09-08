@@ -54,11 +54,11 @@ export function BookingDetailsStep({
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
 						{/* Customer Name */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="customerName"
 							render={({ field }) => (
 								<FormItem>
@@ -76,7 +76,7 @@ export function BookingDetailsStep({
 
 						{/* Customer Phone */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="customerPhone"
 							render={({ field }) => (
 								<FormItem>
@@ -94,7 +94,7 @@ export function BookingDetailsStep({
 
 						{/* Customer Email */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="customerEmail"
 							render={({ field }) => (
 								<FormItem>
@@ -112,7 +112,7 @@ export function BookingDetailsStep({
 
 						{/* Passenger Count */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="passengerCount"
 							render={({ field }) => (
 								<FormItem>
@@ -138,7 +138,7 @@ export function BookingDetailsStep({
 
 						{/* Pickup Date/Time */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="scheduledPickupTime"
 							render={({ field }) => (
 								<FormItem>
@@ -162,7 +162,7 @@ export function BookingDetailsStep({
 
 						{/* Special Requests */}
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="specialRequests"
 							render={({ field }) => (
 								<FormItem>

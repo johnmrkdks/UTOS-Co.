@@ -1,19 +1,16 @@
 import { useParams, useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
-import { GuestCarBookingForm } from "../_components/guest-car-booking-form";
+import { useGetPublishedCarByIdQuery } from "@/features/customer/_hooks/query/use-get-published-car-by-id-query";
+import { CarBookingForm } from "../_components/car-booking-form";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { ArrowLeft, Car, Users, Fuel, Gauge, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-export function GuestCarBookingPage() {
+export function CarBookingPage() {
 	const { carId } = useParams({ from: "/_marketing/book-car/$carId" });
 	const search = useSearch({ from: "/_marketing/book-car/$carId" });
 
-	const { data: car, isLoading } = useQuery(
-		trpc.cars.getPublished.queryOptions({ id: carId })
-	);
+	const { data: car, isLoading } = useGetPublishedCarByIdQuery(carId);
 
 	if (isLoading) {
 		return (
@@ -126,11 +123,11 @@ export function GuestCarBookingPage() {
 					<CardHeader>
 						<CardTitle>Book This Car</CardTitle>
 						<p className="text-sm text-gray-600">
-							No account required - book as a guest
+							Complete your car booking
 						</p>
 					</CardHeader>
 					<CardContent>
-						<GuestCarBookingForm car={car} />
+						<CarBookingForm car={car} />
 					</CardContent>
 				</Card>
 			</div>

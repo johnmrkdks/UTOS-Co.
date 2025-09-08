@@ -69,23 +69,25 @@ function RouteComponent() {
 								<h3 className="text-lg font-semibold">Service Packages</h3>
 								<p className="text-sm text-muted-foreground">Manage your service packages, pricing, and availability</p>
 							</div>
-							<Dialog open={showAddPackage} onOpenChange={setShowAddPackage}>
-								<DialogTrigger asChild>
-									<Button className="flex items-center gap-2">
-										<Plus className="h-4 w-4" />
-										Add Package
-									</Button>
-								</DialogTrigger>
-								<DialogContent className="sm:max-w-[800px]">
-									<DialogHeader>
-										<DialogTitle>Create New Package</DialogTitle>
-										<DialogDescription>
-											Add a new package to your service offerings. Fill in the details below.
-										</DialogDescription>
-									</DialogHeader>
-									<AddNewPackageForm onSuccess={() => setShowAddPackage(false)} />
-								</DialogContent>
-							</Dialog>
+							<div className="flex items-center gap-2">
+								<Dialog open={showAddPackage} onOpenChange={setShowAddPackage}>
+									<DialogTrigger asChild>
+										<Button className="flex items-center gap-2">
+											<Plus className="h-4 w-4" />
+											Add Package
+										</Button>
+									</DialogTrigger>
+									<DialogContent className="sm:max-w-[800px]">
+										<DialogHeader>
+											<DialogTitle>Create New Package</DialogTitle>
+											<DialogDescription>
+												Add a new package to your service offerings. Fill in the details below.
+											</DialogDescription>
+										</DialogHeader>
+										<AddNewPackageForm onSuccess={() => setShowAddPackage(false)} />
+									</DialogContent>
+								</Dialog>
+							</div>
 						</div>
 
 						<PackageAnalyticsCards

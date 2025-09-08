@@ -136,7 +136,7 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 					<DialogTitle>Edit Drive Type</DialogTitle>
 					<DialogDescription>Edit the details of the drive type.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

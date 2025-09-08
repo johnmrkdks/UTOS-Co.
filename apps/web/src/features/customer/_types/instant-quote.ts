@@ -8,12 +8,17 @@ export interface Stop {
 
 export interface QuoteResult {
 	totalAmount: number;
-	baseFare: number;
-	distanceFare: number;
-	timeFare: number;
-	extraCharges: number;
+	firstKmFare: number;
+	additionalKmFare: number;
 	estimatedDistance: number;
 	estimatedDuration: number;
+	breakdown: {
+		firstKmRate: number;
+		additionalKmRate: number;
+		totalDistance: number;
+		firstKmDistance: number;
+		additionalDistance: number;
+	};
 	quoteToken?: string;
 }
 

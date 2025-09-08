@@ -30,7 +30,7 @@ export function TextInputField<T extends FieldValues>({
 }: TextInputFieldProps<T>) {
 	return (
 		<FormField
-			control={form.control}
+			control={form.control as any}
 			name={name}
 			render={({ field }) => (
 				<FormItem className={cn(className)}>
@@ -82,7 +82,7 @@ export function SelectField<T extends FieldValues>({
 }: SelectFieldProps<T>) {
 	return (
 		<FormField
-			control={form.control}
+			control={form.control as any}
 			name={name}
 			render={({ field }) => (
 				<FormItem>

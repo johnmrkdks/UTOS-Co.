@@ -48,6 +48,7 @@ export function Services({ className, ...props }: ServicesProps) {
 		icon: serviceIcons[pkg.serviceType] || Building,
 		title: pkg.name,
 		description: pkg.description,
+		bannerImageUrl: pkg.bannerImageUrl,
 		features: [
 			`Max ${pkg.maxPassengers} passengers`,
 			pkg.includesDriver ? "Professional chauffeur" : "Self-drive",
@@ -152,52 +153,99 @@ export function Services({ className, ...props }: ServicesProps) {
 							<div
 								key={service.title}
 								className={cn(
-									"relative bg-card border-2 rounded-2xl p-8 hover:border-primary/30 transition-all duration-300 group hover:shadow-xl",
+									"relative bg-card border-2 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 group hover:shadow-xl",
 									service.popular ? "border-primary shadow-lg" : "border-border"
 								)}
 							>
 								{service.popular && (
-									<div className="absolute -top-3 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
+									<div className="absolute -top-3 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold z-10">
 										Most Popular
 									</div>
 								)}
 
-								<div className="flex items-center mb-6">
-									<div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
-										<service.icon className="w-7 h-7 text-primary" />
-									</div>
-									<div>
-										<h3 className="text-xl font-bold text-card-foreground mb-1">
-											{service.title}
-										</h3>
-										<div className="text-2xl font-bold text-primary">
-											{service.price}
+								{/* Banner Image Section */}
+								{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
+									<div className="h-48 relative overflow-hidden">
+										<img 
+											src={service.bannerImageUrl} 
+											alt={service.title}
+											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+											onError={(e) => {
+												// Show fallback design on image error
+												e.currentTarget.parentElement!.innerHTML = `
+													<div class="w-full h-48 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
+														<div class="text-center">
+															<div class="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
+																<svg class="w-8 h-8 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+																</svg>
+															</div>
+															<p class="text-gray-600 font-medium text-sm px-2">${service.title}</p>
+															<p class="text-gray-400 text-xs mt-1">Premium Service</p>
+														</div>
+													</div>
+												`;
+											}}
+										/>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+										
+										{/* Service icon overlay */}
+										<div className="absolute top-4 left-4">
+											<div className="w-12 h-12 bg-white/90 rounded-xl flex items-center justify-center shadow-lg">
+												<service.icon className="w-6 h-6 text-primary" />
+											</div>
+										</div>
+										
+										{/* Price overlay */}
+										<div className="absolute bottom-4 left-4">
+											<div className="text-white">
+												<h3 className="text-xl font-bold mb-1">{service.title}</h3>
+												<div className="text-2xl font-bold text-white/90">
+													{service.price}
+												</div>
+											</div>
 										</div>
 									</div>
-								</div>
-
-								<p className="text-muted-foreground mb-6 leading-relaxed">
-									{service.description}
-								</p>
-
-								<ul className="space-y-3 mb-8">
-									{service.features.map((feature: any, featureIndex: number) => (
-										<li key={featureIndex} className="flex items-center text-muted-foreground">
-											<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-												<div className="w-2 h-2 bg-primary rounded-full" />
+								) : (
+									// Fallback design when no banner image
+									<div className="h-48 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center relative">
+										<div className="text-center">
+											<div className="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
+												<service.icon className="w-8 h-8 text-primary/60" />
 											</div>
-											{feature}
-										</li>
-									))}
-								</ul>
+											<h3 className="text-gray-600 font-medium text-lg px-2">{service.title}</h3>
+											<div className="text-2xl font-bold text-primary mt-2">
+												{service.price}
+											</div>
+										</div>
+									</div>
+								)}
 
-								<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
-									<Button
-										className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300"
-									>
-										Book This Service
-									</Button>
-								</Link>
+								{/* Content Section */}
+								<div className="p-6">
+									<p className="text-muted-foreground mb-6 leading-relaxed">
+										{service.description}
+									</p>
+
+									<ul className="space-y-3 mb-8">
+										{service.features.map((feature: any, featureIndex: number) => (
+											<li key={featureIndex} className="flex items-center text-muted-foreground">
+												<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+													<div className="w-2 h-2 bg-primary rounded-full" />
+												</div>
+												{feature}
+											</li>
+										))}
+									</ul>
+
+									<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
+										<Button
+											className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300"
+										>
+											Book This Service
+										</Button>
+									</Link>
+								</div>
 							</div>
 						))
 						) : (

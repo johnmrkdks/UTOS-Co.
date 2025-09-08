@@ -258,12 +258,12 @@ export function QuoteToBookingDialog({
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Form {...form}>
+								<Form {...form as any}>
 									<form onSubmit={form.handleSubmit(goToConfirmation)} className="space-y-4">
 										{/* Name and Phone */}
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="customerName"
 												render={({ field }) => (
 													<FormItem>
@@ -276,7 +276,7 @@ export function QuoteToBookingDialog({
 												)}
 											/>
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="customerPhone"
 												render={({ field }) => (
 													<FormItem>
@@ -293,7 +293,7 @@ export function QuoteToBookingDialog({
 										{/* Email and Passenger Count */}
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="customerEmail"
 												render={({ field }) => (
 													<FormItem>
@@ -306,7 +306,7 @@ export function QuoteToBookingDialog({
 												)}
 											/>
 											<FormField
-												control={form.control}
+												control={form.control as any}
 												name="passengerCount"
 												render={({ field }) => (
 													<FormItem>
@@ -328,7 +328,7 @@ export function QuoteToBookingDialog({
 
 										{/* Pickup Time */}
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="scheduledPickupTime"
 											render={({ field }) => (
 												<FormItem>
@@ -352,7 +352,7 @@ export function QuoteToBookingDialog({
 
 										{/* Special Requests */}
 										<FormField
-											control={form.control}
+											control={form.control as any}
 											name="specialRequests"
 											render={({ field }) => (
 												<FormItem>

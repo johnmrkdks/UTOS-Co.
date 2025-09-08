@@ -103,12 +103,12 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 				</div>
 			</CardHeader>
 			<CardContent>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
 						{/* Basic Information */}
 						<div className="grid grid-cols-1 gap-4">
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="name"
 								render={({ field }) => (
 									<FormItem>
@@ -122,7 +122,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="email"
 								render={({ field }) => (
 									<FormItem>
@@ -139,7 +139,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="phoneNumber"
 								render={({ field }) => (
 									<FormItem>
@@ -153,7 +153,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							/>
 
 							<FormField
-								control={form.control}
+								control={form.control as any}
 								name="dateOfBirth"
 								render={({ field }) => (
 									<FormItem>
@@ -168,7 +168,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 						</div>
 
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="address"
 							render={({ field }) => (
 								<FormItem>
@@ -189,7 +189,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							</h3>
 							<div className="grid grid-cols-1 gap-4">
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="licenseNumber"
 									render={({ field }) => (
 										<FormItem>
@@ -203,7 +203,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 								/>
 
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="licenseExpiry"
 									render={({ field }) => (
 										<FormItem>
@@ -226,7 +226,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							</h3>
 							<div className="grid grid-cols-1 gap-4">
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="emergencyContactName"
 									render={({ field }) => (
 										<FormItem>
@@ -240,7 +240,7 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 								/>
 
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="emergencyContactPhone"
 									render={({ field }) => (
 										<FormItem>

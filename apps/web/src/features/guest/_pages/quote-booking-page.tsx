@@ -1,11 +1,11 @@
 import { useSearch } from "@tanstack/react-router";
-import { GuestQuoteBookingForm } from "../_components/guest-quote-booking-form";
+import { QuoteBookingForm } from "../_components/quote-booking-form";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { ArrowLeft, MapPin, Clock, DollarSign, Route } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-export function GuestQuoteBookingPage() {
+export function QuoteBookingPage() {
 	const search = useSearch({ from: "/_marketing/book-quote" });
 
 	if (!search.origin || !search.destination || !search.totalFare) {
@@ -109,11 +109,11 @@ export function GuestQuoteBookingPage() {
 					<CardHeader>
 						<CardTitle>Book This Trip</CardTitle>
 						<p className="text-sm text-gray-600">
-							No account required - book as a guest
+							Complete your trip booking
 						</p>
 					</CardHeader>
 					<CardContent>
-						<GuestQuoteBookingForm quoteData={quoteData} />
+						<QuoteBookingForm quoteData={quoteData} />
 					</CardContent>
 				</Card>
 			</div>

@@ -13,7 +13,7 @@ import { PublicationStatsCard } from "@/features/dashboard/_components/publicati
 
 function AddCarButton() {
 	return (
-		<Link to="/dashboard/cars/add-car">
+		<Link to="/admin/dashboard/cars/add-car">
 			<Button>
 				<PlusIcon className="w-4 h-4" />
 				Add New Car
@@ -26,7 +26,7 @@ export function CarsList() {
 	const { viewMode } = useCarsListViewToogleStore();
 	const navigate = useNavigate()
 	const search = useSearch({
-		from: "/dashboard/_layout/cars/",
+		from: "/admin/dashboard/_layout/cars/",
 	})
 
 	// Get filters from search params with defaults

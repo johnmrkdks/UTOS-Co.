@@ -2,9 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
-import { toast } from "sonner";
+import { useCreateCustomBookingFromQuoteMutation } from "@/features/customer/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -14,7 +12,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, isBefore, startOfDay } from "date-fns";
 import { cn } from "@workspace/ui/lib/utils";
 
-const guestQuoteBookingSchema = z.object({
+const quoteBookingSchema = z.object({
 	customerName: z.string().min(2, "Name must be at least 2 characters"),
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
@@ -26,9 +24,9 @@ const guestQuoteBookingSchema = z.object({
 	specialRequirements: z.string().optional(),
 });
 
-type GuestQuoteBookingFormData = z.infer<typeof guestQuoteBookingSchema>;
+type QuoteBookingFormData = z.infer<typeof quoteBookingSchema>;
 
-interface GuestQuoteBookingFormProps {
+interface QuoteBookingFormProps {
 	quoteData: {
 		origin: string;
 		destination: string;
@@ -38,12 +36,12 @@ interface GuestQuoteBookingFormProps {
 	};
 }
 
-export function GuestQuoteBookingForm({ quoteData }: GuestQuoteBookingFormProps) {
+export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 	const [date, setDate] = useState<Date>();
-	const queryClient = useQueryClient();
+	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
 
-	const form = useForm<GuestQuoteBookingFormData>({
-		resolver: zodResolver(guestQuoteBookingSchema),
+	const form = useForm<QuoteBookingFormData>({
+		resolver: zodResolver(quoteBookingSchema),
 		defaultValues: {
 			customerName: "",
 			customerEmail: "",
@@ -54,43 +52,29 @@ export function GuestQuoteBookingForm({ quoteData }: GuestQuoteBookingFormProps)
 		},
 	});
 
-	const createBookingMutation = useMutation({
-		mutationFn: async (data: GuestQuoteBookingFormData) => {
-			const bookingData = {
-				origin: quoteData.origin,
-				destination: quoteData.destination,
-				customerName: data.customerName,
-				customerEmail: data.customerEmail,
-				customerPhone: data.customerPhone,
-				passengerCount: data.passengerCount,
-				bookingDate: data.bookingDate,
-				bookingTime: data.bookingTime,
-				specialRequirements: data.specialRequirements,
-				distance: quoteData.distance,
-				duration: quoteData.duration,
-				totalAmount: quoteData.totalFare,
-			};
 
-			const utils = trpc.useUtils();
-			return await utils.bookings.createCustomBookingFromQuote.mutate(bookingData);
-		},
-		onSuccess: () => {
-			toast.success("Trip booking created successfully!", {
-				description: "You will receive a confirmation email shortly.",
-			});
-			form.reset();
-			setDate(undefined);
-			queryClient.invalidateQueries();
-		},
-		onError: (error: any) => {
-			toast.error("Failed to create booking", {
-				description: error.message || "Please try again later",
-			});
-		},
-	});
+	const onSubmit = (data: QuoteBookingFormData) => {
+		const bookingData = {
+			origin: quoteData.origin,
+			destination: quoteData.destination,
+			customerName: data.customerName,
+			customerEmail: data.customerEmail,
+			customerPhone: data.customerPhone,
+			passengerCount: data.passengerCount,
+			bookingDate: data.bookingDate,
+			bookingTime: data.bookingTime,
+			specialRequirements: data.specialRequirements,
+			distance: quoteData.distance,
+			duration: quoteData.duration,
+			totalAmount: quoteData.totalFare,
+		};
 
-	const onSubmit = (data: GuestQuoteBookingFormData) => {
-		createBookingMutation.mutate(data);
+		createBookingMutation.mutate(bookingData, {
+			onSuccess: () => {
+				form.reset();
+				setDate(undefined);
+			},
+		});
 	};
 
 	// Minimum booking date is today

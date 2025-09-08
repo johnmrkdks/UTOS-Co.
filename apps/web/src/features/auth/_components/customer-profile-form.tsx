@@ -61,7 +61,7 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 
 	return (
 		<div className={cn("w-full max-w-4xl mx-auto", className)}>
-			<Form {...form}>
+			<Form {...form as any}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 					{/* Personal Information */}
 					<Card>

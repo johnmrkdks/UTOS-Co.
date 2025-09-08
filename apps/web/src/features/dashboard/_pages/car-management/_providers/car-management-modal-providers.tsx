@@ -1,8 +1,14 @@
-import { useModalProvider } from "@/features/dashboard/_hooks/use-modal-provider";
-import { AddNewPackageModal } from "@/features/dashboard/_pages/packages/_components/add-new-package/add-new-package-modal";
+import { useModal } from "@/hooks/use-modal";
+import { EditCarModal } from "../_components/modals/edit-car-modal";
+import { DeleteCarModal } from "../_components/modals/delete-car-modal";
 
 export function CarManagementModalProviders() {
-	const { shouldShowModal } = useModalProvider();
+	const { isModalOpen } = useModal();
 
-	return <>{shouldShowModal("dashboard") && <AddNewPackageModal />}</>;
+	return (
+		<>
+			{isModalOpen("edit-car") && <EditCarModal />}
+			{isModalOpen("delete-car") && <DeleteCarModal />}
+		</>
+	);
 }

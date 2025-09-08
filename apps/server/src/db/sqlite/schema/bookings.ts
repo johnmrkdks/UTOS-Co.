@@ -13,7 +13,6 @@ export const bookings = sqliteTable("bookings", {
 	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
 
 	carId: text("car_id")
-		.notNull()
 		.references(() => cars.id, { onDelete: "cascade" }),
 	userId: text("user_id")
 		.notNull()

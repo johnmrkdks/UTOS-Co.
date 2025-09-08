@@ -108,7 +108,7 @@ export function AddFeatureDialog() {
 					<DialogTitle>Add New Feature</DialogTitle>
 					<DialogDescription>Enter the name of the new feature.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

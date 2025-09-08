@@ -113,21 +113,6 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 						)}
 					/>
 
-					<FormField
-						control={control}
-						name="isPublished"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>Publish to Customers</FormLabel>
-									<FormDescription className="text-xs">Make this car visible to public customers</FormDescription>
-								</div>
-							</FormItem>
-						)}
-					/>
 				</div>
 			</div>
 		</div>

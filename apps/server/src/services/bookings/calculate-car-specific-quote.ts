@@ -1,7 +1,7 @@
 import type { DB } from "@/db";
 import { z } from "zod";
 import { getDistanceMatrix, calculateHaversineDistance } from "@/lib/google-maps";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { pricingConfig, cars } from "@/db/schema";
 
 export const CalculateCarSpecificQuoteSchema = z.object({
@@ -24,27 +24,24 @@ export const CalculateCarSpecificQuoteSchema = z.object({
 export type CalculateCarSpecificQuoteParams = z.infer<typeof CalculateCarSpecificQuoteSchema>;
 
 export interface CarSpecificQuote {
-	baseFare: number;
-	distanceFare: number;
-	timeFare: number;
-	extraCharges: number;
+	firstKmFare: number;
+	additionalKmFare: number;
 	totalAmount: number;
 	estimatedDistance: number; // in meters
 	estimatedDuration: number; // in seconds
 	car: {
 		id: string;
 		name: string;
-		baseFare: number;
+		firstKmRate: number;
 		brandName?: string;
 		modelName?: string;
 	};
 	breakdown: {
-		baseRate: number;
-		perKmRate: number;
-		perMinuteRate: number;
-		minimumFare: number;
-		surgePricing?: number;
-		waitingTimeCharges?: number;
+		firstKmRate: number;
+		additionalKmRate: number;
+		totalDistance: number; // in km
+		firstKmDistance: number; // distance charged at first km rate
+		additionalDistance: number; // distance charged at per km rate
 	};
 }
 
@@ -76,20 +73,34 @@ export async function calculateCarSpecificQuoteService(
 
 	const car = carResult[0];
 
-	// Get car-specific pricing configuration
-	const carPricingResult = await db
+	// Try to get car-specific pricing configuration first
+	let carPricingResult = await db
 		.select()
 		.from(pricingConfig)
-		.where(
-			and(
-				eq(pricingConfig.carId, data.carId),
-				eq(pricingConfig.isActive, true)
-			)
-		)
+		.where(eq(pricingConfig.carId, data.carId))
 		.limit(1);
 
+	// If no car-specific pricing exists, fallback to global pricing configuration
 	if (carPricingResult.length === 0) {
-		throw new Error("No pricing configuration found for this car");
+		console.log(`No car-specific pricing found for car ${data.carId}, using global pricing configuration`);
+		carPricingResult = await db
+			.select()
+			.from(pricingConfig)
+			.where(isNull(pricingConfig.carId)) // Global pricing config
+			.limit(1);
+	}
+
+	// If still no pricing config found, try any pricing config as last resort
+	if (carPricingResult.length === 0) {
+		console.log(`No global pricing found, using any pricing configuration as fallback`);
+		carPricingResult = await db
+			.select()
+			.from(pricingConfig)
+			.limit(1);
+	}
+
+	if (carPricingResult.length === 0) {
+		throw new Error("No pricing configuration found. Please contact support or set up pricing configuration.");
 	}
 
 	const carPricing = carPricingResult[0];
@@ -183,79 +194,41 @@ export async function calculateCarSpecificQuoteService(
 
 	// Use car-specific pricing configuration
 	const pricing = {
-		baseRate: carPricing.baseFare, // Use car's specific base fare from pricing config
-		perKmRate: carPricing.pricePerKm,
-		perMinuteRate: carPricing.pricePerMinute || 50,
-		minimumFare: carPricing.baseFare, // Use car's base fare as minimum
-		waitingTimeRate: carPricing.waitingChargePerMinute || 100,
+		firstKmRate: carPricing.firstKmRate,
+		additionalKmRate: carPricing.pricePerKm,
+		firstKmLimit: carPricing.firstKmLimit || 10,
 	};
 
-	// Apply surge pricing
-	const surgePricing = calculateSurgePricing(data.scheduledPickupTime);
+	// Calculate fare components using flexible pricing model
+	const distanceKm = totalDistance / 1000; // convert meters to km
 	
-	// Calculate fare components
-	const baseFare = pricing.baseRate;
-	const distanceKm = totalDistance / 1000;
-	const durationMinutes = totalDuration / 60;
+	// Calculate first km fare and additional km fare
+	const firstKmDistance = Math.min(distanceKm, pricing.firstKmLimit);
+	const additionalDistance = Math.max(0, distanceKm - pricing.firstKmLimit);
 	
-	const distanceFare = Math.round(distanceKm * pricing.perKmRate * surgePricing);
-	const timeFare = 0; // Time fare excluded
-	const waitingTimeCharges = totalWaitingTime * pricing.waitingTimeRate;
+	const firstKmFare = parseFloat((firstKmDistance * pricing.firstKmRate).toFixed(2));
+	const additionalKmFare = parseFloat((additionalDistance * pricing.additionalKmRate).toFixed(2));
 	
-	let totalAmount = baseFare + distanceFare + waitingTimeCharges;
-	
-	// Apply minimum fare
-	if (totalAmount < pricing.minimumFare) {
-		totalAmount = pricing.minimumFare;
-	}
+	const totalAmount = parseFloat((firstKmFare + additionalKmFare).toFixed(2));
 	
 	return {
-		baseFare,
-		distanceFare,
-		timeFare,
-		extraCharges: waitingTimeCharges,
+		firstKmFare,
+		additionalKmFare,
 		totalAmount,
 		estimatedDistance: Math.round(totalDistance),
 		estimatedDuration: Math.round(totalDuration),
+		breakdown: {
+			firstKmRate: pricing.firstKmRate,
+			additionalKmRate: pricing.additionalKmRate,
+			totalDistance: parseFloat(distanceKm.toFixed(2)),
+			firstKmDistance: parseFloat(firstKmDistance.toFixed(2)),
+			additionalDistance: parseFloat(additionalDistance.toFixed(2)),
+		},
 		car: {
 			id: car.id,
 			name: car.name,
-			baseFare: carPricing.baseFare,
-		},
-		breakdown: {
-			baseRate: pricing.baseRate,
-			perKmRate: pricing.perKmRate,
-			perMinuteRate: pricing.perMinuteRate,
-			minimumFare: pricing.minimumFare,
-			surgePricing: surgePricing > 1 ? surgePricing : undefined,
-			waitingTimeCharges: waitingTimeCharges > 0 ? waitingTimeCharges : undefined,
+			firstKmRate: carPricing.firstKmRate,
 		},
 	};
 }
 
-// Calculate surge pricing based on time of day and day of week
-function calculateSurgePricing(scheduledTime: Date): number {
-	const hour = scheduledTime.getHours();
-	const day = scheduledTime.getDay(); // 0 = Sunday, 6 = Saturday
-	
-	// Peak hours: 7-9 AM and 5-7 PM on weekdays
-	const isWeekday = day >= 1 && day <= 5;
-	const isMorningPeak = hour >= 7 && hour <= 9;
-	const isEveningPeak = hour >= 17 && hour <= 19;
-	const isWeekend = day === 0 || day === 6;
-	const isLateNight = hour >= 22 || hour <= 5;
-	
-	if (isWeekday && (isMorningPeak || isEveningPeak)) {
-		return 1.5; // 50% surge during peak hours
-	}
-	
-	if (isWeekend && (hour >= 19 && hour <= 23)) {
-		return 1.3; // 30% surge Friday/Saturday night
-	}
-	
-	if (isLateNight) {
-		return 1.2; // 20% surge for late night/early morning
-	}
-	
-	return 1.0; // No surge
-}

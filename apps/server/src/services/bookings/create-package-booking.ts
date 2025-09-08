@@ -7,7 +7,7 @@ import { z } from "zod";
 
 export const CreatePackageBookingSchema = z.object({
 	packageId: z.string(),
-	carId: z.string(),
+	carId: z.string().nullable(),
 	userId: z.string(),
 	
 	// Route information
@@ -42,65 +42,85 @@ export const CreatePackageBookingSchema = z.object({
 export type CreatePackageBookingParams = z.infer<typeof CreatePackageBookingSchema>;
 
 export async function createPackageBookingService(db: DB, data: CreatePackageBookingParams) {
-	// Validate package exists and is available
-	const packageInfo = await getPackage(db, { id: data.packageId });
-	if (!packageInfo) {
-		throw new Error("Package not found");
-	}
-	
-	if (!packageInfo.isAvailable) {
-		throw new Error("Package is not available");
-	}
-	
-	// Validate passenger count doesn't exceed package limit
-	if (packageInfo.maxPassengers && data.passengerCount > packageInfo.maxPassengers) {
-		throw new Error(`Package only supports ${packageInfo.maxPassengers} passengers`);
-	}
-	
-	// Calculate advance booking time validation
-	const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
-	if (packageInfo.advanceBookingHours && hoursUntilPickup < packageInfo.advanceBookingHours) {
-		throw new Error(`Package requires ${packageInfo.advanceBookingHours} hours advance booking`);
-	}
-	
-	// Prepare booking data
-	const bookingData: InsertBooking = {
-		bookingType: BookingTypeEnum.Package,
-		packageId: data.packageId,
-		carId: data.carId,
-		userId: data.userId,
+	try {
+		console.log("🔍 DEBUG createPackageBookingService - START");
+		console.log("📦 Service data received:", JSON.stringify(data, null, 2));
+		console.log("📅 scheduledPickupTime type:", typeof data.scheduledPickupTime, "value:", data.scheduledPickupTime);
 		
-		originAddress: data.originAddress,
-		originLatitude: data.originLatitude,
-		originLongitude: data.originLongitude,
-		destinationAddress: data.destinationAddress,
-		destinationLatitude: data.destinationLatitude,
-		destinationLongitude: data.destinationLongitude,
+		// Validate package exists and is available
+		console.log("🔍 Looking up package:", data.packageId);
+		const packageInfo = await getPackage(db, { id: data.packageId });
+		console.log("📦 Package found:", packageInfo ? "Yes" : "No", packageInfo?.name);
 		
-		scheduledPickupTime: data.scheduledPickupTime,
-		estimatedDuration: packageInfo.duration,
+		if (!packageInfo) {
+			throw new Error("Package not found");
+		}
 		
-		// Use package fixed pricing
-		quotedAmount: packageInfo.fixedPrice,
-		finalAmount: packageInfo.fixedPrice, // For packages, price is fixed
+		if (!packageInfo.isAvailable) {
+			throw new Error("Package is not available");
+		}
 		
-		customerName: data.customerName,
-		customerPhone: data.customerPhone,
-		customerEmail: data.customerEmail,
-		passengerCount: data.passengerCount,
-		specialRequests: data.specialRequests,
+		// Validate passenger count doesn't exceed package limit
+		if (packageInfo.maxPassengers && data.passengerCount > packageInfo.maxPassengers) {
+			throw new Error(`Package only supports ${packageInfo.maxPassengers} passengers`);
+		}
 		
-		status: BookingStatusEnum.Pending,
-	};
-	
-	const newBooking = await createBooking(db, bookingData);
-	
-	// Create stops if provided
-	if (data.stops && data.stops.length > 0) {
-		// Note: You'll need to implement createBookingStops function in the data layer
-		// For now, this is a placeholder for the booking stops creation
-		// await createBookingStops(db, newBooking.id, data.stops);
+		// Calculate advance booking time validation
+		console.log("🕐 Checking pickup time validation...");
+		const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
+		console.log("⏰ Hours until pickup:", hoursUntilPickup, "Required advance:", packageInfo.advanceBookingHours);
+		
+		if (packageInfo.advanceBookingHours && hoursUntilPickup < packageInfo.advanceBookingHours) {
+			throw new Error(`Package requires ${packageInfo.advanceBookingHours} hours advance booking`);
+		}
+		
+		// Prepare booking data
+		console.log("📝 Preparing booking data...");
+		const bookingData: InsertBooking = {
+			bookingType: BookingTypeEnum.Package,
+			packageId: data.packageId,
+			carId: data.carId,
+			userId: data.userId,
+			
+			originAddress: data.originAddress,
+			originLatitude: data.originLatitude,
+			originLongitude: data.originLongitude,
+			destinationAddress: data.destinationAddress,
+			destinationLatitude: data.destinationLatitude,
+			destinationLongitude: data.destinationLongitude,
+			
+			scheduledPickupTime: data.scheduledPickupTime,
+			estimatedDuration: packageInfo.duration,
+			
+			// Use package fixed pricing
+			quotedAmount: packageInfo.fixedPrice,
+			finalAmount: packageInfo.fixedPrice, // For packages, price is fixed
+			
+			customerName: data.customerName,
+			customerPhone: data.customerPhone,
+			customerEmail: data.customerEmail,
+			passengerCount: data.passengerCount,
+			specialRequests: data.specialRequests,
+			
+			status: BookingStatusEnum.Pending,
+		};
+		
+		console.log("💾 Calling createBooking with:", JSON.stringify(bookingData, null, 2));
+		const newBooking = await createBooking(db, bookingData);
+		console.log("✅ Booking created successfully with ID:", newBooking.id);
+		
+		// Create stops if provided
+		if (data.stops && data.stops.length > 0) {
+			console.log("🛑 Creating stops:", data.stops.length);
+			// Note: You'll need to implement createBookingStops function in the data layer
+			// For now, this is a placeholder for the booking stops creation
+			// await createBookingStops(db, newBooking.id, data.stops);
+		}
+		
+		return newBooking;
+	} catch (error) {
+		console.error("💥 ERROR in createPackageBookingService:", error);
+		console.error("📚 Service error stack:", error instanceof Error ? error.stack : 'No stack trace');
+		throw error;
 	}
-	
-	return newBooking;
 }

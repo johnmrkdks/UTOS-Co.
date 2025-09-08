@@ -1,8 +1,7 @@
 import { DataTable } from "@workspace/ui/components/data-table";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Eye, Power } from "lucide-react";
+import { MoreHorizontal, Pencil, Eye, Trash } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,29 +9,34 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { useGetPricingConfigsQuery } from "../_hooks/query/use-get-pricing-configs-query";
-import { useTogglePricingConfigActiveMutation } from "../_hooks/query/use-toggle-pricing-config-active-mutation";
+import { useDeletePricingConfigMutation } from "../_hooks/query/use-delete-pricing-config-mutation";
 import { useState, useMemo } from "react";
 import { EditPricingConfigDialog } from "./edit-pricing-config-dialog";
 import { ViewPricingConfigDialog } from "./view-pricing-config-dialog";
+import { DeletePricingConfigDialog } from "./delete-pricing-config-dialog";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface PricingConfig {
 	id: string;
 	name: string;
-	baseFare: number;
+	carId?: string;
+	firstKmRate: number;
+	firstKmLimit: number;
 	pricePerKm: number;
-	pricePerMinute: number | null;
-	nightMultiplier: number | null;
-	isActive: boolean | null;
 	createdAt: string | null;
+	car?: {
+		name: string;
+		licensePlate?: string;
+	};
 }
 
 export function PricingConfigTable() {
 	const [editingConfig, setEditingConfig] = useState<PricingConfig | null>(null);
 	const [viewingConfig, setViewingConfig] = useState<PricingConfig | null>(null);
+	const [deletingConfig, setDeletingConfig] = useState<PricingConfig | null>(null);
 	
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
-	const toggleActiveMutation = useTogglePricingConfigActiveMutation();
+	const deletePricingConfigMutation = useDeletePricingConfigMutation();
 
 	const columns: ColumnDef<PricingConfig>[] = useMemo(() => [
 		{
@@ -45,60 +49,56 @@ export function PricingConfigTable() {
 			),
 		},
 		{
-			accessorKey: "baseFare",
+			accessorKey: "car",
 			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Base Fare" />
+				<DataTableColumnHeader column={column} title="Car" />
 			),
 			cell: ({ row }) => {
-				const baseFare = row.getValue("baseFare") as number;
-				return <div>${baseFare?.toFixed(2) || "0.00"}</div>;
+				const config = row.original;
+				return (
+					<div className="text-sm">
+						{config.car?.name ? (
+							<>
+								<div className="font-medium">{config.car.name}</div>
+								{config.car.licensePlate && (
+									<div className="text-muted-foreground">({config.car.licensePlate})</div>
+								)}
+							</>
+						) : (
+							<div className="text-muted-foreground">Global Config</div>
+						)}
+					</div>
+				);
+			},
+		},
+		{
+			accessorKey: "firstKmRate",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="First KM Rate" />
+			),
+			cell: ({ row }) => {
+				const firstKmRate = row.getValue("firstKmRate") as number;
+				return <div>${firstKmRate?.toFixed(2) || "0.00"}</div>;
+			},
+		},
+		{
+			accessorKey: "firstKmLimit",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="First KM Limit" />
+			),
+			cell: ({ row }) => {
+				const firstKmLimit = row.getValue("firstKmLimit") as number;
+				return <div>{firstKmLimit || 10} km</div>;
 			},
 		},
 		{
 			accessorKey: "pricePerKm",
 			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Per KM" />
+				<DataTableColumnHeader column={column} title="Additional KM Rate" />
 			),
 			cell: ({ row }) => {
 				const pricePerKm = row.getValue("pricePerKm") as number;
 				return <div>${pricePerKm?.toFixed(2) || "0.00"}</div>;
-			},
-		},
-		{
-			accessorKey: "pricePerMinute",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Per Minute" />
-			),
-			cell: ({ row }) => {
-				const pricePerMinute = row.getValue("pricePerMinute") as number;
-				return <div>{pricePerMinute ? `$${pricePerMinute.toFixed(2)}` : "N/A"}</div>;
-			},
-		},
-		{
-			accessorKey: "nightMultiplier",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Night Multiplier" />
-			),
-			cell: ({ row }) => {
-				const nightMultiplier = row.getValue("nightMultiplier") as number;
-				return <div>{nightMultiplier ? `${nightMultiplier}x` : "1.0x"}</div>;
-			},
-		},
-		{
-			accessorKey: "isActive",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Status" />
-			),
-			cell: ({ row }) => {
-				const isActive = row.getValue("isActive") as boolean;
-				return (
-					<Badge variant={isActive ? "default" : "secondary"}>
-						{isActive ? "Active" : "Inactive"}
-					</Badge>
-				);
-			},
-			filterFn: (row, id, value) => {
-				return value.includes(row.getValue(id))
 			},
 		},
 		{
@@ -138,11 +138,11 @@ export function PricingConfigTable() {
 								Edit
 							</DropdownMenuItem>
 							<DropdownMenuItem 
-								onClick={() => toggleActiveMutation.mutate({ id: config.id })}
-								disabled={toggleActiveMutation.isPending}
+								onClick={() => setDeletingConfig(config)}
+								className="text-red-600 focus:text-red-600"
 							>
-								<Power className="mr-2 h-4 w-4" />
-								{config.isActive ? "Deactivate" : "Activate"}
+								<Trash className="mr-2 h-4 w-4" />
+								Delete
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -151,18 +151,9 @@ export function PricingConfigTable() {
 			enableSorting: false,
 			enableHiding: false,
 		},
-	], [toggleActiveMutation.mutate, toggleActiveMutation.isPending, setEditingConfig, setViewingConfig]);
+	], [setEditingConfig, setViewingConfig, setDeletingConfig]);
 
-	const filterConfigs = [
-		{
-			columnId: "isActive",
-			title: "Status",
-			options: [
-				{ label: "Active", value: "true" },
-				{ label: "Inactive", value: "false" },
-			],
-		},
-	];
+	const filterConfigs = [];
 
 	const configs = pricingConfigsQuery.data?.data || [];
 
@@ -199,6 +190,14 @@ export function PricingConfigTable() {
 					config={viewingConfig}
 					open={!!viewingConfig}
 					onOpenChange={(open) => !open && setViewingConfig(null)}
+				/>
+			)}
+
+			{deletingConfig && (
+				<DeletePricingConfigDialog
+					config={deletingConfig}
+					open={!!deletingConfig}
+					onOpenChange={(open) => !open && setDeletingConfig(null)}
 				/>
 			)}
 		</>

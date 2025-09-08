@@ -42,13 +42,13 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 	return (
 		<div {...props} className={cn("flex flex-col gap-4", className)}>
 			<h1 className="text-2xl font-bold">Contact Us</h1>
-			<Form {...form}>
+			<Form {...form as any}>
 				<form
 					className="flex flex-col gap-6"
 					onSubmit={form.handleSubmit(handleSubmit)}>
 					<div className="flex flex-col gap-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="name"
 							render={({ field }) => (
 								<FormItem>
@@ -60,7 +60,7 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 							)}
 						/>
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="email"
 							render={({ field }) => (
 								<FormItem>
@@ -72,7 +72,7 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 							)}
 						/>
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="message"
 							render={({ field }) => (
 								<FormItem>

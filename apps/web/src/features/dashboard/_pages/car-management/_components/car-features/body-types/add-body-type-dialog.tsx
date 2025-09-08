@@ -108,7 +108,7 @@ export function AddBodyTypeDialog() {
 					<DialogTitle>Add New Body Type</DialogTitle>
 					<DialogDescription>Enter the name of the new body type.</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

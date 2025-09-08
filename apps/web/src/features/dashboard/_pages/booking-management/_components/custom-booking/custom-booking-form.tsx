@@ -41,11 +41,11 @@ export function BookingForm({
 	const canCalculateQuote = watchedValues[0] && watchedValues[1]
 
 	return (
-		<Form {...form}>
+		<Form {...form as any}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 				{/* Vehicle Selection */}
 				<FormField
-					control={form.control}
+					control={form.control as any}
 					name="carId"
 					render={({ field }) => (
 						<FormItem>
@@ -74,7 +74,7 @@ export function BookingForm({
 					<h3 className="text-lg font-semibold">Customer Information</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="customerName"
 							render={({ field }) => (
 								<FormItem>
@@ -87,7 +87,7 @@ export function BookingForm({
 							)}
 						/>
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="customerPhone"
 							render={({ field }) => (
 								<FormItem>
@@ -101,7 +101,7 @@ export function BookingForm({
 						/>
 					</div>
 					<FormField
-						control={form.control}
+						control={form.control as any}
 						name="customerEmail"
 						render={({ field }) => (
 							<FormItem>
@@ -120,7 +120,7 @@ export function BookingForm({
 					<h3 className="text-lg font-semibold">Trip Details</h3>
 					<div className="space-y-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="originAddress"
 							render={({ field }) => (
 								<FormItem>
@@ -133,7 +133,7 @@ export function BookingForm({
 							)}
 						/>
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="destinationAddress"
 							render={({ field }) => (
 								<FormItem>
@@ -149,7 +149,7 @@ export function BookingForm({
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="scheduledPickupTime"
 							render={({ field }) => (
 								<FormItem>
@@ -162,7 +162,7 @@ export function BookingForm({
 							)}
 						/>
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="passengerCount"
 							render={({ field }) => (
 								<FormItem>
@@ -204,7 +204,7 @@ export function BookingForm({
 
 				{/* Special Requests */}
 				<FormField
-					control={form.control}
+					control={form.control as any}
 					name="specialRequests"
 					render={({ field }) => (
 						<FormItem>

@@ -70,7 +70,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 		<div className="grid gap-4 sm:gap-8 lg:grid-cols-12">
 			{/* Main Form */}
 			<div className="lg:col-span-8">
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-8">
 						{/* Route Details */}
 						<Card className="border-0 shadow-lg">
@@ -88,7 +88,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 							<CardContent className="pt-4 sm:pt-6">
 								<div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="originAddress"
 										render={({ field }) => (
 											<FormItem>
@@ -108,7 +108,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="destinationAddress"
 										render={({ field }) => (
 											<FormItem>
@@ -146,7 +146,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 							<CardContent className="pt-4 sm:pt-6">
 								<div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="scheduledPickupTime"
 										render={({ field }) => (
 											<FormItem>
@@ -173,7 +173,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 									/>
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="passengerCount"
 										render={({ field }) => (
 											<FormItem>
@@ -217,7 +217,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 							<CardContent className="pt-4 sm:pt-6">
 								<div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="customerName"
 										render={({ field }) => (
 											<FormItem>
@@ -230,7 +230,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 										)}
 									/>
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="customerPhone"
 										render={({ field }) => (
 											<FormItem>
@@ -246,7 +246,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 
 								<div className="mt-4 sm:mt-6">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="customerEmail"
 										render={({ field }) => (
 											<FormItem>
@@ -262,7 +262,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 
 								<div className="mt-4 sm:mt-6">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="specialRequests"
 										render={({ field }) => (
 											<FormItem>

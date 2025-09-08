@@ -130,7 +130,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 						Enter the name of the car brand.
 					</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
 						<ValidatedTextInputField
 							form={form}

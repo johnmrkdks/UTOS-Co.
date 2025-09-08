@@ -183,12 +183,12 @@ export function InstantQuoteWidget() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">
-						<Form {...form}>
+						<Form {...form as any}>
 							<form onSubmit={(e) => e.preventDefault()} className="space-y-4">
 								{/* Trip Details */}
 								<div className="space-y-4">
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="originAddress"
 										render={({ field }) => (
 											<FormItem>
@@ -211,7 +211,7 @@ export function InstantQuoteWidget() {
 									{stopFields.map((field, index) => (
 										<FormField
 											key={field.id}
-											control={form.control}
+											control={form.control as any}
 											name={`stops.${index}.address`}
 											render={({ field: stopField }) => (
 												<FormItem>
@@ -234,7 +234,7 @@ export function InstantQuoteWidget() {
 									))}
 
 									<FormField
-										control={form.control}
+										control={form.control as any}
 										name="destinationAddress"
 										render={({ field }) => (
 											<FormItem>

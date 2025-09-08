@@ -13,6 +13,7 @@ export * from "./cars";
 
 export * from "./bookings/booking-reviews";
 export * from "./bookings/booking-stops";
+export * from "./booking-policies";
 export * from "./bookings";
 
 export * from "./instant-quotes";

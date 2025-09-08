@@ -10,7 +10,7 @@ import type { Row } from "@tanstack/react-table"
 import { EditIcon, EyeIcon, MoreHorizontalIcon, TrashIcon, ToggleLeftIcon, ToggleRightIcon } from "lucide-react"
 import type { Car } from "server/types"
 import { useModal } from "@/hooks/use-modal"
-import { toast } from "sonner"
+import { useUpdateCarMutation } from "../../_hooks/query/car/use-update-car-mutation"
 
 interface CarsTableRowActionsProps {
 	row: Row<Car>
@@ -19,6 +19,7 @@ interface CarsTableRowActionsProps {
 export function CarsTableRowActions({ row }: CarsTableRowActionsProps) {
 	const car = row.original
 	const { openModal } = useModal()
+	const updateCarMutation = useUpdateCarMutation()
 
 	const handleView = () => {
 		openModal("view-car", car)
@@ -28,10 +29,17 @@ export function CarsTableRowActions({ row }: CarsTableRowActionsProps) {
 		openModal("edit-car", car)
 	}
 
-
-	const handleToggleAvailability = () => {
-		// TODO: Implement toggle availability mutation
-		toast.success(`Car ${car.isAvailable ? 'disabled' : 'enabled'} successfully`)
+	const handleToggleAvailability = async () => {
+		try {
+			await updateCarMutation.mutateAsync({
+				id: car.id,
+				data: {
+					isAvailable: !car.isAvailable,
+				},
+			})
+		} catch (error) {
+			console.error("Failed to toggle availability:", error)
+		}
 	}
 
 	const handleDelete = () => {

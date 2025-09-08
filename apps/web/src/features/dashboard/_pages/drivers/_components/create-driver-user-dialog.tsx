@@ -111,10 +111,10 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 						Create a new user account with driver role. The driver will need to verify their email and complete onboarding before becoming active.
 					</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
+				<Form {...form as any}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="name"
 							render={({ field }) => (
 								<FormItem>
@@ -130,7 +130,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 							)}
 						/>
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="email"
 							render={({ field }) => (
 								<FormItem>
@@ -151,7 +151,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 						/>
 						
 						<FormField
-							control={form.control}
+							control={form.control as any}
 							name="useDefaultPassword"
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
@@ -176,7 +176,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 						{!useDefaultPassword && (
 							<>
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="password"
 									render={({ field }) => (
 										<FormItem>
@@ -211,7 +211,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 									)}
 								/>
 								<FormField
-									control={form.control}
+									control={form.control as any}
 									name="confirmPassword"
 									render={({ field }) => (
 										<FormItem>
