@@ -1,4 +1,4 @@
-import { and, like, SQL, type AnyColumn } from "drizzle-orm";
+import { and, like, eq, SQL, type AnyColumn } from "drizzle-orm";
 import type { FilterBuilder } from "./query-builder";
 
 export class DefaultFilterBuilder<T = any> implements FilterBuilder<T> {
@@ -10,7 +10,14 @@ export class DefaultFilterBuilder<T = any> implements FilterBuilder<T> {
 		for (const [key, value] of Object.entries(filters)) {
 			if (value && this.table[key as keyof T]) {
 				const column = this.table[key as keyof T] as AnyColumn;
-				conditions.push(like(column, `%${value}%`));
+				
+				// Use exact match for specific fields that need precise filtering
+				if (key === 'userId' || key === 'id' || key.endsWith('Id')) {
+					conditions.push(eq(column, value));
+				} else {
+					// Use LIKE for text search fields
+					conditions.push(like(column, `%${value}%`));
+				}
 			}
 		}
 
@@ -29,7 +36,14 @@ export class RQBFilterBuilder<T = any> implements FilterBuilder<T> {
 		for (const [key, value] of Object.entries(filters)) {
 			if (value && this.table[key as keyof T]) {
 				const column = this.table[key as keyof T] as AnyColumn;
-				conditions.push(like(column, `%${value}%`));
+				
+				// Use exact match for specific fields that need precise filtering
+				if (key === 'userId' || key === 'id' || key.endsWith('Id')) {
+					conditions.push(eq(column, value));
+				} else {
+					// Use LIKE for text search fields
+					conditions.push(like(column, `%${value}%`));
+				}
 			}
 		}
 

@@ -450,6 +450,7 @@ export const bookingsRouter = router({
 						userId: userId, // Only show bookings for this specific user
 					},
 				});
+				
 				return bookings;
 			} catch (error) {
 				handleTRPCError(error);

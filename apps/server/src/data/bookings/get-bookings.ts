@@ -8,7 +8,8 @@ import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getBookings(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.bookings.findMany({
+		baseQuery: (opts?: any) => db.query.bookings.findMany({
+			...opts,
 			with: {
 				driver: {
 					with: {

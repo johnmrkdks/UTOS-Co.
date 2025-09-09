@@ -10,8 +10,15 @@ import { CarStatusEnum } from "@/types";
 
 export async function getPublishedCars(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.cars.findMany({
-			where: and(
+		baseQuery: (opts?: any) => db.query.cars.findMany({
+			...opts,
+			where: opts?.where ? and(
+				eq(cars.isPublished, true),
+				eq(cars.isActive, true),
+				eq(cars.isAvailable, true),
+				eq(cars.status, CarStatusEnum.Available),
+				opts.where
+			) : and(
 				eq(cars.isPublished, true),
 				eq(cars.isActive, true),
 				eq(cars.isAvailable, true),

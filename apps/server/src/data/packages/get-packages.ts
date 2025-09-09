@@ -8,7 +8,7 @@ import type { Package } from "@/schemas/shared";
 
 export async function getPackages(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.packages.findMany(),
+		baseQuery: (opts?: any) => db.query.packages.findMany(opts),
 		filterBuilder: new RQBFilterBuilder(packages),
 		queryType: "rqb",
 	};

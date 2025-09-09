@@ -9,8 +9,13 @@ import { eq, and } from "drizzle-orm";
 
 export async function getPublishedPackages(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
-		baseQuery: () => db.query.packages.findMany({
-			where: and(
+		baseQuery: (opts?: any) => db.query.packages.findMany({
+			...opts,
+			where: opts?.where ? and(
+				eq(packages.isPublished, true),
+				eq(packages.isAvailable, true),
+				opts.where
+			) : and(
 				eq(packages.isPublished, true),
 				eq(packages.isAvailable, true)
 			)
