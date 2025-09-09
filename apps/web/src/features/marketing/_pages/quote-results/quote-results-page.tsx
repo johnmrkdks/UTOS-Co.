@@ -292,7 +292,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
 						<MapPin className="h-3 w-3" />
 						<span>
-							{(quote.estimatedDistance / 1000).toFixed(1)} km • {Math.round(quote.estimatedDuration / 60)} min journey
+							{((quote.estimatedDistance || 0) / 1000).toFixed(1)} km • {Math.round((quote.estimatedDuration || 0) / 60)} min journey
 						</span>
 					</div>
 
@@ -349,38 +349,40 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 						<CardContent className="p-4">
 							<div className="flex justify-between items-center font-bold text-lg mb-2">
 								<span>Estimated Fare</span>
-								<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
+								<span className="text-primary">${(quote.totalAmount || 0).toFixed(2)}</span>
 							</div>
 
 							{/* Collapsible Cost Breakdown */}
-							<button
-								onClick={() => setShowBreakdown(!showBreakdown)}
-								className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-							>
-								{showBreakdown ? (
-									<ChevronDown className="h-3 w-3" />
-								) : (
-									<ChevronRight className="h-3 w-3" />
-								)}
-								View breakdown
-							</button>
+							{quote.breakdown && (
+								<button
+									onClick={() => setShowBreakdown(!showBreakdown)}
+									className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+								>
+									{showBreakdown ? (
+										<ChevronDown className="h-3 w-3" />
+									) : (
+										<ChevronRight className="h-3 w-3" />
+									)}
+									View breakdown
+								</button>
+							)}
 
-							{showBreakdown && (
+							{showBreakdown && quote.breakdown && (
 								<div className="mt-2 pt-2 border-t space-y-1">
 									<div className="flex justify-between text-xs">
-										<span>First {Math.ceil(quote.breakdown.firstKmDistance)}km (Flat Rate)</span>
-										<span>${quote.firstKmFare.toFixed(2)}</span>
+										<span>First {Math.ceil(quote.breakdown.firstKmDistance || 10)}km (Flat Rate)</span>
+										<span>${(quote.firstKmFare || 0).toFixed(2)}</span>
 									</div>
-									{quote.breakdown.additionalDistance > 0 && (
+									{(quote.breakdown.additionalDistance || 0) > 0 && (
 										<div className="flex justify-between text-xs">
-											<span>Additional {quote.breakdown.additionalDistance.toFixed(1)}km × ${quote.breakdown.additionalKmRate.toFixed(2)}/km</span>
-											<span>${quote.additionalKmFare.toFixed(2)}</span>
+											<span>Additional {(quote.breakdown.additionalDistance || 0).toFixed(1)}km × ${(quote.breakdown.additionalKmRate || 0).toFixed(2)}/km</span>
+											<span>${(quote.additionalKmFare || 0).toFixed(2)}</span>
 										</div>
 									)}
-									{quote.breakdown.additionalDistance === 0 && (
+									{(quote.breakdown.additionalDistance || 0) === 0 && (
 										<div className="bg-blue-50 p-2 rounded-md mt-2">
 											<p className="text-xs text-blue-800">
-												<strong>Within flat rate limit:</strong> No additional charges since your {(quote.estimatedDistance / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance)}km tier.
+												<strong>Within flat rate limit:</strong> No additional charges since your {((quote.estimatedDistance || 0) / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance || 10)}km tier.
 											</p>
 										</div>
 									)}

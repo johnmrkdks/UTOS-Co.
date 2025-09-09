@@ -40,13 +40,10 @@ export const CarFormSchema = z.object({
 	categoryId: z.string().min(1, "Category is required"),
 	// Vehicle specifications
 	color: z.string().min(1, "Color is required"),
-	engineSize: z.coerce.number().min(1, "Engine size must be greater than 0"),
 	doors: z.coerce.number().min(2).max(8, "Doors must be between 2 and 8"),
-	cylinders: z.coerce.number().min(1, "Cylinders must be greater than 0"),
-	mileage: z.coerce.number().min(0, "Mileage must be 0 or greater"),
 	// Passenger capacity
 	seatingCapacity: z.coerce.number().min(1, "Seating capacity must be at least 1"),
-	luggageCapacity: z.string().optional(),
+	luggageCapacity: z.coerce.number().min(1, "Luggage capacity must be at least 1").optional(),
 	// Service availability
 	availableForPackages: z.boolean(),
 	availableForCustom: z.boolean(),

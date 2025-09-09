@@ -3,14 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Calendar } from "@workspace/ui/components/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useUserQuery } from "@/hooks/query/use-user-query";
@@ -99,12 +98,6 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 		}
 	};
 
-	// Time slots for booking
-	const timeSlots = [
-		"08:00", "09:00", "10:00", "11:00",
-		"12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
-		"18:00", "19:00", "20:00", "21:00", "22:00"
-	];
 
 	// Show confirmation screen after successful booking
 	if (step === "confirmation" && confirmedBooking) {
@@ -370,62 +363,21 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 											/>
 										</div>
 
-										<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Service Date *</label>
-												<Popover>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															className={cn(
-																"w-full h-12 justify-start text-left text-base",
-																!date && "text-muted-foreground"
-															)}
-														>
-															<CalendarIcon className="mr-3 h-5 w-5" />
-															{date ? format(date, "PPP") : "Pick a date"}
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-auto p-0" align="start">
-														<Calendar
-															mode="single"
-															selected={date}
-															onSelect={(selectedDate) => {
-																setDate(selectedDate);
-																form.setValue("bookingDate", selectedDate!);
-															}}
-															disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
-															initialFocus
-														/>
-													</PopoverContent>
-												</Popover>
-												{form.formState.errors.bookingDate && (
-													<p className="text-sm text-red-600 mt-2 font-medium">
-														{form.formState.errors.bookingDate.message}
-													</p>
-												)}
-											</div>
-
-											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Pickup Time *</label>
-												<select
-													{...form.register("bookingTime")}
-													className="w-full h-12 px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-												>
-													<option value="">Select time</option>
-													{timeSlots.map((time) => (
-														<option key={time} value={time}>
-															{time}
-														</option>
-													))}
-												</select>
-												{form.formState.errors.bookingTime && (
-													<p className="text-sm text-red-600 mt-2 font-medium">
-														{form.formState.errors.bookingTime.message}
-													</p>
-												)}
-											</div>
-										</div>
+										<DateTimePicker
+											selectedDate={date}
+											selectedTime={form.watch("bookingTime") || ""}
+											onDateChange={(selectedDate) => {
+												setDate(selectedDate);
+												if (selectedDate) {
+													form.setValue("bookingDate", selectedDate);
+												}
+											}}
+											onTimeChange={(time) => form.setValue("bookingTime", time)}
+											dateError={form.formState.errors.bookingDate?.message}
+											timeError={form.formState.errors.bookingTime?.message}
+											dateLabel="Service Date *"
+											timeLabel="Pickup Time *"
+										/>
 
 										<div>
 											<label className="block text-sm font-semibold text-gray-800 mb-3">

@@ -45,13 +45,9 @@ const DEFAULT_VALUES: Partial<AddCarFormValues> = {
 	description: "",
 	licensePlate: "",
 	vinNumber: "",
-	mileage: 0,
 	color: "",
-	engineSize: 0,
 	doors: 4,
-	cylinders: 4,
 	seatingCapacity: 4,
-	luggageCapacity: "",
 	availableForPackages: true,
 	availableForCustom: true,
 	isActive: true,
@@ -208,7 +204,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		form,
 		draftStore,
 		initialData,
-		onDiscardSuccess: () => navigate({ to: "/dashboard/car-management" }),
+		onDiscardSuccess: () => navigate({ to: "/admin/dashboard/cars" }),
 	})
 
 	const handleSubmit = useCallback(
@@ -223,7 +219,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 					toast.success("Car has been added successfully!")
 					draftStore.clearDraft()
 					form.reset()
-					navigate({ to: "/dashboard/cars" })
+					navigate({ to: "/admin/dashboard/cars" })
 				},
 				onError: (error) => {
 					console.error("Form submission error:", error)

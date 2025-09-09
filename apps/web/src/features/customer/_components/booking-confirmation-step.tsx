@@ -172,19 +172,13 @@ export function BookingConfirmationStep({
 					</h3>
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm">
-							<span>Base fare</span>
-							<span>${(quote.baseFare / 100).toFixed(2)}</span>
+							<span>First {quote.breakdown?.firstKmDistance || 10}km</span>
+							<span>${(quote.firstKmFare / 100).toFixed(2)}</span>
 						</div>
 						<div className="flex justify-between text-sm">
-							<span>Distance fare</span>
-							<span>${(quote.distanceFare / 100).toFixed(2)}</span>
+							<span>Additional distance</span>
+							<span>${(quote.additionalKmFare / 100).toFixed(2)}</span>
 						</div>
-						{quote.extraCharges > 0 && (
-							<div className="flex justify-between text-sm">
-								<span>Extra charges</span>
-								<span>${(quote.extraCharges / 100).toFixed(2)}</span>
-							</div>
-						)}
 						<Separator />
 						<div className="flex justify-between font-bold">
 							<span>Total Amount</span>

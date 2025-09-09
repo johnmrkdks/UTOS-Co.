@@ -18,11 +18,13 @@ import {
 import { useGetDriversQuery } from "../_hooks/query/use-get-drivers-query";
 import { useUpdateDriverMutation } from "../_hooks/query/use-update-driver-mutation";
 import { useDeleteDriverMutation } from "../_hooks/query/use-delete-driver-mutation";
+import { useRemoveUserMutation } from "../_hooks/query/use-remove-user-mutation";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useState } from "react";
 import { EditDriverDialog } from "./edit-driver-dialog";
 import { ViewDriverDialog } from "./view-driver-dialog";
 import { DeleteDriverConfirmationDialog } from "./delete-driver-confirmation-dialog";
+import { RemoveUserConfirmationDialog } from "./remove-user-confirmation-dialog";
 import { DriverActionConfirmationDialog } from "./driver-action-confirmation-dialog";
 import { DriverDocumentVerificationDialog } from "./driver-document-verification-dialog";
 
@@ -34,12 +36,14 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 	const [editingDriver, setEditingDriver] = useState<any>(null);
 	const [viewingDriver, setViewingDriver] = useState<any>(null);
 	const [deletingDriver, setDeletingDriver] = useState<any>(null);
+	const [removingUserDriver, setRemovingUserDriver] = useState<any>(null);
 	const [verifyingDriver, setVerifyingDriver] = useState<any>(null);
 	const [actionDriver, setActionDriver] = useState<{ driver: any; action: "approve" | "reject" | "activate" | "deactivate" } | null>(null);
 	
 	const driversQuery = useGetDriversQuery({});
 	const updateDriverMutation = useUpdateDriverMutation();
 	const deleteDriverMutation = useDeleteDriverMutation();
+	const removeUserMutation = useRemoveUserMutation();
 
 	const handleDriverAction = async (driverId: string, notes?: string) => {
 		if (!actionDriver) return;
@@ -86,6 +90,14 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 			await deleteDriverMutation.mutateAsync({ id: driverId });
 		} catch (error) {
 			console.error("Failed to delete driver:", error);
+		}
+	};
+
+	const handleRemoveUser = async (userId: string) => {
+		try {
+			await removeUserMutation.mutateAsync(userId);
+		} catch (error) {
+			console.error("Failed to remove user:", error);
 		}
 	};
 
@@ -265,7 +277,14 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 											className="text-red-600"
 										>
 											<Trash2 className="mr-2 h-4 w-4" />
-											Delete Account
+											Delete Driver Only
+										</DropdownMenuItem>
+										<DropdownMenuItem 
+											onClick={() => setRemovingUserDriver(driver)}
+											className="text-red-600"
+										>
+											<Trash2 className="mr-2 h-4 w-4" />
+											Remove User Account (Recommended)
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>
@@ -297,6 +316,14 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 				onOpenChange={(open) => !open && setDeletingDriver(null)}
 				onConfirm={handleDelete}
 				isDeleting={deleteDriverMutation.isPending}
+			/>
+
+			<RemoveUserConfirmationDialog
+				driver={removingUserDriver}
+				open={!!removingUserDriver}
+				onOpenChange={(open) => !open && setRemovingUserDriver(null)}
+				onConfirm={handleRemoveUser}
+				isRemoving={removeUserMutation.isPending}
 			/>
 
 			{actionDriver && (

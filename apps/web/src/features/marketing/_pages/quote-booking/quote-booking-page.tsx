@@ -6,11 +6,12 @@ import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
-import { 
-	ArrowLeft, 
-	Clock, 
-	Users, 
-	MapPin, 
+import { DateTimePicker } from "@/components/date-time-picker";
+import {
+	ArrowLeft,
+	Clock,
+	Users,
+	MapPin,
 	Calendar,
 	Phone,
 	Mail,
@@ -27,9 +28,9 @@ import { toast } from "sonner";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { queryClient } from "@/trpc";
-import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
 import { useCreateCustomBookingFromQuoteMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
+import { useGetCarQuery } from "@/features/customer/_hooks/query/use-get-car-query";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 
@@ -54,32 +55,37 @@ interface QuoteBookingPageProps {
 export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteBookingPageProps) {
 	const search = useSearch({ strict: false }) as any;
 	const navigate = useNavigate();
-	
+
 	// Use user query for authenticated users only
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
-	
-	// Fetch available cars
-	const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAvailableCarsQuery();
-	
+
+
 	// Get quote ID from either path parameter (customer routes) or search parameter (public routes)
 	const quoteId = pathQuoteId || search?.quoteId || "";
-	
+
 	// Fetch secure quote if quoteId is provided
 	const { data: secureQuoteData, isLoading: secureQuoteLoading, error: secureQuoteError } = useGetSecureQuoteQuery(
 		quoteId,
 		{ enabled: !!quoteId }
 	);
-	
+
 	// Mutation for creating booking from quote
 	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
 	
+	// Get car details if carId is available in quote data
+	const carId = (secureQuoteData?.carId) || (search?.carId) || "";
+	const { data: carData, isLoading: carLoading } = useGetCarQuery(
+		{ id: carId },
+		{ enabled: !!carId }
+	);
+
 	// Form state - pre-populate for authenticated users
 	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({
 		passengerCount: 1,
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
-	const [selectedCarId, setSelectedCarId] = useState<string>("");
+	const [date, setDate] = useState<Date>();
 
 	// Pre-populate form data for authenticated users
 	useEffect(() => {
@@ -110,16 +116,6 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	};
 
 
-	// Pre-select car from quote data
-	useEffect(() => {
-		if (quoteData.carId && carsData?.data && !selectedCarId) {
-			const carExists = carsData.data.find(car => car.id === quoteData.carId);
-			if (carExists) {
-				console.log("🚗 Pre-selecting car from quote:", quoteData.carId);
-				setSelectedCarId(quoteData.carId);
-			}
-		}
-	}, [quoteData.carId, carsData?.data, selectedCarId]);
 
 	console.log("🔍 QUOTE BOOKING DEBUG:");
 	console.log("Path Quote ID:", pathQuoteId);
@@ -131,8 +127,6 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	console.log("Secure quote loading:", secureQuoteLoading);
 	console.log("Quote data:", quoteData);
 	console.log("Session data:", sessionData);
-	console.log("Cars data:", carsData);
-	console.log("Selected car ID:", selectedCarId);
 
 
 	const updateFormData = (field: keyof QuoteBookingFormData, value: any) => {
@@ -146,7 +140,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	const validateForm = () => {
 		try {
 			console.log("🔍 Validating quote booking form data:", formData);
-			
+
 			// Ensure all fields have default values to avoid undefined errors
 			const cleanedFormData = {
 				scheduledPickupDate: formData.scheduledPickupDate || "",
@@ -157,7 +151,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				passengerCount: formData.passengerCount || 1,
 				specialRequests: formData.specialRequests || "",
 			};
-			
+
 			QuoteBookingFormSchema.parse(cleanedFormData);
 			console.log("✅ Quote booking form validation passed");
 			setFormErrors({});
@@ -180,16 +174,14 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 	const handleSubmit = async () => {
 		console.log("🚀 Starting quote-based booking submission...");
-		
+
 		if (!validateForm()) {
 			toast.error("Please fill in all required fields");
 			return;
 		}
 
-		if (!selectedCarId) {
-			toast.error("Please select a vehicle");
-			return;
-		}
+		// Car is already selected from the quote, use the pre-selected car
+		const preselectedCarId = quoteData.carId;
 
 		// Only authenticated users can book - require session
 		if (!sessionData?.user) {
@@ -215,18 +207,18 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		try {
 			// Create proper Date object from date and time inputs
 			const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}:00.000Z`);
-			
+
 			// Validate that the date is valid
 			if (isNaN(scheduledPickupTime.getTime())) {
 				toast.error("Invalid pickup date or time");
 				return;
 			}
-			
+
 			// Use simplified pricing from secure quote data if available
 			const firstKmFareAmount = secureQuoteData?.firstKmFare || quoteData.totalFare * 0.7;
 			const additionalKmFareAmount = secureQuoteData?.additionalKmFare || quoteData.totalFare * 0.3;
 			const quotedAmount = Math.round(quoteData.totalFare * 100); // Convert to cents
-			
+
 			const bookingPayload = {
 				userId: effectiveUserInfo.id,
 				originAddress: quoteData.origin,
@@ -245,14 +237,14 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				customerEmail: formData.customerEmail!,
 				passengerCount: formData.passengerCount!,
 				specialRequests: formData.specialRequests,
-				preferredCategoryId: carsData?.data?.find(car => car.id === selectedCarId)?.category?.id,
+				preferredCategoryId: preselectedCarId,
 			};
 
 			console.log("📦 Quote booking payload:", bookingPayload);
 
 			// Use the mutation hook to create booking
 			const result = await createBookingMutation.mutateAsync(bookingPayload);
-			
+
 			console.log("✅ Quote booking successful:", result);
 			setStep("confirmation");
 		} catch (error) {
@@ -284,43 +276,67 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 							<CardContent className="p-8">
 								<div className="space-y-4">
 									<div>
-										<h2 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Booking</h2>
+										<h2 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Chauffeur Booking</h2>
 										<p className="text-gray-600">
 											Please sign in to your account to complete your booking. This helps us provide better service and manage your reservations.
 										</p>
 									</div>
-									
+
 									{/* Selected Car */}
-									{quoteData.carId && carsData?.data && (() => {
-										const selectedCar = carsData.data.find(car => car.id === quoteData.carId);
-										return selectedCar ? (
-											<div className="bg-white rounded-lg p-4 border text-left">
-												<h3 className="font-medium text-gray-900 mb-3 text-center">Selected Vehicle</h3>
-												<div className="flex items-center gap-3">
-													{selectedCar.images && selectedCar.images.length > 0 && (
-														<img
-															src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
-															alt={selectedCar.name}
-															className="w-16 h-12 object-cover rounded border"
-														/>
+									{carId && (
+										<div className="bg-white rounded-lg p-4 border text-left">
+											<h3 className="font-medium text-gray-900 mb-3 text-center">Pre-selected Vehicle</h3>
+											<div className="flex items-center gap-3">
+												<div className="w-16 h-12 bg-primary/10 rounded border flex items-center justify-center">
+													<Car className="w-6 h-6 text-primary/60" />
+												</div>
+												<div className="flex-1 min-w-0">
+													{carLoading ? (
+														<>
+															<div className="font-medium text-sm text-gray-900">
+																Loading vehicle details...
+															</div>
+															<div className="text-xs text-muted-foreground mt-1">
+																Please wait
+															</div>
+														</>
+													) : carData ? (
+														<>
+															<div className="font-medium text-sm text-gray-900">
+																{carData.name}
+															</div>
+															<div className="text-xs text-muted-foreground mt-1">
+																{carData.brandName ? `${carData.brandName}` : ''}{carData.modelName ? ` ${carData.modelName}` : ''} • {carData.categoryName}
+															</div>
+															{carData.features && carData.features.length > 0 && (
+																<div className="flex flex-wrap gap-1 mt-2">
+																	{carData.features.slice(0, 3).map((feature: any) => (
+																		<Badge key={feature.id} variant="secondary" className="text-xs px-2 py-0.5">
+																			{feature.name}
+																		</Badge>
+																	))}
+																	{carData.features.length > 3 && (
+																		<Badge variant="secondary" className="text-xs px-2 py-0.5">
+																			+{carData.features.length - 3} more
+																		</Badge>
+																	)}
+																</div>
+															)}
+														</>
+													) : (
+														<>
+															<div className="font-medium text-sm text-gray-900">
+																Vehicle from your quote
+															</div>
+															<div className="text-xs text-muted-foreground mt-1">
+																Confirmed for booking
+															</div>
+														</>
 													)}
-													<div className="flex-1 min-w-0">
-														<div className="font-medium text-sm text-gray-900">
-															{selectedCar.name}
-														</div>
-														<div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-															<span className="flex items-center gap-1">
-																<Users className="h-3 w-3" />
-																{selectedCar.seatingCapacity} seats
-															</span>
-															<span>{selectedCar.category?.name}</span>
-															<span>{selectedCar.fuelType?.name}</span>
-														</div>
-													</div>
 												</div>
 											</div>
-										) : null;
-									})()}
+										</div>
+									)}
 
 									{/* Quote Summary with Fare Breakdown */}
 									{(secureQuoteData || quoteData.origin) && (
@@ -343,7 +359,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 													<span className="text-gray-600">Duration:</span>
 													<span className="font-medium">{quoteData.duration} min</span>
 												</div>
-												
+
 												{/* Fare Breakdown */}
 												{(secureQuoteData?.firstKmFare || secureQuoteData?.additionalKmFare) && (
 													<>
@@ -372,7 +388,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 														</div>
 													</>
 												)}
-												
+
 												<div className="flex justify-between border-t pt-2 text-base">
 													<span className="font-medium text-gray-900">Total Fare:</span>
 													<span className="font-bold text-primary">${quoteData.totalFare.toFixed(2)}</span>
@@ -380,10 +396,10 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 											</div>
 										</div>
 									)}
-									
+
 									<div className="space-y-3">
-										<Button 
-											className="w-full h-12 text-base font-semibold" 
+										<Button
+											className="w-full h-12 text-base font-semibold"
 											onClick={() => {
 												// Preserve the current URL for redirect after sign-in
 												const currentPath = window.location.pathname + window.location.search;
@@ -396,9 +412,9 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 											<LogIn className="mr-2 h-5 w-5" />
 											Sign In to Continue
 										</Button>
-										
-										<Button 
-											variant="outline" 
+
+										<Button
+											variant="outline"
 											className="w-full"
 											onClick={() => {
 												const currentPath = window.location.pathname + window.location.search;
@@ -410,9 +426,9 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										>
 											Create New Account
 										</Button>
-										
-										<Button 
-											variant="ghost" 
+
+										<Button
+											variant="ghost"
 											className="w-full text-sm"
 											onClick={() => navigate({ to: "/" })}
 										>
@@ -422,7 +438,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								</div>
 							</CardContent>
 						</Card>
-						
+
 						{/* Benefits of Creating Account */}
 						<Card>
 							<CardContent className="p-6">
@@ -494,11 +510,11 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<h4 className="font-medium">Custom Journey</h4>
+							<h4 className="font-medium">Chauffeur Journey</h4>
 							<p className="text-sm text-gray-600">Based on your instant quote</p>
 						</div>
 						<Separator />
-						
+
 						{/* Enhanced Route Display for Confirmation */}
 						<div className="p-3 bg-gradient-to-r from-green-50 to-red-50 rounded-lg border border-gray-200">
 							{/* Mobile - Vertical Stack */}
@@ -514,7 +530,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										<div className="font-medium text-sm leading-tight break-words">{quoteData.origin}</div>
 									</div>
 								</div>
-								
+
 								{/* Destination */}
 								<div className="flex items-start gap-3">
 									<div className="relative mt-0.5">
@@ -526,7 +542,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 									</div>
 								</div>
 							</div>
-							
+
 							{/* Desktop - Horizontal Layout */}
 							<div className="hidden sm:flex items-center justify-between gap-4">
 								{/* Origin */}
@@ -537,13 +553,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										<div className="font-medium text-sm truncate">{quoteData.origin}</div>
 									</div>
 								</div>
-								
+
 								{/* Route Connector */}
 								<div className="flex items-center gap-1 flex-shrink-0">
 									<div className="w-4 h-px bg-gradient-to-r from-green-500 to-red-500"></div>
 									<div className="w-1.5 h-1.5 border-t border-r border-red-500 transform rotate-45"></div>
 								</div>
-								
+
 								{/* Destination */}
 								<div className="flex items-center gap-2 flex-1 min-w-0">
 									<div className="w-3 h-3 rounded-full bg-red-500 border border-white shadow-sm flex-shrink-0" />
@@ -554,7 +570,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								</div>
 							</div>
 						</div>
-						
+
 						<div className="grid grid-cols-2 gap-4 text-sm">
 							<div>
 								<span className="text-gray-600">Date & Time:</span>
@@ -611,345 +627,343 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	}
 
 	return (
-		<div className="max-w-4xl mx-auto space-y-6">
-			{/* Header */}
-			<div className="flex items-center gap-4">
-				<Button variant="outline" size="icon" asChild>
-					<Link to="/">
-						<ArrowLeft className="h-4 w-4" />
-					</Link>
-				</Button>
-				<div>
-					<h1 className="text-3xl font-bold text-gray-900">Complete Your Booking</h1>
-					<p className="text-gray-600">
-						Based on your instant quote
-						{!sessionData?.user && <span className="text-blue-600"> (Anonymous booking)</span>}
-					</p>
-				</div>
-			</div>
-
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Quote Details Sidebar */}
-				<div className="lg:col-span-1">
-					<Card className="sticky top-6">
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Calculator className="h-5 w-5" />
-								Your Quote
-							</CardTitle>
-							<CardDescription>Instant quote details</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{/* Enhanced Route Details */}
-							<div className="relative p-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
-								<div className="space-y-3">
-									{/* Origin */}
-									<div className="flex items-center gap-3 text-sm">
-										<div className="relative">
-											<div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-sm flex-shrink-0" />
-										</div>
-										<div className="flex-1 min-w-0">
-											<div className="font-medium text-gray-900">From</div>
-											<div className="text-gray-600 truncate">{quoteData.origin}</div>
-										</div>
-									</div>
-
-									{/* Route Connection Line */}
-									<div className="ml-2 flex items-center gap-2">
-										<div className="w-px h-4 bg-gradient-to-b from-green-500 to-red-500" />
-										<div className="flex-1 h-px bg-gradient-to-r from-green-500/30 to-red-500/30" />
-										<div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-									</div>
-
-									{/* Destination */}
-									<div className="flex items-center gap-3 text-sm">
-										<div className="relative">
-											<div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-sm flex-shrink-0" />
-										</div>
-										<div className="flex-1 min-w-0">
-											<div className="font-medium text-gray-900">To</div>
-											<div className="text-gray-600 truncate">{quoteData.destination}</div>
-										</div>
-									</div>
-								</div>
-								
-								{/* Route Status Indicator */}
-								<div className="absolute top-1 right-1">
-									<div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-								</div>
-							</div>
-
-							<Separator />
-
-							{/* Journey Stats */}
-							<div className="space-y-2 text-sm">
-								<div className="flex justify-between">
-									<span className="text-gray-600">Distance:</span>
-									<span className="font-medium">{quoteData.distance.toFixed(1)} km</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-gray-600">Duration:</span>
-									<span className="font-medium">{quoteData.duration} min</span>
-								</div>
-							</div>
-
-							<Separator />
-
-							{/* Estimated Fare */}
-							<div className="text-center p-3 bg-primary/10 rounded-lg">
-								<div className="text-sm text-gray-600 mb-1">Estimated Fare</div>
-								<div className="text-2xl font-bold text-primary">${quoteData.totalFare.toFixed(2)}</div>
-								<div className="text-xs text-gray-500">*Price based on instant quote</div>
-							</div>
-						</CardContent>
-					</Card>
+		<div className="min-h-screen bg-gray-50">
+			<div className="max-w-6xl mx-auto px-4 py-8">
+				{/* Header */}
+				<div className="flex items-center gap-4 mb-8">
+					<Button variant="outline" size="icon" asChild>
+						<Link to="/">
+							<ArrowLeft className="h-4 w-4" />
+						</Link>
+					</Button>
+					<div>
+						<h1 className="text-3xl font-bold text-gray-900">Complete Your Chauffeur Booking</h1>
+						<p className="text-gray-600">Based on your instant quote</p>
+					</div>
 				</div>
 
-				{/* Booking Form */}
-				<div className="lg:col-span-2 space-y-6">
-					{/* Vehicle Selection */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Car className="h-5 w-5" />
-								Select Vehicle
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{carsLoading ? (
-								<div className="text-center py-8">
-									<Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-									<p className="text-gray-600">Loading available vehicles...</p>
+				<div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+					{/* Quote Information Panel - Left Side */}
+					<div className="xl:col-span-2">
+						<div className="sticky top-8">
+							<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+								{/* Quote Header */}
+								<div className="h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center relative">
+									<div className="text-center">
+										<div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+											<Calculator className="w-10 h-10 text-primary/60" />
+										</div>
+										<h2 className="text-2xl font-bold text-gray-800 mb-2">Your Quote</h2>
+										<p className="text-gray-600 text-sm px-4">
+											Instant quote for your custom journey
+										</p>
+									</div>
 								</div>
-							) : carsError || !carsData?.data?.length ? (
-								<div className="text-center py-8">
-									<AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-									<p className="text-gray-600">No vehicles currently available</p>
+
+								<div className="p-8">
+									{/* Price Display */}
+									<div className="text-center mb-8">
+										<div className="inline-flex items-baseline gap-2 bg-primary/10 px-6 py-4 rounded-xl border border-primary/20">
+											<span className="text-4xl font-black text-primary">
+												${quoteData.totalFare.toFixed(2)}
+											</span>
+											<span className="text-primary/80 text-sm font-medium">estimated fare</span>
+										</div>
+										<div className="mt-3">
+											<span className="inline-block bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full">
+												*Price based on instant quote
+											</span>
+										</div>
+									</div>
+
+									{/* Trip Details */}
+									<div className="space-y-4">
+										<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+											<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center">
+												<MapPin className="w-3 h-3 text-primary" />
+											</div>
+											Trip Details
+										</h3>
+
+										<div className="space-y-3">
+											<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+												<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+												<div className="flex-1 min-w-0">
+													<span className="text-xs text-gray-500">From</span>
+													<div className="text-sm font-medium text-gray-700 truncate">{quoteData.origin}</div>
+												</div>
+											</div>
+											<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+												<div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+												<div className="flex-1 min-w-0">
+													<span className="text-xs text-gray-500">To</span>
+													<div className="text-sm font-medium text-gray-700 truncate">{quoteData.destination}</div>
+												</div>
+											</div>
+											<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+												<div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+												<span className="text-sm text-gray-700 font-medium">{quoteData.distance.toFixed(1)} km • {quoteData.duration} min</span>
+											</div>
+										</div>
+									</div>
+
+									{/* Pre-selected Vehicle */}
+									{quoteData.carId && (
+										<div className="mt-6">
+											<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+												<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center">
+													<Car className="w-3 h-3 text-primary" />
+												</div>
+												Pre-selected Vehicle
+											</h3>
+											<div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+												<div className="flex items-center gap-3">
+													<div className="w-16 h-12 bg-primary/10 rounded border flex items-center justify-center">
+														<Car className="w-6 h-6 text-primary/60" />
+													</div>
+													<div className="flex-1 min-w-0">
+														<div className="font-medium text-sm text-gray-900">
+															Vehicle from your quote
+														</div>
+														<div className="text-xs text-muted-foreground mt-1">
+															Confirmed for booking
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									)}
+
+									{/* Fare Breakdown */}
+									{secureQuoteData && (secureQuoteData.firstKmFare || secureQuoteData.additionalKmFare) && (
+										<div className="mt-6">
+											<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+												<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center">
+													<Calculator className="w-3 h-3 text-primary" />
+												</div>
+												Fare Breakdown
+											</h3>
+											<div className="space-y-2">
+												{secureQuoteData.firstKmFare && (
+													<div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+														<span className="text-sm text-gray-600">First {secureQuoteData.breakdown?.firstKmDistance || 10}km</span>
+														<span className="text-sm font-medium">${secureQuoteData.firstKmFare.toFixed(2)}</span>
+													</div>
+												)}
+												{secureQuoteData.additionalKmFare && secureQuoteData.additionalKmFare > 0 && (
+													<div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+														<span className="text-sm text-gray-600">Additional {secureQuoteData.breakdown?.additionalDistance?.toFixed(1) || 0}km</span>
+														<span className="text-sm font-medium">${secureQuoteData.additionalKmFare.toFixed(2)}</span>
+													</div>
+												)}
+											</div>
+										</div>
+									)}
 								</div>
-							) : (
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									{carsData.data.map((car) => (
-										<div 
-											key={car.id}
-											className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-												selectedCarId === car.id 
-													? "border-primary bg-primary/5" 
-													: "border-gray-200 hover:border-gray-300"
-											}`}
-											onClick={() => setSelectedCarId(car.id)}
-										>
-											{car.images && car.images.length > 0 && (
-												<img 
-													src={typeof car.images[0] === 'string' ? car.images[0] : car.images[0].url} 
-													alt={`${car.model?.brand?.name || ''} ${car.model?.name || ''}`}
-													className="w-full h-32 object-cover rounded-lg mb-3"
-												/>
+							</div>
+						</div>
+					</div>
+
+					{/* Booking Form Panel - Right Side */}
+					<div className="xl:col-span-3">
+						<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+							<div className="bg-primary p-8">
+								<h1 className="text-3xl font-bold text-white mb-2">Book Your Chauffeur</h1>
+								<p className="text-primary-foreground/90">Complete your chauffeur booking in just a few steps</p>
+							</div>
+
+							<div className="p-8 space-y-8">
+								{/* Contact Information Section */}
+								<div className="space-y-6">
+									<div className="flex items-center gap-4">
+										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+											<span className="text-white text-lg font-bold">1</span>
+										</div>
+										<div>
+											<h3 className="text-xl font-bold text-gray-900">Contact Information</h3>
+											<p className="text-gray-500 text-sm">We'll use this to reach you about your booking</p>
+										</div>
+									</div>
+
+									<div className="space-y-5 pl-14">
+										<div>
+											<label className="block text-sm font-semibold text-gray-800 mb-3">Full Name *</label>
+											<Input
+												placeholder="Enter your full name"
+												value={formData.customerName || ""}
+												onChange={(e) => updateFormData("customerName", e.target.value)}
+												className={`h-12 text-base ${formErrors.customerName ? "border-red-500" : ""}`}
+											/>
+											{formErrors.customerName && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.customerName}</p>
 											)}
-											<h4 className="font-medium">
-												{car.model?.brand?.name || 'Unknown'} {car.model?.name || 'Model'}
-											</h4>
-											<p className="text-sm text-gray-600">{car.category?.name || 'Standard'}</p>
-											<div className="flex items-center gap-2 mt-2">
-												<Users className="h-4 w-4 text-gray-400" />
-												<span className="text-sm">{car.seatingCapacity} seats</span>
+										</div>
+
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+											<div>
+												<label className="block text-sm font-semibold text-gray-800 mb-3">Email Address *</label>
+												<Input
+													type="email"
+													placeholder="Enter your email"
+													value={formData.customerEmail || ""}
+													onChange={(e) => updateFormData("customerEmail", e.target.value)}
+													className={`h-12 text-base ${formErrors.customerEmail ? "border-red-500" : ""}`}
+												/>
+												{formErrors.customerEmail && (
+													<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
+												)}
+											</div>
+
+											<div>
+												<label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number *</label>
+												<Input
+													type="tel"
+													placeholder="Enter your phone number"
+													value={formData.customerPhone || ""}
+													onChange={(e) => updateFormData("customerPhone", e.target.value)}
+													className={`h-12 text-base ${formErrors.customerPhone ? "border-red-500" : ""}`}
+												/>
+												{formErrors.customerPhone && (
+													<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
+												)}
 											</div>
 										</div>
-									))}
-								</div>
-							)}
-						</CardContent>
-					</Card>
-
-					{/* Date & Time */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Calendar className="h-5 w-5" />
-								Date & Time
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<Label htmlFor="scheduledPickupDate">Pickup Date</Label>
-									<Input
-										id="scheduledPickupDate"
-										type="date"
-										value={formData.scheduledPickupDate || ""}
-										onChange={(e) => updateFormData("scheduledPickupDate", e.target.value)}
-										min={new Date().toISOString().split('T')[0]}
-										className={formErrors.scheduledPickupDate ? "border-red-500" : ""}
-									/>
-									{formErrors.scheduledPickupDate && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.scheduledPickupDate}</p>
-									)}
-								</div>
-								<div>
-									<Label htmlFor="scheduledPickupTime">Pickup Time</Label>
-									<Input
-										id="scheduledPickupTime"
-										type="time"
-										value={formData.scheduledPickupTime || ""}
-										onChange={(e) => updateFormData("scheduledPickupTime", e.target.value)}
-										className={formErrors.scheduledPickupTime ? "border-red-500" : ""}
-									/>
-									{formErrors.scheduledPickupTime && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.scheduledPickupTime}</p>
-									)}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Passenger Information */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Users className="h-5 w-5" />
-								Passenger Information
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<Label htmlFor="customerName">Full Name</Label>
-									<Input
-										id="customerName"
-										placeholder="Enter your full name"
-										value={formData.customerName || ""}
-										onChange={(e) => updateFormData("customerName", e.target.value)}
-										className={formErrors.customerName ? "border-red-500" : ""}
-									/>
-									{formErrors.customerName && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.customerName}</p>
-									)}
-								</div>
-								<div>
-									<Label htmlFor="passengerCount">Number of Passengers</Label>
-									<Input
-										id="passengerCount"
-										type="number"
-										min="1"
-										max="8"
-										value={formData.passengerCount || 1}
-										onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
-										className={formErrors.passengerCount ? "border-red-500" : ""}
-									/>
-									{formErrors.passengerCount && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
-									)}
-								</div>
-							</div>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<Label htmlFor="customerPhone">Phone Number</Label>
-									<Input
-										id="customerPhone"
-										type="tel"
-										placeholder="Enter your phone number"
-										value={formData.customerPhone || ""}
-										onChange={(e) => updateFormData("customerPhone", e.target.value)}
-										className={formErrors.customerPhone ? "border-red-500" : ""}
-									/>
-									{formErrors.customerPhone && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
-									)}
-								</div>
-								<div>
-									<Label htmlFor="customerEmail">Email Address</Label>
-									<Input
-										id="customerEmail"
-										type="email"
-										placeholder="Enter your email"
-										value={formData.customerEmail || ""}
-										onChange={(e) => updateFormData("customerEmail", e.target.value)}
-										className={formErrors.customerEmail ? "border-red-500" : ""}
-									/>
-									{formErrors.customerEmail && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
-									)}
-								</div>
-							</div>
-							<div>
-								<Label htmlFor="specialRequests">Special Requests (Optional)</Label>
-								<Textarea
-									id="specialRequests"
-									placeholder="Any special requirements or requests..."
-									value={formData.specialRequests || ""}
-									onChange={(e) => updateFormData("specialRequests", e.target.value)}
-									rows={3}
-								/>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Confirm Booking Button */}
-					<Card>
-						<CardContent className="p-6">
-							<div className="flex items-center justify-between mb-4">
-								<div>
-									<div className="text-lg font-medium">Estimated Cost</div>
-									<div className="text-sm text-gray-600">Based on your instant quote</div>
-								</div>
-								<div className="text-3xl font-bold text-primary">${quoteData.totalFare.toFixed(2)}</div>
-							</div>
-							
-							{/* Fare Breakdown */}
-							{secureQuoteData && (
-								<div className="mb-4 p-3 bg-gray-50 rounded-lg">
-									<div className="text-sm font-medium text-gray-700 mb-2">Fare Breakdown:</div>
-									<div className="space-y-1">
-										{(secureQuoteData.firstKmFare || secureQuoteData.baseFare) && (
-											<div className="flex justify-between text-sm">
-												<span className="text-gray-600">First {quoteData.breakdown?.firstKmLimit || 10} km:</span>
-												<span>${((secureQuoteData.firstKmFare || secureQuoteData.baseFare || 0) / 100).toFixed(2)}</span>
-											</div>
-										)}
-										{((secureQuoteData.additionalKmFare || secureQuoteData.distanceFare) && (secureQuoteData.additionalKmFare || secureQuoteData.distanceFare) > 0) && (
-											<div className="flex justify-between text-sm">
-												<span className="text-gray-600">Additional distance:</span>
-												<span>${((secureQuoteData.additionalKmFare || secureQuoteData.distanceFare || 0) / 100).toFixed(2)}</span>
-											</div>
-										)}
-										{secureQuoteData.breakdown?.surgePricing && secureQuoteData.breakdown.surgePricing > 1 && (
-											<div className="flex justify-between text-sm text-orange-600">
-												<span>Peak time surcharge ({((secureQuoteData.breakdown.surgePricing - 1) * 100).toFixed(0)}%):</span>
-												<span>Applied</span>
-											</div>
-										)}
 									</div>
 								</div>
-							)}
-							<Button 
-								className="w-full" 
-								onClick={handleSubmit}
-								disabled={createBookingMutation.isPending || !selectedCarId}
-							>
-								{createBookingMutation.isPending ? (
-									<>
-										<Loader2 className="h-4 w-4 animate-spin" />
-										Confirming Booking...
-									</>
-								) : (
-									<>
-										<Package className="h-4 w-4" />
-										{sessionData?.user && isCustomerArea
-											? "Book"
-											: "Confirm Booking"
-										}
-									</>
-								)}
-							</Button>
-							
-							{/* Help Messages */}
-							{(!selectedCarId || createBookingMutation.isPending) && (
-								<div className="mt-2 p-2 bg-yellow-50 rounded text-sm text-yellow-800">
-									{!selectedCarId && <div>⚠️ Please select a vehicle to continue</div>}
-									{createBookingMutation.isPending && <div>📤 Processing your booking...</div>}
+
+								{/* Booking Details Section */}
+								<div className="space-y-6">
+									<div className="flex items-center gap-4">
+										<div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+											<span className="text-white text-lg font-bold">2</span>
+										</div>
+										<div>
+											<h3 className="text-xl font-bold text-gray-900">Booking Details</h3>
+											<p className="text-gray-500 text-sm">Tell us about your chauffeur service needs</p>
+										</div>
+									</div>
+
+									<div className="space-y-5 pl-14">
+										<div>
+											<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
+											<Input
+												type="number"
+												min="1"
+												max="8"
+												value={formData.passengerCount || 1}
+												onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
+												className={`h-12 text-base ${formErrors.passengerCount ? "border-red-500" : ""}`}
+											/>
+											{formErrors.passengerCount && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
+											)}
+										</div>
+
+										<DateTimePicker
+											selectedDate={date}
+											selectedTime={formData.scheduledPickupTime || ""}
+											onDateChange={(selectedDate) => {
+												setDate(selectedDate);
+												if (selectedDate) {
+													updateFormData("scheduledPickupDate", selectedDate.toISOString().split('T')[0]);
+												}
+											}}
+											onTimeChange={(time) => updateFormData("scheduledPickupTime", time)}
+											dateError={formErrors.scheduledPickupDate}
+											timeError={formErrors.scheduledPickupTime}
+											dateLabel="Pickup Date *"
+											timeLabel="Pickup Time *"
+										/>
+
+										<div>
+											<label className="block text-sm font-semibold text-gray-800 mb-3">
+												Special Requirements <span className="text-gray-400 font-normal">(Optional)</span>
+											</label>
+											<Textarea
+												placeholder="Any special requests, accessibility needs, or requirements..."
+												value={formData.specialRequests || ""}
+												onChange={(e) => updateFormData("specialRequests", e.target.value)}
+												rows={4}
+												className="resize-none"
+											/>
+										</div>
+									</div>
 								</div>
-							)}
-						</CardContent>
-					</Card>
+
+								{/* Booking Summary */}
+								<div className="bg-primary/10 rounded-xl border border-primary/20 p-6">
+									<div className="flex items-center gap-3 mb-6">
+										<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+											<span className="text-white text-lg">💰</span>
+										</div>
+										<h3 className="text-lg font-bold text-gray-900">Booking Summary</h3>
+									</div>
+
+									<div className="space-y-4">
+										<div className="flex justify-between items-center p-4 bg-white rounded-lg">
+											<div>
+												<span className="font-semibold text-gray-800">Chauffeur Service Price</span>
+												<p className="text-sm text-gray-600">Based on your instant quote</p>
+											</div>
+											<span className="text-2xl font-bold text-primary">
+												${quoteData.totalFare.toFixed(2)}
+											</span>
+										</div>
+
+										<div className="bg-white rounded-lg p-4 border border-primary/20">
+											<div className="flex items-start gap-3">
+												<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center mt-0.5">
+													<span className="text-primary text-sm">ℹ️</span>
+												</div>
+												<div>
+													<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
+													<ul className="text-sm text-gray-600 space-y-1">
+														<li>• No payment required now</li>
+														<li>• Pay securely after service completion</li>
+														<li>• Multiple payment options available</li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								{/* Action Button */}
+								<div className="pt-4">
+									<Button
+										onClick={handleSubmit}
+										className="w-full h-14 text-lg font-bold"
+										disabled={createBookingMutation.isPending}
+									>
+										{createBookingMutation.isPending ? (
+											<>
+												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
+												Creating Your Booking...
+											</>
+										) : sessionData?.user ? (
+											"Book Now"
+										) : (
+											"Sign In & Book"
+										)}
+									</Button>
+
+									{/* Help Messages */}
+									{createBookingMutation.isPending && (
+										<div className="mt-2 p-2 bg-yellow-50 rounded text-sm text-yellow-800">
+											<div>📤 Processing your booking...</div>
+										</div>
+									)}
+
+									<p className="text-sm text-gray-500 text-center mt-6 leading-relaxed">
+										By proceeding, you agree to our{" "}
+										<span className="text-primary underline cursor-pointer hover:text-primary/80">terms of service</span>{" "}
+										and{" "}
+										<span className="text-primary underline cursor-pointer hover:text-primary/80">privacy policy</span>.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

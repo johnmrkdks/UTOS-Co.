@@ -28,50 +28,12 @@ export function DetailsForm({ control }: DetailsFormProps) {
 
 				<FormField
 					control={control}
-					name="mileage"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Mileage (km)</FormLabel>
-							<FormControl>
-								<Input
-									type="number"
-									placeholder="50000"
-									{...field}
-									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={control}
 					name="color"
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
 								<Input placeholder="e.g., White, Black, Silver" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={control}
-					name="engineSize"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Engine Size (CC)</FormLabel>
-							<FormControl>
-								<Input
-									type="number"
-									placeholder="2000"
-									{...field}
-									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
-								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -89,25 +51,6 @@ export function DetailsForm({ control }: DetailsFormProps) {
 									type="number"
 									min="2"
 									max="8"
-									{...field}
-									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 4)}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={control}
-					name="cylinders"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Cylinders</FormLabel>
-							<FormControl>
-								<Input
-									type="number"
-									min="1"
 									{...field}
 									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 4)}
 								/>
@@ -141,9 +84,14 @@ export function DetailsForm({ control }: DetailsFormProps) {
 					name="luggageCapacity"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Luggage Capacity (Optional)</FormLabel>
+							<FormLabel>Luggage Capacity</FormLabel>
 							<FormControl>
-								<Input placeholder="e.g., 2 large bags, 500L" {...field} />
+								<Input
+									type="number"
+									placeholder="Number of bags or volume"
+									{...field}
+									onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : undefined)}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

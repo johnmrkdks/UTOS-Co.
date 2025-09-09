@@ -199,15 +199,31 @@ export async function calculateCarSpecificQuoteService(
 		firstKmLimit: carPricing.firstKmLimit || 10,
 	};
 
-	// Calculate fare components using flexible pricing model
+	// Calculate fare components using simplified two-tier pricing (same as quote tester)
 	const distanceKm = totalDistance / 1000; // convert meters to km
 	
-	// Calculate first km fare and additional km fare
-	const firstKmDistance = Math.min(distanceKm, pricing.firstKmLimit);
-	const additionalDistance = Math.max(0, distanceKm - pricing.firstKmLimit);
+	// Calculate using simplified two-tier pricing model (same logic as quote tester)
+	let firstKmFare = 0;
+	let additionalKmFare = 0;
+	let firstKmDistance = 0;
+	let additionalDistance = 0;
 	
-	const firstKmFare = parseFloat((firstKmDistance * pricing.firstKmRate).toFixed(2));
-	const additionalKmFare = parseFloat((additionalDistance * pricing.additionalKmRate).toFixed(2));
+	if (distanceKm <= pricing.firstKmLimit) {
+		// Distance is within first tier - pay flat rate
+		firstKmFare = pricing.firstKmRate;
+		firstKmDistance = distanceKm; // Record actual distance for breakdown
+		additionalDistance = 0;
+	} else {
+		// Distance exceeds first tier - flat rate + additional per km
+		firstKmFare = pricing.firstKmRate;
+		additionalDistance = distanceKm - pricing.firstKmLimit;
+		additionalKmFare = additionalDistance * pricing.additionalKmRate;
+		firstKmDistance = pricing.firstKmLimit;
+	}
+	
+	// Ensure proper decimal formatting
+	firstKmFare = parseFloat(firstKmFare.toFixed(2));
+	additionalKmFare = parseFloat(additionalKmFare.toFixed(2));
 	
 	const totalAmount = parseFloat((firstKmFare + additionalKmFare).toFixed(2));
 	

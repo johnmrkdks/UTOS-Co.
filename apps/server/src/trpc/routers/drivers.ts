@@ -103,8 +103,13 @@ export const driversRouter = router({
 		}),
 	delete: protectedProcedure
 		.input(DeleteDriverServiceSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
+				// Check if user is admin
+				if (!session?.user?.role || !['admin', 'super_admin'].includes(session.user.role)) {
+					throw new Error("Unauthorized: Admin access required to delete users");
+				}
+
 				const result = await deleteDriverService(db, input);
 				return result;
 			} catch (error) {

@@ -262,7 +262,7 @@ export function CarBookingForm({ car }: CarBookingFormProps) {
 					<div className="flex justify-between items-center font-semibold border-t pt-2">
 						<span>Total Price:</span>
 						<span className="text-xl text-green-600">
-							${totalAmount}
+							${totalAmount.toFixed(2)}
 						</span>
 					</div>
 				</div>

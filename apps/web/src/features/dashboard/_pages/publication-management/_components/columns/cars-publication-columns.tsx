@@ -74,10 +74,10 @@ export const getCarsPublicationColumns = ({
 			return (
 				<div className="space-y-1">
 					<div className="font-medium">
-						${(pricingConfig.baseFare / 100).toFixed(2)}
+						${pricingConfig.firstKmRate.toFixed(2)} for {pricingConfig.firstKmLimit || 10}km
 					</div>
 					<div className="text-xs text-muted-foreground">
-						Base Fare + ${(pricingConfig.pricePerKm / 100).toFixed(2)}/km
+						Then ${pricingConfig.pricePerKm.toFixed(2)}/km
 					</div>
 				</div>
 			);

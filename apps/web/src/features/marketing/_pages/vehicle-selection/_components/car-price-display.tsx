@@ -39,7 +39,7 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 	if (variant === "summary") {
 		return (
 			<div className={className}>
-				<span>From ${pricing?.firstKmRate || 0} + ${pricing?.additionalKmRate || 0}/km</span>
+				<span>From ${pricing?.firstKmRate || 0} + ${pricing?.pricePerKm || 0}/km</span>
 			</div>
 		);
 	}
@@ -50,7 +50,7 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 				${pricing?.firstKmRate || 0}
 			</div>
 			<div className="text-xs text-muted-foreground hidden sm:block">
-				first {pricing?.firstKmLimit || 10}km + ${pricing?.additionalKmRate || 0}/km
+				first {pricing?.firstKmLimit || 10}km + ${pricing?.pricePerKm || 0}/km
 			</div>
 		</div>
 	);

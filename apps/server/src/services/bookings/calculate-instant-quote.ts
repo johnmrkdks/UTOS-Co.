@@ -1,7 +1,7 @@
 import type { DB } from "@/db";
 import { z } from "zod";
 import { getDistanceMatrix, calculateHaversineDistance } from "@/lib/google-maps";
-import { eq, avg, and } from "drizzle-orm";
+import { eq, avg, and, isNull } from "drizzle-orm";
 import { pricingConfig, cars } from "@/db/schema";
 import { storeSecureQuote, type SecureQuoteData } from "@/services/quotes/instant-quote-storage";
 
@@ -140,30 +140,42 @@ export async function calculateInstantQuoteService(
 		}
 	}
 
-	// Get average first km rate from car-specific pricing configurations
-	const avgFirstKmRateResult = await db
-		.select({ avgFirstKmRate: avg(pricingConfig.firstKmRate) })
-		.from(pricingConfig)
-		.innerJoin(cars, eq(cars.id, pricingConfig.carId))
-		.where(
-			and(
-				eq(cars.isPublished, true),
-				eq(cars.isActive, true),
-				eq(cars.isAvailable, true)
-			)
-		);
-
-	const averageFirstKmRate = Number(avgFirstKmRateResult[0]?.avgFirstKmRate);
+	// Get pricing configuration - use car-specific if carId provided, otherwise use general config
+	let pricingConfigResult;
 	
-	if (!averageFirstKmRate || averageFirstKmRate <= 0) {
-		throw new Error("No published cars with pricing configurations found. Please ensure at least one car is published and has pricing configuration.");
-	}
+	if (data.carId) {
+		// Try to get car-specific pricing configuration first
+		pricingConfigResult = await db
+			.select()
+			.from(pricingConfig)
+			.where(eq(pricingConfig.carId, data.carId))
+			.limit(1);
 
-	// Get any pricing configuration from database (for additional km rate)
-	const pricingConfigResult = await db
-		.select()
-		.from(pricingConfig)
-		.limit(1);
+		// If no car-specific pricing exists, fallback to global pricing configuration
+		if (pricingConfigResult.length === 0) {
+			console.log(`No car-specific pricing found for car ${data.carId}, using global pricing configuration`);
+			pricingConfigResult = await db
+				.select()
+				.from(pricingConfig)
+				.where(isNull(pricingConfig.carId)) // Global pricing config
+				.limit(1);
+		}
+
+		// If still no pricing config found, try any pricing config as last resort
+		if (pricingConfigResult.length === 0) {
+			console.log(`No global pricing found, using any pricing configuration as fallback`);
+			pricingConfigResult = await db
+				.select()
+				.from(pricingConfig)
+				.limit(1);
+		}
+	} else {
+		// No carId provided, use first available pricing configuration
+		pricingConfigResult = await db
+			.select()
+			.from(pricingConfig)
+			.limit(1);
+	}
 
 	if (pricingConfigResult.length === 0) {
 		throw new Error("No pricing configuration found. Please contact support or set up pricing configuration.");
@@ -171,7 +183,7 @@ export async function calculateInstantQuoteService(
 
 	const config = pricingConfigResult[0];
 	const pricing = {
-		firstKmRate: averageFirstKmRate,
+		firstKmRate: config.firstKmRate,
 		additionalKmRate: config.pricePerKm,
 		firstKmLimit: config.firstKmLimit || 10,
 	};

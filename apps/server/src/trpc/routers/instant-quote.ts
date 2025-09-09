@@ -74,15 +74,14 @@ export const instantQuoteRouter = router({
 	checkAvailability: publicProcedure
 		.query(async ({ ctx: { db } }) => {
 			try {
-				const activePricingConfig = await db
+				const existingPricingConfig = await db
 					.select()
 					.from(pricingConfig)
-					.where(eq(pricingConfig.isActive, true))
 					.limit(1);
 
 				return {
-					available: activePricingConfig.length > 0,
-					hasActiveConfig: activePricingConfig.length > 0
+					available: existingPricingConfig.length > 0,
+					hasActiveConfig: existingPricingConfig.length > 0
 				};
 			} catch (error) {
 				handleTRPCError(error);
@@ -120,10 +119,14 @@ export const instantQuoteRouter = router({
 					destinationLongitude: quoteData.routeData.destinationLongitude,
 					stops: quoteData.routeData.stops,
 					carId: quoteData.routeData.carId,
-					baseFare: quoteData.quote.baseFare,
-					distanceFare: quoteData.quote.distanceFare,
-					timeFare: quoteData.quote.timeFare,
-					extraCharges: quoteData.quote.extraCharges,
+					// New pricing structure (current)
+					firstKmFare: quoteData.quote.firstKmFare,
+					additionalKmFare: quoteData.quote.additionalKmFare,
+					// Legacy pricing structure (for backward compatibility)
+					baseFare: quoteData.quote.baseFare || quoteData.quote.firstKmFare,
+					distanceFare: quoteData.quote.distanceFare || quoteData.quote.additionalKmFare,
+					timeFare: quoteData.quote.timeFare || 0,
+					extraCharges: quoteData.quote.extraCharges || 0,
 					totalAmount: quoteData.quote.totalAmount,
 					estimatedDistance: quoteData.quote.estimatedDistance,
 					estimatedDuration: quoteData.quote.estimatedDuration,

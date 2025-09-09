@@ -11,8 +11,9 @@ import { z } from "zod";
 import { useState, useEffect } from "react";
 import { useCreatePricingConfigMutation } from "../_hooks/query/use-create-pricing-config-mutation";
 import { useUpdatePricingConfigMutation } from "../_hooks/query/use-update-pricing-config-mutation";
-import { Loader2, DollarSign, Clock, Calendar, Car } from "lucide-react";
+import { Loader2, DollarSign, Clock, Calendar, Car, Plus, ArrowRight } from "lucide-react";
 import { useGetCarsWithoutPricingQuery } from "../_hooks/query/use-get-cars-without-pricing-query";
+import { Link } from "@tanstack/react-router";
 
 const pricingConfigSchema = z.object({
 	name: z.string().min(1, "Please enter a configuration name").max(100, "Name too long"),
@@ -164,47 +165,110 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 												</p>
 											</div>
 										) : (
-											<FormField
-												control={form.control as any}
-												name="carId"
-												render={({ field }) => (
-													<FormItem>
+											<>
+												{cars?.length ? (
+													<FormField
+														control={form.control as any}
+														name="carId"
+														render={({ field }) => (
+															<FormItem>
+																<FormLabel>Select Car</FormLabel>
+																<Select onValueChange={field.onChange} value={field.value || ""}>
+																	<FormControl>
+																		<SelectTrigger className="bg-white">
+																			<SelectValue placeholder="Choose a car for this pricing configuration" />
+																		</SelectTrigger>
+																	</FormControl>
+																	<SelectContent>
+																		{carsLoading ? (
+																			<SelectItem value="loading" disabled>Loading cars...</SelectItem>
+																		) : carsError ? (
+																			<SelectItem value="error" disabled>
+																				Error loading cars. Please refresh the page.
+																			</SelectItem>
+																		) : (
+																			cars.map((car) => (
+																				<SelectItem key={car.id} value={car.id} className="bg-white">
+																					<div className="flex items-center gap-2">
+																						<Car className="h-4 w-4" />
+																						<span>{car.name}</span>
+																						<span className="text-muted-foreground">({car.licensePlate})</span>
+																					</div>
+																				</SelectItem>
+																			))
+																		)}
+																	</SelectContent>
+																</Select>
+																<FormDescription>
+																	Each car can have its own pricing configuration for different luxury tiers.
+																</FormDescription>
+																<FormMessage />
+															</FormItem>
+														)}
+													/>
+												) : carsLoading ? (
+													<div className="space-y-2">
 														<FormLabel>Select Car</FormLabel>
-														<Select onValueChange={field.onChange} value={field.value || ""}>
-															<FormControl>
-																<SelectTrigger className="bg-white">
-																	<SelectValue placeholder="Choose a car for this pricing configuration" />
-																</SelectTrigger>
-															</FormControl>
-															<SelectContent>
-																{carsLoading ? (
-																	<SelectItem value="loading" disabled>Loading cars...</SelectItem>
-																) : carsError ? (
-																	<SelectItem value="error" disabled>
-																		Error loading cars. Please refresh the page.
-																	</SelectItem>
-																) : cars?.length ? (
-																	cars.map((car) => (
-																		<SelectItem key={car.id} value={car.id} className="bg-white">
-																			<div className="flex items-center gap-2">
-																				<Car className="h-4 w-4" />
-																				<span>{car.name}</span>
-																				<span className="text-muted-foreground">({car.licensePlate})</span>
-																			</div>
-																		</SelectItem>
-																	))
-																) : (
-																	<SelectItem value="no-cars" disabled>No cars available</SelectItem>
-																)}
-															</SelectContent>
-														</Select>
-														<FormDescription>
-															Each car can have its own pricing configuration for different luxury tiers.
-														</FormDescription>
-														<FormMessage />
-													</FormItem>
+														<div className="flex items-center gap-2 p-3 border rounded-md">
+															<Loader2 className="h-4 w-4 animate-spin" />
+															<span className="text-muted-foreground">Loading available cars...</span>
+														</div>
+													</div>
+												) : carsError ? (
+													<div className="space-y-2">
+														<FormLabel>Select Car</FormLabel>
+														<div className="p-4 border border-red-200 rounded-lg bg-red-50">
+															<div className="flex items-center gap-2 text-red-800 mb-2">
+																<Car className="h-4 w-4" />
+																<span className="font-medium">Error Loading Cars</span>
+															</div>
+															<p className="text-sm text-red-700 mb-3">
+																Unable to load available cars. Please refresh the page and try again.
+															</p>
+															<Button
+																type="button"
+																variant="outline"
+																size="sm"
+																onClick={() => window.location.reload()}
+																className="border-red-200 text-red-800 hover:bg-red-100"
+															>
+																Refresh Page
+															</Button>
+														</div>
+													</div>
+												) : (
+													<div className="space-y-2">
+														<FormLabel>Select Car</FormLabel>
+														<div className="p-6 border border-primary/20 rounded-lg bg-primary/5">
+															<div className="text-center space-y-4">
+																<div className="flex justify-center">
+																	<div className="rounded-full bg-primary/10 p-3">
+																		<Car className="h-8 w-8 text-primary" />
+																	</div>
+																</div>
+																<div>
+																	<h3 className="text-lg font-medium text-foreground mb-2">
+																		No Cars Available
+																	</h3>
+																	<p className="text-sm text-muted-foreground mb-4">
+																		All cars already have pricing configurations. You need to add a new car to create additional pricing configurations.
+																	</p>
+																</div>
+																<Link to="/admin/dashboard/cars/add-car">
+																	<Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+																		<Plus className="h-4 w-4 mr-2" />
+																		Add New Car
+																		<ArrowRight className="h-4 w-4 ml-2" />
+																	</Button>
+																</Link>
+																<p className="text-xs text-muted-foreground">
+																	After adding a car, return here to create its pricing configuration.
+																</p>
+															</div>
+														</div>
+													</div>
 												)}
-											/>
+											</>
 										)}
 
 										<FormField
@@ -423,7 +487,7 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 							)}
 							<Button
 								type="submit"
-								disabled={isSubmitting}
+								disabled={isSubmitting || (!cars?.length && mode === "create" && !contextData?.fromPublicationManagement)}
 								size="lg"
 							>
 								{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

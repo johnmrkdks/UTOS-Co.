@@ -48,14 +48,11 @@ export const cars = sqliteTable(
 
 		// Vehicle specifications
 		color: text("color").notNull(),
-		engineSize: integer("engine_size").notNull(), // in CC
 		doors: integer("doors").notNull(),
-		cylinders: integer("cylinders").notNull(),
-		mileage: integer("mileage").notNull(),
 
 		// Passenger capacity (important for bookings)
 		seatingCapacity: integer("seating_capacity").notNull().default(4),
-		luggageCapacity: text("luggage_capacity"),
+		luggageCapacity: integer("luggage_capacity"), // Flexible unit (bags, liters, etc.)
 
 		// Service availability
 		availableForPackages: integer("available_for_packages", { mode: "boolean" })

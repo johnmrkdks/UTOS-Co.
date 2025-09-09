@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { drivers } from "@/db/schema";
-import { users } from "@/db/schema";
+import { auth } from "@/lib/auth";
 
 export const DeleteDriverServiceSchema = z.object({
 	id: z.string().optional(),
@@ -62,9 +62,19 @@ export async function deleteDriverService(
 		targetUserId = userId;
 	}
 
-	// Delete the associated user account
+	// Delete the associated user account using Better Auth admin API
 	if (targetUserId) {
-		await db.delete(users).where(eq(users.id, targetUserId));
+		try {
+			await auth.api.removeUser({
+				body: {
+					userId: targetUserId,
+				},
+			});
+		} catch (authError) {
+			console.error("Failed to remove user with Better Auth:", authError);
+			// If Better Auth removal fails, fallback might be needed, but for now we'll throw
+			throw new Error("Failed to remove user account through authentication system");
+		}
 	}
 
 	return { 
