@@ -22,6 +22,13 @@ import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { users } from "@/db/sqlite/schema/users";
+
+// Helper function to get user role from database
+const getUserRole = async (db: any, userId: string) => {
+	const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+	return user[0]?.role;
+};
 
 export const bookingsRouter = router({
 	create: protectedProcedure
@@ -40,7 +47,6 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				const userRole = session?.user?.role;
 				
 				if (!userId) {
 					throw new TRPCError({
@@ -48,6 +54,8 @@ export const bookingsRouter = router({
 						message: "User must be authenticated to delete bookings",
 					});
 				}
+				
+				const userRole = await getUserRole(db, userId);
 				
 				// Get the booking first to check ownership
 				const existingBooking = await getBookingService(db, input);
@@ -83,7 +91,6 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				const userRole = session?.user?.role;
 				
 				if (!userId) {
 					throw new TRPCError({
@@ -91,6 +98,8 @@ export const bookingsRouter = router({
 						message: "User must be authenticated to view bookings",
 					});
 				}
+				
+				const userRole = await getUserRole(db, userId);
 				
 				const booking = await getBookingService(db, input);
 				
@@ -147,7 +156,6 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				const userRole = session?.user?.role;
 				
 				if (!userId) {
 					throw new TRPCError({
@@ -155,6 +163,8 @@ export const bookingsRouter = router({
 						message: "User must be authenticated to view bookings",
 					});
 				}
+				
+				const userRole = await getUserRole(db, userId);
 				
 				// Apply role-based filtering
 				if (userRole === 'admin' || userRole === 'super_admin') {
@@ -203,7 +213,6 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				const userRole = session?.user?.role;
 				
 				if (!userId) {
 					throw new TRPCError({
@@ -211,6 +220,8 @@ export const bookingsRouter = router({
 						message: "User must be authenticated to update bookings",
 					});
 				}
+				
+				const userRole = await getUserRole(db, userId);
 				
 				// Get the booking first to check ownership
 				const existingBooking = await getBookingService(db, { id: input.id });
@@ -374,7 +385,6 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				const userRole = session?.user?.role;
 				
 				if (!userId) {
 					throw new TRPCError({
@@ -382,6 +392,8 @@ export const bookingsRouter = router({
 						message: "User must be authenticated to view bookings",
 					});
 				}
+				
+				const userRole = await getUserRole(db, userId);
 				
 				// Apply role-based filtering
 				if (userRole === 'admin' || userRole === 'super_admin') {

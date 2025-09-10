@@ -154,7 +154,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 											<p className="text-sm font-medium">Phone</p>
 											<p className="text-sm text-muted-foreground flex items-center gap-1">
 												<Phone className="h-3 w-3" />
-												{selectedDriver.user?.phone || "Not provided"}
+												{selectedDriver.phoneNumber || "Not provided"}
 											</p>
 										</div>
 										<div>

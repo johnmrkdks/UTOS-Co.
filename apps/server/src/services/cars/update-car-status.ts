@@ -109,15 +109,15 @@ export async function checkAndUpdateCarAvailability(
 	
 	if (activeBookings.length > 0) {
 		// Check if any booking is currently in progress
-		const inProgressBooking = activeBookings.find(b => b.status === BookingStatusEnum.InProgress);
+		const inProgressBooking = activeBookings.find((booking: typeof activeBookings[0]) => booking.status === BookingStatusEnum.InProgress);
 		if (inProgressBooking) {
 			newStatus = CarStatusEnum.InService;
 		} else {
 			// Find the nearest upcoming booking
 			const now = Math.floor(Date.now() / 1000);
 			const nearestBooking = activeBookings
-				.filter(b => b.scheduledPickupTime && b.scheduledPickupTime > now)
-				.sort((a, b) => (a.scheduledPickupTime || 0) - (b.scheduledPickupTime || 0))[0];
+				.filter((booking: typeof activeBookings[0]) => booking.scheduledPickupTime && booking.scheduledPickupTime > now)
+				.sort((a: typeof activeBookings[0], b: typeof activeBookings[0]) => (a.scheduledPickupTime || 0) - (b.scheduledPickupTime || 0))[0];
 			
 			if (nearestBooking) {
 				newStatus = CarStatusEnum.Booked;

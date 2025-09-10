@@ -40,10 +40,31 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 			updateData.driverAssignedAt = now;
 			break;
 			
-		case BookingStatusEnum.InProgress:
+		case BookingStatusEnum.DriverEnRoute:
+			updateData.driverEnRouteAt = now;
+			break;
+			
+		case BookingStatusEnum.ArrivedPickup:
+			// Driver has arrived at pickup location
+			break;
+			
+		case BookingStatusEnum.PassengerOnBoard:
+		case BookingStatusEnum.InProgress: // Legacy support
 			updateData.serviceStartedAt = now;
 			if (data.actualPickupTime) {
 				updateData.actualPickupTime = data.actualPickupTime;
+			}
+			break;
+			
+		case BookingStatusEnum.DroppedOff:
+			if (data.actualDropoffTime) {
+				updateData.actualDropoffTime = data.actualDropoffTime;
+			}
+			break;
+			
+		case BookingStatusEnum.AwaitingExtras:
+			if (data.extraCharges !== undefined) {
+				updateData.extraCharges = data.extraCharges;
 			}
 			break;
 			
@@ -58,7 +79,7 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 			if (data.finalAmount) {
 				updateData.finalAmount = data.finalAmount;
 			}
-			if (data.extraCharges) {
+			if (data.extraCharges !== undefined) {
 				updateData.extraCharges = data.extraCharges;
 			}
 			break;

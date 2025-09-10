@@ -10,6 +10,7 @@ export const useUpdateBookingStatusMutation = () => {
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.listByType.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.get.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 
 			toast.success(`Booking status updated to ${data?.status?.replace("_", " ")}`);
 		},

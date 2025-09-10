@@ -50,6 +50,9 @@ import {
 	X,
 	MoreVertical,
 	Eye,
+	Car,
+	Phone,
+	Star,
 } from "lucide-react";
 import { useValidateBookingOperationsQuery } from "../_hooks/query/use-validate-booking-operations-query";
 import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutation";
@@ -73,6 +76,7 @@ export function BookingActions({
 }: BookingActionsProps) {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+	const [isDriverInfoDialogOpen, setIsDriverInfoDialogOpen] = useState(false);
 	const [cancellationReason, setCancellationReason] = useState("");
 	const [editData, setEditData] = useState({
 		originAddress: booking?.originAddress || "",
@@ -167,6 +171,16 @@ export function BookingActions({
 								<DropdownMenuItem onClick={() => onViewDetails(booking)}>
 									<Eye className="h-4 w-4 mr-2" />
 									View Details
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+							</>
+						)}
+						
+						{booking?.driver && (
+							<>
+								<DropdownMenuItem onClick={() => setIsDriverInfoDialogOpen(true)}>
+									<Car className="h-4 w-4 mr-2" />
+									Driver Info
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 							</>
@@ -389,6 +403,111 @@ export function BookingActions({
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
+
+				{/* Driver Info Dialog for Dropdown */}
+				<Dialog open={isDriverInfoDialogOpen} onOpenChange={setIsDriverInfoDialogOpen}>
+					<DialogContent className="max-w-md">
+						<DialogHeader>
+							<DialogTitle className="flex items-center gap-2">
+								<Car className="h-5 w-5" />
+								Driver Information
+							</DialogTitle>
+							<DialogDescription>
+								Your assigned driver details
+							</DialogDescription>
+						</DialogHeader>
+						
+						{booking?.driver && (
+							<div className="space-y-4 py-4">
+								{/* Driver Details */}
+								<div className="space-y-3">
+									<div className="flex items-center gap-3">
+										{booking.driver.user?.image ? (
+											<img 
+												src={booking.driver.user.image} 
+												alt={booking.driver.user?.name}
+												className="h-12 w-12 rounded-full object-cover"
+											/>
+										) : (
+											<div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+												<User className="h-6 w-6 text-gray-500" />
+											</div>
+										)}
+										<div className="flex-1">
+											<h3 className="font-semibold text-lg">{booking.driver.user?.name}</h3>
+											{booking.driver.rating && (
+												<div className="flex items-center gap-1">
+													<Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+													<span className="text-sm text-muted-foreground">
+														{booking.driver.rating.toFixed(1)} ({booking.driver.totalRides || 0} trips)
+													</span>
+												</div>
+											)}
+										</div>
+									</div>
+									
+									{/* Contact Information */}
+									<div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-lg">
+										<div>
+											<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone</p>
+											<p className="text-sm font-medium flex items-center gap-1">
+												<Phone className="h-3 w-3" />
+												{booking.driver.phoneNumber || "Not provided"}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">License</p>
+											<p className="text-sm font-medium">{booking.driver.licenseNumber}</p>
+										</div>
+									</div>
+								</div>
+
+								{/* Vehicle Information */}
+								{booking.driver.car && (
+									<div className="space-y-2">
+										<h4 className="font-medium text-sm">Vehicle Information</h4>
+										<div className="p-3 bg-muted/30 rounded-lg space-y-2">
+											<div className="flex justify-between">
+												<span className="text-sm text-muted-foreground">Vehicle:</span>
+												<span className="text-sm font-medium">{booking.driver.car.name}</span>
+											</div>
+											<div className="flex justify-between">
+												<span className="text-sm text-muted-foreground">Plate:</span>
+												<span className="text-sm font-medium">{booking.driver.car.licensePlate}</span>
+											</div>
+											{booking.driver.car.color && (
+												<div className="flex justify-between">
+													<span className="text-sm text-muted-foreground">Color:</span>
+													<span className="text-sm font-medium">{booking.driver.car.color}</span>
+												</div>
+											)}
+										</div>
+									</div>
+								)}
+
+								{/* Action Button */}
+								<div className="flex gap-2 pt-4 border-t">
+									<Button 
+										variant="outline" 
+										onClick={() => setIsDriverInfoDialogOpen(false)}
+										className="flex-1"
+									>
+										Close
+									</Button>
+									{booking.driver.phoneNumber && (
+										<Button 
+											onClick={() => window.open(`tel:${booking.driver.phoneNumber}`)}
+											className="flex-1"
+										>
+											<Phone className="h-4 w-4 mr-2" />
+											Call Driver
+										</Button>
+									)}
+								</div>
+							</div>
+						)}
+					</DialogContent>
+				</Dialog>
 			</>
 		);
 	}

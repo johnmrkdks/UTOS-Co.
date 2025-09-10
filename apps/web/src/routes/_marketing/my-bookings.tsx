@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@workspace/ui/components/dropdown-menu";
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
-import { Calendar, Package, Car, Clock, MapPin, Users, CheckCircle, AlertTriangle, ArrowRightIcon, Loader2 } from "lucide-react";
+import { Calendar, Package, Car, Clock, MapPin, Users, CheckCircle, AlertTriangle, ArrowRightIcon, Loader2, Navigation, Phone, Star, DollarSign, MessageSquare } from "lucide-react";
 import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-bookings-query";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useMemo, useState } from "react";
@@ -31,6 +33,8 @@ function CustomerBookingsPage() {
 	const [selectedBooking, setSelectedBooking] = useState<any>(null);
 	const [showDetailsPage, setShowDetailsPage] = useState(false);
 	const [showDetailsModal, setShowDetailsModal] = useState(false);
+	const [showDriverInfoModal, setShowDriverInfoModal] = useState(false);
+	const [selectedDriverBooking, setSelectedDriverBooking] = useState<any>(null);
 	const isMobile = useIsMobile();
 
 	const handleViewDetails = (booking: any) => {
@@ -50,6 +54,16 @@ function CustomerBookingsPage() {
 	const handleCloseDetailsModal = () => {
 		setShowDetailsModal(false);
 		setSelectedBooking(null);
+	};
+
+	const handleViewDriverInfo = (booking: any) => {
+		setSelectedDriverBooking(booking);
+		setShowDriverInfoModal(true);
+	};
+
+	const handleCloseDriverInfoModal = () => {
+		setShowDriverInfoModal(false);
+		setSelectedDriverBooking(null);
 	};
 
 	// Helper functions
@@ -156,7 +170,7 @@ function CustomerBookingsPage() {
 
 	return (
 		<div className="py-8 md:py-12 bg-background min-h-screen">
-			<div className="container mx-auto px-6">
+			<div className="container mx-auto px-6 max-w-4xl">
 				<div className="space-y-6">
 					{/* Page Header */}
 					<div className="space-y-2 text-center md:text-left">
@@ -200,7 +214,7 @@ function CustomerBookingsPage() {
 						))}
 					</div>
 
-					{/* Bookings List */}
+					{/* Bookings List - Card Based Design */}
 					<div>
 						<div>
 							<h2 className="font-semibold text-lg">Booking History</h2>
@@ -227,167 +241,31 @@ function CustomerBookingsPage() {
 								</Button>
 							</div>
 						) : (
-							<div className="overflow-x-auto">
-								<div className="min-w-full bg-white rounded-xl border border-gray-200 shadow-sm">
-									{/* Desktop Table Header */}
-									<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 bg-gray-50/30 text-sm font-semibold text-gray-800 rounded-t-xl">
-										<div className="col-span-1">Status</div>
-										<div className="col-span-2">Service</div>
-										<div className="col-span-3">Route</div>
-										<div className="col-span-2">Pickup Date & Time</div>
-										<div className="col-span-1">Price</div>
-										<div className="col-span-3">Actions</div>
-									</div>
+							<div className="space-y-4">
+								{bookings.map((booking) => {
+									const isUpcoming = new Date(booking.scheduledPickupTime) > new Date() && !["completed", "cancelled"].includes(booking.status);
+									const isPast = new Date(booking.scheduledPickupTime) < new Date() || ["completed", "cancelled"].includes(booking.status);
 									
-									{/* Bookings Rows */}
-									{bookings.map((booking) => (
-										<div key={booking.id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-all duration-200">
-											{/* Mobile Card View (lg:hidden) */}
-											<div className="lg:hidden p-6 space-y-4 bg-gradient-to-r from-white to-gray-50/20">
-												{/* Header with status and service type */}
-												<div className="space-y-4">
-													<div className="flex items-start justify-between">
-														<div className="space-y-2">
-															<h3 className="font-semibold text-lg text-gray-900">
-																{booking.bookingType === "package" ? "Premium Service" : "Custom Journey"}
-															</h3>
-															<BookingStatusIndicator
-																status={booking.status}
-																bookingType={booking.bookingType}
-																size="default"
-																showUpcoming={true}
-																scheduledPickupTime={booking.scheduledPickupTime}
-																className="flex-wrap"
-															/>
-														</div>
-														<div className="text-right">
-															<div className="font-bold text-xl text-primary">
-																{formatPrice(booking.quotedAmount)}
-															</div>
-															<Badge variant="secondary" className="text-xs mt-1 capitalize bg-primary/10 text-primary border-primary/20">{booking.bookingType}</Badge>
-														</div>
-													</div>
-												</div>
-												
-												{/* Route Information */}
-												<div className="bg-gray-50 rounded-xl p-4 space-y-3">
-													<div className="flex items-center gap-3">
-														<div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
-														<div className="flex-1">
-															<p className="text-sm font-medium text-gray-600">Pickup</p>
-															<p className="text-base text-gray-900 leading-5">{booking.originAddress}</p>
-														</div>
-													</div>
-													<div className="flex items-center gap-3">
-														<div className="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></div>
-														<div className="flex-1">
-															<p className="text-sm font-medium text-gray-600">Destination</p>
-															<p className="text-base text-gray-900 leading-5">{booking.destinationAddress}</p>
-														</div>
-													</div>
-												</div>
-												
-												{/* Date and Time */}
-												<div className="flex items-center justify-between py-3 px-4 bg-blue-50 rounded-xl">
-													<div className="text-center">
-														<p className="text-sm font-medium text-blue-600">Pickup Date</p>
-														<p className="text-base font-semibold text-blue-900">{formatDate(booking.scheduledPickupTime)}</p>
-													</div>
-													<div className="w-px h-8 bg-blue-200"></div>
-													<div className="text-center">
-														<p className="text-sm font-medium text-blue-600">Pickup Time</p>
-														<p className="text-base font-semibold text-blue-900">{formatTime(booking.scheduledPickupTime)}</p>
-													</div>
-												</div>
-												
-												{/* Actions */}
-												<div className="flex items-center justify-between pt-2">
-													{/* View Details Button */}
-													<Button
-														variant="outline"
-														size="lg"
-														className="flex-1 mr-3 text-primary hover:text-primary/90 hover:bg-primary/5 border-primary/30 font-medium"
-														onClick={() => handleViewDetails(booking)}
-													>
-														<span>View Details</span>
-														<ArrowRightIcon className="h-5 w-5 ml-2" />
-													</Button>
-													
-													{/* Dropdown Menu */}
-													<BookingActions 
-														booking={booking}
-														variant="dropdown"
-														onViewDetails={handleViewDetails}
-													/>
-												</div>
-											</div>
-
-											{/* Desktop Table Row (hidden lg:grid) */}
-											<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-5 items-center">
-												{/* Status */}
-												<div className="col-span-1">
-													<BookingStatusIndicator
-														status={booking.status}
-														bookingType={booking.bookingType}
-														size="sm"
-														showUpcoming={true}
-														scheduledPickupTime={booking.scheduledPickupTime}
-														className="flex-col items-start gap-1"
-													/>
-												</div>
-												
-												{/* Service */}
-												<div className="col-span-2">
-													<div className="font-semibold text-sm text-gray-900">
-														{booking.bookingType === "package" ? "Premium Service" : "Custom Journey"}
-													</div>
-													<Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20 capitalize">{booking.bookingType}</Badge>
-												</div>
-												
-												{/* Route */}
-												<div className="col-span-3">
-													<div className="space-y-1">
-														<div className="flex items-center gap-2 text-sm">
-															<div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-															<span className="truncate text-green-700 font-medium">{booking.originAddress}</span>
-														</div>
-														<div className="flex items-center gap-2 text-sm">
-															<div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-															<span className="truncate text-red-700 font-medium">{booking.destinationAddress}</span>
-														</div>
-													</div>
-												</div>
-												
-												{/* Date & Time */}
-												<div className="col-span-2">
-													<div className="text-sm">
-														<div className="font-semibold text-gray-900">{formatDate(booking.scheduledPickupTime)}</div>
-														<div className="text-gray-600">{formatTime(booking.scheduledPickupTime)}</div>
-													</div>
-												</div>
-												
-												{/* Price */}
-												<div className="col-span-1">
-													<div className="font-bold text-lg text-primary">
-														{formatPrice(booking.quotedAmount)}
-													</div>
-												</div>
-												
-												{/* Actions */}
-												<div className="col-span-3">
+									return (
+										<Card key={booking.id} className="overflow-hidden shadow-sm border border-gray-200 bg-white hover:shadow-md transition-all duration-200">
+											<CardContent className="p-4">
+												{/* Header with Title and Status */}
+												<div className="flex items-center justify-between mb-3">
+													<h3 className="text-lg font-semibold text-gray-900">
+														{booking.bookingType === "package" ? "Premium Service" : "Airport Transfer"}
+													</h3>
 													<div className="flex items-center gap-2">
-														{/* View Details Button */}
-														<Button
-															variant="outline"
-															size="sm"
-															className="text-primary hover:text-primary/90 hover:bg-primary/5 border-primary/30 font-medium"
-															onClick={() => handleViewDetails(booking)}
+														<Badge 
+															className={cn(
+																"text-xs px-2 py-1 text-white",
+																isUpcoming && "bg-blue-500",
+																booking.status === "in_progress" && "bg-green-500",
+																booking.status === "completed" && "bg-gray-500",
+																booking.status === "cancelled" && "bg-red-500"
+															)}
 														>
-															<span>Details</span>
-															<ArrowRightIcon className="h-4 w-4 ml-1" />
-														</Button>
-														
-														{/* Dropdown Menu */}
+															{isUpcoming ? 'Upcoming' : booking.status === "in_progress" ? 'In Progress' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace('_', ' ')}
+														</Badge>
 														<BookingActions 
 															booking={booking}
 															variant="dropdown"
@@ -395,10 +273,105 @@ function CustomerBookingsPage() {
 														/>
 													</div>
 												</div>
-											</div>
-										</div>
-									))}
-								</div>
+
+												{/* Service Type Badge and Time */}
+												<div className="flex items-center gap-2 mb-4">
+													<Badge 
+														variant="secondary" 
+														className={cn(
+															"text-xs px-2 py-1",
+															booking.bookingType === "package" && "bg-gray-100 text-gray-700",
+															booking.bookingType === "custom" && "bg-gray-100 text-gray-700"
+														)}
+													>
+														{booking.bookingType === "package" ? "Transportation" : "Custom"}
+													</Badge>
+													<span className="text-sm text-gray-600">
+														{formatTime(booking.scheduledPickupTime)}
+													</span>
+												</div>
+
+												{/* Date and Route */}
+												<div className="flex items-center gap-4 mb-4">
+													<div className="flex items-center gap-2">
+														<Calendar className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">
+															{formatDate(booking.scheduledPickupTime)}
+														</span>
+													</div>
+													<div className="flex items-center gap-2 flex-1 min-w-0">
+														<Navigation className="h-4 w-4 text-gray-400" />
+														<div className="flex-1 min-w-0">
+															<div className="text-sm font-medium text-gray-900">
+																{booking.originAddress.split(',')[0]}
+															</div>
+															<div className="text-xs text-gray-500">
+																to {booking.destinationAddress.split(',')[0]}
+															</div>
+														</div>
+													</div>
+													<div className="text-right">
+														<div className="text-lg font-bold text-primary">
+															{formatPrice(booking.quotedAmount)}
+														</div>
+													</div>
+												</div>
+
+												{/* Driver Info (if assigned) */}
+												{booking.driver && (
+													<div className="bg-blue-50 rounded-lg p-3 mb-4">
+														<div className="flex items-center gap-2">
+															<div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+																<Car className="h-4 w-4 text-blue-600" />
+															</div>
+															<div className="flex-1">
+																<div className="text-sm font-medium text-blue-900">
+																	{booking.driver.user?.name || 'Driver Assigned'}
+																</div>
+																<div className="text-xs text-blue-700">
+																	{booking.driver.car?.name || 'Vehicle assigned'}
+																</div>
+															</div>
+															{/* Rating temporarily hidden - will be implemented later */}
+														</div>
+													</div>
+												)}
+
+												{/* Special Requests (if any) */}
+												{booking.specialRequests && (
+													<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+														<div className="flex items-start gap-2">
+															<AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+															<div>
+																<p className="text-sm font-medium text-yellow-800">Special Requests</p>
+																<p className="text-sm text-yellow-700">{booking.specialRequests}</p>
+															</div>
+														</div>
+													</div>
+												)}
+
+												{/* Action Buttons */}
+												<div className="flex gap-3">
+													<Button
+														variant="outline"
+														className="flex-1 text-gray-700 hover:bg-gray-50 border-gray-300"
+														onClick={() => handleViewDetails(booking)}
+													>
+														View Details
+													</Button>
+													{booking.driver && (
+														<Button
+															className="flex-1"
+															onClick={() => handleViewDriverInfo(booking)}
+														>
+															View Driver Info
+														</Button>
+													)}
+												</div>
+											</CardContent>
+										</Card>
+									);
+								})}
 							</div>
 						)}
 					</div>
@@ -421,6 +394,114 @@ function CustomerBookingsPage() {
 						isOpen={showDetailsModal}
 						onClose={handleCloseDetailsModal}
 					/>
+
+					{/* Driver Info Modal */}
+					<Dialog open={showDriverInfoModal} onOpenChange={setShowDriverInfoModal}>
+						<DialogContent className="max-w-md">
+							<DialogHeader>
+								<DialogTitle className="flex items-center gap-2">
+									<Car className="h-5 w-5" />
+									Driver Information
+								</DialogTitle>
+								<DialogDescription>
+									Your assigned driver details
+								</DialogDescription>
+							</DialogHeader>
+							
+							{selectedDriverBooking?.driver && (
+								<div className="space-y-4 py-4">
+									{/* Driver Details */}
+									<div className="space-y-3">
+										<div className="flex items-center gap-3">
+											{selectedDriverBooking.driver.user?.image ? (
+												<img 
+													src={selectedDriverBooking.driver.user.image} 
+													alt={selectedDriverBooking.driver.user?.name}
+													className="h-12 w-12 rounded-full object-cover"
+												/>
+											) : (
+												<div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+													<Users className="h-6 w-6 text-gray-500" />
+												</div>
+											)}
+											<div className="flex-1">
+												<h3 className="font-semibold text-lg">{selectedDriverBooking.driver.user?.name}</h3>
+												{/* Rating temporarily hidden - will be implemented later */}
+											</div>
+										</div>
+										
+										{/* Contact Information */}
+										<div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-lg">
+											<div>
+												<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone</p>
+												<p className="text-sm font-medium flex items-center gap-1">
+													<Phone className="h-3 w-3" />
+													{selectedDriverBooking.driver.phoneNumber || "Not provided"}
+												</p>
+											</div>
+											<div>
+												<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">License</p>
+												<p className="text-sm font-medium">{selectedDriverBooking.driver.licenseNumber}</p>
+											</div>
+										</div>
+									</div>
+
+									{/* Vehicle Information */}
+									{selectedDriverBooking.driver.car && (
+										<div className="space-y-2">
+											<h4 className="font-medium text-sm">Vehicle Information</h4>
+											<div className="p-3 bg-muted/30 rounded-lg space-y-2">
+												<div className="flex justify-between">
+													<span className="text-sm text-muted-foreground">Vehicle:</span>
+													<span className="text-sm font-medium">{selectedDriverBooking.driver.car.name}</span>
+												</div>
+												<div className="flex justify-between">
+													<span className="text-sm text-muted-foreground">Plate:</span>
+													<span className="text-sm font-medium">{selectedDriverBooking.driver.car.licensePlate}</span>
+												</div>
+												{selectedDriverBooking.driver.car.color && (
+													<div className="flex justify-between">
+														<span className="text-sm text-muted-foreground">Color:</span>
+														<span className="text-sm font-medium">{selectedDriverBooking.driver.car.color}</span>
+													</div>
+												)}
+											</div>
+										</div>
+									)}
+
+									{/* Action Buttons */}
+									<div className="flex gap-2 pt-4 border-t">
+										<Button 
+											variant="outline" 
+											onClick={handleCloseDriverInfoModal}
+											className="flex-1"
+										>
+											Close
+										</Button>
+										{selectedDriverBooking.driver.phoneNumber && (
+											<>
+												<Button 
+													onClick={() => window.open(`tel:${selectedDriverBooking.driver.phoneNumber}`)}
+													className="flex-1"
+												>
+													<Phone className="h-4 w-4 mr-2" />
+													Call Driver
+												</Button>
+												<Button 
+													onClick={() => window.open(`sms:${selectedDriverBooking.driver.phoneNumber}`)}
+													variant="outline"
+													className="flex-1"
+												>
+													<MessageSquare className="h-4 w-4 mr-2" />
+													Message Driver
+												</Button>
+											</>
+										)}
+									</div>
+								</div>
+							)}
+						</DialogContent>
+					</Dialog>
 				</div>
 			</div>
 		</div>

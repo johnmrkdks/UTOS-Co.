@@ -14,7 +14,12 @@ export enum BookingStatusEnum {
 	Pending = "pending",           // Just created
 	Confirmed = "confirmed",       // Payment confirmed
 	DriverAssigned = "driver_assigned", // Driver allocated
-	InProgress = "in_progress",    // Service started
+	DriverEnRoute = "driver_en_route", // Driver started job - on the way to pickup
+	ArrivedPickup = "arrived_pickup",  // Driver arrived at pickup location
+	PassengerOnBoard = "passenger_on_board", // Passenger picked up (POB)
+	InProgress = "in_progress",    // Service started (legacy - same as PassengerOnBoard)
+	DroppedOff = "dropped_off",    // Passenger dropped off at destination
+	AwaitingExtras = "awaiting_extras", // Waiting for extras (tolls, parking, etc.)
 	Completed = "completed",       // Service finished
 	Cancelled = "cancelled",       // Cancelled by customer/admin
 	NoShow = "no_show",           // Customer didn't show up
