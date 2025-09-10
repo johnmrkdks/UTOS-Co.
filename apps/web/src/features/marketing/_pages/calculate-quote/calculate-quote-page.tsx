@@ -12,7 +12,8 @@ import {
 	Loader2,
 	CheckCircle,
 	Plus,
-	X
+	X,
+	Briefcase
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -266,7 +267,11 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 
 			{/* Main Content */}
 			<div className="container mx-auto px-4 py-6">
-				<div className="max-w-2xl mx-auto space-y-6">
+				<div className="max-w-7xl mx-auto">
+					{/* Desktop Grid Layout */}
+					<div className="grid lg:grid-cols-3 gap-8">
+						{/* Main Content Column */}
+						<div className="lg:col-span-2 space-y-6">
 					{hasRouteData ? (
 						/* Route Summary - Only show when we have route data */
 						<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
@@ -455,12 +460,12 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 						</Card>
 					)}
 
-					{/* Selected Vehicle */}
+					{/* Mobile Selected Vehicle */}
 					{selectedCar && (
-						<Card>
+						<Card className="lg:hidden">
 							<CardContent className="p-4">
 								<h3 className="font-medium mb-3 text-sm flex items-center gap-2">
-									<Car className="h-4 w-4 text-blue-600" />
+									<Car className="h-4 w-4 text-primary" />
 									Selected Vehicle
 								</h3>
 								<div className="flex items-center gap-3">
@@ -472,7 +477,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 										/>
 									)}
 									<div className="flex-1 min-w-0">
-										<div className="font-medium text-sm text-gray-900">
+										<div className="font-medium text-sm text-foreground">
 											{selectedCar.name}
 										</div>
 										<div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
@@ -587,9 +592,109 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 					)}
 
 					{/* Info */}
-					<div className="text-center text-xs text-muted-foreground space-y-1">
+					<div className="text-center text-xs text-muted-foreground space-y-1 lg:hidden">
 						<p>* Calculations use real-time traffic and distance data</p>
 						<p>* Prices include all taxes and fees</p>
+					</div>
+						</div>
+
+						{/* Desktop Sidebar */}
+						<div className="lg:block hidden space-y-6">
+							{/* Selected Vehicle */}
+							{selectedCar && (
+								<Card className="sticky top-24">
+									<CardContent className="p-6">
+										<h3 className="font-semibold mb-4 text-lg flex items-center gap-2">
+											<Car className="h-5 w-5 text-primary" />
+											Selected Vehicle
+										</h3>
+										
+										{/* Vehicle Image */}
+										{selectedCar.images && selectedCar.images.length > 0 && (
+											<div className="mb-4">
+												<img
+													src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
+													alt={selectedCar.name}
+													className="w-full h-48 object-cover rounded-lg border"
+												/>
+											</div>
+										)}
+										
+										<div className="space-y-4">
+											{/* Vehicle Name */}
+											<div>
+												<h4 className="font-semibold text-xl text-foreground">
+													{selectedCar.name}
+												</h4>
+												<p className="text-muted-foreground text-sm mt-1">
+													{selectedCar.description}
+												</p>
+											</div>
+
+											{/* Vehicle Details */}
+											<div className="grid grid-cols-2 gap-4 text-sm">
+												<div className="flex items-center gap-2">
+													<Users className="h-4 w-4 text-primary" />
+													<span>{selectedCar.seatingCapacity} passengers</span>
+												</div>
+												{selectedCar.luggageCapacity && (
+													<div className="flex items-center gap-2">
+														<Briefcase className="h-4 w-4 text-primary" />
+														<span>{selectedCar.luggageCapacity} bags</span>
+													</div>
+												)}
+												{selectedCar.category && (
+													<div className="text-muted-foreground">
+														{selectedCar.category.name}
+													</div>
+												)}
+												{selectedCar.fuelType && (
+													<div className="text-muted-foreground">
+														{selectedCar.fuelType.name}
+													</div>
+												)}
+											</div>
+
+											{/* Vehicle Features */}
+											{selectedCar.features && selectedCar.features.length > 0 && (
+												<div>
+													<h5 className="font-medium text-sm mb-2">Premium Features</h5>
+													<div className="flex flex-wrap gap-2">
+														{selectedCar.features.slice(0, 4).map((feature: any) => (
+															<Badge key={feature.id} variant="secondary" className="text-xs">
+																{feature.name}
+															</Badge>
+														))}
+														{selectedCar.features.length > 4 && (
+															<Badge variant="secondary" className="text-xs">
+																+{selectedCar.features.length - 4} more
+															</Badge>
+														)}
+													</div>
+												</div>
+											)}
+
+											{/* Status Indicator */}
+											{!isCalculating && !error && (
+												<div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+													<CheckCircle className="w-5 h-5 text-green-600" />
+													<span className="text-green-800 font-medium text-sm">Vehicle Selected</span>
+												</div>
+											)}
+										</div>
+									</CardContent>
+								</Card>
+							)}
+
+
+							{/* Pricing Info */}
+							<div className="text-xs text-muted-foreground space-y-1 p-4 bg-muted/30 rounded-lg">
+								<p className="font-medium">Pricing Information</p>
+								<p>* Calculations use real-time traffic data</p>
+								<p>* All prices include taxes and fees</p>
+								<p>* Final price confirmed before booking</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

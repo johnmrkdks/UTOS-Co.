@@ -4,6 +4,7 @@ import { deleteCarService, DeleteCarServiceSchema } from "@/services/cars/delete
 import { getCarService, GetCarServiceSchema } from "@/services/cars/get-car";
 import { getCarsService } from "@/services/cars/get-cars";
 import { getPublishedCarsService } from "@/services/cars/get-published-cars";
+import { getAvailableCars } from "@/services/cars/get-available-cars";
 import { getCarPricingEstimateService, GetCarPricingEstimateSchema } from "@/services/cars/get-car-pricing-estimate";
 import { togglePublishCarService, TogglePublishCarServiceSchema } from "@/services/cars/toggle-publish-car";
 import { updateCarService, UpdateCarServiceSchema } from "@/services/cars/update-car";
@@ -83,6 +84,26 @@ export const carsRouter = router({
 			try {
 				const cars = await getPublishedCarsService(db, input);
 				return cars;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Get available cars with time-based conflict checking
+	listAvailable: protectedProcedure
+		.input(ResourceListSchema.extend({
+			scheduledPickupTime: z.string().datetime().optional(),
+			estimatedDuration: z.number().optional(),
+		}))
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const { scheduledPickupTime, estimatedDuration, ...resourceListParams } = input;
+				const availableCars = await getAvailableCars(db, {
+					...resourceListParams,
+					scheduledPickupTime: scheduledPickupTime ? new Date(scheduledPickupTime) : undefined,
+					estimatedDuration
+				});
+				return { data: availableCars, count: availableCars.length };
 			} catch (error) {
 				handleTRPCError(error);
 			}

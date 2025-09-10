@@ -11,6 +11,9 @@ import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-
 import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
 import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-driver-dialog";
+import { AssignCarDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-car-dialog";
+import { EditBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/edit-booking-dialog";
+import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-management/_components/change-status-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarPlus, PackageIcon, RouteIcon, Clock, Activity } from "lucide-react";
@@ -35,7 +38,16 @@ function BookingManagementContent() {
 		openCreateCustomBookingDialog,
 		isAssignDriverDialogOpen,
 		selectedBookingForDriver,
-		closeAssignDriverDialog
+		closeAssignDriverDialog,
+		isAssignCarDialogOpen,
+		selectedBookingForCar,
+		closeAssignCarDialog,
+		isEditBookingDialogOpen,
+		selectedBookingForEdit,
+		closeEditBookingDialog,
+		isChangeStatusDialogOpen,
+		selectedBookingForStatus,
+		closeChangeStatusDialog
 	} = useBookingManagementModalProvider();
 
 	const [filters, setFilters] = useState<BookingFiltersType>({});
@@ -236,6 +248,21 @@ function BookingManagementContent() {
 				booking={selectedBookingForDriver}
 				open={isAssignDriverDialogOpen}
 				onOpenChange={closeAssignDriverDialog}
+			/>
+			<AssignCarDialog 
+				booking={selectedBookingForCar}
+				open={isAssignCarDialogOpen}
+				onOpenChange={closeAssignCarDialog}
+			/>
+			<EditBookingDialog 
+				booking={selectedBookingForEdit}
+				open={isEditBookingDialogOpen}
+				onOpenChange={closeEditBookingDialog}
+			/>
+			<ChangeStatusDialog 
+				booking={selectedBookingForStatus}
+				open={isChangeStatusDialogOpen}
+				onOpenChange={closeChangeStatusDialog}
 			/>
 		</PaddingLayout>
 	)

@@ -228,9 +228,9 @@ function CustomerBookingsPage() {
 							</div>
 						) : (
 							<div className="overflow-x-auto">
-								<div className="min-w-full bg-white rounded-lg border shadow-sm">
+								<div className="min-w-full bg-white rounded-xl border border-gray-200 shadow-sm">
 									{/* Desktop Table Header */}
-									<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 border-b bg-gray-50/50 text-sm font-medium text-gray-700">
+									<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 bg-gray-50/30 text-sm font-semibold text-gray-800 rounded-t-xl">
 										<div className="col-span-1">Status</div>
 										<div className="col-span-2">Service</div>
 										<div className="col-span-3">Route</div>
@@ -241,11 +241,11 @@ function CustomerBookingsPage() {
 									
 									{/* Bookings Rows */}
 									{bookings.map((booking) => (
-										<div key={booking.id} className="border-b last:border-b-0 hover:bg-gray-50/30 transition-colors">
+										<div key={booking.id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-all duration-200">
 											{/* Mobile Card View (lg:hidden) */}
-											<div className="lg:hidden p-6 space-y-4">
+											<div className="lg:hidden p-6 space-y-4 bg-gradient-to-r from-white to-gray-50/20">
 												{/* Header with status and service type */}
-												<div className="space-y-3">
+												<div className="space-y-4">
 													<div className="flex items-start justify-between">
 														<div className="space-y-2">
 															<h3 className="font-semibold text-lg text-gray-900">
@@ -261,10 +261,10 @@ function CustomerBookingsPage() {
 															/>
 														</div>
 														<div className="text-right">
-															<div className="font-bold text-xl text-gray-900">
+															<div className="font-bold text-xl text-primary">
 																{formatPrice(booking.quotedAmount)}
 															</div>
-															<Badge variant="outline" className="text-sm mt-1 capitalize">{booking.bookingType}</Badge>
+															<Badge variant="secondary" className="text-xs mt-1 capitalize bg-primary/10 text-primary border-primary/20">{booking.bookingType}</Badge>
 														</div>
 													</div>
 												</div>
@@ -301,30 +301,29 @@ function CustomerBookingsPage() {
 												</div>
 												
 												{/* Actions */}
-												<div className="space-y-3 pt-2">
-													{/* Edit/Cancel Actions */}
-													<BookingActions 
-														booking={booking}
-														size="default"
-														variant="compact"
-														className="w-full"
-													/>
-													
+												<div className="flex items-center justify-between pt-2">
 													{/* View Details Button */}
 													<Button
 														variant="outline"
 														size="lg"
-														className="w-full text-primary hover:text-primary/80 font-medium"
+														className="flex-1 mr-3 text-primary hover:text-primary/90 hover:bg-primary/5 border-primary/30 font-medium"
 														onClick={() => handleViewDetails(booking)}
 													>
 														<span>View Details</span>
 														<ArrowRightIcon className="h-5 w-5 ml-2" />
 													</Button>
+													
+													{/* Dropdown Menu */}
+													<BookingActions 
+														booking={booking}
+														variant="dropdown"
+														onViewDetails={handleViewDetails}
+													/>
 												</div>
 											</div>
 
 											{/* Desktop Table Row (hidden lg:grid) */}
-											<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 items-center">
+											<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-5 items-center">
 												{/* Status */}
 												<div className="col-span-1">
 													<BookingStatusIndicator
@@ -339,22 +338,22 @@ function CustomerBookingsPage() {
 												
 												{/* Service */}
 												<div className="col-span-2">
-													<div className="font-medium text-sm">
+													<div className="font-semibold text-sm text-gray-900">
 														{booking.bookingType === "package" ? "Premium Service" : "Custom Journey"}
 													</div>
-													<Badge variant="outline" className="text-xs mt-1">{booking.bookingType}</Badge>
+													<Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20 capitalize">{booking.bookingType}</Badge>
 												</div>
 												
 												{/* Route */}
 												<div className="col-span-3">
 													<div className="space-y-1">
 														<div className="flex items-center gap-2 text-sm">
-															<div className="w-2 h-2 bg-green-500 rounded-full"></div>
-															<span className="truncate text-green-700">{booking.originAddress}</span>
+															<div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+															<span className="truncate text-green-700 font-medium">{booking.originAddress}</span>
 														</div>
 														<div className="flex items-center gap-2 text-sm">
-															<div className="w-2 h-2 bg-red-500 rounded-full"></div>
-															<span className="truncate text-red-700">{booking.destinationAddress}</span>
+															<div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+															<span className="truncate text-red-700 font-medium">{booking.destinationAddress}</span>
 														</div>
 													</div>
 												</div>
@@ -362,38 +361,38 @@ function CustomerBookingsPage() {
 												{/* Date & Time */}
 												<div className="col-span-2">
 													<div className="text-sm">
-														<div className="font-medium">{formatDate(booking.scheduledPickupTime)}</div>
-														<div className="text-muted-foreground">{formatTime(booking.scheduledPickupTime)}</div>
+														<div className="font-semibold text-gray-900">{formatDate(booking.scheduledPickupTime)}</div>
+														<div className="text-gray-600">{formatTime(booking.scheduledPickupTime)}</div>
 													</div>
 												</div>
 												
 												{/* Price */}
 												<div className="col-span-1">
-													<div className="font-medium text-sm">
+													<div className="font-bold text-lg text-primary">
 														{formatPrice(booking.quotedAmount)}
 													</div>
 												</div>
 												
 												{/* Actions */}
 												<div className="col-span-3">
-													<div className="flex items-center gap-2 flex-wrap">
-														{/* Edit/Cancel Actions */}
-														<BookingActions 
-															booking={booking}
-															size="sm"
-															variant="default"
-														/>
-														
+													<div className="flex items-center gap-2">
 														{/* View Details Button */}
 														<Button
 															variant="outline"
 															size="sm"
-															className="text-primary hover:text-primary/80"
+															className="text-primary hover:text-primary/90 hover:bg-primary/5 border-primary/30 font-medium"
 															onClick={() => handleViewDetails(booking)}
 														>
 															<span>Details</span>
 															<ArrowRightIcon className="h-4 w-4 ml-1" />
 														</Button>
+														
+														{/* Dropdown Menu */}
+														<BookingActions 
+															booking={booking}
+															variant="dropdown"
+															onViewDetails={handleViewDetails}
+														/>
 													</div>
 												</div>
 											</div>

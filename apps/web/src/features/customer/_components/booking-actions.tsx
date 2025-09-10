@@ -30,6 +30,13 @@ import {
 	TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import {
 	Edit3,
 	XCircle,
 	Loader2,
@@ -41,6 +48,8 @@ import {
 	Info,
 	Save,
 	X,
+	MoreVertical,
+	Eye,
 } from "lucide-react";
 import { useValidateBookingOperationsQuery } from "../_hooks/query/use-validate-booking-operations-query";
 import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutation";
@@ -50,15 +59,17 @@ import { cn } from "@workspace/ui/lib/utils";
 interface BookingActionsProps {
 	booking: any;
 	size?: "sm" | "default" | "lg";
-	variant?: "default" | "compact" | "full";
+	variant?: "default" | "compact" | "full" | "dropdown";
 	className?: string;
+	onViewDetails?: (booking: any) => void;
 }
 
 export function BookingActions({ 
 	booking, 
 	size = "sm", 
 	variant = "default",
-	className 
+	className,
+	onViewDetails 
 }: BookingActionsProps) {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -137,6 +148,248 @@ export function BookingActions({
 					{booking?.status === "completed" ? "Completed" : "Cancelled"}
 				</Badge>
 			</div>
+		);
+	}
+
+	// Dropdown variant
+	if (variant === "dropdown") {
+		return (
+			<>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
+							<MoreVertical className="h-4 w-4 text-gray-600" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="w-48">
+						{onViewDetails && (
+							<>
+								<DropdownMenuItem onClick={() => onViewDetails(booking)}>
+									<Eye className="h-4 w-4 mr-2" />
+									View Details
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+							</>
+						)}
+						
+						{validation?.canEdit && (
+							<DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+								<Edit3 className="h-4 w-4 mr-2" />
+								Edit Booking
+							</DropdownMenuItem>
+						)}
+						
+						{validation?.canCancel && (
+							<DropdownMenuItem 
+								onClick={() => setIsCancelDialogOpen(true)}
+								className="text-red-600 focus:text-red-600"
+							>
+								<XCircle className="h-4 w-4 mr-2" />
+								Cancel Booking
+							</DropdownMenuItem>
+						)}
+						
+						{!validation?.canEdit && !validation?.canCancel && (
+							<DropdownMenuItem disabled>
+								<Info className="h-4 w-4 mr-2" />
+								No actions available
+							</DropdownMenuItem>
+						)}
+					</DropdownMenuContent>
+				</DropdownMenu>
+
+				{/* Edit Dialog for Dropdown */}
+				<Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+					<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+						<DialogHeader>
+							<DialogTitle className="flex items-center gap-2">
+								<Edit3 className="h-5 w-5" />
+								Edit Booking
+							</DialogTitle>
+							<DialogDescription>
+								Make changes to your booking. Time remaining: {getTimeUntilPickup()}
+							</DialogDescription>
+						</DialogHeader>
+						
+						<div className="space-y-6 py-4">
+							{/* Route Information */}
+							<div className="space-y-4">
+								<h4 className="font-semibold text-sm">Route Details</h4>
+								<div className="grid gap-4">
+									<div>
+										<Label htmlFor="originAddress">Pickup Address</Label>
+										<Input
+											id="originAddress"
+											value={editData.originAddress}
+											onChange={(e) => setEditData({ ...editData, originAddress: e.target.value })}
+										/>
+									</div>
+									<div>
+										<Label htmlFor="destinationAddress">Destination Address</Label>
+										<Input
+											id="destinationAddress"
+											value={editData.destinationAddress}
+											onChange={(e) => setEditData({ ...editData, destinationAddress: e.target.value })}
+										/>
+									</div>
+								</div>
+							</div>
+
+							{/* Customer Information */}
+							<div className="space-y-4">
+								<h4 className="font-semibold text-sm">Customer Details</h4>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<div>
+										<Label htmlFor="customerName">Name</Label>
+										<Input
+											id="customerName"
+											value={editData.customerName}
+											onChange={(e) => setEditData({ ...editData, customerName: e.target.value })}
+										/>
+									</div>
+									<div>
+										<Label htmlFor="customerPhone">Phone</Label>
+										<Input
+											id="customerPhone"
+											value={editData.customerPhone}
+											onChange={(e) => setEditData({ ...editData, customerPhone: e.target.value })}
+										/>
+									</div>
+									<div>
+										<Label htmlFor="customerEmail">Email</Label>
+										<Input
+											id="customerEmail"
+											type="email"
+											value={editData.customerEmail}
+											onChange={(e) => setEditData({ ...editData, customerEmail: e.target.value })}
+										/>
+									</div>
+									<div>
+										<Label htmlFor="passengerCount">Passengers</Label>
+										<Input
+											id="passengerCount"
+											type="number"
+											min="1"
+											max="8"
+											value={editData.passengerCount}
+											onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
+										/>
+									</div>
+								</div>
+							</div>
+
+							{/* Special Requests */}
+							<div className="space-y-4">
+								<h4 className="font-semibold text-sm">Special Requests</h4>
+								<Textarea
+									value={editData.specialRequests}
+									onChange={(e) => setEditData({ ...editData, specialRequests: e.target.value })}
+									placeholder="Any special requests or notes..."
+									className="min-h-20"
+								/>
+							</div>
+
+							{/* Actions */}
+							<div className="flex gap-2 pt-4 border-t">
+								<Button 
+									onClick={handleEdit}
+									disabled={editMutation.isPending}
+									className="flex-1"
+								>
+									{editMutation.isPending ? (
+										<>
+											<Loader2 className="h-4 w-4 animate-spin mr-2" />
+											Saving...
+										</>
+									) : (
+										<>
+											<Save className="h-4 w-4 mr-2" />
+											Save Changes
+										</>
+									)}
+								</Button>
+								<Button 
+									variant="outline" 
+									onClick={() => setIsEditDialogOpen(false)}
+									disabled={editMutation.isPending}
+								>
+									<X className="h-4 w-4 mr-2" />
+									Cancel
+								</Button>
+							</div>
+						</div>
+					</DialogContent>
+				</Dialog>
+
+				{/* Cancel Dialog for Dropdown */}
+				<AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle className="flex items-center gap-2 text-red-600">
+								<AlertTriangle className="h-5 w-5" />
+								Cancel Booking
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								<div className="space-y-3">
+									<p>Are you sure you want to cancel this booking?</p>
+									
+									{/* Booking Summary */}
+									<div className="bg-muted/50 p-3 rounded-lg space-y-2">
+										<div className="flex justify-between text-sm">
+											<span className="text-muted-foreground">Route:</span>
+											<span className="font-medium text-right">
+												{booking.originAddress?.substring(0, 30)}... →{" "}
+												{booking.destinationAddress?.substring(0, 30)}...
+											</span>
+										</div>
+										<div className="flex justify-between text-sm">
+											<span className="text-muted-foreground">Amount:</span>
+											<span className="font-medium">{formatPrice(booking.quotedAmount)}</span>
+										</div>
+										<div className="flex justify-between text-sm">
+											<span className="text-muted-foreground">Time until pickup:</span>
+											<span className="font-medium">{getTimeUntilPickup()}</span>
+										</div>
+									</div>
+
+									{/* Cancellation Reason */}
+									<div className="space-y-2">
+										<Label htmlFor="cancellationReason" className="text-sm font-medium">
+											Reason for cancellation (optional)
+										</Label>
+										<Input
+											id="cancellationReason"
+											placeholder="Let us know why you're cancelling..."
+											value={cancellationReason}
+											onChange={(e) => setCancellationReason(e.target.value)}
+										/>
+									</div>
+								</div>
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Keep Booking</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={handleCancel}
+								disabled={cancelMutation.isPending}
+								className="bg-red-600 hover:bg-red-700"
+							>
+								{cancelMutation.isPending ? (
+									<>
+										<Loader2 className="h-4 w-4 animate-spin mr-2" />
+										Cancelling...
+									</>
+								) : (
+									<>
+										<XCircle className="h-4 w-4 mr-2" />
+										Cancel Booking
+									</>
+								)}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			</>
 		);
 	}
 

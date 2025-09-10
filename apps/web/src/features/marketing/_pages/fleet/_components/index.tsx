@@ -56,12 +56,16 @@ export function Fleet({ className, ...props }: FleetProps) {
 	const bookingCards = carsData?.data?.map((car: any, index: number) => ({
 		id: car.id, // Add carId for pricing lookup
 		model: car.name,
+		brand: car.brand?.name || "Luxury",
+		category: car.category?.name || "Economy",
 		description: car.description,
 		features: [
-			`${car.seatingCapacity} passengers`,
-			car.category?.name || "Luxury vehicle",
-			car.fuelType?.name || "Premium fuel",
-			car.transmissionType?.name || "Automatic"
+			`${car.seatingCapacity} seats`,
+			car.luggageCapacity ? `${car.luggageCapacity} bags` : null,
+			car.fuelType?.name || "Petrol",
+			car.transmissionType?.name || "Automatic",
+			"Air Conditioning",
+			"USB Charging Ports"
 		].filter(Boolean),
 		image: car.images?.find((img: any) => img.isMain)?.url || "placeholder.svg",
 		popular: index === 1 // Mark second car as popular
@@ -81,26 +85,46 @@ export function Fleet({ className, ...props }: FleetProps) {
 						</p>
 					</div>
 
-					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-8">
 						{carsLoading ? (
-							// Loading skeleton
-							Array.from({ length: 5 }).map((_, index) => (
-								<div key={index} className="bg-card rounded-2xl border border-border p-6">
-									<div className="h-48 bg-muted rounded-xl mb-6 animate-pulse" />
-									<div className="space-y-4">
-										<div className="h-6 bg-muted rounded w-3/4 animate-pulse" />
-										<div className="h-4 bg-muted rounded w-full animate-pulse" />
-										<div className="h-4 bg-muted rounded w-5/6 animate-pulse" />
+							// Compact loading skeleton to match new design
+							Array.from({ length: 6 }).map((_, index) => (
+								<div key={index} className="bg-white border border-border shadow-lg rounded-lg overflow-hidden">
+									{/* Image skeleton */}
+									<div className="aspect-[4/3] bg-muted animate-pulse" />
+									
+									{/* Content skeleton */}
+									<div className="p-4 space-y-4">
+										{/* Title and description */}
 										<div className="space-y-2">
-											{Array.from({ length: 4 }).map((_, i) => (
-												<div key={i} className="h-4 bg-muted rounded w-4/5 animate-pulse" />
-											))}
+											<div className="h-5 bg-muted rounded w-3/4 animate-pulse" />
+											<div className="h-3 bg-muted rounded w-full animate-pulse" />
+											<div className="h-3 bg-muted rounded w-2/3 animate-pulse" />
 										</div>
-										<div className="pt-4 space-y-2">
-											<div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
-											<div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
+										
+										{/* Features skeleton */}
+										<div className="space-y-3">
+											<div className="flex items-center gap-2">
+												<div className="w-4 h-4 bg-muted rounded animate-pulse" />
+												<div className="h-4 bg-muted rounded w-20 animate-pulse" />
+											</div>
+											<div className="grid grid-cols-2 gap-1.5">
+												{Array.from({ length: 4 }).map((_, i) => (
+													<div key={i} className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+														<div className="w-4 h-4 bg-muted rounded animate-pulse" />
+														<div className="h-3 bg-muted rounded flex-1 animate-pulse" />
+													</div>
+												))}
+											</div>
 										</div>
-										<div className="h-10 bg-muted rounded animate-pulse" />
+										
+										{/* Pricing skeleton */}
+										<div className="bg-muted/30 rounded-lg p-3">
+											<div className="h-6 bg-muted rounded w-20 mx-auto animate-pulse" />
+										</div>
+										
+										{/* Button skeleton */}
+										<div className="h-10 bg-muted rounded-lg animate-pulse" />
 									</div>
 								</div>
 							))

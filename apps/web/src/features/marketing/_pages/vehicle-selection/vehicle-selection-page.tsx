@@ -108,84 +108,38 @@ export function VehicleSelectionPage() {
 			{/* Route Summary (if coming from quote) */}
 			{search.origin && search.destination && (
 				<div className="container mx-auto px-4 py-4">
-					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-						<CardContent className="p-3 sm:p-4">
-							{/* Mobile Route Display - Vertical Stack */}
-							<div className="sm:hidden">
-								<div className="flex items-center gap-2 mb-2">
-									<MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-									<span className="text-xs font-medium text-muted-foreground">Your Route</span>
-								</div>
-								
-								<div className="space-y-3">
-									{/* Origin */}
-									<div className="flex items-start gap-3">
-										<div className="relative mt-0.5">
-											<div className="w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow-sm flex-shrink-0" />
-											<div className="absolute left-1/2 top-3 w-px h-4 bg-gradient-to-b from-green-500 to-red-500 transform -translate-x-1/2"></div>
-										</div>
+					<Card className="bg-white border border-gray-200 shadow-sm">
+						<CardContent className="p-4">
+							{/* Desktop Route Display - Clean Horizontal Layout */}
+							<div className="flex items-center justify-between">
+								{/* From Section */}
+								<div className="flex-1 min-w-0">
+									<div className="flex items-center gap-3">
+										<div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
 										<div className="flex-1 min-w-0">
-											<div className="text-xs text-muted-foreground">From</div>
-											<div className="font-medium text-sm leading-tight break-words">{search.origin}</div>
-										</div>
-									</div>
-									
-									{/* Destination */}
-									<div className="flex items-start gap-3">
-										<div className="relative mt-0.5">
-											<div className="w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow-sm flex-shrink-0" />
-										</div>
-										<div className="flex-1 min-w-0">
-											<div className="text-xs text-muted-foreground">To</div>
-											<div className="font-medium text-sm leading-tight break-words">{search.destination}</div>
-										</div>
-									</div>
-								</div>
-								
-								<div className="mt-3 pt-2 border-t border-primary/10">
-									<div className="text-center text-xs text-muted-foreground">
-										Choose your vehicle below
-									</div>
-								</div>
-							</div>
-
-							{/* Desktop Route Display - Horizontal Layout */}
-							<div className="hidden sm:flex items-center gap-4">
-								{/* Route Visual */}
-								<div className="flex items-center gap-3 flex-1 min-w-0">
-									{/* Origin */}
-									<div className="flex items-center gap-2 flex-1 min-w-0">
-										<div className="relative">
-											<div className="w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow-sm flex-shrink-0" />
-										</div>
-										<div className="flex-1 min-w-0">
-											<div className="text-xs text-muted-foreground">From</div>
-											<div className="font-medium text-sm truncate">{search.origin}</div>
-										</div>
-									</div>
-
-									{/* Route Line with Direction */}
-									<div className="flex items-center gap-1 px-2 flex-shrink-0">
-										<div className="w-6 h-px bg-gradient-to-r from-green-500 to-red-500" />
-										<div className="w-2 h-2 border-t-2 border-r-2 border-red-500 transform rotate-45" />
-									</div>
-
-									{/* Destination */}
-									<div className="flex items-center gap-2 flex-1 min-w-0">
-										<div className="relative">
-											<div className="w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow-sm flex-shrink-0" />
-										</div>
-										<div className="flex-1 min-w-0">
-											<div className="text-xs text-muted-foreground">To</div>
-											<div className="font-medium text-sm truncate">{search.destination}</div>
+											<div className="text-xs text-gray-500 mb-1">From</div>
+											<div className="font-medium text-sm text-gray-900 truncate">{search.origin}</div>
 										</div>
 									</div>
 								</div>
 
-								{/* Route Icon */}
-								<div className="flex-shrink-0">
-									<div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-										<MapPin className="w-4 h-4 text-primary" />
+								{/* Route Arrow */}
+								<div className="flex items-center px-6 flex-shrink-0">
+									<div className="flex items-center gap-1">
+										<div className="w-8 h-px bg-gray-300" />
+										<ArrowRight className="w-4 h-4 text-gray-400" />
+										<div className="w-8 h-px bg-gray-300" />
+									</div>
+								</div>
+
+								{/* To Section */}
+								<div className="flex-1 min-w-0">
+									<div className="flex items-center gap-3">
+										<div className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" />
+										<div className="flex-1 min-w-0">
+											<div className="text-xs text-gray-500 mb-1">To</div>
+											<div className="font-medium text-sm text-gray-900 truncate">{search.destination}</div>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -244,7 +198,7 @@ export function VehicleSelectionPage() {
 						{filteredCars.map((car) => (
 							<Card
 								key={car.id}
-								className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
+								className={`cursor-pointer transition-all duration-300 hover:shadow-lg overflow-hidden p-0 ${
 									selectedCarId === car.id
 										? "ring-2 ring-primary shadow-lg bg-primary/5"
 										: "sm:hover:scale-[1.02]"
@@ -253,7 +207,7 @@ export function VehicleSelectionPage() {
 							>
 								<div className="relative">
 									{/* Car Image */}
-									<div className="h-32 sm:h-40 lg:h-48 bg-gradient-to-br from-muted to-muted/50 rounded-t-lg overflow-hidden">
+									<div className="h-32 sm:h-40 lg:h-48 bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
 										{car.images && car.images.length > 0 ? (
 											<img
 												src={car.images.find(img => img.isMain)?.url || car.images[0].url}

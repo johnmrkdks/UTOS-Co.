@@ -76,6 +76,8 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	stops: many(bookingStops),
 }));
 
+// Relations are defined in cars.ts to avoid circular imports
+
 export const bookingStopsRelations = relations(bookingStops, ({ one }) => ({
 	booking: one(bookings, { fields: [bookingStops.bookingId], references: [bookings.id] }),
 }));

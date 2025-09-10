@@ -8,23 +8,47 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import type { Row } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, User, Car, UserCheck, Edit, Ban, Phone, Mail } from "lucide-react";
+import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity } from "lucide-react";
 import type { Booking } from "./booking-table-columns";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 
 interface BookingTableRowActionsProps {
 	row: Row<Booking>;
 	onEditBooking?: (booking: Booking) => void;
-	onCancelBooking?: (booking: Booking) => void;
 }
 
-export function BookingTableRowActions({ row, onEditBooking, onCancelBooking }: BookingTableRowActionsProps) {
-	const { openBookingDetailsDialog, openAssignDriverDialog } = useBookingManagementModalProvider();
+export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowActionsProps) {
+	const { 
+		openBookingDetailsDialog, 
+		openAssignDriverDialog,
+		openAssignCarDialog,
+		openEditBookingDialog,
+		openChangeStatusDialog
+	} = useBookingManagementModalProvider();
 	const booking = row.original;
 
 	const handleAssignDriver = (booking: Booking) => {
 		console.log("🚗 Opening assign driver dialog for booking:", booking.id);
 		openAssignDriverDialog(booking);
+	};
+
+	const handleAssignCar = (booking: Booking) => {
+		console.log("🚙 Opening assign car dialog for booking:", booking.id);
+		openAssignCarDialog(booking);
+	};
+
+	const handleEditBooking = (booking: Booking) => {
+		console.log("✏️ Opening edit booking dialog for booking:", booking.id);
+		if (onEditBooking) {
+			onEditBooking(booking);
+		} else {
+			openEditBookingDialog(booking);
+		}
+	};
+
+	const handleChangeStatus = (booking: Booking) => {
+		console.log("📋 Opening update status dialog for booking:", booking.id);
+		openChangeStatusDialog(booking);
 	};
 
 	return (
@@ -35,7 +59,7 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking }: 
 					<MoreHorizontal className="h-4 w-4" />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-48">
+			<DropdownMenuContent align="end" className="w-56">
 				<DropdownMenuLabel>Actions</DropdownMenuLabel>
 				<DropdownMenuItem
 					onClick={() => openBookingDetailsDialog(booking.id)}
@@ -44,28 +68,39 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking }: 
 					View details
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				{onEditBooking && (
-					<DropdownMenuItem onClick={() => onEditBooking(booking)}>
-						<Edit className="mr-2 h-4 w-4" />
-						Edit booking
-					</DropdownMenuItem>
-				)}
-				{booking.status !== "cancelled" && (
-					<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
-						<UserCheck className="mr-2 h-4 w-4" />
-						{booking.driver ? "Reassign driver" : "Assign driver"}
-					</DropdownMenuItem>
-				)}
+				
+				{/* Edit Actions */}
+				<DropdownMenuItem onClick={() => handleEditBooking(booking)}>
+					<Edit className="mr-2 h-4 w-4" />
+					Edit booking
+				</DropdownMenuItem>
+				
+				<DropdownMenuItem onClick={() => handleChangeStatus(booking)}>
+					<Activity className="mr-2 h-4 w-4" />
+					Update status
+				</DropdownMenuItem>
+				
 				<DropdownMenuSeparator />
-				{onCancelBooking && booking.status !== "cancelled" && booking.status !== "completed" && (
-					<DropdownMenuItem 
-						className="text-destructive"
-						onClick={() => onCancelBooking(booking)}
-					>
-						<Ban className="mr-2 h-4 w-4" />
-						Cancel booking
-					</DropdownMenuItem>
+				
+				{/* Assignment Actions */}
+				{booking.status !== "cancelled" && booking.status !== "completed" && (
+					<>
+						<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
+							<UserCheck className="mr-2 h-4 w-4" />
+							{booking.driver ? "Reassign driver" : "Assign driver"}
+						</DropdownMenuItem>
+						
+						{/* Car assignment - especially useful for package bookings */}
+						{(booking.bookingType === "package" || !booking.car) && (
+							<DropdownMenuItem onClick={() => handleAssignCar(booking)}>
+								<Car className="mr-2 h-4 w-4" />
+								{booking.car ? "Reassign car" : "Assign car"}
+							</DropdownMenuItem>
+						)}
+						<DropdownMenuSeparator />
+					</>
 				)}
+				
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

@@ -919,8 +919,9 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 													<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
 													<ul className="text-sm text-gray-600 space-y-1">
 														<li>• No payment required now</li>
-														<li>• Pay securely after service completion</li>
-														<li>• Multiple payment options available</li>
+														<li>• Pay after service completion</li>
+														<li>• Driver accepts cash or cashless payments</li>
+														<li>• Online payment options available soon</li>
 													</ul>
 												</div>
 											</div>

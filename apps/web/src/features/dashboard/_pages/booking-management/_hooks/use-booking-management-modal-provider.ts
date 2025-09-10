@@ -5,8 +5,14 @@ interface BookingManagementModalState {
 	isCreateCustomBookingDialogOpen: boolean;
 	isBookingDetailsDialogOpen: boolean;
 	isAssignDriverDialogOpen: boolean;
+	isAssignCarDialogOpen: boolean;
+	isEditBookingDialogOpen: boolean;
+	isChangeStatusDialogOpen: boolean;
 	selectedBookingId: string | null;
 	selectedBookingForDriver: any | null;
+	selectedBookingForCar: any | null;
+	selectedBookingForEdit: any | null;
+	selectedBookingForStatus: any | null;
 	
 	openCreatePackageBookingDialog: () => void;
 	closeCreatePackageBookingDialog: () => void;
@@ -19,6 +25,15 @@ interface BookingManagementModalState {
 	
 	openAssignDriverDialog: (booking: any) => void;
 	closeAssignDriverDialog: () => void;
+	
+	openAssignCarDialog: (booking: any) => void;
+	closeAssignCarDialog: () => void;
+	
+	openEditBookingDialog: (booking: any) => void;
+	closeEditBookingDialog: () => void;
+	
+	openChangeStatusDialog: (booking: any) => void;
+	closeChangeStatusDialog: () => void;
 }
 
 export const useBookingManagementModalProvider = create<BookingManagementModalState>((set) => ({
@@ -26,8 +41,14 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	isCreateCustomBookingDialogOpen: false,
 	isBookingDetailsDialogOpen: false,
 	isAssignDriverDialogOpen: false,
+	isAssignCarDialogOpen: false,
+	isEditBookingDialogOpen: false,
+	isChangeStatusDialogOpen: false,
 	selectedBookingId: null,
 	selectedBookingForDriver: null,
+	selectedBookingForCar: null,
+	selectedBookingForEdit: null,
+	selectedBookingForStatus: null,
 	
 	openCreatePackageBookingDialog: () => set({ isCreatePackageBookingDialogOpen: true }),
 	closeCreatePackageBookingDialog: () => set({ isCreatePackageBookingDialogOpen: false }),
@@ -57,5 +78,41 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	closeAssignDriverDialog: () => set({ 
 		isAssignDriverDialogOpen: false, 
 		selectedBookingForDriver: null 
+	}),
+	
+	openAssignCarDialog: (booking: any) => {
+		console.log("🚙 Modal provider - opening assign car dialog for booking:", booking.id);
+		set({ 
+			isAssignCarDialogOpen: true, 
+			selectedBookingForCar: booking 
+		});
+	},
+	closeAssignCarDialog: () => set({ 
+		isAssignCarDialogOpen: false, 
+		selectedBookingForCar: null 
+	}),
+	
+	openEditBookingDialog: (booking: any) => {
+		console.log("✏️ Modal provider - opening edit booking dialog for booking:", booking.id);
+		set({ 
+			isEditBookingDialogOpen: true, 
+			selectedBookingForEdit: booking 
+		});
+	},
+	closeEditBookingDialog: () => set({ 
+		isEditBookingDialogOpen: false, 
+		selectedBookingForEdit: null 
+	}),
+	
+	openChangeStatusDialog: (booking: any) => {
+		console.log("📋 Modal provider - opening change status dialog for booking:", booking.id);
+		set({ 
+			isChangeStatusDialogOpen: true, 
+			selectedBookingForStatus: booking 
+		});
+	},
+	closeChangeStatusDialog: () => set({ 
+		isChangeStatusDialogOpen: false, 
+		selectedBookingForStatus: null 
 	}),
 }));

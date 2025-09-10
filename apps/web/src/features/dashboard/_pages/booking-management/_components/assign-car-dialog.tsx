@@ -15,6 +15,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Car, Loader } from "lucide-react";
 import { useState } from "react";
+import { useGetAvailableCarsQuery } from "../_hooks/query/use-get-available-cars-query";
 import { useGetCarsQuery } from "../../car-management/_hooks/query/car/use-get-cars-query";
 import { useAssignCarMutation } from "../_hooks/query/use-assign-car-mutation";
 
@@ -31,12 +32,21 @@ export function AssignCarDialog({
 }: AssignCarDialogProps) {
 	const [selectedCarId, setSelectedCarId] = useState<string>("");
 	
-	const carsQuery = useGetCarsQuery({ 
-		page: 1, 
-		limit: 100, // Get all available cars
-		search: "",
+	// Try available cars endpoint first, fallback to regular cars endpoint
+	// Only execute queries when the dialog is actually open
+	const availableCarsQuery = useGetAvailableCarsQuery({ 
+		limit: 100,
+		scheduledPickupTime: booking?.scheduledPickupTime,
+		estimatedDuration: booking?.estimatedDuration ? booking.estimatedDuration / 3600 : 2,
+		enabled: open  // Only run when dialog is open
+	});
+	
+	// Fallback to regular cars query if available cars query fails
+	const regularCarsQuery = useGetCarsQuery({
+		limit: 100,
 		sortBy: "name",
-		sortOrder: "asc"
+		sortOrder: "asc",
+		enabled: open && availableCarsQuery.isError  // Only run when dialog is open and available cars query fails
 	});
 	
 	const assignCarMutation = useAssignCarMutation();
@@ -55,9 +65,13 @@ export function AssignCarDialog({
 		});
 	};
 
-	const availableCars = carsQuery.data?.items?.filter(car => 
-		car.isActive && car.isAvailable && car.status === 'available'
-	) || [];
+	// Use available cars if query succeeds, otherwise fallback to regular cars with filtering
+	const availableCars = availableCarsQuery.data?.data || 
+		regularCarsQuery.data?.items?.filter(car => 
+			car.isActive && car.isAvailable && car.isPublished
+		) || [];
+
+	const isLoading = availableCarsQuery.isLoading || (availableCarsQuery.isError && regularCarsQuery.isLoading);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +87,7 @@ export function AssignCarDialog({
 				</DialogHeader>
 
 				<div className="space-y-4">
-					{carsQuery.isLoading ? (
+					{isLoading ? (
 						<div className="flex items-center justify-center py-8">
 							<Loader className="h-6 w-6 animate-spin text-primary" />
 						</div>

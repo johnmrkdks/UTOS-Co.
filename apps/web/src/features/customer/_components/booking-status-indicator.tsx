@@ -121,7 +121,7 @@ export function BookingStatusIndicator({
 	};
 
 	return (
-		<div className={cn("flex items-center gap-2 flex-wrap", className)}>
+		<div className={cn("flex items-center gap-2", className)}>
 			{/* Main Status Badge */}
 			<Badge
 				variant="outline"
@@ -138,40 +138,14 @@ export function BookingStatusIndicator({
 				<span className="capitalize">{statusConfig.label.replace('_', ' ')}</span>
 			</Badge>
 
-			{/* Upcoming Badge */}
-			{isUpcoming && (
+			{/* Show upcoming indicator only if needed */}
+			{isUpcoming && size !== "sm" && (
 				<Badge
-					variant="outline"
-					className={cn(
-						"bg-blue-50 text-blue-700 border-blue-200",
-						size === "sm" ? "text-xs px-2 py-0.5" : "text-xs px-2 py-1"
-					)}
+					variant="secondary"
+					className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200"
 				>
-					<Calendar className={cn(
-						size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3",
-						"mr-1"
-					)} />
+					<Calendar className="h-3 w-3 mr-1" />
 					Upcoming
-				</Badge>
-			)}
-
-			{/* Booking Type Badge */}
-			{typeConfig && (
-				<Badge
-					variant="outline"
-					className={cn(
-						typeConfig.color,
-						size === "sm" ? "text-xs px-2 py-0.5" : "text-xs px-2 py-1",
-						"font-medium"
-					)}
-				>
-					{showIcon && TypeIconComponent && (
-						<TypeIconComponent className={cn(
-							size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3",
-							"mr-1"
-						)} />
-					)}
-					{typeConfig.label}
 				</Badge>
 			)}
 		</div>

@@ -2,14 +2,16 @@ import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
 import type { ResourceList } from "server/types";
 
-interface GetCarsParams extends ResourceList {
+interface AvailableCarsParams extends ResourceList {
+	scheduledPickupTime?: string;
+	estimatedDuration?: number;
 	enabled?: boolean;
 }
 
-export const useGetCarsQuery = (params: GetCarsParams) => {
+export const useGetAvailableCarsQuery = (params: AvailableCarsParams) => {
 	const { enabled, ...queryParams } = params;
 	return useQuery({
-		...trpc.cars.list.queryOptions(queryParams),
+		...trpc.cars.listAvailable.queryOptions(queryParams),
 		enabled: enabled !== false  // Default to true unless explicitly false
 	});
 };
