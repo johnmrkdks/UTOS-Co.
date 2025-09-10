@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import { useDriverBookingsQuery } from '@/hooks/query/use-driver-bookings-query';
 import {
@@ -54,8 +53,13 @@ function DriverTripsComponent() {
 
 	const bookings = bookingsData?.data || [];
 
-	// Filter bookings based on active tab and search
-	const filteredBookings = bookings.filter(booking => {
+	// Filter only assigned trips for driver focus
+	const assignedBookings = bookings.filter(booking => 
+		['driver_assigned', 'in_progress', 'completed'].includes(booking.status)
+	);
+
+	// Filter bookings based on active tab and search - focused on assigned trips
+	const filteredBookings = assignedBookings.filter(booking => {
 		const matchesSearch = searchQuery === '' ||
 			booking.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			booking.originAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -63,78 +67,19 @@ function DriverTripsComponent() {
 
 		const matchesTab = activeTab === 'all' || (
 			activeTab === 'active' && ['driver_assigned', 'in_progress'].includes(booking.status) ||
-			activeTab === 'upcoming' && ['pending', 'confirmed', 'driver_assigned'].includes(booking.status) ||
 			activeTab === 'completed' && ['completed'].includes(booking.status)
 		);
 
 		return matchesSearch && matchesTab;
 	});
 
-	// Calculate stats
-	const stats = {
-		totalTrips: bookings.filter(b => b.status === 'completed').length,
-		upcomingTrips: bookings.filter(b => ['pending', 'confirmed', 'driver_assigned'].includes(b.status)).length,
-		activeTrips: bookings.filter(b => ['in_progress'].includes(b.status)).length,
-		totalEarnings: bookings
-			.filter(b => b.status === 'completed')
-			.reduce((sum, b) => sum + (b.finalAmount || b.quotedAmount || 0), 0) / 100, // Convert from cents
+	// Simple stats for assigned trips only
+	const assignedStats = {
+		totalAssigned: assignedBookings.length,
+		activeTrips: assignedBookings.filter(b => ['driver_assigned', 'in_progress'].includes(b.status)).length,
+		completedTrips: assignedBookings.filter(b => b.status === 'completed').length,
 	};
 
-	// Analytics card data for driver trips
-	const driverStatsData: AnalyticsCardData[] = [
-		{
-			id: 'total-trips',
-			title: 'Total Trips',
-			value: stats.totalTrips,
-			icon: CheckCircleIcon,
-			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-			iconBg: 'bg-blue-500',
-			changeText: '+0 this week',
-			changeType: 'positive',
-			showTrend: true,
-			showIcon: true,
-			showBackgroundIcon: true
-		},
-		{
-			id: 'trips-done',
-			title: 'Trips Done',
-			value: stats.totalTrips,
-			icon: CheckCircleIcon,
-			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
-			iconBg: 'bg-green-500',
-			changeText: `+${stats.totalTrips} this week`,
-			changeType: 'positive',
-			showTrend: true,
-			showIcon: true,
-			showBackgroundIcon: true
-		},
-		{
-			id: 'upcoming',
-			title: 'Upcoming',
-			value: stats.upcomingTrips,
-			icon: CalendarIcon,
-			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
-			iconBg: 'bg-orange-500',
-			changeText: `+${stats.upcomingTrips} this week`,
-			changeType: 'positive',
-			showTrend: true,
-			showIcon: true,
-			showBackgroundIcon: true
-		},
-		{
-			id: 'active',
-			title: 'Active',
-			value: stats.activeTrips,
-			icon: CarIcon,
-			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
-			iconBg: 'bg-purple-500',
-			changeText: `+${stats.activeTrips} this week`,
-			changeType: 'positive',
-			showTrend: true,
-			showIcon: true,
-			showBackgroundIcon: true
-		}
-	];
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -186,29 +131,17 @@ function DriverTripsComponent() {
 
 	return (
 		<div className="space-y-4 max-w-full">
-			{/* Compact Header */}
+			{/* Focused Header for Assigned Trips */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-xl font-bold text-gray-900">Trip History</h1>
+					<h1 className="text-xl font-bold text-gray-900">My Assigned Trips</h1>
 					<p className="text-sm text-gray-600">
-						{stats.totalTrips} trips completed
+						{assignedStats.totalAssigned} trips assigned • {assignedStats.activeTrips} active • {assignedStats.completedTrips} completed
 					</p>
 				</div>
 				<Button variant="outline" size="sm" onClick={() => refetch()}>
 					<RefreshCwIcon className="h-4 w-4" />
 				</Button>
-			</div>
-
-			{/* Stats Cards - Using AnalyticsCard */}
-			<div className="grid grid-cols-2 gap-3">
-				{driverStatsData.map((data) => (
-					<AnalyticsCard 
-						key={data.id} 
-						data={data} 
-						view="compact"
-						className="rounded-xl border border-gray-200" 
-					/>
-				))}
 			</div>
 
 			{/* Search */}
@@ -222,8 +155,8 @@ function DriverTripsComponent() {
 				/>
 			</div>
 
-			{/* Compact Navigation Cards */}
-			<div className="grid grid-cols-2 gap-2 mb-3">
+			{/* Simplified Navigation - Focused on Assigned Trips */}
+			<div className="grid grid-cols-3 gap-2 mb-3">
 				<button
 					onClick={() => setActiveTab('all')}
 					className={`p-3 rounded-lg border text-center transition-colors ${activeTab === 'all'
@@ -231,8 +164,8 @@ function DriverTripsComponent() {
 							: 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
 						}`}
 				>
-					<div className="font-medium text-xs">All Trips</div>
-					<div className="text-xs text-gray-500 mt-0.5">{bookings.length} total</div>
+					<div className="font-medium text-xs">All Assigned</div>
+					<div className="text-xs text-gray-500 mt-0.5">{assignedStats.totalAssigned} total</div>
 				</button>
 				<button
 					onClick={() => setActiveTab('active')}
@@ -242,17 +175,7 @@ function DriverTripsComponent() {
 						}`}
 				>
 					<div className="font-medium text-xs">Active</div>
-					<div className="text-xs text-gray-500 mt-0.5">{stats.activeTrips} in progress</div>
-				</button>
-				<button
-					onClick={() => setActiveTab('upcoming')}
-					className={`p-3 rounded-lg border text-center transition-colors ${activeTab === 'upcoming'
-							? 'bg-blue-50 border-blue-200 text-blue-700'
-							: 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-						}`}
-				>
-					<div className="font-medium text-xs">Upcoming</div>
-					<div className="text-xs text-gray-500 mt-0.5">{stats.upcomingTrips} scheduled</div>
+					<div className="text-xs text-gray-500 mt-0.5">{assignedStats.activeTrips} in progress</div>
 				</button>
 				<button
 					onClick={() => setActiveTab('completed')}
@@ -262,7 +185,7 @@ function DriverTripsComponent() {
 						}`}
 				>
 					<div className="font-medium text-xs">Completed</div>
-					<div className="text-xs text-gray-500 mt-0.5">{stats.totalTrips} finished</div>
+					<div className="text-xs text-gray-500 mt-0.5">{assignedStats.completedTrips} finished</div>
 				</button>
 			</div>
 
@@ -272,16 +195,15 @@ function DriverTripsComponent() {
 					<div className="text-center py-8">
 						<CarIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
 						<h3 className="text-base font-medium text-gray-900 mb-1">
-							{activeTab === 'all' ? 'No trips found' :
+							{activeTab === 'all' ? 'No assigned trips found' :
 								activeTab === 'active' ? 'No active trips' :
-									activeTab === 'upcoming' ? 'No upcoming trips' :
-										'No completed trips'}
+									'No completed trips'}
 						</h3>
 						<p className="text-sm text-gray-600">
 							{searchQuery ? 'Try adjusting your search terms' :
-								activeTab === 'active' ? 'When you accept a ride, it will appear here' :
-									activeTab === 'upcoming' ? 'Confirmed bookings will appear here' :
-										'Your trip history will be displayed here'}
+								activeTab === 'active' ? 'When you start an assigned trip, it will appear here' :
+								activeTab === 'completed' ? 'Completed trips will be displayed here' :
+									'Your assigned trips will appear here once you receive bookings'}
 						</p>
 					</div>
 				) : (

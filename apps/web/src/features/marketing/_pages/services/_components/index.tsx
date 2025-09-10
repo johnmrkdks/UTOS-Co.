@@ -33,14 +33,14 @@ type ServicesProps = {
 };
 
 export function Services({ className, ...props }: ServicesProps) {
-	// Fetch published packages
+	// Fetch published packages - show all available services
 	const { data: packagesData, isLoading: packagesLoading } = useGetPublishedPackagesQuery({
-		limit: 6
+		limit: 50 // Increased to show more services
 	});
 	
 	// Fetch published cars for fleet showcase
 	const { data: carsData, isLoading: carsLoading } = useGetPublishedCarsQuery({
-		limit: 3
+		limit: 12 // Increased to show more cars in fleet section
 	});
 	
 	const services = packagesData?.data?.map((pkg: any) => ({
@@ -68,51 +68,6 @@ export function Services({ className, ...props }: ServicesProps) {
 	})) || [];
 	return (
 		<div className={cn("", className)} {...props}>
-			{/* Hero Section */}
-			<div className="relative py-24 bg-[url('/src/assets/images/car3.jpeg')] bg-center bg-cover bg-no-repeat">
-				<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
-				<div className="relative z-10 container mx-auto px-6 text-center">
-					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-xs md:text-sm font-medium mb-6">
-							<Sparkles className="w-4 h-4 mr-2" />
-							Premium Transportation Services
-						</div>
-
-						<h1 className="text-4xl lg:text-6xl font-bold text-background mb-6">
-							Luxury Transportation
-							<span className="block text-primary-secondary">
-								Tailored for You
-							</span>
-						</h1>
-
-						<p className="text-lg md:text-xl text-background/80 leading-relaxed max-w-3xl mx-auto mb-8">
-							From airport transfers to special events, our comprehensive range of services
-							ensures you travel in comfort, style, and punctuality every time.
-						</p>
-
-						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Link to="/fleet">
-								<Button
-									size="lg"
-									className="bg-primary hover:bg-soft-beige px-8 py-6 text-lg font-semibold rounded-xl"
-								>
-									Book Now
-								</Button>
-							</Link>
-							<Link to="/contact-us">
-								<Button
-									variant="outline"
-									size="lg"
-									className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl"
-								>
-									Get Quote
-								</Button>
-							</Link>
-						</div>
-					</div>
-				</div>
-			</div>
-
 			{/* Services Grid */}
 			<div className="py-24 bg-background">
 				<div className="container mx-auto px-6">
@@ -126,7 +81,7 @@ export function Services({ className, ...props }: ServicesProps) {
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 						{packagesLoading ? (
 							// Loading skeleton
 							Array.from({ length: 6 }).map((_, index) => (
@@ -284,7 +239,7 @@ export function Services({ className, ...props }: ServicesProps) {
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-3 gap-8">
+					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 						{carsLoading ? (
 							// Loading skeleton for cars
 							Array.from({ length: 3 }).map((_, index) => (

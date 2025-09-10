@@ -511,10 +511,8 @@ export const bookingsRouter = router({
 				});
 
 				if (!driverProfile) {
-					throw new TRPCError({
-						code: "FORBIDDEN", 
-						message: "User is not registered as a driver",
-					});
+					// Return empty array instead of throwing error when no driver profile exists
+					return { data: [], count: 0 };
 				}
 
 				// Only show bookings assigned to this specific driver

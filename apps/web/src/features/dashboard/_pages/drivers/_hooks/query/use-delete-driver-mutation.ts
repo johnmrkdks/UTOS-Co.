@@ -7,9 +7,17 @@ export const useDeleteDriverMutation = () => {
 
 	return useMutation(trpc.drivers.delete.mutationOptions({
 		onSuccess: () => {
-			// Invalidate both drivers and users queries
+			// Invalidate all related queries to refresh the UI
 			queryClient.invalidateQueries({ queryKey: trpc.drivers.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.users.list.queryKey() });
+			
+			// Also invalidate any queries that might show user data with driver role
+			queryClient.invalidateQueries({ predicate: (query) => {
+				return query.queryKey.some(key => 
+					typeof key === 'string' && (key.includes('drivers') || key.includes('users'))
+				);
+			}});
+			
 			toast.success("Driver deleted successfully", {
 				description: "The driver account has been permanently removed.",
 			});

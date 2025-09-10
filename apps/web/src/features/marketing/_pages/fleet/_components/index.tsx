@@ -48,9 +48,9 @@ type FleetProps = {
 };
 
 export function Fleet({ className, ...props }: FleetProps) {
-	// Fetch published cars
+	// Fetch published cars - show all available cars
 	const { data: carsData, isLoading: carsLoading } = useGetPublishedCarsQuery({
-		limit: 5
+		limit: 50 // Increased to show more cars
 	});
 
 	const bookingCards = carsData?.data?.map((car: any, index: number) => ({
@@ -81,7 +81,7 @@ export function Fleet({ className, ...props }: FleetProps) {
 						</p>
 					</div>
 
-					<div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
+					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 						{carsLoading ? (
 							// Loading skeleton
 							Array.from({ length: 5 }).map((_, index) => (

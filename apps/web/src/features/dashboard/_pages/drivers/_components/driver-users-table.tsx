@@ -25,7 +25,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
-import { UserIcon, MailIcon, CalendarIcon, MoreHorizontal, Trash2, Eye } from "lucide-react";
+import { UserIcon, MailIcon, CalendarIcon, MoreHorizontal, Trash2, Eye, AlertTriangle } from "lucide-react";
 import { useGetUsersQuery } from "../_hooks/query/use-get-users-query";
 import { useDeleteDriverMutation } from "../_hooks/query/use-delete-driver-mutation";
 import { useState } from "react";
@@ -38,10 +38,21 @@ export function DriverUsersTable() {
 
 	const handleDelete = async (userId: string) => {
 		try {
-			await deleteDriverMutation.mutateAsync({ userId });
+			console.log("Attempting to delete user:", userId);
+			const result = await deleteDriverMutation.mutateAsync({ 
+				userId, 
+				forceDelete: true, 
+				confirmationText: "DELETE" 
+			});
+			console.log("Delete result:", result);
 			setDeletingUser(null);
 		} catch (error) {
 			console.error("Failed to delete driver account:", error);
+			console.error("Error details:", {
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+				error
+			});
 		}
 	};
 
@@ -204,21 +215,55 @@ export function DriverUsersTable() {
 			</CardContent>
 
 			<AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
-				<AlertDialogContent>
+				<AlertDialogContent className="sm:max-w-md">
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Driver Account</AlertDialogTitle>
-						<AlertDialogDescription>
-							Are you sure you want to delete {deletingUser?.name || "this driver"}'s account? 
-							This action cannot be undone and will permanently remove the user account and any associated driver data from the system.
+						<AlertDialogTitle className="flex items-center gap-2 text-red-600">
+							<AlertTriangle className="h-5 w-5" />
+							⚠️ Delete Driver Account
+						</AlertDialogTitle>
+						<AlertDialogDescription className="text-left space-y-3">
+							<p className="text-base">
+								You are about to <strong className="text-red-600">permanently delete</strong> the account for:
+							</p>
+							<div className="bg-gray-50 p-3 rounded-lg border">
+								<p className="font-semibold text-gray-900">{deletingUser?.name || "Unknown Driver"}</p>
+								<p className="text-sm text-gray-600">{deletingUser?.email}</p>
+							</div>
+							<div className="bg-red-50 border border-red-200 rounded-lg p-3">
+								<p className="text-red-800 font-medium text-sm">This will permanently:</p>
+								<ul className="mt-1 text-red-700 text-xs space-y-1 list-disc list-inside ml-2">
+									<li>Delete the user account and authentication</li>
+									<li>Remove driver profile and documents</li>
+									<li>Cancel any active bookings</li>
+									<li>Delete all related data (sessions, profiles, ratings)</li>
+									<li><strong>This action CANNOT be undone</strong></li>
+								</ul>
+							</div>
+							<p className="text-sm text-gray-700 font-medium">
+								Are you absolutely sure you want to continue?
+							</p>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogFooter className="gap-3">
+						<AlertDialogCancel className="flex-1">
+							Cancel
+						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => deletingUser && handleDelete(deletingUser.id)}
-							className="bg-red-600 hover:bg-red-700"
+							className="bg-red-600 hover:bg-red-700 flex-1"
+							disabled={deleteDriverMutation.isPending}
 						>
-							Delete Account
+							{deleteDriverMutation.isPending ? (
+								<>
+									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+									Deleting...
+								</>
+							) : (
+								<>
+									<Trash2 className="h-4 w-4 mr-2" />
+									Yes, Delete Account
+								</>
+							)}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

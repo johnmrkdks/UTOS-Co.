@@ -16,14 +16,9 @@ type TRPCContext = {
 export async function createContext({
 	context,
 }: CreateContextOptions): Promise<TRPCContext> {
-	// Debug logging for session issues
-	console.log("🔍 tRPC Context - Request headers:", Object.fromEntries(context.req.raw.headers.entries()));
-	
 	const session = await auth.api.getSession({
 		headers: context.req.raw.headers,
 	});
-
-	console.log("🔍 tRPC Context - Session result:", JSON.stringify(session, null, 2));
 
 	return {
 		session,

@@ -19,13 +19,20 @@ interface NavigationItem {
 
 interface DriverNavigationProps {
 	onNavigate?: () => void;
+	driverStatus?: {
+		profileComplete: boolean;
+		isApproved: boolean;
+		isActive: boolean;
+	};
+	needsOnboarding?: boolean;
 }
 
-export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
+export function DriverNavigation({ onNavigate, driverStatus, needsOnboarding }: DriverNavigationProps = {}) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const navigationItems: NavigationItem[] = [
+	// Base navigation items that are always shown
+	const baseNavigationItems: NavigationItem[] = [
 		{
 			id: 'dashboard',
 			label: 'Dashboard',
@@ -38,12 +45,23 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 			icon: CarIcon,
 			href: '/driver/trips'
 		},
-		{
+	];
+
+	// Conditional navigation items
+	const conditionalItems: NavigationItem[] = [];
+
+	// Only show "Complete Profile" if driver needs onboarding (not approved/active)
+	if (needsOnboarding || !driverStatus?.isApproved) {
+		conditionalItems.push({
 			id: 'onboarding',
 			label: 'Complete Profile',
 			icon: ClipboardListIcon,
 			href: '/driver/onboarding'
-		},
+		});
+	}
+
+	// Standard navigation items that are always shown
+	const standardItems: NavigationItem[] = [
 		{
 			id: 'profile',
 			label: 'My Profile',
@@ -56,6 +74,13 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 			icon: SettingsIcon,
 			href: '/driver/settings'
 		},
+	];
+
+	// Combine all navigation items
+	const navigationItems: NavigationItem[] = [
+		...baseNavigationItems,
+		...conditionalItems,
+		...standardItems
 	];
 
 	const isActive = (href: string) => {

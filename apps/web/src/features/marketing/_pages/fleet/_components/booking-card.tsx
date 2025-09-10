@@ -53,63 +53,57 @@ export function BookingCard({
 				</div>
 			)}
 			
-			<CardHeader className="pb-4">
-				<div className="aspect-video bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+			<CardHeader className="pb-3">
+				<div className="aspect-[4/3] bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
 					<img 
 						src={image || placeHolder} 
 						alt={model} 
 						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 					/>
 				</div>
-				<CardTitle className="text-xl font-bold text-card-foreground mb-2">{model}</CardTitle>
-				<p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+				<CardTitle className="text-lg font-bold text-card-foreground mb-1">{model}</CardTitle>
+				<p className="text-muted-foreground text-xs leading-tight line-clamp-2">{description}</p>
 			</CardHeader>
 			
-			<CardContent className="space-y-6">
-				{/* Features */}
-				<div className="space-y-3">
-					<h4 className="font-semibold text-card-foreground text-sm">Features Included:</h4>
-					<div className="space-y-2">
-						{features.map((feature, index) => (
-							<div key={index} className="flex items-center gap-2">
-								<Check className="w-4 h-4 text-primary flex-shrink-0" />
-								<span className="text-muted-foreground text-sm">{feature}</span>
+			<CardContent className="space-y-4">
+				{/* Features - Compact */}
+				<div className="space-y-2">
+					<h4 className="font-semibold text-card-foreground text-xs">Features:</h4>
+					<div className="grid grid-cols-2 gap-1">
+						{features.slice(0, 4).map((feature, index) => (
+							<div key={index} className="flex items-center gap-1">
+								<Check className="w-3 h-3 text-primary flex-shrink-0" />
+								<span className="text-muted-foreground text-xs truncate">{feature}</span>
 							</div>
 						))}
 					</div>
 				</div>
 				
-				{/* Dynamic Pricing */}
-				<div className="bg-beige/50 rounded-lg p-4 space-y-3">
-					<h4 className="font-semibold text-foreground text-sm mb-3">Starting From:</h4>
-					<div className="flex justify-center">
+				{/* Dynamic Pricing - Compact */}
+				<div className="bg-beige/50 rounded-lg p-3">
+					<div className="text-center space-y-2">
 						<CarPriceDisplay 
 							carId={id}
 							variant="card"
 							className="text-center"
 						/>
-					</div>
-					<div className="text-center">
 						<div className="flex justify-center items-center gap-1 text-muted-foreground text-xs">
 							<Clock className="w-3 h-3" />
-							<span>2 hour minimum booking</span>
+							<span>Flexible duration</span>
 						</div>
 					</div>
 				</div>
 			</CardContent>
 			
-			<CardFooter className="pt-6">
-				<div className="w-full">
-					{/* Both authenticated and non-authenticated users start with public calculate-quote */}
-					<Link to="/calculate-quote" search={{ selectedCarId: id }}>
-						<Button 
-							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-							size="lg"
-						>
-							Book Now
-						</Button>
-					</Link>
-				</div>
+			<CardFooter className="pt-3">
+				<Link to="/calculate-quote" search={{ selectedCarId: id }} className="w-full">
+					<Button 
+						className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+						size="sm"
+					>
+						Book Now
+					</Button>
+				</Link>
 			</CardFooter>
 		</Card>
 	);

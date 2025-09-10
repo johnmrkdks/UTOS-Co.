@@ -4,6 +4,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
+import { useDriverBookingsQuery } from '@/hooks/query/use-driver-bookings-query';
 import { DriverStatusAccordion } from '@/features/driver/_components/driver-status-accordion';
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import {
@@ -30,6 +31,13 @@ function DriverDashboardComponent() {
 	const { data: currentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
 	const navigate = useNavigate();
 
+	// Fetch bookings for current driver to get detailed trip analytics
+	const { data: bookingsData, isLoading: isBookingsLoading } = useDriverBookingsQuery({
+		driverId: currentDriver?.id || "",
+		limit: 50,
+		offset: 0,
+	});
+
 	// Driver data with fallback values
 	const driver = {
 		totalRides: 0,
@@ -42,41 +50,73 @@ function DriverDashboardComponent() {
 		...currentDriver
 	};
 
-	// Calculate driver statistics based on real data
+	const bookings = bookingsData?.data || [];
+
+	// Enhanced driver statistics based on real booking data
 	const driverStats = {
-		totalEarnings: driver.totalRides ? driver.totalRides * 45.5 : 0,
+		totalEarnings: bookings
+			.filter(b => b.status === 'completed')
+			.reduce((sum, b) => sum + (b.finalAmount || b.quotedAmount || 0), 0) / 100, // Convert from cents
 		thisWeekEarnings: driver.totalRides ? Math.floor(driver.totalRides * 0.15) * 45.5 : 0,
-		totalTrips: driver.totalRides || 0,
+		totalTrips: bookings.filter(b => b.status === 'completed').length,
 		thisWeekTrips: driver.totalRides ? Math.floor(driver.totalRides * 0.15) : 0,
 		averageRating: driver.rating || 5.0,
 		activeHours: driver.totalRides ? driver.totalRides * 1.8 : 0,
-		completedTrips: driver.totalRides || 0,
-		cancelledTrips: 0,
+		completedTrips: bookings.filter(b => b.status === 'completed').length,
+		upcomingTrips: bookings.filter(b => ['pending', 'confirmed', 'driver_assigned'].includes(b.status)).length,
+		activeTrips: bookings.filter(b => ['in_progress'].includes(b.status)).length,
+		cancelledTrips: bookings.filter(b => b.status === 'cancelled').length,
 	};
 
-	// Analytics card data
+	// Enhanced analytics card data with improved visual hierarchy
 	const analyticsData: AnalyticsCardData[] = [
 		{
 			id: 'earnings',
-			title: 'Earnings',
-			value: `$${driverStats.totalEarnings.toFixed(0)}`,
+			title: 'Total Earnings',
+			value: `$${driverStats.totalEarnings.toFixed(2)}`,
 			icon: DollarSignIcon,
-			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
-			iconBg: 'bg-green-500',
-			changeText: `+$${driverStats.thisWeekEarnings.toFixed(0)}`,
+			bgGradient: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
+			iconBg: 'bg-emerald-600',
+			changeText: `From ${driverStats.completedTrips} completed trips`,
 			changeType: 'positive',
 			showTrend: true,
 			showIcon: true,
 			showBackgroundIcon: true
 		},
 		{
-			id: 'trips',
-			title: 'Trips',
-			value: driverStats.totalTrips,
+			id: 'active-trips',
+			title: 'Active Trips',
+			value: driverStats.activeTrips,
 			icon: CarIcon,
 			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-			iconBg: 'bg-blue-500',
-			changeText: `+${driverStats.thisWeekTrips} week`,
+			iconBg: 'bg-blue-600',
+			changeText: 'currently in progress',
+			changeType: driverStats.activeTrips > 0 ? 'positive' : 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'upcoming-trips',
+			title: 'Upcoming Trips',
+			value: driverStats.upcomingTrips,
+			icon: CalendarIcon,
+			bgGradient: 'bg-gradient-to-br from-amber-50 to-amber-100',
+			iconBg: 'bg-amber-600',
+			changeText: 'scheduled bookings',
+			changeType: driverStats.upcomingTrips > 0 ? 'positive' : 'neutral',
+			showTrend: false,
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'completed-trips',
+			title: 'Completed',
+			value: driverStats.completedTrips,
+			icon: CheckCircleIcon,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-600',
+			changeText: 'trips finished',
 			changeType: 'positive',
 			showTrend: false,
 			showIcon: true,
@@ -88,8 +128,8 @@ function DriverDashboardComponent() {
 			value: driverStats.averageRating.toFixed(1),
 			icon: StarIcon,
 			bgGradient: 'bg-gradient-to-br from-yellow-50 to-yellow-100',
-			iconBg: 'bg-yellow-500',
-			changeText: driverStats.completedTrips > 0 ? `${driverStats.completedTrips} trips` : 'No ratings',
+			iconBg: 'bg-yellow-600',
+			changeText: driverStats.completedTrips > 0 ? 'average rating' : 'No ratings yet',
 			changeType: 'neutral',
 			showTrend: false,
 			showIcon: true,
@@ -101,8 +141,8 @@ function DriverDashboardComponent() {
 			value: `${Math.floor(driverStats.activeHours)}h`,
 			icon: ClockIcon,
 			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
-			iconBg: 'bg-purple-500',
-			changeText: 'Month',
+			iconBg: 'bg-purple-600',
+			changeText: 'this month',
 			changeType: 'neutral',
 			showTrend: false,
 			showIcon: true,
@@ -161,7 +201,7 @@ function DriverDashboardComponent() {
 	const isFullyOnboarded = currentStage.stage === 'fully_active';
 
 	// Enhanced loading state
-	if (isDriverLoading) {
+	if (isDriverLoading || isBookingsLoading) {
 		return (
 			<div className="space-y-6">
 				<div className="animate-pulse space-y-4">
@@ -214,14 +254,26 @@ function DriverDashboardComponent() {
 				isFullyOnboarded={isFullyOnboarded}
 			/>
 
-			{/* Mobile-Optimized Stats Cards */}
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-				{analyticsData.map((data) => (
+			{/* Primary Analytics - Top Row */}
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+				{analyticsData.slice(0, 3).map((data) => (
+					<AnalyticsCard 
+						key={data.id} 
+						data={data} 
+						view="default" 
+						className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] touch-manipulation rounded-xl" 
+					/>
+				))}
+			</div>
+
+			{/* Secondary Analytics - Bottom Row */}
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+				{analyticsData.slice(3).map((data) => (
 					<AnalyticsCard 
 						key={data.id} 
 						data={data} 
 						view="compact" 
-						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation" 
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] touch-manipulation rounded-xl" 
 					/>
 				))}
 			</div>

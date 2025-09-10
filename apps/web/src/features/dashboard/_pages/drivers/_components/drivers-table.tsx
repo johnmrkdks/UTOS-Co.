@@ -85,17 +85,27 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 		}
 	};
 
-	const handleDelete = async (driverId: string) => {
+	const handleDelete = async (driverId: string, forceDelete: boolean = false, confirmationText: string = "") => {
 		try {
-			await deleteDriverMutation.mutateAsync({ id: driverId });
+			await deleteDriverMutation.mutateAsync({ 
+				id: driverId, 
+				forceDelete, 
+				confirmationText 
+			});
 		} catch (error) {
 			console.error("Failed to delete driver:", error);
+			// Re-throw the error so the dialog can handle it
+			throw error;
 		}
 	};
 
 	const handleRemoveUser = async (userId: string) => {
 		try {
-			await removeUserMutation.mutateAsync(userId);
+			await removeUserMutation.mutateAsync({ 
+				userId, 
+				forceDelete: true, 
+				confirmationText: "DELETE" 
+			});
 		} catch (error) {
 			console.error("Failed to remove user:", error);
 		}

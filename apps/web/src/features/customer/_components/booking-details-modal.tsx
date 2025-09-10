@@ -41,6 +41,7 @@ import { format } from "date-fns";
 import { Save } from "lucide-react";
 import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutation";
 import { useCancelBookingMutation } from "../_hooks/query/use-cancel-booking-mutation";
+import { useValidateBookingOperationsQuery } from "../_hooks/query/use-validate-booking-operations-query";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
 
 interface BookingDetailsModalProps {
@@ -112,8 +113,11 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 		selectedCarId: booking?.carId || "",
 	});
 
-	// Get validation data for edit/cancel permissions using client-side logic
-	const validation = canEditOrCancelBooking(booking);
+	// Get validation data for edit/cancel permissions using real-time backend validation
+	const { data: validation, isLoading: validationLoading } = useValidateBookingOperationsQuery(
+		booking?.id,
+		!!booking?.id && isOpen
+	);
 	
 	// Mutations
 	const editMutation = useEditBookingMutation();
@@ -698,31 +702,54 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 
 				{/* Action Buttons */}
 				<div className="pt-4 border-t space-y-4">
+					{/* Loading state for validation */}
+					{validationLoading && (
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<Loader2 className="h-4 w-4 animate-spin" />
+							Checking booking permissions...
+						</div>
+					)}
+
 					{/* Edit/Cancel buttons */}
-					<div className="flex gap-2">
-						{validation?.canEdit && (
-							<Button 
-								variant="outline" 
-								size="sm"
-								onClick={() => setIsEditing(true)}
-							>
-								<Edit3 className="h-4 w-4 mr-2" />
-								Edit Booking
-							</Button>
-						)}
-						
-						{validation?.canCancel && !showCancelConfirm && (
-							<Button 
-								variant="outline" 
-								size="sm"
-								onClick={() => setShowCancelConfirm(true)}
-								className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-							>
-								<XCircle className="h-4 w-4 mr-2" />
-								Cancel Booking
-							</Button>
-						)}
-					</div>
+					{!validationLoading && (
+						<div className="flex gap-2">
+							{validation?.canEdit && (
+								<Button 
+									variant="outline" 
+									size="sm"
+									onClick={() => setIsEditing(true)}
+									className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+								>
+									<Edit3 className="h-4 w-4 mr-2" />
+									Edit Booking
+								</Button>
+							)}
+							
+							{validation?.canCancel && !showCancelConfirm && (
+								<Button 
+									variant="outline" 
+									size="sm"
+									onClick={() => setShowCancelConfirm(true)}
+									className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+								>
+									<XCircle className="h-4 w-4 mr-2" />
+									Cancel Booking
+								</Button>
+							)}
+
+							{/* Display reasons when actions are disabled */}
+							{!validation?.canEdit && !validation?.canCancel && (
+								<div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+									{booking?.status === 'completed' ? 
+										'Booking has been completed' : 
+										booking?.status === 'cancelled' ? 
+										'Booking has been cancelled' :
+										'Booking modifications are not available at this time'
+									}
+								</div>
+							)}
+						</div>
+					)}
 
 					{/* Cancellation reasons */}
 					{!validation?.canEdit && validation?.editReason && (

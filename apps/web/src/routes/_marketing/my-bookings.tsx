@@ -12,6 +12,8 @@ import { cn } from "@workspace/ui/lib/utils";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { BookingDetailsPage } from "@/features/customer/_components/booking-details-page";
 import { BookingDetailsModal } from "@/features/customer/_components/booking-details-modal";
+import { BookingActions } from "@/features/customer/_components/booking-actions";
+import { BookingStatusIndicator } from "@/features/customer/_components/booking-status-indicator";
 
 export const Route = createFileRoute("/_marketing/my-bookings")({
 	component: CustomerBookingsPage,
@@ -249,18 +251,14 @@ function CustomerBookingsPage() {
 															<h3 className="font-semibold text-lg text-gray-900">
 																{booking.bookingType === "package" ? "Premium Service" : "Custom Journey"}
 															</h3>
-															<div className="flex items-center gap-2">
-																<Badge className={cn("text-sm px-3 py-1", getStatusColor(booking.status))}>
-																	{getStatusIcon(booking.status)}
-																	<span className="ml-2 capitalize font-medium">{booking.status.replace('_', ' ')}</span>
-																</Badge>
-																{new Date(booking.scheduledPickupTime) > new Date() && 
-																 !["completed", "cancelled"].includes(booking.status) && (
-																	<Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200 px-3 py-1">
-																		Upcoming
-																	</Badge>
-																)}
-															</div>
+															<BookingStatusIndicator
+																status={booking.status}
+																bookingType={booking.bookingType}
+																size="default"
+																showUpcoming={true}
+																scheduledPickupTime={booking.scheduledPickupTime}
+																className="flex-wrap"
+															/>
 														</div>
 														<div className="text-right">
 															<div className="font-bold text-xl text-gray-900">
@@ -303,11 +301,20 @@ function CustomerBookingsPage() {
 												</div>
 												
 												{/* Actions */}
-												<div className="flex items-center gap-3 pt-2">
+												<div className="space-y-3 pt-2">
+													{/* Edit/Cancel Actions */}
+													<BookingActions 
+														booking={booking}
+														size="default"
+														variant="compact"
+														className="w-full"
+													/>
+													
+													{/* View Details Button */}
 													<Button
 														variant="outline"
 														size="lg"
-														className="flex-1 text-primary hover:text-primary/80 font-medium"
+														className="w-full text-primary hover:text-primary/80 font-medium"
 														onClick={() => handleViewDetails(booking)}
 													>
 														<span>View Details</span>
@@ -320,16 +327,14 @@ function CustomerBookingsPage() {
 											<div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 items-center">
 												{/* Status */}
 												<div className="col-span-1">
-													<Badge className={cn("text-xs", getStatusColor(booking.status))}>
-														{getStatusIcon(booking.status)}
-														<span className="ml-1 capitalize">{booking.status.replace('_', ' ')}</span>
-													</Badge>
-													{new Date(booking.scheduledPickupTime) > new Date() && 
-													 !["completed", "cancelled"].includes(booking.status) && (
-														<Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 mt-1 block w-fit">
-															Upcoming
-														</Badge>
-													)}
+													<BookingStatusIndicator
+														status={booking.status}
+														bookingType={booking.bookingType}
+														size="sm"
+														showUpcoming={true}
+														scheduledPickupTime={booking.scheduledPickupTime}
+														className="flex-col items-start gap-1"
+													/>
 												</div>
 												
 												{/* Service */}
@@ -371,7 +376,15 @@ function CustomerBookingsPage() {
 												
 												{/* Actions */}
 												<div className="col-span-3">
-													<div className="flex items-center gap-2">
+													<div className="flex items-center gap-2 flex-wrap">
+														{/* Edit/Cancel Actions */}
+														<BookingActions 
+															booking={booking}
+															size="sm"
+															variant="default"
+														/>
+														
+														{/* View Details Button */}
 														<Button
 															variant="outline"
 															size="sm"
