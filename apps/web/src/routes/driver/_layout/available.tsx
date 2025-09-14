@@ -25,6 +25,9 @@ function AvailableTripsPage() {
 	const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
 	const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<any>(null);
 
+	// State to track which trip is being started
+	const [startingTripId, setStartingTripId] = useState<string | null>(null);
+
 	// Get assigned trips for current driver
 	const { data: assignedTripsData, isLoading: assignedLoading, error: assignedError } = useDriverBookingsQuery({
 		limit: 50,
@@ -43,12 +46,22 @@ function AvailableTripsPage() {
 
 	const handleStartTrip = async (tripId: string) => {
 		try {
+			setStartingTripId(tripId); // Track which trip is being started
 			// Update trip status from 'driver_assigned' to 'driver_en_route'
 			updateStatusMutation.mutate({
 				id: tripId,
 				status: 'driver_en_route' as any,
+			}, {
+				onSuccess: () => {
+					setStartingTripId(null); // Clear loading state on success
+				},
+				onError: () => {
+					setStartingTripId(null); // Clear loading state on error
+					toast.error("Failed to start trip");
+				}
 			});
 		} catch (error) {
+			setStartingTripId(null); // Clear loading state on catch
 			toast.error("Failed to start trip");
 		}
 	};
@@ -173,10 +186,10 @@ function AvailableTripsPage() {
 											e.stopPropagation(); // Prevent card click
 											handleStartTrip(trip.id);
 										}}
-										disabled={updateStatusMutation.isPending}
+										disabled={startingTripId === trip.id}
 										className="px-4 py-2 font-medium text-sm"
 									>
-										{updateStatusMutation.isPending ? (
+										{startingTripId === trip.id ? (
 											<>
 												<Loader2Icon className="w-3 h-3 animate-spin mr-1" />
 												Starting...
@@ -271,10 +284,10 @@ function AvailableTripsPage() {
 											e.stopPropagation(); // Prevent card click
 											handleStartTrip(trip.id);
 										}}
-										disabled={updateStatusMutation.isPending}
+										disabled={startingTripId === trip.id}
 										className="px-6 py-2 font-medium"
 									>
-										{updateStatusMutation.isPending ? (
+										{startingTripId === trip.id ? (
 											<>
 												<Loader2Icon className="w-4 h-4 animate-spin mr-2" />
 												Starting...
@@ -515,10 +528,10 @@ function AvailableTripsPage() {
 											handleStartTrip(selectedBookingForDetails.id);
 											setBookingDetailsOpen(false);
 										}}
-										disabled={updateStatusMutation.isPending}
+										disabled={startingTripId === selectedBookingForDetails.id}
 										className="w-full h-12 text-base font-semibold"
 									>
-										{updateStatusMutation.isPending ? (
+										{startingTripId === selectedBookingForDetails.id ? (
 											<>
 												<Loader2Icon className="w-5 h-5 animate-spin mr-2" />
 												Starting Trip...
