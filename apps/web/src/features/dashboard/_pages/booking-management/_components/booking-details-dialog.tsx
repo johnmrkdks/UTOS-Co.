@@ -46,7 +46,8 @@ import {
 	TrendingUp,
 	CreditCard,
 	Edit3,
-	X
+	X,
+	CircleDot
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -179,21 +180,78 @@ export function BookingDetailsDialog() {
 									<Navigation className="h-5 w-5 text-primary" />
 									<h3 className="font-semibold">Route</h3>
 								</div>
-								<div className="space-y-3">
-									<div>
-										<div className="text-xs text-gray-500 mb-1">FROM</div>
-										<div className="font-medium">{booking.originAddress}</div>
-									</div>
-									<div>
-										<div className="text-xs text-gray-500 mb-1">TO</div>
-										<div className="font-medium">{booking.destinationAddress}</div>
-									</div>
-									{booking.estimatedDistance && (
-										<div className="flex gap-4 text-sm text-gray-600">
-											<span>{(booking.estimatedDistance / 1000).toFixed(1)} km</span>
-											{booking.estimatedDuration && <span>{Math.round(booking.estimatedDuration / 60)} min</span>}
+								<div className="space-y-4">
+									{/* Origin */}
+									<div className="flex items-start gap-3">
+										<div className="relative mt-1">
+											<div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+												<Navigation className="w-2 h-2 text-white" />
+											</div>
+											{/* Connector line */}
+											{(booking.stops && booking.stops.length > 0) || booking.destinationAddress ? (
+												<div className="absolute left-1/2 top-4 w-0.5 h-5 bg-gradient-to-b from-green-500 to-blue-400 transform -translate-x-1/2"></div>
+											) : null}
 										</div>
+										<div className="flex-1 min-w-0 pt-0.5">
+											<div className="text-xs text-green-700 font-medium mb-1">PICKUP LOCATION</div>
+											<div className="font-medium text-gray-900 text-sm break-words leading-relaxed">{booking.originAddress}</div>
+										</div>
+									</div>
+
+									{/* Stops (if any) */}
+									{booking.stops && booking.stops.length > 0 && (
+										<>
+											{booking.stops.map((stop: any, index: number) => (
+												<div key={stop.id || index} className="flex items-start gap-3">
+													<div className="relative mt-1">
+														<div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+															<CircleDot className="w-2 h-2 text-white" />
+														</div>
+														{/* Connector line */}
+														<div className="absolute left-1/2 top-4 w-0.5 h-5 bg-gradient-to-b from-blue-400 to-red-400 transform -translate-x-1/2"></div>
+													</div>
+													<div className="flex-1 min-w-0 pt-0.5">
+														<div className="text-xs text-blue-700 font-medium mb-1">STOP {index + 1}</div>
+														<div className="font-medium text-gray-900 text-sm break-words leading-relaxed">{stop.address}</div>
+													</div>
+												</div>
+											))}
+										</>
 									)}
+
+									{/* Destination */}
+									<div className="flex items-start gap-3">
+										<div className="relative mt-1">
+											<div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+												<MapPin className="w-2 h-2 text-white" />
+											</div>
+										</div>
+										<div className="flex-1 min-w-0 pt-0.5">
+											<div className="text-xs text-red-700 font-medium mb-1">DROP-OFF LOCATION</div>
+											<div className="font-medium text-gray-900 text-sm break-words leading-relaxed">{booking.destinationAddress}</div>
+										</div>
+									</div>
+								</div>
+
+								{/* Journey Summary */}
+								<div className="mt-4 pt-3 border-t border-gray-100">
+									<div className="flex items-center justify-between text-sm">
+										{booking.estimatedDistance && (
+											<div className="text-gray-600">
+												<span className="font-medium">{(booking.estimatedDistance / 1000).toFixed(1)} km</span>
+											</div>
+										)}
+										{booking.estimatedDuration && (
+											<div className="text-gray-600">
+												<span className="font-medium">{Math.round(booking.estimatedDuration / 60)} min</span>
+											</div>
+										)}
+										{booking.stops && booking.stops.length > 0 && (
+											<div className="text-blue-600">
+												<span className="font-medium">{booking.stops.length} stop{booking.stops.length > 1 ? 's' : ''}</span>
+											</div>
+										)}
+									</div>
 								</div>
 							</div>
 

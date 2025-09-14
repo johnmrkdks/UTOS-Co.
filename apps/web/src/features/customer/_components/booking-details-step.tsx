@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { bookingDetailsSchema, type BookingDetailsFormData } from "../_schemas/instant-quote";
-import { DateInput } from "@workspace/ui/components/date-input";
+import { ImprovedDateTimePicker } from "@/components/improved-datetime-picker";
 
 interface BookingDetailsStepProps {
 	selectedCarId: string;
@@ -23,15 +23,16 @@ export function BookingDetailsStep({
 	onBack, 
 	isSubmitting = false 
 }: BookingDetailsStepProps) {
-	const { data: user } = useUserQuery();
+	const { session } = useUserQuery();
 	
 	const form = useForm<BookingDetailsFormData>({
-		resolver: zodResolver(bookingDetailsSchema),
+		resolver: zodResolver(bookingDetailsSchema) as any,
 		defaultValues: {
-			customerName: user?.name || "",
+			customerName: session?.user?.name || "",
 			customerPhone: "",
-			customerEmail: user?.email || "",
+			customerEmail: session?.user?.email || "",
 			passengerCount: 1,
+			luggageCount: 0,
 			scheduledPickupTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
 			specialRequests: "",
 			selectedCarId: selectedCarId,
@@ -110,31 +111,54 @@ export function BookingDetailsStep({
 							)}
 						/>
 
-						{/* Passenger Count */}
-						<FormField
-							control={form.control as any}
-							name="passengerCount"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Number of Passengers *</FormLabel>
-									<FormControl>
-										<div className="relative">
-											<Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+						{/* Passenger and Luggage Count side by side */}
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<FormField
+								control={form.control as any}
+								name="passengerCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Number of Passengers *</FormLabel>
+										<FormControl>
+											<div className="relative">
+												<Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+												<Input
+													{...field}
+													type="number"
+													min="1"
+													max="8"
+													placeholder="Number of passengers"
+													className="pl-10"
+													onChange={(e) => field.onChange(Number(e.target.value))}
+												/>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control as any}
+								name="luggageCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Luggage Pieces</FormLabel>
+										<FormControl>
 											<Input
 												{...field}
 												type="number"
-												min="1"
-												max="8"
-												placeholder="Number of passengers"
-												className="pl-10"
+												min="0"
+												max="10"
+												placeholder="Number of luggage pieces"
 												onChange={(e) => field.onChange(Number(e.target.value))}
 											/>
-										</div>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
 						{/* Pickup Date/Time */}
 						<FormField
@@ -144,16 +168,12 @@ export function BookingDetailsStep({
 								<FormItem>
 									<FormLabel>Pickup Date & Time *</FormLabel>
 									<FormControl>
-										<div className="relative">
-											<Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-											<DateInput
-												value={field.value}
-												onDateChange={field.onChange}
-												className="pl-10"
-												minYear={new Date().getFullYear()}
-												maxYear={new Date().getFullYear() + 2}
-											/>
-										</div>
+										<ImprovedDateTimePicker
+											value={field.value}
+											onChange={field.onChange}
+											placeholder="Select pickup date and time"
+											minDate={new Date()}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

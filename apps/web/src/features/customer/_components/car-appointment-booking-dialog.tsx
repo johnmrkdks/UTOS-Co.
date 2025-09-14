@@ -29,7 +29,7 @@ const carAppointmentSchema = z.object({
 	
 	// Timing
 	scheduledPickupTime: z.date({
-		required_error: "Please select a pickup date and time",
+		message: "Please select a pickup date and time",
 	}),
 	
 	// Service details
@@ -84,7 +84,7 @@ export function CarAppointmentBookingDialog({
 	})
 
 	const form = useForm<CarAppointmentForm>({
-		resolver: zodResolver(carAppointmentSchema),
+		resolver: zodResolver(carAppointmentSchema) as any,
 		defaultValues: {
 			originAddress: "",
 			destinationAddress: "",

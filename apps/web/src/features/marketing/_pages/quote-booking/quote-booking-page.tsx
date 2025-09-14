@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -22,7 +22,10 @@ import {
 	AlertCircle,
 	Car,
 	Calculator,
-	LogIn
+	LogIn,
+	Navigation,
+	CircleDot,
+	MapPinned
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
@@ -33,6 +36,7 @@ import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
 import { useGetCarQuery } from "@/features/customer/_hooks/query/use-get-car-query";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
+import { createLocalDateForBackend } from "@/utils/timezone";
 
 // Booking form schema for quote-based booking
 const QuoteBookingFormSchema = z.object({
@@ -41,7 +45,8 @@ const QuoteBookingFormSchema = z.object({
 	customerName: z.string({ required_error: "Please enter your full name" }).min(1, "Please enter your full name"),
 	customerPhone: z.string({ required_error: "Please enter your phone number" }).min(1, "Please enter your phone number"),
 	customerEmail: z.string({ required_error: "Please enter your email address" }).email("Please enter a valid email address"),
-	passengerCount: z.number().min(1, "At least 1 passenger required"),
+	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
+	luggageCount: z.number().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed").default(0),
 	specialRequests: z.string().optional(),
 });
 
@@ -82,6 +87,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	// Form state - pre-populate for authenticated users
 	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({
 		passengerCount: 1,
+		luggageCount: 0,
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
@@ -149,6 +155,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				customerPhone: formData.customerPhone || "",
 				customerEmail: formData.customerEmail || "",
 				passengerCount: formData.passengerCount || 1,
+				luggageCount: formData.luggageCount || 0,
 				specialRequests: formData.specialRequests || "",
 			};
 
@@ -205,25 +212,26 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		}
 
 		try {
-			// Create proper Date object from date and time inputs
-			const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}:00.000Z`);
-
-			// Validate that the date is valid
-			if (isNaN(scheduledPickupTime.getTime())) {
-				toast.error("Invalid pickup date or time");
-				return;
-			}
-
 			// Use simplified pricing from secure quote data if available
 			const firstKmFareAmount = secureQuoteData?.firstKmFare || quoteData.totalFare * 0.7;
 			const additionalKmFareAmount = secureQuoteData?.additionalKmFare || quoteData.totalFare * 0.3;
 			const quotedAmount = Math.round(quoteData.totalFare * 100); // Convert to cents
 
+
 			const bookingPayload = {
 				userId: effectiveUserInfo.id,
 				originAddress: quoteData.origin,
 				destinationAddress: quoteData.destination,
-				scheduledPickupTime: scheduledPickupTime.toISOString(),
+				// Include stops from the secure quote data
+				stops: secureQuoteData?.stops ? secureQuoteData.stops.map((stop: any, index: number) => ({
+					address: stop.address,
+					latitude: stop.latitude,
+					longitude: stop.longitude,
+					stopOrder: index + 1, // Add required stopOrder field
+					waitingTime: 0, // Default waiting time
+					notes: stop.notes || undefined, // Optional notes
+				})) : [],
+				scheduledPickupTime: createLocalDateForBackend(formData.scheduledPickupDate!, formData.scheduledPickupTime!),
 				estimatedDuration: quoteData.duration * 60, // Convert minutes to seconds
 				estimatedDistance: quoteData.distance * 1000, // Convert km to meters
 				// Map new pricing structure to existing database fields
@@ -236,6 +244,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				customerPhone: formData.customerPhone!,
 				customerEmail: formData.customerEmail!,
 				passengerCount: formData.passengerCount!,
+				luggageCount: formData.luggageCount || 0,
 				specialRequests: formData.specialRequests,
 				preferredCategoryId: preselectedCarId,
 			};
@@ -282,10 +291,10 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										</p>
 									</div>
 
-									{/* Selected Car */}
-									{carId && (
-										<div className="bg-white rounded-lg p-4 border text-left">
-											<h3 className="font-medium text-gray-900 mb-3 text-center">Pre-selected Vehicle</h3>
+										{/* Selected Car */}
+										{carId && (
+											<div className="bg-white rounded-lg p-4 border text-left">
+												<h3 className="font-medium text-gray-900 mb-3 text-center">Pre-selected Vehicle</h3>
 											<div className="flex items-center gap-3">
 												<div className="w-16 h-12 bg-primary/10 rounded border flex items-center justify-center">
 													<Car className="w-6 h-6 text-primary/60" />
@@ -342,51 +351,84 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 									{(secureQuoteData || quoteData.origin) && (
 										<div className="bg-white rounded-lg p-4 border text-left">
 											<h3 className="font-medium text-gray-900 mb-3 text-center">Your Quote Summary</h3>
-											<div className="space-y-2 text-sm">
-												<div className="flex justify-between">
-													<span className="text-gray-600">From:</span>
-													<span className="font-medium truncate ml-2">{secureQuoteData?.originAddress || quoteData.origin}</span>
-												</div>
-												<div className="flex justify-between">
-													<span className="text-gray-600">To:</span>
-													<span className="font-medium truncate ml-2">{secureQuoteData?.destinationAddress || quoteData.destination}</span>
-												</div>
-												<div className="flex justify-between">
-													<span className="text-gray-600">Distance:</span>
-													<span className="font-medium">{quoteData.distance.toFixed(1)} km</span>
-												</div>
-												<div className="flex justify-between">
-													<span className="text-gray-600">Duration:</span>
-													<span className="font-medium">{quoteData.duration} min</span>
+											<div className="space-y-3 text-sm">
+												{/* From */}
+												<div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+													<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+														<Navigation className="w-3 h-3 text-white" />
+													</div>
+													<div className="flex-1 min-w-0">
+														<span className="text-xs text-green-700 font-medium">Pickup</span>
+														<div className="text-sm font-medium text-gray-800 truncate">{secureQuoteData?.originAddress || quoteData.origin}</div>
+													</div>
 												</div>
 
+												{/* Stops (if any) */}
+												{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
+													<>
+														{secureQuoteData.stops.map((stop: any, index: number) => (
+															<div key={stop.id || index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+																<div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+																	<CircleDot className="w-3 h-3 text-white" />
+																</div>
+																<div className="flex-1 min-w-0">
+																	<span className="text-xs text-blue-700 font-medium">Stop {index + 1}</span>
+																	<div className="text-sm font-medium text-gray-800 truncate">{stop.address}</div>
+																</div>
+															</div>
+														))}
+													</>
+												)}
+
+												{/* To */}
+												<div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
+													<div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+														<MapPinned className="w-3 h-3 text-white" />
+													</div>
+													<div className="flex-1 min-w-0">
+														<span className="text-xs text-red-700 font-medium">Drop-off</span>
+														<div className="text-sm font-medium text-gray-800 truncate">{secureQuoteData?.destinationAddress || quoteData.destination}</div>
+													</div>
+												</div>
+
+												{/* Journey Details */}
+												<div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+													<div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+														<Clock className="w-3 h-3 text-white" />
+													</div>
+													<div className="flex-1">
+														<span className="text-xs text-purple-700 font-medium">Journey</span>
+														<div className="text-sm font-medium text-gray-800">{quoteData.distance.toFixed(1)} km • {quoteData.duration} min</div>
+													</div>
+												</div>
+											</div>
+
+											<div>
 												{/* Fare Breakdown */}
 												{(secureQuoteData?.firstKmFare || secureQuoteData?.additionalKmFare) && (
-													<>
-														<div className="border-t pt-2 mt-2">
-															<div className="text-xs font-medium text-gray-700 mb-2">Fare Breakdown:</div>
-															<div className="space-y-1">
-																{secureQuoteData?.firstKmFare && (
-																	<div className="flex justify-between text-xs">
-																		<span className="text-gray-500">First {Math.ceil(secureQuoteData.breakdown?.firstKmDistance || 10)}km (Flat Rate):</span>
-																		<span>${secureQuoteData.firstKmFare.toFixed(2)}</span>
-																	</div>
-																)}
-																{secureQuoteData?.additionalKmFare && secureQuoteData.additionalKmFare > 0 && (
-																	<div className="flex justify-between text-xs">
-																		<span className="text-gray-500">Additional {secureQuoteData.breakdown?.additionalDistance?.toFixed(1) || 0}km:</span>
-																		<span>${secureQuoteData.additionalKmFare.toFixed(2)}</span>
-																	</div>
-																)}
-																{secureQuoteData?.extraCharges && secureQuoteData.extraCharges > 0 && (
-																	<div className="flex justify-between text-xs">
-																		<span className="text-gray-500">Additional charges:</span>
-																		<span>${secureQuoteData.extraCharges.toFixed(2)}</span>
-																	</div>
-																)}
-															</div>
+													<div className="border-t pt-2 mt-2">
+														<div className="text-xs font-medium text-gray-700 mb-2">Fare Breakdown:</div>
+														<div className="space-y-1">
+															{secureQuoteData?.firstKmFare && (
+																<div className="flex justify-between text-xs">
+																	<span className="text-gray-500">First {Math.ceil(secureQuoteData.breakdown?.firstKmDistance || 10)}km (Flat Rate):</span>
+																	<span>${secureQuoteData.firstKmFare.toFixed(2)}</span>
+																</div>
+															)}
+															{secureQuoteData?.additionalKmFare && secureQuoteData.additionalKmFare > 0 && (
+																<div className="flex justify-between text-xs">
+																	<span className="text-gray-500">Additional {secureQuoteData.breakdown?.additionalDistance?.toFixed(1) || 0}km:</span>
+																	<span>${secureQuoteData.additionalKmFare.toFixed(2)}</span>
+																</div>
+															)}
+															{secureQuoteData?.extraCharges && secureQuoteData.extraCharges > 0 && (
+																<div className="flex justify-between text-xs">
+																	<span className="text-gray-500">Additional charges:</span>
+																	<span>${secureQuoteData.extraCharges.toFixed(2)}</span>
+																</div>
+															)}
 														</div>
-													</>
+													</div>
 												)}
 
 												<div className="flex justify-between border-t pt-2 text-base">
@@ -515,58 +557,88 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 						</div>
 						<Separator />
 
-						{/* Enhanced Route Display for Confirmation */}
-						<div className="p-3 bg-gradient-to-r from-green-50 to-red-50 rounded-lg border border-gray-200">
-							{/* Mobile - Vertical Stack */}
-							<div className="sm:hidden space-y-3">
-								{/* Origin */}
-								<div className="flex items-start gap-3">
-									<div className="relative mt-0.5">
-										<div className="w-3 h-3 rounded-full bg-green-500 border border-white shadow-sm flex-shrink-0" />
-										<div className="absolute left-1/2 top-3 w-px h-4 bg-gradient-to-b from-green-500 to-red-500 transform -translate-x-1/2"></div>
+						{/* Enhanced Route Display for Confirmation - Vertical Layout for Better Readability */}
+						<div className="space-y-4">
+							{/* Journey Route - Always Vertical */}
+							<div className="bg-white rounded-lg border p-4 space-y-4">
+								<h4 className="font-medium text-gray-900 text-sm mb-3">Journey Route</h4>
+								<div className="space-y-3">
+									{/* Origin */}
+									<div className="flex items-start gap-3">
+										<div className="relative mt-1">
+											<div className="w-5 h-5 rounded-full bg-green-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+												<div className="w-2 h-2 rounded-full bg-white"></div>
+											</div>
+											{/* Connector line */}
+											{(secureQuoteData?.stops && secureQuoteData.stops.length > 0) || quoteData.destination ? (
+												<div className="absolute left-1/2 top-5 w-0.5 h-6 bg-gradient-to-b from-green-500 to-blue-400 transform -translate-x-1/2"></div>
+											) : null}
+										</div>
+										<div className="flex-1 min-w-0 pt-0.5">
+											<div className="flex items-center gap-2 mb-1">
+												<span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Pickup Location</span>
+											</div>
+											<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{quoteData.origin}</div>
+										</div>
 									</div>
-									<div className="min-w-0 flex-1">
-										<div className="text-xs text-gray-500">From</div>
-										<div className="font-medium text-sm leading-tight break-words">{quoteData.origin}</div>
-									</div>
-								</div>
 
-								{/* Destination */}
-								<div className="flex items-start gap-3">
-									<div className="relative mt-0.5">
-										<div className="w-3 h-3 rounded-full bg-red-500 border border-white shadow-sm flex-shrink-0" />
-									</div>
-									<div className="min-w-0 flex-1">
-										<div className="text-xs text-gray-500">To</div>
-										<div className="font-medium text-sm leading-tight break-words">{quoteData.destination}</div>
+									{/* Stops (if any) */}
+									{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
+										<>
+											{secureQuoteData.stops.map((stop: any, index: number) => (
+												<div key={stop.id || index} className="flex items-start gap-3">
+													<div className="relative mt-1">
+														<div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+															<div className="w-2 h-2 rounded-full bg-white"></div>
+														</div>
+														{/* Connector line */}
+														<div className="absolute left-1/2 top-5 w-0.5 h-6 bg-gradient-to-b from-blue-400 to-red-400 transform -translate-x-1/2"></div>
+													</div>
+													<div className="flex-1 min-w-0 pt-0.5">
+														<div className="flex items-center gap-2 mb-1">
+															<span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Stop {index + 1}</span>
+														</div>
+														<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{stop.address}</div>
+													</div>
+												</div>
+											))}
+										</>
+									)}
+
+									{/* Destination */}
+									<div className="flex items-start gap-3">
+										<div className="relative mt-1">
+											<div className="w-5 h-5 rounded-full bg-red-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+												<div className="w-2 h-2 rounded-full bg-white"></div>
+											</div>
+										</div>
+										<div className="flex-1 min-w-0 pt-0.5">
+											<div className="flex items-center gap-2 mb-1">
+												<span className="text-xs font-semibold text-red-700 uppercase tracking-wide">Drop-off Location</span>
+											</div>
+											<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{quoteData.destination}</div>
+										</div>
 									</div>
 								</div>
 							</div>
 
-							{/* Desktop - Horizontal Layout */}
-							<div className="hidden sm:flex items-center justify-between gap-4">
-								{/* Origin */}
-								<div className="flex items-center gap-2 flex-1 min-w-0">
-									<div className="w-3 h-3 rounded-full bg-green-500 border border-white shadow-sm flex-shrink-0" />
-									<div className="min-w-0 flex-1">
-										<div className="text-xs text-gray-500">From</div>
-										<div className="font-medium text-sm truncate">{quoteData.origin}</div>
+							{/* Journey Summary */}
+							<div className="bg-gray-50 rounded-lg p-4">
+								<div className="grid grid-cols-2 gap-4 text-sm">
+									<div>
+										<span className="text-gray-600">Distance:</span>
+										<p className="font-medium text-gray-900">{quoteData.distance?.toFixed(1)} km</p>
 									</div>
-								</div>
-
-								{/* Route Connector */}
-								<div className="flex items-center gap-1 flex-shrink-0">
-									<div className="w-4 h-px bg-gradient-to-r from-green-500 to-red-500"></div>
-									<div className="w-1.5 h-1.5 border-t border-r border-red-500 transform rotate-45"></div>
-								</div>
-
-								{/* Destination */}
-								<div className="flex items-center gap-2 flex-1 min-w-0">
-									<div className="w-3 h-3 rounded-full bg-red-500 border border-white shadow-sm flex-shrink-0" />
-									<div className="min-w-0 flex-1">
-										<div className="text-xs text-gray-500">To</div>
-										<div className="font-medium text-sm truncate">{quoteData.destination}</div>
+									<div>
+										<span className="text-gray-600">Duration:</span>
+										<p className="font-medium text-gray-900">{quoteData.duration} min</p>
 									</div>
+									{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
+										<div className="col-span-2">
+											<span className="text-gray-600">Stops:</span>
+											<p className="font-medium text-gray-900">{secureQuoteData.stops.length} intermediate stop{secureQuoteData.stops.length > 1 ? 's' : ''}</p>
+										</div>
+									)}
 								</div>
 							</div>
 						</div>
@@ -574,11 +646,40 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 						<div className="grid grid-cols-2 gap-4 text-sm">
 							<div>
 								<span className="text-gray-600">Date & Time:</span>
-								<p className="font-medium">{formData.scheduledPickupDate} at {formData.scheduledPickupTime}</p>
+								<p className="font-medium">
+									{formData.scheduledPickupDate && formData.scheduledPickupTime ? (
+										(() => {
+											// Parse the date string directly without timezone conversion
+											const [year, month, day] = formData.scheduledPickupDate.split('-');
+											const [hours, minutes] = formData.scheduledPickupTime.split(':');
+											
+											// Format date parts manually to avoid timezone issues
+											const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+											const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+											
+											// Create a date object just for getting day of week (this should be safe)
+											const tempDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+											const dayOfWeek = dayNames[tempDate.getDay()];
+											
+											// Format time to 12-hour format
+											const hour24 = parseInt(hours);
+											const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+											const ampm = hour24 >= 12 ? 'PM' : 'AM';
+											
+											return `${dayOfWeek}, ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year} at ${hour12}:${minutes} ${ampm}`;
+										})()
+									) : (
+										`${formData.scheduledPickupDate} at ${formData.scheduledPickupTime}`
+									)}
+								</p>
 							</div>
 							<div>
 								<span className="text-gray-600">Passengers:</span>
 								<p className="font-medium">{formData.passengerCount} passenger{formData.passengerCount !== 1 ? 's' : ''}</p>
+							</div>
+							<div>
+								<span className="text-gray-600">Luggage:</span>
+								<p className="font-medium">{formData.luggageCount || 0} piece{(formData.luggageCount || 0) !== 1 ? 's' : ''}</p>
 							</div>
 							<div>
 								<span className="text-gray-600">Distance:</span>
@@ -686,23 +787,85 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										</h3>
 
 										<div className="space-y-3">
-											<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-												<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+											{/* From */}
+											<div className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+												<div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+													<Navigation className="w-4 h-4 text-white" />
+												</div>
 												<div className="flex-1 min-w-0">
-													<span className="text-xs text-gray-500">From</span>
-													<div className="text-sm font-medium text-gray-700 truncate">{quoteData.origin}</div>
+													<div className="flex items-center gap-2 mb-1">
+														<span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Pickup Location</span>
+													</div>
+													<div className="text-sm font-medium text-gray-800 truncate">{quoteData.origin}</div>
 												</div>
 											</div>
-											<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-												<div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+
+											{/* Route connector line */}
+											{(secureQuoteData?.stops && secureQuoteData.stops.length > 0) ? (
+												<div className="flex justify-center">
+													<div className="w-px h-4 bg-gradient-to-b from-green-400 to-blue-400"></div>
+												</div>
+											) : (
+												<div className="flex justify-center">
+													<div className="w-px h-4 bg-gradient-to-b from-green-400 to-red-400"></div>
+												</div>
+											)}
+
+											{/* Stops (if any) */}
+											{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
+												<>
+													{secureQuoteData.stops.map((stop: any, index: number) => (
+														<div key={stop.id || index}>
+															<div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+																<div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+																	<CircleDot className="w-4 h-4 text-white" />
+																</div>
+																<div className="flex-1 min-w-0">
+																	<div className="flex items-center gap-2 mb-1">
+																		<span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Stop {index + 1}</span>
+																	</div>
+																	<div className="text-sm font-medium text-gray-800 truncate">{stop.address}</div>
+																</div>
+															</div>
+															{/* Connector to next item */}
+															{index < secureQuoteData.stops.length - 1 ? (
+																<div className="flex justify-center">
+																	<div className="w-px h-4 bg-gradient-to-b from-blue-400 to-blue-400"></div>
+																</div>
+															) : (
+																<div className="flex justify-center">
+																	<div className="w-px h-4 bg-gradient-to-b from-blue-400 to-red-400"></div>
+																</div>
+															)}
+														</div>
+													))}
+												</>
+											)}
+
+											{/* To */}
+											<div className="flex items-center gap-3 p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-lg border border-red-200">
+												<div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+													<MapPinned className="w-4 h-4 text-white" />
+												</div>
 												<div className="flex-1 min-w-0">
-													<span className="text-xs text-gray-500">To</span>
-													<div className="text-sm font-medium text-gray-700 truncate">{quoteData.destination}</div>
+													<div className="flex items-center gap-2 mb-1">
+														<span className="text-xs font-semibold text-red-700 uppercase tracking-wide">Drop-off Location</span>
+													</div>
+													<div className="text-sm font-medium text-gray-800 truncate">{quoteData.destination}</div>
 												</div>
 											</div>
-											<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-												<div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-												<span className="text-sm text-gray-700 font-medium">{quoteData.distance.toFixed(1)} km • {quoteData.duration} min</span>
+
+											{/* Distance and Duration */}
+											<div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 mt-4">
+												<div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+													<Clock className="w-4 h-4 text-white" />
+												</div>
+												<div className="flex-1">
+													<div className="flex items-center gap-2 mb-1">
+														<span className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Journey Details</span>
+													</div>
+													<div className="text-sm font-medium text-gray-800">{quoteData.distance.toFixed(1)} km • {quoteData.duration} min</div>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -785,48 +948,46 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										</div>
 									</div>
 
-									<div className="space-y-5 pl-14">
+									<div className="space-y-5 pl-0 sm:pl-14">
 										<div>
 											<label className="block text-sm font-semibold text-gray-800 mb-3">Full Name *</label>
 											<Input
 												placeholder="Enter your full name"
 												value={formData.customerName || ""}
 												onChange={(e) => updateFormData("customerName", e.target.value)}
-												className={`h-12 text-base ${formErrors.customerName ? "border-red-500" : ""}`}
+												className={`w-full h-12 text-base ${formErrors.customerName ? "border-red-500" : ""}`}
 											/>
 											{formErrors.customerName && (
 												<p className="text-red-500 text-sm mt-1">{formErrors.customerName}</p>
 											)}
 										</div>
 
-										<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Email Address *</label>
-												<Input
-													type="email"
-													placeholder="Enter your email"
-													value={formData.customerEmail || ""}
-													onChange={(e) => updateFormData("customerEmail", e.target.value)}
-													className={`h-12 text-base ${formErrors.customerEmail ? "border-red-500" : ""}`}
-												/>
-												{formErrors.customerEmail && (
-													<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
-												)}
-											</div>
+										<div>
+											<label className="block text-sm font-semibold text-gray-800 mb-3">Email Address *</label>
+											<Input
+												type="email"
+												placeholder="Enter your email"
+												value={formData.customerEmail || ""}
+												onChange={(e) => updateFormData("customerEmail", e.target.value)}
+												className={`w-full h-12 text-base ${formErrors.customerEmail ? "border-red-500" : ""}`}
+											/>
+											{formErrors.customerEmail && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
+											)}
+										</div>
 
-											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number *</label>
-												<Input
-													type="tel"
-													placeholder="Enter your phone number"
-													value={formData.customerPhone || ""}
-													onChange={(e) => updateFormData("customerPhone", e.target.value)}
-													className={`h-12 text-base ${formErrors.customerPhone ? "border-red-500" : ""}`}
-												/>
-												{formErrors.customerPhone && (
-													<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
-												)}
-											</div>
+										<div>
+											<label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number *</label>
+											<Input
+												type="tel"
+												placeholder="Enter your phone number"
+												value={formData.customerPhone || ""}
+												onChange={(e) => updateFormData("customerPhone", e.target.value)}
+												className={`w-full h-12 text-base ${formErrors.customerPhone ? "border-red-500" : ""}`}
+											/>
+											{formErrors.customerPhone && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
+											)}
 										</div>
 									</div>
 								</div>
@@ -843,20 +1004,38 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										</div>
 									</div>
 
-									<div className="space-y-5 pl-14">
-										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
-											<Input
-												type="number"
-												min="1"
-												max="8"
-												value={formData.passengerCount || 1}
-												onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
-												className={`h-12 text-base ${formErrors.passengerCount ? "border-red-500" : ""}`}
-											/>
-											{formErrors.passengerCount && (
-												<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
-											)}
+									<div className="space-y-5 pl-0 sm:pl-14">
+										{/* Passengers and Luggage side by side */}
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+											<div>
+												<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
+												<Input
+													type="number"
+													min="1"
+													max="8"
+													value={formData.passengerCount || 1}
+													onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
+													className={`w-full h-12 text-base ${formErrors.passengerCount ? "border-red-500" : ""}`}
+												/>
+												{formErrors.passengerCount && (
+													<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
+												)}
+											</div>
+
+											<div>
+												<label className="block text-sm font-semibold text-gray-800 mb-3">Luggage Pieces</label>
+												<Input
+													type="number"
+													min="0"
+													max="10"
+													value={formData.luggageCount || 0}
+													onChange={(e) => updateFormData("luggageCount", parseInt(e.target.value) || 0)}
+													className={`w-full h-12 text-base ${formErrors.luggageCount ? "border-red-500" : ""}`}
+												/>
+												{formErrors.luggageCount && (
+													<p className="text-red-500 text-sm mt-1">{formErrors.luggageCount}</p>
+												)}
+											</div>
 										</div>
 
 										<DateTimePicker
@@ -865,7 +1044,12 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 											onDateChange={(selectedDate) => {
 												setDate(selectedDate);
 												if (selectedDate) {
-													updateFormData("scheduledPickupDate", selectedDate.toISOString().split('T')[0]);
+													// Use local date formatting to avoid timezone conversion
+													const year = selectedDate.getFullYear();
+													const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+													const day = String(selectedDate.getDate()).padStart(2, '0');
+													const localDateString = `${year}-${month}-${day}`;
+													updateFormData("scheduledPickupDate", localDateString);
 												}
 											}}
 											onTimeChange={(time) => updateFormData("scheduledPickupTime", time)}

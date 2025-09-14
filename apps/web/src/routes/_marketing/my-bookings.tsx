@@ -305,8 +305,15 @@ function CustomerBookingsPage() {
 															<div className="text-sm font-medium text-gray-900">
 																{booking.originAddress.split(',')[0]}
 															</div>
-															<div className="text-xs text-gray-500">
-																to {booking.destinationAddress.split(',')[0]}
+															<div className="flex items-center gap-2">
+																<div className="text-xs text-gray-500">
+																	to {booking.destinationAddress.split(',')[0]}
+																</div>
+																{booking.stops && booking.stops.length > 0 && (
+																	<Badge variant="outline" className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+																		{booking.stops.length} stop{booking.stops.length > 1 ? 's' : ''}
+																	</Badge>
+																)}
 															</div>
 														</div>
 													</div>

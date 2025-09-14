@@ -28,6 +28,8 @@ import {
 	Edit3,
 	XCircle,
 	Loader2,
+	CircleDot,
+	Navigation,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useState, useEffect } from "react";
@@ -457,22 +459,69 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 						{/* Route Information */}
 						<div className="space-y-4">
 							<h4 className="font-semibold flex items-center gap-2">
-								<MapPin className="h-4 w-4" />
-								Route Details
+								<Route className="h-4 w-4" />
+								Journey Route
+								{booking.stops && booking.stops.length > 0 && (
+									<Badge variant="secondary" className="ml-2 text-xs">
+										{booking.stops.length} stop{booking.stops.length > 1 ? 's' : ''}
+									</Badge>
+								)}
 							</h4>
 							<div className="space-y-3">
-								<div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-									<div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-									<div className="min-w-0">
-										<p className="text-sm font-medium text-green-900">Pickup Location</p>
-										<p className="text-sm text-green-700">{booking.originAddress}</p>
+								{/* Origin */}
+								<div className="flex items-start gap-3">
+									<div className="relative mt-1">
+										<div className="w-5 h-5 rounded-full bg-green-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+											<Navigation className="w-2.5 h-2.5 text-white" />
+										</div>
+										{/* Connector line */}
+										{(booking.stops && booking.stops.length > 0) || booking.destinationAddress ? (
+											<div className="absolute left-1/2 top-5 w-0.5 h-6 bg-gradient-to-b from-green-500 to-blue-400 transform -translate-x-1/2"></div>
+										) : null}
+									</div>
+									<div className="flex-1 min-w-0 pt-0.5">
+										<div className="flex items-center gap-2 mb-1">
+											<span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Pickup Location</span>
+										</div>
+										<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{booking.originAddress}</div>
 									</div>
 								</div>
-								<div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-									<div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-									<div className="min-w-0">
-										<p className="text-sm font-medium text-red-900">Destination</p>
-										<p className="text-sm text-red-700">{booking.destinationAddress}</p>
+
+								{/* Stops (if any) */}
+								{booking.stops && booking.stops.length > 0 && (
+									<>
+										{booking.stops.map((stop: any, index: number) => (
+											<div key={stop.id || index} className="flex items-start gap-3">
+												<div className="relative mt-1">
+													<div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+														<CircleDot className="w-2.5 h-2.5 text-white" />
+													</div>
+													{/* Connector line */}
+													<div className="absolute left-1/2 top-5 w-0.5 h-6 bg-gradient-to-b from-blue-400 to-red-400 transform -translate-x-1/2"></div>
+												</div>
+												<div className="flex-1 min-w-0 pt-0.5">
+													<div className="flex items-center gap-2 mb-1">
+														<span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Stop {index + 1}</span>
+													</div>
+													<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{stop.address}</div>
+												</div>
+											</div>
+										))}
+									</>
+								)}
+
+								{/* Destination */}
+								<div className="flex items-start gap-3">
+									<div className="relative mt-1">
+										<div className="w-5 h-5 rounded-full bg-red-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+											<MapPin className="w-2.5 h-2.5 text-white" />
+										</div>
+									</div>
+									<div className="flex-1 min-w-0 pt-0.5">
+										<div className="flex items-center gap-2 mb-1">
+											<span className="text-xs font-semibold text-red-700 uppercase tracking-wide">Drop-off Location</span>
+										</div>
+										<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{booking.destinationAddress}</div>
 									</div>
 								</div>
 							</div>

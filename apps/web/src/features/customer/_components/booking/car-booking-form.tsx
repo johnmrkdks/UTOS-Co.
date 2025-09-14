@@ -9,7 +9,8 @@ import { Input } from "@workspace/ui/components/input"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple"
 import { authClient } from "@/lib/auth-client"
-import { carAppointmentSchema, type CarAppointmentForm } from "../../_schemas/car-appointment-schema"
+import { ImprovedDateTimePicker } from "@/components/improved-datetime-picker"
+import { createCarAppointmentSchema, type CarAppointmentForm } from "../../_schemas/car-appointment-schema"
 
 interface CarBookingFormProps {
 	car: any
@@ -24,7 +25,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 	const { data: session } = authClient.useSession()
 
 	const form = useForm<CarAppointmentForm>({
-		resolver: zodResolver(carAppointmentSchema),
+		resolver: zodResolver(createCarAppointmentSchema(car.seatingCapacity)) as any,
 		defaultValues: {
 			originAddress: "",
 			destinationAddress: "",
@@ -32,6 +33,7 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 			customerPhone: "",
 			customerEmail: session?.user?.email || "",
 			passengerCount: 1,
+			luggageCount: 0,
 			scheduledPickupTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
 			specialRequests: "",
 		},
@@ -152,19 +154,12 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 											<FormItem>
 												<FormLabel className="text-sm font-medium sm:text-base">Pickup Date & Time *</FormLabel>
 												<FormControl>
-													<Input
-														type="datetime-local"
-														min={minPickupTime.toISOString().slice(0, 16)}
-														value={field.value ? new Date(field.value.getTime() - field.value.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
-														onChange={(e) => {
-															const dateValue = e.target.value;
-															if (dateValue) {
-																// Convert the datetime-local string to a proper Date object
-																const date = new Date(dateValue);
-																field.onChange(date);
-															}
-														}}
-														className="h-10 text-sm sm:h-12 sm:text-base"
+													<ImprovedDateTimePicker
+														value={field.value}
+														onChange={field.onChange}
+														placeholder="Select pickup date and time"
+														minDate={minPickupTime}
+														className="text-sm sm:text-base"
 													/>
 												</FormControl>
 												<FormMessage />
@@ -191,6 +186,30 @@ export function CarBookingForm({ car, onSubmit, onCancel }: CarBookingFormProps)
 												<FormMessage />
 												<p className="text-xs text-muted-foreground sm:text-sm">
 													Max {car.seatingCapacity} passengers
+												</p>
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control as any}
+										name="luggageCount"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-sm font-medium sm:text-base">Luggage Pieces</FormLabel>
+												<FormControl>
+													<Input
+														{...field}
+														type="number"
+														min="0"
+														max="10"
+														onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+														className="h-10 text-sm sm:h-12 sm:text-base"
+													/>
+												</FormControl>
+												<FormMessage />
+												<p className="text-xs text-muted-foreground sm:text-sm">
+													Max 10 pieces of luggage
 												</p>
 											</FormItem>
 										)}

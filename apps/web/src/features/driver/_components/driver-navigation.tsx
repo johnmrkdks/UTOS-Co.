@@ -7,6 +7,8 @@ import {
 	SettingsIcon,
 	ClipboardListIcon,
 	CarIcon,
+	MapPinIcon,
+	ClockIcon,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -31,19 +33,31 @@ export function DriverNavigation({ onNavigate, driverStatus, needsOnboarding }: 
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	// Base navigation items that are always shown
+	// Base navigation items that are always shown - matching mobile navigation
 	const baseNavigationItems: NavigationItem[] = [
 		{
-			id: 'dashboard',
-			label: 'Dashboard',
-			icon: LayoutDashboardIcon,
-			href: '/driver'
+			id: 'available',
+			label: 'Available Trips',
+			icon: MapPinIcon,
+			href: '/driver/available'
 		},
 		{
 			id: 'trips',
 			label: 'My Trips',
 			icon: CarIcon,
 			href: '/driver/trips'
+		},
+		{
+			id: 'history',
+			label: 'History',
+			icon: ClockIcon,
+			href: '/driver/history'
+		},
+		{
+			id: 'dashboard',
+			label: 'Dashboard',
+			icon: LayoutDashboardIcon,
+			href: '/driver/dashboard'
 		},
 	];
 
@@ -127,11 +141,17 @@ export function DriverNavigation({ onNavigate, driverStatus, needsOnboarding }: 
 								)}
 							</div>
 							{/* Optional descriptions */}
-							{item.id === 'dashboard' && (
-								<p className="text-xs text-muted-foreground mt-0.5">Overview and earnings</p>
+							{item.id === 'available' && (
+								<p className="text-xs text-muted-foreground mt-0.5">Accept new trips</p>
 							)}
 							{item.id === 'trips' && (
 								<p className="text-xs text-muted-foreground mt-0.5">Manage your rides</p>
+							)}
+							{item.id === 'history' && (
+								<p className="text-xs text-muted-foreground mt-0.5">Past trips & earnings</p>
+							)}
+							{item.id === 'dashboard' && (
+								<p className="text-xs text-muted-foreground mt-0.5">Overview and earnings</p>
 							)}
 							{item.id === 'onboarding' && (
 								<p className="text-xs text-muted-foreground mt-0.5">Finish driver setup</p>

@@ -7,6 +7,7 @@ import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
 import { createId } from "@paralleldrive/cuid2";
 import { drivers } from "@/db/sqlite/schema/drivers";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
+import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
 
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
@@ -74,6 +75,7 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	driver: one(drivers, { fields: [bookings.driverId], references: [drivers.id] }),
 	package: one(packages, { fields: [bookings.packageId], references: [packages.id] }),
 	stops: many(bookingStops),
+	extras: one(bookingExtras, { fields: [bookings.id], references: [bookingExtras.bookingId] }),
 }));
 
 // Relations are defined in cars.ts to avoid circular imports

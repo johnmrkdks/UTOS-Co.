@@ -19,6 +19,33 @@ input[type="number"] {
 	-moz-appearance: textfield;
 }
 
+/* Prevent iOS Safari zoom on input focus by ensuring 16px minimum font size */
+@media screen and (max-width: 767px) {
+	input,
+	input[type="text"],
+	input[type="email"], 
+	input[type="password"],
+	input[type="search"],
+	input[type="tel"],
+	input[type="url"],
+	input[type="number"],
+	textarea,
+	select,
+	.input,
+	[class*="input"] {
+		font-size: 16px !important;
+		-webkit-text-size-adjust: 100% !important;
+	}
+	
+	/* Target shadcn/ui Input components specifically */
+	input[class*="border"],
+	input[class*="rounded"],
+	input[class*="px-"],
+	input[class*="py-"] {
+		font-size: 16px !important;
+	}
+}
+
 ::-webkit-scrollbar {
     width: 5px;
   }

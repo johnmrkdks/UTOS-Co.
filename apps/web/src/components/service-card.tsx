@@ -136,7 +136,7 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 				{/* Book Button */}
 				<div className="pt-2">
 					<Button asChild className="w-full group-hover:shadow-md transition-shadow">
-						<Link to="/customer/book-service/$serviceId" params={{ serviceId: service.id }}>
+						<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
 							Book This Service
 						</Link>
 					</Button>

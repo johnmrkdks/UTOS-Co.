@@ -13,6 +13,7 @@ import { DateTimePicker } from "@/components/date-time-picker";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { createLocalDateForBackend } from "@/utils/timezone";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
 import { serviceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
 
@@ -73,15 +74,15 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			return;
 		}
 
-		// Create booking data with proper user ID
-		const scheduledPickupTime = new Date(`${data.bookingDate.toISOString().split('T')[0]}T${data.bookingTime}:00.000Z`);
+		// Create booking data with proper user ID - use timezone-aware date handling
+		const dateString = data.bookingDate.toISOString().split('T')[0];
 
 		const bookingData = {
 			packageId: service.id,
 			carId: null, // Will be assigned by admin
 			originAddress: "Service location (TBD)", // Service packages don't have fixed locations
 			destinationAddress: "Service destination (TBD)",
-			scheduledPickupTime: scheduledPickupTime.toISOString(),
+			scheduledPickupTime: createLocalDateForBackend(dateString, data.bookingTime),
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,
 			customerEmail: data.customerEmail,

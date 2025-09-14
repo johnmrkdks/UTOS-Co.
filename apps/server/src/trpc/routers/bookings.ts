@@ -17,6 +17,7 @@ import { updateBookingService, UpdateBookingServiceSchema } from "@/services/boo
 import { editBooking } from "@/services/bookings/edit-booking";
 import { cancelBooking } from "@/services/bookings/cancel-booking";
 import { validateBookingOperations } from "@/services/bookings/validate-booking-operations";
+import { closeTripWithExtras, closeTripWithoutExtras } from "@/services/bookings/close-trip-with-extras";
 import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -318,16 +319,24 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingFromQuoteSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
+				console.log("🔍 DEBUG createCustomBookingFromQuote - RECEIVED INPUT:");
+				console.log("📦 Input data:", JSON.stringify(input, null, 2));
+				console.log("🛑 Stops in input:", input.stops ? input.stops.length : 'No stops');
+				console.log("👤 Session data:", JSON.stringify(session, null, 2));
+
 				// Better Auth anonymous plugin - check both user and session structures
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					console.log("🔍 Session structure:", JSON.stringify(session, null, 2));
 					throw new Error("User session is required. Please sign in or create a guest account.");
 				}
-				
+
 				console.log("🚀 Creating custom booking from quote for userId:", userId);
-				const newBooking = await createCustomBookingFromQuoteService(db, { ...input, userId });
+				const inputWithUserId = { ...input, userId };
+				console.log("📦 Final payload to service:", JSON.stringify(inputWithUserId, null, 2));
+
+				const newBooking = await createCustomBookingFromQuoteService(db, inputWithUserId);
 				console.log("✅ Custom booking created successfully:", newBooking.id);
 				return newBooking;
 			} catch (error) {
@@ -648,6 +657,169 @@ export const bookingsRouter = router({
 				}
 
 				return await cancelBooking(db, input.bookingId, userId, input.cancellationReason);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Get available trips for drivers (unassigned bookings)
+	getAvailableTrips: protectedProcedure
+		.input(ResourceListSchema.extend({
+			status: z.enum(["confirmed", "pending"]).optional(),
+		}))
+		.query(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated to view available trips",
+					});
+				}
+				
+				const userRole = await getUserRole(db, userId);
+				
+				// Only drivers can access available trips
+				if (userRole !== 'driver') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only drivers can view available trips",
+					});
+				}
+				
+				// Get bookings that don't have a driver assigned yet
+				const bookings = await getBookingsService(db, {
+					...input,
+					filters: {
+						...input.filters,
+						// Only show confirmed bookings that need drivers
+						status: input.status || "confirmed",
+						// Only show bookings without assigned drivers
+						driverId: null as any,
+					},
+				});
+				
+				return bookings;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Close trip with extras (drivers only)
+	closeTripWithExtras: protectedProcedure
+		.input(z.object({
+			bookingId: z.string(),
+			isNoShow: z.boolean().default(false),
+			extrasData: z.object({
+				additionalWaitTime: z.number().min(0).default(0),
+				unscheduledStops: z.number().min(0).default(0),
+				parkingCharges: z.number().min(0).default(0),
+				tollCharges: z.number().min(0).default(0),
+				location: z.string().default(''),
+				otherCharges: z.object({
+					description: z.string().default(''),
+					amount: z.number().min(0).default(0),
+				}),
+				extraType: z.enum(['general', 'driver', 'operator']).default('general'),
+				notes: z.string().default(''),
+			}),
+		}))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				const userId = session?.user?.id || session?.session?.userId;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Driver must be authenticated to close trips",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+				
+				// Only drivers can close trips
+				if (userRole !== 'driver') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only drivers can close trips",
+					});
+				}
+
+				// Get the driver profile
+				const driverProfile = await db.query.drivers.findFirst({
+					where: (drivers, { eq }) => eq(drivers.userId, userId),
+				});
+
+				if (!driverProfile) {
+					throw new TRPCError({
+						code: "FORBIDDEN", 
+						message: "User is not registered as a driver",
+					});
+				}
+
+				const result = await closeTripWithExtras(
+					db,
+					input.bookingId, 
+					driverProfile.id, 
+					input.extrasData,
+					input.isNoShow
+				);
+
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Close trip without extras (drivers only)
+	closeTripWithoutExtras: protectedProcedure
+		.input(z.object({
+			bookingId: z.string(),
+			isNoShow: z.boolean().default(false),
+		}))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				const userId = session?.user?.id || session?.session?.userId;
+				
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Driver must be authenticated to close trips",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+				
+				// Only drivers can close trips
+				if (userRole !== 'driver') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only drivers can close trips",
+					});
+				}
+
+				// Get the driver profile
+				const driverProfile = await db.query.drivers.findFirst({
+					where: (drivers, { eq }) => eq(drivers.userId, userId),
+				});
+
+				if (!driverProfile) {
+					throw new TRPCError({
+						code: "FORBIDDEN", 
+						message: "User is not registered as a driver",
+					});
+				}
+
+				const result = await closeTripWithoutExtras(
+					db,
+					input.bookingId, 
+					driverProfile.id,
+					input.isNoShow
+				);
+
+				return result;
 			} catch (error) {
 				handleTRPCError(error);
 			}

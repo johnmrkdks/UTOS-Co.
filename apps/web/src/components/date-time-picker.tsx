@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Calendar } from "@workspace/ui/components/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
 import { cn } from "@workspace/ui/lib/utils";
+import { ImprovedTimePicker } from "./improved-time-picker";
 
 interface DateTimePickerProps {
 	selectedDate?: Date;
@@ -18,11 +19,6 @@ interface DateTimePickerProps {
 	className?: string;
 }
 
-const timeSlots = [
-	"08:00", "09:00", "10:00", "11:00",
-	"12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
-	"18:00", "19:00", "20:00", "21:00", "22:00"
-];
 
 export function DateTimePicker({
 	selectedDate,
@@ -76,21 +72,15 @@ export function DateTimePicker({
 				<label className="block text-sm font-semibold text-gray-800 mb-3">
 					{timeLabel}
 				</label>
-				<select
+				<ImprovedTimePicker
 					value={selectedTime || ""}
-					onChange={(e) => onTimeChange?.(e.target.value)}
+					onChange={(time) => onTimeChange?.(time)}
+					placeholder="Select pickup time"
 					className={cn(
-						"w-full h-12 px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-base",
+						"w-full h-12 text-base",
 						timeError && "border-red-500"
 					)}
-				>
-					<option value="">Select time</option>
-					{timeSlots.map((time) => (
-						<option key={time} value={time}>
-							{time}
-						</option>
-					))}
-				</select>
+				/>
 				{timeError && (
 					<p className="text-red-500 text-sm mt-1 font-medium">{timeError}</p>
 				)}

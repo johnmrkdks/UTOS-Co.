@@ -49,7 +49,7 @@ export function CustomerUserMenu() {
 					<DropdownMenuSeparator />
 					<DropdownMenuGroup>
 						<DropdownMenuItem asChild>
-							<Link to="/dashboard/bookings" className="flex items-center w-full">
+							<Link to="/my-bookings" className="flex items-center w-full">
 								<Calendar size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>My Bookings</span>
 							</Link>
@@ -64,13 +64,13 @@ export function CustomerUserMenu() {
 					<DropdownMenuSeparator />
 					<DropdownMenuGroup>
 						<DropdownMenuItem asChild>
-							<Link to="/dashboard/profile" className="flex items-center w-full">
+							<Link to="/profile" className="flex items-center w-full">
 								<User size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>Profile</span>
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
-							<Link to="/dashboard/account/settings" className="flex items-center w-full">
+							<Link to="/account/settings" className="flex items-center w-full">
 								<Settings size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>Settings</span>
 							</Link>

@@ -8,9 +8,11 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import type { Row } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity } from "lucide-react";
+import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X } from "lucide-react";
 import type { Booking } from "./booking-table-columns";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import { useUnassignDriverMutation } from "../_hooks/query/use-unassign-driver-mutation";
+import { useUnassignCarMutation } from "../_hooks/query/use-unassign-car-mutation";
 
 interface BookingTableRowActionsProps {
 	row: Row<Booking>;
@@ -25,6 +27,8 @@ export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowAc
 		openEditBookingDialog,
 		openChangeStatusDialog
 	} = useBookingManagementModalProvider();
+	const unassignDriverMutation = useUnassignDriverMutation();
+	const unassignCarMutation = useUnassignCarMutation();
 	const booking = row.original;
 
 	const handleAssignDriver = (booking: Booking) => {
@@ -49,6 +53,16 @@ export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowAc
 	const handleChangeStatus = (booking: Booking) => {
 		console.log("📋 Opening update status dialog for booking:", booking.id);
 		openChangeStatusDialog(booking);
+	};
+
+	const handleUnassignDriver = (booking: Booking) => {
+		console.log("🚫 Unassigning driver from booking:", booking.id);
+		unassignDriverMutation.mutate({ bookingId: booking.id });
+	};
+
+	const handleUnassignCar = (booking: Booking) => {
+		console.log("🚫 Unassigning car from booking:", booking.id);
+		unassignCarMutation.mutate({ bookingId: booking.id });
 	};
 
 	return (
@@ -90,11 +104,33 @@ export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowAc
 							{booking.driver ? "Reassign driver" : "Assign driver"}
 						</DropdownMenuItem>
 						
+						{/* Unassign driver - only show if driver is assigned and status allows */}
+						{booking.driver && ['confirmed', 'driver_assigned'].includes(booking.status) && (
+							<DropdownMenuItem 
+								onClick={() => handleUnassignDriver(booking)}
+								className="text-orange-600 hover:text-orange-700"
+							>
+								<UserX className="mr-2 h-4 w-4" />
+								Unassign driver
+							</DropdownMenuItem>
+						)}
+						
 						{/* Car assignment - especially useful for package bookings */}
 						{(booking.bookingType === "package" || !booking.car) && (
 							<DropdownMenuItem onClick={() => handleAssignCar(booking)}>
 								<Car className="mr-2 h-4 w-4" />
 								{booking.car ? "Reassign car" : "Assign car"}
+							</DropdownMenuItem>
+						)}
+
+						{/* Unassign car - only show if car is assigned */}
+						{booking.car && (
+							<DropdownMenuItem 
+								onClick={() => handleUnassignCar(booking)}
+								className="text-orange-600 hover:text-orange-700"
+							>
+								<X className="mr-2 h-4 w-4" />
+								Unassign car
 							</DropdownMenuItem>
 						)}
 						<DropdownMenuSeparator />

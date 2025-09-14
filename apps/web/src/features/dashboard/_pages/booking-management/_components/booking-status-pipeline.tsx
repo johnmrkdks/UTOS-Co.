@@ -56,25 +56,65 @@ const statusColumns: StatusColumn[] = [
 		id: "driver_assigned",
 		name: "Driver Assigned",
 		title: "Driver Assigned", 
-		description: "Driver en route to pickup",
+		description: "Driver allocated to trip",
 		color: "bg-purple-50 border-purple-200",
 		headerColor: "bg-purple-100"
+	},
+	{ 
+		id: "driver_en_route",
+		name: "Driver En Route",
+		title: "En Route", 
+		description: "Driver heading to pickup",
+		color: "bg-indigo-50 border-indigo-200",
+		headerColor: "bg-indigo-100"
+	},
+	{ 
+		id: "arrived_pickup",
+		name: "Arrived Pickup",
+		title: "Arrived PU", 
+		description: "Driver at pickup location",
+		color: "bg-cyan-50 border-cyan-200",
+		headerColor: "bg-cyan-100"
+	},
+	{ 
+		id: "passenger_on_board",
+		name: "Passenger On Board",
+		title: "POB", 
+		description: "Passenger picked up",
+		color: "bg-green-50 border-green-200",
+		headerColor: "bg-green-100"
 	},
 	{ 
 		id: "in_progress",
 		name: "In Progress",
 		title: "In Progress", 
-		description: "Service in progress",
+		description: "Service in progress (legacy)",
+		color: "bg-green-50 border-green-200",
+		headerColor: "bg-green-100"
+	},
+	{ 
+		id: "dropped_off",
+		name: "Dropped Off",
+		title: "Dropped Off", 
+		description: "Passenger at destination",
 		color: "bg-orange-50 border-orange-200",
 		headerColor: "bg-orange-100"
+	},
+	{ 
+		id: "awaiting_extras",
+		name: "Awaiting Extras",
+		title: "Awaiting Extras", 
+		description: "Adding tolls/parking fees",
+		color: "bg-amber-50 border-amber-200",
+		headerColor: "bg-amber-100"
 	},
 	{ 
 		id: "completed",
 		name: "Completed",
 		title: "Completed", 
 		description: "Service completed",
-		color: "bg-green-50 border-green-200",
-		headerColor: "bg-green-100"
+		color: "bg-gray-50 border-gray-200",
+		headerColor: "bg-gray-100"
 	},
 ];
 
@@ -290,6 +330,90 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 																}}
 															>
 																Assign
+															</Button>
+														)}
+
+														{booking.column === "driver_assigned" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-indigo-600 hover:text-indigo-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Mark as en route
+																}}
+															>
+																En Route
+															</Button>
+														)}
+
+														{booking.column === "driver_en_route" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-cyan-600 hover:text-cyan-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Mark as arrived
+																}}
+															>
+																Arrived
+															</Button>
+														)}
+
+														{booking.column === "arrived_pickup" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-green-600 hover:text-green-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Mark passenger on board
+																}}
+															>
+																POB
+															</Button>
+														)}
+
+														{(booking.column === "passenger_on_board" || booking.column === "in_progress") && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-orange-600 hover:text-orange-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Mark as dropped off
+																}}
+															>
+																Drop Off
+															</Button>
+														)}
+
+														{booking.column === "dropped_off" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-amber-600 hover:text-amber-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Add extras dialog
+																}}
+															>
+																Extras
+															</Button>
+														)}
+
+														{booking.column === "awaiting_extras" && (
+															<Button 
+																variant="ghost" 
+																size="sm" 
+																className="h-6 px-2 text-xs text-gray-600 hover:text-gray-700"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	// TODO: Complete trip
+																}}
+															>
+																Complete
 															</Button>
 														)}
 													</div>

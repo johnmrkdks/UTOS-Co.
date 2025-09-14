@@ -35,6 +35,9 @@ import { Route as DriverLayoutTripsRouteImport } from './routes/driver/_layout/t
 import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layout/settings'
 import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
 import { Route as DriverLayoutOnboardingRouteImport } from './routes/driver/_layout/onboarding'
+import { Route as DriverLayoutHistoryRouteImport } from './routes/driver/_layout/history'
+import { Route as DriverLayoutDashboardRouteImport } from './routes/driver/_layout/dashboard'
+import { Route as DriverLayoutAvailableRouteImport } from './routes/driver/_layout/available'
 import { Route as DashboardLayoutServicesRouteImport } from './routes/dashboard/_layout/services'
 import { Route as DashboardLayoutQuoteResultsRouteImport } from './routes/dashboard/_layout/quote-results'
 import { Route as DashboardLayoutInstantQuoteRouteImport } from './routes/dashboard/_layout/instant-quote'
@@ -203,6 +206,21 @@ const DriverLayoutProfileRoute = DriverLayoutProfileRouteImport.update({
 const DriverLayoutOnboardingRoute = DriverLayoutOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
+const DriverLayoutHistoryRoute = DriverLayoutHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
+const DriverLayoutDashboardRoute = DriverLayoutDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => DriverLayoutRoute,
+} as any)
+const DriverLayoutAvailableRoute = DriverLayoutAvailableRouteImport.update({
+  id: '/available',
+  path: '/available',
   getParentRoute: () => DriverLayoutRoute,
 } as any)
 const DashboardLayoutServicesRoute = DashboardLayoutServicesRouteImport.update({
@@ -422,6 +440,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/instant-quote': typeof DashboardLayoutInstantQuoteRoute
   '/dashboard/quote-results': typeof DashboardLayoutQuoteResultsRoute
   '/dashboard/services': typeof DashboardLayoutServicesRoute
+  '/driver/available': typeof DriverLayoutAvailableRoute
+  '/driver/dashboard': typeof DriverLayoutDashboardRoute
+  '/driver/history': typeof DriverLayoutHistoryRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
@@ -478,6 +499,9 @@ export interface FileRoutesByTo {
   '/dashboard/instant-quote': typeof DashboardLayoutInstantQuoteRoute
   '/dashboard/quote-results': typeof DashboardLayoutQuoteResultsRoute
   '/dashboard/services': typeof DashboardLayoutServicesRoute
+  '/driver/available': typeof DriverLayoutAvailableRoute
+  '/driver/dashboard': typeof DriverLayoutDashboardRoute
+  '/driver/history': typeof DriverLayoutHistoryRoute
   '/driver/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
@@ -538,6 +562,9 @@ export interface FileRoutesById {
   '/dashboard/_layout/instant-quote': typeof DashboardLayoutInstantQuoteRoute
   '/dashboard/_layout/quote-results': typeof DashboardLayoutQuoteResultsRoute
   '/dashboard/_layout/services': typeof DashboardLayoutServicesRoute
+  '/driver/_layout/available': typeof DriverLayoutAvailableRoute
+  '/driver/_layout/dashboard': typeof DriverLayoutDashboardRoute
+  '/driver/_layout/history': typeof DriverLayoutHistoryRoute
   '/driver/_layout/onboarding': typeof DriverLayoutOnboardingRoute
   '/driver/_layout/profile': typeof DriverLayoutProfileRoute
   '/driver/_layout/settings': typeof DriverLayoutSettingsRoute
@@ -596,6 +623,9 @@ export interface FileRouteTypes {
     | '/dashboard/instant-quote'
     | '/dashboard/quote-results'
     | '/dashboard/services'
+    | '/driver/available'
+    | '/driver/dashboard'
+    | '/driver/history'
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
@@ -652,6 +682,9 @@ export interface FileRouteTypes {
     | '/dashboard/instant-quote'
     | '/dashboard/quote-results'
     | '/dashboard/services'
+    | '/driver/available'
+    | '/driver/dashboard'
+    | '/driver/history'
     | '/driver/onboarding'
     | '/driver/profile'
     | '/driver/settings'
@@ -711,6 +744,9 @@ export interface FileRouteTypes {
     | '/dashboard/_layout/instant-quote'
     | '/dashboard/_layout/quote-results'
     | '/dashboard/_layout/services'
+    | '/driver/_layout/available'
+    | '/driver/_layout/dashboard'
+    | '/driver/_layout/history'
     | '/driver/_layout/onboarding'
     | '/driver/_layout/profile'
     | '/driver/_layout/settings'
@@ -937,6 +973,27 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/driver/onboarding'
       preLoaderRoute: typeof DriverLayoutOnboardingRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
+    '/driver/_layout/history': {
+      id: '/driver/_layout/history'
+      path: '/history'
+      fullPath: '/driver/history'
+      preLoaderRoute: typeof DriverLayoutHistoryRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
+    '/driver/_layout/dashboard': {
+      id: '/driver/_layout/dashboard'
+      path: '/dashboard'
+      fullPath: '/driver/dashboard'
+      preLoaderRoute: typeof DriverLayoutDashboardRouteImport
+      parentRoute: typeof DriverLayoutRoute
+    }
+    '/driver/_layout/available': {
+      id: '/driver/_layout/available'
+      path: '/available'
+      fullPath: '/driver/available'
+      preLoaderRoute: typeof DriverLayoutAvailableRouteImport
       parentRoute: typeof DriverLayoutRoute
     }
     '/dashboard/_layout/services': {
@@ -1268,6 +1325,9 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 )
 
 interface DriverLayoutRouteChildren {
+  DriverLayoutAvailableRoute: typeof DriverLayoutAvailableRoute
+  DriverLayoutDashboardRoute: typeof DriverLayoutDashboardRoute
+  DriverLayoutHistoryRoute: typeof DriverLayoutHistoryRoute
   DriverLayoutOnboardingRoute: typeof DriverLayoutOnboardingRoute
   DriverLayoutProfileRoute: typeof DriverLayoutProfileRoute
   DriverLayoutSettingsRoute: typeof DriverLayoutSettingsRoute
@@ -1276,6 +1336,9 @@ interface DriverLayoutRouteChildren {
 }
 
 const DriverLayoutRouteChildren: DriverLayoutRouteChildren = {
+  DriverLayoutAvailableRoute: DriverLayoutAvailableRoute,
+  DriverLayoutDashboardRoute: DriverLayoutDashboardRoute,
+  DriverLayoutHistoryRoute: DriverLayoutHistoryRoute,
   DriverLayoutOnboardingRoute: DriverLayoutOnboardingRoute,
   DriverLayoutProfileRoute: DriverLayoutProfileRoute,
   DriverLayoutSettingsRoute: DriverLayoutSettingsRoute,

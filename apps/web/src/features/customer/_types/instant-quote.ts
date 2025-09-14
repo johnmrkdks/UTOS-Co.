@@ -30,4 +30,6 @@ export interface RouteData {
 	destinationLatitude: number;
 	destinationLongitude: number;
 	stops: Stop[];
+	passengerCount?: number;
+	luggageCount?: number;
 }

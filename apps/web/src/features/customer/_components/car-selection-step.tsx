@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
@@ -31,11 +31,18 @@ export function CarSelectionStep({
 	const cars = carsData?.data;
 	const calculateCarQuoteMutation = useCalculateCarSpecificQuoteMutation();
 	const [carPrices, setCarPrices] = useState<Record<string, number>>({});
+	const loadedPricesRef = useRef<Set<string>>(new Set());
 
 	// Calculate prices for each car when route data is available
 	useEffect(() => {
-		if (cars && routeData && !calculateCarQuoteMutation.isPending) {
+		if (cars && routeData) {
 			cars.forEach(async (car) => {
+				// Skip if we already calculated a price for this car
+				if (loadedPricesRef.current.has(car.id)) return;
+				
+				// Mark as loading to prevent duplicate requests
+				loadedPricesRef.current.add(car.id);
+				
 				try {
 					const quote = await calculateCarQuoteMutation.mutateAsync({
 						carId: car.id,
@@ -47,16 +54,20 @@ export function CarSelectionStep({
 						destinationLongitude: routeData.destinationLongitude,
 						stops: routeData.stops,
 					});
-					setCarPrices(prev => ({
-						...prev,
-						[car.id]: quote.totalAmount
-					}));
+					if (quote?.totalAmount) {
+						setCarPrices(prev => ({
+							...prev,
+							[car.id]: quote.totalAmount
+						}));
+					}
 				} catch (error) {
 					console.error(`Failed to calculate price for car ${car.id}:`, error);
+					// Remove from loaded set on error so it can retry
+					loadedPricesRef.current.delete(car.id);
 				}
 			});
 		}
-	}, [cars, routeData, calculateCarQuoteMutation]);
+	}, [cars, routeData]);
 
 	const formatPrice = (price: number) => `$${(price / 100).toFixed(2)}`;
 	
@@ -231,7 +242,7 @@ export function CarSelectionStep({
 										
 										{car.features && car.features.length > 0 && (
 											<div className="flex flex-wrap gap-1 mt-2">
-												{car.features.slice(0, 3).map((feature) => (
+												{car.features.slice(0, 3).map((feature: any) => (
 													<Badge key={feature.id} variant="secondary" className="text-xs">
 														{feature.name}
 													</Badge>

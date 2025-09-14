@@ -67,7 +67,8 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 			}
 		}
 
-		return filtered;
+		// Ensure data is sorted by createdAt in descending order (newest first)
+		return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	}, [bookingsQuery.data?.data, bookingType, status, filters]);
 
 	// Handle bulk selection
@@ -173,6 +174,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 				searchKey="customerName"
 				searchPlaceholder="Search by customer name..."
 				isLoading={bookingsQuery.isLoading}
+				enableSorting={true}
 			/>
 		</div>
 	);

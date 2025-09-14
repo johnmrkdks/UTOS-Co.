@@ -25,12 +25,31 @@ interface ChangeStatusDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-const bookingStatuses = [
+// All possible booking statuses for display purposes
+const allBookingStatuses = [
 	{ value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
 	{ value: 'confirmed', label: 'Confirmed', color: 'bg-blue-100 text-blue-800' },
 	{ value: 'driver_assigned', label: 'Driver Assigned', color: 'bg-purple-100 text-purple-800' },
-	{ value: 'in_progress', label: 'In Progress', color: 'bg-orange-100 text-orange-800' },
-	{ value: 'completed', label: 'Completed', color: 'bg-green-100 text-green-800' },
+	{ value: 'driver_en_route', label: 'Driver En Route', color: 'bg-indigo-100 text-indigo-800' },
+	{ value: 'arrived_pickup', label: 'Arrived at Pickup', color: 'bg-cyan-100 text-cyan-800' },
+	{ value: 'passenger_on_board', label: 'Passenger On Board', color: 'bg-green-100 text-green-800' },
+	{ value: 'in_progress', label: 'In Progress (Legacy)', color: 'bg-green-100 text-green-800' },
+	{ value: 'dropped_off', label: 'Dropped Off', color: 'bg-orange-100 text-orange-800' },
+	{ value: 'awaiting_extras', label: 'Awaiting Extras', color: 'bg-amber-100 text-amber-800' },
+	{ value: 'completed', label: 'Completed', color: 'bg-gray-100 text-gray-800' },
+	{ value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
+];
+
+// Statuses available for manual selection (excludes driver_assigned and in_progress)
+const selectableBookingStatuses = [
+	{ value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
+	{ value: 'confirmed', label: 'Confirmed', color: 'bg-blue-100 text-blue-800' },
+	{ value: 'driver_en_route', label: 'Driver En Route', color: 'bg-indigo-100 text-indigo-800' },
+	{ value: 'arrived_pickup', label: 'Arrived at Pickup', color: 'bg-cyan-100 text-cyan-800' },
+	{ value: 'passenger_on_board', label: 'Passenger On Board', color: 'bg-green-100 text-green-800' },
+	{ value: 'dropped_off', label: 'Dropped Off', color: 'bg-orange-100 text-orange-800' },
+	{ value: 'awaiting_extras', label: 'Awaiting Extras', color: 'bg-amber-100 text-amber-800' },
+	{ value: 'completed', label: 'Completed', color: 'bg-gray-100 text-gray-800' },
 	{ value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
 ];
 
@@ -55,8 +74,8 @@ export function ChangeStatusDialog({
 		});
 	};
 
-	const currentStatusInfo = bookingStatuses.find(s => s.value === booking?.status);
-	const newStatusInfo = bookingStatuses.find(s => s.value === selectedStatus);
+	const currentStatusInfo = allBookingStatuses.find(s => s.value === booking?.status);
+	const newStatusInfo = allBookingStatuses.find(s => s.value === selectedStatus);
 
 	// Reset selected status when booking changes
 	React.useEffect(() => {
@@ -99,7 +118,7 @@ export function ChangeStatusDialog({
 								<SelectValue placeholder="Select new status" />
 							</SelectTrigger>
 							<SelectContent>
-								{bookingStatuses.map((status) => (
+								{selectableBookingStatuses.map((status) => (
 									<SelectItem key={status.value} value={status.value}>
 										<div className="flex items-center gap-2">
 											<div 

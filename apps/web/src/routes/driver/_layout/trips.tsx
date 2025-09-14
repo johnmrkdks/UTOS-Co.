@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import { useDriverBookingsQuery } from '@/hooks/query/use-driver-bookings-query';
 import {
@@ -27,13 +27,22 @@ import {
 	MessageSquare,
 	PlusIcon,
 	TrashIcon,
+	X,
+	ActivityIcon,
+	CircleDot,
 } from "lucide-react";
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from "@workspace/ui/components/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@workspace/ui/components/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
 import { useUpdateBookingStatusMutation } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-update-booking-status-mutation";
 import { cn } from "@workspace/ui/lib/utils";
+import { SwipeToConfirm } from "@/components/swipe-to-confirm";
+import { format } from "date-fns";
+import { CloseTripOptionsDialog } from "@/features/driver/_components/close-trip-options-dialog";
+import { CloseTripExtrasForm, type ExtrasFormData } from "@/features/driver/_components/close-trip-extras-form";
+import { TripConfirmationDialog } from "@/features/driver/_components/trip-confirmation-dialog";
+import { useCloseTripWithExtrasMutation, useCloseTripWithoutExtrasMutation } from "@/features/driver/_hooks/query/use-close-trip-mutations";
 
 export const Route = createFileRoute('/driver/_layout/trips')({
 	component: DriverTripsComponent,
@@ -41,7 +50,6 @@ export const Route = createFileRoute('/driver/_layout/trips')({
 
 function DriverTripsComponent() {
 	const { data: rawCurrentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
-	const [activeTab, setActiveTab] = useState<'all' | 'active' | 'upcoming' | 'completed'>('all');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [passengerDetailsOpen, setPassengerDetailsOpen] = useState(false);
 	const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -49,9 +57,27 @@ function DriverTripsComponent() {
 	const [extras, setExtras] = useState<{id: string, description: string, amount: string}[]>([
 		{id: '1', description: '', amount: ''}
 	]);
+	// New Close Trip workflow state
+	const [closeTripOptionsOpen, setCloseTripOptionsOpen] = useState(false);
+	const [closeTripExtrasOpen, setCloseTripExtrasOpen] = useState(false);
+	const [tripConfirmationOpen, setTripConfirmationOpen] = useState(false);
+	const [isNoShow, setIsNoShow] = useState(false);
+	const [extrasData, setExtrasData] = useState<ExtrasFormData | undefined>(undefined);
+	const [selectedTripForClose, setSelectedTripForClose] = useState<any>(null);
+	const [showMapsModal, setShowMapsModal] = useState(false);
+	const [selectedMapsBooking, setSelectedMapsBooking] = useState<any>(null);
+	const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
+	const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<any>(null);
 
 	// Status update mutation
 	const updateStatusMutation = useUpdateBookingStatusMutation();
+	const closeTripWithExtrasMutation = useCloseTripWithExtrasMutation();
+	const closeTripWithoutExtrasMutation = useCloseTripWithoutExtrasMutation();
+
+	// Memoize mobile detection to prevent re-evaluation during render
+	const isMobile = useMemo(() => {
+		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+	}, []);
 
 	// Driver data with fallback values
 	const currentDriver = {
@@ -59,90 +85,41 @@ function DriverTripsComponent() {
 		...rawCurrentDriver
 	};
 
-	// Fetch bookings for current driver
+	// Fetch all bookings for current driver - we'll filter client-side for multiple statuses
 	const { data: bookingsData, isLoading: isBookingsLoading, refetch } = useDriverBookingsQuery({
 		driverId: currentDriver.id || "",
 		limit: 50,
 		offset: 0,
 	});
 
-	const bookings = bookingsData?.data || [];
+	const allBookings = bookingsData?.data || [];
 
-	// Filter only assigned trips for driver focus - include all driver workflow statuses
-	const assignedBookings = bookings.filter(booking => 
-		['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off', 'awaiting_extras', 'completed'].includes(booking.status)
+	// Filter for active trip statuses that drivers need to work on
+	const activeStatuses = ["driver_assigned", "driver_en_route", "in_progress", "arrived_pickup", "passenger_on_board", "dropped_off", "awaiting_extras"];
+	
+	const bookings = allBookings.filter(booking => 
+		activeStatuses.includes(booking.status)
 	);
 
-	// Filter bookings based on active tab and search - focused on assigned trips
-	const filteredBookings = assignedBookings.filter(booking => {
+	// Filter bookings based on search only - already filtered to in-progress trips by query
+	const filteredBookings = bookings.filter(booking => {
 		const matchesSearch = searchQuery === '' ||
 			booking.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			booking.originAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			booking.destinationAddress.toLowerCase().includes(searchQuery.toLowerCase());
 
-		const matchesTab = activeTab === 'all' || (
-			activeTab === 'active' && ['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off', 'awaiting_extras'].includes(booking.status) ||
-			activeTab === 'upcoming' && ['confirmed', 'driver_assigned'].includes(booking.status) ||
-			activeTab === 'completed' && ['completed'].includes(booking.status)
-		);
-
-		return matchesSearch && matchesTab;
+		return matchesSearch;
+	}).sort((a, b) => {
+		// Sort by closest scheduled pickup time (soonest first)
+		return new Date(a.scheduledPickupTime).getTime() - new Date(b.scheduledPickupTime).getTime();
 	});
 
-	// Simple stats for assigned trips only
-	const assignedStats = {
-		totalAssigned: assignedBookings.length,
-		upcomingTrips: assignedBookings.filter(b => ['confirmed', 'driver_assigned'].includes(b.status)).length,
-		activeTrips: assignedBookings.filter(b => ['driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off', 'awaiting_extras'].includes(b.status)).length,
-		completedTrips: assignedBookings.filter(b => b.status === 'completed').length,
-	};
-
-
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-			case 'confirmed': return 'bg-blue-100 text-blue-800 border-blue-300';
-			case 'driver_assigned': return 'bg-purple-100 text-purple-800 border-purple-300';
-			case 'driver_en_route': return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-			case 'arrived_pickup': return 'bg-cyan-100 text-cyan-800 border-cyan-300';
-			case 'passenger_on_board': return 'bg-green-100 text-green-800 border-green-300';
-			case 'in_progress': return 'bg-green-100 text-green-800 border-green-300';
-			case 'dropped_off': return 'bg-orange-100 text-orange-800 border-orange-300';
-			case 'awaiting_extras': return 'bg-amber-100 text-amber-800 border-amber-300';
-			case 'completed': return 'bg-gray-100 text-gray-800 border-gray-300';
-			case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
-			default: return 'bg-gray-100 text-gray-800 border-gray-300';
-		}
-	};
-
-	const getStatusIcon = (status: string) => {
-		switch (status) {
-			case 'pending': return <ClockIcon className="h-4 w-4" />;
-			case 'confirmed': return <CheckCircleIcon className="h-4 w-4" />;
-			case 'driver_assigned': return <UserIcon className="h-4 w-4" />;
-			case 'in_progress': return <CarIcon className="h-4 w-4" />;
-			case 'completed': return <CheckCircleIcon className="h-4 w-4" />;
-			case 'cancelled': return <AlertCircleIcon className="h-4 w-4" />;
-			default: return <ClockIcon className="h-4 w-4" />;
-		}
-	};
-
-	const formatTime = (timestamp: number | string) => {
-		return new Date(Number(timestamp) * 1000).toLocaleString();
-	};
-
-	const formatCurrency = (cents: number) => {
-		return `$${(cents / 100).toFixed(2)}`;
-	};
-
-	const formatPrice = (priceInCents: number) => `$${(priceInCents / 100).toFixed(0)}`;
-
-	const formatDate = (date: string | Date) => {
-		return new Date(date).toLocaleDateString("en-US", {
-			weekday: "long",
-			month: "short",
-			day: "numeric",
-		});
+	// Simple stats for in-progress trips only
+	const tripStats = {
+		totalInProgress: bookings.length,
+		activeTrips: bookings.filter(b => ['driver_en_route', 'in_progress', 'arrived_pickup', 'passenger_on_board'].includes(b.status)).length,
+		pendingTrips: bookings.filter(b => ['driver_assigned'].includes(b.status)).length,
+		waitingForExtras: bookings.filter(b => ['dropped_off', 'awaiting_extras'].includes(b.status)).length,
 	};
 
 	// Driver workflow status transitions
@@ -176,11 +153,11 @@ function DriverTripsComponent() {
 			case 'driver_en_route':
 				return 'Arrived PU';
 			case 'arrived_pickup':
-				return 'POB (Passenger On Board)';
+				return 'POB';
 			case 'passenger_on_board':
 				return 'Dropped Off';
 			case 'dropped_off':
-				return 'Add Extras';
+				return 'Close Trip';
 			case 'awaiting_extras':
 				return 'Complete Trip';
 			default:
@@ -189,10 +166,10 @@ function DriverTripsComponent() {
 	};
 
 	const handleStartTrip = (booking: any) => {
-		// If current status is 'dropped_off', show extras dialog
+		// If current status is 'dropped_off', show Close Trip options dialog
 		if (booking.status === 'dropped_off') {
-			setSelectedBooking(booking);
-			setExtrasDialogOpen(true);
+			setSelectedTripForClose(booking);
+			setCloseTripOptionsOpen(true);
 			return;
 		}
 		
@@ -200,6 +177,16 @@ function DriverTripsComponent() {
 		updateStatusMutation.mutate({
 			id: booking.id,
 			status: nextStatus as any,
+		}, {
+			onSuccess: () => {
+				// Update the selected booking details with new status
+				if (selectedBookingForDetails && selectedBookingForDetails.id === booking.id) {
+					setSelectedBookingForDetails({
+						...selectedBookingForDetails,
+						status: nextStatus
+					});
+				}
+			}
 		});
 	};
 
@@ -253,10 +240,207 @@ function DriverTripsComponent() {
 		});
 	};
 
+	// New Close Trip workflow handlers
+	const handleCloseTripOption = (option: 'close' | 'close-with-extras' | 'no-show' | 'no-show-with-extras' | 'close-later') => {
+		setCloseTripOptionsOpen(false);
+		
+		switch (option) {
+			case 'close':
+				// Close trip without extras - go directly to confirmation
+				setIsNoShow(false);
+				setExtrasData(undefined);
+				setTripConfirmationOpen(true);
+				break;
+			case 'close-with-extras':
+				// Show extras form
+				setIsNoShow(false);
+				setCloseTripExtrasOpen(true);
+				break;
+			case 'no-show':
+				// No show without extras
+				setIsNoShow(true);
+				setExtrasData(undefined);
+				setTripConfirmationOpen(true);
+				break;
+			case 'no-show-with-extras':
+				// No show with extras form
+				setIsNoShow(true);
+				setCloseTripExtrasOpen(true);
+				break;
+			case 'close-later':
+				// Just close the dialog, don't do anything
+				setSelectedTripForClose(null);
+				break;
+		}
+	};
+
+	const handleExtrasSubmit = (formData: ExtrasFormData) => {
+		setExtrasData(formData);
+		setCloseTripExtrasOpen(false);
+		setTripConfirmationOpen(true);
+	};
+
+	const handleExtrasBack = () => {
+		setCloseTripExtrasOpen(false);
+		setCloseTripOptionsOpen(true);
+	};
+
+	const handleTripConfirmation = () => {
+		if (!selectedTripForClose) return;
+
+		if (extrasData) {
+			// Convert form amounts from dollars to cents for backend
+			const extrasForBackend = {
+				additionalWaitTime: extrasData.additionalWaitTime,
+				unscheduledStops: extrasData.unscheduledStops,
+				parkingCharges: Math.round(extrasData.parkingCharges * 100), // Convert to cents
+				tollCharges: Math.round(extrasData.tollCharges * 100), // Convert to cents
+				location: extrasData.location,
+				otherCharges: {
+					description: extrasData.otherCharges.description,
+					amount: Math.round(extrasData.otherCharges.amount * 100), // Convert to cents
+				},
+				extraType: extrasData.extraType,
+				notes: extrasData.notes,
+			};
+
+			// Use the new close trip with extras mutation
+			closeTripWithExtrasMutation.mutate({
+				bookingId: selectedTripForClose.id,
+				isNoShow: isNoShow,
+				extrasData: extrasForBackend,
+			}, {
+				onSuccess: () => {
+					// Reset all state
+					setTripConfirmationOpen(false);
+					setSelectedTripForClose(null);
+					setExtrasData(undefined);
+					setIsNoShow(false);
+					
+					// Update the selected booking details if open
+					if (selectedBookingForDetails && selectedBookingForDetails.id === selectedTripForClose.id) {
+						setSelectedBookingForDetails({
+							...selectedBookingForDetails,
+							status: 'completed'
+						});
+					}
+				}
+			});
+		} else {
+			// No extras - use simple close trip mutation
+			closeTripWithoutExtrasMutation.mutate({
+				bookingId: selectedTripForClose.id,
+				isNoShow: isNoShow,
+			}, {
+				onSuccess: () => {
+					// Reset all state
+					setTripConfirmationOpen(false);
+					setSelectedTripForClose(null);
+					setExtrasData(undefined);
+					setIsNoShow(false);
+					
+					// Update the selected booking details if open
+					if (selectedBookingForDetails && selectedBookingForDetails.id === selectedTripForClose.id) {
+						setSelectedBookingForDetails({
+							...selectedBookingForDetails,
+							status: 'completed'
+						});
+					}
+				}
+			});
+		}
+	};
+
+	const handleTripConfirmationBack = () => {
+		setTripConfirmationOpen(false);
+		if (extrasData) {
+			// Go back to extras form
+			setCloseTripExtrasOpen(true);
+		} else {
+			// Go back to options
+			setCloseTripOptionsOpen(true);
+		}
+	};
+
+	const calculateTotalExtrasCharges = () => {
+		if (!extrasData) return 0;
+		return extrasData.parkingCharges + extrasData.tollCharges + extrasData.otherCharges.amount;
+	};
+
 	const handleViewPassengerDetails = (booking: any) => {
 		setSelectedBooking(booking);
 		setPassengerDetailsOpen(true);
-	};;
+	};
+
+	const handleOpenBookingDetails = (booking: any) => {
+		setSelectedBookingForDetails(booking);
+		setBookingDetailsOpen(true);
+	};
+
+	const navigateToLocation = (destinationAddress: string, locationType: 'pickup' | 'dropoff') => {
+		// Prefer Google Maps for all platforms as requested by client
+		const destination = encodeURIComponent(destinationAddress);
+		const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${destination}&travelmode=driving`;
+		
+		const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+		const isAndroid = /Android/.test(navigator.userAgent);
+		
+		if (isIOS || isAndroid) {
+			// On mobile, use window.location.href to open Google Maps app or fallback to web
+			window.location.href = googleMapsUrl;
+		} else {
+			// Desktop - open Google Maps in new tab
+			window.open(googleMapsUrl, '_blank');
+		}
+		
+		setShowMapsModal(false);
+	};
+
+	const openMapsApp = (booking: any, appType: 'google' | 'apple') => {
+		let mapsUrl = '';
+		
+		// Determine destination based on booking status
+		let destination = '';
+		let origin = '';
+		
+		if (['confirmed', 'driver_assigned', 'driver_en_route'].includes(booking.status)) {
+			destination = booking.originAddress; // Go to pickup
+		} else if (['arrived_pickup', 'passenger_on_board'].includes(booking.status)) {
+			destination = booking.destinationAddress; // Go to dropoff
+		} else {
+			// Show full route
+			origin = booking.originAddress;
+			destination = booking.destinationAddress;
+		}
+
+		switch (appType) {
+			case 'google':
+				// Google Maps always needs explicit origin for proper routing
+				if (origin) {
+					mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+				} else {
+					// Use current location as origin for Google Maps
+					mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+				}
+				break;
+			case 'apple':
+				// Apple Maps uses current location by default
+				if (origin) {
+					mapsUrl = `maps://?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(destination)}&dirflg=d`;
+				} else {
+					mapsUrl = `maps://?daddr=${encodeURIComponent(destination)}&dirflg=d`;
+				}
+				break;
+		}
+
+		// Use window.location.href for mobile app links
+		if (appType === 'apple' || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+			window.location.href = mapsUrl;
+		} else {
+			window.open(mapsUrl, '_blank');
+		}
+		setShowMapsModal(false);
+	};
 
 	if (isDriverLoading || isBookingsLoading) {
 		return (
@@ -265,333 +449,593 @@ function DriverTripsComponent() {
 					<div className="h-8 bg-gray-200 rounded w-1/3"></div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 						{[...Array(4)].map((_, i) => (
-							<div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+							<div key={i} className="h-24 bg-gray-200 rounded"></div>
 						))}
 					</div>
-					<div className="h-64 bg-gray-200 rounded-lg"></div>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="py-8 md:py-12 bg-background min-h-screen">
-			<div className="container mx-auto px-6 max-w-4xl">
-				<div className="space-y-6">
-					{/* Page Header */}
-					<div className="space-y-2 text-center md:text-left">
-						<h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-							My Trips
-						</h1>
-						<p className="text-muted-foreground text-sm md:text-base">
-							{assignedStats.totalAssigned} trips assigned • {assignedStats.activeTrips} active • {assignedStats.completedTrips} completed
-						</p>
-					</div>
-
-					{/* Search */}
-					<div className="relative">
-						<SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-						<Input
-							placeholder="Search trips..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-9 w-full"
-						/>
-					</div>
-
-					{/* Trip List */}
+		<div className={cn(
+			isMobile ? "min-h-screen bg-gray-50 flex flex-col" : "min-h-screen bg-gray-50 p-4 max-w-4xl mx-auto"
+		)}>
+			{/* Header */}
+			<div className={cn(
+				"bg-white border-b flex-shrink-0",
+				isMobile ? "px-4 py-3" : "rounded-lg mb-4 p-4"
+			)}>
+				<div className="flex items-center justify-between">
 					<div>
-						{filteredBookings.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
-								<div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-									<CarIcon className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-								</div>
-								<h3 className="font-semibold text-base md:text-lg mb-2">No trips assigned</h3>
-								<p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed px-4 md:px-0">
-									Your assigned trips will appear here once you receive bookings from the dispatch.
-								</p>
-							</div>
-						) : (
-							<div className="space-y-4">
-								{filteredBookings.map((booking) => {
-									const isUpcoming = new Date(booking.scheduledPickupTime) > new Date() && !["completed", "cancelled"].includes(booking.status);
-									const isPast = new Date(booking.scheduledPickupTime) < new Date() || ["completed", "cancelled"].includes(booking.status);
-									
-									return (
-										<Card key={booking.id} className="overflow-hidden shadow-sm border border-gray-200 bg-white hover:shadow-md transition-all duration-200">
-											<CardContent className="p-4">
-												{/* Header with Title and Status */}
-												<div className="flex items-center justify-between mb-3">
-													<h3 className="text-lg font-semibold text-gray-900">
-														Airport Transfer
-													</h3>
-													<div className="flex items-center gap-2">
-														<Badge 
-															className={cn(
-																"text-xs px-2 py-1 text-white",
-																isUpcoming && "bg-blue-500",
-																booking.status === "in_progress" && "bg-green-500",
-																booking.status === "completed" && "bg-gray-500",
-																booking.status === "cancelled" && "bg-red-500"
-															)}
-														>
-															{isUpcoming ? 'Upcoming' : booking.status === "in_progress" ? 'In Progress' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace('_', ' ')}
-														</Badge>
-														<DropdownMenu>
-															<DropdownMenuTrigger asChild>
-																<Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
-																	<MoreVerticalIcon className="h-4 w-4 text-gray-600" />
-																</Button>
-															</DropdownMenuTrigger>
-															<DropdownMenuContent align="end" className="w-48">
-																<DropdownMenuItem onClick={() => handleViewPassengerDetails(booking)}>
-																	<UserIcon className="h-4 w-4 mr-2" />
-																	View Passenger Details
-																</DropdownMenuItem>
-																<DropdownMenuItem onClick={() => {
-																	// Create route based on booking status
-																	let mapsUrl = '';
-																	if (['confirmed', 'driver_assigned', 'driver_en_route'].includes(booking.status)) {
-																		// Driver should go to pickup location
-																		mapsUrl = `https://maps.google.com/dir/?api=1&destination=${encodeURIComponent(booking.originAddress)}`;
-																	} else if (['arrived_pickup', 'passenger_on_board'].includes(booking.status)) {
-																		// Driver should go to drop-off location
-																		mapsUrl = `https://maps.google.com/dir/?api=1&destination=${encodeURIComponent(booking.destinationAddress)}`;
-																	} else {
-																		// Full route for reference
-																		mapsUrl = `https://maps.google.com/dir/?api=1&origin=${encodeURIComponent(booking.originAddress)}&destination=${encodeURIComponent(booking.destinationAddress)}`;
-																	}
-																	window.open(mapsUrl, '_blank');
-																}}>
-																	<NavigationIcon className="h-4 w-4 mr-2" />
-																	Open Maps
-																</DropdownMenuItem>
-															</DropdownMenuContent>
-														</DropdownMenu>
-													</div>
-												</div>
-
-												{/* Service Type Badge, Time and Distance */}
-												<div className="flex items-center gap-2 mb-4">
-													<Badge 
-														variant="secondary" 
-														className="text-xs px-2 py-1 bg-gray-100 text-gray-700"
-													>
-														{booking.bookingType === "package" ? "Airport Transfer" : "Custom"}
-													</Badge>
-													<div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-														Status: {booking.status}
-													</div>
-													<span className="text-sm text-gray-600">
-														{formatTime(booking.scheduledPickupTime)}
-													</span>
-													<span className="text-sm text-gray-600">
-														{formatPrice(booking.finalAmount || booking.quotedAmount)}
-													</span>
-													<div className="ml-auto text-sm text-gray-500">
-														{booking.estimatedDistance ? `${(booking.estimatedDistance / 1609).toFixed(1)} miles` : ''}
-													</div>
-												</div>
-
-												{/* Date and Route */}
-												<div className="flex items-center gap-4 mb-4">
-													<div className="flex items-center gap-2">
-														<CalendarIcon className="h-4 w-4 text-gray-400" />
-														<span className="text-sm text-gray-700">
-															{formatDate(booking.scheduledPickupTime)}
-														</span>
-													</div>
-													<div className="flex items-center gap-2 flex-1 min-w-0">
-														<NavigationIcon className="h-4 w-4 text-gray-400" />
-														<div className="flex-1 min-w-0">
-															<div className="text-sm font-medium text-gray-900">
-																{booking.originAddress.split(',')[0]}
-															</div>
-															<div className="text-xs text-gray-500">
-																to {booking.destinationAddress.split(',')[0]}
-															</div>
-														</div>
-													</div>
-												</div>
-
-												{/* Passenger Info */}
-												<div className="bg-purple-50 rounded-lg p-3 mb-4">
-													<div className="flex items-center gap-2">
-														<div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-															<UserIcon className="h-4 w-4 text-purple-600" />
-														</div>
-														<div className="flex-1">
-															<div className="text-sm font-medium text-purple-900">
-																{booking.customerName}
-															</div>
-															<div className="text-xs text-purple-700">
-																{booking.customerPhone}
-															</div>
-														</div>
-														<div className="flex gap-2">
-															<Button
-																size="sm"
-																variant="ghost"
-																className="h-8 w-8 p-0 hover:bg-purple-200"
-																onClick={() => window.open(`tel:${booking.customerPhone}`)}
-															>
-																<PhoneIcon className="h-4 w-4 text-purple-600" />
-															</Button>
-															<Button
-																size="sm"
-																variant="ghost"
-																className="h-8 w-8 p-0 hover:bg-purple-200"
-																onClick={() => window.open(`sms:${booking.customerPhone}`)}
-															>
-																<MessageSquare className="h-4 w-4 text-purple-600" />
-															</Button>
-														</div>
-													</div>
-												</div>
-
-												{/* Special Requests (if any) */}
-												{booking.specialRequests && (
-													<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-														<div className="flex items-start gap-2">
-															<AlertCircleIcon className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-															<div>
-																<p className="text-sm font-medium text-yellow-800">Special Requests</p>
-																<p className="text-sm text-yellow-700">{booking.specialRequests}</p>
-															</div>
-														</div>
-													</div>
-												)}
-
-												{/* Action Buttons */}
-												<div className="flex gap-3">
-													<Button
-														variant="outline"
-														className="flex-1 text-gray-700 hover:bg-gray-50 border-gray-300"
-														onClick={() => handleViewPassengerDetails(booking)}
-													>
-														Contact Passenger
-													</Button>
-													{['driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'dropped_off', 'awaiting_extras', 'confirmed'].includes(booking.status) && (
-														<Button
-															className="flex-1"
-															onClick={() => handleStartTrip(booking)}
-															disabled={updateStatusMutation.isPending}
-														>
-															{updateStatusMutation.isPending ? 'Updating...' : getStatusButtonText(booking.status)}
-														</Button>
-													)}
-												</div>
-											</CardContent>
-										</Card>
-									);
-								})}
-							</div>
-						)}
+						<h1 className={cn(
+							"font-bold text-gray-900",
+							isMobile ? "text-lg" : "text-2xl"
+						)}>My Trips</h1>
+						<p className="text-gray-600 text-xs">Your current in-progress trips</p>
 					</div>
+					<Button 
+						variant="outline" 
+						size="sm"
+						onClick={() => refetch()}
+						className={cn(isMobile ? "h-8 px-2" : "h-8")}
+					>
+						<RefreshCwIcon className="h-4 w-4" />
+						{!isMobile && <span className="ml-2">Refresh</span>}
+					</Button>
 				</div>
 			</div>
 
-			{/* Passenger Details Dialog */}
-			<Dialog open={passengerDetailsOpen} onOpenChange={setPassengerDetailsOpen}>
+			{/* Active Trips Banner */}
+			{tripStats.activeTrips > 0 && (
+				<div className={cn(
+					"bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 flex-shrink-0",
+					isMobile ? "mx-0 px-4 py-3" : "mx-4 mb-4 rounded-lg px-4 py-3"
+				)}>
+					<div className="flex items-center gap-3">
+						<div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+						<div className="flex-1">
+							<h3 className="font-semibold text-blue-900 text-sm">
+								{tripStats.activeTrips === 1 
+									? "1 trip in progress" 
+									: `${tripStats.activeTrips} trips in progress`
+								}
+							</h3>
+							<p className="text-blue-700 text-xs">
+								{tripStats.pendingTrips > 0 ? `${tripStats.pendingTrips} pending • ` : ''}
+								{tripStats.waitingForExtras > 0 ? `${tripStats.waitingForExtras} awaiting extras • ` : ''}
+								Tap any trip to continue
+							</p>
+						</div>
+						<div className="flex items-center gap-1">
+							<ActivityIcon className="h-4 w-4 text-blue-600" />
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Filters and Search */}
+			<div className={cn(
+				"flex-shrink-0",
+				isMobile ? "px-4 py-3 bg-white border-b" : "mb-4"
+			)}>
+				{/* Search */}
+				<div className="relative mb-3">
+					<SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+					<Input
+						placeholder="Search by customer, pickup, or destination..."
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className={cn(
+							"pl-10 border-gray-300",
+							isMobile ? "h-9 text-sm" : ""
+						)}
+					/>
+				</div>
+				
+			</div>
+
+			{/* Trips List */}
+			<div className={cn(
+				isMobile ? "flex-1 overflow-y-auto" : "space-y-4"
+			)}>
+				{filteredBookings.length === 0 ? (
+					<div className={cn(
+						"flex items-center justify-center h-full",
+						isMobile ? "px-4" : ""
+					)}>
+						<div className="text-center">
+							<AlertCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+							<h3 className="text-lg font-medium text-gray-900 mb-2">No trips found</h3>
+							<p className="text-gray-500 text-sm">
+								{searchQuery ? 'Try adjusting your search terms.' : 'No assigned trips at the moment.'}
+							</p>
+						</div>
+					</div>
+				) : (
+					<div className={cn(
+						isMobile ? "" : "grid gap-4"
+					)}>
+						{filteredBookings.map((booking, index) => {
+							// Status-based color coding with stronger inline styles 
+							const getStatusStyle = (status: string) => {
+								const baseStyle = { 
+									borderLeftWidth: '4px',
+									borderLeftStyle: 'solid' as const
+								};
+								
+								switch (status) {
+									case 'driver_assigned':
+										return { ...baseStyle, borderLeftColor: '#3b82f6' }; // Blue
+									case 'driver_en_route':
+										return { ...baseStyle, borderLeftColor: '#eab308' }; // Yellow
+									case 'arrived_pickup':
+										return { ...baseStyle, borderLeftColor: '#f97316' }; // Orange
+									case 'passenger_on_board':
+									case 'in_progress':
+										return { ...baseStyle, borderLeftColor: '#22c55e' }; // Green
+									case 'dropped_off':
+									case 'awaiting_extras':
+										return { ...baseStyle, borderLeftColor: '#a855f7' }; // Purple
+									case 'completed':
+										return { ...baseStyle, borderLeftColor: '#6b7280' }; // Gray
+									default:
+										return { ...baseStyle, borderLeftColor: '#d1d5db' }; // Light gray
+								}
+							};
+
+							return (
+								<Card 
+									key={booking.id} 
+									style={getStatusStyle(booking.status)}
+									className={cn(
+										"bg-white transition-colors cursor-pointer active:bg-gray-50",
+										isMobile 
+											? "border-r-0 border-t-0 border-b border-gray-200 rounded-none shadow-none" 
+											: "border-r border-t border-b border-gray-200 shadow-sm hover:shadow-md"
+									)}
+									onClick={() => handleOpenBookingDetails(booking)}
+								>
+									<CardContent className={cn(
+										isMobile ? "px-3 py-2.5" : "p-4"
+									)}>
+										{isMobile ? (
+											// Mobile optimized layout
+											<>
+												{/* Header - Time and Status */}
+												<div className="flex items-center justify-between mb-2">
+													<div className="flex items-center gap-1.5">
+														<ClockIcon className="h-3.5 w-3.5 text-gray-500" />
+														<div className="flex flex-col">
+															<span className="text-sm font-semibold text-gray-900">
+																{format(new Date(booking.scheduledPickupTime), "HH:mm")}
+															</span>
+															<span className="text-xs text-gray-500">
+																{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
+															</span>
+														</div>
+													</div>
+													<Badge 
+														variant={booking.status === 'completed' ? 'default' : 
+															booking.status === 'cancelled' ? 'destructive' : 
+															booking.status === 'confirmed' ? 'secondary' : 'outline'} 
+														className="text-xs px-2 py-0.5"
+													>
+														{booking.status === 'driver_en_route' ? 'IN PROGRESS' : booking.status.replace('_', ' ').toUpperCase()}
+													</Badge>
+												</div>
+
+												{/* Route - More aggressive truncation for mobile */}
+												<div className="space-y-1 mb-2">
+													<div className="flex items-center gap-2">
+														<div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+														<p className="text-xs text-gray-700 truncate flex-1 max-w-[200px]">
+															{booking.originAddress.length > 35 
+																? booking.originAddress.substring(0, 35) + '...' 
+																: booking.originAddress}
+														</p>
+													</div>
+													{/* Stops (if any) */}
+													{booking.stops && booking.stops.length > 0 && (
+														<div className="flex items-center gap-2">
+															<div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+															<p className="text-xs text-blue-600 truncate flex-1 max-w-[200px]">
+																{booking.stops.length} stop{booking.stops.length > 1 ? 's' : ''}
+															</p>
+														</div>
+													)}
+													<div className="flex items-center gap-2">
+														<div className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></div>
+														<p className="text-xs text-gray-700 truncate flex-1 max-w-[200px]">
+															{booking.destinationAddress.length > 35 
+																? booking.destinationAddress.substring(0, 35) + '...' 
+																: booking.destinationAddress}
+														</p>
+													</div>
+												</div>
+
+												{/* Customer - Compact */}
+												<div className="flex items-center gap-1.5">
+													<UserIcon className="h-3.5 w-3.5 text-gray-500" />
+													<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
+												</div>
+											</>
+										) : (
+											// Desktop layout (unchanged)
+											<>
+												{/* Header with Time and Status */}
+												<div className="flex items-center justify-between mb-2">
+													<div className="flex items-center gap-2">
+														<ClockIcon className="h-4 w-4 text-gray-500" />
+														<div className="flex flex-col">
+															<span className="font-semibold text-gray-900">
+																{format(new Date(booking.scheduledPickupTime), "HH:mm")}
+															</span>
+															<span className="text-xs text-gray-500">
+																{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
+															</span>
+														</div>
+													</div>
+													<Badge 
+														variant={booking.status === 'completed' ? 'default' : 
+															booking.status === 'cancelled' ? 'destructive' : 
+															booking.status === 'confirmed' ? 'secondary' : 'outline'} 
+														className="text-xs font-medium"
+													>
+														{booking.status === 'driver_en_route' ? 'IN PROGRESS' : booking.status.replace('_', ' ').toUpperCase()}
+													</Badge>
+												</div>
+
+												{/* Route */}
+												<div className="space-y-1 mb-2">
+													<div className="flex items-start gap-2">
+														<div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
+														<div className="flex-1 min-w-0">
+															<p className="text-sm text-gray-900 truncate">{booking.originAddress}</p>
+														</div>
+													</div>
+													{/* Stops (if any) */}
+													{booking.stops && booking.stops.length > 0 && (
+														<div className="flex items-start gap-2">
+															<div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+															<div className="flex-1 min-w-0">
+																<p className="text-sm text-blue-600 truncate">
+																	{booking.stops.length} intermediate stop{booking.stops.length > 1 ? 's' : ''}
+																</p>
+															</div>
+														</div>
+													)}
+													<div className="flex items-start gap-2">
+														<div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+														<div className="flex-1 min-w-0">
+															<p className="text-sm text-gray-900 truncate">{booking.destinationAddress}</p>
+														</div>
+													</div>
+												</div>
+
+												{/* Customer */}
+												<div className="flex items-center gap-2">
+													<UserIcon className="h-4 w-4 text-gray-500" />
+													<span className="text-sm text-gray-700">{booking.customerName}</span>
+												</div>
+											</>
+										)}
+									</CardContent>
+								</Card>
+							);
+						})}
+						{/* Bottom padding for mobile to ensure last item is visible above bottom nav */}
+						{isMobile && (
+							<div className="h-20"></div>
+						)}
+					</div>
+				)}
+			</div>
+
+			{/* Navigation Location Selection Modal */}
+			<Dialog open={showMapsModal} onOpenChange={setShowMapsModal}>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2">
-							<UserIcon className="h-5 w-5" />
-							Passenger Details
+							<NavigationIcon className="h-5 w-5" />
+							Start navigation to
 						</DialogTitle>
 						<DialogDescription>
-							Trip information for {selectedBooking?.customerName}
+							You can only navigate to the drop off location once the passenger is in the vehicle.
 						</DialogDescription>
 					</DialogHeader>
 					
-					{selectedBooking && (
-						<div className="space-y-4 py-4">
-							{/* Passenger Information */}
-							<div className="space-y-3">
-								<div className="flex items-center gap-3">
-									<div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-										<UserIcon className="h-6 w-6 text-blue-600" />
+					<div className="space-y-3 py-4">
+						{/* Pickup Location */}
+						<Button 
+							variant="outline" 
+							className="w-full justify-start p-4 h-auto"
+							onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.originAddress, 'pickup')}
+						>
+							<div className="flex items-start gap-3 text-left">
+								<div className="w-3 h-3 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+								<div className="flex-1 min-w-0">
+									<div className="text-sm font-medium text-gray-900 mb-1">Pickup location</div>
+									<div className="text-xs text-gray-600 leading-relaxed">
+										{selectedMapsBooking?.originAddress}
 									</div>
-									<div className="flex-1">
-										<h3 className="font-semibold text-lg">{selectedBooking.customerName}</h3>
-										<p className="text-sm text-muted-foreground">
-											{selectedBooking.passengerCount} passenger{selectedBooking.passengerCount !== 1 ? 's' : ''}
-										</p>
+								</div>
+							</div>
+						</Button>
+
+						{/* Stops (if any) */}
+						{selectedMapsBooking?.stops && selectedMapsBooking.stops.length > 0 && (
+							<div className="space-y-2">
+								<div className="text-sm font-medium text-gray-700 px-1">
+									Intermediate Stops ({selectedMapsBooking.stops.length})
+								</div>
+								{selectedMapsBooking.stops.map((stop: any, index: number) => (
+									<Button 
+										key={stop.id || index}
+										variant="outline" 
+										className="w-full justify-start p-4 h-auto bg-blue-50 border-blue-200"
+										onClick={() => navigateToLocation(stop.address, 'pickup')}
+									>
+										<div className="flex items-start gap-3 text-left">
+											<div className="w-3 h-3 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+											<div className="flex-1 min-w-0">
+												<div className="text-sm font-medium text-blue-900 mb-1">Stop {index + 1}</div>
+												<div className="text-xs text-blue-700 leading-relaxed">
+													{stop.address}
+												</div>
+											</div>
+										</div>
+									</Button>
+								))}
+							</div>
+						)}
+
+						{/* Dropoff Location */}
+						<Button 
+							variant="outline" 
+							className="w-full justify-start p-4 h-auto"
+							onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.destinationAddress, 'dropoff')}
+						>
+							<div className="flex items-start gap-3 text-left">
+								<div className="w-3 h-3 rounded-full bg-red-500 mt-1 flex-shrink-0"></div>
+								<div className="flex-1 min-w-0">
+									<div className="text-sm font-medium text-gray-900 mb-1">Dropoff location</div>
+									<div className="text-xs text-gray-600 leading-relaxed">
+										{selectedMapsBooking?.destinationAddress}
+									</div>
+								</div>
+							</div>
+						</Button>
+
+						{/* Cancel */}
+						<Button 
+							variant="ghost" 
+							className="w-full mt-4"
+							onClick={() => setShowMapsModal(false)}
+						>
+							Cancel
+						</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
+
+			{/* Booking Details Dialog/Fullscreen */}
+			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
+				<DialogContent 
+					className={cn(
+						"[&>button]:hidden", // Hide default close button
+						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
+					)}
+				>
+					{selectedBookingForDetails && (
+						<div className={cn(
+							isMobile ? "flex flex-col h-full" : "flex flex-col"
+						)}>
+							{/* Compact Header with gradient background */}
+							<div className={cn(
+								"relative p-4 bg-gradient-to-br from-primary to-primary/80 text-white flex-shrink-0 flex items-center justify-between",
+								isMobile ? "pt-8" : "rounded-t-lg"
+							)}>
+								<div className="flex items-center gap-3">
+									<ClockIcon className="h-5 w-5 text-white/80" />
+									<div>
+										<h2 className="text-lg font-bold">
+											{format(new Date(selectedBookingForDetails.scheduledPickupTime), "MMM dd, yyyy HH:mm")}
+										</h2>
+										<div className="flex items-center gap-2 mt-1">
+											<span className="text-xs text-white/80">
+												Trip ID: {selectedBookingForDetails.id.slice(-6).toUpperCase()}
+											</span>
+											<Badge className="bg-white/20 text-white border-white/30 text-xs px-2 py-0.5">
+												{selectedBookingForDetails.status.replace('_', ' ').toUpperCase()}
+											</Badge>
+										</div>
 									</div>
 								</div>
 								
-								{/* Contact Information */}
-								<div className="grid grid-cols-1 gap-3 p-3 bg-muted/30 rounded-lg">
-									<div className="flex justify-between">
-										<span className="text-sm text-muted-foreground">Phone:</span>
-										<span className="text-sm font-medium">{selectedBooking.customerPhone}</span>
-									</div>
-									{selectedBooking.customerEmail && (
-										<div className="flex justify-between">
-											<span className="text-sm text-muted-foreground">Email:</span>
-											<span className="text-sm font-medium">{selectedBooking.customerEmail}</span>
+								<Button
+									variant="ghost"
+									size="lg"
+									className="h-12 w-12 p-0 text-white hover:bg-white/20 rounded-full flex-shrink-0 border-2 border-white/30 hover:border-white/50 transition-all duration-200"
+									onClick={() => setBookingDetailsOpen(false)}
+								>
+									<X className="h-6 w-6" />
+								</Button>
+							</div>
+
+							{/* Scrollable Content with improved design */}
+							<div className={cn(
+								"p-4 space-y-4",
+								isMobile ? "flex-1 overflow-y-auto pb-2" : ""
+							)}>
+								{/* Compact Route Information Card */}
+								<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+									<h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+										<MapPinIcon className="h-4 w-4 text-primary" />
+										Trip Route
+									</h3>
+									<div className="space-y-2">
+										<div className="flex items-start gap-2">
+											<div className="w-2.5 h-2.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
+											<div className="flex-1 min-w-0">
+												<p className="text-xs font-medium text-green-700 mb-0.5">Pick up</p>
+												<p className="text-xs text-gray-600 leading-tight break-words line-clamp-2">
+													{selectedBookingForDetails.originAddress}
+												</p>
+											</div>
 										</div>
-									)}
+										
+										{/* Stops (if any) */}
+										{selectedBookingForDetails.stops && selectedBookingForDetails.stops.length > 0 && (
+											<>
+												{selectedBookingForDetails.stops.map((stop: any, index: number) => (
+													<div key={stop.id || index}>
+														<div className="border-l border-gray-200 ml-1 h-2"></div>
+														<div className="flex items-start gap-2">
+															<div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+															<div className="flex-1 min-w-0">
+																<p className="text-xs font-medium text-blue-700 mb-0.5">Stop {index + 1}</p>
+																<p className="text-xs text-gray-600 leading-tight break-words line-clamp-2">
+																	{stop.address}
+																</p>
+															</div>
+														</div>
+													</div>
+												))}
+											</>
+										)}
+										
+										<div className="border-l border-gray-200 ml-1 h-2"></div>
+										
+										<div className="flex items-start gap-2">
+											<div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+											<div className="flex-1 min-w-0">
+												<p className="text-xs font-medium text-red-700 mb-0.5">Drop off</p>
+												<p className="text-xs text-gray-600 leading-tight break-words line-clamp-2">
+													{selectedBookingForDetails.destinationAddress}
+												</p>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								{/* Compact Vehicle Information */}
+								{selectedBookingForDetails.car && (
+									<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+										<div className="flex items-center gap-2.5">
+											<div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+												<CarIcon className="h-4 w-4 text-blue-600" />
+											</div>
+											<div>
+												<p className="text-sm font-medium text-gray-900">{selectedBookingForDetails.car.name}</p>
+												<p className="text-xs text-gray-500">Assigned Vehicle</p>
+											</div>
+										</div>
+									</div>
+								)}
+
+
+								{/* Compact Customer Information Card - Moved down for easier access */}
+								<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+									<div className="flex items-center gap-3">
+										<div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center flex-shrink-0">
+											<UserIcon className="h-5 w-5 text-primary" />
+										</div>
+										<div className="flex-1 min-w-0">
+											<p className="font-semibold text-sm text-gray-900 truncate">{selectedBookingForDetails.customerName}</p>
+											<p className="text-xs text-gray-600">{selectedBookingForDetails.customerPhone}</p>
+										</div>
+										<div className="flex gap-1.5">
+											<Button
+												variant="outline"
+												size="sm"
+												className="h-9 w-9 p-0 rounded-full shadow-sm hover:shadow-md transition-shadow"
+												onClick={() => window.location.href = `tel:${selectedBookingForDetails.customerPhone}`}
+											>
+												<PhoneIcon className="h-4 w-4 text-green-600" />
+											</Button>
+											<Button
+												variant="outline"
+												size="sm"
+												className="h-9 w-9 p-0 rounded-full shadow-sm hover:shadow-md transition-shadow"
+												onClick={() => window.location.href = `sms:${selectedBookingForDetails.customerPhone}`}
+											>
+												<MessageSquare className="h-4 w-4 text-blue-600" />
+											</Button>
+										</div>
+									</div>
 								</div>
 							</div>
 
-							{/* Trip Information */}
-							<div className="space-y-2">
-								<h4 className="font-medium text-sm">Trip Details</h4>
-								<div className="p-3 bg-muted/30 rounded-lg space-y-2">
-									<div className="flex items-start gap-2">
-										<MapPinIcon className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-										<div className="flex-1">
-											<p className="text-xs font-medium text-muted-foreground">PICKUP</p>
-											<p className="text-sm">{selectedBooking.originAddress}</p>
+							{/* Enhanced Actions - Fixed bottom for mobile */}
+							<div className={cn(
+								"p-4 space-y-3 bg-white border-t border-gray-200",
+								isMobile ? "flex-shrink-0 shadow-lg min-h-[140px]" : "rounded-b-lg"
+							)}>
+								{/* Navigation or Fare Display based on trip status */}
+								{['dropped_off', 'completed', 'no_show'].includes(selectedBookingForDetails.status) ? (
+									/* Trip Fare Card for completed trips */
+									<div className="w-full h-12 border-2 border-green-200 bg-green-50 rounded-lg flex items-center justify-center">
+										<div className="flex items-center gap-2">
+											<DollarSignIcon className="h-5 w-5 text-green-600" />
+											<span className="text-green-800 font-semibold">
+												Trip Fare: ${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+											</span>
+											{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+												<span className="text-green-700 text-sm">
+													(+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)} extras)
+												</span>
+											) : null}
 										</div>
 									</div>
-									<div className="flex items-start gap-2">
-										<NavigationIcon className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-										<div className="flex-1">
-											<p className="text-xs font-medium text-muted-foreground">DESTINATION</p>
-											<p className="text-sm">{selectedBooking.destinationAddress}</p>
-										</div>
-									</div>
-									<div className="flex justify-between pt-2 border-t">
-										<div>
-											<p className="text-xs font-medium text-muted-foreground">SCHEDULED</p>
-											<p className="text-sm">{formatTime(selectedBooking.scheduledPickupTime)}</p>
-										</div>
-										<div className="text-right">
-											<p className="text-xs font-medium text-muted-foreground">FARE</p>
-											<p className="text-sm font-semibold">{formatCurrency(selectedBooking.finalAmount || selectedBooking.quotedAmount)}</p>
-										</div>
-									</div>
-								</div>
-							</div>
+								) : (
+									/* Navigate Button for active trips */
+									<Button
+										variant="outline"
+										className="w-full h-12 border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium transition-all duration-200"
+										onClick={() => {
+											setSelectedMapsBooking(selectedBookingForDetails);
+											setShowMapsModal(true);
+										}}
+									>
+										<NavigationIcon className="h-5 w-5 mr-2" />
+										Navigate
+									</Button>
+								)}
 
-							{/* Special Requests */}
-							{selectedBooking.specialRequests && (
-								<div className="space-y-2">
-									<h4 className="font-medium text-sm">Special Requests</h4>
-									<div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-										<p className="text-sm text-yellow-800">{selectedBooking.specialRequests}</p>
-									</div>
-								</div>
-							)}
+								{/* Status Action */}
+								{(() => {
+									const canProgress = ['driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'dropped_off', 'awaiting_extras', 'confirmed'].includes(selectedBookingForDetails.status);
+									const needsSwipeConfirmation = ['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board'].includes(selectedBookingForDetails.status);
 
-							{/* Action Buttons */}
-							<div className="flex gap-2 pt-4 border-t">
-								<Button 
-									variant="outline" 
-									onClick={() => setPassengerDetailsOpen(false)}
-									className="flex-1"
-								>
-									Close
-								</Button>
-								<Button 
-									onClick={() => window.open(`tel:${selectedBooking.customerPhone}`)}
-									className="flex-1"
-								>
-									<PhoneIcon className="h-4 w-4 mr-2" />
-									Call Passenger
-								</Button>
+									if (!canProgress) return null;
+
+									if (isMobile && needsSwipeConfirmation) {
+										return (
+											<SwipeToConfirm
+												onConfirm={() => {
+													handleStartTrip(selectedBookingForDetails);
+												}}
+												confirmText={getStatusButtonText(selectedBookingForDetails.status)}
+												instruction={`Swipe to ${getStatusButtonText(selectedBookingForDetails.status)}`}
+												variant="primary"
+												disabled={updateStatusMutation.isPending}
+											/>
+										);
+									}
+
+									return (
+										<Button
+											className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
+											onClick={() => {
+												handleStartTrip(selectedBookingForDetails);
+											}}
+											disabled={updateStatusMutation.isPending}
+										>
+											{updateStatusMutation.isPending ? 'Updating...' : getStatusButtonText(selectedBookingForDetails.status)}
+										</Button>
+									);
+								})()}
 							</div>
 						</div>
 					)}
@@ -602,106 +1046,97 @@ function DriverTripsComponent() {
 			<Dialog open={extrasDialogOpen} onOpenChange={setExtrasDialogOpen}>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
-						<DialogTitle>Add Extras</DialogTitle>
+						<DialogTitle>Add Trip Extras</DialogTitle>
 						<DialogDescription>
-							Add any additional charges like tolls, parking fees, etc.
+							Add any additional charges for {selectedBooking?.customerName}
 						</DialogDescription>
 					</DialogHeader>
 					
-					<div className="space-y-4">
-						<div className="space-y-3">
-							<div className="flex items-center justify-between">
-								<label className="text-sm font-medium">Extra Charges</label>
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={addExtraItem}
-									className="h-8"
-								>
-									<PlusIcon className="h-4 w-4 mr-1" />
-									Add Item
-								</Button>
+					<div className="space-y-4 py-4">
+						{extras.map((extra, index) => (
+							<div key={extra.id} className="flex gap-2">
+								<Input
+									placeholder="Description (e.g., Tolls, Parking)"
+									value={extra.description}
+									onChange={(e) => updateExtraItem(extra.id, 'description', e.target.value)}
+									className="flex-1"
+								/>
+								<Input
+									placeholder="Amount"
+									type="number"
+									step="0.01"
+									value={extra.amount}
+									onChange={(e) => updateExtraItem(extra.id, 'amount', e.target.value)}
+									className="w-24"
+								/>
+								{extras.length > 1 && (
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => removeExtraItem(extra.id)}
+										className="h-10 w-10 p-0"
+									>
+										<TrashIcon className="h-4 w-4" />
+									</Button>
+								)}
 							</div>
-							
-							{extras.map((item, index) => (
-								<div key={item.id} className="flex gap-2 items-start">
-									<div className="flex-1">
-										<Input
-											placeholder="Description (e.g., Toll, Parking)"
-											value={item.description}
-											onChange={(e) => updateExtraItem(item.id, 'description', e.target.value)}
-											className="text-sm"
-										/>
-									</div>
-									<div className="w-24">
-										<Input
-											type="number"
-											step="0.01"
-											placeholder="$0.00"
-											value={item.amount}
-											onChange={(e) => updateExtraItem(item.id, 'amount', e.target.value)}
-											className="text-sm"
-										/>
-									</div>
-									{extras.length > 1 && (
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											onClick={() => removeExtraItem(item.id)}
-											className="h-10 w-10 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-										>
-											<TrashIcon className="h-4 w-4" />
-										</Button>
-									)}
-								</div>
-							))}
-							
-							{calculateTotalExtras() > 0 && (
-								<div className="flex justify-between items-center pt-2 border-t border-gray-200">
-									<span className="text-sm font-medium">Total:</span>
-									<span className="text-sm font-semibold">${calculateTotalExtras().toFixed(2)}</span>
-								</div>
-							)}
-							
-							<p className="text-xs text-muted-foreground">
-								Add multiple items like tolls, parking fees, or other charges
-							</p>
-						</div>
-					</div>
-
-					<div className="flex gap-2 pt-4">
+						))}
+						
 						<Button
 							variant="outline"
-							onClick={() => {
-								// Skip extras and complete trip directly
-								if (selectedBooking) {
-									updateStatusMutation.mutate({
-										id: selectedBooking.id,
-										status: 'completed' as any,
-										extraCharges: 0,
-									});
-								}
-								setExtrasDialogOpen(false);
-								setExtras([{id: '1', description: '', amount: ''}]);
-								setSelectedBooking(null);
-							}}
-							className="flex-1"
-							disabled={updateStatusMutation.isPending}
+							onClick={addExtraItem}
+							className="w-full"
 						>
-							{updateStatusMutation.isPending ? 'Completing...' : 'Skip Extras'}
+							<PlusIcon className="h-4 w-4 mr-2" />
+							Add Another Item
 						</Button>
-						<Button 
-							onClick={handleSubmitExtras}
-							className="flex-1"
-							disabled={updateStatusMutation.isPending}
-						>
-							{updateStatusMutation.isPending ? 'Adding...' : 'Add Extras'}
-						</Button>
+						
+						<div className="border-t pt-4">
+							<div className="flex justify-between items-center">
+								<span className="font-medium">Total Extra Charges:</span>
+								<span className="font-bold text-lg">${calculateTotalExtras().toFixed(2)}</span>
+							</div>
+						</div>
+						
+						<div className="flex gap-2">
+							<Button variant="outline" onClick={() => setExtrasDialogOpen(false)} className="flex-1">
+								Cancel
+							</Button>
+							<Button onClick={handleSubmitExtras} className="flex-1">
+								Add Extras & Continue
+							</Button>
+						</div>
 					</div>
 				</DialogContent>
 			</Dialog>
+
+			{/* New Close Trip Workflow Dialogs */}
+			<CloseTripOptionsDialog
+				open={closeTripOptionsOpen}
+				onOpenChange={setCloseTripOptionsOpen}
+				booking={selectedTripForClose}
+				onSelectOption={handleCloseTripOption}
+			/>
+
+			<CloseTripExtrasForm
+				open={closeTripExtrasOpen}
+				onOpenChange={setCloseTripExtrasOpen}
+				booking={selectedTripForClose}
+				isNoShow={isNoShow}
+				onSubmit={handleExtrasSubmit}
+				onBack={handleExtrasBack}
+			/>
+
+			<TripConfirmationDialog
+				open={tripConfirmationOpen}
+				onOpenChange={setTripConfirmationOpen}
+				booking={selectedTripForClose}
+				extrasData={extrasData}
+				totalCharges={calculateTotalExtrasCharges()}
+				onConfirm={handleTripConfirmation}
+				onGoBack={handleTripConfirmationBack}
+				isSubmitting={updateStatusMutation.isPending || closeTripWithExtrasMutation.isPending || closeTripWithoutExtrasMutation.isPending}
+			/>
 		</div>
 	);
 }

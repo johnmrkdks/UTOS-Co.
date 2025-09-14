@@ -11,6 +11,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { ModalProvider } from "@/hooks/use-modal";
+import React from "react";
 
 export type RouterAppContext = {
 	trpc: typeof trpc;
@@ -27,6 +28,10 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			{
 				name: "description",
 				content: "Down Under Chauffeur Booking App",
+			},
+			{
+				name: "viewport",
+				content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover",
 			},
 		],
 		links: [
@@ -45,6 +50,39 @@ function RootComponent() {
 	type ModifierKey = 'Alt' | 'Control' | 'Meta' | 'Shift';
 	type KeyboardKey = ModifierKey | (string & {});
 
+	// Prevent iOS zoom on input focus
+	React.useEffect(() => {
+		const preventZoom = () => {
+			const viewportMeta = document.querySelector('meta[name="viewport"]');
+			if (viewportMeta) {
+				viewportMeta.setAttribute('content', 
+					'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover'
+				);
+			}
+
+			// Add event listeners to all input elements
+			const inputs = document.querySelectorAll('input, textarea, select');
+			inputs.forEach(input => {
+				input.addEventListener('focus', () => {
+					if (viewportMeta) {
+						viewportMeta.setAttribute('content', 
+							'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover'
+						);
+					}
+				});
+			});
+		};
+
+		// Run on mount and when DOM changes
+		preventZoom();
+		
+		// Observer for dynamically added inputs
+		const observer = new MutationObserver(preventZoom);
+		observer.observe(document.body, { childList: true, subtree: true });
+
+		return () => observer.disconnect();
+	}, []);
+
 	return (
 		<ModalProvider>
 			<HeadContent />
@@ -52,7 +90,16 @@ function RootComponent() {
 				{/* {isFetching ? <Loader /> : <Outlet />} */}
 				<Outlet />
 			</div>
-			<Toaster richColors />
+			<Toaster 
+				richColors 
+				position="top-center"
+				toastOptions={{
+					style: {
+						marginTop: '60px', // Account for mobile header
+					},
+					className: 'mobile:max-w-[90vw] mobile:text-sm',
+				}}
+			/>
 			<TanStackDevtools
 				config={{
 					position: "bottom-left",

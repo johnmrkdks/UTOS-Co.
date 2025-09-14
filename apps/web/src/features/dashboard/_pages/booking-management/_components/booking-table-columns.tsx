@@ -3,7 +3,7 @@ import { DataTableColumnHeader } from "@workspace/ui/components/data-table-colum
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { User, Car, UserCheck, Phone } from "lucide-react";
+import { User, Car, UserCheck, Phone, CircleDot } from "lucide-react";
 import { BookingTableRowActions } from "./booking-table-row-actions";
 
 // Booking interface
@@ -16,6 +16,7 @@ export interface Booking {
 	customerEmail?: string;
 	originAddress: string;
 	destinationAddress: string;
+	stops?: Array<{ id: string; address: string; }>;
 	scheduledPickupTime: string;
 	quotedAmount: number;
 	carId: string;
@@ -167,7 +168,12 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 				pending: "secondary",
 				confirmed: "default",
 				driver_assigned: "outline",
+				driver_en_route: "outline",
+				arrived_pickup: "outline",
+				passenger_on_board: "default",
 				in_progress: "default",
+				dropped_off: "outline",
+				awaiting_extras: "secondary",
 				completed: "default",
 				cancelled: "destructive",
 			};
@@ -213,12 +219,43 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 					<div className="text-xs font-medium truncate">
 						From: {row.original.originAddress}
 					</div>
+					{row.original.stops && row.original.stops.length > 0 && (
+						<div className="text-xs text-blue-600 truncate">
+							{row.original.stops.length} stop{row.original.stops.length > 1 ? 's' : ''}
+						</div>
+					)}
 					<div className="text-xs text-muted-foreground truncate">
 						To: {row.original.destinationAddress}
 					</div>
 				</div>
 			),
 			size: 200,
+		});
+
+		// Stops column
+		columns.push({
+			id: "stops",
+			accessorKey: "stops",
+			header: "Stops",
+			cell: ({ row }) => {
+				const stops = row.original.stops;
+				if (!stops || stops.length === 0) {
+					return (
+						<div className="text-center">
+							<span className="text-xs text-muted-foreground">—</span>
+						</div>
+					);
+				}
+				return (
+					<div className="flex items-center gap-1">
+						<CircleDot className="h-3 w-3 text-blue-500" />
+						<Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+							{stops.length}
+						</Badge>
+					</div>
+				);
+			},
+			size: 80,
 		});
 	}
 

@@ -13,6 +13,7 @@ export * from "./cars";
 
 export * from "./bookings/booking-reviews";
 export * from "./bookings/booking-stops";
+export * from "./bookings/booking-extras";
 export * from "./booking-policies";
 export * from "./bookings";
 

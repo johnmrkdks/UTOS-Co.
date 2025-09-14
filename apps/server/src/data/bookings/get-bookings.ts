@@ -19,6 +19,8 @@ export async function getBookings(db: DB, options: ResourceList) {
 				car: true,
 				user: true,
 				package: true,
+				extras: true, // Include extras data
+				stops: true, // Include stops data
 			},
 		}),
 		filterBuilder: new RQBFilterBuilder(bookings),

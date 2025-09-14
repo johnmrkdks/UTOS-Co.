@@ -1,4 +1,5 @@
 import { createBooking } from "@/data/bookings/create-booking";
+import { createBookingStops } from "@/data/bookings/create-booking-stops";
 import { getPackage } from "@/data/packages/get-package";
 import type { DB } from "@/db";
 import { BookingTypeEnum, BookingStatusEnum } from "@/db/sqlite/enums";
@@ -112,9 +113,18 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 		// Create stops if provided
 		if (data.stops && data.stops.length > 0) {
 			console.log("🛑 Creating stops:", data.stops.length);
-			// Note: You'll need to implement createBookingStops function in the data layer
-			// For now, this is a placeholder for the booking stops creation
-			// await createBookingStops(db, newBooking.id, data.stops);
+			const stopsData = data.stops.map((stop, index) => ({
+				bookingId: newBooking.id,
+				stopOrder: stop.stopOrder,
+				address: stop.address,
+				latitude: stop.latitude,
+				longitude: stop.longitude,
+				waitingTime: stop.waitingTime,
+				notes: stop.notes,
+			}));
+			
+			await createBookingStops(db, stopsData);
+			console.log("✅ Stops created successfully");
 		}
 		
 		return newBooking;

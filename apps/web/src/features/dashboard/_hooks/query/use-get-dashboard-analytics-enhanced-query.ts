@@ -69,7 +69,7 @@ export const formatDashboardAnalytics = (analytics: any) => {
 			? `Package booking for ${booking.customerName || "Customer"}`
 			: `Custom booking for ${booking.customerName || "Customer"}`,
 		description: booking.originAddress && booking.destinationAddress
-			? `${booking.originAddress} → ${booking.destinationAddress}`
+			? `${booking.originAddress}${booking.stops && booking.stops.length > 0 ? ` (${booking.stops.length} stop${booking.stops.length > 1 ? 's' : ''})` : ''} → ${booking.destinationAddress}`
 			: "Booking details",
 		time: formatTimeAgo(new Date(booking.createdAt)),
 		status: booking.status,
