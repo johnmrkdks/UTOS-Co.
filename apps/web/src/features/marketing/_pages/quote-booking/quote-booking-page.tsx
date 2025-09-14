@@ -46,7 +46,7 @@ const QuoteBookingFormSchema = z.object({
 	customerPhone: z.string({ required_error: "Please enter your phone number" }).min(1, "Please enter your phone number"),
 	customerEmail: z.string({ required_error: "Please enter your email address" }).email("Please enter a valid email address"),
 	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
-	luggageCount: z.number().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed").default(0),
+	luggageCount: z.number().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
 	specialRequests: z.string().optional(),
 });
 
@@ -85,10 +85,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	);
 
 	// Form state - pre-populate for authenticated users
-	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({
-		passengerCount: 1,
-		luggageCount: 0,
-	});
+	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
 	const [date, setDate] = useState<Date>();
@@ -154,8 +151,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				customerName: formData.customerName || "",
 				customerPhone: formData.customerPhone || "",
 				customerEmail: formData.customerEmail || "",
-				passengerCount: formData.passengerCount || 1,
-				luggageCount: formData.luggageCount || 0,
+				passengerCount: formData.passengerCount, // No fallback - make it required
+				luggageCount: formData.luggageCount, // No fallback - make it required
 				specialRequests: formData.specialRequests || "",
 			};
 
@@ -244,7 +241,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				customerPhone: formData.customerPhone!,
 				customerEmail: formData.customerEmail!,
 				passengerCount: formData.passengerCount!,
-				luggageCount: formData.luggageCount || 0,
+				luggageCount: formData.luggageCount!,
 				specialRequests: formData.specialRequests,
 				preferredCategoryId: preselectedCarId,
 			};
@@ -675,7 +672,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 							</div>
 							<div>
 								<span className="text-gray-600">Passengers:</span>
-								<p className="font-medium">{formData.passengerCount} passenger{formData.passengerCount !== 1 ? 's' : ''}</p>
+								<p className="font-medium">{formData.passengerCount || 0} passenger{(formData.passengerCount || 0) !== 1 ? 's' : ''}</p>
 							</div>
 							<div>
 								<span className="text-gray-600">Luggage:</span>
@@ -1008,13 +1005,15 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										{/* Passengers and Luggage side by side */}
 										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
+												<label className="block text-sm font-semibold text-gray-800 mb-1">Number of Passengers *</label>
+												<p className="text-xs text-gray-600 mb-3">Maximum capacity: 8 passengers</p>
 												<Input
 													type="number"
 													min="1"
 													max="8"
-													value={formData.passengerCount || 1}
-													onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
+													placeholder="e.g. 2"
+													value={formData.passengerCount || ""}
+													onChange={(e) => updateFormData("passengerCount", e.target.value ? parseInt(e.target.value) : undefined)}
 													className={`w-full h-12 text-base ${formErrors.passengerCount ? "border-red-500" : ""}`}
 												/>
 												{formErrors.passengerCount && (
@@ -1023,13 +1022,15 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 											</div>
 
 											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Luggage Pieces</label>
+												<label className="block text-sm font-semibold text-gray-800 mb-1">Luggage Pieces *</label>
+												<p className="text-xs text-gray-600 mb-3">Maximum capacity: 10 pieces of luggage</p>
 												<Input
 													type="number"
 													min="0"
 													max="10"
-													value={formData.luggageCount || 0}
-													onChange={(e) => updateFormData("luggageCount", parseInt(e.target.value) || 0)}
+													placeholder="e.g. 3"
+													value={formData.luggageCount || ""}
+													onChange={(e) => updateFormData("luggageCount", e.target.value ? parseInt(e.target.value) : undefined)}
 													className={`w-full h-12 text-base ${formErrors.luggageCount ? "border-red-500" : ""}`}
 												/>
 												{formErrors.luggageCount && (

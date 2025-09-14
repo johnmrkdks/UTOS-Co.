@@ -51,11 +51,14 @@ function BookingManagementContent() {
 	} = useBookingManagementModalProvider();
 
 	const [filters, setFilters] = useState<BookingFiltersType>({});
+	const [sortBy, setSortBy] = useState<string>('scheduledPickupTime');
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); // Upcoming bookings first
 
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
-		sortBy: 'createdAt',
-		sortOrder: 'desc',
+		sortBy,
+		sortOrder,
+		...filters,
 	})
 
 	// Calculate real-time metrics from bookings data
@@ -127,6 +130,11 @@ function BookingManagementContent() {
 		setFilters({});
 	}
 
+	const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+		setSortBy(newSortBy);
+		setSortOrder(newSortOrder);
+	}
+
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between space-y-2">
@@ -165,6 +173,9 @@ function BookingManagementContent() {
 				filters={filters}
 				onFiltersChange={setFilters}
 				onClearFilters={clearFilters}
+				sortBy={sortBy}
+				sortOrder={sortOrder}
+				onSortChange={handleSortChange}
 			/>
 
 			<Tabs defaultValue="all" className="space-y-4">

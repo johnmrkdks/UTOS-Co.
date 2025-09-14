@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as MyBookingsLayoutRouteImport } from './routes/my-bookings/_layout'
 import { Route as DriverLayoutRouteImport } from './routes/driver/_layout'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as MarketingTermsAndConditionsRouteImport } from './routes/_marketing/terms-and-conditions'
@@ -30,7 +31,11 @@ import { Route as MarketingCalculateQuoteRouteImport } from './routes/_marketing
 import { Route as MarketingAboutUsRouteImport } from './routes/_marketing/about-us'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
+import { Route as MyBookingsLayoutIndexRouteImport } from './routes/my-bookings/_layout/index'
 import { Route as DriverLayoutIndexRouteImport } from './routes/driver/_layout/index'
+import { Route as MyBookingsLayoutTripsRouteImport } from './routes/my-bookings/_layout/trips'
+import { Route as MyBookingsLayoutHistoryRouteImport } from './routes/my-bookings/_layout/history'
+import { Route as MyBookingsLayoutDashboardRouteImport } from './routes/my-bookings/_layout/dashboard'
 import { Route as DriverLayoutTripsRouteImport } from './routes/driver/_layout/trips'
 import { Route as DriverLayoutSettingsRouteImport } from './routes/driver/_layout/settings'
 import { Route as DriverLayoutProfileRouteImport } from './routes/driver/_layout/profile'
@@ -71,10 +76,16 @@ import { Route as AdminDashboardLayoutAdminTestingIndexRouteImport } from './rou
 import { Route as AdminDashboardLayoutDriversOnboardingRouteImport } from './routes/admin/dashboard/_layout/drivers/onboarding'
 import { Route as AdminDashboardLayoutCarsAddCarRouteImport } from './routes/admin/dashboard/_layout/cars/add-car'
 
+const MyBookingsRouteImport = createFileRoute('/my-bookings')()
 const DriverRouteImport = createFileRoute('/driver')()
 const DashboardRouteImport = createFileRoute('/dashboard')()
 const AdminDashboardRouteImport = createFileRoute('/admin/dashboard')()
 
+const MyBookingsRoute = MyBookingsRouteImport.update({
+  id: '/my-bookings',
+  path: '/my-bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DriverRoute = DriverRouteImport.update({
   id: '/driver',
   path: '/driver',
@@ -98,6 +109,10 @@ const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MarketingRoute,
+} as any)
+const MyBookingsLayoutRoute = MyBookingsLayoutRouteImport.update({
+  id: '/_layout',
+  getParentRoute: () => MyBookingsRoute,
 } as any)
 const DriverLayoutRoute = DriverLayoutRouteImport.update({
   id: '/_layout',
@@ -183,11 +198,32 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyBookingsLayoutIndexRoute = MyBookingsLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MyBookingsLayoutRoute,
+} as any)
 const DriverLayoutIndexRoute = DriverLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DriverLayoutRoute,
 } as any)
+const MyBookingsLayoutTripsRoute = MyBookingsLayoutTripsRouteImport.update({
+  id: '/trips',
+  path: '/trips',
+  getParentRoute: () => MyBookingsLayoutRoute,
+} as any)
+const MyBookingsLayoutHistoryRoute = MyBookingsLayoutHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => MyBookingsLayoutRoute,
+} as any)
+const MyBookingsLayoutDashboardRoute =
+  MyBookingsLayoutDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => MyBookingsLayoutRoute,
+  } as any)
 const DriverLayoutTripsRoute = DriverLayoutTripsRouteImport.update({
   id: '/trips',
   path: '/trips',
@@ -420,7 +456,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/faqs': typeof MarketingFaqsRoute
   '/fleet': typeof MarketingFleetRoute
-  '/my-bookings': typeof MarketingMyBookingsRoute
+  '/my-bookings': typeof MyBookingsLayoutRouteWithChildren
   '/privacy': typeof MarketingPrivacyRoute
   '/profile': typeof MarketingProfileRoute
   '/quote-results': typeof MarketingQuoteResultsRoute
@@ -447,7 +483,11 @@ export interface FileRoutesByFullPath {
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
+  '/my-bookings/dashboard': typeof MyBookingsLayoutDashboardRoute
+  '/my-bookings/history': typeof MyBookingsLayoutHistoryRoute
+  '/my-bookings/trips': typeof MyBookingsLayoutTripsRoute
   '/driver/': typeof DriverLayoutIndexRoute
+  '/my-bookings/': typeof MyBookingsLayoutIndexRoute
   '/dashboard/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
   '/dashboard/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
   '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
@@ -479,7 +519,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/faqs': typeof MarketingFaqsRoute
   '/fleet': typeof MarketingFleetRoute
-  '/my-bookings': typeof MarketingMyBookingsRoute
+  '/my-bookings': typeof MyBookingsLayoutIndexRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/profile': typeof MarketingProfileRoute
   '/quote-results': typeof MarketingQuoteResultsRoute
@@ -506,6 +546,9 @@ export interface FileRoutesByTo {
   '/driver/profile': typeof DriverLayoutProfileRoute
   '/driver/settings': typeof DriverLayoutSettingsRoute
   '/driver/trips': typeof DriverLayoutTripsRoute
+  '/my-bookings/dashboard': typeof MyBookingsLayoutDashboardRoute
+  '/my-bookings/history': typeof MyBookingsLayoutHistoryRoute
+  '/my-bookings/trips': typeof MyBookingsLayoutTripsRoute
   '/dashboard/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
   '/dashboard/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
   '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
@@ -549,6 +592,8 @@ export interface FileRoutesById {
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/driver': typeof DriverRouteWithChildren
   '/driver/_layout': typeof DriverLayoutRouteWithChildren
+  '/my-bookings': typeof MyBookingsRouteWithChildren
+  '/my-bookings/_layout': typeof MyBookingsLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
   '/_marketing/account/settings': typeof MarketingAccountSettingsRoute
   '/_marketing/book-car/$carId': typeof MarketingBookCarCarIdRoute
@@ -569,7 +614,11 @@ export interface FileRoutesById {
   '/driver/_layout/profile': typeof DriverLayoutProfileRoute
   '/driver/_layout/settings': typeof DriverLayoutSettingsRoute
   '/driver/_layout/trips': typeof DriverLayoutTripsRoute
+  '/my-bookings/_layout/dashboard': typeof MyBookingsLayoutDashboardRoute
+  '/my-bookings/_layout/history': typeof MyBookingsLayoutHistoryRoute
+  '/my-bookings/_layout/trips': typeof MyBookingsLayoutTripsRoute
   '/driver/_layout/': typeof DriverLayoutIndexRoute
+  '/my-bookings/_layout/': typeof MyBookingsLayoutIndexRoute
   '/dashboard/_layout/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
   '/dashboard/_layout/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
   '/dashboard/_layout/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
@@ -630,7 +679,11 @@ export interface FileRouteTypes {
     | '/driver/profile'
     | '/driver/settings'
     | '/driver/trips'
+    | '/my-bookings/dashboard'
+    | '/my-bookings/history'
+    | '/my-bookings/trips'
     | '/driver/'
+    | '/my-bookings/'
     | '/dashboard/book-appointment/$carId'
     | '/dashboard/book-service/$serviceId'
     | '/dashboard/car-details/$carId'
@@ -689,6 +742,9 @@ export interface FileRouteTypes {
     | '/driver/profile'
     | '/driver/settings'
     | '/driver/trips'
+    | '/my-bookings/dashboard'
+    | '/my-bookings/history'
+    | '/my-bookings/trips'
     | '/dashboard/book-appointment/$carId'
     | '/dashboard/book-service/$serviceId'
     | '/dashboard/car-details/$carId'
@@ -731,6 +787,8 @@ export interface FileRouteTypes {
     | '/dashboard/_layout'
     | '/driver'
     | '/driver/_layout'
+    | '/my-bookings'
+    | '/my-bookings/_layout'
     | '/_marketing/'
     | '/_marketing/account/settings'
     | '/_marketing/book-car/$carId'
@@ -751,7 +809,11 @@ export interface FileRouteTypes {
     | '/driver/_layout/profile'
     | '/driver/_layout/settings'
     | '/driver/_layout/trips'
+    | '/my-bookings/_layout/dashboard'
+    | '/my-bookings/_layout/history'
+    | '/my-bookings/_layout/trips'
     | '/driver/_layout/'
+    | '/my-bookings/_layout/'
     | '/dashboard/_layout/book-appointment/$carId'
     | '/dashboard/_layout/book-service/$serviceId'
     | '/dashboard/_layout/car-details/$carId'
@@ -781,11 +843,19 @@ export interface RootRouteChildren {
   AuthSignUpRoute: typeof AuthSignUpRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DriverRoute: typeof DriverRouteWithChildren
+  MyBookingsRoute: typeof MyBookingsRouteWithChildren
   AdminDashboardRoute: typeof AdminDashboardRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/my-bookings': {
+      id: '/my-bookings'
+      path: '/my-bookings'
+      fullPath: '/my-bookings'
+      preLoaderRoute: typeof MyBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/driver': {
       id: '/driver'
       path: '/driver'
@@ -820,6 +890,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
       parentRoute: typeof MarketingRoute
+    }
+    '/my-bookings/_layout': {
+      id: '/my-bookings/_layout'
+      path: '/my-bookings'
+      fullPath: '/my-bookings'
+      preLoaderRoute: typeof MyBookingsLayoutRouteImport
+      parentRoute: typeof MyBookingsRoute
     }
     '/driver/_layout': {
       id: '/driver/_layout'
@@ -940,12 +1017,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-bookings/_layout/': {
+      id: '/my-bookings/_layout/'
+      path: '/'
+      fullPath: '/my-bookings/'
+      preLoaderRoute: typeof MyBookingsLayoutIndexRouteImport
+      parentRoute: typeof MyBookingsLayoutRoute
+    }
     '/driver/_layout/': {
       id: '/driver/_layout/'
       path: '/'
       fullPath: '/driver/'
       preLoaderRoute: typeof DriverLayoutIndexRouteImport
       parentRoute: typeof DriverLayoutRoute
+    }
+    '/my-bookings/_layout/trips': {
+      id: '/my-bookings/_layout/trips'
+      path: '/trips'
+      fullPath: '/my-bookings/trips'
+      preLoaderRoute: typeof MyBookingsLayoutTripsRouteImport
+      parentRoute: typeof MyBookingsLayoutRoute
+    }
+    '/my-bookings/_layout/history': {
+      id: '/my-bookings/_layout/history'
+      path: '/history'
+      fullPath: '/my-bookings/history'
+      preLoaderRoute: typeof MyBookingsLayoutHistoryRouteImport
+      parentRoute: typeof MyBookingsLayoutRoute
+    }
+    '/my-bookings/_layout/dashboard': {
+      id: '/my-bookings/_layout/dashboard'
+      path: '/dashboard'
+      fullPath: '/my-bookings/dashboard'
+      preLoaderRoute: typeof MyBookingsLayoutDashboardRouteImport
+      parentRoute: typeof MyBookingsLayoutRoute
     }
     '/driver/_layout/trips': {
       id: '/driver/_layout/trips'
@@ -1361,6 +1466,35 @@ const DriverRouteChildren: DriverRouteChildren = {
 const DriverRouteWithChildren =
   DriverRoute._addFileChildren(DriverRouteChildren)
 
+interface MyBookingsLayoutRouteChildren {
+  MyBookingsLayoutDashboardRoute: typeof MyBookingsLayoutDashboardRoute
+  MyBookingsLayoutHistoryRoute: typeof MyBookingsLayoutHistoryRoute
+  MyBookingsLayoutTripsRoute: typeof MyBookingsLayoutTripsRoute
+  MyBookingsLayoutIndexRoute: typeof MyBookingsLayoutIndexRoute
+}
+
+const MyBookingsLayoutRouteChildren: MyBookingsLayoutRouteChildren = {
+  MyBookingsLayoutDashboardRoute: MyBookingsLayoutDashboardRoute,
+  MyBookingsLayoutHistoryRoute: MyBookingsLayoutHistoryRoute,
+  MyBookingsLayoutTripsRoute: MyBookingsLayoutTripsRoute,
+  MyBookingsLayoutIndexRoute: MyBookingsLayoutIndexRoute,
+}
+
+const MyBookingsLayoutRouteWithChildren =
+  MyBookingsLayoutRoute._addFileChildren(MyBookingsLayoutRouteChildren)
+
+interface MyBookingsRouteChildren {
+  MyBookingsLayoutRoute: typeof MyBookingsLayoutRouteWithChildren
+}
+
+const MyBookingsRouteChildren: MyBookingsRouteChildren = {
+  MyBookingsLayoutRoute: MyBookingsLayoutRouteWithChildren,
+}
+
+const MyBookingsRouteWithChildren = MyBookingsRoute._addFileChildren(
+  MyBookingsRouteChildren,
+)
+
 interface AdminDashboardLayoutRouteChildren {
   AdminDashboardLayoutIndexRoute: typeof AdminDashboardLayoutIndexRoute
   AdminDashboardLayoutCarsAddCarRoute: typeof AdminDashboardLayoutCarsAddCarRoute
@@ -1435,6 +1569,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignUpRoute: AuthSignUpRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DriverRoute: DriverRouteWithChildren,
+  MyBookingsRoute: MyBookingsRouteWithChildren,
   AdminDashboardRoute: AdminDashboardRouteWithChildren,
 }
 export const routeTree = rootRouteImport

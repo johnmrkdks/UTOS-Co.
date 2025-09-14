@@ -1,16 +1,16 @@
-import type React from "react";
-import { useState, useRef, useEffect } from "react";
-import { cn } from "@workspace/ui/lib/utils";
-import { Check, X, ChevronRight, Trash2, Save } from "lucide-react";
+import type React from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
+import { Check, X, ChevronRight, Trash2, Save } from "lucide-react"
+import { cn } from "@workspace/ui/lib/utils"
 
 interface SwipeToConfirmProps {
-	onConfirm: () => void;
-	onCancel?: () => void;
-	confirmText: string;
-	instruction: string;
-	variant?: "primary" | "destructive";
-	className?: string;
-	disabled?: boolean;
+	onConfirm: () => void
+	onCancel?: () => void
+	confirmText: string
+	instruction: string
+	variant?: "primary" | "destructive"
+	className?: string
+	disabled?: boolean
 }
 
 export function SwipeToConfirm({
@@ -22,139 +22,159 @@ export function SwipeToConfirm({
 	className,
 	disabled = false,
 }: SwipeToConfirmProps) {
-	const [isDragging, setIsDragging] = useState(false);
-	const [dragPosition, setDragPosition] = useState(0);
-	const [isConfirmed, setIsConfirmed] = useState(false);
-	const [isCancelled, setIsCancelled] = useState(false);
-	const containerRef = useRef<HTMLDivElement>(null);
-	const sliderRef = useRef<HTMLDivElement>(null);
+	const [isDragging, setIsDragging] = useState(false)
+	const [dragPosition, setDragPosition] = useState(0)
+	const [actionState, setActionState] = useState<"idle" | "confirming" | "cancelling">("idle")
+	const containerRef = useRef<HTMLDivElement>(null)
+	const sliderRef = useRef<HTMLDivElement>(null)
+	const animationFrameRef = useRef<number>()
+	const onConfirmRef = useRef(onConfirm)
+	const onCancelRef = useRef(onCancel)
 
-	const threshold = 0.8; // 80% of the container width
-	const cancelThreshold = -0.3; // 30% to the left for cancel
+	const threshold = 0.8 // 80% of the container width
+	const cancelThreshold = -0.3 // 30% to the left for cancel
 
 	useEffect(() => {
-		const handleMouseMove = (e: MouseEvent | TouchEvent) => {
-			if (!isDragging || !containerRef.current || !sliderRef.current) return;
+		onConfirmRef.current = onConfirm
+		onCancelRef.current = onCancel
+	}, [onConfirm, onCancel])
 
-			const containerRect = containerRef.current.getBoundingClientRect();
-			const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-			const newPosition = clientX - containerRect.left - 32; // Account for slider width/2
-			const maxPosition = containerRect.width - 64; // Account for slider width
+	const resetSlider = useCallback(() => {
+		setDragPosition(0)
+		setActionState("idle")
+		setIsDragging(false)
+	}, [])
 
-			const clampedPosition = Math.max(-100, Math.min(maxPosition, newPosition));
-			setDragPosition(clampedPosition);
-		};
+	useEffect(() => {
+		if (!isDragging) return
 
-		const handleMouseUp = () => {
-			if (!isDragging || !containerRef.current) return;
+		const handleMove = (e: MouseEvent | TouchEvent) => {
+			if (!containerRef.current || disabled) return
 
-			const containerWidth = containerRef.current.getBoundingClientRect().width - 64;
-			const progress = dragPosition / containerWidth;
+			if (animationFrameRef.current) {
+				cancelAnimationFrame(animationFrameRef.current)
+			}
+
+			animationFrameRef.current = requestAnimationFrame(() => {
+				const containerRect = containerRef.current!.getBoundingClientRect()
+				const clientX = "touches" in e ? e.touches[0].clientX : e.clientX
+				const newPosition = clientX - containerRect.left - 32 // Account for slider width/2
+				const maxPosition = containerRect.width - 64 // Account for slider width
+
+				const clampedPosition = Math.max(-100, Math.min(maxPosition, newPosition))
+				setDragPosition(clampedPosition)
+			})
+		}
+
+		const handleEnd = () => {
+			if (!containerRef.current || disabled) return
+
+			const containerWidth = containerRef.current.getBoundingClientRect().width - 64
+			const progress = dragPosition / containerWidth
 
 			if (progress >= threshold) {
 				// Confirmed
-				setIsConfirmed(true);
-				setDragPosition(containerWidth);
+				setActionState("confirming")
+				setDragPosition(containerWidth)
 				setTimeout(() => {
-					onConfirm();
-					resetSlider();
-				}, 300);
-			} else if (progress <= cancelThreshold && onCancel) {
+					onConfirmRef.current()
+					resetSlider()
+				}, 200)
+			} else if (progress <= cancelThreshold && onCancelRef.current) {
 				// Cancelled
-				setIsCancelled(true);
-				setDragPosition(-60);
+				setActionState("cancelling")
+				setDragPosition(-60)
 				setTimeout(() => {
-					onCancel();
-					resetSlider();
-				}, 300);
+					onCancelRef.current?.()
+					resetSlider()
+				}, 200)
 			} else {
-				// Reset to start
-				resetSlider();
+				resetSlider()
 			}
-
-			setIsDragging(false);
-		};
-
-		if (isDragging) {
-			document.addEventListener("mousemove", handleMouseMove);
-			document.addEventListener("mouseup", handleMouseUp);
-			document.addEventListener("touchmove", handleMouseMove);
-			document.addEventListener("touchend", handleMouseUp);
 		}
+
+		const handleMouseMove = (e: MouseEvent) => handleMove(e)
+		const handleMouseUp = () => handleEnd()
+		const handleTouchMove = (e: TouchEvent) => {
+			e.preventDefault()
+			handleMove(e)
+		}
+		const handleTouchEnd = () => handleEnd()
+
+		document.addEventListener("mousemove", handleMouseMove)
+		document.addEventListener("mouseup", handleMouseUp)
+		document.addEventListener("touchmove", handleTouchMove, { passive: false })
+		document.addEventListener("touchend", handleTouchEnd)
 
 		return () => {
-			document.removeEventListener("mousemove", handleMouseMove);
-			document.removeEventListener("mouseup", handleMouseUp);
-			document.removeEventListener("touchmove", handleMouseMove);
-			document.removeEventListener("touchend", handleMouseUp);
-		};
-	}, [isDragging, dragPosition, threshold, cancelThreshold, onConfirm, onCancel]);
+			document.removeEventListener("mousemove", handleMouseMove)
+			document.removeEventListener("mouseup", handleMouseUp)
+			document.removeEventListener("touchmove", handleTouchMove)
+			document.removeEventListener("touchend", handleTouchEnd)
+		}
+	}, [isDragging, disabled, dragPosition, threshold, cancelThreshold, resetSlider])
 
-	const resetSlider = () => {
-		setTimeout(() => {
-			setDragPosition(0);
-			setIsConfirmed(false);
-			setIsCancelled(false);
-		}, 100);
-	};
+	const handleStart = useCallback(
+		(e: React.MouseEvent | React.TouchEvent) => {
+			if (disabled || actionState !== "idle") return
 
-	const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-		if (disabled) return;
-		e.preventDefault();
-		setIsDragging(true);
-	};
+			e.preventDefault()
+			setIsDragging(true)
+		},
+		[disabled, actionState],
+	)
 
 	const getBackgroundColor = () => {
-		if (isConfirmed) return variant === "destructive" ? "bg-destructive" : "bg-primary";
-		if (isCancelled) return "bg-muted";
+		if (actionState === "confirming") return variant === "destructive" ? "bg-destructive" : "bg-primary"
+		if (actionState === "cancelling") return "bg-muted"
 
-		const containerWidth = (containerRef.current?.getBoundingClientRect().width || 64) - 64;
-		const progress = Math.max(0, dragPosition / Math.max(containerWidth, 1));
+		const containerWidth = (containerRef.current?.getBoundingClientRect().width || 64) - 64
+		const progress = Math.max(0, dragPosition / Math.max(containerWidth, 1))
 
 		if (progress >= threshold) {
-			return variant === "destructive" ? "bg-destructive" : "bg-primary";
+			return variant === "destructive" ? "bg-destructive" : "bg-primary"
 		}
 		if (dragPosition <= cancelThreshold * containerWidth && onCancel) {
-			return "bg-muted";
+			return "bg-muted"
 		}
-		return "bg-card";
-	};
+		return "bg-card"
+	}
 
 	const getSliderIcon = () => {
-		if (isConfirmed) return <Check className="w-5 h-5 text-white" />;
-		if (isCancelled) return <X className="w-5 h-5 text-muted-foreground" />;
+		if (actionState === "confirming") return <Check className="w-5 h-5 text-white" />
+		if (actionState === "cancelling") return <X className="w-5 h-5 text-muted-foreground" />
 
-		const containerWidth = (containerRef.current?.getBoundingClientRect().width || 64) - 64;
-		const progress = Math.max(0, dragPosition / Math.max(containerWidth, 1));
+		const containerWidth = (containerRef.current?.getBoundingClientRect().width || 64) - 64
+		const progress = Math.max(0, dragPosition / Math.max(containerWidth, 1))
 
 		if (progress >= threshold) {
 			return variant === "destructive" ? (
 				<Trash2 className="w-5 h-5 text-destructive" />
 			) : (
 				<Save className="w-5 h-5 text-primary" />
-			);
+			)
 		}
 		if (dragPosition <= cancelThreshold * containerWidth && onCancel) {
-			return <X className="w-5 h-5 text-muted-foreground" />;
+			return <X className="w-5 h-5 text-muted-foreground" />
 		}
-		return <ChevronRight className="w-5 h-5 text-muted-foreground" />;
-	};
+		return <ChevronRight className="w-5 h-5 text-muted-foreground" />
+	}
 
 	const getSliderColor = () => {
-		if (isConfirmed) return variant === "destructive" ? "bg-destructive" : "bg-primary";
-		if (isCancelled) return "bg-muted-foreground";
+		if (actionState === "confirming") return variant === "destructive" ? "bg-destructive" : "bg-primary"
+		if (actionState === "cancelling") return "bg-muted-foreground"
 
-		const containerWidth = (containerRef.current?.getBoundingClientRect().width || 64) - 64;
-		const progress = Math.max(0, dragPosition / Math.max(containerWidth, 1));
+		const containerWidth = (containerRef.current?.getBoundingClientRect().width || 64) - 64
+		const progress = Math.max(0, dragPosition / Math.max(containerWidth, 1))
 
 		if (progress >= threshold) {
-			return variant === "destructive" ? "bg-destructive" : "bg-primary";
+			return variant === "destructive" ? "bg-destructive" : "bg-primary"
 		}
 		if (dragPosition <= cancelThreshold * containerWidth && onCancel) {
-			return "bg-muted-foreground";
+			return "bg-muted-foreground"
 		}
-		return "bg-background border-2 border-border";
-	};
+		return "bg-background border-2 border-border"
+	}
 
 	return (
 		<div className={cn("w-full", className)}>
@@ -163,19 +183,21 @@ export function SwipeToConfirm({
 				className={cn(
 					"relative h-16 rounded-xl border-2 overflow-hidden transition-all duration-300 ease-out shadow-sm",
 					getBackgroundColor(),
-					variant === "primary" ? "border-primary/30" : "border-destructive/30"
+					variant === "primary" ? "border-primary/30" : "border-destructive/30",
 				)}
 			>
 				{/* Background text with better styling */}
-				<div className={cn(
-					"absolute inset-0 flex items-center justify-center transition-opacity duration-200",
-					dragPosition > 10 ? "opacity-0" : "opacity-100"
-				)}>
+				<div
+					className={cn(
+						"absolute inset-0 flex items-center justify-center transition-opacity duration-200",
+						dragPosition > 10 ? "opacity-0" : "opacity-100",
+					)}
+				>
 					<div className="flex items-center gap-2 text-sm font-medium text-gray-700 select-none bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-gray-200">
 						{disabled ? (
 							<>
 								<div className="w-3 h-3 animate-spin border border-gray-400 border-t-transparent rounded-full"></div>
-								Updating...
+								{"Updating..."}
 							</>
 						) : (
 							<>
@@ -190,37 +212,41 @@ export function SwipeToConfirm({
 				<div
 					ref={sliderRef}
 					className={cn(
-						"absolute top-2 left-2 w-12 h-12 rounded-md flex items-center justify-center transition-all duration-200 ease-out shadow-lg",
+						"absolute top-2 left-2 w-12 h-12 rounded-md flex items-center justify-center shadow-lg",
 						disabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing",
 						getSliderColor(),
 						isDragging && !disabled && "scale-110",
+						"transition-all duration-200 ease-out",
 					)}
 					style={{
 						transform: `translateX(${dragPosition}px)`,
-						transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+						transition: isDragging
+							? "scale 0.2s ease-out"
+							: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), scale 0.2s ease-out",
 					}}
-					onMouseDown={handleMouseDown}
-					onTouchStart={handleMouseDown}
+					onMouseDown={handleStart}
+					onTouchStart={handleStart}
 				>
 					{getSliderIcon()}
 				</div>
 
 				{/* Action text overlay - only shows when dragging */}
-				{(isConfirmed ||
+				{(actionState === "confirming" ||
 					(dragPosition > 10 &&
-						dragPosition / Math.max((containerRef.current?.getBoundingClientRect().width || 64) - 64, 1) >= threshold)) && (
-					<div className="absolute inset-0 flex items-center justify-center">
-						<span
-							className={cn(
-								"text-sm font-bold select-none bg-white px-3 py-1 rounded-full shadow-sm border",
-								variant === "destructive" ? "text-red-700" : "text-primary",
-							)}
-						>
-							{confirmText}
-						</span>
-					</div>
-				)}
+						dragPosition / Math.max((containerRef.current?.getBoundingClientRect().width || 64) - 64, 1) >=
+						threshold)) && (
+						<div className="absolute inset-0 flex items-center justify-center">
+							<span
+								className={cn(
+									"text-sm font-bold select-none bg-white px-3 py-1 rounded-full shadow-sm border",
+									variant === "destructive" ? "text-red-700" : "text-primary",
+								)}
+							>
+								{confirmText}
+							</span>
+						</div>
+					)}
 			</div>
 		</div>
-	);
+	)
 }

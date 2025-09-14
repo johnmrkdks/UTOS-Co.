@@ -14,7 +14,7 @@ const quoteBookingSchema = z.object({
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
 	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
-	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed").default(0),
+	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
 	scheduledPickupTime: z.date({
 		required_error: "Please select a pickup date and time",
 	}),
@@ -42,8 +42,6 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			customerName: "",
 			customerEmail: "",
 			customerPhone: "",
-			passengerCount: 1,
-			luggageCount: 0,
 			scheduledPickupTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
 			specialRequirements: "",
 		},
@@ -58,7 +56,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			customerEmail: data.customerEmail,
 			customerPhone: data.customerPhone,
 			passengerCount: data.passengerCount,
-			luggageCount: data.luggageCount || 0,
+			luggageCount: data.luggageCount,
 			scheduledPickupTime: data.scheduledPickupTime,
 			specialRequirements: data.specialRequirements,
 			distance: quoteData.distance,
@@ -119,22 +117,26 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 				{/* Passengers and Luggage side by side */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<div>
-						<label className="block text-sm font-medium mb-1">Number of Passengers</label>
+						<label className="block text-sm font-medium mb-1">Number of Passengers *</label>
+						<p className="text-xs text-gray-600 mb-2">Maximum capacity: 8 passengers</p>
 						<Input
 							type="number"
 							min={1}
 							max={8}
+							placeholder="e.g. 2"
 							{...form.register("passengerCount", { valueAsNumber: true })}
 							error={form.formState.errors.passengerCount?.message}
 						/>
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium mb-1">Luggage Pieces</label>
+						<label className="block text-sm font-medium mb-1">Luggage Pieces *</label>
+						<p className="text-xs text-gray-600 mb-2">Maximum capacity: 10 pieces of luggage</p>
 						<Input
 							type="number"
 							min={0}
 							max={10}
+							placeholder="e.g. 3"
 							{...form.register("luggageCount", { valueAsNumber: true })}
 							error={form.formState.errors.luggageCount?.message}
 						/>

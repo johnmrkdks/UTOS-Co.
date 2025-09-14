@@ -43,7 +43,6 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			customerName: "",
 			customerEmail: "",
 			customerPhone: "",
-			passengerCount: 1,
 			bookingTime: "",
 			specialRequirements: "",
 		},
@@ -353,11 +352,13 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 									<div className="space-y-5 pl-14">
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
+											<label className="block text-sm font-semibold text-gray-800 mb-1">Number of Passengers *</label>
+											<p className="text-xs text-gray-600 mb-3">Maximum capacity: {service.maxPassengers || 8} passengers</p>
 											<Input
 												type="number"
 												min={1}
 												max={service.maxPassengers || 8}
+												placeholder="e.g. 2"
 												{...form.register("passengerCount", { valueAsNumber: true })}
 												className="h-12 text-base"
 												error={form.formState.errors.passengerCount?.message}

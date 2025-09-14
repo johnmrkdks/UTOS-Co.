@@ -8,7 +8,7 @@ export const createServiceBookingSchema = (maxPassengers?: number) => z.object({
 	
 	// Booking details
 	passengerCount: z.number().int().min(1, "At least 1 passenger required").max(maxPassengers || 8, maxPassengers ? `Maximum ${maxPassengers} passengers allowed` : "Maximum 8 passengers allowed"),
-	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed").default(0),
+	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
 	scheduledPickupTime: z.date({
 		required_error: "Please select a pickup date and time",
 	}),

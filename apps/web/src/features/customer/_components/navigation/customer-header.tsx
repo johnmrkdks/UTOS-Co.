@@ -52,7 +52,7 @@ export function CustomerHeader({
 
 						{/* User Menu */}
 						<div className="flex items-center space-x-3">
-							<CustomerUserMenu />
+							<CustomerUserMenu onSignOut={onSignOut} />
 						</div>
 					</div>
 				</div>
