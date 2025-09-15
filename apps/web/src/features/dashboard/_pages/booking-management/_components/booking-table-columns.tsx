@@ -271,7 +271,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			return (
 				<div className="text-xs">
 					<div className="font-medium">{format(date, "MMM dd, yyyy")}</div>
-					<div className="text-muted-foreground">{format(date, "HH:mm")}</div>
+					<div className="text-muted-foreground">{format(date, "h:mm a")}</div>
 				</div>
 			);
 		},

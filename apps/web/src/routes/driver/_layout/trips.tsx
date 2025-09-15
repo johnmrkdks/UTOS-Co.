@@ -30,6 +30,7 @@ import {
 	X,
 	ActivityIcon,
 	CircleDot,
+	ChevronRight,
 } from "lucide-react";
 import { useState, useMemo } from 'react';
 import { Input } from "@workspace/ui/components/input";
@@ -54,8 +55,8 @@ function DriverTripsComponent() {
 	const [passengerDetailsOpen, setPassengerDetailsOpen] = useState(false);
 	const [selectedBooking, setSelectedBooking] = useState<any>(null);
 	const [extrasDialogOpen, setExtrasDialogOpen] = useState(false);
-	const [extras, setExtras] = useState<{id: string, description: string, amount: string}[]>([
-		{id: '1', description: '', amount: ''}
+	const [extras, setExtras] = useState<{ id: string, description: string, amount: string }[]>([
+		{ id: '1', description: '', amount: '' }
 	]);
 	// New Close Trip workflow state
 	const [closeTripOptionsOpen, setCloseTripOptionsOpen] = useState(false);
@@ -96,8 +97,8 @@ function DriverTripsComponent() {
 
 	// Filter for active trip statuses that drivers need to work on
 	const activeStatuses = ["driver_assigned", "driver_en_route", "in_progress", "arrived_pickup", "passenger_on_board", "dropped_off", "awaiting_extras"];
-	
-	const bookings = allBookings.filter(booking => 
+
+	const bookings = allBookings.filter(booking =>
 		activeStatuses.includes(booking.status)
 	);
 
@@ -172,7 +173,7 @@ function DriverTripsComponent() {
 			setCloseTripOptionsOpen(true);
 			return;
 		}
-		
+
 		const nextStatus = getNextStatus(booking.status);
 		updateStatusMutation.mutate({
 			id: booking.id,
@@ -203,8 +204,8 @@ function DriverTripsComponent() {
 	};
 
 	const updateExtraItem = (id: string, field: 'description' | 'amount', value: string) => {
-		setExtras(prev => prev.map(item => 
-			item.id === id ? {...item, [field]: value} : item
+		setExtras(prev => prev.map(item =>
+			item.id === id ? { ...item, [field]: value } : item
 		));
 	};
 
@@ -219,7 +220,7 @@ function DriverTripsComponent() {
 		if (selectedBooking) {
 			const totalExtrasAmount = calculateTotalExtras();
 			const extrasAmountInCents = Math.round(totalExtrasAmount * 100);
-			
+
 			// Update booking with extras amount and move to next status
 			updateStatusMutation.mutate({
 				id: selectedBooking.id,
@@ -227,9 +228,9 @@ function DriverTripsComponent() {
 				extraCharges: extrasAmountInCents,
 			});
 		}
-		
+
 		setExtrasDialogOpen(false);
-		setExtras([{id: '1', description: '', amount: ''}]);
+		setExtras([{ id: '1', description: '', amount: '' }]);
 		setSelectedBooking(null);
 	};
 
@@ -243,7 +244,7 @@ function DriverTripsComponent() {
 	// New Close Trip workflow handlers
 	const handleCloseTripOption = (option: 'close' | 'close-with-extras' | 'no-show' | 'no-show-with-extras' | 'close-later') => {
 		setCloseTripOptionsOpen(false);
-		
+
 		switch (option) {
 			case 'close':
 				// Close trip without extras - go directly to confirmation
@@ -309,44 +310,12 @@ function DriverTripsComponent() {
 				bookingId: selectedTripForClose.id,
 				isNoShow: isNoShow,
 				extrasData: extrasForBackend,
-			}, {
-				onSuccess: () => {
-					// Reset all state
-					setTripConfirmationOpen(false);
-					setSelectedTripForClose(null);
-					setExtrasData(undefined);
-					setIsNoShow(false);
-					
-					// Update the selected booking details if open
-					if (selectedBookingForDetails && selectedBookingForDetails.id === selectedTripForClose.id) {
-						setSelectedBookingForDetails({
-							...selectedBookingForDetails,
-							status: 'completed'
-						});
-					}
-				}
 			});
 		} else {
 			// No extras - use simple close trip mutation
 			closeTripWithoutExtrasMutation.mutate({
 				bookingId: selectedTripForClose.id,
 				isNoShow: isNoShow,
-			}, {
-				onSuccess: () => {
-					// Reset all state
-					setTripConfirmationOpen(false);
-					setSelectedTripForClose(null);
-					setExtrasData(undefined);
-					setIsNoShow(false);
-					
-					// Update the selected booking details if open
-					if (selectedBookingForDetails && selectedBookingForDetails.id === selectedTripForClose.id) {
-						setSelectedBookingForDetails({
-							...selectedBookingForDetails,
-							status: 'completed'
-						});
-					}
-				}
 			});
 		}
 	};
@@ -381,10 +350,10 @@ function DriverTripsComponent() {
 		// Prefer Google Maps for all platforms as requested by client
 		const destination = encodeURIComponent(destinationAddress);
 		const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${destination}&travelmode=driving`;
-		
+
 		const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 		const isAndroid = /Android/.test(navigator.userAgent);
-		
+
 		if (isIOS || isAndroid) {
 			// On mobile, use window.location.href to open Google Maps app or fallback to web
 			window.location.href = googleMapsUrl;
@@ -392,17 +361,17 @@ function DriverTripsComponent() {
 			// Desktop - open Google Maps in new tab
 			window.open(googleMapsUrl, '_blank');
 		}
-		
+
 		setShowMapsModal(false);
 	};
 
 	const openMapsApp = (booking: any, appType: 'google' | 'apple') => {
 		let mapsUrl = '';
-		
+
 		// Determine destination based on booking status
 		let destination = '';
 		let origin = '';
-		
+
 		if (['confirmed', 'driver_assigned', 'driver_en_route'].includes(booking.status)) {
 			destination = booking.originAddress; // Go to pickup
 		} else if (['arrived_pickup', 'passenger_on_board'].includes(booking.status)) {
@@ -474,8 +443,8 @@ function DriverTripsComponent() {
 						)}>My Trips</h1>
 						<p className="text-gray-600 text-xs">Your current in-progress trips</p>
 					</div>
-					<Button 
-						variant="outline" 
+					<Button
+						variant="outline"
 						size="sm"
 						onClick={() => refetch()}
 						className={cn(isMobile ? "h-8 px-2" : "h-8")}
@@ -496,8 +465,8 @@ function DriverTripsComponent() {
 						<div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
 						<div className="flex-1">
 							<h3 className="font-semibold text-blue-900 text-sm">
-								{tripStats.activeTrips === 1 
-									? "1 trip in progress" 
+								{tripStats.activeTrips === 1
+									? "1 trip in progress"
 									: `${tripStats.activeTrips} trips in progress`
 								}
 							</h3>
@@ -532,7 +501,7 @@ function DriverTripsComponent() {
 						)}
 					/>
 				</div>
-				
+
 			</div>
 
 			{/* Trips List */}
@@ -559,11 +528,11 @@ function DriverTripsComponent() {
 						{filteredBookings.map((booking, index) => {
 							// Status-based color coding with stronger inline styles 
 							const getStatusStyle = (status: string) => {
-								const baseStyle = { 
+								const baseStyle = {
 									borderLeftWidth: '4px',
 									borderLeftStyle: 'solid' as const
 								};
-								
+
 								switch (status) {
 									case 'driver_assigned':
 										return { ...baseStyle, borderLeftColor: '#3b82f6' }; // Blue
@@ -585,13 +554,13 @@ function DriverTripsComponent() {
 							};
 
 							return (
-								<Card 
-									key={booking.id} 
+								<Card
+									key={booking.id}
 									style={getStatusStyle(booking.status)}
 									className={cn(
 										"bg-white transition-colors cursor-pointer active:bg-gray-50",
-										isMobile 
-											? "border-r-0 border-t-0 border-b border-gray-200 rounded-none shadow-none" 
+										isMobile
+											? "border-r-0 border-t-0 border-b border-gray-200 rounded-none shadow-none"
 											: "border-r border-t border-b border-gray-200 shadow-sm hover:shadow-md"
 									)}
 									onClick={() => handleOpenBookingDetails(booking)}
@@ -608,17 +577,17 @@ function DriverTripsComponent() {
 														<ClockIcon className="h-3.5 w-3.5 text-gray-500" />
 														<div className="flex flex-col">
 															<span className="text-sm font-semibold text-gray-900">
-																{format(new Date(booking.scheduledPickupTime), "HH:mm")}
+																{format(new Date(booking.scheduledPickupTime), "h:mm a")}
 															</span>
 															<span className="text-xs text-gray-500">
 																{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
 															</span>
 														</div>
 													</div>
-													<Badge 
-														variant={booking.status === 'completed' ? 'default' : 
-															booking.status === 'cancelled' ? 'destructive' : 
-															booking.status === 'confirmed' ? 'secondary' : 'outline'} 
+													<Badge
+														variant={booking.status === 'completed' ? 'default' :
+															booking.status === 'cancelled' ? 'destructive' :
+																booking.status === 'confirmed' ? 'secondary' : 'outline'}
 														className="text-xs px-2 py-0.5"
 													>
 														{booking.status === 'driver_en_route' ? 'IN PROGRESS' : booking.status.replace('_', ' ').toUpperCase()}
@@ -626,38 +595,46 @@ function DriverTripsComponent() {
 												</div>
 
 												{/* Route - More aggressive truncation for mobile */}
-												<div className="space-y-1 mb-2">
-													<div className="flex items-center gap-2">
-														<div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
-														<p className="text-xs text-gray-700 truncate flex-1 max-w-[200px]">
-															{booking.originAddress.length > 35 
-																? booking.originAddress.substring(0, 35) + '...' 
-																: booking.originAddress}
-														</p>
-													</div>
-													{/* Stops (if any) */}
-													{booking.stops && booking.stops.length > 0 && (
+												<div className="flex items-center justify-between space-y-1 mb-2">
+													<div className="flex flex-col items-start gap-2">
 														<div className="flex items-center gap-2">
-															<div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-															<p className="text-xs text-blue-600 truncate flex-1 max-w-[200px]">
-																{booking.stops.length} stop{booking.stops.length > 1 ? 's' : ''}
+															<div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+															<p className="text-xs text-gray-700 truncate flex-1 max-w-[200px]">
+																{booking.originAddress.length > 35
+																	? booking.originAddress.substring(0, 35) + '...'
+																	: booking.originAddress}
 															</p>
 														</div>
-													)}
-													<div className="flex items-center gap-2">
-														<div className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></div>
-														<p className="text-xs text-gray-700 truncate flex-1 max-w-[200px]">
-															{booking.destinationAddress.length > 35 
-																? booking.destinationAddress.substring(0, 35) + '...' 
-																: booking.destinationAddress}
-														</p>
+														{/* Stops (if any) */}
+														{booking.stops && booking.stops.length > 0 && (
+															<div className="flex items-center gap-2">
+																<div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+																<p className="text-xs text-blue-600 truncate flex-1 max-w-[200px]">
+																	{booking.stops?.length} stop{(booking.stops?.length || 0) > 1 ? 's' : ''}
+																</p>
+															</div>
+														)}
+														<div className="flex items-center gap-2 justify-between">
+															<div className="flex items-center gap-2 flex-1">
+																<div className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></div>
+																<p className="text-xs text-gray-700 truncate max-w-[200px]">
+																	{booking.destinationAddress.length > 35
+																		? booking.destinationAddress.substring(0, 35) + '...'
+																		: booking.destinationAddress}
+																</p>
+															</div>
+														</div>
 													</div>
+													{/* Arrow icon at the end of route info */}
+													<ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
 												</div>
 
 												{/* Customer - Compact */}
-												<div className="flex items-center gap-1.5">
-													<UserIcon className="h-3.5 w-3.5 text-gray-500" />
-													<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
+												<div className="flex items-center justify-between">
+													<div className="flex items-center gap-1.5">
+														<UserIcon className="h-3.5 w-3.5 text-gray-500" />
+														<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
+													</div>
 												</div>
 											</>
 										) : (
@@ -669,17 +646,17 @@ function DriverTripsComponent() {
 														<ClockIcon className="h-4 w-4 text-gray-500" />
 														<div className="flex flex-col">
 															<span className="font-semibold text-gray-900">
-																{format(new Date(booking.scheduledPickupTime), "HH:mm")}
+																{format(new Date(booking.scheduledPickupTime), "h:mm a")}
 															</span>
 															<span className="text-xs text-gray-500">
 																{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
 															</span>
 														</div>
 													</div>
-													<Badge 
-														variant={booking.status === 'completed' ? 'default' : 
-															booking.status === 'cancelled' ? 'destructive' : 
-															booking.status === 'confirmed' ? 'secondary' : 'outline'} 
+													<Badge
+														variant={booking.status === 'completed' ? 'default' :
+															booking.status === 'cancelled' ? 'destructive' :
+																booking.status === 'confirmed' ? 'secondary' : 'outline'}
 														className="text-xs font-medium"
 													>
 														{booking.status === 'driver_en_route' ? 'IN PROGRESS' : booking.status.replace('_', ' ').toUpperCase()}
@@ -688,35 +665,44 @@ function DriverTripsComponent() {
 
 												{/* Route */}
 												<div className="space-y-1 mb-2">
-													<div className="flex items-start gap-2">
-														<div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-														<div className="flex-1 min-w-0">
-															<p className="text-sm text-gray-900 truncate">{booking.originAddress}</p>
-														</div>
-													</div>
-													{/* Stops (if any) */}
-													{booking.stops && booking.stops.length > 0 && (
+													<div>
 														<div className="flex items-start gap-2">
-															<div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+															<div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
 															<div className="flex-1 min-w-0">
-																<p className="text-sm text-blue-600 truncate">
-																	{booking.stops.length} intermediate stop{booking.stops.length > 1 ? 's' : ''}
-																</p>
+																<p className="text-sm text-gray-900 truncate">{booking.originAddress}</p>
 															</div>
 														</div>
-													)}
-													<div className="flex items-start gap-2">
-														<div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
-														<div className="flex-1 min-w-0">
-															<p className="text-sm text-gray-900 truncate">{booking.destinationAddress}</p>
+														{/* Stops (if any) */}
+														{booking.stops && booking.stops.length > 0 && (
+															<div className="flex items-start gap-2">
+																<div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+																<div className="flex-1 min-w-0">
+																	<p className="text-sm text-blue-600 truncate">
+																		{booking.stops?.length} intermediate stop{(booking.stops?.length || 0) > 1 ? 's' : ''}
+																	</p>
+																</div>
+															</div>
+														)}
+														<div className="flex items-start gap-2 justify-between">
+															<div className="flex items-start gap-2 flex-1">
+																<div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+																<div className="flex-1 min-w-0">
+																	<p className="text-sm text-gray-900 truncate">{booking.destinationAddress}</p>
+																</div>
+															</div>
 														</div>
 													</div>
+													{/* Arrow icon at the end of route info */}
+													<ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0 mt-1" />
+
 												</div>
 
 												{/* Customer */}
-												<div className="flex items-center gap-2">
-													<UserIcon className="h-4 w-4 text-gray-500" />
-													<span className="text-sm text-gray-700">{booking.customerName}</span>
+												<div className="flex items-center justify-between">
+													<div className="flex items-center gap-2">
+														<UserIcon className="h-4 w-4 text-gray-500" />
+														<span className="text-sm text-gray-700">{booking.customerName}</span>
+													</div>
 												</div>
 											</>
 										)}
@@ -744,11 +730,11 @@ function DriverTripsComponent() {
 							You can only navigate to the drop off location once the passenger is in the vehicle.
 						</DialogDescription>
 					</DialogHeader>
-					
+
 					<div className="space-y-3 py-4">
 						{/* Pickup Location */}
-						<Button 
-							variant="outline" 
+						<Button
+							variant="outline"
 							className="w-full justify-start p-4 h-auto"
 							onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.originAddress, 'pickup')}
 						>
@@ -770,9 +756,9 @@ function DriverTripsComponent() {
 									Intermediate Stops ({selectedMapsBooking.stops.length})
 								</div>
 								{selectedMapsBooking.stops.map((stop: any, index: number) => (
-									<Button 
+									<Button
 										key={stop.id || index}
-										variant="outline" 
+										variant="outline"
 										className="w-full justify-start p-4 h-auto bg-blue-50 border-blue-200"
 										onClick={() => navigateToLocation(stop.address, 'pickup')}
 									>
@@ -791,8 +777,8 @@ function DriverTripsComponent() {
 						)}
 
 						{/* Dropoff Location */}
-						<Button 
-							variant="outline" 
+						<Button
+							variant="outline"
 							className="w-full justify-start p-4 h-auto"
 							onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.destinationAddress, 'dropoff')}
 						>
@@ -808,8 +794,8 @@ function DriverTripsComponent() {
 						</Button>
 
 						{/* Cancel */}
-						<Button 
-							variant="ghost" 
+						<Button
+							variant="ghost"
 							className="w-full mt-4"
 							onClick={() => setShowMapsModal(false)}
 						>
@@ -821,7 +807,7 @@ function DriverTripsComponent() {
 
 			{/* Booking Details Dialog/Fullscreen */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
-				<DialogContent 
+				<DialogContent
 					className={cn(
 						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
@@ -840,7 +826,7 @@ function DriverTripsComponent() {
 									<ClockIcon className="h-5 w-5 text-white/80" />
 									<div>
 										<h2 className="text-lg font-bold">
-											{format(new Date(selectedBookingForDetails.scheduledPickupTime), "MMM dd, yyyy HH:mm")}
+											{format(new Date(selectedBookingForDetails.scheduledPickupTime), "MMM dd, yyyy h:mm a")}
 										</h2>
 										<div className="flex items-center gap-2 mt-1">
 											<span className="text-xs text-white/80">
@@ -852,7 +838,7 @@ function DriverTripsComponent() {
 										</div>
 									</div>
 								</div>
-								
+
 								<Button
 									variant="ghost"
 									size="lg"
@@ -866,7 +852,7 @@ function DriverTripsComponent() {
 							{/* Scrollable Content with improved design */}
 							<div className={cn(
 								"p-4 space-y-4",
-								isMobile ? "flex-1 overflow-y-auto pb-2" : ""
+								isMobile ? "flex-1 overflow-y-auto pb-32" : ""
 							)}>
 								{/* Compact Route Information Card */}
 								<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
@@ -884,7 +870,7 @@ function DriverTripsComponent() {
 												</p>
 											</div>
 										</div>
-										
+
 										{/* Stops (if any) */}
 										{selectedBookingForDetails.stops && selectedBookingForDetails.stops.length > 0 && (
 											<>
@@ -904,9 +890,9 @@ function DriverTripsComponent() {
 												))}
 											</>
 										)}
-										
+
 										<div className="border-l border-gray-200 ml-1 h-2"></div>
-										
+
 										<div className="flex items-start gap-2">
 											<div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
 											<div className="flex-1 min-w-0">
@@ -967,13 +953,13 @@ function DriverTripsComponent() {
 								</div>
 							</div>
 
-							{/* Enhanced Actions - Fixed bottom for mobile */}
+							{/* Enhanced Actions - Sticky at bottom for mobile */}
 							<div className={cn(
-								"p-4 space-y-3 bg-white border-t border-gray-200",
-								isMobile ? "flex-shrink-0 shadow-lg min-h-[140px]" : "rounded-b-lg"
+								"p-4 bg-white border-t border-gray-200",
+								isMobile ? "fixed bottom-0 left-0 right-0 z-50 shadow-2xl safe-area-pb" : "rounded-b-lg"
 							)}>
 								{/* Navigation or Fare Display based on trip status */}
-								{['dropped_off', 'completed', 'no_show'].includes(selectedBookingForDetails.status) ? (
+								{['completed', 'no_show'].includes(selectedBookingForDetails.status) ? (
 									/* Trip Fare Card for completed trips */
 									<div className="w-full h-12 border-2 border-green-200 bg-green-50 rounded-lg flex items-center justify-center">
 										<div className="flex items-center gap-2">
@@ -989,53 +975,76 @@ function DriverTripsComponent() {
 										</div>
 									</div>
 								) : (
-									/* Navigate Button for active trips */
-									<Button
-										variant="outline"
-										className="w-full h-12 border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium transition-all duration-200"
-										onClick={() => {
-											setSelectedMapsBooking(selectedBookingForDetails);
-											setShowMapsModal(true);
-										}}
-									>
-										<NavigationIcon className="h-5 w-5 mr-2" />
-										Navigate
-									</Button>
-								)}
+									<div className="space-y-3">
+										{/* Trip Fare for dropped_off status */}
+										{selectedBookingForDetails.status === 'dropped_off' && (
+											<div className="w-full h-12 border-2 border-green-200 bg-green-50 rounded-lg flex items-center justify-center">
+												<div className="flex items-center gap-2">
+													<DollarSignIcon className="h-5 w-5 text-green-600" />
+													<span className="text-green-800 font-semibold">
+														Trip Fare: ${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+													</span>
+													{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+														<span className="text-green-700 text-sm">
+															(+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)} extras)
+														</span>
+													) : null}
+												</div>
+											</div>
+										)}
 
-								{/* Status Action */}
-								{(() => {
-									const canProgress = ['driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'dropped_off', 'awaiting_extras', 'confirmed'].includes(selectedBookingForDetails.status);
-									const needsSwipeConfirmation = ['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board'].includes(selectedBookingForDetails.status);
-
-									if (!canProgress) return null;
-
-									if (isMobile && needsSwipeConfirmation) {
-										return (
-											<SwipeToConfirm
-												onConfirm={() => {
-													handleStartTrip(selectedBookingForDetails);
-												}}
-												confirmText={getStatusButtonText(selectedBookingForDetails.status)}
-												instruction={`Swipe to ${getStatusButtonText(selectedBookingForDetails.status)}`}
-												variant="primary"
-												disabled={updateStatusMutation.isPending}
-											/>
-										);
-									}
-
-									return (
+										{/* Horizontal Actions Layout */}
+										<div className="flex gap-3 items-center">
+										{/* Navigate Button - Smaller size */}
 										<Button
-											className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
+											variant="outline"
+											className="h-12 w-12 p-0 border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium transition-all duration-200 rounded-lg"
 											onClick={() => {
-												handleStartTrip(selectedBookingForDetails);
+												setSelectedMapsBooking(selectedBookingForDetails);
+												setShowMapsModal(true);
 											}}
-											disabled={updateStatusMutation.isPending}
 										>
-											{updateStatusMutation.isPending ? 'Updating...' : getStatusButtonText(selectedBookingForDetails.status)}
+											<NavigationIcon className="h-5 w-5" />
 										</Button>
-									);
-								})()}
+
+										{/* Status Action - Takes remaining width */}
+										{(() => {
+											const canProgress = ['driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'dropped_off', 'awaiting_extras', 'confirmed'].includes(selectedBookingForDetails.status);
+											const needsSwipeConfirmation = ['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board'].includes(selectedBookingForDetails.status);
+
+											if (!canProgress) return null;
+
+											if (isMobile && needsSwipeConfirmation) {
+												return (
+													<div className="flex-1">
+														<SwipeToConfirm
+															onConfirm={() => {
+																handleStartTrip(selectedBookingForDetails);
+															}}
+															confirmText={getStatusButtonText(selectedBookingForDetails.status)}
+															instruction={`Swipe to ${getStatusButtonText(selectedBookingForDetails.status)}`}
+															variant="primary"
+															disabled={updateStatusMutation.isPending}
+														/>
+													</div>
+												);
+											}
+
+											return (
+												<Button
+													className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-sm font-medium"
+													onClick={() => {
+														handleStartTrip(selectedBookingForDetails);
+													}}
+													disabled={updateStatusMutation.isPending}
+												>
+													{updateStatusMutation.isPending ? 'Updating...' : getStatusButtonText(selectedBookingForDetails.status)}
+												</Button>
+											);
+										})()}
+										</div>
+									</div>
+								)}
 							</div>
 						</div>
 					)}
@@ -1051,7 +1060,7 @@ function DriverTripsComponent() {
 							Add any additional charges for {selectedBooking?.customerName}
 						</DialogDescription>
 					</DialogHeader>
-					
+
 					<div className="space-y-4 py-4">
 						{extras.map((extra, index) => (
 							<div key={extra.id} className="flex gap-2">
@@ -1081,7 +1090,7 @@ function DriverTripsComponent() {
 								)}
 							</div>
 						))}
-						
+
 						<Button
 							variant="outline"
 							onClick={addExtraItem}
@@ -1090,14 +1099,14 @@ function DriverTripsComponent() {
 							<PlusIcon className="h-4 w-4 mr-2" />
 							Add Another Item
 						</Button>
-						
+
 						<div className="border-t pt-4">
 							<div className="flex justify-between items-center">
 								<span className="font-medium">Total Extra Charges:</span>
 								<span className="font-bold text-lg">${calculateTotalExtras().toFixed(2)}</span>
 							</div>
 						</div>
-						
+
 						<div className="flex gap-2">
 							<Button variant="outline" onClick={() => setExtrasDialogOpen(false)} className="flex-1">
 								Cancel

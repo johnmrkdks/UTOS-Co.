@@ -151,7 +151,7 @@ export function RealTimeBookingStatus({
 											}
 										</p>
 										<p className="text-xs text-gray-500">
-											Updated {format(new Date(driverLocation.timestamp), "HH:mm:ss")}
+											Updated {format(new Date(driverLocation.timestamp), "h:mm:ss a")}
 										</p>
 									</div>
 								</div>

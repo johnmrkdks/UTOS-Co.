@@ -8,6 +8,8 @@ export interface BookingOperationValidation {
 	editReason?: string;
 	cancelReason?: string;
 	cancellationFeePercentage?: number;
+	hoursUntilPickup?: number;
+	hasDriverAssigned?: boolean;
 }
 
 export interface BookingForValidation {
@@ -56,6 +58,9 @@ export async function validateBookingOperations(
 				canCancel: false,
 				editReason: `Cannot modify ${booking.status} booking`,
 				cancelReason: `Cannot cancel ${booking.status} booking`,
+				cancellationFeePercentage: 0,
+				hoursUntilPickup,
+				hasDriverAssigned,
 			};
 		}
 
@@ -97,6 +102,8 @@ export async function validateBookingOperations(
 			editReason,
 			cancelReason,
 			cancellationFeePercentage: defaultPolicy.cancellationFeePercentage,
+			hoursUntilPickup,
+			hasDriverAssigned,
 		};
 		
 		console.log("✅ validateBookingOperations - Final result:", JSON.stringify(result, null, 2));

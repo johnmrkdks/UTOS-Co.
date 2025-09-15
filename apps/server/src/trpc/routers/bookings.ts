@@ -446,7 +446,7 @@ export const bookingsRouter = router({
 			}
 		}),
 
-	// Get user's own bookings only
+	// Get user's own bookings only with validation included
 	getUserBookings: protectedProcedure
 		.input(ResourceListSchema.extend({
 			userId: z.string().optional(),
@@ -455,14 +455,14 @@ export const bookingsRouter = router({
 			try {
 				// Ensure user can only see their own bookings
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to view bookings",
 					});
 				}
-				
+
 				// Force filter by the authenticated user's ID only (ignore input userId)
 				const bookings = await getBookingsService(db, {
 					...input,
@@ -471,8 +471,72 @@ export const bookingsRouter = router({
 						userId: userId, // Only show bookings for this specific user
 					},
 				});
-				
-				return bookings;
+
+				// Add validation information to each booking
+				const bookingsWithValidation = bookings.data ? {
+					...bookings,
+					data: await Promise.all(bookings.data.map(async (booking) => {
+						// Skip validation for completed/cancelled bookings to save processing
+						if (["completed", "cancelled"].includes(booking.status)) {
+							return {
+								...booking,
+								canEdit: false,
+								canCancel: false,
+								editReason: `Cannot modify ${booking.status} booking`,
+								cancelReason: `Cannot cancel ${booking.status} booking`,
+							};
+						}
+
+						// Calculate validation for active bookings
+						const now = new Date();
+						const pickupTime = new Date(booking.scheduledPickupTime);
+						const hoursUntilPickup = (pickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+						const hasDriverAssigned = !!booking.driverAssignedAt;
+
+						// Use default 4-hour policy
+						const defaultPolicy = {
+							editAllowedHours: 4,
+							editDisabledAfterDriverAssignment: true,
+							cancellationAllowedHours: 4,
+							cancellationFeePercentage: 0,
+							cancellationDisabledAfterDriverAssignment: false,
+						};
+
+						// Check edit permissions
+						let canEdit = true;
+						let editReason: string | undefined;
+						if (hoursUntilPickup < defaultPolicy.editAllowedHours) {
+							canEdit = false;
+							editReason = `Edits must be made at least ${defaultPolicy.editAllowedHours} hours before pickup`;
+						} else if (hasDriverAssigned && defaultPolicy.editDisabledAfterDriverAssignment) {
+							canEdit = false;
+							editReason = "Cannot edit booking after driver has been assigned";
+						}
+
+						// Check cancellation permissions
+						let canCancel = true;
+						let cancelReason: string | undefined;
+						if (hoursUntilPickup < defaultPolicy.cancellationAllowedHours) {
+							canCancel = false;
+							cancelReason = `Cancellations must be made at least ${defaultPolicy.cancellationAllowedHours} hours before pickup`;
+						} else if (hasDriverAssigned && defaultPolicy.cancellationDisabledAfterDriverAssignment) {
+							canCancel = false;
+							cancelReason = "Cannot cancel booking after driver has been assigned";
+						}
+
+						return {
+							...booking,
+							canEdit,
+							canCancel,
+							editReason,
+							cancelReason,
+							hoursUntilPickup,
+							hasDriverAssigned,
+						};
+					}))
+				} : bookings;
+
+				return bookingsWithValidation;
 			} catch (error) {
 				handleTRPCError(error);
 			}

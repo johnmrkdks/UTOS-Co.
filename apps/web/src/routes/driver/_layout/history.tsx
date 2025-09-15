@@ -22,10 +22,10 @@ function HistoryPage() {
 
 	// State for active tab
 	const [activeTab, setActiveTab] = useState("all");
-	
+
 	// State for selected trip details
 	const [selectedTrip, setSelectedTrip] = useState<any>(null);
-	
+
 	// State for trip details dialog  
 	const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
 	const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<any>(null);
@@ -34,11 +34,11 @@ function HistoryPage() {
 	const { data: bookingsData, isLoading } = useGetDriverBookingsQuery({
 		limit: 100, // Fetch more records to show full history
 	});
-	
+
 	// Transform backend data to match frontend structure
 	const trips = useMemo(() => {
 		if (!bookingsData?.data) return [];
-		
+
 		return bookingsData.data.map((booking: any) => ({
 			id: booking.id,
 			pickupAddress: booking.originAddress,
@@ -56,13 +56,13 @@ function HistoryPage() {
 
 	const completedTrips = trips.filter(trip => trip.status === "completed" || trip.status === "no_show");
 	const cancelledTrips = trips.filter(trip => trip.status === "cancelled");
-	
+
 	// Handle trip click to show details
 	const handleTripClick = (trip: any) => {
 		setSelectedTrip(trip);
 		handleOpenBookingDetails(trip);
 	};
-	
+
 	// Handle opening booking details dialog (same as trips.tsx)
 	const handleOpenBookingDetails = (booking: any) => {
 		// Convert trip data structure to booking data structure for the dialog
@@ -80,7 +80,7 @@ function HistoryPage() {
 			extraCharges: null, // History doesn't have extra charges
 			car: null // TODO: Add car information to history data
 		};
-		
+
 		setSelectedBookingForDetails(bookingData);
 		setBookingDetailsOpen(true);
 	};
@@ -88,7 +88,7 @@ function HistoryPage() {
 	// Group trips by date
 	const groupTripsByDate = (tripsList: typeof trips) => {
 		const grouped: Record<string, typeof trips> = {};
-		
+
 		tripsList.forEach((trip: any) => {
 			const dateKey = format(trip.scheduledTime, "yyyy-MM-dd");
 			if (!grouped[dateKey]) {
@@ -99,7 +99,7 @@ function HistoryPage() {
 
 		// Sort dates in descending order (newest first)
 		const sortedDates = Object.keys(grouped).sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime());
-		
+
 		const result: Array<{ date: string; trips: typeof trips }> = [];
 		sortedDates.forEach(date => {
 			result.push({
@@ -107,13 +107,13 @@ function HistoryPage() {
 				trips: grouped[date].sort((a, b) => b.scheduledTime.getTime() - a.scheduledTime.getTime())
 			});
 		});
-		
+
 		return result;
 	};
 
 	const TripCard = ({ trip, onClick }: { trip: typeof trips[0], onClick?: () => void }) => {
 		return (
-			<Card 
+			<Card
 				className={cn(
 					"bg-white transition-colors w-full overflow-hidden cursor-pointer hover:shadow-md",
 					isMobile ? "border-0 border-b border-gray-200 rounded-none shadow-none" : "border border-gray-200 shadow-sm"
@@ -127,18 +127,18 @@ function HistoryPage() {
 						<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
 					</div>
 
-					<div className="flex items-start justify-between">
+					<div className="flex items-center justify-between">
 						{/* Left side - Route info */}
 						<div className="flex-1 min-w-0 space-y-2">
 							{/* Route - Pickup to Drop-off */}
 							<div className="space-y-2">
 								<div className="flex items-start gap-2">
 									<div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
-									<p className="text-sm text-gray-600 leading-tight">
-										{trip.pickupAddress 
-											? isMobile 
-												? trip.pickupAddress.length > 35 
-													? trip.pickupAddress.substring(0, 35) + '...' 
+									<p className="text-xs text-gray-600 leading-tight">
+										{trip.pickupAddress
+											? isMobile
+												? trip.pickupAddress.length > 35
+													? trip.pickupAddress.substring(0, 35) + '...'
 													: trip.pickupAddress
 												: trip.pickupAddress
 											: 'Pickup location unavailable'
@@ -147,11 +147,11 @@ function HistoryPage() {
 								</div>
 								<div className="flex items-start gap-2">
 									<div className="w-2 h-2 bg-red-500 rounded-full mt-1 flex-shrink-0"></div>
-									<p className="text-sm text-gray-600 leading-tight">
-										{trip.destinationAddress 
-											? isMobile 
-												? trip.destinationAddress.length > 35 
-													? trip.destinationAddress.substring(0, 35) + '...' 
+									<p className="text-xs text-gray-600 leading-tight">
+										{trip.destinationAddress
+											? isMobile
+												? trip.destinationAddress.length > 35
+													? trip.destinationAddress.substring(0, 35) + '...'
 													: trip.destinationAddress
 												: trip.destinationAddress
 											: 'Destination unavailable'
@@ -160,11 +160,7 @@ function HistoryPage() {
 								</div>
 							</div>
 						</div>
-
-						{/* Right side - Arrow indicator */}
-						<div className="flex items-center ml-3">
-							<ChevronRight className="w-5 h-5 text-gray-400" />
-						</div>
+						<ChevronRight className="w-5 h-5 text-gray-400" />
 					</div>
 				</CardContent>
 			</Card>
@@ -181,7 +177,7 @@ function HistoryPage() {
 
 	const renderTripsWithDateGroups = (tripsList: any[]) => {
 		const groupedTrips = groupTripsByDate(tripsList);
-		
+
 		if (isLoading) {
 			return (
 				<div className="flex flex-col items-center justify-center py-12">
@@ -190,11 +186,11 @@ function HistoryPage() {
 				</div>
 			);
 		}
-		
+
 		if (groupedTrips.length === 0) {
 			return (
-				<EmptyState 
-					title="No Trip History" 
+				<EmptyState
+					title="No Trip History"
 					description="You haven't completed any trips yet. Start accepting trips to build your history!"
 				/>
 			);
@@ -211,14 +207,14 @@ function HistoryPage() {
 						)}>
 							{format(new Date(date), "EEEE, do MMMM yyyy")}
 						</div>
-						
+
 						{/* Trips for this date */}
 						<div className={cn(isMobile ? "" : "space-y-3")}>
 							{dayTrips.map((trip: any) => (
-								<TripCard 
-									key={trip.id} 
-									trip={trip} 
-									onClick={() => handleTripClick(trip)} 
+								<TripCard
+									key={trip.id}
+									trip={trip}
+									onClick={() => handleTripClick(trip)}
 								/>
 							))}
 						</div>
@@ -256,34 +252,34 @@ function HistoryPage() {
 						{/* Mobile Tab Headers */}
 						<div className="bg-white border-b border-gray-200 sticky top-0 z-20">
 							<div className="flex w-full">
-								<button 
+								<button
 									onClick={() => setActiveTab("all")}
 									className={cn(
 										"flex-1 py-3 px-1 text-xs font-medium text-center border-b-2 transition-all duration-200 min-w-0",
-										activeTab === "all" 
-											? "border-primary text-primary bg-primary/5" 
+										activeTab === "all"
+											? "border-primary text-primary bg-primary/5"
 											: "border-transparent text-gray-600 hover:text-gray-900"
 									)}
 								>
 									<span className="truncate">All ({trips.length})</span>
 								</button>
-								<button 
+								<button
 									onClick={() => setActiveTab("completed")}
 									className={cn(
 										"flex-1 py-3 px-1 text-xs font-medium text-center border-b-2 transition-all duration-200 min-w-0",
-										activeTab === "completed" 
-											? "border-primary text-primary bg-primary/5" 
+										activeTab === "completed"
+											? "border-primary text-primary bg-primary/5"
 											: "border-transparent text-gray-600 hover:text-gray-900"
 									)}
 								>
 									<span className="truncate">Done ({completedTrips.length})</span>
 								</button>
-								<button 
+								<button
 									onClick={() => setActiveTab("cancelled")}
 									className={cn(
 										"flex-1 py-3 px-1 text-xs font-medium text-center border-b-2 transition-all duration-200 min-w-0",
-										activeTab === "cancelled" 
-											? "border-primary text-primary bg-primary/5" 
+										activeTab === "cancelled"
+											? "border-primary text-primary bg-primary/5"
 											: "border-transparent text-gray-600 hover:text-gray-900"
 									)}
 								>
@@ -307,7 +303,7 @@ function HistoryPage() {
 							<TabsTrigger value="completed">Completed ({completedTrips.length})</TabsTrigger>
 							<TabsTrigger value="cancelled">Cancelled ({cancelledTrips.length})</TabsTrigger>
 						</TabsList>
-						
+
 						<TabsContent value="all" className="mt-6">
 							{renderTripsWithDateGroups(trips)}
 						</TabsContent>
@@ -322,10 +318,10 @@ function HistoryPage() {
 					</Tabs>
 				)}
 			</div>
-			
+
 			{/* Trip Details Dialog (same as trips.tsx) */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
-				<DialogContent 
+				<DialogContent
 					className={cn(
 						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
@@ -356,7 +352,7 @@ function HistoryPage() {
 										</div>
 									</div>
 								</div>
-								
+
 								{/* Close button */}
 								<Button
 									variant="ghost"
@@ -410,9 +406,9 @@ function HistoryPage() {
 												))}
 											</>
 										)}
-										
+
 										<div className="border-l border-gray-200 ml-1 h-2"></div>
-										
+
 										{/* Drop off */}
 										<div className="flex items-start gap-2">
 											<div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>

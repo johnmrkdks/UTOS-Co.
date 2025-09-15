@@ -22,7 +22,6 @@ import { Route as MarketingSelectVehicleRouteImport } from './routes/_marketing/
 import { Route as MarketingQuoteResultsRouteImport } from './routes/_marketing/quote-results'
 import { Route as MarketingProfileRouteImport } from './routes/_marketing/profile'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
-import { Route as MarketingMyBookingsRouteImport } from './routes/_marketing/my-bookings'
 import { Route as MarketingFleetRouteImport } from './routes/_marketing/fleet'
 import { Route as MarketingFaqsRouteImport } from './routes/_marketing/faqs'
 import { Route as MarketingDashboardRouteImport } from './routes/_marketing/dashboard'
@@ -151,11 +150,6 @@ const MarketingProfileRoute = MarketingProfileRouteImport.update({
 const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => MarketingRoute,
-} as any)
-const MarketingMyBookingsRoute = MarketingMyBookingsRouteImport.update({
-  id: '/my-bookings',
-  path: '/my-bookings',
   getParentRoute: () => MarketingRoute,
 } as any)
 const MarketingFleetRoute = MarketingFleetRouteImport.update({
@@ -456,7 +450,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/faqs': typeof MarketingFaqsRoute
   '/fleet': typeof MarketingFleetRoute
-  '/my-bookings': typeof MyBookingsLayoutRouteWithChildren
   '/privacy': typeof MarketingPrivacyRoute
   '/profile': typeof MarketingProfileRoute
   '/quote-results': typeof MarketingQuoteResultsRoute
@@ -464,6 +457,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/driver': typeof DriverLayoutRouteWithChildren
+  '/my-bookings': typeof MyBookingsLayoutRouteWithChildren
   '/': typeof MarketingIndexRoute
   '/account/settings': typeof MarketingAccountSettingsRoute
   '/book-car/$carId': typeof MarketingBookCarCarIdRoute
@@ -519,7 +513,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/faqs': typeof MarketingFaqsRoute
   '/fleet': typeof MarketingFleetRoute
-  '/my-bookings': typeof MyBookingsLayoutIndexRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/profile': typeof MarketingProfileRoute
   '/quote-results': typeof MarketingQuoteResultsRoute
@@ -527,6 +520,7 @@ export interface FileRoutesByTo {
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
   '/driver': typeof DriverLayoutIndexRoute
+  '/my-bookings': typeof MyBookingsLayoutIndexRoute
   '/': typeof MarketingIndexRoute
   '/account/settings': typeof MarketingAccountSettingsRoute
   '/book-car/$carId': typeof MarketingBookCarCarIdRoute
@@ -581,7 +575,6 @@ export interface FileRoutesById {
   '/_marketing/dashboard': typeof MarketingDashboardRoute
   '/_marketing/faqs': typeof MarketingFaqsRoute
   '/_marketing/fleet': typeof MarketingFleetRoute
-  '/_marketing/my-bookings': typeof MarketingMyBookingsRoute
   '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/profile': typeof MarketingProfileRoute
   '/_marketing/quote-results': typeof MarketingQuoteResultsRoute
@@ -652,7 +645,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/faqs'
     | '/fleet'
-    | '/my-bookings'
     | '/privacy'
     | '/profile'
     | '/quote-results'
@@ -660,6 +652,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms-and-conditions'
     | '/driver'
+    | '/my-bookings'
     | '/'
     | '/account/settings'
     | '/book-car/$carId'
@@ -715,7 +708,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/faqs'
     | '/fleet'
-    | '/my-bookings'
     | '/privacy'
     | '/profile'
     | '/quote-results'
@@ -723,6 +715,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms-and-conditions'
     | '/driver'
+    | '/my-bookings'
     | '/'
     | '/account/settings'
     | '/book-car/$carId'
@@ -776,7 +769,6 @@ export interface FileRouteTypes {
     | '/_marketing/dashboard'
     | '/_marketing/faqs'
     | '/_marketing/fleet'
-    | '/_marketing/my-bookings'
     | '/_marketing/privacy'
     | '/_marketing/profile'
     | '/_marketing/quote-results'
@@ -952,13 +944,6 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof MarketingPrivacyRouteImport
-      parentRoute: typeof MarketingRoute
-    }
-    '/_marketing/my-bookings': {
-      id: '/_marketing/my-bookings'
-      path: '/my-bookings'
-      fullPath: '/my-bookings'
-      preLoaderRoute: typeof MarketingMyBookingsRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/fleet': {
@@ -1335,7 +1320,6 @@ interface MarketingRouteChildren {
   MarketingDashboardRoute: typeof MarketingDashboardRoute
   MarketingFaqsRoute: typeof MarketingFaqsRoute
   MarketingFleetRoute: typeof MarketingFleetRoute
-  MarketingMyBookingsRoute: typeof MarketingMyBookingsRoute
   MarketingPrivacyRoute: typeof MarketingPrivacyRoute
   MarketingProfileRoute: typeof MarketingProfileRoute
   MarketingQuoteResultsRoute: typeof MarketingQuoteResultsRoute
@@ -1356,7 +1340,6 @@ const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingDashboardRoute: MarketingDashboardRoute,
   MarketingFaqsRoute: MarketingFaqsRoute,
   MarketingFleetRoute: MarketingFleetRoute,
-  MarketingMyBookingsRoute: MarketingMyBookingsRoute,
   MarketingPrivacyRoute: MarketingPrivacyRoute,
   MarketingProfileRoute: MarketingProfileRoute,
   MarketingQuoteResultsRoute: MarketingQuoteResultsRoute,

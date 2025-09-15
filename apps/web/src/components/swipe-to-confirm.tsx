@@ -27,11 +27,11 @@ export function SwipeToConfirm({
 	const [actionState, setActionState] = useState<"idle" | "confirming" | "cancelling">("idle")
 	const containerRef = useRef<HTMLDivElement>(null)
 	const sliderRef = useRef<HTMLDivElement>(null)
-	const animationFrameRef = useRef<number>()
+	const animationFrameRef = useRef<number | undefined>(undefined)
 	const onConfirmRef = useRef(onConfirm)
 	const onCancelRef = useRef(onCancel)
 
-	const threshold = 0.8 // 80% of the container width
+	const threshold = 1.0 // 100% of the container width
 	const cancelThreshold = -0.3 // 30% to the left for cancel
 
 	useEffect(() => {
@@ -181,7 +181,7 @@ export function SwipeToConfirm({
 			<div
 				ref={containerRef}
 				className={cn(
-					"relative h-16 rounded-xl border-2 overflow-hidden transition-all duration-300 ease-out shadow-sm",
+					"relative h-12 rounded-xl border-2 overflow-hidden transition-all duration-300 ease-out shadow-sm",
 					getBackgroundColor(),
 					variant === "primary" ? "border-primary/30" : "border-destructive/30",
 				)}
@@ -193,17 +193,14 @@ export function SwipeToConfirm({
 						dragPosition > 10 ? "opacity-0" : "opacity-100",
 					)}
 				>
-					<div className="flex items-center gap-2 text-sm font-medium text-gray-700 select-none bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-gray-200">
+					<div className="flex flex-row gap-2 items-center text-sm font-medium text-gray-700 select-none">
 						{disabled ? (
 							<>
 								<div className="w-3 h-3 animate-spin border border-gray-400 border-t-transparent rounded-full"></div>
 								{"Updating..."}
 							</>
 						) : (
-							<>
-								<ChevronRight className="w-4 h-4 text-gray-400" />
-								{instruction}
-							</>
+							instruction
 						)}
 					</div>
 				</div>
@@ -212,7 +209,7 @@ export function SwipeToConfirm({
 				<div
 					ref={sliderRef}
 					className={cn(
-						"absolute top-2 left-2 w-12 h-12 rounded-md flex items-center justify-center shadow-lg",
+						"absolute top-0.5 left-0.5 w-10 h-10 rounded-lg flex items-center justify-center shadow-lg",
 						disabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing",
 						getSliderColor(),
 						isDragging && !disabled && "scale-110",

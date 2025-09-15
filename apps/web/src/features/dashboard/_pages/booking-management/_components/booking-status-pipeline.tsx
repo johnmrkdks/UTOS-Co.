@@ -265,7 +265,7 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 													<div className="space-y-1">
 														<div className="flex items-center text-xs text-muted-foreground">
 															<Clock className="h-3 w-3 mr-1" />
-															{format(new Date(booking.scheduledPickupTime), "MMM dd, HH:mm")}
+															{format(new Date(booking.scheduledPickupTime), "MMM dd, h:mm a")}
 														</div>
 														
 														<div className="flex items-center text-xs text-muted-foreground">

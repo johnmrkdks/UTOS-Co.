@@ -79,14 +79,14 @@ function AvailableTripsPage() {
 		// Better car name handling
 		const getCarDisplayName = () => {
 			if (trip.selectedCar?.name) return trip.selectedCar.name;
-			
+
 			const make = trip.selectedCar?.make;
 			const model = trip.selectedCar?.model;
-			
+
 			if (make && model) return `${make} ${model}`;
 			if (make) return make;
 			if (model) return model;
-			
+
 			return `Booking #${trip.id.slice(-6).toUpperCase()}`;
 		};
 
@@ -115,7 +115,7 @@ function AvailableTripsPage() {
 									<ClockIcon className="h-4 w-4 text-blue-500" />
 									<div>
 										<span className="text-lg font-bold text-gray-900">
-											{format(new Date(trip.scheduledPickupTime), "HH:mm")}
+											{format(new Date(trip.scheduledPickupTime), "h:mm a")}
 										</span>
 										<div className="text-xs text-gray-500">
 											{format(new Date(trip.scheduledPickupTime), "MMM dd, yyyy")}
@@ -141,21 +141,34 @@ function AvailableTripsPage() {
 								)}
 							</div>
 
-							{/* Route - Compact Mobile Layout */}
+							{/* Route - Compact Mobile Layout with Stops */}
 							<div className="space-y-2 mb-4">
+								{/* Origin */}
 								<div className="flex items-center gap-2">
-									<div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+									<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
 									<p className="text-sm text-gray-700 line-clamp-1">
-										{trip.originAddress.length > 40 
-											? trip.originAddress.substring(0, 40) + '...' 
+										{trip.originAddress.length > 40
+											? trip.originAddress.substring(0, 40) + '...'
 											: trip.originAddress}
 									</p>
 								</div>
+
+								{/* Stops (if any) */}
+								{stopsCount > 0 && (
+									<div className="flex items-center gap-2">
+										<div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+										<p className="text-sm text-blue-600 line-clamp-1">
+											{stopsCount} stop{stopsCount > 1 ? 's' : ''}
+										</p>
+									</div>
+								)}
+
+								{/* Destination */}
 								<div className="flex items-center gap-2">
 									<div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></div>
 									<p className="text-sm text-gray-700 line-clamp-1">
-										{trip.destinationAddress.length > 40 
-											? trip.destinationAddress.substring(0, 40) + '...' 
+										{trip.destinationAddress.length > 40
+											? trip.destinationAddress.substring(0, 40) + '...'
 											: trip.destinationAddress}
 									</p>
 								</div>
@@ -172,14 +185,8 @@ function AvailableTripsPage() {
 										<UsersIcon className="h-4 w-4 text-gray-400" />
 										<span className="font-medium">{trip.passengerCount || 1}</span>
 									</div>
-									{stopsCount > 0 && (
-										<div className="flex items-center gap-1 text-sm text-gray-600">
-											<MapPinIcon className="h-4 w-4 text-gray-400" />
-											<span className="font-medium">{stopsCount} stop{stopsCount > 1 ? 's' : ''}</span>
-										</div>
-									)}
 								</div>
-								
+
 								{trip.status === "driver_assigned" ? (
 									<Button
 										onClick={(e) => {
@@ -215,7 +222,7 @@ function AvailableTripsPage() {
 									<ClockIcon className="h-5 w-5 text-blue-500" />
 									<div>
 										<span className="text-xl font-bold text-gray-900">
-											{format(new Date(trip.scheduledPickupTime), "HH:mm")}
+											{format(new Date(trip.scheduledPickupTime), "h:mm a")}
 										</span>
 										<span className="text-sm text-gray-500 ml-2">
 											{format(new Date(trip.scheduledPickupTime), "MMM dd, yyyy")}
@@ -243,13 +250,27 @@ function AvailableTripsPage() {
 
 							{/* Route */}
 							<div className="space-y-3 mb-4">
+								{/* Origin */}
 								<div className="flex items-start gap-3">
-									<div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+									<div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
 									<div className="flex-1 min-w-0">
 										<p className="text-sm font-medium text-gray-900 mb-1">Pickup</p>
 										<p className="text-sm text-gray-600 break-words">{trip.originAddress}</p>
 									</div>
 								</div>
+
+								{/* Stops (if any) */}
+								{stopsCount > 0 && (
+									<div className="flex items-start gap-3">
+										<div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+										<div className="flex-1 min-w-0">
+											<p className="text-sm font-medium text-blue-700 mb-1">Stops</p>
+											<p className="text-sm text-blue-600">{stopsCount} intermediate stop{stopsCount > 1 ? 's' : ''}</p>
+										</div>
+									</div>
+								)}
+
+								{/* Destination */}
 								<div className="flex items-start gap-3">
 									<div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
 									<div className="flex-1 min-w-0">
@@ -270,14 +291,8 @@ function AvailableTripsPage() {
 										<UsersIcon className="h-4 w-4 text-gray-400" />
 										<span className="font-medium">{trip.passengerCount || 1} pax</span>
 									</div>
-									{stopsCount > 0 && (
-										<div className="flex items-center gap-1 text-sm text-gray-600">
-											<MapPinIcon className="h-4 w-4 text-gray-400" />
-											<span className="font-medium">{stopsCount} stop{stopsCount > 1 ? 's' : ''}</span>
-										</div>
-									)}
 								</div>
-								
+
 								{trip.status === "driver_assigned" ? (
 									<Button
 										onClick={(e) => {
@@ -360,8 +375,8 @@ function AvailableTripsPage() {
 						"flex items-center justify-center h-full",
 						isMobile ? "px-4" : ""
 					)}>
-						<EmptyState 
-							title="Error Loading Trips" 
+						<EmptyState
+							title="Error Loading Trips"
 							description="There was an error loading your assigned trips. Please try again."
 						/>
 					</div>
@@ -370,8 +385,8 @@ function AvailableTripsPage() {
 						"flex items-center justify-center h-full",
 						isMobile ? "px-4" : ""
 					)}>
-						<EmptyState 
-							title="No Assigned Trips" 
+						<EmptyState
+							title="No Assigned Trips"
 							description="You don't have any trips assigned to you yet. Check back later!"
 						/>
 					</div>
@@ -412,7 +427,7 @@ function AvailableTripsPage() {
 										<ArrowLeft className="h-5 w-5" />
 									</Button>
 									<h2 className="text-lg font-bold">
-										{format(new Date(selectedBookingForDetails.scheduledPickupTime), "MMM dd, yyyy HH:mm")}
+										{format(new Date(selectedBookingForDetails.scheduledPickupTime), "MMM dd, yyyy h:mm a")}
 									</h2>
 									<div className="w-5" /> {/* Spacer for centering */}
 								</div>
