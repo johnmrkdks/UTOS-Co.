@@ -55,6 +55,7 @@ export const bookings = sqliteTable("bookings", {
 	customerPhone: text("customer_phone").notNull(),
 	customerEmail: text("customer_email"),
 	passengerCount: integer("passenger_count").notNull().default(1),
+	luggageCount: integer("luggage_count").default(0),
 	specialRequests: text("special_requests"),
 
 	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),

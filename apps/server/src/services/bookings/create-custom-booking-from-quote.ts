@@ -41,6 +41,7 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	customerPhone: z.string(),
 	customerEmail: z.string().email().optional(),
 	passengerCount: z.number().int().min(1).default(1),
+	luggageCount: z.number().int().min(0).default(0),
 	specialRequests: z.string().optional(),
 	
 	// Optional car preference

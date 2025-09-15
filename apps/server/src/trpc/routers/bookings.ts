@@ -686,11 +686,12 @@ export const bookingsRouter = router({
 			destinationAddress: z.string().optional(),
 			destinationLatitude: z.number().optional(),
 			destinationLongitude: z.number().optional(),
-			scheduledPickupTime: z.date().optional(),
+			scheduledPickupTime: z.string().transform((str) => new Date(str)).optional(),
 			customerName: z.string().optional(),
 			customerPhone: z.string().optional(),
 			customerEmail: z.string().optional(),
 			passengerCount: z.number().optional(),
+			luggageCount: z.number().optional(),
 			specialRequests: z.string().optional(),
 		}))
 		.mutation(async ({ ctx: { db, session }, input }) => {

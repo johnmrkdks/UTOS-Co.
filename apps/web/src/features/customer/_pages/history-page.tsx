@@ -63,6 +63,9 @@ export function CustomerHistoryPage() {
 	// Handle opening booking details dialog (same as trips.tsx)
 	const handleOpenBookingDetails = (booking: any) => {
 		// Convert trip data structure to booking data structure for the dialog
+		// Note: We need to get the original booking data to access extraCharges
+		const originalBooking = bookingsData?.data?.find((b: any) => b.id === booking.id);
+
 		const bookingData = {
 			id: booking.id,
 			scheduledPickupTime: booking.scheduledTime,
@@ -73,10 +76,10 @@ export function CustomerHistoryPage() {
 			customerPhone: null, // History doesn't have phone data
 			status: booking.status,
 			finalAmount: booking.finalAmount,
-			quotedAmount: booking.finalAmount, // Use finalAmount as quotedAmount for history
+			quotedAmount: originalBooking?.quotedAmount || booking.finalAmount, // Use original quoted amount
 			amount: booking.finalAmount,
 			totalAmount: booking.finalAmount,
-			extraCharges: null, // History doesn't have extra charges
+			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
 			car: null // TODO: Add car information to history data
 		};
 
@@ -349,7 +352,7 @@ export function CustomerHistoryPage() {
 							isMobile ? "flex flex-col h-full" : "flex flex-col"
 						)}>
 							{/* Header */}
-							<div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex-shrink-0">
+							<div className="flex items-center justify-between p-4 bg-gradient-to-br from-primary to-primary/80 text-white flex-shrink-0">
 								<div className="flex items-center gap-3">
 									<Clock className="h-5 w-5 text-white/80" />
 									<div>
@@ -430,11 +433,40 @@ export function CustomerHistoryPage() {
 									</div>
 								</div>
 
-								{/* Pricing */}
+								{/* Trip Fare */}
 								<div className="bg-white rounded-lg p-4 border">
-									<h3 className="font-semibold text-gray-900 mb-3">Pricing</h3>
-									<div className="flex items-center justify-between">
-										<span className="text-lg font-bold">{formatPrice(selectedBookingForDetails.finalAmount || selectedBookingForDetails.amount || 0)}</span>
+									<h3 className="font-semibold text-gray-900 mb-3">Trip Fare</h3>
+									<div className="space-y-2">
+										{/* Base trip fare */}
+										<div className="flex items-center justify-between">
+											<span className="text-sm text-gray-600">Trip Fare:</span>
+											<span className="text-sm font-semibold">
+												{formatPrice(selectedBookingForDetails.quotedAmount || selectedBookingForDetails.finalAmount || selectedBookingForDetails.amount || 0)}
+											</span>
+										</div>
+
+										{/* Extras if any */}
+										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+											<div className="flex items-center justify-between">
+												<span className="text-sm text-gray-600">Extras:</span>
+												<span className="text-sm font-semibold text-green-600">
+													+{formatPrice(selectedBookingForDetails.extraCharges)}
+												</span>
+											</div>
+										) : null}
+
+										{/* Divider if there are extras */}
+										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+											<div className="border-t border-gray-200"></div>
+										) : null}
+
+										{/* Total */}
+										<div className="flex items-center justify-between">
+											<span className="text-base font-bold text-gray-900">Total:</span>
+											<span className="text-lg font-bold text-gray-900">
+												{formatPrice(selectedBookingForDetails.finalAmount || selectedBookingForDetails.amount || selectedBookingForDetails.quotedAmount || 0)}
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>

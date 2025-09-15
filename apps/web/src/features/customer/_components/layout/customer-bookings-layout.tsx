@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
 import { useLocation } from "@tanstack/react-router";
+import { Loader } from "@/components/loader";
 import {
 	CustomerHeader,
 	CustomerBottomNavigation,
@@ -14,7 +15,7 @@ import { useCustomerBookingsNavigation } from "../navigation/use-customer-bookin
 export function CustomerBookingsLayout() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { session, signOutWithConfirmation } = useUserQuery();
+	const { session, isPending, signOutWithConfirmation } = useUserQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const navigationItems = useCustomerBookingsNavigation();
 
@@ -25,7 +26,16 @@ export function CustomerBookingsLayout() {
 
 	const user = session?.user;
 
-	// Redirect if not authenticated
+	// Show loading while session is being fetched
+	if (isPending) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loader />
+			</div>
+		);
+	}
+
+	// Redirect if not authenticated (only after loading is complete)
 	if (!user) {
 		navigate({ to: '/sign-in' });
 		return null;

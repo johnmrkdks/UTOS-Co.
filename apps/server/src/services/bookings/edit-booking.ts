@@ -16,6 +16,7 @@ interface EditBookingData {
 	customerPhone?: string;
 	customerEmail?: string;
 	passengerCount?: number;
+	luggageCount?: number;
 	specialRequests?: string;
 }
 

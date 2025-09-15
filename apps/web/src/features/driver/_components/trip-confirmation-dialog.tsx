@@ -60,18 +60,41 @@ export function TripConfirmationDialog({
 					<div>
 						<h3 className="text-sm font-medium mb-3">I confirm the following:</h3>
 						
-						{hasExtras && (
-							<Card className="border-primary/20 bg-primary/5 mb-3">
-								<CardContent className="p-3">
+						{/* Fare Breakdown Card */}
+						<Card className="border-primary/20 bg-primary/5 mb-3">
+							<CardContent className="p-3">
+								<div className="space-y-2">
+									{/* Original Trip Fare */}
 									<div className="flex justify-between items-center">
-										<span className="text-sm font-medium">Total extra charges</span>
-										<span className="text-sm font-bold text-primary">
-											{formatCurrency(totalCharges)}
+										<span className="text-sm font-medium">Trip Fare</span>
+										<span className="text-sm font-semibold">
+											{formatCurrency((booking?.finalAmount || booking?.quotedAmount || 0) / 100)}
 										</span>
 									</div>
-								</CardContent>
-							</Card>
-						)}
+
+									{/* Extras (if any) */}
+									{hasExtras && totalCharges > 0 ? (
+										<div className="flex justify-between items-center">
+											<span className="text-sm font-medium">Extras</span>
+											<span className="text-sm font-semibold text-primary">
+												+ {formatCurrency(totalCharges)}
+											</span>
+										</div>
+									) : null}
+
+									{/* Divider */}
+									<div className="border-t border-primary/20"></div>
+
+									{/* Total Fare */}
+									<div className="flex justify-between items-center">
+										<span className="text-sm font-bold">Total Trip Fare</span>
+										<span className="text-sm font-bold text-primary">
+											{formatCurrency(((booking?.finalAmount || booking?.quotedAmount || 0) / 100) + totalCharges)}
+										</span>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
 
 						{/* Booking Summary */}
 						<Card className="border-0 bg-muted/30 mb-3">

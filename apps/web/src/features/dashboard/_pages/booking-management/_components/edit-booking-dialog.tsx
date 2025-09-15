@@ -6,48 +6,27 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@workspace/ui/components/select";
-import { CalendarIcon, EditIcon, Loader } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { EditIcon, Loader } from "lucide-react";
 import * as z from "zod";
-import React from "react";
-import { format } from "date-fns";
-import { cn } from "@workspace/ui/lib/utils";
-import { Calendar } from "@workspace/ui/components/calendar";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@workspace/ui/components/popover";
+import React, { useState } from "react";
+import { DateTimePicker } from "@/components/date-time-picker";
+import { createLocalDateForBackend } from "@/utils/timezone";
 import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutation";
 import type { Booking } from "./booking-table-columns";
 
 const editBookingSchema = z.object({
-	originAddress: z.string().min(1, "Origin address is required"),
-	destinationAddress: z.string().min(1, "Destination address is required"),
-	scheduledPickupTime: z.date(),
+	scheduledPickupDate: z.string({ required_error: "Please select a pickup date" }).min(1, "Please select a pickup date"),
+	scheduledPickupTime: z.string({ required_error: "Please select a pickup time" }).min(1, "Please select a pickup time"),
 	notes: z.string().optional(),
 	quotedAmount: z.number().positive("Amount must be positive"),
 	customerName: z.string().min(1, "Customer name is required"),
 	customerPhone: z.string().min(1, "Customer phone is required"),
 	customerEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
+	luggageCount: z.number().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
+	specialRequests: z.string().optional(),
 });
 
 type EditBookingFormData = z.infer<typeof editBookingSchema>;
@@ -64,51 +43,118 @@ export function EditBookingDialog({
 	onOpenChange,
 }: EditBookingDialogProps) {
 	const editBookingMutation = useEditBookingMutation();
+	const [date, setDate] = useState<Date>();
+	const [formData, setFormData] = useState<Partial<EditBookingFormData>>({});
+	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-	const form = useForm<EditBookingFormData>({
-		resolver: zodResolver(editBookingSchema),
-		defaultValues: {
-			originAddress: booking?.originAddress || "",
-			destinationAddress: booking?.destinationAddress || "",
-			scheduledPickupTime: booking?.scheduledPickupTime ? new Date(booking.scheduledPickupTime) : new Date(),
-			notes: booking?.notes || "",
-			quotedAmount: booking?.quotedAmount ? booking.quotedAmount / 100 : 0,
-			customerName: booking?.customerName || "",
-			customerPhone: booking?.customerPhone || "",
-			customerEmail: booking?.customerEmail || "",
-		},
-	});
-
-	const onSubmit = (data: EditBookingFormData) => {
-		if (!booking?.id) return;
-
-		editBookingMutation.mutate({
-			id: booking.id,
-			...data,
-			quotedAmount: Math.round(data.quotedAmount * 100), // Convert to cents
-		}, {
-			onSuccess: () => {
-				onOpenChange(false);
-				form.reset();
-			}
-		});
-	};
-
-	// Update form values when booking changes
+	// Update form data when booking changes
 	React.useEffect(() => {
 		if (booking) {
-			form.reset({
-				originAddress: booking.originAddress || "",
-				destinationAddress: booking.destinationAddress || "",
-				scheduledPickupTime: booking.scheduledPickupTime ? new Date(booking.scheduledPickupTime) : new Date(),
+			// Parse the scheduled pickup time to get date and time
+			const scheduledPickupTime = booking?.scheduledPickupTime ? new Date(booking.scheduledPickupTime) : new Date();
+
+			// Extract date for the date picker
+			setDate(scheduledPickupTime);
+
+			// Extract time in HH:MM format
+			const timeString = scheduledPickupTime.toLocaleTimeString('en-GB', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false
+			});
+
+			// Extract date string in YYYY-MM-DD format
+			const year = scheduledPickupTime.getFullYear();
+			const month = String(scheduledPickupTime.getMonth() + 1).padStart(2, '0');
+			const day = String(scheduledPickupTime.getDate()).padStart(2, '0');
+			const dateString = `${year}-${month}-${day}`;
+
+			setFormData({
+				scheduledPickupDate: dateString,
+				scheduledPickupTime: timeString,
 				notes: booking.notes || "",
 				quotedAmount: booking.quotedAmount ? booking.quotedAmount / 100 : 0,
 				customerName: booking.customerName || "",
 				customerPhone: booking.customerPhone || "",
 				customerEmail: booking.customerEmail || "",
+				passengerCount: booking.passengerCount || 1,
+				luggageCount: booking.luggageCount || 0,
+				specialRequests: booking.specialRequests || "",
 			});
 		}
-	}, [booking, form]);
+	}, [booking]);
+
+	const updateFormData = (field: keyof EditBookingFormData, value: any) => {
+		setFormData(prev => ({ ...prev, [field]: value }));
+		// Clear error when user starts typing
+		if (formErrors[field]) {
+			setFormErrors(prev => ({ ...prev, [field]: "" }));
+		}
+	};
+
+	const validateForm = () => {
+		try {
+			// Ensure all fields have default values to avoid undefined errors
+			const cleanedFormData = {
+				scheduledPickupDate: formData.scheduledPickupDate || "",
+				scheduledPickupTime: formData.scheduledPickupTime || "",
+				customerName: formData.customerName || "",
+				customerPhone: formData.customerPhone || "",
+				customerEmail: formData.customerEmail || "",
+				quotedAmount: formData.quotedAmount || 0,
+				passengerCount: formData.passengerCount || 1,
+				luggageCount: formData.luggageCount || 0,
+				notes: formData.notes || "",
+				specialRequests: formData.specialRequests || "",
+			};
+
+			editBookingSchema.parse(cleanedFormData);
+			setFormErrors({});
+			return true;
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				const errors: Record<string, string> = {};
+				error.issues.forEach((err) => {
+					if (err.path.length > 0) {
+						errors[err.path[0] as string] = err.message;
+					}
+				});
+				setFormErrors(errors);
+			}
+			return false;
+		}
+	};
+
+	const handleSubmit = () => {
+		if (!booking?.id) return;
+
+		if (!validateForm()) {
+			return;
+		}
+
+		// Convert date and time back to ISO string for backend
+		const scheduledPickupTime = createLocalDateForBackend(
+			formData.scheduledPickupDate!,
+			formData.scheduledPickupTime!
+		);
+
+		editBookingMutation.mutate({
+			id: booking.id,
+			customerName: formData.customerName!,
+			customerPhone: formData.customerPhone!,
+			customerEmail: formData.customerEmail || "",
+			scheduledPickupTime,
+			notes: formData.notes || "",
+			quotedAmount: Math.round((formData.quotedAmount || 0) * 100), // Convert to cents
+			passengerCount: formData.passengerCount!,
+			luggageCount: formData.luggageCount!,
+			specialRequests: formData.specialRequests || "",
+		}, {
+			onSuccess: () => {
+				onOpenChange(false);
+			}
+		});
+	};
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -123,197 +169,177 @@ export function EditBookingDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-						{/* Customer Information */}
-						<div className="space-y-4">
-							<h3 className="text-lg font-semibold">Customer Information</h3>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<FormField
-									control={form.control}
-									name="customerName"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Customer Name</FormLabel>
-											<FormControl>
-												<Input placeholder="Full name" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
+				<div className="space-y-6">
+					{/* Customer Information */}
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">Customer Information</h3>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
+								<Input
+									placeholder="Full name"
+									value={formData.customerName || ""}
+									onChange={(e) => updateFormData("customerName", e.target.value)}
+									className={formErrors.customerName ? "border-red-500" : ""}
 								/>
-								<FormField
-									control={form.control}
-									name="customerPhone"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Phone Number</FormLabel>
-											<FormControl>
-												<Input placeholder="+61 XXX XXX XXX" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={form.control}
-									name="customerEmail"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Email (Optional)</FormLabel>
-											<FormControl>
-												<Input placeholder="customer@email.com" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						</div>
-
-						{/* Trip Information */}
-						<div className="space-y-4">
-							<h3 className="text-lg font-semibold">Trip Information</h3>
-							<div className="grid grid-cols-1 gap-4">
-								<FormField
-									control={form.control}
-									name="originAddress"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Origin Address</FormLabel>
-											<FormControl>
-												<Input placeholder="Pickup location" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={form.control}
-									name="destinationAddress"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Destination Address</FormLabel>
-											<FormControl>
-												<Input placeholder="Drop-off location" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={form.control}
-									name="scheduledPickupTime"
-									render={({ field }) => (
-										<FormItem className="flex flex-col">
-											<FormLabel>Pickup Date & Time</FormLabel>
-											<Popover>
-												<PopoverTrigger asChild>
-													<FormControl>
-														<Button
-															variant={"outline"}
-															className={cn(
-																"w-full pl-3 text-left font-normal",
-																!field.value && "text-muted-foreground"
-															)}
-														>
-															{field.value ? (
-																format(field.value, "PPP 'at' p")
-															) : (
-																<span>Pick a date</span>
-															)}
-															<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-														</Button>
-													</FormControl>
-												</PopoverTrigger>
-												<PopoverContent className="w-auto p-0" align="start">
-													<Calendar
-														mode="single"
-														selected={field.value}
-														onSelect={field.onChange}
-														disabled={(date) =>
-															date < new Date() || date < new Date("1900-01-01")
-														}
-														initialFocus
-													/>
-												</PopoverContent>
-											</Popover>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						</div>
-
-						{/* Pricing */}
-						<div className="space-y-4">
-							<h3 className="text-lg font-semibold">Pricing</h3>
-							<FormField
-								control={form.control}
-								name="quotedAmount"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Quoted Amount (AUD)</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												step="0.01"
-												placeholder="0.00"
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
+								{formErrors.customerName && (
+									<p className="text-red-500 text-sm mt-1">{formErrors.customerName}</p>
 								)}
-							/>
+							</div>
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+								<Input
+									placeholder="+61 XXX XXX XXX"
+									value={formData.customerPhone || ""}
+									onChange={(e) => updateFormData("customerPhone", e.target.value)}
+									className={formErrors.customerPhone ? "border-red-500" : ""}
+								/>
+								{formErrors.customerPhone && (
+									<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
+								)}
+							</div>
+							<div className="md:col-span-2">
+								<label className="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+								<Input
+									placeholder="customer@email.com"
+									value={formData.customerEmail || ""}
+									onChange={(e) => updateFormData("customerEmail", e.target.value)}
+									className={formErrors.customerEmail ? "border-red-500" : ""}
+								/>
+								{formErrors.customerEmail && (
+									<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
+								)}
+							</div>
 						</div>
+					</div>
 
-						{/* Notes */}
-						<FormField
-							control={form.control}
-							name="notes"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Notes (Optional)</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Additional notes or special requests"
-											className="min-h-[80px]"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+					{/* Booking Details */}
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">Booking Details</h3>
+
+						{/* Date and Time Picker */}
+						<DateTimePicker
+							selectedDate={date}
+							selectedTime={formData.scheduledPickupTime || ""}
+							onDateChange={(selectedDate) => {
+								setDate(selectedDate);
+								if (selectedDate) {
+									// Use local date formatting to avoid timezone conversion
+									const year = selectedDate.getFullYear();
+									const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+									const day = String(selectedDate.getDate()).padStart(2, '0');
+									const localDateString = `${year}-${month}-${day}`;
+									updateFormData("scheduledPickupDate", localDateString);
+								}
+							}}
+							onTimeChange={(time) => updateFormData("scheduledPickupTime", time)}
+							dateError={formErrors.scheduledPickupDate}
+							timeError={formErrors.scheduledPickupTime}
+							dateLabel="Pickup Date *"
+							timeLabel="Pickup Time *"
 						/>
 
-						<div className="flex gap-3 pt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => onOpenChange(false)}
-								className="flex-1"
-							>
-								Cancel
-							</Button>
-							<Button
-								type="submit"
-								disabled={editBookingMutation.isPending}
-								className="flex-1 bg-primary hover:bg-primary/90"
-							>
-								{editBookingMutation.isPending ? (
-									<>
-										<Loader className="h-4 w-4 mr-2 animate-spin" />
-										Updating...
-									</>
-								) : (
-									"Update Booking"
+						{/* Passengers and Luggage */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers *</label>
+								<Input
+									type="number"
+									min="1"
+									max="8"
+									placeholder="e.g. 2"
+									value={formData.passengerCount || ""}
+									onChange={(e) => updateFormData("passengerCount", e.target.value ? parseInt(e.target.value) : undefined)}
+									className={formErrors.passengerCount ? "border-red-500" : ""}
+								/>
+								{formErrors.passengerCount && (
+									<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
 								)}
-							</Button>
+							</div>
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">Luggage Pieces *</label>
+								<Input
+									type="number"
+									min="0"
+									max="10"
+									placeholder="e.g. 3"
+									value={formData.luggageCount || ""}
+									onChange={(e) => updateFormData("luggageCount", e.target.value ? parseInt(e.target.value) : undefined)}
+									className={formErrors.luggageCount ? "border-red-500" : ""}
+								/>
+								{formErrors.luggageCount && (
+									<p className="text-red-500 text-sm mt-1">{formErrors.luggageCount}</p>
+								)}
+							</div>
 						</div>
-					</form>
-				</Form>
+					</div>
+
+					{/* Pricing */}
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">Pricing</h3>
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-2">Quoted Amount (AUD) *</label>
+							<Input
+								type="number"
+								step="0.01"
+								placeholder="0.00"
+								value={formData.quotedAmount || ""}
+								onChange={(e) => updateFormData("quotedAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
+								className={formErrors.quotedAmount ? "border-red-500" : ""}
+							/>
+							{formErrors.quotedAmount && (
+								<p className="text-red-500 text-sm mt-1">{formErrors.quotedAmount}</p>
+							)}
+						</div>
+					</div>
+
+					{/* Notes */}
+					<div className="space-y-4">
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+							<Textarea
+								placeholder="Additional notes or special requests"
+								className="min-h-[80px]"
+								value={formData.notes || ""}
+								onChange={(e) => updateFormData("notes", e.target.value)}
+							/>
+						</div>
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-2">Special Requests (Optional)</label>
+							<Textarea
+								placeholder="Any special requirements, accessibility needs, or requests..."
+								className="min-h-[80px]"
+								value={formData.specialRequests || ""}
+								onChange={(e) => updateFormData("specialRequests", e.target.value)}
+							/>
+						</div>
+					</div>
+
+					<div className="flex gap-3 pt-4">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => onOpenChange(false)}
+							className="flex-1"
+						>
+							Cancel
+						</Button>
+						<Button
+							onClick={handleSubmit}
+							disabled={editBookingMutation.isPending}
+							className="flex-1 bg-primary hover:bg-primary/90"
+						>
+							{editBookingMutation.isPending ? (
+								<>
+									<Loader className="h-4 w-4 mr-2 animate-spin" />
+									Updating...
+								</>
+							) : (
+								"Update Booking"
+							)}
+						</Button>
+					</div>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

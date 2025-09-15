@@ -38,7 +38,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
 import { useUpdateBookingStatusMutation } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-update-booking-status-mutation";
 import { cn } from "@workspace/ui/lib/utils";
-import { SwipeToConfirm } from "@/components/swipe-to-confirm";
 import { format } from "date-fns";
 import { CloseTripOptionsDialog } from "@/features/driver/_components/close-trip-options-dialog";
 import { CloseTripExtrasForm, type ExtrasFormData } from "@/features/driver/_components/close-trip-extras-form";
@@ -310,13 +309,33 @@ function DriverTripsComponent() {
 				bookingId: selectedTripForClose.id,
 				isNoShow: isNoShow,
 				extrasData: extrasForBackend,
-			});
+			} as any);
+
+			// Close all dialogs immediately (success handling is done in the mutation hook)
+			setTripConfirmationOpen(false);
+			setCloseTripOptionsOpen(false);
+			setCloseTripExtrasOpen(false);
+
+			// Clear trip close state
+			setSelectedTripForClose(null);
+			setExtrasData(undefined);
+			setIsNoShow(false);
 		} else {
 			// No extras - use simple close trip mutation
 			closeTripWithoutExtrasMutation.mutate({
 				bookingId: selectedTripForClose.id,
 				isNoShow: isNoShow,
-			});
+			} as any);
+
+			// Close all dialogs immediately (success handling is done in the mutation hook)
+			setTripConfirmationOpen(false);
+			setCloseTripOptionsOpen(false);
+			setCloseTripExtrasOpen(false);
+
+			// Clear trip close state
+			setSelectedTripForClose(null);
+			setExtrasData(undefined);
+			setIsNoShow(false);
 		}
 	};
 
@@ -576,9 +595,14 @@ function DriverTripsComponent() {
 													<div className="flex items-center gap-1.5">
 														<ClockIcon className="h-3.5 w-3.5 text-gray-500" />
 														<div className="flex flex-col">
-															<span className="text-sm font-semibold text-gray-900">
-																{format(new Date(booking.scheduledPickupTime), "h:mm a")}
-															</span>
+															<div className="flex items-center gap-2">
+																<span className="text-sm font-semibold text-gray-900">
+																	{format(new Date(booking.scheduledPickupTime), "h:mm a")}
+																</span>
+																<span className="text-xs text-gray-400 font-mono">
+																	#{booking.id.slice(-6)}
+																</span>
+															</div>
 															<span className="text-xs text-gray-500">
 																{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
 															</span>
@@ -606,11 +630,11 @@ function DriverTripsComponent() {
 															</p>
 														</div>
 														{/* Stops (if any) */}
-														{booking.stops && booking.stops.length > 0 && (
+														{(booking as any).stops && (booking as any).stops.length > 0 && (
 															<div className="flex items-center gap-2">
 																<div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
 																<p className="text-xs text-blue-600 truncate flex-1 max-w-[200px]">
-																	{booking.stops?.length} stop{(booking.stops?.length || 0) > 1 ? 's' : ''}
+																	{(booking as any).stops?.length || 0} stop{((booking as any).stops?.length || 0) > 1 ? 's' : ''}
 																</p>
 															</div>
 														)}
@@ -645,9 +669,14 @@ function DriverTripsComponent() {
 													<div className="flex items-center gap-2">
 														<ClockIcon className="h-4 w-4 text-gray-500" />
 														<div className="flex flex-col">
-															<span className="font-semibold text-gray-900">
-																{format(new Date(booking.scheduledPickupTime), "h:mm a")}
-															</span>
+															<div className="flex items-center gap-2">
+																<span className="font-semibold text-gray-900">
+																	{format(new Date(booking.scheduledPickupTime), "h:mm a")}
+																</span>
+																<span className="text-xs text-gray-400 font-mono">
+																	#{booking.id.slice(-6)}
+																</span>
+															</div>
 															<span className="text-xs text-gray-500">
 																{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
 															</span>
@@ -673,12 +702,12 @@ function DriverTripsComponent() {
 															</div>
 														</div>
 														{/* Stops (if any) */}
-														{booking.stops && booking.stops.length > 0 && (
+														{(booking as any).stops && (booking as any).stops.length > 0 && (
 															<div className="flex items-start gap-2">
 																<div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
 																<div className="flex-1 min-w-0">
 																	<p className="text-sm text-blue-600 truncate">
-																		{booking.stops?.length} intermediate stop{(booking.stops?.length || 0) > 1 ? 's' : ''}
+																		{(booking as any).stops?.length || 0} intermediate stop{((booking as any).stops?.length || 0) > 1 ? 's' : ''}
 																	</p>
 																</div>
 															</div>
@@ -961,34 +990,82 @@ function DriverTripsComponent() {
 								{/* Navigation or Fare Display based on trip status */}
 								{['completed', 'no_show'].includes(selectedBookingForDetails.status) ? (
 									/* Trip Fare Card for completed trips */
-									<div className="w-full h-12 border-2 border-green-200 bg-green-50 rounded-lg flex items-center justify-center">
-										<div className="flex items-center gap-2">
-											<DollarSignIcon className="h-5 w-5 text-green-600" />
-											<span className="text-green-800 font-semibold">
-												Trip Fare: ${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
-											</span>
-											{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
-												<span className="text-green-700 text-sm">
-													(+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)} extras)
+									<div className="w-full border-2 border-green-200 bg-green-50 rounded-lg p-3">
+										<div className="space-y-1">
+											{/* Base fare */}
+											<div className="flex items-center justify-between">
+												<span className="text-green-700 text-sm">Trip Fare:</span>
+												<span className="text-green-800 font-semibold">
+													${((selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
 												</span>
+											</div>
+
+											{/* Extras if any */}
+											{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+												<div className="flex items-center justify-between">
+													<span className="text-green-700 text-sm">Extras:</span>
+													<span className="text-green-700 font-semibold">
+														+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
+													</span>
+												</div>
 											) : null}
+
+											{/* Divider if there are extras */}
+											{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+												<div className="border-t border-green-300"></div>
+											) : null}
+
+											{/* Total */}
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-2">
+													<DollarSignIcon className="h-4 w-4 text-green-600" />
+													<span className="text-green-800 font-bold">Total:</span>
+												</div>
+												<span className="text-green-800 font-bold text-lg">
+													${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+												</span>
+											</div>
 										</div>
 									</div>
 								) : (
 									<div className="space-y-3">
 										{/* Trip Fare for dropped_off status */}
 										{selectedBookingForDetails.status === 'dropped_off' && (
-											<div className="w-full h-12 border-2 border-green-200 bg-green-50 rounded-lg flex items-center justify-center">
-												<div className="flex items-center gap-2">
-													<DollarSignIcon className="h-5 w-5 text-green-600" />
-													<span className="text-green-800 font-semibold">
-														Trip Fare: ${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
-													</span>
-													{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
-														<span className="text-green-700 text-sm">
-															(+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)} extras)
+											<div className="w-full border-2 border-green-200 bg-green-50 rounded-lg p-3">
+												<div className="space-y-1">
+													{/* Base fare */}
+													<div className="flex items-center justify-between">
+														<span className="text-green-700 text-sm">Trip Fare:</span>
+														<span className="text-green-800 font-semibold">
+															${((selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
 														</span>
+													</div>
+
+													{/* Extras if any */}
+													{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+														<div className="flex items-center justify-between">
+															<span className="text-green-700 text-sm">Extras:</span>
+															<span className="text-green-700 font-semibold">
+																+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
+															</span>
+														</div>
 													) : null}
+
+													{/* Divider if there are extras */}
+													{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+														<div className="border-t border-green-300"></div>
+													) : null}
+
+													{/* Total */}
+													<div className="flex items-center justify-between">
+														<div className="flex items-center gap-2">
+															<DollarSignIcon className="h-4 w-4 text-green-600" />
+															<span className="text-green-800 font-bold">Total:</span>
+														</div>
+														<span className="text-green-800 font-bold text-lg">
+															${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+														</span>
+													</div>
 												</div>
 											</div>
 										)}
@@ -1010,25 +1087,8 @@ function DriverTripsComponent() {
 										{/* Status Action - Takes remaining width */}
 										{(() => {
 											const canProgress = ['driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'dropped_off', 'awaiting_extras', 'confirmed'].includes(selectedBookingForDetails.status);
-											const needsSwipeConfirmation = ['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board'].includes(selectedBookingForDetails.status);
 
 											if (!canProgress) return null;
-
-											if (isMobile && needsSwipeConfirmation) {
-												return (
-													<div className="flex-1">
-														<SwipeToConfirm
-															onConfirm={() => {
-																handleStartTrip(selectedBookingForDetails);
-															}}
-															confirmText={getStatusButtonText(selectedBookingForDetails.status)}
-															instruction={`Swipe to ${getStatusButtonText(selectedBookingForDetails.status)}`}
-															variant="primary"
-															disabled={updateStatusMutation.isPending}
-														/>
-													</div>
-												);
-											}
 
 											return (
 												<Button

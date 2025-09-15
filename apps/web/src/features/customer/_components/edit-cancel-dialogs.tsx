@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
+import { DateTimePicker } from "@/components/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -49,16 +50,52 @@ export function EditCancelDialogs({
 	onCancelOpenChange,
 }: EditCancelDialogsProps) {
 	const [cancellationReason, setCancellationReason] = useState("");
+	const [date, setDate] = useState<Date>();
 	const [editData, setEditData] = useState({
-		originAddress: booking?.originAddress || "",
-		destinationAddress: booking?.destinationAddress || "",
-		scheduledPickupTime: booking?.scheduledPickupTime || "",
+		scheduledPickupDate: "",
+		scheduledPickupTime: "",
 		customerName: booking?.customerName || "",
 		customerPhone: booking?.customerPhone || "",
 		customerEmail: booking?.customerEmail || "",
 		passengerCount: booking?.passengerCount || 1,
+		luggageCount: booking?.luggageCount || 0,
 		specialRequests: booking?.specialRequests || "",
 	});
+
+	// Update form data when booking changes
+	useEffect(() => {
+		if (booking) {
+			// Parse the scheduled pickup time to get date and time
+			const scheduledPickupTime = booking?.scheduledPickupTime ? new Date(booking.scheduledPickupTime) : new Date();
+
+			// Extract date for the date picker
+			setDate(scheduledPickupTime);
+
+			// Extract time in HH:MM format
+			const timeString = scheduledPickupTime.toLocaleTimeString('en-GB', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false
+			});
+
+			// Extract date string in YYYY-MM-DD format
+			const year = scheduledPickupTime.getFullYear();
+			const month = String(scheduledPickupTime.getMonth() + 1).padStart(2, '0');
+			const day = String(scheduledPickupTime.getDate()).padStart(2, '0');
+			const dateString = `${year}-${month}-${day}`;
+
+			setEditData({
+				scheduledPickupDate: dateString,
+				scheduledPickupTime: timeString,
+				customerName: booking.customerName || "",
+				customerPhone: booking.customerPhone || "",
+				customerEmail: booking.customerEmail || "",
+				passengerCount: booking.passengerCount || 1,
+				luggageCount: booking.luggageCount || 0,
+				specialRequests: booking.specialRequests || "",
+			});
+		}
+	}, [booking]);
 
 	// Mobile detection
 	const isMobile = useIsMobile();
@@ -70,9 +107,24 @@ export function EditCancelDialogs({
 	const handleEdit = () => {
 		if (!booking?.id || !booking?.canEdit) return;
 
+		// Create Date object from date and time
+		const [year, month, day] = editData.scheduledPickupDate.split('-').map(Number);
+		const [hours, minutes] = editData.scheduledPickupTime.split(':').map(Number);
+		const scheduledPickupTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
 		editMutation.mutate({
 			bookingId: booking.id,
-			...editData,
+			scheduledPickupTime,
+			customerName: editData.customerName,
+			customerPhone: editData.customerPhone,
+			customerEmail: editData.customerEmail,
+			passengerCount: editData.passengerCount,
+			specialRequests: editData.specialRequests,
+		}, {
+			onSuccess: () => {
+				// Close the edit dialog
+				onEditOpenChange(false);
+			}
 		});
 	};
 
@@ -82,6 +134,13 @@ export function EditCancelDialogs({
 		cancelMutation.mutate({
 			bookingId: booking.id,
 			cancellationReason: cancellationReason || undefined,
+		}, {
+			onSuccess: () => {
+				// Only close the dialog on successful cancellation
+				onCancelOpenChange(false);
+				// Clear the cancellation reason for next time
+				setCancellationReason("");
+			}
 		});
 	};
 
@@ -138,29 +197,6 @@ export function EditCancelDialogs({
 
 							{/* Scrollable Content */}
 							<div className="flex-1 overflow-y-auto p-4 space-y-6 pb-20">
-								{/* Route Information */}
-								<div className="bg-white rounded-lg p-4 border space-y-4">
-									<h4 className="font-semibold text-sm">Route Details</h4>
-									<div className="space-y-4">
-										<div>
-											<Label htmlFor="originAddress">Pickup Address</Label>
-											<Input
-												id="originAddress"
-												value={editData.originAddress}
-												onChange={(e) => setEditData({ ...editData, originAddress: e.target.value })}
-											/>
-										</div>
-										<div>
-											<Label htmlFor="destinationAddress">Destination Address</Label>
-											<Input
-												id="destinationAddress"
-												value={editData.destinationAddress}
-												onChange={(e) => setEditData({ ...editData, destinationAddress: e.target.value })}
-											/>
-										</div>
-									</div>
-								</div>
-
 								{/* Customer Information */}
 								<div className="bg-white rounded-lg p-4 border space-y-4">
 									<h4 className="font-semibold text-sm">Customer Details</h4>
@@ -190,8 +226,37 @@ export function EditCancelDialogs({
 												onChange={(e) => setEditData({ ...editData, customerEmail: e.target.value })}
 											/>
 										</div>
+									</div>
+								</div>
+
+								{/* Booking Details */}
+								<div className="bg-white rounded-lg p-4 border space-y-4">
+									<h4 className="font-semibold text-sm">Booking Details</h4>
+									<div className="space-y-4">
+										{/* Pickup Date & Time */}
 										<div>
-											<Label htmlFor="passengerCount">Passengers</Label>
+											<DateTimePicker
+												selectedDate={date}
+												selectedTime={editData.scheduledPickupTime}
+												onDateChange={(selectedDate) => {
+													setDate(selectedDate);
+													if (selectedDate) {
+														// Use local date formatting to avoid timezone conversion
+														const year = selectedDate.getFullYear();
+														const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+														const day = String(selectedDate.getDate()).padStart(2, '0');
+														const localDateString = `${year}-${month}-${day}`;
+														setEditData({ ...editData, scheduledPickupDate: localDateString });
+													}
+												}}
+												onTimeChange={(time) => setEditData({ ...editData, scheduledPickupTime: time })}
+												dateLabel="Pickup Date *"
+												timeLabel="Pickup Time *"
+												className="grid-cols-1 gap-4"
+											/>
+										</div>
+										<div>
+											<Label htmlFor="passengerCount">Number of Passengers</Label>
 											<Input
 												id="passengerCount"
 												type="number"
@@ -199,6 +264,17 @@ export function EditCancelDialogs({
 												max="8"
 												value={editData.passengerCount}
 												onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
+											/>
+										</div>
+										<div>
+											<Label htmlFor="luggageCount">Luggage Pieces</Label>
+											<Input
+												id="luggageCount"
+												type="number"
+												min="0"
+												max="10"
+												value={editData.luggageCount}
+												onChange={(e) => setEditData({ ...editData, luggageCount: parseInt(e.target.value) || 0 })}
 											/>
 										</div>
 									</div>
@@ -262,29 +338,6 @@ export function EditCancelDialogs({
 							</DialogHeader>
 
 							<div className="space-y-6 py-4">
-								{/* Route Information */}
-								<div className="space-y-4">
-									<h4 className="font-semibold text-sm">Route Details</h4>
-									<div className="grid gap-4">
-										<div>
-											<Label htmlFor="originAddress">Pickup Address</Label>
-											<Input
-												id="originAddress"
-												value={editData.originAddress}
-												onChange={(e) => setEditData({ ...editData, originAddress: e.target.value })}
-											/>
-										</div>
-										<div>
-											<Label htmlFor="destinationAddress">Destination Address</Label>
-											<Input
-												id="destinationAddress"
-												value={editData.destinationAddress}
-												onChange={(e) => setEditData({ ...editData, destinationAddress: e.target.value })}
-											/>
-										</div>
-									</div>
-								</div>
-
 								{/* Customer Information */}
 								<div className="space-y-4">
 									<h4 className="font-semibold text-sm">Customer Details</h4>
@@ -305,7 +358,7 @@ export function EditCancelDialogs({
 												onChange={(e) => setEditData({ ...editData, customerPhone: e.target.value })}
 											/>
 										</div>
-										<div>
+										<div className="md:col-span-2">
 											<Label htmlFor="customerEmail">Email</Label>
 											<Input
 												id="customerEmail"
@@ -314,16 +367,56 @@ export function EditCancelDialogs({
 												onChange={(e) => setEditData({ ...editData, customerEmail: e.target.value })}
 											/>
 										</div>
-										<div>
-											<Label htmlFor="passengerCount">Passengers</Label>
-											<Input
-												id="passengerCount"
-												type="number"
-												min="1"
-												max="8"
-												value={editData.passengerCount}
-												onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
-											/>
+									</div>
+								</div>
+
+								{/* Booking Details */}
+								<div className="space-y-4">
+									<h4 className="font-semibold text-sm">Booking Details</h4>
+									<div className="space-y-4">
+										{/* Pickup Date & Time */}
+										<DateTimePicker
+											selectedDate={date}
+											selectedTime={editData.scheduledPickupTime}
+											onDateChange={(selectedDate) => {
+												setDate(selectedDate);
+												if (selectedDate) {
+													// Use local date formatting to avoid timezone conversion
+													const year = selectedDate.getFullYear();
+													const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+													const day = String(selectedDate.getDate()).padStart(2, '0');
+													const localDateString = `${year}-${month}-${day}`;
+													setEditData({ ...editData, scheduledPickupDate: localDateString });
+												}
+											}}
+											onTimeChange={(time) => setEditData({ ...editData, scheduledPickupTime: time })}
+											dateLabel="Pickup Date *"
+											timeLabel="Pickup Time *"
+										/>
+										{/* Passengers and Luggage */}
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div>
+												<Label htmlFor="passengerCount">Number of Passengers</Label>
+												<Input
+													id="passengerCount"
+													type="number"
+													min="1"
+													max="8"
+													value={editData.passengerCount}
+													onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
+												/>
+											</div>
+											<div>
+												<Label htmlFor="luggageCount">Luggage Pieces</Label>
+												<Input
+													id="luggageCount"
+													type="number"
+													min="0"
+													max="10"
+													value={editData.luggageCount}
+													onChange={(e) => setEditData({ ...editData, luggageCount: parseInt(e.target.value) || 0 })}
+												/>
+											</div>
 										</div>
 									</div>
 								</div>

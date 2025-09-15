@@ -26,6 +26,7 @@ import {
 	Info,
 	Edit3,
 	XCircle,
+	MessageSquare,
 } from "lucide-react";
 import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-bookings-query";
 import { useUserQuery } from "@/hooks/query/use-user-query";
@@ -34,6 +35,31 @@ import { cn } from "@workspace/ui/lib/utils";
 import { BookingActions } from "@/features/customer/_components/booking-actions";
 import { EditCancelDialogs } from "@/features/customer/_components/edit-cancel-dialogs";
 import { format } from "date-fns";
+
+// Helper functions for booking validation
+const canEditBooking = (booking: any): boolean => {
+	if (!booking?.scheduledPickupTime) return false;
+
+	const now = new Date();
+	const pickupTime = new Date(booking.scheduledPickupTime);
+	const hoursUntilPickup = (pickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+	// Can edit if pickup is more than 4 hours away and booking is not started/completed/cancelled
+	const isEditableBooking = !['driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off', 'completed', 'cancelled', 'no_show'].includes(booking.status);
+	return hoursUntilPickup > 4 && isEditableBooking;
+};
+
+const canCancelBooking = (booking: any): boolean => {
+	if (!booking?.scheduledPickupTime) return false;
+
+	const now = new Date();
+	const pickupTime = new Date(booking.scheduledPickupTime);
+	const hoursUntilPickup = (pickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+	// Can cancel if pickup is more than 4 hours away and booking is not started/completed/cancelled
+	const isCancellableBooking = !['driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off', 'completed', 'cancelled', 'no_show'].includes(booking.status);
+	return hoursUntilPickup > 4 && isCancellableBooking;
+};
 
 export function CustomerTripsPage() {
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
@@ -230,9 +256,14 @@ export function CustomerTripsPage() {
 							<div className="flex items-center gap-1.5">
 								<Clock className="h-3.5 w-3.5 text-gray-500" />
 								<div className="flex flex-col">
-									<span className="text-sm font-semibold text-gray-900">
-										{format(new Date(booking.scheduledPickupTime), "h:mm a")}
-									</span>
+									<div className="flex items-center gap-2">
+										<span className="text-sm font-semibold text-gray-900">
+											{format(new Date(booking.scheduledPickupTime), "h:mm a")}
+										</span>
+										<span className="text-xs text-gray-400 font-mono">
+											#{booking.id.slice(-6)}
+										</span>
+									</div>
 									<span className="text-xs text-gray-500">
 										{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
 									</span>
@@ -315,7 +346,7 @@ export function CustomerTripsPage() {
 									)}
 
 									{/* Edit Booking */}
-									{booking?.canEdit && (
+									{canEditBooking(booking) && (
 										<DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditBooking(booking); }}>
 											<Edit3 className="h-4 w-4 mr-2" />
 											Edit Booking
@@ -323,7 +354,7 @@ export function CustomerTripsPage() {
 									)}
 
 									{/* Cancel Booking */}
-									{booking?.canCancel && (
+									{canCancelBooking(booking) && (
 										<DropdownMenuItem
 											onClick={(e) => { e.stopPropagation(); handleCancelBooking(booking); }}
 											className="text-red-600 focus:text-red-600"
@@ -334,10 +365,15 @@ export function CustomerTripsPage() {
 									)}
 
 									{/* No actions available */}
-									{!booking?.canEdit && !booking?.canCancel && (
+									{!canEditBooking(booking) && !canCancelBooking(booking) && (
 										<DropdownMenuItem disabled>
 											<Info className="h-4 w-4 mr-2" />
-											No actions available
+											{['completed', 'cancelled', 'no_show'].includes(booking.status)
+												? 'Trip already completed'
+												: ['driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off'].includes(booking.status)
+													? 'Trip already in progress'
+													: 'Too close to pickup time (4hr limit)'
+											}
 										</DropdownMenuItem>
 									)}
 								</DropdownMenuContent>
@@ -352,9 +388,14 @@ export function CustomerTripsPage() {
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4 text-gray-500" />
 								<div className="flex flex-col">
-									<span className="font-semibold text-gray-900">
-										{format(new Date(booking.scheduledPickupTime), "h:mm a")}
-									</span>
+									<div className="flex items-center gap-2">
+										<span className="font-semibold text-gray-900">
+											{format(new Date(booking.scheduledPickupTime), "h:mm a")}
+										</span>
+										<span className="text-xs text-gray-400 font-mono">
+											#{booking.id.slice(-6)}
+										</span>
+									</div>
 									<span className="text-xs text-gray-500">
 										{format(new Date(booking.scheduledPickupTime), "MMM dd, yyyy")}
 									</span>
@@ -434,7 +475,7 @@ export function CustomerTripsPage() {
 									)}
 
 									{/* Edit Booking */}
-									{booking?.canEdit && (
+									{canEditBooking(booking) && (
 										<DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditBooking(booking); }}>
 											<Edit3 className="h-4 w-4 mr-2" />
 											Edit Booking
@@ -442,7 +483,7 @@ export function CustomerTripsPage() {
 									)}
 
 									{/* Cancel Booking */}
-									{booking?.canCancel && (
+									{canCancelBooking(booking) && (
 										<DropdownMenuItem
 											onClick={(e) => { e.stopPropagation(); handleCancelBooking(booking); }}
 											className="text-red-600 focus:text-red-600"
@@ -453,10 +494,15 @@ export function CustomerTripsPage() {
 									)}
 
 									{/* No actions available */}
-									{!booking?.canEdit && !booking?.canCancel && (
+									{!canEditBooking(booking) && !canCancelBooking(booking) && (
 										<DropdownMenuItem disabled>
 											<Info className="h-4 w-4 mr-2" />
-											No actions available
+											{['completed', 'cancelled', 'no_show'].includes(booking.status)
+												? 'Trip already completed'
+												: ['driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress', 'dropped_off'].includes(booking.status)
+													? 'Trip already in progress'
+													: 'Too close to pickup time (4hr limit)'
+											}
 										</DropdownMenuItem>
 									)}
 								</DropdownMenuContent>
@@ -714,7 +760,7 @@ export function CustomerTripsPage() {
 				<DialogContent
 					className={cn(
 						"[&>button]:hidden", // Hide default close button
-						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-md bg-gray-50"
+						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-lg w-full bg-gray-50"
 					)}
 				>
 					{selectedBooking && (
@@ -727,7 +773,12 @@ export function CustomerTripsPage() {
 								isMobile ? "" : "rounded-t-lg"
 							)}>
 								<DialogHeader className="flex-1">
-									<DialogTitle className="text-left">Trip Details</DialogTitle>
+									<DialogTitle className="text-left flex items-center gap-2">
+										Trip Details
+										<span className="text-xs text-gray-400 font-mono">
+											#{selectedBooking.id.slice(-6)}
+										</span>
+									</DialogTitle>
 								</DialogHeader>
 								<Button
 									variant="ghost"
@@ -842,24 +893,32 @@ export function CustomerTripsPage() {
 														<Button
 															size="sm"
 															variant="outline"
-															className="h-8 w-8 p-0"
-															onClick={() => {
+															className="h-8 w-8 p-0 hover:bg-green-50 hover:border-green-300"
+															onClick={(e) => {
+																e.stopPropagation();
 																const phone = selectedBooking.driver?.phoneNumber || selectedBooking.driver?.user?.phoneNumber || selectedBooking.driverPhone;
-																if (phone) window.open(`tel:${phone}`);
+																if (phone && phone !== 'Contact info not available') {
+																	window.location.href = `tel:${phone}`;
+																}
 															}}
+															disabled={!selectedBooking.driver?.phoneNumber && !selectedBooking.driver?.user?.phoneNumber && !selectedBooking.driverPhone}
 														>
-															<Phone className="h-3.5 w-3.5" />
+															<Phone className="h-3.5 w-3.5 text-green-600" />
 														</Button>
 														<Button
 															size="sm"
 															variant="outline"
-															className="h-8 w-8 p-0"
-															onClick={() => {
+															className="h-8 w-8 p-0 hover:bg-blue-50 hover:border-blue-300"
+															onClick={(e) => {
+																e.stopPropagation();
 																const phone = selectedBooking.driver?.phoneNumber || selectedBooking.driver?.user?.phoneNumber || selectedBooking.driverPhone;
-																if (phone) window.open(`sms:${phone}`);
+																if (phone && phone !== 'Contact info not available') {
+																	window.location.href = `sms:${phone}`;
+																}
 															}}
+															disabled={!selectedBooking.driver?.phoneNumber && !selectedBooking.driver?.user?.phoneNumber && !selectedBooking.driverPhone}
 														>
-															💬
+															<MessageSquare className="h-3.5 w-3.5 text-blue-600" />
 														</Button>
 													</div>
 												</div>
@@ -888,10 +947,10 @@ export function CustomerTripsPage() {
 				<DialogContent
 					className={cn(
 						"[&>button]:hidden", // Hide default close button
-						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
+						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-lg w-full bg-gray-50"
 					)}
 				>
-					{selectedDriverBooking?.assignedDriver && (
+					{selectedDriverBooking && (selectedDriverBooking.driver || selectedDriverBooking.assignedDriver) && (
 						<div className={cn(
 							isMobile ? "flex flex-col h-full" : "flex flex-col"
 						)}>
@@ -925,19 +984,25 @@ export function CustomerTripsPage() {
 								<div className="bg-white rounded-lg p-4 border">
 									<h3 className="font-semibold text-gray-900 mb-3">Driver Details</h3>
 									<div className="flex items-center gap-3 mb-4">
-										{selectedDriverBooking.assignedDriver.user?.image ? (
+										{(selectedDriverBooking.driver?.user?.image || selectedDriverBooking.assignedDriver?.user?.image) ? (
 											<img
-												src={selectedDriverBooking.assignedDriver.user.image}
-												alt={selectedDriverBooking.assignedDriver.user?.name}
+												src={selectedDriverBooking.driver?.user?.image || selectedDriverBooking.assignedDriver?.user?.image}
+												alt={selectedDriverBooking.driver?.user?.name || selectedDriverBooking.assignedDriver?.user?.name}
 												className="h-12 w-12 rounded-full object-cover"
 											/>
 										) : (
-											<div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-												<Users className="h-6 w-6 text-gray-500" />
+											<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+												<Users className="h-6 w-6 text-primary" />
 											</div>
 										)}
 										<div className="flex-1">
-											<h4 className="font-semibold text-lg">{selectedDriverBooking.assignedDriver.user?.name || 'Driver'}</h4>
+											<h4 className="font-semibold text-lg">
+												{selectedDriverBooking.driver?.user?.name ||
+												 selectedDriverBooking.driver?.name ||
+												 selectedDriverBooking.assignedDriver?.user?.name ||
+												 selectedDriverBooking.driverName ||
+												 'Driver'}
+											</h4>
 											<p className="text-sm text-gray-600">Professional Driver</p>
 										</div>
 									</div>
@@ -948,33 +1013,55 @@ export function CustomerTripsPage() {
 											<p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Phone</p>
 											<p className="text-sm font-medium flex items-center gap-1">
 												<Phone className="h-3 w-3" />
-												{selectedDriverBooking.assignedDriver.phoneNumber || "Not provided"}
+												{selectedDriverBooking.driver?.phoneNumber ||
+												 selectedDriverBooking.driver?.user?.phoneNumber ||
+												 selectedDriverBooking.assignedDriver?.phoneNumber ||
+												 selectedDriverBooking.driverPhone ||
+												 "Not provided"}
 											</p>
 										</div>
 										<div>
 											<p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">License</p>
-											<p className="text-sm font-medium">{selectedDriverBooking.assignedDriver.licenseNumber || "N/A"}</p>
+											<p className="text-sm font-medium">
+												{selectedDriverBooking.driver?.licenseNumber ||
+												 selectedDriverBooking.assignedDriver?.licenseNumber ||
+												 "N/A"}
+											</p>
 										</div>
 									</div>
 								</div>
 
 								{/* Vehicle Information */}
-								{selectedDriverBooking.assignedDriver.car && (
+								{(selectedDriverBooking.driver?.car || selectedDriverBooking.assignedDriver?.car || selectedDriverBooking.car) && (
 									<div className="bg-white rounded-lg p-4 border">
 										<h3 className="font-semibold text-gray-900 mb-3">Vehicle Information</h3>
 										<div className="space-y-3">
 											<div className="flex justify-between">
 												<span className="text-sm text-gray-500">Vehicle:</span>
-												<span className="text-sm font-medium">{selectedDriverBooking.assignedDriver.car.name}</span>
+												<span className="text-sm font-medium">
+													{selectedDriverBooking.driver?.car?.name ||
+													 selectedDriverBooking.assignedDriver?.car?.name ||
+													 selectedDriverBooking.car?.name ||
+													 'Vehicle information unavailable'}
+												</span>
 											</div>
 											<div className="flex justify-between">
 												<span className="text-sm text-gray-500">Plate:</span>
-												<span className="text-sm font-medium">{selectedDriverBooking.assignedDriver.car.licensePlate}</span>
+												<span className="text-sm font-medium">
+													{selectedDriverBooking.driver?.car?.licensePlate ||
+													 selectedDriverBooking.assignedDriver?.car?.licensePlate ||
+													 selectedDriverBooking.car?.licensePlate ||
+													 'N/A'}
+												</span>
 											</div>
-											{selectedDriverBooking.assignedDriver.car.color && (
+											{(selectedDriverBooking.driver?.car?.color || selectedDriverBooking.assignedDriver?.car?.color || selectedDriverBooking.car?.color) && (
 												<div className="flex justify-between">
 													<span className="text-sm text-gray-500">Color:</span>
-													<span className="text-sm font-medium">{selectedDriverBooking.assignedDriver.car.color}</span>
+													<span className="text-sm font-medium">
+														{selectedDriverBooking.driver?.car?.color ||
+														 selectedDriverBooking.assignedDriver?.car?.color ||
+														 selectedDriverBooking.car?.color}
+													</span>
 												</div>
 											)}
 										</div>
@@ -982,25 +1069,46 @@ export function CustomerTripsPage() {
 								)}
 
 								{/* Action Buttons */}
-								<div className="flex gap-2 pt-4">
-									{selectedDriverBooking.assignedDriver.phoneNumber && (
-										<>
-											<Button
-												onClick={() => window.open(`tel:${selectedDriverBooking.assignedDriver.phoneNumber}`)}
-												className="flex-1"
-											>
-												<Phone className="h-4 w-4 mr-2" />
-												Call Driver
-											</Button>
-											<Button
-												onClick={() => window.open(`sms:${selectedDriverBooking.assignedDriver.phoneNumber}`)}
-												variant="outline"
-												className="flex-1"
-											>
-												Message
-											</Button>
-										</>
-									)}
+								<div className={cn(
+									"flex gap-2 pt-4",
+									isMobile ? "pb-4" : ""
+								)}>
+									{(() => {
+										const phoneNumber = selectedDriverBooking.driver?.phoneNumber ||
+														   selectedDriverBooking.driver?.user?.phoneNumber ||
+														   selectedDriverBooking.assignedDriver?.phoneNumber ||
+														   selectedDriverBooking.driverPhone;
+
+										return phoneNumber && phoneNumber !== "Not provided" ? (
+											<>
+												<Button
+													onClick={(e) => {
+														e.stopPropagation();
+														window.location.href = `tel:${phoneNumber}`;
+													}}
+													className="flex-1 h-12"
+												>
+													<Phone className="h-4 w-4 mr-2" />
+													Call Driver
+												</Button>
+												<Button
+													onClick={(e) => {
+														e.stopPropagation();
+														window.location.href = `sms:${phoneNumber}`;
+													}}
+													variant="outline"
+													className="flex-1 h-12"
+												>
+													<MessageSquare className="h-4 w-4 mr-2" />
+													Message
+												</Button>
+											</>
+										) : (
+											<div className="w-full text-center py-4 text-sm text-gray-500">
+												Contact information not available
+											</div>
+										);
+									})()}
 								</div>
 							</div>
 						</div>

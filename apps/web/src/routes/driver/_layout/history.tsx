@@ -66,6 +66,9 @@ function HistoryPage() {
 	// Handle opening booking details dialog (same as trips.tsx)
 	const handleOpenBookingDetails = (booking: any) => {
 		// Convert trip data structure to booking data structure for the dialog
+		// Note: We need to get the original booking data to access extraCharges
+		const originalBooking = bookingsData?.data?.find((b: any) => b.id === booking.id);
+
 		const bookingData = {
 			id: booking.id,
 			scheduledPickupTime: booking.scheduledTime,
@@ -76,8 +79,8 @@ function HistoryPage() {
 			customerPhone: null, // History doesn't have phone data
 			status: booking.status,
 			finalAmount: booking.finalAmount,
-			quotedAmount: booking.finalAmount, // Use finalAmount as quotedAmount for history
-			extraCharges: null, // History doesn't have extra charges
+			quotedAmount: originalBooking?.quotedAmount || booking.finalAmount, // Use original quoted amount
+			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
 			car: null // TODO: Add car information to history data
 		};
 
@@ -448,20 +451,36 @@ function HistoryPage() {
 										Trip Fare
 									</h3>
 									<div className="space-y-2">
+										{/* Base trip fare */}
 										<div className="flex justify-between items-center">
-											<span className="text-sm text-gray-600">Total Amount</span>
+											<span className="text-sm text-gray-600">Trip Fare:</span>
+											<span className="text-sm font-semibold">
+												${((selectedBookingForDetails.quotedAmount || selectedBookingForDetails.finalAmount || 0) / 100).toFixed(2)}
+											</span>
+										</div>
+
+										{/* Extras if any */}
+										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+											<div className="flex justify-between items-center">
+												<span className="text-sm text-gray-600">Extras:</span>
+												<span className="text-sm font-semibold text-green-600">
+													+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
+												</span>
+											</div>
+										) : null}
+
+										{/* Divider if there are extras */}
+										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+											<div className="border-t border-gray-200"></div>
+										) : null}
+
+										{/* Total */}
+										<div className="flex justify-between items-center">
+											<span className="text-base font-bold text-gray-900">Total:</span>
 											<span className="text-lg font-bold text-gray-900">
 												${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
 											</span>
 										</div>
-										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) && (
-											<div className="flex justify-between items-center pt-1 border-t border-gray-100">
-												<span className="text-xs text-gray-500">Includes extras</span>
-												<span className="text-sm font-medium text-green-600">
-													+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
-												</span>
-											</div>
-										)}
 									</div>
 								</div>
 							</div>
