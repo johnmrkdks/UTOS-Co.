@@ -12,7 +12,7 @@ export const useCreateServiceBookingMutation = () => {
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.getUserBookings.queryKey() });
 			
 			toast.success("Service booked successfully", {
-				description: `Your booking for "${data.id}" has been confirmed. We'll contact you shortly.`,
+				description: `Your booking for "${data?.id || 'booking'}" has been confirmed. We'll contact you shortly.`,
 			});
 		},
 		onError: (error) => {

@@ -24,6 +24,7 @@ interface PackageServiceType {
 	name: string;
 	description: string | null;
 	icon: string | null;
+	rateType: "fixed" | "hourly";
 	isActive: boolean;
 	displayOrder: number | null;
 }
@@ -55,6 +56,7 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 					<TableRow>
 						<TableHead>Name</TableHead>
 						<TableHead>Description</TableHead>
+						<TableHead>Rate Type</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Order</TableHead>
 						<TableHead className="text-right">Actions</TableHead>
@@ -68,6 +70,11 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 								<TableCell className="font-medium">{serviceType.name}</TableCell>
 								<TableCell className="text-sm text-muted-foreground">
 									{serviceType.description || "No description"}
+								</TableCell>
+								<TableCell>
+									<Badge variant={serviceType.rateType === "fixed" ? "outline" : "secondary"}>
+										{serviceType.rateType === "fixed" ? "Fixed Rate" : "Hourly Rate"}
+									</Badge>
 								</TableCell>
 								<TableCell>
 									<Badge variant={serviceType.isActive ? "default" : "secondary"}>

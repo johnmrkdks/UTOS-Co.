@@ -4,7 +4,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
-import { useDriverBookingsQuery } from '@/hooks/query/use-driver-bookings-query';
+import { useGetDriverBookingsQuery } from "@/features/driver/_hooks/query/use-get-driver-bookings-query";
 import {
 	CalendarIcon,
 	MapPinIcon,
@@ -36,6 +36,7 @@ import { useState, useMemo } from 'react';
 import { Input } from "@workspace/ui/components/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@workspace/ui/components/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@workspace/ui/components/alert-dialog";
 import { useUpdateBookingStatusMutation } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-update-booking-status-mutation";
 import { cn } from "@workspace/ui/lib/utils";
 import { format } from "date-fns";
@@ -43,6 +44,8 @@ import { CloseTripOptionsDialog } from "@/features/driver/_components/close-trip
 import { CloseTripExtrasForm, type ExtrasFormData } from "@/features/driver/_components/close-trip-extras-form";
 import { TripConfirmationDialog } from "@/features/driver/_components/trip-confirmation-dialog";
 import { useCloseTripWithExtrasMutation, useCloseTripWithoutExtrasMutation } from "@/features/driver/_hooks/query/use-close-trip-mutations";
+import { useQueryClient } from "@tanstack/react-query";
+import { trpc } from "@/trpc";
 
 export const Route = createFileRoute('/driver/_layout/trips')({
 	component: DriverTripsComponent,
@@ -50,6 +53,7 @@ export const Route = createFileRoute('/driver/_layout/trips')({
 
 function DriverTripsComponent() {
 	const { data: rawCurrentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
+	const queryClient = useQueryClient();
 	const [searchQuery, setSearchQuery] = useState('');
 	const [passengerDetailsOpen, setPassengerDetailsOpen] = useState(false);
 	const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -68,6 +72,7 @@ function DriverTripsComponent() {
 	const [selectedMapsBooking, setSelectedMapsBooking] = useState<any>(null);
 	const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
 	const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<any>(null);
+	const [closeConfirmationOpen, setCloseConfirmationOpen] = useState(false);
 
 	// Status update mutation
 	const updateStatusMutation = useUpdateBookingStatusMutation();
@@ -81,35 +86,41 @@ function DriverTripsComponent() {
 
 	// Driver data with fallback values
 	const currentDriver = {
-		id: null,
+		id: null as string | null,
 		...rawCurrentDriver
 	};
 
-	// Fetch all bookings for current driver - we'll filter client-side for multiple statuses
-	const { data: bookingsData, isLoading: isBookingsLoading, refetch } = useDriverBookingsQuery({
-		driverId: currentDriver.id || "",
-		limit: 50,
-		offset: 0,
+	// Fetch all bookings for current driver - use same parameters as history page that works
+	const { data: bookingsData, isLoading: isBookingsLoading, refetch } = useGetDriverBookingsQuery({
+		limit: 100, // Match history page parameters
 	});
 
 	const allBookings = bookingsData?.data || [];
 
 	// Filter for active trip statuses that drivers need to work on
-	const activeStatuses = ["driver_assigned", "driver_en_route", "in_progress", "arrived_pickup", "passenger_on_board", "dropped_off", "awaiting_extras"];
+	// Note: driver_assigned trips appear in /driver/available, not here
+	const activeStatuses = [
+		"driver_en_route",     // Driver has started the trip - heading to pickup
+		"in_progress",         // Legacy status for active trips
+		"arrived_pickup",      // Driver arrived at pickup location
+		"passenger_on_board",  // Passenger picked up, heading to destination
+		"dropped_off",         // Passenger dropped off, awaiting trip closure
+		"awaiting_extras"      // Trip closed, awaiting extras processing
+	];
 
-	const bookings = allBookings.filter(booking =>
+	const bookings = allBookings.filter((booking: any) =>
 		activeStatuses.includes(booking.status)
 	);
 
 	// Filter bookings based on search only - already filtered to in-progress trips by query
-	const filteredBookings = bookings.filter(booking => {
+	const filteredBookings = bookings.filter((booking: any) => {
 		const matchesSearch = searchQuery === '' ||
 			booking.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			booking.originAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			booking.destinationAddress.toLowerCase().includes(searchQuery.toLowerCase());
 
 		return matchesSearch;
-	}).sort((a, b) => {
+	}).sort((a: any, b: any) => {
 		// Sort by closest scheduled pickup time (soonest first)
 		return new Date(a.scheduledPickupTime).getTime() - new Date(b.scheduledPickupTime).getTime();
 	});
@@ -174,11 +185,20 @@ function DriverTripsComponent() {
 		}
 
 		const nextStatus = getNextStatus(booking.status);
+
 		updateStatusMutation.mutate({
 			id: booking.id,
-			status: nextStatus as any,
-		}, {
-			onSuccess: () => {
+			status: nextStatus,
+		} as any, {
+			onSuccess: (data) => {
+				// Invalidate and refetch driver trips to get refreshed data
+				queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+				queryClient.refetchQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+
+				// Also invalidate available trips queries to update both pages
+				queryClient.invalidateQueries({ queryKey: trpc.bookings.getAvailableTrips.queryKey() });
+				queryClient.refetchQueries({ queryKey: trpc.bookings.getAvailableTrips.queryKey() });
+
 				// Update the selected booking details with new status
 				if (selectedBookingForDetails && selectedBookingForDetails.id === booking.id) {
 					setSelectedBookingForDetails({
@@ -186,6 +206,9 @@ function DriverTripsComponent() {
 						status: nextStatus
 					});
 				}
+			},
+			onError: (error) => {
+				console.error('❌ Failed to update trip status:', error);
 			}
 		});
 	};
@@ -223,9 +246,9 @@ function DriverTripsComponent() {
 			// Update booking with extras amount and move to next status
 			updateStatusMutation.mutate({
 				id: selectedBooking.id,
-				status: 'awaiting_extras' as any,
+				status: 'awaiting_extras',
 				extraCharges: extrasAmountInCents,
-			});
+			} as any);
 		}
 
 		setExtrasDialogOpen(false);
@@ -236,8 +259,8 @@ function DriverTripsComponent() {
 	const handleCompleteTrip = (booking: any) => {
 		updateStatusMutation.mutate({
 			id: booking.id,
-			status: 'completed' as any,
-		});
+			status: 'completed',
+		} as any);
 	};
 
 	// New Close Trip workflow handlers
@@ -291,17 +314,17 @@ function DriverTripsComponent() {
 		if (extrasData) {
 			// Convert form amounts from dollars to cents for backend
 			const extrasForBackend = {
-				additionalWaitTime: extrasData.additionalWaitTime,
-				unscheduledStops: extrasData.unscheduledStops,
-				parkingCharges: Math.round(extrasData.parkingCharges * 100), // Convert to cents
-				tollCharges: Math.round(extrasData.tollCharges * 100), // Convert to cents
-				location: extrasData.location,
+				additionalWaitTime: extrasData.additionalWaitTime || 0,
+				unscheduledStops: extrasData.unscheduledStops || 0,
+				parkingCharges: Math.round((extrasData.parkingCharges || 0) * 100), // Convert to cents
+				tollCharges: Math.round((extrasData.tollCharges || 0) * 100), // Convert to cents
+				location: extrasData.location || '',
 				otherCharges: {
-					description: extrasData.otherCharges.description,
-					amount: Math.round(extrasData.otherCharges.amount * 100), // Convert to cents
+					description: extrasData.otherCharges?.description || '',
+					amount: Math.round((extrasData.otherCharges?.amount || 0) * 100), // Convert to cents
 				},
-				extraType: extrasData.extraType,
-				notes: extrasData.notes,
+				extraType: extrasData.extraType || 'general',
+				notes: extrasData.notes || '',
 			};
 
 			// Use the new close trip with extras mutation
@@ -309,33 +332,77 @@ function DriverTripsComponent() {
 				bookingId: selectedTripForClose.id,
 				isNoShow: isNoShow,
 				extrasData: extrasForBackend,
-			} as any);
+			} as any, {
+				onSuccess: (data) => {
 
-			// Close all dialogs immediately (success handling is done in the mutation hook)
-			setTripConfirmationOpen(false);
-			setCloseTripOptionsOpen(false);
-			setCloseTripExtrasOpen(false);
+					// Force immediate refresh of the data - don't clear state until after refresh
+					queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+					queryClient.refetchQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 
-			// Clear trip close state
-			setSelectedTripForClose(null);
-			setExtrasData(undefined);
-			setIsNoShow(false);
+					// Small delay to allow cache to refresh before clearing state
+					setTimeout(() => {
+						// Close only the trip closing workflow dialogs
+						setTripConfirmationOpen(false);
+						setCloseTripOptionsOpen(false);
+						setCloseTripExtrasOpen(false);
+
+						// Update the booking details dialog with the completed trip data
+						if (selectedBookingForDetails && selectedBookingForDetails.id === selectedTripForClose?.id && data?.data?.booking) {
+							const updatedBooking = data.data.booking;
+							setSelectedBookingForDetails({
+								...selectedBookingForDetails,
+								status: updatedBooking.status,
+								extraCharges: updatedBooking.extraCharges,
+								finalAmount: updatedBooking.finalAmount,
+								serviceCompletedAt: updatedBooking.serviceCompletedAt
+							});
+						}
+
+						// Clear trip close state
+						setSelectedTripForClose(null);
+						setExtrasData(undefined);
+						setIsNoShow(false);
+					}, 500); // Half second delay to allow cache refresh
+				},
+				onError: (error) => {
+					// Keep dialogs open on error so user can retry
+					console.error("Failed to close trip with extras:", error);
+				}
+			});
 		} else {
 			// No extras - use simple close trip mutation
 			closeTripWithoutExtrasMutation.mutate({
 				bookingId: selectedTripForClose.id,
 				isNoShow: isNoShow,
-			} as any);
+			} as any, {
+				onSuccess: (data) => {
+					// Close only the trip closing workflow dialogs
+					setTripConfirmationOpen(false);
+					setCloseTripOptionsOpen(false);
+					setCloseTripExtrasOpen(false);
 
-			// Close all dialogs immediately (success handling is done in the mutation hook)
-			setTripConfirmationOpen(false);
-			setCloseTripOptionsOpen(false);
-			setCloseTripExtrasOpen(false);
+					// Update the booking details dialog with the completed trip data
+					if (selectedBookingForDetails && selectedBookingForDetails.id === selectedTripForClose?.id && data?.data?.booking) {
+						const updatedBooking = data.data.booking;
+						setSelectedBookingForDetails({
+							...selectedBookingForDetails,
+							status: updatedBooking.status,
+							extraCharges: updatedBooking.extraCharges || 0,
+							finalAmount: updatedBooking.finalAmount,
+							serviceCompletedAt: updatedBooking.serviceCompletedAt
+						});
+					}
 
-			// Clear trip close state
-			setSelectedTripForClose(null);
-			setExtrasData(undefined);
-			setIsNoShow(false);
+					// Clear trip close state
+					setSelectedTripForClose(null);
+					setExtrasData(undefined);
+					setIsNoShow(false);
+				},
+				onError: (error) => {
+					// Keep dialogs open on error so user can retry
+					console.error("Failed to close trip:", error);
+				}
+			});
 		}
 	};
 
@@ -351,8 +418,11 @@ function DriverTripsComponent() {
 	};
 
 	const calculateTotalExtrasCharges = () => {
-		if (!extrasData) return 0;
-		return extrasData.parkingCharges + extrasData.tollCharges + extrasData.otherCharges.amount;
+		if (!extrasData) {
+			return 0;
+		}
+		const total = (extrasData.parkingCharges || 0) + (extrasData.tollCharges || 0) + (extrasData.otherCharges?.amount || 0);
+		return total;
 	};
 
 	const handleViewPassengerDetails = (booking: any) => {
@@ -363,6 +433,21 @@ function DriverTripsComponent() {
 	const handleOpenBookingDetails = (booking: any) => {
 		setSelectedBookingForDetails(booking);
 		setBookingDetailsOpen(true);
+	};
+
+	const handleCloseBookingDetails = () => {
+		// If trip is completed, require confirmation to close
+		if (selectedBookingForDetails && ['completed', 'no_show'].includes(selectedBookingForDetails.status)) {
+			setCloseConfirmationOpen(true);
+		} else {
+			// For non-completed trips, close directly
+			setBookingDetailsOpen(false);
+		}
+	};
+
+	const confirmCloseBookingDetails = () => {
+		setCloseConfirmationOpen(false);
+		setBookingDetailsOpen(false);
 	};
 
 	const navigateToLocation = (destinationAddress: string, locationType: 'pickup' | 'dropoff') => {
@@ -544,7 +629,7 @@ function DriverTripsComponent() {
 					<div className={cn(
 						isMobile ? "" : "grid gap-4"
 					)}>
-						{filteredBookings.map((booking, index) => {
+						{filteredBookings.map((booking: any, index: number) => {
 							// Status-based color coding with stronger inline styles 
 							const getStatusStyle = (status: string) => {
 								const baseStyle = {
@@ -835,7 +920,21 @@ function DriverTripsComponent() {
 			</Dialog>
 
 			{/* Booking Details Dialog/Fullscreen */}
-			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
+			<Dialog
+				open={bookingDetailsOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						// Prevent click-outside close for completed trips on desktop
+						if (selectedBookingForDetails && ['completed', 'no_show'].includes(selectedBookingForDetails.status) && !isMobile) {
+							return; // Do nothing, prevent closing
+						}
+						// For mobile or non-completed trips, use confirmation handler
+						handleCloseBookingDetails();
+					} else {
+						setBookingDetailsOpen(open);
+					}
+				}}
+			>
 				<DialogContent
 					className={cn(
 						"[&>button]:hidden", // Hide default close button
@@ -872,7 +971,7 @@ function DriverTripsComponent() {
 									variant="ghost"
 									size="lg"
 									className="h-12 w-12 p-0 text-white hover:bg-white/20 rounded-full flex-shrink-0 border-2 border-white/30 hover:border-white/50 transition-all duration-200"
-									onClick={() => setBookingDetailsOpen(false)}
+									onClick={handleCloseBookingDetails}
 								>
 									<X className="h-6 w-6" />
 								</Button>
@@ -1010,8 +1109,19 @@ function DriverTripsComponent() {
 												</div>
 											) : null}
 
+											{/* Pending Extras (from current form) */}
+											{selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0 && (
+												<div className="flex items-center justify-between">
+													<span className="text-blue-700 text-sm">Pending Extras:</span>
+													<span className="text-blue-700 font-semibold">
+														+${calculateTotalExtrasCharges().toFixed(2)}
+													</span>
+												</div>
+											)}
+
 											{/* Divider if there are extras */}
-											{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+											{((selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ||
+											  (selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0)) ? (
 												<div className="border-t border-green-300"></div>
 											) : null}
 
@@ -1022,7 +1132,16 @@ function DriverTripsComponent() {
 													<span className="text-green-800 font-bold">Total:</span>
 												</div>
 												<span className="text-green-800 font-bold text-lg">
-													${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+													${(() => {
+														// If trip is completed, show finalAmount (includes extras)
+														if (['completed', 'cancelled'].includes(selectedBookingForDetails.status) || !selectedTripForClose) {
+															return ((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2);
+														}
+														// If trip is being closed with extras, show original + extras preview
+														const baseAmount = (selectedBookingForDetails.quotedAmount || 0) / 100;
+														const extrasAmount = selectedTripForClose?.id === selectedBookingForDetails.id ? calculateTotalExtrasCharges() : 0;
+														return (baseAmount + extrasAmount).toFixed(2);
+													})()}
 												</span>
 											</div>
 										</div>
@@ -1051,8 +1170,19 @@ function DriverTripsComponent() {
 														</div>
 													) : null}
 
+													{/* Pending Extras (from current form) */}
+													{selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0 && (
+														<div className="flex items-center justify-between">
+															<span className="text-blue-700 text-sm">Pending Extras:</span>
+															<span className="text-blue-700 font-semibold">
+																+${calculateTotalExtrasCharges().toFixed(2)}
+															</span>
+														</div>
+													)}
+
 													{/* Divider if there are extras */}
-													{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+													{((selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ||
+													  (selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0)) ? (
 														<div className="border-t border-green-300"></div>
 													) : null}
 
@@ -1063,7 +1193,16 @@ function DriverTripsComponent() {
 															<span className="text-green-800 font-bold">Total:</span>
 														</div>
 														<span className="text-green-800 font-bold text-lg">
-															${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+															${(() => {
+																// If trip is completed, show finalAmount (includes extras)
+																if (['completed', 'cancelled'].includes(selectedBookingForDetails.status) || !selectedTripForClose) {
+																	return ((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2);
+																}
+																// If trip is being closed with extras, show original + extras preview
+																const baseAmount = (selectedBookingForDetails.quotedAmount || 0) / 100;
+																const extrasAmount = selectedTripForClose?.id === selectedBookingForDetails.id ? calculateTotalExtrasCharges() : 0;
+																return (baseAmount + extrasAmount).toFixed(2);
+															})()}
 														</span>
 													</div>
 												</div>
@@ -1206,6 +1345,24 @@ function DriverTripsComponent() {
 				onGoBack={handleTripConfirmationBack}
 				isSubmitting={updateStatusMutation.isPending || closeTripWithExtrasMutation.isPending || closeTripWithoutExtrasMutation.isPending}
 			/>
+
+			{/* Close Confirmation Dialog */}
+			<AlertDialog open={closeConfirmationOpen} onOpenChange={setCloseConfirmationOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Close Trip Details?</AlertDialogTitle>
+						<AlertDialogDescription>
+							The trip transaction has been completed successfully. Are you sure you want to close the trip details? You can always view the trip again from your history.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Keep Open</AlertDialogCancel>
+						<AlertDialogAction onClick={confirmCloseBookingDetails}>
+							Close Details
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

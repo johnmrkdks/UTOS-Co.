@@ -89,6 +89,21 @@ export const carsRouter = router({
 			}
 		}),
 
+	getPublished: publicProcedure
+		.input(GetCarServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const car = await getCarService(db, input);
+				// Only return if car is published and available to customers
+				if (!car?.isPublished || !car?.isActive || !car?.isAvailable) {
+					throw new Error("Car not found or not available");
+				}
+				return car;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
 	// Get available cars with time-based conflict checking
 	listAvailable: protectedProcedure
 		.input(ResourceListSchema.extend({
@@ -120,17 +135,4 @@ export const carsRouter = router({
 			}
 		}),
 	
-	getPublished: publicProcedure
-		.input(GetCarServiceSchema)
-		.query(async ({ ctx: { db }, input }) => {
-			try {
-				const car = await getCarService(db, input);
-				if (!car?.isPublished || !car?.isActive || !car?.isAvailable) {
-					throw new Error("Car not found or not available");
-				}
-				return car;
-			} catch (error) {
-				handleTRPCError(error);
-			}
-		}),
 });

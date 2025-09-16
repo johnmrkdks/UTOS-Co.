@@ -3,12 +3,11 @@ import { DialogClose, DialogFooter } from "@workspace/ui/components/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Switch } from "@workspace/ui/components/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useCreatePackageMutation } from "../../_hooks/query/use-create-package-mutation";
 import { useGetPackageServiceTypesQuery } from "../../_hooks/query/use-get-package-service-types-query";
 import { Loader2, Upload, X } from "lucide-react";
@@ -21,9 +20,9 @@ const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
 	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
 	serviceTypeId: z.string().min(1, "Service type is required"),
-	fixedPrice: z.number().min(0, "Price must be positive"),
-	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
-	isAvailable: z.boolean().default(true),
+	fixedPrice: z.number().min(0, "Price must be positive").optional(),
+	hourlyRate: z.number().min(0, "Hourly rate must be positive").optional(),
+	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4).optional(),
 	bannerImageUrl: z.string().optional(),
 	// Optional fields that can be null/undefined in database
 	categoryId: z.string().optional(),
@@ -60,7 +59,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 	const { data: serviceTypesData } = useGetPackageServiceTypesQuery();
 
 	const serviceTypes = serviceTypesData?.data || [];
-	
+
 	const [{ files: imageFiles }, { addFiles, removeFile, openFileDialog, getInputProps }] = useFileUpload({
 		maxFiles: 1,
 		maxSize: 5 * 1024 * 1024, // 5MB
@@ -80,8 +79,7 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			description: "",
 			serviceTypeId: "",
 			fixedPrice: 0,
-			maxPassengers: 4,
-			isAvailable: true,
+			hourlyRate: 0,
 			bannerImageUrl: "",
 			// Set defaults for optional fields
 			advanceBookingHours: 24,
@@ -93,6 +91,14 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			waitingTimeMinutes: 0,
 		},
 	});
+
+	// Watch the selected service type to determine pricing type
+	const selectedServiceTypeId = form.watch('serviceTypeId');
+	const selectedServiceType = useMemo(() =>
+		serviceTypes.find(type => type.id === selectedServiceTypeId),
+		[serviceTypes, selectedServiceTypeId]
+	);
+	const isHourlyRate = selectedServiceType?.rateType === 'hourly';
 
 	const handleImageUpload = async (fileWrapper: any) => {
 		try {
@@ -135,7 +141,9 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			// Convert price to cents for storage
 			const packageData = {
 				...data,
-				fixedPrice: Math.round(data.fixedPrice * 100), // Convert to cents
+				fixedPrice: data.fixedPrice ? Math.round(data.fixedPrice * 100) : null,
+				hourlyRate: data.hourlyRate ? Math.round(data.hourlyRate * 100) : null,
+				maxPassengers: data.maxPassengers || 4, // Default to 4 if not set
 			};
 			
 			console.log("💰 Package data with price converted to cents:", JSON.stringify(packageData, null, 2));
@@ -235,49 +243,60 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							)}
 						/>
 
-						<div className="grid grid-cols-2 gap-4">
-							<FormField
-								control={form.control as any}
-								name="fixedPrice"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Fixed Price (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
+						{/* Dynamic pricing field - only show when service type is selected */}
+						{selectedServiceType && (
+							<div className="space-y-4">
+								{isHourlyRate ? (
+									<FormField
+										control={form.control as any}
+										name="hourlyRate"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Hourly Rate (AUD)</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														step="0.01"
+														min="0"
+														placeholder="0.00"
+														{...field}
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<div className="text-sm text-muted-foreground">
+													Rate charged per hour for this service
+												</div>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								) : (
+									<FormField
+										control={form.control as any}
+										name="fixedPrice"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Fixed Price (AUD)</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														step="0.01"
+														min="0"
+														placeholder="0.00"
+														{...field}
+														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+													/>
+												</FormControl>
+												<div className="text-sm text-muted-foreground">
+													Total fixed price for this service
+												</div>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 								)}
-							/>
-
-							<FormField
-								control={form.control as any}
-								name="maxPassengers"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Max Passengers</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												min="1"
-												max="20"
-												placeholder="4" 
-												{...field} 
-												onChange={(e) => field.onChange(parseInt(e.target.value) || 4)}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
+							</div>
+						)}
 					</div>
 
 					{/* Right Column - Image Upload & Settings */}
@@ -339,35 +358,6 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							)}
 						/>
 
-						{/* Settings Section */}
-						<div className="space-y-4">
-							<div>
-								<h4 className="text-sm font-medium mb-3">Package Settings</h4>
-								<div className="space-y-3">
-									<FormField
-										control={form.control as any}
-										name="isAvailable"
-										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-												<div className="space-y-0.5">
-													<FormLabel className="text-sm font-medium">Available for Booking</FormLabel>
-													<div className="text-xs text-muted-foreground">
-														Enable internal booking functionality
-													</div>
-												</div>
-												<FormControl>
-													<Switch 
-														checked={field.value} 
-														onCheckedChange={field.onChange} 
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-
-								</div>
-							</div>
-						</div>
 					</div>
 				</div>
 

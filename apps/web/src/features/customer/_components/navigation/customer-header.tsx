@@ -4,10 +4,9 @@ import { Logo } from "@/components/logo";
 import { Button } from "@workspace/ui/components/button";
 import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
-import { LogOut, BellIcon, Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import type { CustomerNavigationItem } from "./types";
 import { BUSINESS_INFO } from "@/constants/business-info";
-import { CustomerNotificationMenu } from "./customer-notification-menu";
 import { CustomerUserMenu } from "./customer-user-menu";
 import { BrandLogo } from "@/components/brand-logo";
 import { CustomerMobileMenuContent } from "./customer-mobile-menu-content";
@@ -93,10 +92,6 @@ export function CustomerHeader({
 							</div>
 						</div>
 
-						<div className="flex items-center gap-2">
-							{/* Notifications - Moved to Right */}
-							<CustomerNotificationMenu />
-						</div>
 					</div>
 				</div>
 			</div>

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { UpdatePackageServiceTypeSchema } from "@/schemas/shared/tables/package-service-type";
 import { packageServiceTypes } from "@/db/sqlite/schema";
+import { RateTypeEnum } from "@/db/sqlite/enums";
 import type { DB } from "@/db";
 import { eq } from "drizzle-orm";
 
@@ -16,8 +17,9 @@ export async function updatePackageServiceTypeService(
 		.update(packageServiceTypes)
 		.set({
 			...updateData,
+			...(updateData.rateType && { rateType: updateData.rateType as RateTypeEnum }),
 			updatedAt: new Date(),
-		})
+		} as any)
 		.where(eq(packageServiceTypes.id, id))
 		.returning();
 

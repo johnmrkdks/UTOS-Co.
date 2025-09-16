@@ -38,19 +38,23 @@ import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 import { createLocalDateForBackend } from "@/utils/timezone";
 
-// Booking form schema for quote-based booking
-const QuoteBookingFormSchema = z.object({
+// Create dynamic booking form schema based on car capacity
+const createQuoteBookingFormSchema = (maxPassengers?: number, maxLuggage?: number) => z.object({
 	scheduledPickupDate: z.string({ required_error: "Please select a pickup date" }).min(1, "Please select a pickup date"),
 	scheduledPickupTime: z.string({ required_error: "Please select a pickup time" }).min(1, "Please select a pickup time"),
 	customerName: z.string({ required_error: "Please enter your full name" }).min(1, "Please enter your full name"),
 	customerPhone: z.string({ required_error: "Please enter your phone number" }).min(1, "Please enter your phone number"),
 	customerEmail: z.string({ required_error: "Please enter your email address" }).email("Please enter a valid email address"),
-	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
-	luggageCount: z.number().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
+	passengerCount: z.number()
+		.min(1, "At least 1 passenger required")
+		.max(maxPassengers || 8, `Maximum ${maxPassengers || 8} passengers allowed for this vehicle`),
+	luggageCount: z.number()
+		.min(0, "Luggage count cannot be negative")
+		.max(maxLuggage || 10, `Maximum ${maxLuggage || 10} pieces of luggage allowed for this vehicle`),
 	specialRequests: z.string().optional(),
 });
 
-type QuoteBookingFormData = z.infer<typeof QuoteBookingFormSchema>;
+type QuoteBookingFormData = z.infer<ReturnType<typeof createQuoteBookingFormSchema>>;
 
 interface QuoteBookingPageProps {
 	isCustomerArea?: boolean;
@@ -74,15 +78,53 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		{ enabled: !!quoteId }
 	);
 
+	// Enhanced debugging for quote data
+	console.log("🔍 Quote debugging:");
+	console.log("- quoteId:", quoteId);
+	console.log("- secureQuoteLoading:", secureQuoteLoading);
+	console.log("- secureQuoteError:", secureQuoteError);
+	console.log("- secureQuoteData:", secureQuoteData);
+
 	// Mutation for creating booking from quote
 	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
 	
 	// Get car details if carId is available in quote data
 	const carId = (secureQuoteData?.carId) || (search?.carId) || "";
-	const { data: carData, isLoading: carLoading } = useGetCarQuery(
+	console.log("🚗 Car debugging:");
+	console.log("- carId from quote:", secureQuoteData?.carId);
+	console.log("- carId from search:", search?.carId);
+	console.log("- final carId:", carId);
+	console.log("- carId enabled?", !!carId);
+
+	const { data: carData, isLoading: carLoading, error: carError } = useGetCarQuery(
 		{ id: carId },
 		{ enabled: !!carId }
 	);
+
+	// Enhanced car debugging
+	console.log("🚗 Car query status:");
+	console.log("- carLoading:", carLoading);
+	console.log("- carError:", carError);
+	console.log("- carData:", carData);
+
+	if (carData) {
+		console.log("🚗 Car capacity details:", {
+			name: carData.name,
+			seatingCapacity: carData.seatingCapacity,
+			maxPassengers: carData.maxPassengers,
+			luggageCapacity: carData.luggageCapacity,
+			isPublished: carData.isPublished,
+			isActive: carData.isActive,
+			isAvailable: carData.isAvailable
+		});
+	}
+	if (carError) {
+		console.error("❌ Car loading error details:", {
+			message: carError.message,
+			cause: carError.cause,
+			stack: carError.stack
+		});
+	}
 
 	// Form state - pre-populate for authenticated users
 	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({});
@@ -156,7 +198,20 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				specialRequests: formData.specialRequests || "",
 			};
 
-			QuoteBookingFormSchema.parse(cleanedFormData);
+			// Create dynamic schema based on car capacity
+			console.log("🔧 Creating schema with capacity:", {
+				seatingCapacity: carData?.seatingCapacity,
+				luggageCapacity: carData?.luggageCapacity,
+				carDataAvailable: !!carData
+			});
+
+		const QuoteBookingFormSchema = createQuoteBookingFormSchema(
+			carData?.seatingCapacity || undefined,
+			carData?.luggageCapacity || undefined
+		);
+
+		console.log("✅ Schema created, validating form data:", cleanedFormData);
+		QuoteBookingFormSchema.parse(cleanedFormData);
 			console.log("✅ Quote booking form validation passed");
 			setFormErrors({});
 			return true;
@@ -306,6 +361,15 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 																Please wait
 															</div>
 														</>
+													) : carError ? (
+														<>
+															<div className="font-medium text-sm text-orange-900">
+																Vehicle details unavailable
+															</div>
+															<div className="text-xs text-orange-600 mt-1">
+																Using standard capacity limits (8 passengers, 10 luggage)
+															</div>
+														</>
 													) : carData ? (
 														<>
 															<div className="font-medium text-sm text-gray-900">
@@ -335,7 +399,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 																Vehicle from your quote
 															</div>
 															<div className="text-xs text-muted-foreground mt-1">
-																Confirmed for booking
+																Using standard capacity limits (8 passengers, 10 luggage)
 															</div>
 														</>
 													)}
@@ -1006,11 +1070,11 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 											<div>
 												<label className="block text-sm font-semibold text-gray-800 mb-1">Number of Passengers *</label>
-												<p className="text-xs text-gray-600 mb-3">Maximum capacity: 8 passengers</p>
+												<p className="text-xs text-gray-600 mb-3">Maximum capacity: {carData?.seatingCapacity || 8} passengers</p>
 												<Input
 													type="number"
 													min="1"
-													max="8"
+													max={carData?.seatingCapacity || 8}
 													placeholder="e.g. 2"
 													value={formData.passengerCount || ""}
 													onChange={(e) => updateFormData("passengerCount", e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1023,11 +1087,11 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 											<div>
 												<label className="block text-sm font-semibold text-gray-800 mb-1">Luggage Pieces *</label>
-												<p className="text-xs text-gray-600 mb-3">Maximum capacity: 10 pieces of luggage</p>
+												<p className="text-xs text-gray-600 mb-3">Maximum capacity: {carData?.luggageCapacity || 10} pieces of luggage</p>
 												<Input
 													type="number"
 													min="0"
-													max="10"
+													max={carData?.luggageCapacity || 10}
 													placeholder="e.g. 3"
 													value={formData.luggageCount || ""}
 													onChange={(e) => updateFormData("luggageCount", e.target.value ? parseInt(e.target.value) : undefined)}

@@ -137,7 +137,7 @@ export function CarAppointmentBookingDialog({
 				destinationLongitude: destinationGeometry?.location?.lng?.(),
 				
 				// Timing
-				scheduledPickupTime: data.scheduledPickupTime,
+				scheduledPickupTime: data.scheduledPickupTime.toISOString(),
 				estimatedDuration: data.estimatedDuration * 60, // convert to seconds
 				estimatedDistance,
 				

@@ -6,7 +6,6 @@ import { PublicationRowActions } from "../publication-row-actions";
 
 interface CarsPublicationColumnsProps {
 	onTogglePublish: (carId: string) => void;
-	onManagePricing: (carId: string) => void;
 	hasCarPricingConfig: (carId: string) => boolean;
 	getCarPricingConfig: (carId: string) => any | null;
 	isToggling: boolean;
@@ -14,7 +13,6 @@ interface CarsPublicationColumnsProps {
 
 export const getCarsPublicationColumns = ({
 	onTogglePublish,
-	onManagePricing,
 	hasCarPricingConfig,
 	getCarPricingConfig,
 	isToggling
@@ -181,8 +179,6 @@ export const getCarsPublicationColumns = ({
 					<PublicationRowActions
 						carId={car.id}
 						carName={car.name}
-						hasPricingConfig={hasPricingConfig}
-						onManagePricing={() => onManagePricing(car.id)}
 					/>
 				</div>
 			);

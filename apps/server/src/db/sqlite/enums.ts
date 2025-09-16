@@ -46,3 +46,8 @@ export enum CarStatusEnum {
 	Maintenance = "maintenance",
 	OutOfService = "out_of_service",
 }
+
+export enum RateTypeEnum {
+	Fixed = "fixed",    // Fixed price packages (weddings, concerts, etc.)
+	Hourly = "hourly",  // Hourly rate packages (tours, etc.)
+}

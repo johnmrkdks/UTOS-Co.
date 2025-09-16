@@ -9,6 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Checkbox } from "@workspace/ui/components/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import {
 	Form,
 	FormControl,
@@ -28,6 +29,7 @@ import { useEffect } from "react";
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
 	description: z.string().optional(),
+	rateType: z.enum(["fixed", "hourly"]).default("fixed"),
 	isActive: z.boolean(),
 	displayOrder: z.number().int().min(0),
 });
@@ -46,6 +48,7 @@ export function EditPackageServiceTypeDialog() {
 		defaultValues: {
 			name: "",
 			description: "",
+			rateType: "fixed" as const,
 			isActive: true,
 			displayOrder: 0,
 		},
@@ -56,6 +59,7 @@ export function EditPackageServiceTypeDialog() {
 			form.reset({
 				name: data.name || "",
 				description: data.description || "",
+				rateType: data.rateType || "fixed",
 				isActive: data.isActive ?? true,
 				displayOrder: data.displayOrder || 0,
 			});
@@ -119,6 +123,30 @@ export function EditPackageServiceTypeDialog() {
 							)}
 						/>
 
+						<FormField
+							control={form.control as any}
+							name="rateType"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Rate Type</FormLabel>
+									<Select onValueChange={field.onChange} value={field.value}>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select rate type" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											<SelectItem value="fixed">Fixed Rate (Weddings, Concerts, Events)</SelectItem>
+											<SelectItem value="hourly">Hourly Rate (Tours, City Transfers)</SelectItem>
+										</SelectContent>
+									</Select>
+									<FormDescription>
+										Fixed rate packages have one price, hourly packages charge per hour
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
 						<FormField
 							control={form.control as any}

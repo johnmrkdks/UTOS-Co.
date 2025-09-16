@@ -28,12 +28,11 @@ export function TripConfirmationDialog({
 	const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
 
 	const hasExtras = extrasData && (
-		Object.values(extrasData.waitTimes).some(t => t > 0) ||
 		extrasData.additionalWaitTime > 0 ||
 		extrasData.unscheduledStops > 0 ||
 		extrasData.parkingCharges > 0 ||
 		extrasData.tollCharges > 0 ||
-		extrasData.otherCharges.amount > 0
+		(extrasData.otherCharges?.amount || 0) > 0
 	);
 
 	return (
@@ -120,16 +119,6 @@ export function TripConfirmationDialog({
 							<div className="space-y-2 mb-3">
 								<h4 className="font-medium text-xs">Extras included:</h4>
 								<div className="space-y-1 text-xs">
-									{/* Wait Times */}
-									{(extrasData.waitTimes.international > 0 || 
-									  extrasData.waitTimes.domestic > 0 || 
-									  extrasData.waitTimes.other > 0) && (
-										<div className="flex justify-between">
-											<span>Wait time charges</span>
-											<span className="font-medium">Calculated</span>
-										</div>
-									)}
-									
 									{extrasData.additionalWaitTime > 0 && (
 										<div className="flex justify-between">
 											<span>Additional wait time ({extrasData.additionalWaitTime} min)</span>
@@ -158,10 +147,10 @@ export function TripConfirmationDialog({
 										</div>
 									)}
 
-									{extrasData.otherCharges.amount > 0 && (
+									{(extrasData.otherCharges?.amount || 0) > 0 && (
 										<div className="flex justify-between">
 											<span>Other charges</span>
-											<span className="font-medium">{formatCurrency(extrasData.otherCharges.amount)}</span>
+											<span className="font-medium">{formatCurrency(extrasData.otherCharges?.amount || 0)}</span>
 										</div>
 									)}
 

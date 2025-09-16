@@ -19,18 +19,13 @@ interface CloseTripExtrasFormProps {
 }
 
 export interface ExtrasFormData {
-	waitTimes: {
-		international: number; // in minutes
-		domestic: number; // in minutes
-		other: number; // in minutes
-	};
 	additionalWaitTime: number; // in minutes
 	unscheduledStops: number;
 	parkingCharges: number; // in dollars
 	tollCharges: number; // in dollars
 	otherCharges: {
 		description: string;
-		amount: number;
+		amount: number; // in dollars
 	};
 	extraType: 'general' | 'driver' | 'operator';
 	notes: string;
@@ -52,11 +47,6 @@ export function CloseTripExtrasForm({
 	onBack
 }: CloseTripExtrasFormProps) {
 	const [formData, setFormData] = useState<ExtrasFormData>({
-		waitTimes: {
-			international: 0,
-			domestic: 0,
-			other: 0
-		},
 		additionalWaitTime: 0,
 		unscheduledStops: 0,
 		parkingCharges: 0,
@@ -76,17 +66,11 @@ export function CloseTripExtrasForm({
 
 
 	const calculateTotalCharges = () => {
-		// Wait time charges (only above courtesy time)
-		const intlWaitCharge = Math.max(0, formData.waitTimes.international - WAIT_TIME_RATES.international) * 0; // Define rate
-		const domesticWaitCharge = Math.max(0, formData.waitTimes.domestic - WAIT_TIME_RATES.domestic) * 0; // Define rate  
-		const otherWaitCharge = Math.max(0, formData.waitTimes.other - WAIT_TIME_RATES.other) * 0; // Define rate
-
-		const totalWaitCharges = intlWaitCharge + domesticWaitCharge + otherWaitCharge;
-		const additionalWaitCharge = formData.additionalWaitTime * 0; // Define rate per minute
+		// Calculate total charges (wait time charges would be calculated based on additionalWaitTime rate)
+		const additionalWaitCharge = formData.additionalWaitTime * 0; // TODO: Define rate per minute
 
 		// Other charges
-		const total = totalWaitCharges +
-			additionalWaitCharge +
+		const total = additionalWaitCharge +
 			formData.parkingCharges +
 			formData.tollCharges +
 			formData.otherCharges.amount;

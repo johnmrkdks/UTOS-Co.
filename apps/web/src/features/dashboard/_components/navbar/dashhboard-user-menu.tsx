@@ -1,10 +1,9 @@
-import { BoltIcon, BookOpenIcon, Layers2Icon, LogOutIcon, PinIcon, PenIcon as UserPenIcon } from "lucide-react"
+import { LogOutIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -44,32 +43,6 @@ export function DashboardUserMenu() {
 					<span className="text-foreground truncate text-sm font-medium">{session?.user.name}</span>
 					<span className="text-muted-foreground truncate text-xs font-normal">{session?.user.email}</span>
 				</DropdownMenuLabel>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<BoltIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 1</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<Layers2Icon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 2</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<BookOpenIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 3</span>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<PinIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 4</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<UserPenIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 5</span>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={signOutWithConfirmation.openSignOutDialog}>
 					<LogOutIcon size={16} className="opacity-60" aria-hidden="true" />

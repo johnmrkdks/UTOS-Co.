@@ -7,67 +7,22 @@ import { CarsTableRowActions } from "./cars-table-row-actions"
 
 export const carsTableColumns: ColumnDef<Car>[] = [
 	{
-		id: "image",
-		accessorKey: "images",
-		header: ({ column }) => (
-			<DataTableColumnHeader className="ml-4" column={column} title="Image" />
-		),
-		cell: ({ row }) => {
-			const images = row.getValue("images") as any[]
-			const firstImage = images?.[0]
-			return (
-				<div className="ml-4">
-					{firstImage ? (
-						<img 
-							src={firstImage.url} 
-							alt="Car" 
-							className="w-12 h-8 object-cover rounded"
-						/>
-					) : (
-						<div className="w-12 h-8 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-							No Image
-						</div>
-					)}
-				</div>
-			)
-		},
-		enableSorting: false,
-		enableHiding: false,
-	},
-	{
 		id: "name",
 		accessorKey: "name",
 		header: ({ column }) => (
 			<DataTableColumnHeader column={column} title="Car Name" />
 		),
-		cell: ({ row }) => (
-			<div className="font-medium">{row.getValue("name")}</div>
-		),
-		enableSorting: true,
-		enableHiding: false,
-	},
-	{
-		id: "brand",
-		accessorKey: "model.brand.name",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Brand" />
-		),
 		cell: ({ row }) => {
-			const model = row.original.model as any
-			return <div>{model?.brand?.name || 'N/A'}</div>
-		},
-		enableSorting: true,
-		enableHiding: false,
-	},
-	{
-		id: "model",
-		accessorKey: "model.name",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Model" />
-		),
-		cell: ({ row }) => {
-			const model = row.original.model as any
-			return <div>{model?.name || 'N/A'}</div>
+			const car = row.original
+			const model = car.model as any
+			return (
+				<div className="space-y-1">
+					<div className="font-medium">{row.getValue("name")}</div>
+					<div className="text-sm text-muted-foreground">
+						{model?.brand?.name} {model?.name}
+					</div>
+				</div>
+			)
 		},
 		enableSorting: true,
 		enableHiding: false,
@@ -107,18 +62,31 @@ export const carsTableColumns: ColumnDef<Car>[] = [
 		enableHiding: false,
 	},
 	{
-		id: "isAvailable",
+		id: "availability",
 		accessorKey: "isAvailable",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Availability" />
+			<DataTableColumnHeader column={column} title="Status" />
 		),
 		cell: ({ row }) => {
 			const isAvailable = row.getValue("isAvailable") as boolean
-			return (
-				<Badge variant={isAvailable ? "default" : "secondary"}>
-					{isAvailable ? "Available" : "Unavailable"}
-				</Badge>
-			)
+			const isActive = row.original.isActive as boolean
+			const status = row.original.status as string
+
+			// Determine overall status based on multiple factors
+			let statusBadge;
+			if (isActive && isAvailable && status === 'available') {
+				statusBadge = <Badge variant="default" className="bg-green-500">Available</Badge>
+			} else if (!isActive) {
+				statusBadge = <Badge variant="secondary">Inactive</Badge>
+			} else if (status === 'maintenance') {
+				statusBadge = <Badge variant="destructive" className="bg-yellow-500">Maintenance</Badge>
+			} else if (status === 'out_of_service') {
+				statusBadge = <Badge variant="destructive">Out of Service</Badge>
+			} else {
+				statusBadge = <Badge variant="secondary">Unavailable</Badge>
+			}
+
+			return statusBadge
 		},
 		enableSorting: true,
 		enableHiding: true,
@@ -129,7 +97,9 @@ export const carsTableColumns: ColumnDef<Car>[] = [
 		header: ({ column }) => (
 			<DataTableColumnHeader column={column} title="Year" />
 		),
-		cell: ({ row }) => <div>{row.getValue("year")}</div>,
+		cell: ({ row }) => (
+			<div className="font-medium">{row.getValue("year")}</div>
+		),
 		enableSorting: true,
 		enableHiding: true,
 	},
@@ -137,7 +107,7 @@ export const carsTableColumns: ColumnDef<Car>[] = [
 		id: "createdAt",
 		accessorKey: "createdAt",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Created At" />
+			<DataTableColumnHeader column={column} title="Created" />
 		),
 		cell: ({ row }) => (
 			<div className="text-sm text-muted-foreground">
@@ -151,10 +121,10 @@ export const carsTableColumns: ColumnDef<Car>[] = [
 		id: "actions",
 		accessorKey: "actions",
 		header: ({ column }) => (
-			<DataTableColumnHeader className="flex justify-end mr-4" column={column} title="Actions" />
+			<DataTableColumnHeader className="flex justify-end" column={column} title="Actions" />
 		),
 		cell: ({ row }) => (
-			<div className="flex justify-end mr-4">
+			<div className="flex justify-end">
 				<CarsTableRowActions row={row} />
 			</div>
 		),

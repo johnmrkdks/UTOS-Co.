@@ -59,3 +59,21 @@ export async function requireDriver() {
 	return session;
 }
 
+export async function redirectIfAuthenticated() {
+	const session = await authClient.getSession();
+	if (session) {
+		const userRole = session.data?.user.role;
+		switch (userRole) {
+			case "admin":
+			case "super_admin":
+				throw redirect({ to: "/admin/dashboard" });
+			case "driver":
+				throw redirect({ to: "/driver" });
+			case "user":
+				throw redirect({ to: "/" });
+			default:
+				throw redirect({ to: "/" });
+		}
+	}
+}
+

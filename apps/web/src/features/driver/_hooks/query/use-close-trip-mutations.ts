@@ -2,16 +2,16 @@ import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-// Interface matching the form data structure
+// Interface matching the backend service structure
 export interface ExtrasFormData {
 	additionalWaitTime: number;
 	unscheduledStops: number;
-	parkingCharges: number; // in cents
-	tollCharges: number; // in cents
+	parkingCharges: number; // in dollars (will be converted to cents)
+	tollCharges: number; // in dollars (will be converted to cents)
 	location: string;
 	otherCharges: {
 		description: string;
-		amount: number; // in cents
+		amount: number; // in dollars (will be converted to cents)
 	};
 	extraType: 'general' | 'driver' | 'operator';
 	notes: string;
@@ -22,10 +22,13 @@ export const useCloseTripWithExtrasMutation = () => {
 
 	return useMutation(trpc.bookings.closeTripWithExtras.mutationOptions({
 		onSuccess: (data) => {
-			// Invalidate related queries
+			// Invalidate and refetch related queries to ensure UI updates
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.list.queryKey() });
-			
+
+			// Force refetch driver bookings to update the trip list
+			queryClient.refetchQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+
 			toast.success("Trip completed with extras", {
 				description: `Total fare updated: $${data?.data?.booking?.finalAmount ? (data.data.booking.finalAmount / 100).toFixed(2) : '0.00'}`,
 			});
@@ -44,10 +47,13 @@ export const useCloseTripWithoutExtrasMutation = () => {
 
 	return useMutation(trpc.bookings.closeTripWithoutExtras.mutationOptions({
 		onSuccess: (data) => {
-			// Invalidate related queries
+			// Invalidate and refetch related queries to ensure UI updates
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.list.queryKey() });
-			
+
+			// Force refetch driver bookings to update the trip list
+			queryClient.refetchQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+
 			toast.success("Trip completed successfully", {
 				description: "The trip has been marked as completed",
 			});

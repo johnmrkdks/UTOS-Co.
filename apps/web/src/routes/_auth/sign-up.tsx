@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import placeholder from "@/assets/placeholder.svg";
 import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
 import SignUpForm from "@/features/auth/_components/sign-up-form";
+import { redirectIfAuthenticated } from "@/utils/auth";
 import { Car, Shield, Star, Clock, Users } from "lucide-react";
 import { z } from "zod";
 
@@ -12,6 +13,9 @@ const signUpSearchSchema = z.object({
 
 export const Route = createFileRoute("/_auth/sign-up")({
 	validateSearch: signUpSearchSchema,
+	beforeLoad: async () => {
+		await redirectIfAuthenticated();
+	},
 	component: RouteComponent,
 });
 

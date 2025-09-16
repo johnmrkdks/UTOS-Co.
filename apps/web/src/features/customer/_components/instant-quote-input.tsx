@@ -118,11 +118,12 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 										<GooglePlacesInput
 											placeholder="Enter pickup location..."
 											value={field.value}
-											onAddressSelect={(address: string, geometry: any) => {
-												field.onChange(address);
-												if (geometry?.location) {
-													form.setValue("originLatitude", geometry.location.lat());
-													form.setValue("originLongitude", geometry.location.lng());
+											onChange={field.onChange}
+											onPlaceSelect={(place) => {
+												field.onChange(place.description);
+												if (place.geometry?.location) {
+													form.setValue("originLatitude", place.geometry.location.lat());
+													form.setValue("originLongitude", place.geometry.location.lng());
 												}
 											}}
 										/>
@@ -143,11 +144,12 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 										<GooglePlacesInput
 											placeholder="Enter destination..."
 											value={field.value}
-											onAddressSelect={(address: string, geometry: any) => {
-												field.onChange(address);
-												if (geometry?.location) {
-													form.setValue("destinationLatitude", geometry.location.lat());
-													form.setValue("destinationLongitude", geometry.location.lng());
+											onChange={field.onChange}
+											onPlaceSelect={(place) => {
+												field.onChange(place.description);
+												if (place.geometry?.location) {
+													form.setValue("destinationLatitude", place.geometry.location.lat());
+													form.setValue("destinationLongitude", place.geometry.location.lng());
 												}
 											}}
 										/>
@@ -214,11 +216,12 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 												<GooglePlacesInput
 													placeholder="Enter stop location..."
 													value={field.value}
-													onAddressSelect={(address: string, geometry: any) => {
-														field.onChange(address);
-														if (geometry?.location) {
+													onChange={field.onChange}
+													onPlaceSelect={(place) => {
+														field.onChange(place.description);
+														if (place.geometry?.location) {
 															const stopsGeometry = form.getValues("stopsGeometry") || [];
-															stopsGeometry[index] = geometry;
+															stopsGeometry[index] = place.geometry;
 															form.setValue("stopsGeometry", stopsGeometry);
 														}
 													}}

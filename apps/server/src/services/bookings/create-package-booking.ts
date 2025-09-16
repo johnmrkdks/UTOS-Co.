@@ -93,9 +93,9 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			scheduledPickupTime: data.scheduledPickupTime,
 			estimatedDuration: packageInfo.duration,
 			
-			// Use package fixed pricing
-			quotedAmount: packageInfo.fixedPrice,
-			finalAmount: packageInfo.fixedPrice, // For packages, price is fixed
+			// Use package pricing (fixed or hourly based on service type)
+			quotedAmount: packageInfo.fixedPrice || packageInfo.hourlyRate || 0,
+			finalAmount: packageInfo.fixedPrice || packageInfo.hourlyRate || 0, // Use available pricing
 			
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,

@@ -19,8 +19,9 @@ export const packages = sqliteTable("packages", {
 	duration: integer("duration"), // in minutes (null for transfers)
 	maxDistance: integer("max_distance"), // in km (null if unlimited)
 
-	// Fixed pricing (since it's concluded/fixed)
-	fixedPrice: integer("fixed_price").notNull(), // in cents
+	// Pricing (based on service type rate type)
+	fixedPrice: integer("fixed_price"), // in cents (for fixed rate packages)
+	hourlyRate: integer("hourly_rate"), // in cents per hour (for hourly rate packages)
 	extraKmPrice: integer("extra_km_price"), // if distance exceeds maxDistance
 	extraHourPrice: integer("extra_hour_price"), // if duration exceeds planned
 	depositRequired: integer("deposit_required"), // in cents

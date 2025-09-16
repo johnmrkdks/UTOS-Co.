@@ -7,6 +7,7 @@ export const InsertPackageServiceTypeSchema = createInsertSchema(packageServiceT
 	name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
 	description: z.string().optional(),
 	icon: z.string().optional(),
+	rateType: z.enum(["fixed", "hourly"]).default("fixed"),
 	isActive: z.boolean().optional(),
 	displayOrder: z.number().int().min(0).optional(),
 });

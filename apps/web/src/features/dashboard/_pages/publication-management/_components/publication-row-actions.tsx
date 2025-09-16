@@ -6,13 +6,11 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { MoreHorizontal, DollarSign, Edit, Eye, Settings } from "lucide-react";
+import { MoreHorizontal, Edit, Eye, Settings } from "lucide-react";
 
 interface PublicationRowActionsProps {
 	carId: string;
 	carName: string;
-	hasPricingConfig: boolean;
-	onManagePricing: () => void;
 	onViewDetails?: () => void;
 	onEditCar?: () => void;
 }
@@ -20,8 +18,6 @@ interface PublicationRowActionsProps {
 export function PublicationRowActions({
 	carId,
 	carName,
-	hasPricingConfig,
-	onManagePricing,
 	onViewDetails,
 	onEditCar,
 }: PublicationRowActionsProps) {
@@ -37,13 +33,6 @@ export function PublicationRowActions({
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
-				{/* Pricing Configuration */}
-				<DropdownMenuItem onClick={onManagePricing}>
-					<DollarSign className="h-4 w-4" />
-					{hasPricingConfig ? "Edit Pricing Config" : "Add Pricing Config"}
-				</DropdownMenuItem>
-
-				<DropdownMenuSeparator />
 
 				{/* Car Management Actions */}
 				{onViewDetails && (
