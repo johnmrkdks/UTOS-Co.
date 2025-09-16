@@ -9,7 +9,7 @@ import { useState } from "react";
 
 export interface BookingFilters {
 	status?: string;
-	bookingType?: "package" | "custom";
+	bookingType?: "package" | "custom" | "offload";
 	dateFrom?: string;
 	dateTo?: string;
 	customerName?: string;
@@ -162,7 +162,7 @@ export function BookingFilters({
 				{/* Type Filter */}
 				<Select
 					value={filters.bookingType || "all"}
-					onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom")}
+					onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom" | "offload")}
 				>
 					<SelectTrigger className="h-8">
 						<SelectValue placeholder="Type" />
@@ -171,6 +171,7 @@ export function BookingFilters({
 						<SelectItem value="all">All Types</SelectItem>
 						<SelectItem value="package">Package</SelectItem>
 						<SelectItem value="custom">Custom</SelectItem>
+						<SelectItem value="offload">Offload</SelectItem>
 					</SelectContent>
 				</Select>
 

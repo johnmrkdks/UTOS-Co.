@@ -3,6 +3,7 @@ import { create } from "zustand";
 interface BookingManagementModalState {
 	isCreatePackageBookingDialogOpen: boolean;
 	isCreateCustomBookingDialogOpen: boolean;
+	isCreateOffloadBookingDialogOpen: boolean;
 	isBookingDetailsDialogOpen: boolean;
 	isAssignDriverDialogOpen: boolean;
 	isAssignCarDialogOpen: boolean;
@@ -19,6 +20,9 @@ interface BookingManagementModalState {
 	
 	openCreateCustomBookingDialog: () => void;
 	closeCreateCustomBookingDialog: () => void;
+
+	openCreateOffloadBookingDialog: () => void;
+	closeCreateOffloadBookingDialog: () => void;
 	
 	openBookingDetailsDialog: (bookingId: string) => void;
 	closeBookingDetailsDialog: () => void;
@@ -39,6 +43,7 @@ interface BookingManagementModalState {
 export const useBookingManagementModalProvider = create<BookingManagementModalState>((set) => ({
 	isCreatePackageBookingDialogOpen: false,
 	isCreateCustomBookingDialogOpen: false,
+	isCreateOffloadBookingDialogOpen: false,
 	isBookingDetailsDialogOpen: false,
 	isAssignDriverDialogOpen: false,
 	isAssignCarDialogOpen: false,
@@ -55,6 +60,9 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	
 	openCreateCustomBookingDialog: () => set({ isCreateCustomBookingDialogOpen: true }),
 	closeCreateCustomBookingDialog: () => set({ isCreateCustomBookingDialogOpen: false }),
+
+	openCreateOffloadBookingDialog: () => set({ isCreateOffloadBookingDialogOpen: true }),
+	closeCreateOffloadBookingDialog: () => set({ isCreateOffloadBookingDialogOpen: false }),
 	
 	openBookingDetailsDialog: (bookingId: string) => {
 		console.log("🚀 Modal provider - opening booking details dialog for ID:", bookingId);

@@ -7,7 +7,8 @@ export enum UserRoleEnum {
 
 export enum BookingTypeEnum {
 	Package = "package",     // Fixed service packages
-	Custom = "custom"        // Custom route/instant quote
+	Custom = "custom",       // Custom route/instant quote
+	Offload = "offload"      // Manual bookings from other companies
 }
 
 export enum BookingStatusEnum {

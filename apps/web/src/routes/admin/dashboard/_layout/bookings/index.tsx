@@ -7,8 +7,8 @@ import { BookingManagementModalProviders } from "@/features/dashboard/_pages/boo
 import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
 import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
 import { BookingFilters, type BookingFilters as BookingFiltersType } from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
-import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-package-booking-dialog";
 import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
+import { CreateOffloadBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-offload-booking-dialog";
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
 import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-driver-dialog";
 import { AssignCarDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-car-dialog";
@@ -16,7 +16,7 @@ import { EditBookingDialog } from "@/features/dashboard/_pages/booking-managemen
 import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-management/_components/change-status-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, PackageIcon, RouteIcon, Clock, Activity } from "lucide-react";
+import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
@@ -34,8 +34,8 @@ function RouteComponent() {
 
 function BookingManagementContent() {
 	const {
-		openCreatePackageBookingDialog,
 		openCreateCustomBookingDialog,
+		openCreateOffloadBookingDialog,
 		isAssignDriverDialogOpen,
 		selectedBookingForDriver,
 		closeAssignDriverDialog,
@@ -141,20 +141,20 @@ function BookingManagementContent() {
 				<h2 className="text-3xl font-bold tracking-tight">Booking Management</h2>
 				<div className="flex items-center space-x-2">
 					<Button
-						onClick={openCreatePackageBookingDialog}
-						className="flex items-center gap-2"
+						onClick={openCreateOffloadBookingDialog}
+						variant="outline"
+						className="flex items-center gap-2 border-orange-200 text-orange-700 hover:bg-orange-50"
 					>
-						<PackageIcon className="h-4 w-4" />
-						Create Package Booking
+						<TruckIcon className="h-4 w-4" />
+						Create Offload Booking
 					</Button>
-					<Button
+					{/* <Button
 						onClick={openCreateCustomBookingDialog}
-						variant='outline'
 						className="flex items-center gap-2"
 					>
 						<RouteIcon className="h-4 w-4" />
 						Create Custom Booking
-					</Button>
+					</Button> */}
 				</div>
 			</div>
 
@@ -184,6 +184,7 @@ function BookingManagementContent() {
 					<TabsTrigger value="pending">Pending</TabsTrigger>
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
 					<TabsTrigger value="custom">Custom Bookings</TabsTrigger>
+					<TabsTrigger value="offload">Offloads</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
@@ -250,10 +251,26 @@ function BookingManagementContent() {
 						</CardContent>
 					</Card>
 				</TabsContent>
+
+				<TabsContent value="offload" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Offload Bookings</CardTitle>
+							<CardDescription>
+								Manual bookings from other companies to help with workload distribution.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Suspense fallback={<Loader />}>
+								<BookingsListTable bookingType="offload" filters={filters} />
+							</Suspense>
+						</CardContent>
+					</Card>
+				</TabsContent>
 			</Tabs>
 
-			<CreatePackageBookingDialog />
 			<CreateCustomBookingDialog />
+			<CreateOffloadBookingDialog />
 			<BookingDetailsDialog />
 			<AssignDriverDialog 
 				booking={selectedBookingForDriver}

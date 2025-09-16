@@ -7,7 +7,7 @@ import { useState, useMemo } from "react";
 import { UserCheck, Ban } from "lucide-react";
 
 interface BookingsListTableProps {
-	bookingType?: "package" | "custom";
+	bookingType?: "package" | "custom" | "offload";
 	status?: string;
 	filters?: BookingFilters;
 	compact?: boolean;

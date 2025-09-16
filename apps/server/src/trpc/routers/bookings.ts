@@ -8,6 +8,7 @@ import { createBookingService, CreateBookingServiceSchema } from "@/services/boo
 import { createPackageBookingService, CreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
 import { createCustomBookingService, CreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
 import { createCustomBookingFromQuoteService, CreateCustomBookingFromQuoteSchema } from "@/services/bookings/create-custom-booking-from-quote";
+import { createOffloadBookingService, CreateOffloadBookingServiceSchema } from "@/services/bookings/create-offload-booking";
 import { calculateInstantQuoteService, CalculateInstantQuoteSchema } from "@/services/bookings/calculate-instant-quote";
 import { updateBookingStatusService, UpdateBookingStatusSchema, assignDriverService, AssignDriverSchema } from "@/services/bookings/update-booking-status";
 import { DeleteBookingServiceSchema, deleteBookingService } from "@/services/bookings/delete-booking";
@@ -341,6 +342,46 @@ export const bookingsRouter = router({
 				return newBooking;
 			} catch (error) {
 				console.error("❌ TRPC Error in createCustomBookingFromQuote:", {
+					error: error instanceof Error ? error.message : String(error),
+					stack: error instanceof Error ? error.stack : undefined,
+					input: JSON.stringify(input, null, 2)
+				});
+				handleTRPCError(error);
+			}
+		}),
+
+	// Create offload booking (admin only)
+	createOffloadBooking: protectedProcedure
+		.input(CreateOffloadBookingServiceSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				console.log("🔍 DEBUG createOffloadBooking - RECEIVED INPUT:");
+				console.log("📦 Input data:", JSON.stringify(input, null, 2));
+
+				// Check if user is admin or super_admin
+				const userId = session?.user?.id || session?.session?.userId;
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Authentication required",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+				if (!userRole || !['admin', 'super_admin'].includes(userRole)) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Admin access required to create offload bookings",
+					});
+				}
+
+				console.log("🚀 Creating offload booking for user:", userId, "with role:", userRole);
+				const newBooking = await createOffloadBookingService(db, input, userId);
+				console.log("✅ Offload booking created successfully:", newBooking?.id);
+
+				return newBooking;
+			} catch (error) {
+				console.error("❌ TRPC Error in createOffloadBooking:", {
 					error: error instanceof Error ? error.message : String(error),
 					stack: error instanceof Error ? error.stack : undefined,
 					input: JSON.stringify(input, null, 2)
