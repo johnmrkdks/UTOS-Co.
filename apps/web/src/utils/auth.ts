@@ -61,8 +61,16 @@ export async function requireDriver() {
 
 export async function redirectIfAuthenticated() {
 	const session = await authClient.getSession();
-	if (session) {
-		const userRole = session.data?.user.role;
+	console.log("🔍 redirectIfAuthenticated - Session check:", {
+		hasSession: !!session,
+		sessionData: session?.data,
+		userRole: session?.data?.user?.role
+	});
+
+	// Check if session exists AND has valid data
+	if (session?.data?.user) {
+		const userRole = session.data.user.role;
+		console.log("🚀 Redirecting authenticated user with role:", userRole);
 		switch (userRole) {
 			case "admin":
 			case "super_admin":
@@ -74,6 +82,8 @@ export async function redirectIfAuthenticated() {
 			default:
 				throw redirect({ to: "/" });
 		}
+	} else {
+		console.log("✅ No valid session data found, allowing access to auth page");
 	}
 }
 

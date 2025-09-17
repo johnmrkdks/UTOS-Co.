@@ -114,7 +114,7 @@ export function EditCancelDialogs({
 
 		editMutation.mutate({
 			bookingId: booking.id,
-			scheduledPickupTime,
+			scheduledPickupTime: scheduledPickupTime.toISOString(),
 			customerName: editData.customerName,
 			customerPhone: editData.customerPhone,
 			customerEmail: editData.customerEmail,

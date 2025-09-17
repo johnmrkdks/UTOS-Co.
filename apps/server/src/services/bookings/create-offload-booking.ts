@@ -10,6 +10,10 @@ export const CreateOffloadBookingServiceSchema = z.object({
 	vehicleType: z.string().min(1, "Vehicle type is required"),
 	quotedAmount: z.number().positive("Price must be a positive number"),
 	scheduledPickupTime: z.string(),
+	customerName: z.string().min(1, "Customer name is required"),
+	customerPhone: z.string().min(1, "Customer phone is required"),
+	passengerCount: z.number().int().min(1).max(20).optional(),
+	luggageCount: z.number().int().min(0).max(50).optional(),
 	notes: z.string().optional(),
 	bookingType: z.literal("offload"),
 });
@@ -37,10 +41,11 @@ export async function createOffloadBookingService(db: DB, data: CreateOffloadBoo
 		distanceFare: 0, // No distance fare for offload bookings
 		quotedAmount: data.quotedAmount,
 		finalAmount: data.quotedAmount, // Same as quoted amount initially
-		customerName: data.offloaderName,
-		customerEmail: "", // Empty string instead of null
-		customerPhone: "N/A", // Placeholder since it's required
-		passengerCount: 1, // Default to 1
+		customerName: data.customerName,
+		customerEmail: "", // Empty string instead of null - not collected for offload bookings
+		customerPhone: data.customerPhone,
+		passengerCount: data.passengerCount || 1,
+		luggageCount: data.luggageCount || 0,
 		specialRequests: data.notes || "",
 		status: "confirmed" as const, // Offload bookings start as confirmed
 	};

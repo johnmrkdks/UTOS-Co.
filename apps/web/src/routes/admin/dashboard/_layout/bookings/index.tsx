@@ -70,7 +70,7 @@ function BookingManagementContent() {
 		const bookingDate = new Date(b.scheduledPickupTime);
 		return bookingDate.toDateString() === today.toDateString();
 	}).length;
-	const activeBookings = bookingsData.filter(b => 
+	const activeBookings = bookingsData.filter(b =>
 		["driver_assigned", "in_progress"].includes(b.status)
 	).length;
 
@@ -148,22 +148,22 @@ function BookingManagementContent() {
 						<TruckIcon className="h-4 w-4" />
 						Create Offload Booking
 					</Button>
-					{/* <Button
+					<Button
 						onClick={openCreateCustomBookingDialog}
 						className="flex items-center gap-2"
 					>
 						<RouteIcon className="h-4 w-4" />
 						Create Custom Booking
-					</Button> */}
+					</Button>
 				</div>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{bookingManagementStatsData.map((data) => (
-					<AnalyticsCard 
-						key={data.id} 
-						data={data} 
-						view='compact' 
+					<AnalyticsCard
+						key={data.id}
+						data={data}
+						view='compact'
 					/>
 				))}
 			</div>
@@ -272,22 +272,22 @@ function BookingManagementContent() {
 			<CreateCustomBookingDialog />
 			<CreateOffloadBookingDialog />
 			<BookingDetailsDialog />
-			<AssignDriverDialog 
+			<AssignDriverDialog
 				booking={selectedBookingForDriver}
 				open={isAssignDriverDialogOpen}
 				onOpenChange={closeAssignDriverDialog}
 			/>
-			<AssignCarDialog 
+			<AssignCarDialog
 				booking={selectedBookingForCar}
 				open={isAssignCarDialogOpen}
 				onOpenChange={closeAssignCarDialog}
 			/>
-			<EditBookingDialog 
+			<EditBookingDialog
 				booking={selectedBookingForEdit}
 				open={isEditBookingDialogOpen}
 				onOpenChange={closeEditBookingDialog}
 			/>
-			<ChangeStatusDialog 
+			<ChangeStatusDialog
 				booking={selectedBookingForStatus}
 				open={isChangeStatusDialogOpen}
 				onOpenChange={closeChangeStatusDialog}

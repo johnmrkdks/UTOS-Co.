@@ -29,6 +29,27 @@ export const offloadBookingSchema = z.object({
 		.date({
 			required_error: "Pickup date and time is required",
 		}),
+	// Customer information
+	customerName: z
+		.string()
+		.min(1, "Customer name is required")
+		.max(100, "Customer name must be less than 100 characters"),
+	customerPhone: z
+		.string()
+		.min(1, "Customer phone is required")
+		.regex(/^[\+\-\s\d\(\)]+$/, "Please enter a valid phone number"),
+	passengerCount: z
+		.number()
+		.int("Passenger count must be a whole number")
+		.min(1, "At least 1 passenger required")
+		.max(20, "Maximum 20 passengers allowed")
+		.optional(),
+	luggageCount: z
+		.number()
+		.int("Luggage count must be a whole number")
+		.min(0, "Luggage count cannot be negative")
+		.max(50, "Maximum 50 pieces of luggage allowed")
+		.optional(),
 	notes: z
 		.string()
 		.max(500, "Notes must be less than 500 characters")

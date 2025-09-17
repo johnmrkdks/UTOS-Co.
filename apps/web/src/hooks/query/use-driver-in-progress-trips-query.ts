@@ -13,7 +13,7 @@ export const useDriverInProgressTripsQuery = (params: DriverInProgressTripsParam
 			filters: {
 				...params.filters,
 				// Only show trips that are currently in progress for this driver
-				status: ["driver_assigned", "driver_en_route", "in_progress"],
+				status: "driver_assigned,driver_en_route,in_progress",
 			},
 		})
 	);

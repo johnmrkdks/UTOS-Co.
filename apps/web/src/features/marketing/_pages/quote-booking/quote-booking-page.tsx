@@ -65,6 +65,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	const search = useSearch({ strict: false }) as any;
 	const navigate = useNavigate();
 
+
 	// Use user query for authenticated users only
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
 
@@ -245,7 +246,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		// Only authenticated users can book - require session
 		if (!sessionData?.user) {
 			toast.error("Please sign in to complete your booking.");
-			navigate({ to: "/sign-in" });
+			navigate({ to: "/sign-in", resetScroll: true });
 			return;
 		}
 
@@ -331,7 +332,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="container mx-auto px-4 py-8">
-					<div className="max-w-2xl mx-auto text-center space-y-6">
+					<div className="max-w-2xl mx-auto text-center space-y-6 overflow-hidden">
 						{/* Authentication Required Card */}
 						<Card className="border-blue-200 bg-blue-50">
 							<CardContent className="p-8">
@@ -410,17 +411,17 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 									{/* Quote Summary with Fare Breakdown */}
 									{(secureQuoteData || quoteData.origin) && (
-										<div className="bg-white rounded-lg p-4 border text-left">
+										<div className="bg-white rounded-lg p-4 border text-left w-full overflow-hidden">
 											<h3 className="font-medium text-gray-900 mb-3 text-center">Your Quote Summary</h3>
 											<div className="space-y-3 text-sm">
 												{/* From */}
-												<div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+												<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200 min-w-0">
 													<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
 														<Navigation className="w-3 h-3 text-white" />
 													</div>
-													<div className="flex-1 min-w-0">
+													<div className="flex-1 min-w-0 overflow-hidden">
 														<span className="text-xs text-green-700 font-medium">Pickup</span>
-														<div className="text-sm font-medium text-gray-800 truncate">{secureQuoteData?.originAddress || quoteData.origin}</div>
+														<div className="text-sm font-medium text-gray-800 truncate break-words">{secureQuoteData?.originAddress || quoteData.origin}</div>
 													</div>
 												</div>
 
@@ -428,13 +429,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
 													<>
 														{secureQuoteData.stops.map((stop: any, index: number) => (
-															<div key={stop.id || index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+															<div key={stop.id || index} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200 min-w-0">
 																<div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
 																	<CircleDot className="w-3 h-3 text-white" />
 																</div>
-																<div className="flex-1 min-w-0">
+																<div className="flex-1 min-w-0 overflow-hidden">
 																	<span className="text-xs text-blue-700 font-medium">Stop {index + 1}</span>
-																	<div className="text-sm font-medium text-gray-800 truncate">{stop.address}</div>
+																	<div className="text-sm font-medium text-gray-800 truncate break-words">{stop.address}</div>
 																</div>
 															</div>
 														))}
@@ -442,13 +443,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												)}
 
 												{/* To */}
-												<div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
+												<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-red-50 rounded-lg border border-red-200 min-w-0">
 													<div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
 														<MapPinned className="w-3 h-3 text-white" />
 													</div>
-													<div className="flex-1 min-w-0">
+													<div className="flex-1 min-w-0 overflow-hidden">
 														<span className="text-xs text-red-700 font-medium">Drop-off</span>
-														<div className="text-sm font-medium text-gray-800 truncate">{secureQuoteData?.destinationAddress || quoteData.destination}</div>
+														<div className="text-sm font-medium text-gray-800 truncate break-words">{secureQuoteData?.destinationAddress || quoteData.destination}</div>
 													</div>
 												</div>
 
@@ -508,7 +509,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												const currentPath = window.location.pathname + window.location.search;
 												navigate({
 													to: "/sign-in",
-													search: { redirect: currentPath }
+													search: { redirect: currentPath },
+													resetScroll: true
 												});
 											}}
 										>
@@ -523,7 +525,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												const currentPath = window.location.pathname + window.location.search;
 												navigate({
 													to: "/sign-up",
-													search: { redirect: currentPath }
+													search: { redirect: currentPath },
+													resetScroll: true
 												});
 											}}
 										>
@@ -533,7 +536,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										<Button
 											variant="ghost"
 											className="w-full text-sm"
-											onClick={() => navigate({ to: "/" })}
+											onClick={() => navigate({ to: "/", resetScroll: true })}
 										>
 											Get New Quote
 										</Button>

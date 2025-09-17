@@ -30,7 +30,7 @@ export function CustomerBookingsDashboardPage() {
 		// Calculate total spend
 		const totalSpent = bookings
 			.filter(b => b.status === "completed")
-			.reduce((sum, b) => sum + (b.amount || 0), 0);
+			.reduce((sum, b) => sum + ((b as any).amount || 0), 0);
 
 		return { upcoming, inProgress, completed, total, totalSpent };
 	}, [bookings]);

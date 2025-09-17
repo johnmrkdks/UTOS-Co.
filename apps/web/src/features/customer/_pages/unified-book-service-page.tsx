@@ -120,7 +120,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 			console.log("❌ Form validation failed:", error);
 			if (error instanceof z.ZodError) {
 				const errors: Record<string, string> = {};
-				error.errors.forEach((err) => {
+				error.issues.forEach((err: any) => {
 					if (err.path.length > 0) {
 						errors[err.path[0] as string] = err.message;
 						console.log(`Field ${err.path[0]}: ${err.message}`);
@@ -285,7 +285,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 						</p>
 						<div className="space-y-2">
 							<Button className="w-full" asChild>
-								<Link to="/dashboard/bookings">View My Bookings</Link>
+								<Link to="/my-bookings">View My Bookings</Link>
 							</Button>
 							<Button variant="outline" className="w-full" asChild>
 								<Link to="/dashboard/services">Browse More Services</Link>
@@ -323,10 +323,10 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 								<div>
 									<CardTitle>{service.name}</CardTitle>
 									<Badge variant="secondary" className="mt-2">
-										{getServiceTypeDisplay(service.serviceType)}
+										{getServiceTypeDisplay((service as any).serviceType || "service")}
 									</Badge>
 								</div>
-								<span className="text-2xl font-bold text-primary">{formatPrice(service.fixedPrice)}</span>
+								<span className="text-2xl font-bold text-primary">{formatPrice(service.fixedPrice || 0)}</span>
 							</div>
 							<CardDescription>{service.description}</CardDescription>
 						</CardHeader>
@@ -346,7 +346,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							<div className="space-y-3">
 								<div className="flex items-center gap-2 text-sm text-gray-600">
 									<Clock className="h-4 w-4" />
-									<span>{formatDuration(service.duration)}</span>
+									<span>{formatDuration(service.duration || undefined)}</span>
 								</div>
 								<div className="flex items-center gap-2 text-sm text-gray-600">
 									<Users className="h-4 w-4" />
@@ -554,7 +554,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 									<div className="text-lg font-medium">Total Cost</div>
 									<div className="text-sm text-gray-600">Fixed price for this service</div>
 								</div>
-								<div className="text-3xl font-bold text-primary">{formatPrice(service.fixedPrice)}</div>
+								<div className="text-3xl font-bold text-primary">{formatPrice(service.fixedPrice || 0)}</div>
 							</div>
 							<Button 
 								className="w-full" 

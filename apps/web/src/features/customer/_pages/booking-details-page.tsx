@@ -31,7 +31,8 @@ import { useParams, useNavigate } from "@tanstack/react-router";
 import { useGetBookingByIdQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-booking-by-id-query";
 
 export function BookingDetailsPage() {
-	const { bookingId } = useParams({ from: '/my-bookings/_layout/booking-details/$bookingId' });
+	const params = useParams({ strict: false });
+	const bookingId = (params as any).bookingId || '';
 	const navigate = useNavigate();
 	const { data: booking, isLoading, error } = useGetBookingByIdQuery(bookingId);
 
@@ -150,11 +151,11 @@ export function BookingDetailsPage() {
 								<div className="space-y-3 flex-1">
 									<div>
 										<p className="text-sm font-medium">From</p>
-										<p className="text-sm text-muted-foreground">{booking.originAddress || booking.pickupAddress}</p>
+										<p className="text-sm text-muted-foreground">{booking.originAddress || (booking as any).pickupAddress}</p>
 									</div>
 									<div>
 										<p className="text-sm font-medium">To</p>
-										<p className="text-sm text-muted-foreground">{booking.destinationAddress || booking.dropoffAddress || 'Not specified'}</p>
+										<p className="text-sm text-muted-foreground">{booking.destinationAddress || (booking as any).dropoffAddress || 'Not specified'}</p>
 									</div>
 								</div>
 							</div>
@@ -213,7 +214,7 @@ export function BookingDetailsPage() {
 				</Card>
 
 				{/* Pricing */}
-				{booking.amount && (
+				{(booking as any).amount && (
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-base">Pricing Details</CardTitle>
@@ -222,7 +223,7 @@ export function BookingDetailsPage() {
 							<div className="space-y-2">
 								<div className="flex justify-between">
 									<span className="text-sm">Quoted Amount</span>
-									<span className="text-sm font-semibold">{formatPrice(booking.amount)}</span>
+									<span className="text-sm font-semibold">{formatPrice((booking as any).amount)}</span>
 								</div>
 								{booking.baseFare && (
 									<div className="flex justify-between text-sm text-muted-foreground">
@@ -242,7 +243,7 @@ export function BookingDetailsPage() {
 				)}
 
 				{/* Driver Info */}
-				{booking.assignedDriver && (
+				{(booking as any).assignedDriver && (
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-base">Driver Information</CardTitle>
@@ -252,15 +253,15 @@ export function BookingDetailsPage() {
 								<User className="h-4 w-4 text-muted-foreground" />
 								<div>
 									<p className="text-xs text-muted-foreground">Driver</p>
-									<p className="text-sm font-medium">{booking.assignedDriver.name}</p>
+									<p className="text-sm font-medium">{(booking as any).assignedDriver.name}</p>
 								</div>
 							</div>
-							{booking.assignedDriver.phoneNumber && (
+							{(booking as any).assignedDriver.phoneNumber && (
 								<div className="flex items-center gap-3">
 									<Phone className="h-4 w-4 text-muted-foreground" />
 									<div>
 										<p className="text-xs text-muted-foreground">Phone</p>
-										<p className="text-sm">{booking.assignedDriver.phoneNumber}</p>
+										<p className="text-sm">{(booking as any).assignedDriver.phoneNumber}</p>
 									</div>
 								</div>
 							)}
@@ -280,7 +281,7 @@ export function BookingDetailsPage() {
 								<div>
 									<p className="text-sm font-medium">Created</p>
 									<p className="text-xs text-muted-foreground">
-										{formatDate(booking.createdAt)} at {formatTime(booking.createdAt)}
+										{booking.createdAt ? formatDate(booking.createdAt) : 'N/A'} at {booking.createdAt ? formatTime(booking.createdAt) : 'N/A'}
 									</p>
 								</div>
 							</div>

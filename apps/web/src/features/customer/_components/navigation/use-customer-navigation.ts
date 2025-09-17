@@ -38,7 +38,7 @@ export function useCustomerNavigation(): CustomerNavigationItem[] {
 			name: "Instant Quote",
 			href: "/",
 			icon: Calculator,
-			active: location.pathname === "/" && location.search?.includes("instant-quote"),
+			active: location.pathname === "/" && new URLSearchParams(typeof location.search === 'string' ? location.search : "").has("instant-quote"),
 			primary: true
 		},
 	];

@@ -19,6 +19,8 @@ const router = createRouter({
 	defaultPreload: "intent",
 	defaultPendingComponent: () => <Loader />,
 	context: { trpc, queryClient },
+	// Enable TanStack Router's built-in scroll restoration
+	scrollRestoration: true,
 	Wrap: function WrapComponent({ children }: { children: React.ReactNode }) {
 		return (
 			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

@@ -114,9 +114,10 @@ export function BookingDetailsPage({ booking, onClose }: BookingDetailsPageProps
 	const handleSaveEdit = () => {
 		if (!booking?.id) return;
 		
-		const { selectedCarId, ...bookingData } = editData;
+		const { selectedCarId, scheduledPickupTime, ...bookingData } = editData;
 		editMutation.mutate({
 			bookingId: booking.id,
+			scheduledPickupTime: scheduledPickupTime.toISOString(),
 			...bookingData,
 		});
 	};

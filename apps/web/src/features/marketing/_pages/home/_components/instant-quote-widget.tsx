@@ -104,15 +104,17 @@ export function InstantQuoteWidget() {
 		if (isDirectBooking) {
 			// Direct booking from /booking - car already selected, go directly to calculate quote (public route)
 			params.set("selectedCarId", search.carId);
-			navigate({ 
-				to: "/calculate-quote", 
-				search: Object.fromEntries(params) 
+			navigate({
+				to: "/calculate-quote",
+				search: Object.fromEntries(params),
+				resetScroll: true
 			});
 		} else {
 			// Normal flow - need to select vehicle first
-			navigate({ 
-				to: "/select-vehicle", 
-				search: Object.fromEntries(params) 
+			navigate({
+				to: "/select-vehicle",
+				search: Object.fromEntries(params),
+				resetScroll: true
 			});
 		}
 	}

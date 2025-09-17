@@ -26,22 +26,8 @@ import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/quer
 import { useCreateServiceBookingMutation } from "@/features/customer/_hooks/query/use-create-service-booking-mutation";
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { createServiceBookingSchema, type ServiceBookingFormData } from "@/features/customer/_schemas/service-booking-schema";
 import { z } from "zod";
-
-// Booking form schema
-const BookingFormSchema = z.object({
-	originAddress: z.string().min(1, "Pickup location is required"),
-	destinationAddress: z.string().min(1, "Destination is required"),
-	scheduledPickupDate: z.string().min(1, "Pickup date is required"),
-	scheduledPickupTime: z.string().min(1, "Pickup time is required"),
-	customerName: z.string().min(1, "Name is required"),
-	customerPhone: z.string().min(1, "Phone number is required"),
-	customerEmail: z.string().email("Valid email required"),
-	passengerCount: z.number().min(1, "At least 1 passenger required"),
-	specialRequests: z.string().optional(),
-});
-
-type BookingFormData = z.infer<typeof BookingFormSchema>;
 
 export function BookServicePage() {
 	const { serviceId } = useParams({ from: "/dashboard/_layout/book-service/$serviceId" });
@@ -78,11 +64,29 @@ export function BookServicePage() {
 		}
 	}
 
+	// Determine if service is hourly based on service type rate type
+	const isHourlyService = (service as any)?.serviceType?.rateType === "hourly";
+
+	// Create dynamic schema based on service type
+	const ServiceBookingSchema = createServiceBookingSchema(service?.maxPassengers || undefined, isHourlyService);
+
+	// Extended form data type to include fields used in this form
+	type ExtendedFormData = ServiceBookingFormData & {
+		originAddress?: string;
+		destinationAddress?: string;
+		scheduledPickupDate?: string;
+		scheduledPickupTime?: string;
+		customerName?: string;
+		customerPhone?: string;
+		customerEmail?: string;
+		specialRequests?: string;
+	};
+
 	// Form state
-	const [formData, setFormData] = useState<Partial<BookingFormData>>({
-		customerName: user?.name || "",
-		customerEmail: user?.email || "",
+	const [formData, setFormData] = useState<Partial<ExtendedFormData>>({
 		passengerCount: 1,
+		luggageCount: 0,
+		serviceDuration: isHourlyService ? 1 : undefined, // Default to 1 hour for hourly services
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
@@ -102,14 +106,39 @@ export function BookServicePage() {
 	const getServiceTypeDisplay = (serviceType: string) => {
 		switch (serviceType) {
 			case "transfer": return "Transfer";
-			case "tour": return "Tour";  
+			case "tour": return "Tour";
 			case "event": return "Event";
 			case "hourly": return "Hourly";
 			default: return serviceType;
 		}
 	};
 
-	const updateFormData = (field: keyof BookingFormData, value: any) => {
+	// Calculate total price based on service type
+	const calculateTotalPrice = () => {
+		if (!service) return 0;
+
+		if (isHourlyService && service.hourlyRate && formData.serviceDuration) {
+			return service.hourlyRate * formData.serviceDuration;
+		}
+
+		return service.fixedPrice || 0;
+	};
+
+	// Format price display for hourly services
+	const formatPriceDisplay = () => {
+		if (!service) return "$0";
+
+		if (isHourlyService && service.hourlyRate) {
+			if (formData.serviceDuration) {
+				return `${formatPrice(service.hourlyRate)} × ${formData.serviceDuration}h = ${formatPrice(calculateTotalPrice())}`;
+			}
+			return `${formatPrice(service.hourlyRate)} per hour`;
+		}
+
+		return formatPrice(service.fixedPrice || 0);
+	};
+
+	const updateFormData = (field: keyof ExtendedFormData, value: any) => {
 		setFormData(prev => ({ ...prev, [field]: value }));
 		// Clear error when user starts typing
 		if (formErrors[field]) {
@@ -120,23 +149,36 @@ export function BookServicePage() {
 	const validateForm = () => {
 		try {
 			console.log("🔍 Validating form data:", formData);
-			BookingFormSchema.parse(formData);
+			// Basic validation for required fields
+			const errors: Record<string, string> = {};
+
+			if (!formData.passengerCount || formData.passengerCount < 1) {
+				errors.passengerCount = "At least 1 passenger required";
+			}
+
+			if (isHourlyService && (!formData.serviceDuration || formData.serviceDuration < 1)) {
+				errors.serviceDuration = "Service duration is required for hourly services";
+			}
+
+			if (!formData.scheduledPickupDate) {
+				errors.scheduledPickupDate = "Pickup date is required";
+			}
+
+			if (!formData.scheduledPickupTime) {
+				errors.scheduledPickupTime = "Pickup time is required";
+			}
+
+			if (Object.keys(errors).length > 0) {
+				setFormErrors(errors);
+				console.log("Form errors:", errors);
+				return false;
+			}
+
 			console.log("✅ Form validation passed");
 			setFormErrors({});
 			return true;
 		} catch (error) {
 			console.log("❌ Form validation failed:", error);
-			if (error instanceof z.ZodError) {
-				const errors: Record<string, string> = {};
-				error.errors.forEach((err) => {
-					if (err.path.length > 0) {
-						errors[err.path[0] as string] = err.message;
-						console.log(`Field ${err.path[0]}: ${err.message}`);
-					}
-				});
-				setFormErrors(errors);
-				console.log("Form errors:", errors);
-			}
 			return false;
 		}
 	};
@@ -189,14 +231,15 @@ export function BookServicePage() {
 			packageId: service.id,
 			carId: availableCar.id,
 			userId: user.id,
-			originAddress: formData.originAddress!,
-			destinationAddress: formData.destinationAddress!,
+			originAddress: formData.originAddress || "TBD", // Package services may not require specific pickup
+			destinationAddress: formData.destinationAddress || "TBD", // Package services may not require specific destination
 			scheduledPickupTime,
-			customerName: formData.customerName!,
-			customerPhone: formData.customerPhone!,
-			customerEmail: formData.customerEmail!,
+			customerName: user.name || "",
+			customerPhone: "N/A", // User doesn't have phone in session
+			customerEmail: user.email || "",
 			passengerCount: formData.passengerCount!,
-			specialRequests: formData.specialRequests,
+			specialRequests: formData.specialRequests || "",
+			...(isHourlyService && { serviceDuration: formData.serviceDuration })
 		};
 
 		console.log("📦 Booking payload:", bookingPayload);
@@ -285,7 +328,7 @@ export function BookServicePage() {
 						</p>
 						<div className="space-y-2">
 							<Button className="w-full" asChild>
-								<Link to="/dashboard/bookings">View My Bookings</Link>
+								<Link to="/my-bookings">View My Bookings</Link>
 							</Button>
 							<Button variant="outline" className="w-full" asChild>
 								<Link to="/dashboard/services">Browse More Services</Link>
@@ -321,10 +364,19 @@ export function BookServicePage() {
 								<div>
 									<CardTitle>{service.name}</CardTitle>
 									<Badge variant="secondary" className="mt-2">
-										{getServiceTypeDisplay(service.serviceType)}
+										{getServiceTypeDisplay((service as any).serviceType)}
 									</Badge>
 								</div>
-								<span className="text-2xl font-bold text-primary">{formatPrice(service.fixedPrice)}</span>
+								<div className="text-right">
+									{isHourlyService ? (
+										<div>
+											<span className="text-2xl font-bold text-primary">{formatPrice(service.hourlyRate || 0)}</span>
+											<span className="text-sm text-gray-600 block">per hour</span>
+										</div>
+									) : (
+										<span className="text-2xl font-bold text-primary">{formatPrice(service.fixedPrice || 0)}</span>
+									)}
+								</div>
 							</div>
 							<CardDescription>{service.description}</CardDescription>
 						</CardHeader>
@@ -344,7 +396,7 @@ export function BookServicePage() {
 							<div className="space-y-3">
 								<div className="flex items-center gap-2 text-sm text-gray-600">
 									<Clock className="h-4 w-4" />
-									<span>{formatDuration(service.duration)}</span>
+									<span>{formatDuration(service.duration || 0)}</span>
 								</div>
 								<div className="flex items-center gap-2 text-sm text-gray-600">
 									<Users className="h-4 w-4" />
@@ -500,6 +552,26 @@ export function BookServicePage() {
 										<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
 									)}
 								</div>
+								{isHourlyService && (
+									<div>
+										<Label htmlFor="serviceDuration">Service Duration (Hours)</Label>
+										<Input
+											id="serviceDuration"
+											type="number"
+											min="1"
+											max="24"
+											value={formData.serviceDuration || 1}
+											onChange={(e) => updateFormData("serviceDuration", parseInt(e.target.value) || 1)}
+											className={formErrors.serviceDuration ? "border-red-500" : ""}
+										/>
+										<p className="text-sm text-gray-600 mt-1">
+											Rate: {formatPrice(service.hourlyRate || 0)} per hour
+										</p>
+										{formErrors.serviceDuration && (
+											<p className="text-red-500 text-sm mt-1">{formErrors.serviceDuration}</p>
+										)}
+									</div>
+								)}
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div>
@@ -550,9 +622,17 @@ export function BookServicePage() {
 							<div className="flex items-center justify-between mb-4">
 								<div>
 									<div className="text-lg font-medium">Total Cost</div>
-									<div className="text-sm text-gray-600">Fixed price for this service</div>
+									<div className="text-sm text-gray-600">
+										{isHourlyService ? (
+											formData.serviceDuration
+												? `${formData.serviceDuration} hour${formData.serviceDuration > 1 ? 's' : ''} @ ${formatPrice(service.hourlyRate || 0)}/hour`
+												: "Select duration to see total"
+										) : (
+											"Fixed price for this service"
+										)}
+									</div>
 								</div>
-								<div className="text-3xl font-bold text-primary">{formatPrice(service.fixedPrice)}</div>
+								<div className="text-3xl font-bold text-primary">{formatPrice(calculateTotalPrice())}</div>
 							</div>
 							<Button 
 								className="w-full" 

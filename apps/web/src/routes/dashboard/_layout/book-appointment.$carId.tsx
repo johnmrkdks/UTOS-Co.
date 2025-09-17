@@ -94,14 +94,14 @@ function CarBookingPage() {
 			}, {
 				onSuccess: (data) => {
 					toast.success("Appointment booked successfully!", {
-						description: `Your luxury chauffeur appointment has been confirmed. Booking ID: ${data.id}`,
+						description: `Your luxury chauffeur appointment has been confirmed. Booking ID: ${data?.id || 'N/A'}`,
 					})
-					setBookingId(data.id)
+					setBookingId(data?.id || null)
 					setCurrentStep("success")
 
 					// Redirect to bookings page after success
 					setTimeout(() => {
-						navigate({ to: "/dashboard/bookings" })
+						navigate({ to: "/admin/dashboard/bookings" })
 					}, 3000)
 				},
 				onError: (error) => {

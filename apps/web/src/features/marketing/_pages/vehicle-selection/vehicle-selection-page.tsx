@@ -28,6 +28,7 @@ export function VehicleSelectionPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
+
 	// Fetch published cars
 	const { data: carsData, isLoading } = useGetPublishedCarsQuery({ limit: 50 });
 
@@ -64,9 +65,10 @@ export function VehicleSelectionPage() {
 			? "/dashboard/calculate-quote" 
 			: "/calculate-quote";
 		
-		navigate({ 
-			to: calculateQuotePath, 
-			search: Object.fromEntries(params) as any
+		navigate({
+			to: calculateQuotePath,
+			search: Object.fromEntries(params) as any,
+			resetScroll: true
 		});
 	};
 
@@ -83,13 +85,14 @@ export function VehicleSelectionPage() {
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => navigate({ 
-									to: search.fromCustomerArea ? "/dashboard/cars" : "/" 
+								onClick={() => navigate({
+									to: "/",
+									resetScroll: true
 								})}
 								className="gap-2 -ml-2"
 							>
 								<ArrowLeft className="w-4 h-4" />
-								{search.fromCustomerArea ? "Back to Cars" : "Back to Quote"}
+								Back to Quote
 							</Button>
 						</div>
 
@@ -98,13 +101,14 @@ export function VehicleSelectionPage() {
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => navigate({ 
-									to: search.fromCustomerArea ? "/dashboard/cars" : "/" 
+								onClick={() => navigate({
+									to: "/",
+									resetScroll: true
 								})}
 								className="gap-2"
 							>
 								<ArrowLeft className="w-4 h-4" />
-								{search.fromCustomerArea ? "Back to Cars" : "Back to Quote"}
+								Back to Quote
 							</Button>
 							<div className="h-6 w-px bg-border" />
 							<div>
@@ -245,7 +249,7 @@ export function VehicleSelectionPage() {
 									<div className="h-40 sm:h-40 lg:h-48 bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
 										{car.images && car.images.length > 0 ? (
 											<img
-												src={car.images.find(img => img.isMain)?.url || car.images[0].url}
+												src={car.images.find((img: any) => img.isMain)?.url || car.images[0].url}
 												alt={car.name}
 												className="w-full h-full object-cover"
 											/>
@@ -308,7 +312,7 @@ export function VehicleSelectionPage() {
 										{/* Features - Mobile optimized */}
 										{car.features && car.features.length > 0 && (
 											<div className="flex flex-wrap gap-1.5">
-												{car.features.slice(0, 3).map((feature, idx) => (
+												{car.features.slice(0, 3).map((feature: any, idx: number) => (
 													<Badge key={idx} variant="outline" className="text-xs px-2 py-1">
 														{feature.name}
 													</Badge>
@@ -351,7 +355,7 @@ export function VehicleSelectionPage() {
 									<div className="w-12 h-12 bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
 										{selectedCar.images?.[0] ? (
 											<img
-												src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
+												src={selectedCar.images.find((img: any) => img.isMain)?.url || selectedCar.images[0].url}
 												alt={selectedCar.name}
 												className="w-full h-full object-cover"
 											/>
@@ -382,7 +386,7 @@ export function VehicleSelectionPage() {
 									<div className="w-12 h-12 bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center flex-shrink-0">
 										{selectedCar.images?.[0] ? (
 											<img
-												src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
+												src={selectedCar.images.find((img: any) => img.isMain)?.url || selectedCar.images[0].url}
 												alt={selectedCar.name}
 												className="w-full h-full object-cover rounded-lg"
 											/>

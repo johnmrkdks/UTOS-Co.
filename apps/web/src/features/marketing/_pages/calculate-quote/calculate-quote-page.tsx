@@ -41,6 +41,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 	const search = useSearch({ strict: false }) as any;
 	const [isCalculating, setIsCalculating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
 	const [originGeometry, setOriginGeometry] = useState<any>(null);
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null);
 	const [stopsGeometry, setStopsGeometry] = useState<any[]>([]);
@@ -122,13 +123,15 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 				if (search.selectedCarId && !search.origin) {
 					navigate({
 						to: "/book-quote/$quoteId",
-						params: { quoteId }
+						params: { quoteId },
+						resetScroll: true
 					});
 				} else {
 					// Otherwise, go to quote results
 					navigate({
 						to: "/quote-results",
-						search: { quoteId }
+						search: { quoteId },
+						resetScroll: true
 					});
 				}
 			} else {
@@ -191,13 +194,15 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 				if (search.selectedCarId && !search.origin) {
 					navigate({
 						to: "/book-quote/$quoteId",
-						params: { quoteId }
+						params: { quoteId },
+						resetScroll: true
 					});
 				} else {
 					// Otherwise, go to quote results
 					navigate({
 						to: "/quote-results",
-						search: { quoteId }
+						search: { quoteId },
+						resetScroll: true
 					});
 				}
 			} else {
@@ -214,7 +219,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 	const handleGoBack = () => {
 		// If we have a selected car but no route data, we came from fleet
 		if (search.selectedCarId && !hasRouteData) {
-			navigate({ to: "/fleet" });
+			navigate({ to: "/fleet", resetScroll: true });
 		} else {
 			// Go back to vehicle selection with route data
 			const params = new URLSearchParams();
@@ -226,9 +231,10 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 			if (search.destinationLng) params.set("destinationLng", search.destinationLng);
 			if (search.stops) params.set("stops", search.stops);
 
-			navigate({ 
-				to: "/select-vehicle", 
-				search: Object.fromEntries(params) 
+			navigate({
+				to: "/select-vehicle",
+				search: Object.fromEntries(params),
+				resetScroll: true
 			});
 		}
 	};

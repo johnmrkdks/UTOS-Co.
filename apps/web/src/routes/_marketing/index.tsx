@@ -31,15 +31,16 @@ function RouteComponent() {
 		if (session?.user && search.redirect) {
 			navigate({
 				to: search.redirect,
+				resetScroll: true
 			});
 			return;
 		}
 
 		// Auto-redirect drivers to their dashboard
 		if (session?.user?.role === "driver") {
-			navigate({ to: "/driver" });
+			navigate({ to: "/driver", resetScroll: true });
 		} else if (session?.user?.role === "admin" || session?.user?.role === "super_admin") {
-			navigate({ to: "/admin/dashboard" });
+			navigate({ to: "/admin/dashboard", resetScroll: true });
 		}
 	}, [session, search.redirect, navigate]);
 

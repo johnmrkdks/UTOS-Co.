@@ -22,7 +22,6 @@ export function ServicesPage() {
 
 	// Fetch published services (packages from customer perspective)
 	const { data: servicesData, isLoading, error } = useGetPublishedServicesQuery({
-		search: searchTerm,
 		limit: 50,
 		offset: 0,
 	});
@@ -57,15 +56,15 @@ export function ServicesPage() {
 	};
 
 	// Get unique service types for filtering
-	const serviceTypes = Array.from(new Set(services.map(s => s.serviceType))).map(type => getServiceTypeDisplay(type));
+	const serviceTypes = Array.from(new Set(services.map(s => (s as any).serviceType))).map(type => getServiceTypeDisplay(type));
 
 	const filteredServices = services.filter(service => {
 		const matchesSearch = 
 			service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			service.serviceType.toLowerCase().includes(searchTerm.toLowerCase());
+			(service as any).serviceType.toLowerCase().includes(searchTerm.toLowerCase());
 		
-		const matchesCategory = activeCategory === "All" || getServiceTypeDisplay(service.serviceType) === activeCategory;
+		const matchesCategory = activeCategory === "All" || getServiceTypeDisplay((service as any).serviceType) === activeCategory;
 		
 		return matchesSearch && matchesCategory;
 	});
@@ -186,14 +185,14 @@ export function ServicesPage() {
 								{/* Service Type Badge */}
 								<div className="absolute bottom-4 left-4">
 									<Badge className="bg-primary/90 text-primary-foreground border-0 shadow-lg">
-										{getServiceTypeDisplay(service.serviceType)}
+										{getServiceTypeDisplay((service as any).serviceType)}
 									</Badge>
 								</div>
 								
 								{/* Price Badge */}
 								<div className="absolute top-4 left-4">
 									<Badge className="bg-white/95 text-primary font-bold shadow-lg">
-										{formatPrice(service.fixedPrice)}
+										{formatPrice(service.fixedPrice || 0)}
 									</Badge>
 								</div>
 								
@@ -219,7 +218,7 @@ export function ServicesPage() {
 								<div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
 									<div className="flex items-center gap-2">
 										<Clock className="h-4 w-4" />
-										<span>{formatDuration(service.duration)}</span>
+										<span>{formatDuration(service.duration || undefined)}</span>
 									</div>
 									<div className="flex items-center gap-2">
 										<Users className="h-4 w-4" />
@@ -285,7 +284,7 @@ export function ServicesPage() {
 						Can't find what you're looking for? Get an instant quote for a custom car booking.
 					</p>
 					<Button variant="outline" asChild>
-						<Link to="/calculate-quote">Get Instant Quote</Link>
+						<Link to="/calculate-quote" search={{ selectedCarId: "" }}>Get Instant Quote</Link>
 					</Button>
 				</CardContent>
 			</Card>

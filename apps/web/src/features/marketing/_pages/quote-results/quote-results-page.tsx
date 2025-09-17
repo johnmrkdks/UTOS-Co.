@@ -52,6 +52,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 	const [quote, setQuote] = useState<QuoteResult | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
+
 	const { session, isPending: userLoading } = useUserQuery();
 
 	// Fetch quote details using the secure quote ID - using manual approach due to type issues
@@ -84,7 +85,8 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 			// User is authenticated - route to book-quote
 			navigate({
 				to: "/book-quote/$quoteId",
-				params: { quoteId: search.quoteId }
+				params: { quoteId: search.quoteId },
+				resetScroll: true
 			});
 		} else {
 			// User not authenticated, redirect to sign-in with appropriate redirect
@@ -92,7 +94,8 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 
 			navigate({
 				to: "/sign-in",
-				search: { redirect: redirectPath }
+				search: { redirect: redirectPath },
+				resetScroll: true
 			});
 		}
 	};
@@ -108,7 +111,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => navigate({ to: "/" })}
+									onClick={() => navigate({ to: "/", resetScroll: true })}
 									className="gap-2"
 								>
 									<ArrowLeft className="w-4 h-4" />
@@ -157,7 +160,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => navigate({ to: "/" })}
+									onClick={() => navigate({ to: "/", resetScroll: true })}
 									className="gap-2"
 								>
 									<ArrowLeft className="w-4 h-4" />
@@ -185,7 +188,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							</AlertDescription>
 						</Alert>
 						<div className="mt-6 text-center">
-							<Button onClick={() => navigate({ to: "/" })}>
+							<Button onClick={() => navigate({ to: "/", resetScroll: true })}>
 								Get New Quote
 							</Button>
 						</div>
@@ -205,7 +208,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => navigate({ to: "/" })}
+								onClick={() => navigate({ to: "/", resetScroll: true })}
 								className="gap-2"
 							>
 								<ArrowLeft className="w-4 h-4" />
@@ -415,7 +418,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 
 						<Button
 							variant="outline"
-							onClick={() => navigate({ to: "/" })}
+							onClick={() => navigate({ to: "/", resetScroll: true })}
 							className="w-full h-10 text-sm"
 						>
 							Get New Quote

@@ -36,6 +36,21 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 			return
 		}
 
+		// Check if script is already being loaded
+		const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`)
+		if (existingScript) {
+			// Script already exists, just wait for it to load
+			const checkLoaded = () => {
+				if ((window as any).google?.maps?.places) {
+					setIsLoaded(true)
+				} else {
+					setTimeout(checkLoaded, 100)
+				}
+			}
+			checkLoaded()
+			return
+		}
+
 		// Create script tag to load Google Maps API
 		const script = document.createElement("script")
 		script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE"}&libraries=places`
@@ -52,13 +67,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 
 		document.head.appendChild(script)
 
-		return () => {
-			// Clean up script if component unmounts
-			const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`)
-			if (existingScript) {
-				document.head.removeChild(existingScript)
-			}
-		}
+		// Don't clean up the script - let it persist for other components
 	}, [])
 
 	// Initialize autocomplete when Google Maps is loaded and input ref is available

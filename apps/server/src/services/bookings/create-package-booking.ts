@@ -28,6 +28,9 @@ export const CreatePackageBookingSchema = z.object({
 	customerEmail: z.string().email().optional(),
 	passengerCount: z.number().int().min(1).default(1),
 	specialRequests: z.string().optional(),
+
+	// Duration for hourly services
+	serviceDuration: z.number().int().min(1).optional(),
 	
 	// Optional stops for package bookings
 	stops: z.array(z.object({
@@ -65,6 +68,25 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 		if (packageInfo.maxPassengers && data.passengerCount > packageInfo.maxPassengers) {
 			throw new Error(`Package only supports ${packageInfo.maxPassengers} passengers`);
 		}
+
+		// Fetch service type information for validation
+		let serviceType = null;
+		let isHourlyService = false;
+
+		if (packageInfo.serviceTypeId) {
+			try {
+				const { getPackageServiceTypeService } = await import("@/services/package-service-types/get-package-service-type");
+				serviceType = await getPackageServiceTypeService(db, { id: packageInfo.serviceTypeId });
+				isHourlyService = serviceType?.rateType === "hourly";
+			} catch (error) {
+				console.warn("Could not fetch service type:", error);
+			}
+		}
+
+		// Validate service duration for hourly services
+		if (isHourlyService && !data.serviceDuration) {
+			throw new Error("Service duration is required for hourly services");
+		}
 		
 		// Calculate advance booking time validation
 		console.log("🕐 Checking pickup time validation...");
@@ -91,11 +113,19 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			destinationLongitude: data.destinationLongitude,
 			
 			scheduledPickupTime: data.scheduledPickupTime,
-			estimatedDuration: packageInfo.duration,
-			
-			// Use package pricing (fixed or hourly based on service type)
-			quotedAmount: packageInfo.fixedPrice || packageInfo.hourlyRate || 0,
-			finalAmount: packageInfo.fixedPrice || packageInfo.hourlyRate || 0, // Use available pricing
+
+			// Store service duration in estimated duration for hourly services
+			estimatedDuration: isHourlyService && data.serviceDuration
+				? data.serviceDuration * 60 // Convert hours to minutes
+				: packageInfo.duration,
+
+			// Calculate pricing based on service type
+			quotedAmount: isHourlyService && packageInfo.hourlyRate && data.serviceDuration
+				? packageInfo.hourlyRate * data.serviceDuration
+				: packageInfo.fixedPrice || 0,
+			finalAmount: isHourlyService && packageInfo.hourlyRate && data.serviceDuration
+				? packageInfo.hourlyRate * data.serviceDuration
+				: packageInfo.fixedPrice || 0,
 			
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,

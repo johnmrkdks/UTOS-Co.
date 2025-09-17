@@ -135,11 +135,11 @@ export function UnifiedBookingPage() {
 			goToStep("processing");
 			
 			const result = await createBookingMutation.mutateAsync({
-				quoteToken: quote.quoteToken || "",
+				// quoteToken: quote.quoteToken || "", // Remove unsupported property
 				...bookingDetails,
 			});
 
-			setCompletedBookingId(result.id);
+			setCompletedBookingId(result?.id || "");
 			goToStep("success");
 			toast.success("Booking confirmed successfully!");
 		} catch (error) {
@@ -203,8 +203,8 @@ export function UnifiedBookingPage() {
 						}
 					}}
 					onNext={() => goToStep("booking-details")}
-					instantQuote={quote}
-					routeData={routeData}
+					instantQuote={quote || undefined}
+					routeData={routeData || undefined}
 				/>
 			)}
 
