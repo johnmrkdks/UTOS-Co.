@@ -6,7 +6,8 @@ import {
 	MenuIcon,
 	XIcon,
 	LogOutIcon,
-	ClipboardListIcon
+	ClipboardListIcon,
+	ChevronsLeft
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { DriverUserMenu } from "./driver-user-menu";
@@ -41,14 +42,24 @@ export function DriverTopNavigation({
 									<MenuIcon className="h-5 w-5" />
 								</Button>
 							</SheetTrigger>
-							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full">
+							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full [&>button]:hidden">
 								{/* Fixed Header */}
 								<div className="p-4 border-b flex-shrink-0">
-									<div className="flex items-center">
-										<Logo />
-										<div className="ml-2">
-											<h2 className="text-lg font-semibold">Driver Portal</h2>
+									<div className="flex items-center justify-between">
+										<div className="flex items-center">
+											<Logo />
+											<div className="ml-2">
+												<h2 className="text-lg font-semibold">Driver Portal</h2>
+											</div>
 										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => setIsMobileMenuOpen(false)}
+											className="p-2 hover:bg-gray-100 rounded-lg"
+										>
+											<ChevronsLeft className="w-5 h-5 text-gray-600" />
+										</Button>
 									</div>
 								</div>
 

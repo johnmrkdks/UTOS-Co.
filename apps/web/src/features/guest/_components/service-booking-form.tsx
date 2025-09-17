@@ -1,27 +1,33 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Calendar, Clock, Users, MapPin, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Badge } from "@workspace/ui/components/badge";
+import { Separator } from "@workspace/ui/components/separator";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { createLocalDateForBackend } from "@/utils/timezone";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
-import { serviceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
+import { createServiceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
+import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
 
 interface ServiceBookingFormProps {
 	service: {
 		id: string;
 		name: string;
-		fixedPrice: number;
+		fixedPrice?: number;
+		hourlyRate?: number;
+		serviceType: string; // 'hourly' or 'fixed'
 		maxPassengers?: number;
 		description?: string;
 		bannerImageUrl?: string;
@@ -33,20 +39,42 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 	const [date, setDate] = useState<Date>();
 	const [step, setStep] = useState<"form" | "confirmation">("form");
 	const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
+	const [pickupLocation, setPickupLocation] = useState("");
+	const [destination, setDestination] = useState("");
+	const [stops, setStops] = useState<string[]>([]);
+	const [hours, setHours] = useState<number>(2);
+
 	const navigate = useNavigate();
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
 
+	// Determine if this is an hourly service
+	const isHourlyService = service.serviceType === 'hourly' || !!service.hourlyRate;
+
+	// Create schema based on service type
+	const schema = createServiceBookingSchema(service.maxPassengers, isHourlyService);
+
 	const form = useForm<ServiceBookingFormData>({
-		resolver: zodResolver(serviceBookingSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			customerName: "",
 			customerEmail: "",
 			customerPhone: "",
-			bookingTime: "",
+			passengerCount: 1,
+			luggageCount: 0,
+			scheduledPickupTime: new Date(),
+			serviceDuration: isHourlyService ? 2 : undefined,
 			specialRequirements: "",
 		},
 	});
+
+	// Calculate total cost for hourly services
+	const totalCost = useMemo(() => {
+		if (isHourlyService && service.hourlyRate) {
+			return hours * service.hourlyRate;
+		}
+		return service.fixedPrice || 0;
+	}, [isHourlyService, service.hourlyRate, service.fixedPrice, hours]);
 
 	// Pre-populate with user data if authenticated
 	useEffect(() => {
@@ -210,7 +238,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 									<div className="h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center">
 										<div className="text-center">
 											<div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-												<CalendarIcon className="w-10 h-10 text-primary/60" />
+												<Calendar className="w-10 h-10 text-primary/60" />
 											</div>
 											<h2 className="text-2xl font-bold text-gray-800 mb-2">{service.name}</h2>
 											<p className="text-gray-600 text-sm px-4">
@@ -423,9 +451,9 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												<div>
 													<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
 													<ul className="text-sm text-gray-600 space-y-1">
-														<li>• No payment required now</li>
 														<li>• Pay securely after service completion</li>
-														<li>• Multiple payment options available</li>
+														<li>• Driver accepts cash or cashless payments</li>
+														<li>• Online payment options available soon</li>
 													</ul>
 												</div>
 											</div>

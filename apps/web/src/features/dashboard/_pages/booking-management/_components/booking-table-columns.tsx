@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { User, Car, UserCheck, Phone, CircleDot } from "lucide-react";
 import { BookingTableRowActions } from "./booking-table-row-actions";
+import { StatusBadge } from "@/components/status-badge";
 
 // Booking interface
 export interface Booking {
@@ -164,26 +165,9 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		),
 		cell: ({ row }) => {
 			const status = row.getValue("status") as string;
-			const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-				pending: "secondary",
-				confirmed: "default",
-				driver_assigned: "outline",
-				driver_en_route: "outline",
-				arrived_pickup: "outline",
-				passenger_on_board: "default",
-				in_progress: "default",
-				dropped_off: "outline",
-				awaiting_extras: "secondary",
-				completed: "default",
-				cancelled: "destructive",
-			};
-			return (
-				<Badge variant={statusColors[status] || "secondary"}>
-					{status.replace("_", " ").toUpperCase()}
-				</Badge>
-			);
+			return <StatusBadge status={status} size="md" />;
 		},
-		size: 130,
+		size: 140,
 	});
 
 	// Customer column

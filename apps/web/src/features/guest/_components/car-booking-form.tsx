@@ -267,7 +267,7 @@ export function CarBookingForm({ car }: CarBookingFormProps) {
 					</div>
 				</div>
 				<p className="text-xs text-gray-500 mt-2">
-					Payment will be processed after booking confirmation. No payment required now.
+					Payment will be processed after booking confirmation. Online payment options available soon.
 				</p>
 			</div>
 

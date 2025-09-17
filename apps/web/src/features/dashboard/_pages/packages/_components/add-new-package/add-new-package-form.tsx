@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
+import { Badge } from "@workspace/ui/components/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -78,8 +79,8 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			name: "",
 			description: "",
 			serviceTypeId: "",
-			fixedPrice: 0,
-			hourlyRate: 0,
+			fixedPrice: undefined,
+			hourlyRate: undefined,
 			bannerImageUrl: "",
 			// Set defaults for optional fields
 			advanceBookingHours: 24,
@@ -138,15 +139,15 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 		
 		setIsSubmitting(true);
 		try {
-			// Convert price to cents for storage
+			// Store price values directly in dollars
 			const packageData = {
 				...data,
-				fixedPrice: data.fixedPrice ? Math.round(data.fixedPrice * 100) : null,
-				hourlyRate: data.hourlyRate ? Math.round(data.hourlyRate * 100) : null,
+				fixedPrice: data.fixedPrice || null,
+				hourlyRate: data.hourlyRate || null,
 				maxPassengers: data.maxPassengers || 4, // Default to 4 if not set
 			};
 			
-			console.log("💰 Package data with price converted to cents:", JSON.stringify(packageData, null, 2));
+			console.log("💰 Package data with prices in dollars:", JSON.stringify(packageData, null, 2));
 			console.log("🚀 Calling createPackageMutation...");
 			
 			const result = await createPackageMutation.mutateAsync(packageData);
@@ -224,7 +225,12 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 														.map((serviceType) => (
 															<SelectItem key={serviceType.id} value={serviceType.id}>
-																{serviceType.name}
+																<div className="flex items-center w-full">
+																	<span className="flex-1">{serviceType.name}</span>
+																	<span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded ml-3">
+																		{serviceType.rateType === 'hourly' ? 'Hourly' : 'Fixed'}
+																	</span>
+																</div>
 															</SelectItem>
 														))
 												) : (
@@ -260,7 +266,11 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														min="0"
 														placeholder="0.00"
 														{...field}
-														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+														value={field.value || ""}
+														onChange={(e) => {
+															const value = e.target.value;
+															field.onChange(value === "" ? undefined : parseFloat(value) || undefined);
+														}}
 													/>
 												</FormControl>
 												<div className="text-sm text-muted-foreground">
@@ -284,7 +294,11 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														min="0"
 														placeholder="0.00"
 														{...field}
-														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+														value={field.value || ""}
+														onChange={(e) => {
+															const value = e.target.value;
+															field.onChange(value === "" ? undefined : parseFloat(value) || undefined);
+														}}
 													/>
 												</FormControl>
 												<div className="text-sm text-muted-foreground">

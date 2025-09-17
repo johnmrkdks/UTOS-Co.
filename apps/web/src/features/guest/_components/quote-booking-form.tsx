@@ -177,7 +177,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 					</span>
 				</div>
 				<p className="text-xs text-gray-500 mb-4">
-					Payment will be processed after booking confirmation. No payment required now.
+					Payment will be processed after booking confirmation.
 				</p>
 			</div>
 

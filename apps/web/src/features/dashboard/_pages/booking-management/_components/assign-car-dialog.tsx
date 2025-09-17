@@ -56,7 +56,9 @@ export function AssignCarDialog({
 
 		assignCarMutation.mutate({
 			id: booking.id,
-			carId: selectedCarId,
+			data: {
+				carId: selectedCarId,
+			},
 		}, {
 			onSuccess: () => {
 				onOpenChange(false);

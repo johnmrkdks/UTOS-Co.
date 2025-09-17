@@ -73,6 +73,8 @@ function DriverTripsComponent() {
 	const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
 	const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<any>(null);
 	const [closeConfirmationOpen, setCloseConfirmationOpen] = useState(false);
+	const [pobConfirmationOpen, setPobConfirmationOpen] = useState(false);
+	const [selectedBookingForPob, setSelectedBookingForPob] = useState<any>(null);
 
 	// Status update mutation
 	const updateStatusMutation = useUpdateBookingStatusMutation();
@@ -141,9 +143,9 @@ function DriverTripsComponent() {
 			case 'driver_assigned':
 				return 'driver_en_route'; // Start Job
 			case 'driver_en_route':
-				return 'arrived_pickup'; // Arrived PU
+				return 'arrived_pickup'; // Arrived at Pickup
 			case 'arrived_pickup':
-				return 'passenger_on_board'; // POB
+				return 'passenger_on_board'; // Passenger/s On Board
 			case 'passenger_on_board':
 				return 'dropped_off'; // Dropped Off
 			case 'dropped_off':
@@ -162,9 +164,9 @@ function DriverTripsComponent() {
 			case 'driver_assigned':
 				return 'Start Job';
 			case 'driver_en_route':
-				return 'Arrived PU';
+				return 'Arrived at Pickup';
 			case 'arrived_pickup':
-				return 'POB';
+				return 'Passenger/s On Board';
 			case 'passenger_on_board':
 				return 'Dropped Off';
 			case 'dropped_off':
@@ -181,6 +183,13 @@ function DriverTripsComponent() {
 		if (booking.status === 'dropped_off') {
 			setSelectedTripForClose(booking);
 			setCloseTripOptionsOpen(true);
+			return;
+		}
+
+		// If current status is 'arrived_pickup', show POB confirmation dialog
+		if (booking.status === 'arrived_pickup') {
+			setSelectedBookingForPob(booking);
+			setPobConfirmationOpen(true);
 			return;
 		}
 
@@ -448,6 +457,43 @@ function DriverTripsComponent() {
 	const confirmCloseBookingDetails = () => {
 		setCloseConfirmationOpen(false);
 		setBookingDetailsOpen(false);
+	};
+
+	const handlePobConfirmation = () => {
+		if (!selectedBookingForPob) return;
+
+		const nextStatus = getNextStatus(selectedBookingForPob.status);
+
+		updateStatusMutation.mutate({
+			id: selectedBookingForPob.id,
+			status: nextStatus,
+		} as any, {
+			onSuccess: (data) => {
+				// Invalidate and refetch driver trips to get refreshed data
+				queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+				queryClient.refetchQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
+
+				// Also invalidate available trips queries to update both pages
+				queryClient.invalidateQueries({ queryKey: trpc.bookings.getAvailableTrips.queryKey() });
+				queryClient.refetchQueries({ queryKey: trpc.bookings.getAvailableTrips.queryKey() });
+
+				// Update the selected booking details with new status
+				if (selectedBookingForDetails && selectedBookingForDetails.id === selectedBookingForPob.id) {
+					setSelectedBookingForDetails({
+						...selectedBookingForDetails,
+						status: nextStatus
+					});
+				}
+
+				// Close the confirmation dialog
+				setPobConfirmationOpen(false);
+				setSelectedBookingForPob(null);
+			},
+			onError: (error) => {
+				console.error('❌ Failed to update trip status:', error);
+				// Keep dialog open on error
+			}
+		});
 	};
 
 	const navigateToLocation = (destinationAddress: string, locationType: 'pickup' | 'dropoff') => {
@@ -1359,6 +1405,32 @@ function DriverTripsComponent() {
 						<AlertDialogCancel>Keep Open</AlertDialogCancel>
 						<AlertDialogAction onClick={confirmCloseBookingDetails}>
 							Close Details
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* POB Confirmation Dialog */}
+			<AlertDialog open={pobConfirmationOpen} onOpenChange={setPobConfirmationOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Confirm Passenger/s On Board</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure the passenger/s are now on board and you're ready to proceed to the destination? This will update the trip status and cannot be easily undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={() => {
+							setPobConfirmationOpen(false);
+							setSelectedBookingForPob(null);
+						}}>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handlePobConfirmation}
+							disabled={updateStatusMutation.isPending}
+						>
+							{updateStatusMutation.isPending ? 'Updating...' : 'Confirm Passenger/s On Board'}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

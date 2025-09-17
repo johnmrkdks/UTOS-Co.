@@ -9,6 +9,8 @@ import { useState, useMemo } from "react";
 import type { BookingFilters } from "./booking-filters";
 import { KanbanProvider, KanbanBoard, KanbanCards, KanbanCard } from "@/components/kanban";
 import type { KanbanItemProps, KanbanColumnProps } from "@/components/kanban";
+import { getAllStatuses, getStatusConfig, type BookingStatus } from "@/lib/booking-status-config";
+import { StatusActionButton } from "@/components/status-badge";
 
 interface BookingStatusPipelineProps {
 	filters?: BookingFilters;
@@ -35,88 +37,18 @@ interface StatusColumn extends KanbanColumnProps {
 	headerColor: string;
 }
 
-const statusColumns: StatusColumn[] = [
-	{ 
-		id: "pending",
-		name: "Pending",
-		title: "Pending", 
-		description: "Awaiting confirmation",
-		color: "bg-yellow-50 border-yellow-200",
-		headerColor: "bg-yellow-100"
-	},
-	{ 
-		id: "confirmed",
-		name: "Confirmed",
-		title: "Confirmed", 
-		description: "Ready for driver assignment",
-		color: "bg-blue-50 border-blue-200",
-		headerColor: "bg-blue-100"
-	},
-	{ 
-		id: "driver_assigned",
-		name: "Driver Assigned",
-		title: "Driver Assigned", 
-		description: "Driver allocated to trip",
-		color: "bg-purple-50 border-purple-200",
-		headerColor: "bg-purple-100"
-	},
-	{ 
-		id: "driver_en_route",
-		name: "Driver En Route",
-		title: "En Route", 
-		description: "Driver heading to pickup",
-		color: "bg-indigo-50 border-indigo-200",
-		headerColor: "bg-indigo-100"
-	},
-	{ 
-		id: "arrived_pickup",
-		name: "Arrived Pickup",
-		title: "Arrived PU", 
-		description: "Driver at pickup location",
-		color: "bg-cyan-50 border-cyan-200",
-		headerColor: "bg-cyan-100"
-	},
-	{ 
-		id: "passenger_on_board",
-		name: "Passenger On Board",
-		title: "POB", 
-		description: "Passenger picked up",
-		color: "bg-green-50 border-green-200",
-		headerColor: "bg-green-100"
-	},
-	{ 
-		id: "in_progress",
-		name: "In Progress",
-		title: "In Progress", 
-		description: "Service in progress (legacy)",
-		color: "bg-green-50 border-green-200",
-		headerColor: "bg-green-100"
-	},
-	{ 
-		id: "dropped_off",
-		name: "Dropped Off",
-		title: "Dropped Off", 
-		description: "Passenger at destination",
-		color: "bg-orange-50 border-orange-200",
-		headerColor: "bg-orange-100"
-	},
-	{ 
-		id: "awaiting_extras",
-		name: "Awaiting Extras",
-		title: "Awaiting Extras", 
-		description: "Adding tolls/parking fees",
-		color: "bg-amber-50 border-amber-200",
-		headerColor: "bg-amber-100"
-	},
-	{ 
-		id: "completed",
-		name: "Completed",
-		title: "Completed", 
-		description: "Service completed",
-		color: "bg-gray-50 border-gray-200",
-		headerColor: "bg-gray-100"
-	},
-];
+// Generate status columns from centralized configuration
+const statusColumns: StatusColumn[] = getAllStatuses().map((statusId) => {
+	const config = getStatusConfig(statusId);
+	return {
+		id: statusId,
+		name: config.shortLabel,
+		title: config.shortLabel,
+		description: config.description,
+		color: config.kanbanBg,
+		headerColor: config.kanbanHeader
+	};
+});
 
 export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 	const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
@@ -293,9 +225,9 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 													</div>
 
 													<div className="flex items-center justify-between pt-1">
-														<Button 
-															variant="ghost" 
-															size="sm" 
+														<Button
+															variant="ghost"
+															size="sm"
 															className="h-6 px-2 text-xs"
 															onClick={(e) => {
 																e.stopPropagation();
@@ -304,118 +236,15 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 														>
 															View
 														</Button>
-														
-														{booking.column === "pending" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Quick confirm action
-																}}
-															>
-																Confirm
-															</Button>
-														)}
-														
-														{booking.column === "confirmed" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-purple-600 hover:text-purple-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Quick assign driver action
-																}}
-															>
-																Assign
-															</Button>
-														)}
 
-														{booking.column === "driver_assigned" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-indigo-600 hover:text-indigo-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Mark as en route
-																}}
-															>
-																En Route
-															</Button>
-														)}
-
-														{booking.column === "driver_en_route" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-cyan-600 hover:text-cyan-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Mark as arrived
-																}}
-															>
-																Arrived
-															</Button>
-														)}
-
-														{booking.column === "arrived_pickup" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-green-600 hover:text-green-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Mark passenger on board
-																}}
-															>
-																POB
-															</Button>
-														)}
-
-														{(booking.column === "passenger_on_board" || booking.column === "in_progress") && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-orange-600 hover:text-orange-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Mark as dropped off
-																}}
-															>
-																Drop Off
-															</Button>
-														)}
-
-														{booking.column === "dropped_off" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-amber-600 hover:text-amber-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Add extras dialog
-																}}
-															>
-																Extras
-															</Button>
-														)}
-
-														{booking.column === "awaiting_extras" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-gray-600 hover:text-gray-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Complete trip
-																}}
-															>
-																Complete
-															</Button>
-														)}
+														<StatusActionButton
+															status={booking.column}
+															onClick={() => {
+																// TODO: Handle status transition
+																console.log(`Transition from ${booking.column} to next status`);
+															}}
+															size="sm"
+														/>
 													</div>
 												</div>
 											</KanbanCard>

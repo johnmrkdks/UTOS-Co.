@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@workspace/ui/lib/utils";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
+import { BookingTypeBadge } from "@/components/booking-type-badge";
 
 export const Route = createFileRoute("/driver/_layout/available")({
 	component: AvailableTripsPage,
@@ -193,10 +194,13 @@ function AvailableTripsPage() {
 									</div>
 								</div>
 
-								<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-2 py-1 text-xs">
-									<CheckCircleIcon className="w-3 h-3 mr-1" />
-									Assigned
-								</Badge>
+								<div className="flex gap-1">
+									<BookingTypeBadge booking={trip} />
+									<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-2 py-1 text-xs">
+										<CheckCircleIcon className="w-3 h-3 mr-1" />
+										Assigned
+									</Badge>
+								</div>
 							</div>
 						</>
 					) : (
@@ -284,10 +288,13 @@ function AvailableTripsPage() {
 									</div>
 								</div>
 
-								<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1">
-									<CheckCircleIcon className="w-4 h-4 mr-1" />
-									Assigned
-								</Badge>
+								<div className="flex gap-2">
+									<BookingTypeBadge booking={trip} />
+									<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1">
+										<CheckCircleIcon className="w-4 h-4 mr-1" />
+										Assigned
+									</Badge>
+								</div>
 							</div>
 						</>
 					)}

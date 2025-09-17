@@ -9,6 +9,7 @@ import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-book
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
+import { BookingTypeBadge } from "@/components/booking-type-badge";
 
 export function CustomerHistoryPage() {
 	// Check if mobile using window width
@@ -125,8 +126,20 @@ export function CustomerHistoryPage() {
 				<CardContent className={cn("min-w-0 w-full overflow-x-hidden", isMobile ? "px-4 py-3" : "p-4")}>
 					{/* Booking ID and Date/Time */}
 					<div className="flex items-center justify-between mb-3">
-						<span className="text-sm font-semibold text-gray-900">Trip #{trip.id.slice(-6)}</span>
-						<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
+						<div className="flex items-center gap-2">
+							<span className="text-sm font-semibold text-gray-900">Trip #{trip.id.slice(-6)}</span>
+							<BookingTypeBadge booking={trip} />
+						</div>
+						<div className="flex items-center gap-2">
+							<Badge
+								variant={trip.status === 'completed' ? 'default' :
+								        trip.status === 'cancelled' ? 'destructive' : 'outline'}
+								className="text-xs px-2 py-0.5"
+							>
+								{trip.status.replace('_', ' ').toUpperCase()}
+							</Badge>
+							<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
+						</div>
 					</div>
 
 					<div className="flex items-center justify-between">

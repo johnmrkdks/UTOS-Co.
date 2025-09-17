@@ -34,7 +34,9 @@ import { useMemo, useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 import { BookingActions } from "@/features/customer/_components/booking-actions";
 import { EditCancelDialogs } from "@/features/customer/_components/edit-cancel-dialogs";
+import { BookingTypeBadge } from "@/components/booking-type-badge";
 import { format } from "date-fns";
+
 
 // Helper functions for booking validation
 const canEditBooking = (booking: any): boolean => {
@@ -269,14 +271,17 @@ export function CustomerTripsPage() {
 									</span>
 								</div>
 							</div>
-							<Badge
-								variant={booking.status === 'completed' ? 'default' :
-									booking.status === 'cancelled' ? 'destructive' :
-										booking.status === 'confirmed' ? 'secondary' : 'outline'}
-								className="text-xs px-2 py-0.5"
-							>
-								{booking.status.replace('_', ' ').toUpperCase()}
-							</Badge>
+							<div className="flex gap-1">
+								<BookingTypeBadge booking={booking} />
+								<Badge
+									variant={booking.status === 'completed' ? 'default' :
+										booking.status === 'cancelled' ? 'destructive' :
+											booking.status === 'confirmed' ? 'secondary' : 'outline'}
+									className="text-xs px-2 py-0.5"
+								>
+									{booking.status.replace('_', ' ').toUpperCase()}
+								</Badge>
+							</div>
 						</div>
 
 						{/* Route - Mobile optimized */}
@@ -401,14 +406,17 @@ export function CustomerTripsPage() {
 									</span>
 								</div>
 							</div>
-							<Badge
-								variant={booking.status === 'completed' ? 'default' :
-									booking.status === 'cancelled' ? 'destructive' :
-										booking.status === 'confirmed' ? 'secondary' : 'outline'}
-								className="text-xs font-medium"
-							>
-								{booking.status.replace('_', ' ').toUpperCase()}
-							</Badge>
+							<div className="flex gap-2">
+								<BookingTypeBadge booking={booking} />
+								<Badge
+									variant={booking.status === 'completed' ? 'default' :
+										booking.status === 'cancelled' ? 'destructive' :
+											booking.status === 'confirmed' ? 'secondary' : 'outline'}
+									className="text-xs font-medium"
+								>
+									{booking.status.replace('_', ' ').toUpperCase()}
+								</Badge>
+							</div>
 						</div>
 
 						{/* Route */}

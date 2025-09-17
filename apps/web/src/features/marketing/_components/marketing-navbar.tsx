@@ -25,7 +25,9 @@ import {
 	CarIcon,
 	InfoIcon,
 	HelpCircleIcon,
-	ContactIcon
+	ContactIcon,
+	Package,
+	ChevronsLeft
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { useUserQuery } from "@/hooks/query/use-user-query";
@@ -93,14 +95,24 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 									<Menu className="w-6 h-6" />
 								</Button>
 							</SheetTrigger>
-							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full">
+							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full [&>button]:hidden">
 								{/* Fixed Header */}
 								<div className="p-4 border-b flex-shrink-0">
-									<div className="flex items-center">
-										<Logo />
-										<div className="ml-2">
-											<h2 className="text-lg font-semibold">Down Under Chauffeur</h2>
+									<div className="flex items-center justify-between">
+										<div className="flex items-center">
+											<Logo />
+											<div className="ml-2">
+												<h2 className="text-lg font-semibold">Down Under Chauffeur</h2>
+											</div>
 										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => setIsSheetOpen(false)}
+											className="p-2 hover:bg-gray-100 rounded-lg"
+										>
+											<ChevronsLeft className="w-5 h-5 text-gray-600" />
+										</Button>
 									</div>
 								</div>
 
@@ -271,10 +283,11 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 	// Map marketing routes to navigation items with icons
 	const getNavigationItems = () => {
 		const isCustomer = session?.user?.role === "user";
-		
+
 		const baseRoutes = [
 			{ path: "/", label: "Home", icon: HomeIcon },
 			{ path: "/fleet", label: "Our Fleet", icon: CarIcon },
+			{ path: "/services", label: "Services", icon: Package },
 			{ path: "/about-us", label: "About Us", icon: InfoIcon },
 			{ path: "/faqs", label: "FAQs", icon: HelpCircleIcon },
 			{ path: "/contact-us", label: "Contact", icon: ContactIcon },
@@ -356,6 +369,9 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 										)}
 										{item.path === "/fleet" && (
 											<p className="text-xs text-muted-foreground mt-0.5">Explore luxury vehicles</p>
+										)}
+										{item.path === "/services" && (
+											<p className="text-xs text-muted-foreground mt-0.5">Browse our premium services</p>
 										)}
 										{item.path === "/my-bookings" && (
 											<p className="text-xs text-muted-foreground mt-0.5">View and manage bookings</p>

@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { packageCategories } from "./packages/package-categories";
@@ -20,11 +20,11 @@ export const packages = sqliteTable("packages", {
 	maxDistance: integer("max_distance"), // in km (null if unlimited)
 
 	// Pricing (based on service type rate type)
-	fixedPrice: integer("fixed_price"), // in cents (for fixed rate packages)
-	hourlyRate: integer("hourly_rate"), // in cents per hour (for hourly rate packages)
-	extraKmPrice: integer("extra_km_price"), // if distance exceeds maxDistance
-	extraHourPrice: integer("extra_hour_price"), // if duration exceeds planned
-	depositRequired: integer("deposit_required"), // in cents
+	fixedPrice: real("fixed_price"), // in dollars (for fixed rate packages)
+	hourlyRate: real("hourly_rate"), // in dollars per hour (for hourly rate packages)
+	extraKmPrice: real("extra_km_price"), // if distance exceeds maxDistance
+	extraHourPrice: real("extra_hour_price"), // if duration exceeds planned
+	depositRequired: real("deposit_required"), // in dollars
 
 	// Service constraints
 	maxPassengers: integer("max_passengers").default(4),

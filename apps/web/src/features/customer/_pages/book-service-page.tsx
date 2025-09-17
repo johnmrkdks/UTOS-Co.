@@ -40,29 +40,6 @@ export function BookServicePage() {
 	const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAvailableCarsQuery();
 	const createBookingMutation = useCreateServiceBookingMutation();
 
-	// Debug data loading
-	console.log("Service ID:", serviceId);
-	console.log("Service data:", service);
-	console.log("Service loading:", isLoading);
-	console.log("Service error:", error);
-	console.log("Cars data:", carsData);
-	console.log("Cars loading:", carsLoading);
-	console.log("Cars error:", carsError);
-	
-	// Detailed car availability debugging
-	if (carsData) {
-		console.log("📊 CARS AVAILABILITY REPORT:");
-		console.log("Total cars returned:", carsData?.data?.length || 0);
-		console.log("Cars list:", carsData?.data);
-		if (carsData?.data?.length === 0) {
-			console.log("❌ No cars found! Cars must have ALL of these conditions:");
-			console.log("  - isPublished = true");
-			console.log("  - isActive = true"); 
-			console.log("  - isAvailable = true");
-			console.log("  - status = 'available'");
-			console.log("🔧 Check your Admin Dashboard → Cars and make sure each car has all these settings enabled!");
-		}
-	}
 
 	// Determine if service is hourly based on service type rate type
 	const isHourlyService = (service as any)?.serviceType?.rateType === "hourly";
@@ -148,7 +125,6 @@ export function BookServicePage() {
 
 	const validateForm = () => {
 		try {
-			console.log("🔍 Validating form data:", formData);
 			// Basic validation for required fields
 			const errors: Record<string, string> = {};
 
@@ -170,29 +146,18 @@ export function BookServicePage() {
 
 			if (Object.keys(errors).length > 0) {
 				setFormErrors(errors);
-				console.log("Form errors:", errors);
 				return false;
 			}
 
-			console.log("✅ Form validation passed");
 			setFormErrors({});
 			return true;
 		} catch (error) {
-			console.log("❌ Form validation failed:", error);
 			return false;
 		}
 	};
 
 	const handleSubmit = async () => {
-		console.log("🚀 Starting booking submission...");
-		console.log("Form data:", formData);
-		console.log("Service:", service);
-		console.log("User:", user);
-		console.log("Cars data:", carsData);
-
 		if (!validateForm()) {
-			console.error("❌ Form validation failed");
-			console.log("Form errors:", formErrors);
 			toast.error("Please fill in all required fields", {
 				description: "Check the form for any errors and try again."
 			});
@@ -200,7 +165,6 @@ export function BookServicePage() {
 		}
 
 		if (!service) {
-			console.error("❌ No service data available");
 			toast.error("Service information not loaded", {
 				description: "Please refresh the page and try again."
 			});
@@ -208,7 +172,6 @@ export function BookServicePage() {
 		}
 
 		if (!user) {
-			console.error("❌ No user data available");
 			toast.error("User not authenticated", {
 				description: "Please sign in to book a service."
 			});
@@ -217,7 +180,6 @@ export function BookServicePage() {
 
 		const availableCar = carsData?.data?.[0];
 		if (!availableCar) {
-			console.error("❌ No cars available for booking");
 			toast.error("No vehicles available", {
 				description: "Currently no vehicles are available for booking. Please try again later."
 			});
@@ -225,7 +187,6 @@ export function BookServicePage() {
 		}
 
 		const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}`);
-		console.log("📅 Scheduled pickup time:", scheduledPickupTime);
 
 		const bookingPayload = {
 			packageId: service.id,
@@ -242,14 +203,11 @@ export function BookServicePage() {
 			...(isHourlyService && { serviceDuration: formData.serviceDuration })
 		};
 
-		console.log("📦 Booking payload:", bookingPayload);
-
 		try {
 			const result = await createBookingMutation.mutateAsync(bookingPayload);
-			console.log("✅ Booking successful:", result);
 			setStep("confirmation");
 		} catch (error) {
-			console.error("❌ Booking failed:", error);
+			// Error handling is done in the mutation hook
 		}
 	};
 

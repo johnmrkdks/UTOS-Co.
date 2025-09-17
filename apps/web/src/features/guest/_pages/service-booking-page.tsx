@@ -1,6 +1,7 @@
 import { useParams, useSearch } from "@tanstack/react-router";
 import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/query/use-get-published-service-by-id-query";
 import { ServiceBookingForm } from "../_components/service-booking-form";
+import { HourlyServiceBookingForm } from "../_components/hourly-service-booking-form";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { ArrowLeft, MapPin, Clock, Users, Star } from "lucide-react";
@@ -37,6 +38,23 @@ export function ServiceBookingPage() {
 		);
 	}
 
+	// Debug logging to see service data
+	console.log('Service booking data:', {
+		service,
+		serviceType: service.serviceType,
+		hourlyRate: service.hourlyRate,
+		fixedPrice: service.fixedPrice,
+		hasHourlyRate: service.hourlyRate && service.hourlyRate > 0,
+		hasFixedPrice: service.fixedPrice && service.fixedPrice > 0
+	});
+
+	// Determine if this is an hourly service
+	const isHourlyService = service.serviceType?.rateType === 'hourly' ||
+							 (service.hourlyRate && service.hourlyRate > 0) ||
+							 (!service.fixedPrice && service.hourlyRate);
+
+	console.log('Is hourly service:', isHourlyService);
+
 	return (
 		<div className="container mx-auto px-4 py-8">
 			{/* Back Button */}
@@ -45,9 +63,13 @@ export function ServiceBookingPage() {
 				Back to Services
 			</Link>
 
-			<div className="grid  gap-8">
-				{/* Booking Form */}
-				<ServiceBookingForm service={service} />
+			<div className="grid gap-8">
+				{/* Conditionally render appropriate booking form */}
+				{isHourlyService ? (
+					<HourlyServiceBookingForm service={service} />
+				) : (
+					<ServiceBookingForm service={service} />
+				)}
 			</div>
 		</div>
 	);
