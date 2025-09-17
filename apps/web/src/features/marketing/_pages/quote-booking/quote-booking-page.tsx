@@ -112,7 +112,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		console.log("🚗 Car capacity details:", {
 			name: carData.name,
 			seatingCapacity: carData.seatingCapacity,
-			maxPassengers: carData.maxPassengers,
+			maxPassengers: carData.seatingCapacity || 8,
 			luggageCapacity: carData.luggageCapacity,
 			isPublished: carData.isPublished,
 			isActive: carData.isActive,
@@ -122,8 +122,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	if (carError) {
 		console.error("❌ Car loading error details:", {
 			message: carError.message,
-			cause: carError.cause,
-			stack: carError.stack
+			data: carError.data,
+			shape: carError.shape
 		});
 	}
 
@@ -377,7 +377,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 																{carData.name}
 															</div>
 															<div className="text-xs text-muted-foreground mt-1">
-																{carData.brandName ? `${carData.brandName}` : ''}{carData.modelName ? ` ${carData.modelName}` : ''} • {carData.categoryName}
+																{carData.category?.name || 'Premium Vehicle'}
 															</div>
 															{carData.features && carData.features.length > 0 && (
 																<div className="flex flex-wrap gap-1 mt-2">

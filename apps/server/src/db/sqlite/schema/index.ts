@@ -25,6 +25,7 @@ export * from "./packages/package-service-types";
 export * from "./packages";
 
 export * from "./price-config";
+export * from "./contact-messages";
 export * from "./accounts";
 export * from "./customer-profiles";
 export * from "./drivers";

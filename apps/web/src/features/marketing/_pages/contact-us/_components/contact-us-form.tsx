@@ -5,6 +5,7 @@ import {
 	FormField,
 	FormItem,
 	FormLabel,
+	FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -12,15 +13,17 @@ import { cn } from "@workspace/ui/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useCreateContactMessageMutation } from "../../../_hooks/query/use-create-contact-message-mutation";
+import { Loader2 } from "lucide-react";
 
 type ContactUsFormProps = {
 	className?: string;
 };
 
 const formSchema = z.object({
-	name: z.string().min(2),
-	email: z.string().email(),
-	message: z.string().min(10),
+	name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+	email: z.string().email("Invalid email address").max(255, "Email is too long"),
+	message: z.string().min(1, "Message is required").max(2000, "Message is too long"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -35,8 +38,14 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 		resolver: zodResolver(formSchema),
 	});
 
+	const createContactMessageMutation = useCreateContactMessageMutation();
+
 	const handleSubmit = (data: FormData) => {
-		console.log(data);
+		createContactMessageMutation.mutate(data, {
+			onSuccess: () => {
+				form.reset();
+			},
+		});
 	};
 
 	return (
@@ -56,6 +65,7 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 									<FormControl>
 										<Input {...field} placeholder="Enter your name" />
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>
@@ -68,6 +78,7 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 									<FormControl>
 										<Input {...field} placeholder="your@email.com" />
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>
@@ -83,12 +94,27 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 											placeholder="Enter question or feedback"
 										/>
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>
 					</div>
 					<div className="w-1/2">
-						<Button type="submit" variant="dark" className="w-full rounded-xl">Submit</Button>
+						<Button
+							type="submit"
+							variant="dark"
+							className="w-full rounded-xl"
+							disabled={createContactMessageMutation.isPending}
+						>
+							{createContactMessageMutation.isPending ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Sending...
+								</>
+							) : (
+								"Submit"
+							)}
+						</Button>
 					</div>
 				</form>
 			</Form>
