@@ -51,8 +51,9 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 	// Determine if this is an hourly service
 	const isHourlyService = service.serviceType === 'hourly' || !!service.hourlyRate;
 
-	// Create schema based on service type
-	const schema = createServiceBookingSchema(service.maxPassengers, isHourlyService);
+	// Create schema based on service type - ensure minimum 20 passengers
+	const maxPassengers = Math.max(service.maxPassengers || 20, 20);
+	const schema = createServiceBookingSchema(maxPassengers, isHourlyService);
 
 	const form = useForm<ServiceBookingFormData>({
 		resolver: zodResolver(schema),
@@ -62,7 +63,6 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			customerPhone: "",
 			passengerCount: 1,
 			luggageCount: 0,
-			scheduledPickupTime: new Date(),
 			serviceDuration: isHourlyService ? 2 : undefined,
 			specialRequirements: "",
 		},
@@ -121,6 +121,11 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			const result = await createBookingMutation.mutateAsync(bookingData);
 			setConfirmedBooking(result);
 			setStep("confirmation");
+
+			// Scroll to top after booking confirmation
+			setTimeout(() => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}, 100);
 		} catch (error) {
 			console.error("Service booking failed:", error);
 		}
@@ -155,7 +160,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Price:</span>
-							<span className="font-medium">${(service.fixedPrice / 100).toFixed(2)}</span>
+							<span className="font-medium">${service.fixedPrice?.toFixed(2) || '0.00'}</span>
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Passengers:</span>
@@ -249,58 +254,36 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 								)}
 
 								<div className="p-8">
-									{/* Price Display */}
-									<div className="text-center mb-8">
-										<div className="inline-flex items-baseline gap-2 bg-primary/10 px-6 py-4 rounded-xl border border-primary/20">
-											<span className="text-4xl font-black text-primary">
-												${(service.fixedPrice / 100).toFixed(0)}
-											</span>
-											<span className="text-primary/80 text-sm font-medium">per booking</span>
+									{/* Price Display - Only for fixed-type services */}
+									{!isHourlyService && service.fixedPrice && (
+										<div className="text-center mb-8">
+											<div className="inline-flex items-baseline gap-2 bg-primary/10 px-6 py-4 rounded-xl border border-primary/20">
+												<span className="text-4xl font-black text-primary">
+													${service.fixedPrice?.toFixed(2) || '0.00'}
+												</span>
+												<span className="text-primary/80 text-sm font-medium">per booking</span>
+											</div>
+											<div className="mt-3">
+												<span className="inline-block bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full">
+													Fixed Price - No Hidden Fees
+												</span>
+											</div>
 										</div>
-										<div className="mt-3">
-											<span className="inline-block bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full">
-												Fixed Price - No Hidden Fees
-											</span>
-										</div>
-									</div>
+									)}
 
-									{/* Service Features */}
+									{/* Service Description */}
 									<div className="space-y-4">
 										<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
 											<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center">
 												<CheckCircle className="w-3 h-3 text-primary" />
 											</div>
-											What's Included
+											Service Details
 										</h3>
-										
-										<div className="grid gap-3">
-											{service.features && service.features.length > 0 ? (
-												service.features.map((feature, index) => (
-													<div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">{feature}</span>
-													</div>
-												))
-											) : (
-												<>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Max {service.maxPassengers || (isHourlyService ? 15 : 8)} passengers</span>
-													</div>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Professional chauffeur</span>
-													</div>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Fuel included</span>
-													</div>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Tolls separate</span>
-													</div>
-												</>
-											)}
+
+										<div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
+											<p className="text-gray-700 leading-relaxed">
+												{service.description || "Premium chauffeur service with professional standards and exceptional comfort."}
+											</p>
 										</div>
 									</div>
 								</div>
@@ -380,12 +363,11 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 									<div className="space-y-5 pl-14">
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-1">Number of Passengers *</label>
-											<p className="text-xs text-gray-600 mb-3">Maximum capacity: {service.maxPassengers || 8} passengers</p>
+											<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
 											<Input
 												type="number"
 												min={1}
-												max={service.maxPassengers || 8}
+												max={maxPassengers}
 												placeholder="e.g. 2"
 												{...form.register("passengerCount", { valueAsNumber: true })}
 												className="h-12 text-base"
@@ -400,9 +382,23 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												setDate(selectedDate);
 												if (selectedDate) {
 													form.setValue("bookingDate", selectedDate);
+													// Also update scheduledPickupTime for validation
+													const currentTime = form.getValues("bookingTime");
+													if (currentTime) {
+														const combinedDateTime = createLocalDateForBackend(selectedDate.toISOString().split('T')[0], currentTime);
+														form.setValue("scheduledPickupTime", new Date(combinedDateTime));
+													}
 												}
 											}}
-											onTimeChange={(time) => form.setValue("bookingTime", time)}
+											onTimeChange={(time) => {
+												form.setValue("bookingTime", time);
+												// Also update scheduledPickupTime for validation
+												const currentDate = form.getValues("bookingDate");
+												if (currentDate && time) {
+													const combinedDateTime = createLocalDateForBackend(currentDate.toISOString().split('T')[0], time);
+													form.setValue("scheduledPickupTime", new Date(combinedDateTime));
+												}
+											}}
 											dateError={form.formState.errors.bookingDate?.message}
 											timeError={form.formState.errors.bookingTime?.message}
 											dateLabel="Service Date *"
@@ -439,7 +435,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												<p className="text-sm text-gray-600">All-inclusive fixed rate</p>
 											</div>
 											<span className="text-2xl font-bold text-primary">
-												${(service.fixedPrice / 100).toFixed(2)}
+												${service.fixedPrice?.toFixed(2) || '0.00'}
 											</span>
 										</div>
 

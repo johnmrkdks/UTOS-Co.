@@ -14,9 +14,10 @@ interface BookingsListTableProps {
 	status?: string;
 	filters?: BookingFilters;
 	compact?: boolean;
+	isArchived?: boolean;
 }
 
-export function BookingsListTable({ bookingType, status, filters, compact = false }: BookingsListTableProps) {
+export function BookingsListTable({ bookingType, status, filters, compact = false, isArchived }: BookingsListTableProps) {
 	const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
 	const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 	const [bulkOperationsDialogOpen, setBulkOperationsDialogOpen] = useState(false);
@@ -42,6 +43,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 	console.log("- Data count:", bookingsQuery.data?.data?.length);
 	console.log("- Booking type filter:", bookingType);
 	console.log("- Status filter:", status);
+	console.log("- Archive filter:", isArchived);
 
 	// Apply filters to the data
 	const filteredData = useMemo(() => {
@@ -55,6 +57,11 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		}
 		if (status) {
 			filtered = filtered.filter(b => b.status === status);
+		}
+
+		// Apply archive filter
+		if (isArchived !== undefined) {
+			filtered = filtered.filter(b => Boolean(b.isArchived) === isArchived);
 		}
 
 		// Apply advanced filters
@@ -102,7 +109,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		})));
 
 		return sortedFiltered;
-	}, [bookingsQuery.data?.data, bookingType, status, filters]);
+	}, [bookingsQuery.data?.data, bookingType, status, filters, isArchived]);
 
 	// Handle bulk selection
 	const toggleBookingSelection = (bookingId: string) => {

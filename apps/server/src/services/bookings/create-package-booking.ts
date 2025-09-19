@@ -65,9 +65,9 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			throw new Error("Package is not available");
 		}
 		
-		// Validate passenger count doesn't exceed package limit
-		if (packageInfo.maxPassengers && data.passengerCount > packageInfo.maxPassengers) {
-			throw new Error(`Package only supports ${packageInfo.maxPassengers} passengers`);
+		// Validate passenger count doesn't exceed system limit (20 passengers max)
+		if (data.passengerCount > 20) {
+			throw new Error(`Maximum 20 passengers allowed per booking`);
 		}
 
 		// Fetch service type information for validation
@@ -89,14 +89,8 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			throw new Error("Service duration is required for hourly services");
 		}
 		
-		// Calculate advance booking time validation
-		console.log("🕐 Checking pickup time validation...");
-		const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
-		console.log("⏰ Hours until pickup:", hoursUntilPickup, "Required advance:", packageInfo.advanceBookingHours);
-		
-		if (packageInfo.advanceBookingHours && hoursUntilPickup < packageInfo.advanceBookingHours) {
-			throw new Error(`Package requires ${packageInfo.advanceBookingHours} hours advance booking`);
-		}
+		// Note: Advance booking time validation removed per CEO requirements
+		// Clients should be able to book anytime
 		
 		// Prepare booking data
 		console.log("📝 Preparing booking data...");

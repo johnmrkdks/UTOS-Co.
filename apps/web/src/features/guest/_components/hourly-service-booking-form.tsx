@@ -41,15 +41,16 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 	const [destination, setDestination] = useState("");
 	const [stops, setStops] = useState<string[]>([]);
 	const [hours, setHours] = useState<number>(2);
-	const [selectedDate, setSelectedDate] = useState<Date>(addHours(new Date(), 25));
-	const [selectedTime, setSelectedTime] = useState<string>("12:00");
+	const [selectedDate, setSelectedDate] = useState<Date>();
+	const [selectedTime, setSelectedTime] = useState<string>();
 
 	const navigate = useNavigate();
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
 
-	// Create schema for hourly service
-	const schema = createServiceBookingSchema(service.maxPassengers, true);
+	// Create schema for hourly service - ensure minimum 20 passengers
+	const maxPassengers = Math.max(service.maxPassengers || 20, 20);
+	const schema = createServiceBookingSchema(maxPassengers, true);
 
 	const form = useForm<ServiceBookingFormData>({
 		resolver: zodResolver(schema),
@@ -59,7 +60,9 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 			customerPhone: "",
 			passengerCount: 1,
 			luggageCount: 0,
-			scheduledPickupTime: selectedDate,
+			scheduledPickupTime: undefined,
+			bookingDate: undefined,
+			bookingTime: "",
 			serviceDuration: 2,
 			specialRequirements: "",
 		},
@@ -95,8 +98,17 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 			const combinedDateTime = new Date(selectedDate);
 			combinedDateTime.setHours(hours, minutes, 0, 0);
 			form.setValue("scheduledPickupTime", combinedDateTime);
+			form.setValue("bookingDate", selectedDate);
+			form.setValue("bookingTime", selectedTime);
 		}
 	}, [selectedDate, selectedTime, form]);
+
+	// Trigger form validation when key fields change
+	useEffect(() => {
+		if (pickupLocation && destination && selectedDate && selectedTime) {
+			form.trigger(); // This will re-validate the entire form
+		}
+	}, [pickupLocation, destination, selectedDate, selectedTime, form]);
 
 	const addStop = () => {
 		if (stops.length < 5) {
@@ -167,6 +179,12 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 			const result = await createBookingMutation.mutateAsync(bookingData);
 			setConfirmedBooking(result);
 			setStep("confirmation");
+
+			// Scroll to top after booking confirmation
+			setTimeout(() => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}, 100);
+
 			toast.success("Booking confirmed successfully!");
 		} catch (error) {
 			console.error("💥 FRONTEND DEBUG - Booking error:", error);
@@ -261,8 +279,9 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 	}
 
 	return (
-		<div className="container mx-auto px-4 py-8">
-			<div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+		<div className="min-h-screen bg-gray-50">
+			<div className="max-w-6xl mx-auto px-4 py-8">
+				<div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
 				{/* Service Information Panel - Left Side */}
 				<div className="xl:col-span-2">
 					<div className="sticky top-8">
@@ -324,12 +343,6 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 											<span className="text-sm text-gray-600">Calculation</span>
 											<span className="font-semibold">{hours} × ${service.hourlyRate.toFixed(2)}</span>
 										</div>
-										{service.maxPassengers && (
-											<div className="flex justify-between items-center py-2 border-b border-gray-100">
-												<span className="text-sm text-gray-600">Max Passengers</span>
-												<span className="font-semibold">{service.maxPassengers}</span>
-											</div>
-										)}
 									</div>
 								</div>
 
@@ -371,23 +384,27 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 
 				{/* Booking Form - Right Side */}
 				<div className="xl:col-span-3">
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Package className="w-5 h-5" />
-								Book Your Hourly Service
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+					<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+						<div className="bg-primary p-8">
+							<h1 className="text-3xl font-bold text-white mb-2">Book Your Hourly Service</h1>
+							<p className="text-primary-foreground/90">Complete your hourly service booking in just a few steps</p>
+						</div>
+
+						<form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-8">
 								{/* Service Configuration */}
 								<div className="space-y-6">
-									<h3 className="text-lg font-semibold flex items-center gap-2">
-										<span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-										Service Configuration
-									</h3>
+									<div className="flex items-center gap-4">
+										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+											<span className="text-white text-lg font-bold">1</span>
+										</div>
+										<div>
+											<h3 className="text-xl font-bold text-gray-900">Service Configuration</h3>
+											<p className="text-gray-500 text-sm">Set your hourly service preferences</p>
+										</div>
+									</div>
 
-									<div className="grid md:grid-cols-2 gap-6 pl-10">
+									<div className="space-y-5 pl-14">
+										<div className="grid md:grid-cols-2 gap-5">
 										{/* Hours Selection */}
 										<div className="space-y-3">
 											<Label className="text-base font-semibold flex items-center gap-2">
@@ -435,13 +452,14 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 											<Input
 												type="number"
 												min="1"
-												max={service.maxPassengers || 8}
+												max={maxPassengers}
 												{...form.register("passengerCount", { valueAsNumber: true })}
 												className="w-full"
 											/>
 											{form.formState.errors.passengerCount && (
 												<p className="text-sm text-red-600">{form.formState.errors.passengerCount.message}</p>
 											)}
+										</div>
 										</div>
 									</div>
 								</div>
@@ -450,12 +468,17 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 
 								{/* Journey Details */}
 								<div className="space-y-6">
-									<h3 className="text-lg font-semibold flex items-center gap-2">
-										<span className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-										Journey Details
-									</h3>
+									<div className="flex items-center gap-4">
+										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+											<span className="text-white text-lg font-bold">2</span>
+										</div>
+										<div>
+											<h3 className="text-xl font-bold text-gray-900">Journey Details</h3>
+											<p className="text-gray-500 text-sm">Set your pickup and destination</p>
+										</div>
+									</div>
 
-									<div className="grid gap-6 pl-10">
+									<div className="space-y-5 pl-14">
 										{/* Pickup Location */}
 										<div className="space-y-3">
 											<Label className="text-base font-semibold">Pickup Location (Origin) *</Label>
@@ -522,14 +545,19 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 
 								<Separator />
 
-								{/* Customer Details */}
+								{/* Contact Information */}
 								<div className="space-y-6">
-									<h3 className="text-lg font-semibold flex items-center gap-2">
-										<span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-										Customer Details
-									</h3>
+									<div className="flex items-center gap-4">
+										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+											<span className="text-white text-lg font-bold">3</span>
+										</div>
+										<div>
+											<h3 className="text-xl font-bold text-gray-900">Contact Information</h3>
+											<p className="text-gray-500 text-sm">Your details for booking confirmation</p>
+										</div>
+									</div>
 
-									<div className="grid gap-6 pl-10">
+									<div className="space-y-5 pl-14">
 										<div className="grid md:grid-cols-2 gap-4">
 											<div className="space-y-3">
 												<Label className="text-base font-semibold">Full Name *</Label>
@@ -576,12 +604,17 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 
 								{/* Booking Details */}
 								<div className="space-y-6">
-									<h3 className="text-lg font-semibold flex items-center gap-2">
-										<span className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
-										Booking Details
-									</h3>
+									<div className="flex items-center gap-4">
+										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+											<span className="text-white text-lg font-bold">4</span>
+										</div>
+										<div>
+											<h3 className="text-xl font-bold text-gray-900">Booking Details</h3>
+											<p className="text-gray-500 text-sm">Choose your pickup date and time</p>
+										</div>
+									</div>
 
-									<div className="grid gap-6 pl-10">
+									<div className="space-y-5 pl-14">
 										{/* Pickup Date and Time */}
 										<div className="space-y-3">
 											<Label className="text-base font-semibold flex items-center gap-2">
@@ -620,8 +653,8 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 									<Button
 										type="submit"
 										size="lg"
-										disabled={createBookingMutation.isPending || !pickupLocation || !destination}
-										className="min-w-[220px] h-14 text-base"
+										disabled={createBookingMutation.isPending || !pickupLocation || !destination || !selectedDate || !selectedTime}
+										className="w-full h-14 text-lg font-bold"
 									>
 										{createBookingMutation.isPending ? (
 											<>
@@ -636,9 +669,9 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 										)}
 									</Button>
 								</div>
-							</form>
-						</CardContent>
-					</Card>
+						</form>
+					</div>
+				</div>
 				</div>
 			</div>
 		</div>

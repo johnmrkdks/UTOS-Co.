@@ -64,7 +64,7 @@ function DriverDashboardComponent() {
 		activeHours: driver.totalRides ? driver.totalRides * 1.8 : 0,
 		completedTrips: bookings.filter(b => b.status === 'completed').length,
 		upcomingTrips: bookings.filter(b => ['pending', 'confirmed', 'driver_assigned'].includes(b.status)).length,
-		activeTrips: bookings.filter(b => ['in_progress'].includes(b.status)).length,
+		activeTrips: bookings.filter(b => ['driver_en_route', 'in_progress', 'arrived_pickup', 'passenger_on_board'].includes(b.status)).length,
 		cancelledTrips: bookings.filter(b => b.status === 'cancelled').length,
 	};
 

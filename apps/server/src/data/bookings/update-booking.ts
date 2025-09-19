@@ -10,10 +10,16 @@ type UpdateBookingParams = {
 };
 
 export async function updateBooking(db: DB, { id, data }: UpdateBookingParams) {
-	const [updatedBooking] = await db.update(bookings).set({
-		...data,
-		status: data.status as BookingStatusEnum,
-		bookingType: data.bookingType as BookingTypeEnum,
-	}).where(eq(bookings.id, id)).returning();
+	const updateData: any = { ...data };
+
+	// Only cast status and bookingType if they exist in the data
+	if (data.status) {
+		updateData.status = data.status as BookingStatusEnum;
+	}
+	if (data.bookingType) {
+		updateData.bookingType = data.bookingType as BookingTypeEnum;
+	}
+
+	const [updatedBooking] = await db.update(bookings).set(updateData).where(eq(bookings.id, id)).returning();
 	return updatedBooking;
 }

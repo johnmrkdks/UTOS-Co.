@@ -32,7 +32,7 @@ export async function validateBookingOperations(
 		
 		const defaultPolicy = {
 			editAllowedHours: 4,
-			editDisabledAfterDriverAssignment: true,
+			editDisabledAfterDriverAssignment: false,
 			cancellationAllowedHours: 4,
 			cancellationFeePercentage: 0,
 			cancellationDisabledAfterDriverAssignment: false,
@@ -72,10 +72,6 @@ export async function validateBookingOperations(
 			canEdit = false;
 			editReason = `Edits must be made at least ${defaultPolicy.editAllowedHours} hours before pickup`;
 			console.log("❌ Edit not allowed: too close to pickup time");
-		} else if (hasDriverAssigned && defaultPolicy.editDisabledAfterDriverAssignment) {
-			canEdit = false;
-			editReason = "Cannot edit booking after driver has been assigned";
-			console.log("❌ Edit not allowed: driver already assigned");
 		} else {
 			console.log("✅ Edit allowed");
 		}

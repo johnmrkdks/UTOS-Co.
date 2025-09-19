@@ -320,7 +320,7 @@ export function Services({ className, ...props }: ServicesProps) {
 										/>
 									</div>
 									
-									<Link to="/book-car/$carId" params={{ carId: vehicle.id }}>
+									<Link to="/calculate-quote" search={{ selectedCarId: vehicle.id }}>
 										<Button
 											variant="outline"
 											className="w-full border-primary/20 text-primary hover:bg-primary/10 transition-all duration-300"

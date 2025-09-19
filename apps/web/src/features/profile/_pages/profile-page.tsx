@@ -5,11 +5,17 @@ import { Label } from "@workspace/ui/components/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { UserIcon, CameraIcon, SaveIcon, Loader2 } from "lucide-react";
 import { useUserQuery } from "@/hooks/query/use-user-query";
-import { useUpdateProfileMutation } from "@/hooks/auth/use-update-profile-mutation";
+import { useUpdateUserProfileMutation } from "@/hooks/customer/use-update-user-profile-mutation";
+import { trpc } from "@/trpc";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export function ProfilePage() {
 	const { session } = useUserQuery();
+	const { data: userProfile } = useQuery({
+		...trpc.customerProfile.getProfile.queryOptions(),
+		enabled: true
+	});
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({
 		name: "",
@@ -17,18 +23,45 @@ export function ProfilePage() {
 		phone: "",
 	});
 
-	const updateProfileMutation = useUpdateProfileMutation();
+	const updateProfileMutation = useUpdateUserProfileMutation();
 
-	// Update form data when session loads
+	// Update form data when session or user profile loads
 	useEffect(() => {
-		if (session?.user) {
+		console.log("🔍 DEBUG: ProfilePage data loading");
+		console.log("Session user:", session?.user);
+		console.log("UserProfile query data:", userProfile);
+		console.log("UserProfile user:", userProfile?.user);
+		console.log("UserProfile user phone specifically:", userProfile?.user?.phone);
+		console.log("Current formData before update:", formData);
+
+		if (userProfile?.user) {
+			// Prefer userProfile data as it includes phone field
+			console.log("✅ Using userProfile data for form");
+			console.log("Phone from userProfile:", userProfile.user.phone);
+			console.log("Name from userProfile:", userProfile.user.name);
+			console.log("Email from userProfile:", userProfile.user.email);
+
+			const newFormData = {
+				name: userProfile.user.name || "",
+				email: userProfile.user.email || "",
+				phone: userProfile.user.phone || "",
+			};
+
+			console.log("📝 Setting new form data:", newFormData);
+			setFormData(newFormData);
+		} else if (session?.user) {
+			// Fallback to session data
+			console.log("⚠️ Falling back to session data");
+			console.log("Phone from session:", (session.user as any)?.phone);
 			setFormData({
 				name: session.user.name || "",
 				email: session.user.email || "",
 				phone: (session.user as any)?.phone || "",
 			});
+		} else {
+			console.log("❌ No userProfile or session data available");
 		}
-	}, [session?.user]);
+	}, [session?.user, userProfile?.user]);
 
 	const handleSave = async () => {
 		try {
@@ -40,16 +73,19 @@ export function ProfilePage() {
 			const updateData: any = {};
 			let hasChanges = false;
 
-			if (formData.name !== session?.user?.name) {
+			// Use userProfile data for comparison if available, otherwise fallback to session
+			const currentUser = userProfile?.user || session?.user;
+
+			if (formData.name !== currentUser?.name) {
 				updateData.name = formData.name;
 				hasChanges = true;
-				console.log("📝 Name changed from:", session?.user?.name, "to:", formData.name);
+				console.log("📝 Name changed from:", currentUser?.name, "to:", formData.name);
 			}
 
-			if (formData.phone !== (session?.user as any)?.phone) {
+			if (formData.phone !== (currentUser as any)?.phone) {
 				updateData.phone = formData.phone;
 				hasChanges = true;
-				console.log("📞 Phone changed from:", (session?.user as any)?.phone, "to:", formData.phone);
+				console.log("📞 Phone changed from:", (currentUser as any)?.phone, "to:", formData.phone);
 			}
 
 			if (hasChanges) {
@@ -184,12 +220,13 @@ export function ProfilePage() {
 										variant="outline"
 										onClick={() => {
 											setIsEditing(false);
-											// Reset form data to current session values
-											if (session?.user) {
+											// Reset form data to current values
+											const currentUser = userProfile?.user || session?.user;
+											if (currentUser) {
 												setFormData({
-													name: session.user.name || "",
-													email: session.user.email || "",
-													phone: (session.user as any)?.phone || "",
+													name: currentUser.name || "",
+													email: currentUser.email || "",
+													phone: (currentUser as any)?.phone || "",
 												});
 											}
 										}}

@@ -16,7 +16,7 @@ import { EditBookingDialog } from "@/features/dashboard/_pages/booking-managemen
 import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-management/_components/change-status-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon } from "lucide-react";
+import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
@@ -73,6 +73,7 @@ function BookingManagementContent() {
 	const activeBookings = bookingsData.filter(b =>
 		["driver_assigned", "in_progress"].includes(b.status)
 	).length;
+	const archivedBookings = bookingsData.filter(b => b.isArchived === true).length;
 
 	// Analytics card data for booking management
 	const bookingManagementStatsData: AnalyticsCardData[] = [
@@ -123,6 +124,18 @@ function BookingManagementContent() {
 			changeType: 'positive',
 			showIcon: true,
 			showBackgroundIcon: true
+		},
+		{
+			id: 'archived',
+			title: 'Archived',
+			value: archivedBookings,
+			icon: Archive,
+			bgGradient: 'bg-gradient-to-br from-gray-50 to-gray-100',
+			iconBg: 'bg-gray-500',
+			changeText: 'Archived bookings',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
 		}
 	]
 
@@ -148,17 +161,10 @@ function BookingManagementContent() {
 						<TruckIcon className="h-4 w-4" />
 						Create Offload Booking
 					</Button>
-					<Button
-						onClick={openCreateCustomBookingDialog}
-						className="flex items-center gap-2"
-					>
-						<RouteIcon className="h-4 w-4" />
-						Create Custom Booking
-					</Button>
 				</div>
 			</div>
 
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 				{bookingManagementStatsData.map((data) => (
 					<AnalyticsCard
 						key={data.id}
@@ -185,6 +191,7 @@ function BookingManagementContent() {
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
 					<TabsTrigger value="custom">Custom Bookings</TabsTrigger>
 					<TabsTrigger value="offload">Offloads</TabsTrigger>
+					<TabsTrigger value="archived">Archived</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
@@ -263,6 +270,22 @@ function BookingManagementContent() {
 						<CardContent>
 							<Suspense fallback={<Loader />}>
 								<BookingsListTable bookingType="offload" filters={filters} />
+							</Suspense>
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="archived" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Archived Bookings</CardTitle>
+							<CardDescription>
+								Bookings that have been archived for record keeping. Archived bookings are hidden from regular views.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Suspense fallback={<Loader />}>
+								<BookingsListTable isArchived={true} filters={filters} />
 							</Suspense>
 						</CardContent>
 					</Card>

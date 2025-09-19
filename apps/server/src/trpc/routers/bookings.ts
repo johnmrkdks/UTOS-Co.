@@ -27,6 +27,7 @@ import { ResourceListSchema } from "@/utils/query/resource-list";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { users } from "@/db/sqlite/schema/users";
+import { BookingStatusEnum } from "@/db/sqlite/enums";
 
 // Helper function to get user role from database
 const getUserRole = async (db: any, userId: string) => {
@@ -266,8 +267,8 @@ export const bookingsRouter = router({
 			}
 		}),
 
-	// Package booking procedures (require authentication)
-	createPackageBooking: protectedProcedure
+	// Package booking procedures (allow guest users)
+	createPackageBooking: guestProcedure
 		.input(CreatePackageBookingSchema.omit({ userId: true }))
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
@@ -1055,6 +1056,89 @@ export const bookingsRouter = router({
 
 				const result = await bulkDeleteBookingsService(db, input);
 				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Unassign driver from booking
+	unassignDriver: protectedProcedure
+		.input(z.object({
+			bookingId: z.string(),
+		}))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+
+				// Only admins can unassign drivers
+				if (userRole !== 'admin' && userRole !== 'super_admin') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only administrators can unassign drivers",
+					});
+				}
+
+				// Update booking to remove driver assignment and reset status to confirmed
+				const updatedBooking = await updateBookingService(db, {
+					id: input.bookingId,
+					data: {
+						driverId: null,
+						status: BookingStatusEnum.Confirmed
+					}
+				});
+
+				return updatedBooking;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Unassign car from booking
+	unassignCar: protectedProcedure
+		.input(z.object({
+			bookingId: z.string(),
+		}))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+
+				// Only admins can unassign cars
+				if (userRole !== 'admin' && userRole !== 'super_admin') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only administrators can unassign cars",
+					});
+				}
+
+				// Update booking to remove car assignment
+				const updatedBooking = await updateBookingService(db, {
+					id: input.bookingId,
+					data: {
+						carId: null
+					}
+				});
+
+				return updatedBooking;
 			} catch (error) {
 				handleTRPCError(error);
 			}

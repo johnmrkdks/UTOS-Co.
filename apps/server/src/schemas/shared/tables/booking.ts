@@ -26,7 +26,7 @@ export const InsertBookingSchema = createInsertSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum),
 });
 export const UpdateBookingSchema = createUpdateSchema(bookings, {
-	status: z.nativeEnum(BookingStatusEnum),
+	status: z.nativeEnum(BookingStatusEnum).optional(),
 });
 
 export type Booking = z.infer<typeof BookingSchema>;

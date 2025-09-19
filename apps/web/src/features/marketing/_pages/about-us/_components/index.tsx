@@ -15,6 +15,11 @@ import {
 	MapPin
 } from "lucide-react";
 
+// Team member images
+import founderImage from "@/assets/people/founder.jpeg";
+import driverImage from "@/assets/people/driver.jpeg";
+import omImage from "@/assets/people/om.jpeg";
+
 const values = [
 	{
 		icon: Shield,
@@ -67,22 +72,19 @@ const achievements = [
 
 const team = [
 	{
-		name: "Name Here",
+		name: "Kris Dana",
 		role: "Founder & CEO",
-		experience: "15+ years in luxury transportation",
-		description: "Passionate about delivering exceptional service and building lasting client relationships."
+		image: founderImage
 	},
 	{
-		name: "Name Here",
-		role: "Operations Manager",
-		experience: "10+ years in hospitality",
-		description: "Ensures every detail of your journey is perfectly orchestrated for maximum comfort."
+		name: "John Mark Bagamaspad",
+		role: "Operations Manager/IT",
+		image: omImage
 	},
 	{
-		name: "Name Here",
-		role: "Head Chauffeur",
-		experience: "20+ years professional driving",
-		description: "Leads our team of chauffeurs with expertise in luxury service and Sydney navigation."
+		name: "John Stoj",
+		role: "Head Driver",
+		image: driverImage
 	}
 ];
 
@@ -276,21 +278,19 @@ export function AboutUs({ className, ...props }: AboutProps) {
 								key={member.name}
 								className="bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-center border border-border"
 							>
-								<div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-									<Users className="w-10 h-10 text-primary" />
+								<div className="w-32 h-40 mx-auto mb-6 rounded-2xl overflow-hidden shadow-lg">
+									<img
+										src={member.image}
+										alt={`${member.name} - ${member.role}`}
+										className="w-full h-full object-cover object-center"
+									/>
 								</div>
 								<h3 className="text-xl font-bold text-card-foreground mb-2">
 									{member.name}
 								</h3>
-								<div className="text-primary font-semibold mb-2">
+								<div className="text-primary font-semibold">
 									{member.role}
 								</div>
-								<div className="text-sm text-muted-foreground mb-4">
-									{member.experience}
-								</div>
-								<p className="text-muted-foreground leading-relaxed">
-									{member.description}
-								</p>
 							</div>
 						))}
 					</div>

@@ -27,7 +27,7 @@ export const packages = sqliteTable("packages", {
 	depositRequired: real("deposit_required"), // in dollars
 
 	// Service constraints
-	maxPassengers: integer("max_passengers").default(4),
+	maxPassengers: integer("max_passengers").default(20),
 	advanceBookingHours: integer("advance_booking_hours").default(24), // minimum notice
 	cancellationHours: integer("cancellation_hours").default(24), // cancellation policy
 
