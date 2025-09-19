@@ -4,7 +4,10 @@ import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
 import { BookingFilters } from "./booking-filters";
 import { bookingTableColumns, compactBookingTableColumns, type Booking } from "./booking-table-columns";
 import { useState, useMemo } from "react";
-import { UserCheck, Ban } from "lucide-react";
+import { UserCheck, Ban, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { ArchiveBookingDialog } from "./archive-booking-dialog";
+import { BulkOperationsDialog } from "./bulk-operations-dialog";
+import { useArchiveBookingMutation } from "../_hooks/query/use-archive-booking-mutation";
 
 interface BookingsListTableProps {
 	bookingType?: "package" | "custom" | "offload";
@@ -15,9 +18,14 @@ interface BookingsListTableProps {
 
 export function BookingsListTable({ bookingType, status, filters, compact = false }: BookingsListTableProps) {
 	const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
+	const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+	const [bulkOperationsDialogOpen, setBulkOperationsDialogOpen] = useState(false);
+	const [selectedBookingForArchive, setSelectedBookingForArchive] = useState<Booking | null>(null);
+	const [isArchivingOperation, setIsArchivingOperation] = useState(true);
+	const [bulkOperationType, setBulkOperationType] = useState<"archive" | "unarchive" | "delete">("archive");
 	
 	const bookingsQuery = useGetBookingsQuery({
-		limit: 50,
+		limit: 1000, // Removed practical limit for now - will implement pagination later
 		offset: 0,
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
@@ -124,21 +132,37 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		console.log("Cancel booking:", booking.id);
 	};
 
+	const handleArchiveBooking = (booking: Booking, isArchiving: boolean) => {
+		setSelectedBookingForArchive(booking);
+		setIsArchivingOperation(isArchiving);
+		setArchiveDialogOpen(true);
+	};
+
+	const handleDeleteBooking = (booking: Booking) => {
+		setSelectedBookings([booking.id]);
+		setBulkOperationType("delete");
+		setBulkOperationsDialogOpen(true);
+	};
+
 	// Use appropriate column configuration based on compact mode
-	const columns = compact 
+	const columns = compact
 		? compactBookingTableColumns({
 			selectedBookings,
 			onToggleBookingSelection: toggleBookingSelection,
 			onToggleAllSelection: toggleAllSelection,
 			onEditBooking: handleEditBooking,
-			onCancelBooking: handleCancelBooking
+			onCancelBooking: handleCancelBooking,
+			onArchiveBooking: handleArchiveBooking,
+			onDeleteBooking: handleDeleteBooking
 		})
 		: bookingTableColumns({
 			selectedBookings,
 			onToggleBookingSelection: toggleBookingSelection,
 			onToggleAllSelection: toggleAllSelection,
 			onEditBooking: handleEditBooking,
-			onCancelBooking: handleCancelBooking
+			onCancelBooking: handleCancelBooking,
+			onArchiveBooking: handleArchiveBooking,
+			onDeleteBooking: handleDeleteBooking
 		});
 
 	if (bookingsQuery.isLoading) {
@@ -182,9 +206,33 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 							<Ban className="h-4 w-4 mr-2" />
 							Cancel Selected
 						</Button>
-						<Button 
-							variant="ghost" 
-							size="sm" 
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								setBulkOperationType("archive");
+								setBulkOperationsDialogOpen(true);
+							}}
+							className="text-orange-600 hover:text-orange-700"
+						>
+							<Archive className="h-4 w-4 mr-2" />
+							Archive Selected
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								setBulkOperationType("delete");
+								setBulkOperationsDialogOpen(true);
+							}}
+							className="text-red-600 hover:text-red-700"
+						>
+							<Trash2 className="h-4 w-4 mr-2" />
+							Delete Selected
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
 							onClick={() => setSelectedBookings([])}
 						>
 							Clear Selection
@@ -200,6 +248,23 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 				searchPlaceholder="Search by customer name..."
 				isLoading={bookingsQuery.isLoading}
 				enableSorting={true}
+			/>
+
+			{/* Archive/Restore Dialog */}
+			<ArchiveBookingDialog
+				booking={selectedBookingForArchive}
+				open={archiveDialogOpen}
+				onOpenChange={setArchiveDialogOpen}
+				isArchiving={isArchivingOperation}
+			/>
+
+			{/* Bulk Operations Dialog */}
+			<BulkOperationsDialog
+				selectedBookingIds={selectedBookings}
+				open={bulkOperationsDialogOpen}
+				onOpenChange={setBulkOperationsDialogOpen}
+				operationType={bulkOperationType}
+				onClearSelection={() => setSelectedBookings([])}
 			/>
 		</div>
 	);

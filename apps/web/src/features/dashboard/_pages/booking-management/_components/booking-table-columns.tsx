@@ -22,6 +22,7 @@ export interface Booking {
 	quotedAmount: number;
 	carId: string;
 	userId: string;
+	isArchived?: boolean | null;
 	car?: {
 		id: string;
 		name: string;
@@ -59,6 +60,8 @@ interface BookingTableColumnsOptions {
 	onToggleAllSelection?: () => void;
 	onEditBooking?: (booking: Booking) => void;
 	onCancelBooking?: (booking: Booking) => void;
+	onArchiveBooking?: (booking: Booking, isArchiving: boolean) => void;
+	onDeleteBooking?: (booking: Booking) => void;
 	enableRowSelection?: boolean;
 	compact?: boolean;
 }
@@ -70,6 +73,8 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		onToggleAllSelection,
 		onEditBooking,
 		onCancelBooking,
+		onArchiveBooking,
+		onDeleteBooking,
 		enableRowSelection = true,
 		compact = false
 	} = options;
@@ -114,6 +119,8 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 				row={row}
 				onEditBooking={onEditBooking}
 				onCancelBooking={onCancelBooking}
+				onArchiveBooking={onArchiveBooking}
+				onDeleteBooking={onDeleteBooking}
 			/>
 		),
 		enableSorting: false,
@@ -147,8 +154,8 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			cell: ({ row }) => {
 				const type = row.getValue("bookingType") as string;
 				return (
-					<Badge variant={type === "package" ? "default" : "secondary"}>
-						{type === "package" ? "Package" : "Custom"}
+					<Badge variant={type === "package" ? "default" : type === "offload" ? "destructive" : "secondary"}>
+						{type === "package" ? "Package" : type === "offload" ? "Offload" : "Custom"}
 					</Badge>
 				);
 			},

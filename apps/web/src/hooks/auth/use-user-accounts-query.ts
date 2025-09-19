@@ -2,5 +2,5 @@ import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
 
 export const useUserAccountsQuery = () => {
-	return useQuery(trpc.auth.getUserAccounts.queryOptions());
+	return useQuery((trpc as any).auth.getUserAccounts.queryOptions());
 };

@@ -19,6 +19,8 @@ import { editBooking } from "@/services/bookings/edit-booking";
 import { cancelBooking } from "@/services/bookings/cancel-booking";
 import { validateBookingOperations } from "@/services/bookings/validate-booking-operations";
 import { closeTripWithExtras, closeTripWithoutExtras } from "@/services/bookings/close-trip-with-extras";
+import { archiveBookingService, ArchiveBookingServiceSchema } from "@/services/bookings/archive-booking";
+import { bulkArchiveBookingsService, bulkDeleteBookingsService, BulkArchiveBookingsSchema, BulkDeleteBookingsSchema } from "@/services/bookings/bulk-booking-operations";
 import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -178,7 +180,6 @@ export const bookingsRouter = router({
 					// Admins can see all bookings
 					const bookings = await getBookingsService(db, input);
 					console.log("- Bookings result:", {
-						total: bookings?.total || 0,
 						count: bookings?.data?.length || 0,
 						hasData: !!bookings?.data,
 						firstBooking: bookings?.data?.[0] || null
@@ -957,6 +958,102 @@ export const bookingsRouter = router({
 					input.isNoShow
 				);
 
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Archive booking (admin only)
+	archive: protectedProcedure
+		.input(ArchiveBookingServiceSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+
+				// Only admins can archive bookings
+				if (userRole !== 'admin' && userRole !== 'super_admin') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only administrators can archive bookings",
+					});
+				}
+
+				const result = await archiveBookingService(db, input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Bulk archive bookings (admin only)
+	bulkArchive: protectedProcedure
+		.input(BulkArchiveBookingsSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+
+				// Only admins can bulk archive bookings
+				if (userRole !== 'admin' && userRole !== 'super_admin') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only administrators can archive bookings",
+					});
+				}
+
+				const result = await bulkArchiveBookingsService(db, input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Bulk delete bookings (admin only)
+	bulkDelete: protectedProcedure
+		.input(BulkDeleteBookingsSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				// Get user info from session
+				const userId = session?.user?.id || session?.session?.userId;
+
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "User must be authenticated",
+					});
+				}
+
+				const userRole = await getUserRole(db, userId);
+
+				// Only admins can bulk delete bookings
+				if (userRole !== 'admin' && userRole !== 'super_admin') {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only administrators can delete bookings",
+					});
+				}
+
+				const result = await bulkDeleteBookingsService(db, input);
 				return result;
 			} catch (error) {
 				handleTRPCError(error);

@@ -11,6 +11,7 @@ import {
 	ClockIcon,
 	DollarSignIcon,
 	UserIcon,
+	UsersIcon,
 	PhoneIcon,
 	CheckCircleIcon,
 	AlertCircleIcon,
@@ -782,11 +783,25 @@ function DriverTripsComponent() {
 													<ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
 												</div>
 
-												{/* Customer - Compact */}
+												{/* Customer, Pax, and Vehicle - Compact */}
 												<div className="flex items-center justify-between">
-													<div className="flex items-center gap-1.5">
-														<UserIcon className="h-3.5 w-3.5 text-gray-500" />
-														<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
+													<div className="flex items-center gap-3">
+														<div className="flex items-center gap-1.5">
+															<UserIcon className="h-3.5 w-3.5 text-gray-500" />
+															<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
+														</div>
+														<div className="flex items-center gap-1">
+															<UsersIcon className="h-3.5 w-3.5 text-gray-500" />
+															<span className="text-xs text-gray-600">{booking.passengerCount || 1} pax</span>
+														</div>
+														{(booking.car?.name || booking.assignedCar?.name) && (
+															<div className="flex items-center gap-1">
+																<CarIcon className="h-3.5 w-3.5 text-gray-500" />
+																<span className="text-xs text-gray-600 truncate max-w-[80px]">
+																	{booking.car?.name || booking.assignedCar?.name}
+																</span>
+															</div>
+														)}
 													</div>
 												</div>
 											</>
@@ -855,11 +870,25 @@ function DriverTripsComponent() {
 
 												</div>
 
-												{/* Customer */}
+												{/* Customer, Pax, and Vehicle */}
 												<div className="flex items-center justify-between">
-													<div className="flex items-center gap-2">
-														<UserIcon className="h-4 w-4 text-gray-500" />
-														<span className="text-sm text-gray-700">{booking.customerName}</span>
+													<div className="flex items-center gap-4">
+														<div className="flex items-center gap-2">
+															<UserIcon className="h-4 w-4 text-gray-500" />
+															<span className="text-sm text-gray-700">{booking.customerName}</span>
+														</div>
+														<div className="flex items-center gap-1">
+															<UsersIcon className="h-4 w-4 text-gray-500" />
+															<span className="text-sm text-gray-600">{booking.passengerCount || 1} pax</span>
+														</div>
+														{(booking.car?.name || booking.assignedCar?.name) && (
+															<div className="flex items-center gap-1">
+																<CarIcon className="h-4 w-4 text-gray-500" />
+																<span className="text-sm text-gray-600">
+																	{booking.car?.name || booking.assignedCar?.name}
+																</span>
+															</div>
+														)}
 													</div>
 												</div>
 											</>

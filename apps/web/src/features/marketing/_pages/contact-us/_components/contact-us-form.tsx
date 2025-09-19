@@ -41,7 +41,7 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 	const createContactMessageMutation = useCreateContactMessageMutation();
 
 	const handleSubmit = (data: FormData) => {
-		createContactMessageMutation.mutate(data, {
+		(createContactMessageMutation as any).mutate(data, {
 			onSuccess: () => {
 				form.reset();
 			},

@@ -109,9 +109,8 @@ export function CustomerTripsPage() {
 	// Helper functions
 	const formatPrice = (price: number) => {
 		if (!price) return '$0.00';
-		// Check if price is already in dollars or cents
-		const amount = price > 1000 ? price / 100 : price;
-		return `$${amount.toFixed(2)}`;
+		// Price is already in dollars, no conversion needed
+		return `$${price.toFixed(2)}`;
 	};
 
 	const formatDate = (date: string | Date) => {

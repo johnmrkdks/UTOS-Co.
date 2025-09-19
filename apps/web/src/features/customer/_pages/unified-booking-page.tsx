@@ -134,7 +134,7 @@ export function UnifiedBookingPage() {
 		try {
 			goToStep("processing");
 			
-			const result = await createBookingMutation.mutateAsync({
+			const result = await (createBookingMutation as any).mutateAsync({
 				// quoteToken: quote.quoteToken || "", // Remove unsupported property
 				...bookingDetails,
 			});

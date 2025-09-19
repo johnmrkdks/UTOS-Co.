@@ -6,5 +6,5 @@ export const useListContactMessagesQuery = (params?: {
 	limit?: number;
 	offset?: number;
 }) => {
-	return useQuery(trpc.contactMessages.list.queryOptions(params || {}));
+	return useQuery((trpc as any).contactMessages.list.queryOptions(params || {}));
 };

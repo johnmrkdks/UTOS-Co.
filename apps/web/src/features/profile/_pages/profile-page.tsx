@@ -25,7 +25,7 @@ export function ProfilePage() {
 			setFormData({
 				name: session.user.name || "",
 				email: session.user.email || "",
-				phone: session.user.phone || "",
+				phone: (session.user as any)?.phone || "",
 			});
 		}
 	}, [session?.user]);
@@ -46,10 +46,10 @@ export function ProfilePage() {
 				console.log("📝 Name changed from:", session?.user?.name, "to:", formData.name);
 			}
 
-			if (formData.phone !== session?.user?.phone) {
+			if (formData.phone !== (session?.user as any)?.phone) {
 				updateData.phone = formData.phone;
 				hasChanges = true;
-				console.log("📞 Phone changed from:", session?.user?.phone, "to:", formData.phone);
+				console.log("📞 Phone changed from:", (session?.user as any)?.phone, "to:", formData.phone);
 			}
 
 			if (hasChanges) {
@@ -189,7 +189,7 @@ export function ProfilePage() {
 												setFormData({
 													name: session.user.name || "",
 													email: session.user.email || "",
-													phone: session.user.phone || "",
+													phone: (session.user as any)?.phone || "",
 												});
 											}
 										}}

@@ -8,7 +8,7 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import type { Row } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X } from "lucide-react";
+import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import type { Booking } from "./booking-table-columns";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { useUnassignDriverMutation } from "../_hooks/query/use-unassign-driver-mutation";
@@ -17,9 +17,11 @@ import { useUnassignCarMutation } from "../_hooks/query/use-unassign-car-mutatio
 interface BookingTableRowActionsProps {
 	row: Row<Booking>;
 	onEditBooking?: (booking: Booking) => void;
+	onArchiveBooking?: (booking: Booking, isArchiving: boolean) => void;
+	onDeleteBooking?: (booking: Booking) => void;
 }
 
-export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowActionsProps) {
+export function BookingTableRowActions({ row, onEditBooking, onArchiveBooking, onDeleteBooking }: BookingTableRowActionsProps) {
 	const { 
 		openBookingDetailsDialog, 
 		openAssignDriverDialog,
@@ -63,6 +65,22 @@ export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowAc
 	const handleUnassignCar = (booking: Booking) => {
 		console.log("🚫 Unassigning car from booking:", booking.id);
 		unassignCarMutation.mutate({ bookingId: booking.id });
+	};
+
+	const handleArchiveBooking = (booking: Booking) => {
+		console.log("📁 Archiving booking:", booking.id);
+		if (onArchiveBooking) {
+			// Toggle archive state: null/false -> true, true -> false
+			const newArchiveState = booking.isArchived ? false : true;
+			onArchiveBooking(booking, newArchiveState);
+		}
+	};
+
+	const handleDeleteBooking = (booking: Booking) => {
+		console.log("🗑️ Deleting booking:", booking.id);
+		if (onDeleteBooking) {
+			onDeleteBooking(booking);
+		}
 	};
 
 	return (
@@ -136,7 +154,34 @@ export function BookingTableRowActions({ row, onEditBooking }: BookingTableRowAc
 						<DropdownMenuSeparator />
 					</>
 				)}
-				
+
+				{/* Archive/Restore Actions */}
+				<DropdownMenuItem
+					onClick={() => handleArchiveBooking(booking)}
+					className={booking.isArchived ? "text-blue-600 hover:text-blue-700" : "text-orange-600 hover:text-orange-700"}
+				>
+					{booking.isArchived ? (
+						<>
+							<ArchiveRestore className="mr-2 h-4 w-4" />
+							Restore booking
+						</>
+					) : (
+						<>
+							<Archive className="mr-2 h-4 w-4" />
+							Archive booking
+						</>
+					)}
+				</DropdownMenuItem>
+
+				{/* Delete Action */}
+				<DropdownMenuItem
+					onClick={() => handleDeleteBooking(booking)}
+					className="text-red-600 hover:text-red-700"
+				>
+					<Trash2 className="mr-2 h-4 w-4" />
+					Delete permanently
+				</DropdownMenuItem>
+
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

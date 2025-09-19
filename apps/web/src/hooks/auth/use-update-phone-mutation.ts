@@ -9,11 +9,11 @@ export interface UpdatePhoneInput {
 export const useUpdatePhoneMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.auth.updateUserPhone.mutationOptions({
-		onMutate: (variables) => {
+	return useMutation((trpc as any).auth.updateUserPhone.mutationOptions({
+		onMutate: (variables: any) => {
 			console.log("🔄 Starting phone update mutation with:", variables);
 		},
-		onSuccess: (data) => {
+		onSuccess: (data: any) => {
 			console.log("✅ Phone update successful:", data);
 			// Invalidate user queries to refresh user information
 			queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -22,7 +22,7 @@ export const useUpdatePhoneMutation = () => {
 				description: "Your phone number has been updated successfully.",
 			});
 		},
-		onError: (error) => {
+		onError: (error: any) => {
 			console.error("❌ Phone update failed:", error);
 			toast.error("Failed to update phone number", {
 				description: error.message || "Please try again later.",

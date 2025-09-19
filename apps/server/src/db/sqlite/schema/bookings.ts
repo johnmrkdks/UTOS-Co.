@@ -59,6 +59,7 @@ export const bookings = sqliteTable("bookings", {
 	specialRequests: text("special_requests"),
 
 	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
+	isArchived: integer("is_archived", { mode: "boolean" }),
 
 	// Booking timeline tracking
 	confirmedAt: integer("confirmed_at", { mode: "timestamp" }),

@@ -10,11 +10,11 @@ export interface UpdateProfileInput {
 export const useUpdateProfileMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.auth.updateUserProfile.mutationOptions({
-		onMutate: (variables) => {
+	return useMutation((trpc as any).auth.updateUserProfile.mutationOptions({
+		onMutate: (variables: any) => {
 			console.log("🔄 Starting profile update mutation with:", variables);
 		},
-		onSuccess: (data) => {
+		onSuccess: (data: any) => {
 			console.log("✅ Profile update successful:", data);
 
 			// Invalidate user queries to refresh user information
@@ -24,7 +24,7 @@ export const useUpdateProfileMutation = () => {
 				description: "Your profile information has been saved.",
 			});
 		},
-		onError: (error) => {
+		onError: (error: any) => {
 			console.error("❌ Profile update failed:", error);
 			toast.error("Failed to update profile", {
 				description: error.message || "Please try again later.",

@@ -88,8 +88,8 @@ export const AccountLinkingForm = ({
 
 	// Use real account info from server data
 	const accountInfo: AccountInfo = {
-		hasGoogleAccount: accountsData?.accountInfo?.hasGoogleAccount || false,
-		hasPasswordAccount: accountsData?.accountInfo?.hasPasswordAccount || false,
+		hasGoogleAccount: (accountsData as any)?.accountInfo?.hasGoogleAccount || false,
+		hasPasswordAccount: (accountsData as any)?.accountInfo?.hasPasswordAccount || false,
 		email: userEmail,
 	};
 
@@ -111,7 +111,7 @@ export const AccountLinkingForm = ({
 			});
 
 			// Force refresh account data
-			queryClient.invalidateQueries({ queryKey: trpc.auth.getUserAccounts.queryKey() });
+			queryClient.invalidateQueries({ queryKey: (trpc as any).auth.getUserAccounts.queryKey() });
 		} else if (urlParams.get('error')) {
 			// Remove the parameter from URL
 			const newUrl = new URL(window.location.href);
@@ -176,7 +176,7 @@ export const AccountLinkingForm = ({
 
 	const handleSetPassword = async (data: SetPasswordFormData) => {
 		try {
-			await setPasswordMutation.mutateAsync({
+			await (setPasswordMutation as any).mutateAsync({
 				password: data.password,
 			});
 

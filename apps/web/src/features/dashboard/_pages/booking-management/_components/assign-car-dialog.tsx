@@ -54,7 +54,7 @@ export function AssignCarDialog({
 	const handleAssignCar = () => {
 		if (!selectedCarId || !booking?.id) return;
 
-		assignCarMutation.mutate({
+		(assignCarMutation as any).mutate({
 			id: booking.id,
 			data: {
 				carId: selectedCarId,
@@ -68,8 +68,8 @@ export function AssignCarDialog({
 	};
 
 	// Use available cars if query succeeds, otherwise fallback to regular cars with filtering
-	const availableCars = availableCarsQuery.data?.data || 
-		regularCarsQuery.data?.items?.filter(car => 
+	const availableCars = availableCarsQuery.data?.data ||
+		(regularCarsQuery.data as any)?.items?.filter((car: any) =>
 			car.isActive && car.isAvailable && car.isPublished
 		) || [];
 
@@ -102,7 +102,7 @@ export function AssignCarDialog({
 										<SelectValue placeholder="Select a car" />
 									</SelectTrigger>
 									<SelectContent>
-										{availableCars.map((car) => (
+										{availableCars.map((car: any) => (
 											<SelectItem key={car.id} value={car.id}>
 												<div className="flex items-center gap-2">
 													<Car className="h-4 w-4" />

@@ -5,14 +5,14 @@ import { toast } from "sonner";
 export const useUpdateContactMessageStatusMutation = (options?: { silent?: boolean }) => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.contactMessages.updateStatus.mutationOptions({
+	return useMutation((trpc as any).contactMessages.updateStatus.mutationOptions({
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: trpc.contactMessages.list.queryKey() });
+			queryClient.invalidateQueries({ queryKey: (trpc as any).contactMessages.list.queryKey() });
 			if (!options?.silent) {
 				toast.success("Message status updated");
 			}
 		},
-		onError: (error) => {
+		onError: (error: any) => {
 			toast.error("Failed to update message status", {
 				description: error.message,
 			});

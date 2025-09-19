@@ -66,7 +66,7 @@ export const useUnlinkAccountMutation = () => {
 		onSuccess: () => {
 			// Invalidate user and account queries to refresh account information
 			queryClient.invalidateQueries({ queryKey: ["user"] });
-			queryClient.invalidateQueries({ queryKey: trpc.auth.getUserAccounts.queryKey() });
+			queryClient.invalidateQueries({ queryKey: (trpc as any).auth.getUserAccounts.queryKey() });
 
 			toast.success("Account unlinked", {
 				description: "The account has been successfully disconnected.",

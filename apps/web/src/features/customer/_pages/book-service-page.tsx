@@ -165,7 +165,7 @@ export function BookServicePage() {
 
 			if (!result.success) {
 				const zodErrors: Record<string, string> = {};
-				result.error.errors.forEach((error) => {
+				(result.error as any).errors.forEach((error: any) => {
 					const path = error.path.join('.');
 					zodErrors[path] = error.message;
 				});
