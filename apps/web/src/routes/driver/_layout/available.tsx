@@ -111,8 +111,8 @@ function AvailableTripsPage() {
 					{isMobile ? (
 						// Mobile optimized layout
 						<>
-							{/* Header - Time, Car Name and Price */}
-							<div className="flex items-center justify-between mb-3">
+							{/* Header - Time and ID */}
+							<div className="flex items-center justify-between mb-2">
 								<div className="flex items-center gap-2">
 									<ClockIcon className="h-4 w-4 text-blue-500" />
 									<div>
@@ -129,18 +129,16 @@ function AvailableTripsPage() {
 										</div>
 									</div>
 								</div>
-								<Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-sm px-3 py-1">
+								<Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-sm px-2 py-1">
 									${formatCurrency(totalAmount)}
 								</Badge>
 							</div>
 
-							{/* Car Name */}
-							<div className="mb-3">
-								<h3 className="text-lg font-semibold text-gray-900">
-									{getCarDisplayName()}
-								</h3>
+							{/* Type Badge and Distance */}
+							<div className="flex items-center justify-between mb-3">
+								<BookingTypeBadge booking={trip} />
 								{trip.estimatedDistance && (
-									<div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+									<div className="flex items-center gap-2 text-xs text-gray-500">
 										<span>{formatDistance(trip.estimatedDistance)}km</span>
 										<span>•</span>
 										<span>{formatDuration(trip.estimatedDuration || 0)}min</span>
@@ -148,14 +146,14 @@ function AvailableTripsPage() {
 								)}
 							</div>
 
-							{/* Route - Compact Mobile Layout with Stops */}
-							<div className="space-y-2 mb-4">
+							{/* Route - Ultra Compact Mobile Layout */}
+							<div className="space-y-1.5 mb-3">
 								{/* Origin */}
 								<div className="flex items-center gap-2">
 									<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
-									<p className="text-sm text-gray-700 line-clamp-1">
-										{trip.originAddress.length > 40
-											? trip.originAddress.substring(0, 40) + '...'
+									<p className="text-xs text-gray-700 line-clamp-1 leading-tight">
+										{trip.originAddress.length > 35
+											? trip.originAddress.substring(0, 35) + '...'
 											: trip.originAddress}
 									</p>
 								</div>
@@ -164,7 +162,7 @@ function AvailableTripsPage() {
 								{stopsCount > 0 && (
 									<div className="flex items-center gap-2">
 										<div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
-										<p className="text-sm text-blue-600 line-clamp-1">
+										<p className="text-xs text-blue-600 line-clamp-1 leading-tight">
 											{stopsCount} stop{stopsCount > 1 ? 's' : ''}
 										</p>
 									</div>
@@ -173,40 +171,36 @@ function AvailableTripsPage() {
 								{/* Destination */}
 								<div className="flex items-center gap-2">
 									<div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></div>
-									<p className="text-sm text-gray-700 line-clamp-1">
-										{trip.destinationAddress.length > 40
-											? trip.destinationAddress.substring(0, 40) + '...'
+									<p className="text-xs text-gray-700 line-clamp-1 leading-tight">
+										{trip.destinationAddress.length > 35
+											? trip.destinationAddress.substring(0, 35) + '...'
 											: trip.destinationAddress}
 									</p>
 								</div>
 							</div>
 
-							{/* Customer and Action - Bottom Row */}
-							<div className="flex items-center justify-between pt-3 border-t border-gray-100">
-								<div className="flex items-center gap-3">
-									<div className="flex items-center gap-1 text-sm text-gray-600">
-										<UserIcon className="h-4 w-4 text-gray-400" />
-										<span className="font-medium truncate max-w-[120px]">{trip.customerName || 'Customer'}</span>
-									</div>
-									<div className="flex items-center gap-1 text-sm text-gray-600">
-										<UsersIcon className="h-4 w-4 text-gray-400" />
-										<span className="font-medium">{trip.passengerCount || 1}</span>
-									</div>
+							{/* Customer, Pax, and Car - Compact Bottom Row */}
+							<div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+								<div className="flex items-center gap-1 text-xs text-gray-600">
+									<UserIcon className="h-3 w-3 text-gray-400" />
+									<span className="font-medium truncate max-w-[80px]">{trip.customerName || 'Customer'}</span>
 								</div>
-
-								<div className="flex gap-1">
-									<BookingTypeBadge booking={trip} />
-									<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-2 py-1 text-xs">
-										<CheckCircleIcon className="w-3 h-3 mr-1" />
-										Assigned
-									</Badge>
+								<div className="flex items-center gap-1 text-xs text-gray-600">
+									<UsersIcon className="h-3 w-3 text-gray-400" />
+									<span className="font-medium">{trip.passengerCount || 1}</span>
+								</div>
+								<div className="flex items-center gap-1 text-xs text-gray-600 flex-1 min-w-0">
+									<CarIcon className="h-3 w-3 text-gray-400" />
+									<span className="font-medium truncate">
+										{trip.car?.name || trip.carName || trip.vehicleName || trip.vehicle?.name || 'Unassigned'}
+									</span>
 								</div>
 							</div>
 						</>
 					) : (
 						// Desktop layout (enhanced version of previous design)
 						<>
-							{/* Header with Time, Car Name and Status */}
+							{/* Header with Time, Type, and Price */}
 							<div className="flex items-center justify-between mb-3">
 								<div className="flex items-center gap-3">
 									<ClockIcon className="h-5 w-5 text-blue-500" />
@@ -219,29 +213,29 @@ function AvailableTripsPage() {
 												#{trip.id.slice(-6)}
 											</span>
 										</div>
-										<span className="text-sm text-gray-500">
+										<div className="text-sm text-gray-500">
 											{format(new Date(trip.scheduledPickupTime), "MMM dd, yyyy")}
-										</span>
+										</div>
 									</div>
 								</div>
-								<Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-lg px-4 py-2">
-									${formatCurrency(totalAmount)}
-								</Badge>
+								<div className="flex items-center gap-3">
+									<BookingTypeBadge booking={trip} />
+									<Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-lg px-4 py-2">
+										${formatCurrency(totalAmount)}
+									</Badge>
+								</div>
 							</div>
 
-							{/* Car Name and Details */}
-							<div className="mb-4">
-								<h3 className="text-xl font-semibold text-gray-900 mb-1">
-									{getCarDisplayName()}
-								</h3>
-								{trip.estimatedDistance && (
+							{/* Distance and Duration */}
+							{trip.estimatedDistance && (
+								<div className="mb-4">
 									<div className="flex items-center gap-3 text-sm text-gray-500">
 										<span>{formatDistance(trip.estimatedDistance)}km</span>
 										<span>•</span>
 										<span>{formatDuration(trip.estimatedDuration || 0)}min</span>
 									</div>
-								)}
-							</div>
+								</div>
+							)}
 
 							{/* Route */}
 							<div className="space-y-3 mb-4">
@@ -275,45 +269,21 @@ function AvailableTripsPage() {
 								</div>
 							</div>
 
-							{/* Customer info with badges inline */}
-							<div className="space-y-2 pt-3 border-t border-gray-100">
-								{/* Customer info with badges */}
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2 text-sm text-gray-600">
-										<UserIcon className="h-4 w-4 text-gray-400" />
-										<span className="font-medium">{trip.customerName || 'Customer'}</span>
-									</div>
-									<div className="flex gap-2">
-										<BookingTypeBadge booking={trip} />
-										<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-2 py-0.5 text-xs">
-											<CheckCircleIcon className="w-3 h-3 mr-1" />
-											Assigned
-										</Badge>
-									</div>
+							{/* Customer, Pax, and Car - Horizontal Layout */}
+							<div className="flex items-center gap-6 pt-3 border-t border-gray-100">
+								<div className="flex items-center gap-2 text-sm text-gray-600">
+									<UserIcon className="h-4 w-4 text-gray-400" />
+									<span className="font-medium">{trip.customerName || 'Customer'}</span>
 								</div>
-								{/* Passenger count and Vehicle info */}
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-1 text-sm text-gray-600">
-										<UsersIcon className="h-4 w-4 text-gray-400" />
-										<span className="font-medium">{trip.passengerCount || 1} pax</span>
-									</div>
-									<div className="flex items-center gap-1 text-sm text-gray-600">
-										<CarIcon className="h-4 w-4 text-gray-400" />
-										<span className="font-medium text-right">
-											{(() => {
-												console.log('Full trip object keys:', Object.keys(trip));
-												console.log('Trip car data:', {
-													car: trip.car,
-													carId: trip.carId,
-													assignedCar: trip.assignedCar,
-													carName: trip.carName,
-													vehicleName: trip.vehicleName,
-													vehicle: trip.vehicle
-												});
-												return trip.car?.name || trip.carName || trip.vehicleName || trip.vehicle?.name || 'Unassigned';
-											})()}
-										</span>
-									</div>
+								<div className="flex items-center gap-2 text-sm text-gray-600">
+									<UsersIcon className="h-4 w-4 text-gray-400" />
+									<span className="font-medium">{trip.passengerCount || 1} pax</span>
+								</div>
+								<div className="flex items-center gap-2 text-sm text-gray-600">
+									<CarIcon className="h-4 w-4 text-gray-400" />
+									<span className="font-medium">
+										{trip.car?.name || trip.carName || trip.vehicleName || trip.vehicle?.name || 'Unassigned'}
+									</span>
 								</div>
 							</div>
 						</>

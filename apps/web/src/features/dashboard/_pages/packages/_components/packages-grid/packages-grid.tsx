@@ -260,21 +260,13 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 											)}
 										</div>
 
-										{/* Package Stats */}
-										<div className="flex items-center gap-2 text-xs text-muted-foreground">
-											{pkg.maxPassengers && (
-												<div className="flex items-center gap-1">
-													<Users className="h-3 w-3" />
-													<span>{pkg.maxPassengers}</span>
-												</div>
-											)}
-											{pkg.duration && (
-												<div className="flex items-center gap-1">
-													<Clock className="h-3 w-3" />
-													<span>{Math.floor(pkg.duration / 60)}h</span>
-												</div>
-											)}
-										</div>
+										{/* Package Stats - Duration only */}
+										{pkg.duration && (
+											<div className="flex items-center gap-1 text-xs text-muted-foreground">
+												<Clock className="h-3 w-3" />
+												<span>{Math.floor(pkg.duration / 60)}h</span>
+											</div>
+										)}
 									</div>
 								</div>
 
