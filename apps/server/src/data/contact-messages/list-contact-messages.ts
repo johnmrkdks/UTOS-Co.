@@ -1,30 +1,45 @@
+import type { DB } from "@/db";
 import { contactMessages } from "@/db/sqlite/schema";
-import { desc, eq } from "drizzle-orm";
-import type { Database } from "@/types";
+import type { ContactMessage } from "@/db/sqlite/schema";
+import { eq, desc } from "drizzle-orm";
+import type { ResourceList } from "@/utils/query/resource-list";
+
+interface ListContactMessagesOptions extends ResourceList {
+	status?: "unread" | "read" | "archived";
+}
 
 export async function listContactMessages(
-	db: Database,
-	options?: {
-		status?: "unread" | "read" | "archived";
-		limit?: number;
-		offset?: number;
-	}
+	db: DB,
+	options: ListContactMessagesOptions = {}
 ) {
-	let query = db.select().from(contactMessages);
+	const { status, limit = 50, offset = 0 } = options;
 
-	if (options?.status) {
-		query = query.where(eq(contactMessages.status, options.status));
-	}
+	// Build the where condition based on status filter
+	const whereCondition = status ? eq(contactMessages.status, status) : undefined;
 
-	query = query.orderBy(desc(contactMessages.createdAt));
+	// Execute the query with filtering
+	const data = await db
+		.select()
+		.from(contactMessages)
+		.where(whereCondition)
+		.orderBy(desc(contactMessages.createdAt))
+		.limit(limit)
+		.offset(offset);
 
-	if (options?.limit) {
-		query = query.limit(options.limit);
-	}
+	// Get total count for pagination
+	const totalCount = await db
+		.select({ count: contactMessages.id })
+		.from(contactMessages)
+		.where(whereCondition);
 
-	if (options?.offset) {
-		query = query.offset(options.offset);
-	}
-
-	return await query;
+	return {
+		data,
+		metadata: {
+			total: totalCount.length,
+			limit,
+			offset,
+			page: Math.floor(offset / limit) + 1,
+			totalPages: Math.ceil(totalCount.length / limit),
+		},
+	};
 }

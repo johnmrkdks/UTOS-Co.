@@ -44,18 +44,25 @@ export interface SecureInstantQuote extends InstantQuote {
 }
 
 export async function calculateInstantQuoteService(
-	db: DB, 
+	db: DB,
 	data: CalculateInstantQuoteParams,
 	env?: { GOOGLE_MAPS_API_KEY?: string }
 ): Promise<InstantQuote> {
+	console.log("🔍 calculateInstantQuoteService - Starting calculation");
+	console.log("🔍 calculateInstantQuoteService - Input data:", JSON.stringify(data, null, 2));
+	console.log("🔍 calculateInstantQuoteService - Environment:", !!env?.GOOGLE_MAPS_API_KEY ? "Google Maps API key available" : "No Google Maps API key");
+
 	let totalDistance = 0;
 	let totalDuration = 0;
 	let totalWaitingTime = 0;
 
 	try {
+		console.log("🔍 calculateInstantQuoteService - Attempting Google Maps API call");
 		// Try to use Google Maps Distance Matrix API first
 		const origins = [data.originAddress];
 		const destinations = [data.destinationAddress];
+		console.log("🔍 calculateInstantQuoteService - Origins:", origins);
+		console.log("🔍 calculateInstantQuoteService - Destinations:", destinations);
 		
 		// Add stops if provided
 		if (data.stops && data.stops.length > 0) {
@@ -117,7 +124,11 @@ export async function calculateInstantQuoteService(
 				totalDuration = element.duration?.value || 0; // seconds
 			}
 		}
+		console.log("🔍 calculateInstantQuoteService - Google Maps API successful");
+		console.log("🔍 calculateInstantQuoteService - Total distance:", totalDistance, "meters");
+		console.log("🔍 calculateInstantQuoteService - Total duration:", totalDuration, "seconds");
 	} catch (error) {
+		console.error("❌ calculateInstantQuoteService - Google Maps API failed:", error);
 		console.warn("Google Maps API failed, using fallback calculation:", error);
 		
 		// Fallback to Haversine formula if coordinates are available
@@ -141,15 +152,21 @@ export async function calculateInstantQuoteService(
 	}
 
 	// Get pricing configuration - use car-specific if carId provided, otherwise use general config
+	console.log("🔍 calculateInstantQuoteService - Fetching pricing configuration");
+	console.log("🔍 calculateInstantQuoteService - Car ID provided:", data.carId);
+
 	let pricingConfigResult;
-	
+
 	if (data.carId) {
+		console.log("🔍 calculateInstantQuoteService - Looking for car-specific pricing");
 		// Try to get car-specific pricing configuration first
 		pricingConfigResult = await db
 			.select()
 			.from(pricingConfig)
 			.where(eq(pricingConfig.carId, data.carId))
 			.limit(1);
+
+		console.log("🔍 calculateInstantQuoteService - Car-specific pricing results:", pricingConfigResult.length);
 
 		// If no car-specific pricing exists, fallback to global pricing configuration
 		if (pricingConfigResult.length === 0) {
@@ -170,6 +187,7 @@ export async function calculateInstantQuoteService(
 				.limit(1);
 		}
 	} else {
+		console.log("🔍 calculateInstantQuoteService - No car ID provided, using first available pricing configuration");
 		// No carId provided, use first available pricing configuration
 		pricingConfigResult = await db
 			.select()
@@ -177,11 +195,21 @@ export async function calculateInstantQuoteService(
 			.limit(1);
 	}
 
+	console.log("🔍 calculateInstantQuoteService - Final pricing config results:", pricingConfigResult.length);
+
 	if (pricingConfigResult.length === 0) {
+		console.error("❌ calculateInstantQuoteService - No pricing configuration found");
 		throw new Error("No pricing configuration found. Please contact support or set up pricing configuration.");
 	}
 
 	const config = pricingConfigResult[0];
+	console.log("🔍 calculateInstantQuoteService - Using pricing config:", {
+		id: config.id,
+		firstKmRate: config.firstKmRate,
+		pricePerKm: config.pricePerKm,
+		firstKmLimit: config.firstKmLimit,
+		carId: config.carId
+	});
 	const pricing = {
 		firstKmRate: config.firstKmRate,
 		additionalKmRate: config.pricePerKm,
@@ -211,8 +239,19 @@ export async function calculateInstantQuoteService(
 	}
 	
 	const totalAmount = parseFloat((firstKmFare + additionalKmFare).toFixed(2));
-	
-	return {
+
+	console.log("🔍 calculateInstantQuoteService - Final calculation results:", {
+		distanceKm,
+		firstKmDistance,
+		additionalDistance,
+		firstKmFare,
+		additionalKmFare,
+		totalAmount,
+		estimatedDistance: Math.round(totalDistance),
+		estimatedDuration: Math.round(totalDuration)
+	});
+
+	const finalQuote = {
 		firstKmFare,
 		additionalKmFare,
 		totalAmount,
@@ -226,6 +265,9 @@ export async function calculateInstantQuoteService(
 			additionalDistance: parseFloat(additionalDistance.toFixed(2)),
 		},
 	};
+
+	console.log("✅ calculateInstantQuoteService - Returning quote successfully");
+	return finalQuote;
 }
 
 // Calculate distance between two points using Haversine formula

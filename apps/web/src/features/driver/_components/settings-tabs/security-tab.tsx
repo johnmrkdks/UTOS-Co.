@@ -1,25 +1,19 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { Input } from "@workspace/ui/components/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@workspace/ui/components/form";
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import {
-	KeyIcon,
 	MailIcon,
 	ShieldIcon,
 	CheckCircleIcon,
 	AlertCircleIcon,
-	EyeIcon,
-	EyeOffIcon,
 	LinkIcon,
 	UnlinkIcon
 } from "lucide-react";
+import { UpdatePasswordForm } from "@/components/forms/update-password-form";
+import { AccountLinkingForm } from "@/components/forms/account-linking-form";
 
 // Google icon component since lucide-react doesn't have one
 const GoogleIcon = ({ className }: { className?: string }) => (
@@ -31,58 +25,14 @@ const GoogleIcon = ({ className }: { className?: string }) => (
 	</svg>
 );
 
-const changePasswordSchema = z.object({
-	currentPassword: z.string().min(1, "Current password is required"),
-	newPassword: z.string().min(8, "New password must be at least 8 characters"),
-	confirmPassword: z.string().min(1, "Please confirm your new password"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-	message: "Passwords don't match",
-	path: ["confirmPassword"],
-});
-
-type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
-
 interface SecurityTabProps {
 	user: any;
 }
 
 export function SecurityTab({ user }: SecurityTabProps) {
-	const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-	const [showNewPassword, setShowNewPassword] = useState(false);
-	const [isChangingPassword, setIsChangingPassword] = useState(false);
 	const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
 	const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
 
-	const form = useForm<ChangePasswordForm>({
-		resolver: zodResolver(changePasswordSchema),
-		defaultValues: {
-			currentPassword: "",
-			newPassword: "",
-			confirmPassword: "",
-		},
-	});
-
-	const handleChangePassword = async (data: ChangePasswordForm) => {
-		setIsChangingPassword(true);
-		try {
-			await authClient.changePassword({
-				currentPassword: data.currentPassword,
-				newPassword: data.newPassword,
-			});
-
-			toast.success("Password changed successfully", {
-				description: "Your password has been updated. You can now use your new password to log in.",
-			});
-
-			form.reset();
-		} catch (error: any) {
-			toast.error("Failed to change password", {
-				description: error.message || "Please check your current password and try again.",
-			});
-		} finally {
-			setIsChangingPassword(false);
-		}
-	};
 
 	const handleConnectGoogle = async () => {
 		setIsConnectingGoogle(true);
@@ -126,8 +76,8 @@ export function SecurityTab({ user }: SecurityTabProps) {
 
 	return (
 		<div className="space-y-4">
-			{/* Account Status Overview */}
-			<Card>
+			{/* Account Status Overview - Hidden for now */}
+			{/* <Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-base">
 						<ShieldIcon className="h-4 w-4" />
@@ -182,130 +132,23 @@ export function SecurityTab({ user }: SecurityTabProps) {
 						</div>
 					</div>
 				</CardContent>
-			</Card>
+			</Card> */}
 
 			{/* Password Change */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2 text-base">
-						<KeyIcon className="h-4 w-4" />
-						Change Password
-					</CardTitle>
-					<CardDescription>
-						Update your password for better security
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<Form {...form as any}>
-						<form onSubmit={form.handleSubmit(handleChangePassword)} className="space-y-3">
-							<FormField
-								control={form.control as any}
-								name="currentPassword"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="text-sm">Current Password</FormLabel>
-										<FormControl>
-											<div className="relative">
-												<Input
-													type={showCurrentPassword ? "text" : "password"}
-													placeholder="Enter your current password"
-													{...field}
-													className="text-sm"
-												/>
-												<Button
-													type="button"
-													variant="ghost"
-													size="sm"
-													className="absolute right-0 top-0 h-full px-2 py-1 hover:bg-transparent"
-													onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-												>
-													{showCurrentPassword ? (
-														<EyeOffIcon className="h-3 w-3" />
-													) : (
-														<EyeIcon className="h-3 w-3" />
-													)}
-												</Button>
-											</div>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+			<UpdatePasswordForm
+				title="Change Password"
+				description="Update your password for better security. This will sign you out of all other devices."
+			/>
 
-							<FormField
-								control={form.control as any}
-								name="newPassword"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="text-sm">New Password</FormLabel>
-										<FormControl>
-											<div className="relative">
-												<Input
-													type={showNewPassword ? "text" : "password"}
-													placeholder="Enter your new password"
-													{...field}
-													className="text-sm"
-												/>
-												<Button
-													type="button"
-													variant="ghost"
-													size="sm"
-													className="absolute right-0 top-0 h-full px-2 py-1 hover:bg-transparent"
-													onClick={() => setShowNewPassword(!showNewPassword)}
-												>
-													{showNewPassword ? (
-														<EyeOffIcon className="h-3 w-3" />
-													) : (
-														<EyeIcon className="h-3 w-3" />
-													)}
-												</Button>
-											</div>
-										</FormControl>
-										<FormDescription className="text-xs">
-											Password must be at least 8 characters long
-										</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+			{/* Account Linking */}
+			<AccountLinkingForm
+				title="Connected Accounts"
+				description="Manage your sign-in methods for easier and more secure access"
+				userEmail={user?.email}
+			/>
 
-							<FormField
-								control={form.control as any}
-								name="confirmPassword"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="text-sm">Confirm New Password</FormLabel>
-										<FormControl>
-											<Input
-												type={showNewPassword ? "text" : "password"}
-												placeholder="Confirm your new password"
-												{...field}
-												className="text-sm"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<div className="pt-3">
-								<Button
-									type="submit"
-									disabled={isChangingPassword}
-									className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-									size="sm"
-								>
-									<KeyIcon className="h-3 w-3 mr-2" />
-									{isChangingPassword ? "Changing..." : "Change Password"}
-								</Button>
-							</div>
-						</form>
-					</Form>
-				</CardContent>
-			</Card>
-
-			{/* Google OAuth Connection */}
-			<Card>
+			{/* Google OAuth Connection - Hidden for now */}
+			{/* <Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-base">
 						<GoogleIcon className="h-4 w-4" />
@@ -356,7 +199,7 @@ export function SecurityTab({ user }: SecurityTabProps) {
 						</div>
 					)}
 				</CardContent>
-			</Card>
+			</Card> */}
 		</div>
 	);
 }

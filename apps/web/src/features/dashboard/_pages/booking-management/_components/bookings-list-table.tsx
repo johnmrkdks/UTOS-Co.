@@ -23,6 +23,18 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		sortOrder: 'desc',
 	});
 
+	// Debug logging
+	console.log("🔍 BookingsListTable Debug:");
+	console.log("- Query status:", {
+		isLoading: bookingsQuery.isLoading,
+		isError: bookingsQuery.isError,
+		error: bookingsQuery.error
+	});
+	console.log("- Raw data:", bookingsQuery.data);
+	console.log("- Data count:", bookingsQuery.data?.data?.length);
+	console.log("- Booking type filter:", bookingType);
+	console.log("- Status filter:", status);
+
 	// Apply filters to the data
 	const filteredData = useMemo(() => {
 		if (!bookingsQuery.data?.data) return [];
@@ -60,15 +72,28 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 				filtered = filtered.filter(b => new Date(b.scheduledPickupTime) <= toDate);
 			}
 			if (filters.minAmount) {
-				filtered = filtered.filter(b => (b.quotedAmount / 100) >= filters.minAmount!);
+				filtered = filtered.filter(b => b.quotedAmount >= filters.minAmount!);
 			}
 			if (filters.maxAmount) {
-				filtered = filtered.filter(b => (b.quotedAmount / 100) <= filters.maxAmount!);
+				filtered = filtered.filter(b => b.quotedAmount <= filters.maxAmount!);
 			}
 		}
 
 		// Ensure data is sorted by createdAt in descending order (newest first)
-		return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+		const sortedFiltered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+		console.log("🔍 Filtered Data Debug:");
+		console.log("- Original count:", bookingsQuery.data?.data?.length || 0);
+		console.log("- After filters:", sortedFiltered.length);
+		console.log("- Filtered bookings:", sortedFiltered.map(b => ({
+			id: b.id,
+			bookingType: b.bookingType,
+			status: b.status,
+			customerName: b.customerName,
+			createdAt: b.createdAt
+		})));
+
+		return sortedFiltered;
 	}, [bookingsQuery.data?.data, bookingType, status, filters]);
 
 	// Handle bulk selection

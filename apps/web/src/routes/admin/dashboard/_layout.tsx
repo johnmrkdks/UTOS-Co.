@@ -31,9 +31,11 @@ function RouteComponent() {
 								<Loader />
 							</div>
 						)}
-						<Suspense fallback={<Loader />}>
-							<Outlet />
-						</Suspense>
+						<div className="max-w-7xl mx-auto w-full">
+							<Suspense fallback={<Loader />}>
+								<Outlet />
+							</Suspense>
+						</div>
 					</div>
 				</div>
 			</SidebarInset>

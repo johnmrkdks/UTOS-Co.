@@ -8,14 +8,21 @@ interface Service {
 	id: string;
 	name: string;
 	description?: string;
-	fixedPrice: number;
+	fixedPrice?: number;
+	hourlyRate?: number;
 	maxPassengers?: number;
 	duration?: number;
 	serviceType: string;
 	bannerImageUrl?: string;
 	includesDriver?: boolean;
 	includesFuel?: boolean;
-	depositRequired?: boolean;
+	includesTolls?: boolean;
+	depositRequired?: number;
+	// Service type details
+	packageServiceType?: {
+		name: string;
+		rateType: 'fixed' | 'hourly';
+	};
 }
 
 interface ServiceCardProps {
@@ -25,8 +32,47 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 	// Helper functions
-	const formatPrice = (priceInCents: number) => {
-		return `$${(priceInCents / 100).toFixed(0)}`;
+	const formatPrice = (price: number) => {
+		return `$${price.toFixed(0)}`;
+	};
+
+	const getPriceDisplay = () => {
+		const rateType = service.packageServiceType?.rateType;
+
+		if (rateType === 'hourly' && service.hourlyRate) {
+			return {
+				price: `$${service.hourlyRate.toFixed(0)}/hr`,
+				label: 'Hourly Rate',
+				badgeText: `${formatPrice(service.hourlyRate)}/hr`
+			};
+		} else if (rateType === 'fixed' && service.fixedPrice) {
+			return {
+				price: formatPrice(service.fixedPrice),
+				label: 'Fixed Price',
+				badgeText: formatPrice(service.fixedPrice)
+			};
+		} else {
+			// Fallback logic
+			if (service.hourlyRate && service.hourlyRate > 0) {
+				return {
+					price: `$${service.hourlyRate.toFixed(0)}/hr`,
+					label: 'Hourly Rate',
+					badgeText: `${formatPrice(service.hourlyRate)}/hr`
+				};
+			} else if (service.fixedPrice && service.fixedPrice > 0) {
+				return {
+					price: formatPrice(service.fixedPrice),
+					label: 'Fixed Price',
+					badgeText: formatPrice(service.fixedPrice)
+				};
+			} else {
+				return {
+					price: 'Contact for Price',
+					label: 'Custom Quote',
+					badgeText: 'Quote'
+				};
+			}
+		}
 	};
 
 	const formatDuration = (minutes?: number) => {
@@ -76,8 +122,8 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 
 				{/* Price Badge */}
 				<div className="absolute top-4 right-4">
-					<Badge className="bg-green-600 text-white border-0 shadow-lg font-bold">
-						{formatPrice(service.fixedPrice)}
+					<Badge className="bg-green-600 text-white border-0 shadow-lg font-bold text-sm">
+						{getPriceDisplay().badgeText}
 					</Badge>
 				</div>
 
@@ -93,14 +139,26 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 
 			{/* Card Content */}
 			<CardHeader className="pb-4">
-				<CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
-					{service.name}
-				</CardTitle>
-				{service.description && (
-					<p className="text-sm text-muted-foreground leading-relaxed">
-						{service.description}
-					</p>
-				)}
+				<div className="flex justify-between items-start gap-3">
+					<div className="flex-1">
+						<CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+							{service.name}
+						</CardTitle>
+						{service.description && (
+							<p className="text-sm text-muted-foreground leading-relaxed mt-1">
+								{service.description}
+							</p>
+						)}
+					</div>
+					<div className="text-right flex-shrink-0">
+						<div className="text-2xl font-bold text-primary">
+							{getPriceDisplay().price}
+						</div>
+						<div className="text-xs text-muted-foreground">
+							{getPriceDisplay().label}
+						</div>
+					</div>
+				</div>
 			</CardHeader>
 
 			<CardContent className="space-y-4">
@@ -110,27 +168,6 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 						<Clock className="h-4 w-4 text-primary" />
 						<span>{formatDuration(service.duration)}</span>
 					</div>
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<Users className="h-4 w-4 text-primary" />
-						<span>Max {service.maxPassengers || 4}</span>
-					</div>
-				</div>
-
-				{/* Service Features */}
-				<div className="flex flex-wrap gap-2">
-					{service.includesDriver && (
-						<Badge variant="outline" className="text-xs border-green-200 text-green-700 bg-green-50">
-							Professional Chauffeur
-						</Badge>
-					)}
-					{service.includesFuel && (
-						<Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
-							Fuel Included
-						</Badge>
-					)}
-					<Badge variant="outline" className="text-xs border-purple-200 text-purple-700 bg-purple-50">
-						Fixed Price
-					</Badge>
 				</div>
 
 				{/* Book Button */}

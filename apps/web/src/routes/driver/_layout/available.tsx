@@ -74,7 +74,7 @@ function AvailableTripsPage() {
 	};
 
 	const TripCard = ({ trip }: { trip: any }) => {
-		const formatCurrency = (amount: number) => (amount / 100).toFixed(2);
+		const formatCurrency = (amount: number) => amount.toFixed(2);
 		const formatDistance = (meters: number) => (meters / 1000).toFixed(1);
 		const formatDuration = (seconds: number) => Math.round(seconds / 60);
 
@@ -505,7 +505,7 @@ function AvailableTripsPage() {
 										)}
 										<div>
 											<span className="text-gray-600">Fare:</span>
-											<p className="font-medium text-primary">${((selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}</p>
+											<p className="font-medium text-primary">${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}</p>
 										</div>
 										<div>
 											<span className="text-gray-600">Status:</span>

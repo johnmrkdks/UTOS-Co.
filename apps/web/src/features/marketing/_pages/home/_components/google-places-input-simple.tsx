@@ -90,7 +90,7 @@ export function GooglePlacesInput({
 	}, [onChange, onPlaceSelect, isLoaded])
 
 	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if (!showSuggestions || predictions.length === 0) return
+		if (!showSuggestions || !predictions || predictions.length === 0) return
 
 		switch (e.key) {
 			case 'ArrowDown':
@@ -165,7 +165,7 @@ export function GooglePlacesInput({
 			</div>
 
 			{/* Suggestions dropdown */}
-			{showSuggestions && predictions.length > 0 && (
+			{showSuggestions && predictions && predictions.length > 0 && (
 				<div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
 					{predictions.map((prediction, index) => (
 						<button
@@ -196,7 +196,7 @@ export function GooglePlacesInput({
 			)}
 
 			{/* Loading state when no API key */}
-			{!isLoaded && value.length > 0 && (
+			{!isLoaded && value && value.length > 0 && (
 				<div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg p-3">
 					<div className="text-xs text-muted-foreground text-center">
 						<Loader2 className="h-4 w-4 mx-auto mb-1 animate-spin" />

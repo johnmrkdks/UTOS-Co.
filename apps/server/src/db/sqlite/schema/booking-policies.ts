@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
 
@@ -15,7 +15,7 @@ export const bookingPolicies = sqliteTable("booking_policies", {
 	
 	// Cancellation policy settings (in hours before pickup)  
 	cancellationAllowedHours: integer("cancellation_allowed_hours").notNull().default(4),
-	cancellationFeePercentage: integer("cancellation_fee_percentage").notNull().default(0), // 0-100
+	cancellationFeePercentage: real("cancellation_fee_percentage").notNull().default(0), // 0-100 (supports decimals like 12.5%)
 	cancellationDisabledAfterDriverAssignment: integer("cancellation_disabled_after_driver_assignment", { mode: "boolean" }).notNull().default(false),
 	
 	// General policy settings

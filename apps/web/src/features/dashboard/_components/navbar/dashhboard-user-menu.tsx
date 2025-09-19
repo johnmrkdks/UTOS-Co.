@@ -1,4 +1,4 @@
-import { LogOutIcon } from "lucide-react"
+import { LogOutIcon, SettingsIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -13,6 +13,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { getNameInitials } from "@/utils/format"
 import { useUserQuery } from "@/hooks/query/use-user-query"
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog"
+import { Link } from "@tanstack/react-router"
 
 export function DashboardUserMenu() {
 	const { session, isPending, signOutWithConfirmation } = useUserQuery()
@@ -44,6 +45,17 @@ export function DashboardUserMenu() {
 					<span className="text-muted-foreground truncate text-xs font-normal">{session?.user.email}</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
+				{(session?.user.role === "admin" || session?.user.role === "super_admin") && (
+					<>
+						<DropdownMenuItem asChild>
+							<Link to="/admin/dashboard/settings">
+								<SettingsIcon size={16} className="opacity-60" aria-hidden="true" />
+								<span>Settings</span>
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+					</>
+				)}
 				<DropdownMenuItem onClick={signOutWithConfirmation.openSignOutDialog}>
 					<LogOutIcon size={16} className="opacity-60" aria-hidden="true" />
 					<span>Sign Out</span>

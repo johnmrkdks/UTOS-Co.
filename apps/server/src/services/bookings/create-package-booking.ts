@@ -27,6 +27,7 @@ export const CreatePackageBookingSchema = z.object({
 	customerPhone: z.string(),
 	customerEmail: z.string().email().optional(),
 	passengerCount: z.number().int().min(1).default(1),
+	luggageCount: z.number().int().min(0).default(0),
 	specialRequests: z.string().optional(),
 
 	// Duration for hourly services
@@ -131,6 +132,7 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			customerPhone: data.customerPhone,
 			customerEmail: data.customerEmail,
 			passengerCount: data.passengerCount,
+			luggageCount: data.luggageCount,
 			specialRequests: data.specialRequests,
 			
 			status: BookingStatusEnum.Pending,

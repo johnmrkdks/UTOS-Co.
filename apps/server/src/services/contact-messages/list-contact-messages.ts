@@ -1,5 +1,5 @@
 import { listContactMessages as listContactMessagesData } from "@/data/contact-messages";
-import type { Database } from "@/types";
+import type { DB } from "@/db";
 import type { ResourceList } from "@/types";
 
 interface ListContactMessagesInput extends ResourceList {
@@ -7,16 +7,8 @@ interface ListContactMessagesInput extends ResourceList {
 }
 
 export async function listContactMessages(
-	db: Database,
+	db: DB,
 	input: ListContactMessagesInput = {}
 ) {
-	const { limit = 50, offset = 0, status } = input;
-
-	const messages = await listContactMessagesData(db, {
-		status,
-		limit,
-		offset,
-	});
-
-	return messages;
+	return await listContactMessagesData(db, input);
 }

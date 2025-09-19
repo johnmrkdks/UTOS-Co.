@@ -1,0 +1,28 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { trpc } from "@/trpc";
+import { toast } from "sonner";
+
+export interface SetPasswordInput {
+	password: string;
+}
+
+export const useSetPasswordMutation = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation(trpc.auth.setPassword.mutationOptions({
+		onSuccess: () => {
+			// Invalidate user and account queries to refresh account information
+			queryClient.invalidateQueries({ queryKey: ["user"] });
+			queryClient.invalidateQueries({ queryKey: trpc.auth.getUserAccounts.queryKey() });
+
+			toast.success("Password set successfully", {
+				description: "You can now sign in with your email and password.",
+			});
+		},
+		onError: (error) => {
+			toast.error("Failed to set password", {
+				description: error.message || "Please try again later.",
+			});
+		},
+	}));
+};

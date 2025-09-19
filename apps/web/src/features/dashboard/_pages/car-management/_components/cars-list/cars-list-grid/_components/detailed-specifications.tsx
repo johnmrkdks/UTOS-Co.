@@ -44,7 +44,7 @@ export const DetailedSpecifications = memo<DetailedSpecificationsProps>(({ car }
 					<SpecItem icon={Fuel} label="Fuel Type" value={car.fuelType?.name || "N/A"} />
 					<div className="flex items-center justify-between">
 						<span className="text-muted-foreground">Mileage:</span>
-						<span className="font-medium">{car.mileage.toLocaleString()} miles</span>
+						<span className="font-medium">{car.mileage ? car.mileage.toLocaleString() : 'N/A'} miles</span>
 					</div>
 				</SpecSection>
 

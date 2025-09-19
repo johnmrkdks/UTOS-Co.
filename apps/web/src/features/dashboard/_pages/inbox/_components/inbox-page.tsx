@@ -6,9 +6,13 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Mail, MailOpen, Archive, RefreshCw } from "lucide-react";
 import { useListContactMessagesQuery } from "../../../_hooks/query/use-list-contact-messages-query";
 import { ContactMessageCard } from "./contact-message-card";
+import { ContactMessageDialog } from "./contact-message-dialog";
+import type { ContactMessage } from "server/db/sqlite/schema";
 
 export function InboxPage() {
 	const [activeTab, setActiveTab] = useState<"all" | "unread" | "read" | "archived">("all");
+	const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+	const [dialogOpen, setDialogOpen] = useState(false);
 
 	const allMessagesQuery = useListContactMessagesQuery();
 	const unreadMessagesQuery = useListContactMessagesQuery({ status: "unread" });
@@ -29,7 +33,7 @@ export function InboxPage() {
 	};
 
 	const currentQuery = getCurrentQuery();
-	const messages = currentQuery.data || [];
+	const messages = currentQuery.data?.data || [];
 
 	const handleRefresh = () => {
 		allMessagesQuery.refetch();
@@ -38,14 +42,19 @@ export function InboxPage() {
 		archivedMessagesQuery.refetch();
 	};
 
+	const handleOpenMessage = (message: ContactMessage) => {
+		setSelectedMessage(message);
+		setDialogOpen(true);
+	};
+
 	// Count badges
-	const unreadCount = unreadMessagesQuery.data?.length || 0;
-	const readCount = readMessagesQuery.data?.length || 0;
-	const archivedCount = archivedMessagesQuery.data?.length || 0;
-	const totalCount = allMessagesQuery.data?.length || 0;
+	const unreadCount = unreadMessagesQuery.data?.data?.length || 0;
+	const readCount = readMessagesQuery.data?.data?.length || 0;
+	const archivedCount = archivedMessagesQuery.data?.data?.length || 0;
+	const totalCount = allMessagesQuery.data?.data?.length || 0;
 
 	return (
-		<div className="container mx-auto p-6 space-y-6">
+		<div className="p-6 space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold">Inbox</h1>
@@ -127,7 +136,11 @@ export function InboxPage() {
 							) : (
 								<div className="space-y-4">
 									{messages.map((message) => (
-										<ContactMessageCard key={message.id} message={message} />
+										<ContactMessageCard
+											key={message.id}
+											message={message}
+											onClick={() => handleOpenMessage(message)}
+										/>
 									))}
 								</div>
 							)}
@@ -150,7 +163,11 @@ export function InboxPage() {
 							) : (
 								<div className="space-y-4">
 									{messages.map((message) => (
-										<ContactMessageCard key={message.id} message={message} />
+										<ContactMessageCard
+											key={message.id}
+											message={message}
+											onClick={() => handleOpenMessage(message)}
+										/>
 									))}
 								</div>
 							)}
@@ -173,7 +190,11 @@ export function InboxPage() {
 							) : (
 								<div className="space-y-4">
 									{messages.map((message) => (
-										<ContactMessageCard key={message.id} message={message} />
+										<ContactMessageCard
+											key={message.id}
+											message={message}
+											onClick={() => handleOpenMessage(message)}
+										/>
 									))}
 								</div>
 							)}
@@ -196,7 +217,11 @@ export function InboxPage() {
 							) : (
 								<div className="space-y-4">
 									{messages.map((message) => (
-										<ContactMessageCard key={message.id} message={message} />
+										<ContactMessageCard
+											key={message.id}
+											message={message}
+											onClick={() => handleOpenMessage(message)}
+										/>
 									))}
 								</div>
 							)}
@@ -204,6 +229,12 @@ export function InboxPage() {
 					</Tabs>
 				</CardContent>
 			</Card>
+
+			<ContactMessageDialog
+				message={selectedMessage}
+				open={dialogOpen}
+				onOpenChange={setDialogOpen}
+			/>
 		</div>
 	);
 }

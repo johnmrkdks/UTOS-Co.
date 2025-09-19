@@ -42,13 +42,13 @@ export const bookings = sqliteTable("bookings", {
 	estimatedDistance: integer("estimated_distance"), // in meters
 	actualDistance: integer("actual_distance"), // in meters
 
-	// Pricing (different models for package vs custom)
-	quotedAmount: integer("quoted_amount").notNull(), // initial quote
-	finalAmount: integer("final_amount"), // actual charged amount
-	baseFare: integer("base_fare"), // for custom bookings
-	distanceFare: integer("distance_fare"), // for custom bookings
-	timeFare: integer("time_fare"), // for custom bookings
-	extraCharges: integer("extra_charges").default(0),
+	// Pricing (different models for package vs custom) - ALL AMOUNTS IN DOLLARS WITH DECIMAL PRECISION
+	quotedAmount: real("quoted_amount").notNull(), // initial quote in dollars (e.g., 45.75)
+	finalAmount: real("final_amount"), // actual charged amount in dollars
+	baseFare: real("base_fare"), // for custom bookings in dollars
+	distanceFare: real("distance_fare"), // for custom bookings in dollars
+	timeFare: real("time_fare"), // for custom bookings in dollars
+	extraCharges: real("extra_charges").default(0), // extra charges in dollars
 
 	// Customer details
 	customerName: text("customer_name").notNull(),
@@ -76,7 +76,7 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	driver: one(drivers, { fields: [bookings.driverId], references: [drivers.id] }),
 	package: one(packages, { fields: [bookings.packageId], references: [packages.id] }),
 	stops: many(bookingStops),
-	extras: one(bookingExtras, { fields: [bookings.id], references: [bookingExtras.bookingId] }),
+	extras: many(bookingExtras),
 }));
 
 // Relations are defined in cars.ts to avoid circular imports

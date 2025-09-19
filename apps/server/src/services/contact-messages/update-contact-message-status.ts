@@ -1,8 +1,8 @@
 import { updateContactMessageStatus as updateContactMessageStatusData } from "@/data/contact-messages";
-import type { Database } from "@/types";
+import type { DB } from "@/db";
 
 export async function updateContactMessageStatus(
-	db: Database,
+	db: DB,
 	messageId: string,
 	status: "unread" | "read" | "archived"
 ) {

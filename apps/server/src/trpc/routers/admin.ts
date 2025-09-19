@@ -10,10 +10,22 @@ export const adminRouter = router({
 		.input(CreateDriverUserServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
+				console.log("=== tRPC DEBUG: createDriverUser mutation called ===");
+				console.log("tRPC Input:", JSON.stringify(input, null, 2));
+				console.log("tRPC DB context:", !!db ? "DB available" : "DB not available");
+
 				const result = await createDriverUserService(db, input);
+
+				console.log("=== tRPC DEBUG: createDriverUser mutation successful ===");
+				console.log("tRPC Result:", JSON.stringify(result, null, 2));
 				return result;
 			} catch (error) {
-				console.error("Error creating driver user:", error);
+				console.error("=== tRPC ERROR: createDriverUser mutation failed ===");
+				console.error("tRPC Error type:", typeof error);
+				console.error("tRPC Error name:", error instanceof Error ? error.name : "Unknown");
+				console.error("tRPC Error message:", error instanceof Error ? error.message : error);
+				console.error("tRPC Error stack:", error instanceof Error ? error.stack : "No stack trace");
+				console.error("=== tRPC END ERROR ===");
 				handleTRPCError(error);
 			}
 		}),

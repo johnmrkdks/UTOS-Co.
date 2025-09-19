@@ -41,10 +41,11 @@ function DriverSettingsComponent() {
 			</div>
 
 			<Tabs defaultValue="security" className="space-y-4">
-				<TabsList className="grid w-full grid-cols-3 h-auto">
+				<TabsList className="grid w-full grid-cols-2 h-auto">
 					<TabsTrigger value="security" className="text-xs py-2">Security</TabsTrigger>
 					<TabsTrigger value="account" className="text-xs py-2">Account</TabsTrigger>
-					<TabsTrigger value="notifications" className="text-xs py-2">Notifications</TabsTrigger>
+					{/* Hidden tab for now */}
+					{/* <TabsTrigger value="notifications" className="text-xs py-2">Notifications</TabsTrigger> */}
 				</TabsList>
 
 				{/* Security Tab */}
@@ -57,10 +58,10 @@ function DriverSettingsComponent() {
 					<AccountTab user={user} />
 				</TabsContent>
 
-				{/* Notifications Tab */}
-				<TabsContent value="notifications" className="space-y-4">
+				{/* Hidden tab content for now */}
+				{/* <TabsContent value="notifications" className="space-y-4">
 					<NotificationsTab />
-				</TabsContent>
+				</TabsContent> */}
 			</Tabs>
 		</div>
 	);

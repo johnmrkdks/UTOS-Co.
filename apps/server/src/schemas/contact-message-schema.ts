@@ -17,6 +17,11 @@ export const updateContactMessageStatusSchema = z.object({
 	status: z.enum(["unread", "read", "archived"]),
 });
 
+export const deleteContactMessageSchema = z.object({
+	messageId: z.string().uuid("Invalid message ID"),
+});
+
 export type CreateContactMessageInput = z.infer<typeof createContactMessageSchema>;
 export type ListContactMessagesInput = z.infer<typeof listContactMessagesSchema>;
 export type UpdateContactMessageStatusInput = z.infer<typeof updateContactMessageStatusSchema>;
+export type DeleteContactMessageInput = z.infer<typeof deleteContactMessageSchema>;

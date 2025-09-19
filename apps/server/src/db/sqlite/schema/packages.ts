@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { packageCategories } from "./packages/package-categories";
 import { packageServiceTypes } from "./packages/package-service-types";
@@ -50,4 +50,15 @@ export const packages = sqliteTable("packages", {
 }, (table) => ({
 	nameIdx: index("packages_name_idx").on(table.name),
 	publishedAvailabilityIdx: index("packages_published_availability_idx").on(table.isPublished, table.isAvailable),
+}));
+
+export const packagesRelations = relations(packages, ({ one }) => ({
+	packageServiceType: one(packageServiceTypes, {
+		fields: [packages.serviceTypeId],
+		references: [packageServiceTypes.id],
+	}),
+	category: one(packageCategories, {
+		fields: [packages.categoryId],
+		references: [packageCategories.id],
+	}),
 }));

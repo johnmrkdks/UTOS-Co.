@@ -285,7 +285,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												<>
 													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
 														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Max {service.maxPassengers || 4} passengers</span>
+														<span className="text-sm text-gray-700 font-medium">Max {service.maxPassengers || (isHourlyService ? 15 : 8)} passengers</span>
 													</div>
 													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
 														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />

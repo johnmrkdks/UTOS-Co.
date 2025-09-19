@@ -73,7 +73,7 @@ export function EditBookingDialog({
 				scheduledPickupDate: dateString,
 				scheduledPickupTime: timeString,
 				notes: booking.notes || "",
-				quotedAmount: booking.quotedAmount ? booking.quotedAmount / 100 : 0,
+				quotedAmount: booking.quotedAmount || 0,
 				customerName: booking.customerName || "",
 				customerPhone: booking.customerPhone || "",
 				customerEmail: booking.customerEmail || "",
@@ -145,7 +145,7 @@ export function EditBookingDialog({
 			customerEmail: formData.customerEmail || "",
 			scheduledPickupTime,
 			notes: formData.notes || "",
-			quotedAmount: Math.round((formData.quotedAmount || 0) * 100), // Convert to cents
+			quotedAmount: formData.quotedAmount || 0, // Store as dollar amount
 			passengerCount: formData.passengerCount!,
 			luggageCount: formData.luggageCount!,
 			specialRequests: formData.specialRequests || "",

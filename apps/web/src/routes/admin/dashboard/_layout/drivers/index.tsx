@@ -39,10 +39,11 @@ function RouteComponent() {
 							Create Driver Account
 						</Button>
 					</CreateDriverUserDialog>
-					<Button onClick={handleAddDriver}>
+					{/* Hidden Driver Onboarding button for now */}
+					{/* <Button onClick={handleAddDriver}>
 						<PlusIcon className="h-4 w-4" />
 						Driver Onboarding
-					</Button>
+					</Button> */}
 				</div>
 			</div>
 
@@ -107,10 +108,11 @@ function RouteComponent() {
 					<TabsTrigger value="pending">Pending Approval</TabsTrigger>
 					<TabsTrigger value="active">Active</TabsTrigger>
 					<TabsTrigger value="inactive">Inactive</TabsTrigger>
-					<TabsTrigger value="guide" className="ml-auto">
+					{/* Hidden Process Guide tab for now */}
+					{/* <TabsTrigger value="guide" className="ml-auto">
 						<InfoIcon className="h-4 w-4 mr-1" />
 						Process Guide
-					</TabsTrigger>
+					</TabsTrigger> */}
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
@@ -174,9 +176,10 @@ function RouteComponent() {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="guide" className="space-y-4">
+				{/* Hidden Process Guide content for now */}
+				{/* <TabsContent value="guide" className="space-y-4">
 					<DriverProcessGuide />
-				</TabsContent>
+				</TabsContent> */}
 			</Tabs>
 		</PaddingLayout>
 	)

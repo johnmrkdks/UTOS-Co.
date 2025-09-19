@@ -1,9 +1,9 @@
 import { contactMessages } from "@/db/sqlite/schema";
 import { eq } from "drizzle-orm";
-import type { Database } from "@/types";
+import type { DB } from "@/db";
 
 export async function updateContactMessageStatus(
-	db: Database,
+	db: DB,
 	messageId: string,
 	status: "unread" | "read" | "archived"
 ) {

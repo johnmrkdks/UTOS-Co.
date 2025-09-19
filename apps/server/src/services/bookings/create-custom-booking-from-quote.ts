@@ -29,12 +29,12 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	estimatedDuration: z.number().int().optional(), // in seconds
 	estimatedDistance: z.number().int().optional(), // in meters
 	
-	// Pricing from quote
-	baseFare: z.number().int(),
-	distanceFare: z.number().int(),
-	timeFare: z.number().int().optional(),
-	extraCharges: z.number().int().default(0),
-	quotedAmount: z.number().int(),
+	// Pricing from quote (in dollars with decimal precision)
+	baseFare: z.number(),
+	distanceFare: z.number(),
+	timeFare: z.number().optional(),
+	extraCharges: z.number().default(0),
+	quotedAmount: z.number(),
 	
 	// Customer details
 	customerName: z.string(),
@@ -114,6 +114,7 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 		customerPhone: data.customerPhone,
 		customerEmail: data.customerEmail,
 		passengerCount: data.passengerCount,
+		luggageCount: data.luggageCount,
 		specialRequests: data.specialRequests,
 		
 		status: BookingStatusEnum.Pending,

@@ -30,7 +30,7 @@ export function BookingExtrasDetails({ booking }: BookingExtrasDetailsProps) {
 		return null;
 	}
 
-	const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+	const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
 	const formatTime = (minutes: number) => `${minutes} minutes`;
 
 	return (

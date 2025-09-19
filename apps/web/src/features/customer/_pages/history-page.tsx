@@ -45,10 +45,12 @@ export function CustomerHistoryPage() {
 			scheduledTime: new Date(booking.scheduledPickupTime),
 			completedTime: booking.serviceCompletedAt ? new Date(booking.serviceCompletedAt) : null,
 			passengers: booking.passengerCount || 1,
-			finalAmount: booking.amount || booking.quotedAmount || booking.totalAmount || 0,
+			finalAmount: (booking.quotedAmount || 0) + (booking.extraCharges || 0),
 			distance: "N/A", // Customer history doesn't track distance
 			duration: "N/A", // Customer history doesn't track duration
-			status: booking.status as "completed" | "cancelled" | "no_show"
+			status: booking.status as "completed" | "cancelled" | "no_show",
+			bookingType: booking.bookingType,
+			packageId: booking.packageId
 		})).filter(trip => ['completed', 'cancelled', 'no_show'].includes(trip.status));
 	}, [bookingsData]);
 
@@ -64,8 +66,12 @@ export function CustomerHistoryPage() {
 	// Handle opening booking details dialog (same as trips.tsx)
 	const handleOpenBookingDetails = (booking: any) => {
 		// Convert trip data structure to booking data structure for the dialog
-		// Note: We need to get the original booking data to access extraCharges
+		// Note: We need to get the original booking data to access extraCharges and extras
 		const originalBooking = bookingsData?.data?.find((b: any) => b.id === booking.id);
+
+		// Debug logging
+		console.log("DEBUG: Original booking data:", originalBooking);
+		console.log("DEBUG: Extras data:", (originalBooking as any)?.extras);
 
 		const bookingData = {
 			id: booking.id,
@@ -81,6 +87,7 @@ export function CustomerHistoryPage() {
 			amount: booking.finalAmount,
 			totalAmount: booking.finalAmount,
 			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
+			extras: (originalBooking as any)?.extras || [], // Get extras breakdown from original booking
 			car: null // TODO: Add car information to history data
 		};
 
@@ -199,7 +206,7 @@ export function CustomerHistoryPage() {
 	};
 
 	// Helper functions
-	const formatPrice = (priceInCents: number) => `$${(priceInCents / 100).toFixed(0)}`;
+	const formatPrice = (priceInDollars: number) => `$${priceInDollars.toFixed(2)}`;
 
 	// Render function for trips with date groups (same as driver history)
 	const renderTripsWithDateGroups = (tripsList: typeof trips) => {
@@ -452,32 +459,111 @@ export function CustomerHistoryPage() {
 									<div className="space-y-2">
 										{/* Base trip fare */}
 										<div className="flex items-center justify-between">
-											<span className="text-sm text-gray-600">Trip Fare:</span>
+											<span className="text-sm text-gray-600">Base Trip Fare:</span>
 											<span className="text-sm font-semibold">
-												{formatPrice(selectedBookingForDetails.quotedAmount || selectedBookingForDetails.finalAmount || selectedBookingForDetails.amount || 0)}
+												{formatPrice(selectedBookingForDetails.quotedAmount || 0)}
 											</span>
 										</div>
 
-										{/* Extras if any */}
-										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+										{/* Extras breakdown if any */}
+										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+											<div className="space-y-2">
+												<div className="text-sm font-medium text-gray-700 mt-3 mb-2">Extra Charges:</div>
+												{selectedBookingForDetails.extras.map((extra: any, index: number) => (
+													<div key={index} className="bg-gray-50 rounded-lg p-3 space-y-2">
+														{extra.additionalWaitTime > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">Additional Wait Time:</span>
+																<span className="text-xs font-semibold text-amber-600">
+																	{extra.additionalWaitTime} minutes
+																</span>
+															</div>
+														)}
+														{extra.unscheduledStops > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">Unscheduled Stops:</span>
+																<span className="text-xs font-semibold text-blue-600">
+																	+{formatPrice(extra.unscheduledStops)}
+																</span>
+															</div>
+														)}
+														{extra.parkingCharges > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">Parking Charges:</span>
+																<span className="text-xs font-semibold text-purple-600">
+																	+{formatPrice(extra.parkingCharges)}
+																</span>
+															</div>
+														)}
+														{extra.tollCharges > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">
+																	Toll Charges{extra.tollLocation ? ` (${extra.tollLocation})` : ''}:
+																</span>
+																<span className="text-xs font-semibold text-orange-600">
+																	+{formatPrice(extra.tollCharges)}
+																</span>
+															</div>
+														)}
+														{extra.otherChargesAmount > 0 && (
+															<div className="space-y-1">
+																<div className="flex items-center justify-between">
+																	<span className="text-xs text-gray-600">Other Charges:</span>
+																	<span className="text-xs font-semibold text-red-600">
+																		+{formatPrice(extra.otherChargesAmount)}
+																	</span>
+																</div>
+																{extra.otherChargesDescription && (
+																	<p className="text-xs text-gray-500 italic">
+																		{extra.otherChargesDescription}
+																	</p>
+																)}
+															</div>
+														)}
+														{extra.notes && (
+															<div className="pt-1 border-t border-gray-200">
+																<p className="text-xs text-gray-500">
+																	<span className="font-medium">Notes:</span> {extra.notes}
+																</p>
+															</div>
+														)}
+													</div>
+												))}
+											</div>
+										)}
+
+										{/* Simple extras total if no detailed breakdown available */}
+										{(!selectedBookingForDetails.extras || selectedBookingForDetails.extras.length === 0) &&
+										 (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) && (
 											<div className="flex items-center justify-between">
-												<span className="text-sm text-gray-600">Extras:</span>
-												<span className="text-sm font-semibold text-green-600">
+												<span className="text-sm text-gray-600">Additional Charges:</span>
+												<span className="text-sm font-semibold text-orange-600">
 													+{formatPrice(selectedBookingForDetails.extraCharges)}
 												</span>
 											</div>
-										) : null}
+										)}
+
+										{/* Show total extras amount if we have detailed breakdown */}
+										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+											<div className="flex items-center justify-between bg-orange-50 px-3 py-2 rounded">
+												<span className="text-sm font-medium text-orange-700">Total Additional Charges:</span>
+												<span className="text-sm font-bold text-orange-700">
+													+{formatPrice(selectedBookingForDetails.extraCharges || 0)}
+												</span>
+											</div>
+										)}
 
 										{/* Divider if there are extras */}
-										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+										{((selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0) ||
+										  (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0)) && (
 											<div className="border-t border-gray-200"></div>
-										) : null}
+										)}
 
 										{/* Total */}
 										<div className="flex items-center justify-between">
-											<span className="text-base font-bold text-gray-900">Total:</span>
+											<span className="text-base font-bold text-gray-900">Total Paid:</span>
 											<span className="text-lg font-bold text-gray-900">
-												{formatPrice(selectedBookingForDetails.finalAmount || selectedBookingForDetails.amount || selectedBookingForDetails.quotedAmount || 0)}
+												{formatPrice((selectedBookingForDetails.quotedAmount || 0) + (selectedBookingForDetails.extraCharges || 0))}
 											</span>
 										</div>
 									</div>

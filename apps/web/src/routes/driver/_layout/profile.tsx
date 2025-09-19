@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { Progress } from "@workspace/ui/components/progress";
 import { useUserQuery } from '@/hooks/query/use-user-query';
 import { PersonalInfoTab } from '@/features/driver/_components/profile-tabs/personal-info-tab';
@@ -91,8 +91,8 @@ function DriverProfileComponent() {
 				</div>
 			</div>
 
-			{/* Application Status Overview */}
-			<Card className="border-blue-200 bg-blue-50">
+			{/* Application Status Overview - Hidden for now */}
+			{/* <Card className="border-blue-200 bg-blue-50">
 				<CardHeader className="pb-3">
 					<div className="flex items-center justify-between">
 						<div>
@@ -127,40 +127,36 @@ function DriverProfileComponent() {
 						))}
 					</div>
 				</CardContent>
-			</Card>
+			</Card> */}
 
-			<Tabs defaultValue="personal" className="space-y-4">
-				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+			{/* Personal Information */}
+			<PersonalInfoTab
+				driverProfile={driverProfile}
+				userEmail={user?.email}
+				userName={user?.name}
+			/>
+
+			{/* Hidden sections for now */}
+			{/* <Tabs defaultValue="personal" className="space-y-4">
+				<TabsList className="grid w-full grid-cols-1 h-auto">
 					<TabsTrigger value="personal" className="text-xs py-2">Personal</TabsTrigger>
 					<TabsTrigger value="documents" className="text-xs py-2">Documents</TabsTrigger>
 					<TabsTrigger value="stats" className="text-xs py-2">Statistics</TabsTrigger>
 					<TabsTrigger value="settings" className="text-xs py-2">Settings</TabsTrigger>
 				</TabsList>
 
-				{/* Personal Information Tab */}
-				<TabsContent value="personal" className="space-y-4">
-					<PersonalInfoTab 
-						driverProfile={driverProfile}
-						userEmail={user?.email}
-						userName={user?.name}
-					/>
-				</TabsContent>
-
-				{/* Documents Tab */}
 				<TabsContent value="documents" className="space-y-4">
 					<DocumentsTab driverProfile={driverProfile} />
 				</TabsContent>
 
-				{/* Statistics Tab */}
 				<TabsContent value="stats" className="space-y-4">
 					<StatisticsTab driverProfile={driverProfile} />
 				</TabsContent>
 
-				{/* Settings Tab */}
 				<TabsContent value="settings" className="space-y-4">
 					<SettingsTab />
 				</TabsContent>
-			</Tabs>
+			</Tabs> */}
 		</div>
 	);
 }

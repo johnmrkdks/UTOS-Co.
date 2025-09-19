@@ -39,6 +39,17 @@ const BookingFormSchema = z.object({
 	customerEmail: z.string().email("Valid email required"),
 	passengerCount: z.number().min(1, "At least 1 passenger required"),
 	specialRequests: z.string().optional(),
+}).refine((data) => {
+	// Validate 24-hour advance notice for package bookings
+	if (!data.scheduledPickupDate || !data.scheduledPickupTime) return true; // Let required validation handle this
+
+	const scheduledPickupTime = new Date(`${data.scheduledPickupDate}T${data.scheduledPickupTime}`);
+	const now = new Date();
+	const hoursUntilPickup = (scheduledPickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+	return hoursUntilPickup >= 24;
+}, {
+	message: "Package bookings require at least 24 hours advance notice",
+	path: ["scheduledPickupDate"], // Show error on date field
 });
 
 type BookingFormData = z.infer<typeof BookingFormSchema>;
@@ -61,6 +72,9 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 	const { data: service, isLoading, error } = useGetPublishedServiceByIdQuery(serviceId);
 	const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAvailableCarsQuery();
 	const createBookingMutation = useCreateUnifiedServiceBookingMutation();
+
+	// Determine if this is an hourly service
+	const isHourlyService = (service as any)?.serviceType?.rateType === "hourly";
 
 	// Debug data loading
 	console.log("🔍 UNIFIED BOOKING DEBUG:");
@@ -348,10 +362,6 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 									<Clock className="h-4 w-4" />
 									<span>{formatDuration(service.duration || undefined)}</span>
 								</div>
-								<div className="flex items-center gap-2 text-sm text-gray-600">
-									<Users className="h-4 w-4" />
-									<span>Up to {service.maxPassengers || 4} passengers</span>
-								</div>
 							</div>
 
 							{/* Included Services */}
@@ -493,7 +503,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 										id="passengerCount"
 										type="number"
 										min="1"
-										max={service.maxPassengers || 4}
+										max={service.maxPassengers || (isHourlyService ? 15 : 8)}
 										value={formData.passengerCount || 1}
 										onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
 										className={formErrors.passengerCount ? "border-red-500" : ""}

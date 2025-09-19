@@ -11,6 +11,10 @@ export async function getPublishedPackages(db: DB, options: ResourceList) {
 	const queryBuilder: QueryBuilder = {
 		baseQuery: (opts?: any) => db.query.packages.findMany({
 			...opts,
+			with: {
+				packageServiceType: true,
+				category: true,
+			},
 			where: opts?.where ? and(
 				eq(packages.isPublished, true),
 				eq(packages.isAvailable, true),

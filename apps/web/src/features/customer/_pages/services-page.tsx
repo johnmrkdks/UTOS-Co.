@@ -257,10 +257,6 @@ export function ServicesPage() {
 
 											{/* Service Stats */}
 											<div className="flex items-center gap-2 text-xs text-muted-foreground">
-												<div className="flex items-center gap-1">
-													<Users className="h-3 w-3" />
-													<span>{service.maxPassengers || 4}</span>
-												</div>
 												{service.duration && (
 													<div className="flex items-center gap-1">
 														<Clock className="h-3 w-3" />
@@ -268,30 +264,6 @@ export function ServicesPage() {
 													</div>
 												)}
 											</div>
-										</div>
-
-										{/* Service Features */}
-										<div className="flex flex-wrap gap-1">
-											{service.includesDriver && (
-												<Badge variant="outline" className="text-xs">
-													Driver
-												</Badge>
-											)}
-											{service.includesFuel && (
-												<Badge variant="outline" className="text-xs">
-													Fuel
-												</Badge>
-											)}
-											{service.includesTolls && (
-												<Badge variant="outline" className="text-xs">
-													Tolls
-												</Badge>
-											)}
-											{service.includesWaiting && (
-												<Badge variant="outline" className="text-xs">
-													Waiting
-												</Badge>
-											)}
 										</div>
 
 										{/* Advance Booking Notice */}

@@ -23,16 +23,17 @@ export const CreateCustomBookingSchema = z.object({
 	
 	// Distance and pricing estimates
 	estimatedDistance: z.number().int().optional(), // in meters
-	baseFare: z.number().int(),
-	distanceFare: z.number().int(),
-	timeFare: z.number().int().optional(),
-	quotedAmount: z.number().int(),
+	baseFare: z.number(),
+	distanceFare: z.number(),
+	timeFare: z.number().optional(),
+	quotedAmount: z.number(),
 	
 	// Customer details
 	customerName: z.string(),
 	customerPhone: z.string(),
 	customerEmail: z.string().email().optional(),
 	passengerCount: z.number().int().min(1).default(1),
+	luggageCount: z.number().int().min(0).default(0),
 	specialRequests: z.string().optional(),
 	
 	// Stops for custom bookings
@@ -82,6 +83,7 @@ export async function createCustomBookingService(db: DB, data: CreateCustomBooki
 		customerPhone: data.customerPhone,
 		customerEmail: data.customerEmail,
 		passengerCount: data.passengerCount,
+		luggageCount: data.luggageCount,
 		specialRequests: data.specialRequests,
 		
 		status: BookingStatusEnum.Pending,

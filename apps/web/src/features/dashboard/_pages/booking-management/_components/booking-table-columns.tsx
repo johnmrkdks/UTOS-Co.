@@ -273,7 +273,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			const amount = row.getValue("quotedAmount") as number;
 			return (
 				<div className="font-medium text-xs">
-					${(amount / 100).toFixed(2)}
+					${amount.toFixed(2)}
 				</div>
 			);
 		},

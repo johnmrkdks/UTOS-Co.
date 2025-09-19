@@ -8,6 +8,8 @@ import { z } from "zod";
 import { CarSchema } from "./car";
 import { UserSchema } from "./user";
 import { PackageSchema } from "./package";
+import { BookingExtraSchema } from "./booking-extra";
+import { BookingStopSchema } from "./booking-stop";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 
 export const BookingSchema = createSelectSchema(bookings, {
@@ -17,6 +19,8 @@ export const BookingSchema = createSelectSchema(bookings, {
 	car: CarSchema.optional(),
 	user: UserSchema.optional(),
 	package: PackageSchema.optional(),
+	extras: z.array(BookingExtraSchema).optional(),
+	stops: z.array(BookingStopSchema).optional(),
 });
 export const InsertBookingSchema = createInsertSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum),

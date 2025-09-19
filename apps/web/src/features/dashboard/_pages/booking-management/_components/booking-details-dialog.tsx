@@ -137,7 +137,7 @@ export function BookingDetailsDialog() {
 					<div className="flex items-center gap-3">
 						<div className="text-right">
 							<div className="text-lg font-bold text-primary">
-								${(booking.quotedAmount / 100).toFixed(2)}
+								${booking.quotedAmount.toFixed(2)}
 							</div>
 							<div className="text-xs text-gray-500 font-mono">{booking.id}</div>
 						</div>
@@ -410,25 +410,25 @@ export function BookingDetailsDialog() {
 											{booking.baseFare && (
 												<div className="flex justify-between">
 													<span>Base fare:</span>
-													<span>${(booking.baseFare / 100).toFixed(2)}</span>
+													<span>${booking.baseFare.toFixed(2)}</span>
 												</div>
 											)}
 											{booking.distanceFare && (
 												<div className="flex justify-between">
 													<span>Distance:</span>
-													<span>${(booking.distanceFare / 100).toFixed(2)}</span>
+													<span>${booking.distanceFare.toFixed(2)}</span>
 												</div>
 											)}
 											{booking.timeFare && (
 												<div className="flex justify-between">
 													<span>Time:</span>
-													<span>${(booking.timeFare / 100).toFixed(2)}</span>
+													<span>${booking.timeFare.toFixed(2)}</span>
 												</div>
 											)}
 											{booking.extraCharges && booking.extraCharges > 0 && (
 												<div className="flex justify-between">
 													<span>Extra charges:</span>
-													<span>${(booking.extraCharges / 100).toFixed(2)}</span>
+													<span>${booking.extraCharges.toFixed(2)}</span>
 												</div>
 											)}
 										</div>
@@ -437,14 +437,14 @@ export function BookingDetailsDialog() {
 										<div className="flex justify-between items-center">
 											<span className="font-semibold">Total Amount:</span>
 											<span className="text-lg font-bold text-primary">
-												${(booking.quotedAmount / 100).toFixed(2)}
+												${booking.quotedAmount.toFixed(2)}
 											</span>
 										</div>
 										{booking.finalAmount && booking.finalAmount !== booking.quotedAmount && (
 											<div className="flex justify-between items-center mt-1">
 												<span className="font-semibold">Final Amount:</span>
 												<span className="text-lg font-bold text-primary">
-													${(booking.finalAmount / 100).toFixed(2)}
+													${booking.finalAmount.toFixed(2)}
 												</span>
 											</div>
 										)}

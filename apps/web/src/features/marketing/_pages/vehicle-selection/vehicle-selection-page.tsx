@@ -78,7 +78,7 @@ export function VehicleSelectionPage() {
 		<div className="min-h-screen bg-background">
 			{/* Header */}
 			<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-				<div className="px-4 py-3 sm:py-4">
+				<div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
 					<div className="flex items-center justify-between">
 						{/* Mobile - Simpler header */}
 						<div className="sm:hidden flex items-center justify-between w-full">
@@ -122,7 +122,7 @@ export function VehicleSelectionPage() {
 
 			{/* Route Summary (if coming from quote) */}
 			{search.origin && search.destination && (
-				<div className="px-4 py-3 sm:py-4">
+				<div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
 					<Card className="bg-white border border-gray-200 shadow-sm">
 						<CardContent className="p-3 sm:p-4">
 							{/* Mobile - Vertical Stack */}
@@ -185,7 +185,7 @@ export function VehicleSelectionPage() {
 			)}
 
 			{/* Search and Filters */}
-			<div className="px-4 py-3 sm:py-4">
+			<div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
 				<div className="space-y-3 sm:space-y-0 sm:flex sm:gap-4">
 					{/* Search */}
 					<div className="relative flex-1">
@@ -225,7 +225,7 @@ export function VehicleSelectionPage() {
 			</div>
 
 			{/* Vehicle Grid */}
-			<div className="px-4 pb-24 sm:pb-28">
+			<div className="max-w-7xl mx-auto px-4 pb-24 sm:pb-28">
 				{isLoading ? (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 						{Array.from({ length: 6 }).map((_, i) => (
@@ -347,7 +347,7 @@ export function VehicleSelectionPage() {
 			{/* Fixed Bottom Action */}
 			{selectedCarId && (
 				<div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t shadow-lg">
-					<div className="p-4">
+					<div className="max-w-7xl mx-auto p-4">
 						{/* Mobile Layout - Improved */}
 						<div className="sm:hidden space-y-4">
 							{selectedCar && (

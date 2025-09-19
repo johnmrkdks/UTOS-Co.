@@ -58,7 +58,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 				id: pkg.id,
 				data: {
 					...data,
-					fixedPrice: Math.round(data.fixedPrice * 100), // Convert from dollars to cents for backend
+					fixedPrice: data.fixedPrice, // Store as dollar amount
 				},
 			});
 			onOpenChange(false);

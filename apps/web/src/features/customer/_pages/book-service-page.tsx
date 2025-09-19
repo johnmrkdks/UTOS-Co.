@@ -144,14 +144,39 @@ export function BookServicePage() {
 				errors.scheduledPickupTime = "Pickup time is required";
 			}
 
+			// If basic validation fails, don't proceed to schema validation
 			if (Object.keys(errors).length > 0) {
 				setFormErrors(errors);
+				return false;
+			}
+
+			// Schema validation with date conversion
+			const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}`);
+
+			const validationData = {
+				passengerCount: formData.passengerCount!,
+				luggageCount: formData.luggageCount || 0,
+				scheduledPickupTime,
+				...(isHourlyService && { serviceDuration: formData.serviceDuration }),
+				specialRequirements: formData.specialRequests
+			};
+
+			const result = ServiceBookingSchema.safeParse(validationData);
+
+			if (!result.success) {
+				const zodErrors: Record<string, string> = {};
+				result.error.errors.forEach((error) => {
+					const path = error.path.join('.');
+					zodErrors[path] = error.message;
+				});
+				setFormErrors(zodErrors);
 				return false;
 			}
 
 			setFormErrors({});
 			return true;
 		} catch (error) {
+			console.error("Validation error:", error);
 			return false;
 		}
 	};
@@ -356,10 +381,6 @@ export function BookServicePage() {
 									<Clock className="h-4 w-4" />
 									<span>{formatDuration(service.duration || 0)}</span>
 								</div>
-								<div className="flex items-center gap-2 text-sm text-gray-600">
-									<Users className="h-4 w-4" />
-									<span>Up to {service.maxPassengers || 4} passengers</span>
-								</div>
 							</div>
 
 							{/* Included Services */}
@@ -501,7 +522,7 @@ export function BookServicePage() {
 										id="passengerCount"
 										type="number"
 										min="1"
-										max={service.maxPassengers || 4}
+										max={service.maxPassengers || (isHourlyService ? 15 : 8)}
 										value={formData.passengerCount || 1}
 										onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
 										className={formErrors.passengerCount ? "border-red-500" : ""}

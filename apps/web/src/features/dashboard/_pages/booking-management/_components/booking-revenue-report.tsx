@@ -43,28 +43,28 @@ export function BookingRevenueReport({ filters }: BookingRevenueReportProps) {
 				bookings = bookings.filter(b => new Date(b.scheduledPickupTime) <= toDate);
 			}
 			if (filters.minAmount) {
-				bookings = bookings.filter(b => (b.quotedAmount / 100) >= filters.minAmount!);
+				bookings = bookings.filter(b => b.quotedAmount >= filters.minAmount!);
 			}
 			if (filters.maxAmount) {
-				bookings = bookings.filter(b => (b.quotedAmount / 100) <= filters.maxAmount!);
+				bookings = bookings.filter(b => b.quotedAmount <= filters.maxAmount!);
 			}
 		}
 
 		// Calculate metrics
-		const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0) / 100;
+		const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0);
 		const completedBookings = bookings.filter(b => b.status === "completed");
-		const confirmedRevenue = completedBookings.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0) / 100;
+		const confirmedRevenue = completedBookings.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0);
 		const pendingRevenue = bookings
 			.filter(b => ["pending", "confirmed", "driver_assigned", "in_progress"].includes(b.status))
-			.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0) / 100;
+			.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0);
 
 		// Revenue by type
 		const packageRevenue = bookings
 			.filter(b => b.bookingType === "package")
-			.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0) / 100;
+			.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0);
 		const customRevenue = bookings
 			.filter(b => b.bookingType === "custom")
-			.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0) / 100;
+			.reduce((sum, booking) => sum + (booking.quotedAmount || 0), 0);
 
 		// Average booking value
 		const averageBookingValue = bookings.length > 0 ? totalRevenue / bookings.length : 0;

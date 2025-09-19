@@ -67,7 +67,7 @@ export function TripConfirmationDialog({
 									<div className="flex justify-between items-center">
 										<span className="text-sm font-medium">Trip Fare</span>
 										<span className="text-sm font-semibold">
-											{formatCurrency((booking?.finalAmount || booking?.quotedAmount || 0) / 100)}
+											{formatCurrency(booking?.finalAmount || booking?.quotedAmount || 0)}
 										</span>
 									</div>
 
@@ -88,7 +88,7 @@ export function TripConfirmationDialog({
 									<div className="flex justify-between items-center">
 										<span className="text-sm font-bold">Total Trip Fare</span>
 										<span className="text-sm font-bold text-primary">
-											{formatCurrency(((booking?.finalAmount || booking?.quotedAmount || 0) / 100) + totalCharges)}
+											{formatCurrency((booking?.finalAmount || booking?.quotedAmount || 0) + totalCharges)}
 										</span>
 									</div>
 								</div>

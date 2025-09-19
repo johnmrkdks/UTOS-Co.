@@ -1,9 +1,114 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Badge } from "@workspace/ui/components/badge";
+import { UpdatePasswordForm } from "@/components/forms/update-password-form";
+import { AccountLinkingForm } from "@/components/forms/account-linking-form";
+import { useUserQuery } from "@/hooks/query/use-user-query";
+import {
+	CheckCircleIcon,
+	AlertCircleIcon,
+	ShieldIcon,
+	UserIcon
+} from "lucide-react";
 
 export const Route = createFileRoute('/admin/dashboard/_layout/settings/')({
-  component: RouteComponent,
-})
+	component: AdminSettingsComponent,
+});
 
-function RouteComponent() {
-  return <div>Hello "/admin/dashboard/_layout/settings/"!</div>
+function AdminSettingsComponent() {
+	const { session } = useUserQuery();
+
+	return (
+		<div className="space-y-6 p-6">
+			{/* Header */}
+			<div className="space-y-2">
+				<h1 className="text-2xl font-bold text-gray-900">Admin Settings</h1>
+				<p className="text-gray-600">Manage your administrator account security and preferences</p>
+			</div>
+
+			<div className="grid gap-6 lg:grid-cols-3">
+				{/* Security Section */}
+				<div className="lg:col-span-2 space-y-6">
+					<UpdatePasswordForm
+						title="Admin Security"
+						description="Update your administrator password. This will sign you out of all other devices for security."
+					/>
+
+					<AccountLinkingForm
+						title="Administrator Account Linking"
+						description="Manage your admin sign-in methods and account security"
+						userEmail={session?.user?.email}
+					/>
+				</div>
+
+				{/* Account Information */}
+				<div className="space-y-6">
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-lg">
+								<UserIcon className="h-5 w-5" />
+								Account Information
+							</CardTitle>
+							<CardDescription>
+								Your administrator account details
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="space-y-2">
+								<span className="text-sm font-medium text-gray-500">Email</span>
+								<p className="font-medium">{session?.user.email}</p>
+							</div>
+
+							<div className="space-y-2">
+								<span className="text-sm font-medium text-gray-500">Role</span>
+								<Badge variant="default" className="bg-purple-100 text-purple-700 capitalize">
+									{session?.user.role || "Admin"}
+								</Badge>
+							</div>
+
+							<div className="space-y-2">
+								<span className="text-sm font-medium text-gray-500">Email Status</span>
+								<div className="flex items-center gap-2">
+									{session?.user.emailVerified ? (
+										<>
+											<CheckCircleIcon className="h-4 w-4 text-green-600" />
+											<span className="text-sm text-green-600">Verified</span>
+										</>
+									) : (
+										<>
+											<AlertCircleIcon className="h-4 w-4 text-orange-600" />
+											<span className="text-sm text-orange-600">Not verified</span>
+										</>
+									)}
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<span className="text-sm font-medium text-gray-500">Member Since</span>
+								<p className="font-medium">
+									{session?.user.createdAt ? new Date(session.user.createdAt).toLocaleDateString() : "Unknown"}
+								</p>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Security Notice */}
+					<Card className="border-amber-200 bg-amber-50">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-base text-amber-800">
+								<ShieldIcon className="h-4 w-4" />
+								Security Notice
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="text-sm text-amber-700">
+							<p>
+								As an administrator, you have access to sensitive system data.
+								Always use a strong, unique password and keep your account secure.
+							</p>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		</div>
+	);
 }

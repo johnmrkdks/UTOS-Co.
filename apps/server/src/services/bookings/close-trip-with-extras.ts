@@ -6,12 +6,12 @@ import type { DB } from "@/db";
 export interface ExtrasFormData {
 	additionalWaitTime: number; // in minutes
 	unscheduledStops: number;
-	parkingCharges: number; // in cents
-	tollCharges: number; // in cents
+	parkingCharges: number; // in dollars with decimal precision
+	tollCharges: number; // in dollars with decimal precision
 	location: string; // toll location
 	otherCharges: {
 		description: string;
-		amount: number; // in cents
+		amount: number; // in dollars with decimal precision
 	};
 	extraType: 'general' | 'driver' | 'operator';
 	notes: string;

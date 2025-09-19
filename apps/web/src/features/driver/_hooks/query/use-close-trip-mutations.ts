@@ -6,12 +6,12 @@ import { toast } from "sonner";
 export interface ExtrasFormData {
 	additionalWaitTime: number;
 	unscheduledStops: number;
-	parkingCharges: number; // in dollars (will be converted to cents)
-	tollCharges: number; // in dollars (will be converted to cents)
+	parkingCharges: number; // in dollars with decimal precision
+	tollCharges: number; // in dollars with decimal precision
 	location: string;
 	otherCharges: {
 		description: string;
-		amount: number; // in dollars (will be converted to cents)
+		amount: number; // in dollars with decimal precision
 	};
 	extraType: 'general' | 'driver' | 'operator';
 	notes: string;
@@ -30,7 +30,7 @@ export const useCloseTripWithExtrasMutation = () => {
 			queryClient.refetchQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 
 			toast.success("Trip completed with extras", {
-				description: `Total fare updated: $${data?.data?.booking?.finalAmount ? (data.data.booking.finalAmount / 100).toFixed(2) : '0.00'}`,
+				description: `Total fare updated: $${data?.data?.booking?.finalAmount ? data.data.booking.finalAmount.toFixed(2) : '0.00'}`,
 			});
 		},
 		onError: (error) => {

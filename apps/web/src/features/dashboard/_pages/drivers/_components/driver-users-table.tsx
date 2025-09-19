@@ -115,7 +115,7 @@ export function DriverUsersTable() {
 							<TableHeader>
 								<TableRow>
 									<TableHead>Driver</TableHead>
-									<TableHead>Email Status</TableHead>
+									{/* <TableHead>Email Status</TableHead> */}
 									<TableHead>Account Status</TableHead>
 									<TableHead>Created</TableHead>
 									<TableHead className="text-right">Actions</TableHead>
@@ -143,7 +143,8 @@ export function DriverUsersTable() {
 												</div>
 											</div>
 										</TableCell>
-										<TableCell>
+										{/* Hidden Email Status column */}
+										{/* <TableCell>
 											{user.emailVerified ? (
 												<div className="flex items-center gap-2">
 													<div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -161,7 +162,7 @@ export function DriverUsersTable() {
 													</Badge>
 												</div>
 											)}
-										</TableCell>
+										</TableCell> */}
 										<TableCell>
 											<div className="flex flex-col gap-1">
 												<Badge variant="outline" className="w-fit capitalize bg-blue-50 text-blue-700 border-blue-200">

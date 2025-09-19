@@ -37,14 +37,15 @@ import { useGetCarQuery } from "@/features/customer/_hooks/query/use-get-car-que
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 import { createLocalDateForBackend } from "@/utils/timezone";
+import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 
 // Create dynamic booking form schema based on car capacity
 const createQuoteBookingFormSchema = (maxPassengers?: number, maxLuggage?: number) => z.object({
-	scheduledPickupDate: z.string({ required_error: "Please select a pickup date" }).min(1, "Please select a pickup date"),
-	scheduledPickupTime: z.string({ required_error: "Please select a pickup time" }).min(1, "Please select a pickup time"),
-	customerName: z.string({ required_error: "Please enter your full name" }).min(1, "Please enter your full name"),
-	customerPhone: z.string({ required_error: "Please enter your phone number" }).min(1, "Please enter your phone number"),
-	customerEmail: z.string({ required_error: "Please enter your email address" }).email("Please enter a valid email address"),
+	scheduledPickupDate: z.string().min(1, "Please select a pickup date"),
+	scheduledPickupTime: z.string().min(1, "Please select a pickup time"),
+	customerName: z.string().min(1, "Please enter your full name"),
+	customerPhone: z.string().min(1, "Please enter your phone number"),
+	customerEmail: z.string().email("Please enter a valid email address"),
 	passengerCount: z.number()
 		.min(1, "At least 1 passenger required")
 		.max(maxPassengers || 8, `Maximum ${maxPassengers || 8} passengers allowed for this vehicle`),
@@ -64,6 +65,9 @@ interface QuoteBookingPageProps {
 export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteBookingPageProps) {
 	const search = useSearch({ strict: false }) as any;
 	const navigate = useNavigate();
+
+	// Scroll to top functionality
+	const scrollContainerRef = useScrollToTop({ behavior: "smooth", disabled: true });
 
 
 	// Use user query for authenticated users only
@@ -268,7 +272,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 			// Use simplified pricing from secure quote data if available
 			const firstKmFareAmount = secureQuoteData?.firstKmFare || quoteData.totalFare * 0.7;
 			const additionalKmFareAmount = secureQuoteData?.additionalKmFare || quoteData.totalFare * 0.3;
-			const quotedAmount = Math.round(quoteData.totalFare * 100); // Convert to cents
+			const quotedAmount = quoteData.totalFare; // Store as dollar amount
 
 
 			const bookingPayload = {
@@ -288,8 +292,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				estimatedDuration: quoteData.duration * 60, // Convert minutes to seconds
 				estimatedDistance: quoteData.distance * 1000, // Convert km to meters
 				// Map new pricing structure to existing database fields
-				baseFare: Math.round(firstKmFareAmount * 100), // Convert to cents
-				distanceFare: Math.round(additionalKmFareAmount * 100), // Convert to cents
+				baseFare: firstKmFareAmount, // Store as dollar amount
+				distanceFare: additionalKmFareAmount, // Store as dollar amount
 				timeFare: 0, // Not used in simplified pricing
 				extraCharges: 0,
 				quotedAmount,
@@ -309,6 +313,22 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 			console.log("✅ Quote booking successful:", result);
 			setStep("confirmation");
+
+			// Scroll to top after confirmation
+			setTimeout(() => {
+				if (scrollContainerRef.current) {
+					scrollContainerRef.current.scrollTo({
+						top: 0,
+						behavior: "smooth"
+					});
+				} else {
+					// Fallback to window scroll if container ref not found
+					window.scrollTo({
+						top: 0,
+						behavior: "smooth"
+					});
+				}
+			}, 100);
 		} catch (error) {
 			console.error("❌ Quote booking failed:", error);
 		}
@@ -331,26 +351,26 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	if (!sessionLoading && !sessionData?.user && (secureQuoteData || (quoteData.origin && quoteData.destination && quoteData.totalFare))) {
 		return (
 			<div className="min-h-screen bg-background">
-				<div className="container mx-auto px-4 py-8">
-					<div className="max-w-2xl mx-auto text-center space-y-6 overflow-hidden">
+				<div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+					<div className="max-w-2xl mx-auto text-center space-y-4 sm:space-y-6">
 						{/* Authentication Required Card */}
 						<Card className="border-blue-200 bg-blue-50">
-							<CardContent className="p-8">
-								<div className="space-y-4">
+							<CardContent className="p-4 sm:p-8">
+								<div className="space-y-3 sm:space-y-4">
 									<div>
-										<h2 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Chauffeur Booking</h2>
-										<p className="text-gray-600">
+										<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Complete Your Chauffeur Booking</h2>
+										<p className="text-sm sm:text-base text-gray-600">
 											Please sign in to your account to complete your booking. This helps us provide better service and manage your reservations.
 										</p>
 									</div>
 
 										{/* Selected Car */}
 										{carId && (
-											<div className="bg-white rounded-lg p-4 border text-left">
-												<h3 className="font-medium text-gray-900 mb-3 text-center">Pre-selected Vehicle</h3>
-											<div className="flex items-center gap-3">
-												<div className="w-16 h-12 bg-primary/10 rounded border flex items-center justify-center">
-													<Car className="w-6 h-6 text-primary/60" />
+											<div className="bg-white rounded-lg p-3 sm:p-4 border text-left">
+												<h3 className="font-medium text-gray-900 mb-2 sm:mb-3 text-center text-sm sm:text-base">Pre-selected Vehicle</h3>
+											<div className="flex items-center gap-2 sm:gap-3">
+												<div className="w-12 h-10 sm:w-16 sm:h-12 bg-primary/10 rounded border flex items-center justify-center flex-shrink-0">
+													<Car className="w-4 h-4 sm:w-6 sm:h-6 text-primary/60" />
 												</div>
 												<div className="flex-1 min-w-0">
 													{carLoading ? (
@@ -373,22 +393,22 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 														</>
 													) : carData ? (
 														<>
-															<div className="font-medium text-sm text-gray-900">
+															<div className="font-medium text-xs sm:text-sm text-gray-900 truncate">
 																{carData.name}
 															</div>
-															<div className="text-xs text-muted-foreground mt-1">
+															<div className="text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">
 																{carData.category?.name || 'Premium Vehicle'}
 															</div>
 															{carData.features && carData.features.length > 0 && (
-																<div className="flex flex-wrap gap-1 mt-2">
-																	{carData.features.slice(0, 3).map((feature: any) => (
-																		<Badge key={feature.id} variant="secondary" className="text-xs px-2 py-0.5">
+																<div className="flex flex-wrap gap-1 mt-1 sm:mt-2">
+																	{carData.features.slice(0, 2).map((feature: any) => (
+																		<Badge key={feature.id} variant="secondary" className="text-xs px-1.5 py-0.5">
 																			{feature.name}
 																		</Badge>
 																	))}
-																	{carData.features.length > 3 && (
-																		<Badge variant="secondary" className="text-xs px-2 py-0.5">
-																			+{carData.features.length - 3} more
+																	{carData.features.length > 2 && (
+																		<Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+																			+{carData.features.length - 2} more
 																		</Badge>
 																	)}
 																</div>
@@ -411,17 +431,17 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 									{/* Quote Summary with Fare Breakdown */}
 									{(secureQuoteData || quoteData.origin) && (
-										<div className="bg-white rounded-lg p-4 border text-left w-full overflow-hidden">
-											<h3 className="font-medium text-gray-900 mb-3 text-center">Your Quote Summary</h3>
-											<div className="space-y-3 text-sm">
+										<div className="bg-white rounded-lg p-3 sm:p-4 border text-left w-full">
+											<h3 className="font-medium text-gray-900 mb-2 sm:mb-3 text-center text-sm sm:text-base">Your Quote Summary</h3>
+											<div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
 												{/* From */}
-												<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200 min-w-0">
-													<div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-														<Navigation className="w-3 h-3 text-white" />
+												<div className="flex items-start gap-2 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200">
+													<div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+														<Navigation className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
 													</div>
-													<div className="flex-1 min-w-0 overflow-hidden">
-														<span className="text-xs text-green-700 font-medium">Pickup</span>
-														<div className="text-sm font-medium text-gray-800 truncate break-words">{secureQuoteData?.originAddress || quoteData.origin}</div>
+													<div className="flex-1 min-w-0">
+														<span className="text-xs text-green-700 font-medium block">Pickup</span>
+														<div className="text-xs sm:text-sm font-medium text-gray-800 break-words leading-tight mt-0.5">{secureQuoteData?.originAddress || quoteData.origin}</div>
 													</div>
 												</div>
 
@@ -429,13 +449,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
 													<>
 														{secureQuoteData.stops.map((stop: any, index: number) => (
-															<div key={stop.id || index} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200 min-w-0">
-																<div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-																	<CircleDot className="w-3 h-3 text-white" />
+															<div key={stop.id || index} className="flex items-start gap-2 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
+																<div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+																	<CircleDot className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
 																</div>
-																<div className="flex-1 min-w-0 overflow-hidden">
-																	<span className="text-xs text-blue-700 font-medium">Stop {index + 1}</span>
-																	<div className="text-sm font-medium text-gray-800 truncate break-words">{stop.address}</div>
+																<div className="flex-1 min-w-0">
+																	<span className="text-xs text-blue-700 font-medium block">Stop {index + 1}</span>
+																	<div className="text-xs sm:text-sm font-medium text-gray-800 break-words leading-tight mt-0.5">{stop.address}</div>
 																</div>
 															</div>
 														))}
@@ -443,24 +463,24 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 												)}
 
 												{/* To */}
-												<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-red-50 rounded-lg border border-red-200 min-w-0">
-													<div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-														<MapPinned className="w-3 h-3 text-white" />
+												<div className="flex items-start gap-2 p-2 sm:p-3 bg-red-50 rounded-lg border border-red-200">
+													<div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+														<MapPinned className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
 													</div>
-													<div className="flex-1 min-w-0 overflow-hidden">
-														<span className="text-xs text-red-700 font-medium">Drop-off</span>
-														<div className="text-sm font-medium text-gray-800 truncate break-words">{secureQuoteData?.destinationAddress || quoteData.destination}</div>
+													<div className="flex-1 min-w-0">
+														<span className="text-xs text-red-700 font-medium block">Drop-off</span>
+														<div className="text-xs sm:text-sm font-medium text-gray-800 break-words leading-tight mt-0.5">{secureQuoteData?.destinationAddress || quoteData.destination}</div>
 													</div>
 												</div>
 
 												{/* Journey Details */}
-												<div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-													<div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-														<Clock className="w-3 h-3 text-white" />
+												<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-purple-50 rounded-lg border border-purple-200">
+													<div className="w-5 h-5 sm:w-6 sm:h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+														<Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
 													</div>
 													<div className="flex-1">
-														<span className="text-xs text-purple-700 font-medium">Journey</span>
-														<div className="text-sm font-medium text-gray-800">{quoteData.distance.toFixed(1)} km • {quoteData.duration} min</div>
+														<span className="text-xs text-purple-700 font-medium block">Journey</span>
+														<div className="text-xs sm:text-sm font-medium text-gray-800 mt-0.5">{quoteData.distance.toFixed(1)} km • {quoteData.duration} min</div>
 													</div>
 												</div>
 											</div>
@@ -594,27 +614,29 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 	if (step === "confirmation") {
 		return (
-			<div className="max-w-2xl mx-auto space-y-6">
-				{/* Header */}
-				<div className="text-center space-y-4">
-					<CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-					<div>
-						<h1 className="text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
-						<p className="text-gray-600">Your custom booking has been submitted successfully</p>
-						{!sessionData?.user && (
-							<p className="text-sm text-blue-600 mt-2">
-								💡 Tip: Create an account to easily manage your bookings
-							</p>
-						)}
-					</div>
-				</div>
+			<div className="min-h-screen bg-gray-50">
+				<div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+					<div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+						{/* Header */}
+						<div className="text-center space-y-3 sm:space-y-4">
+							<CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-green-500 mx-auto" />
+							<div>
+								<h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
+								<p className="text-sm sm:text-base text-gray-600">Your custom booking has been submitted successfully</p>
+								{!sessionData?.user && (
+									<p className="text-sm text-blue-600 mt-2">
+										💡 Tip: Create an account to easily manage your bookings
+									</p>
+								)}
+							</div>
+						</div>
 
-				{/* Booking Details */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Booking Details</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
+						{/* Booking Details */}
+						<Card>
+							<CardHeader>
+								<CardTitle className="text-lg sm:text-xl">Booking Details</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-3 sm:space-y-4">
 						<div>
 							<h4 className="font-medium">Chauffeur Journey</h4>
 							<p className="text-sm text-gray-600">Based on your instant quote</p>
@@ -754,66 +776,68 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								<p className="font-medium text-primary">${quoteData.totalFare.toFixed(2)}</p>
 							</div>
 						</div>
-					</CardContent>
-				</Card>
+							</CardContent>
+						</Card>
 
-				{/* Next Steps */}
-				<Card>
-					<CardContent className="p-6 text-center">
-						<h3 className="font-medium mb-2">What happens next?</h3>
-						<p className="text-sm text-gray-600 mb-4">
-							Our team will review your booking and contact you within 24 hours to confirm details and assign a driver.
-						</p>
-						<div className="space-y-2">
-							{sessionData?.user ? (
-								<>
-									<Button className="w-full" asChild>
-										<Link to="/my-bookings">View My Bookings</Link>
-									</Button>
-									<Button variant="outline" className="w-full" asChild>
-										<Link to="/">Get Another Quote</Link>
-									</Button>
-								</>
-							) : (
-								<>
-									<Button className="w-full" asChild>
-										<Link to="/sign-up">Create Account to Track Bookings</Link>
-									</Button>
-									<Button variant="outline" className="w-full" asChild>
-										<Link to="/">Get Another Quote</Link>
-									</Button>
-								</>
-							)}
-						</div>
-					</CardContent>
-				</Card>
+						{/* Next Steps */}
+						<Card>
+							<CardContent className="p-4 sm:p-6 text-center">
+								<h3 className="font-medium mb-2 text-base sm:text-lg">What happens next?</h3>
+								<p className="text-sm text-gray-600 mb-4">
+									Our team will review your booking and contact you within 24 hours to confirm details and assign a driver.
+								</p>
+								<div className="space-y-2">
+									{sessionData?.user ? (
+										<>
+											<Button className="w-full" asChild>
+												<Link to="/my-bookings">View My Bookings</Link>
+											</Button>
+											<Button variant="outline" className="w-full" asChild>
+												<Link to="/">Get Another Quote</Link>
+											</Button>
+										</>
+									) : (
+										<>
+											<Button className="w-full" asChild>
+												<Link to="/sign-up">Create Account to Track Bookings</Link>
+											</Button>
+											<Button variant="outline" className="w-full" asChild>
+												<Link to="/">Get Another Quote</Link>
+											</Button>
+										</>
+									)}
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-6xl mx-auto px-4 py-8">
+		<div ref={scrollContainerRef} className="min-h-screen bg-gray-50">
+			<div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
 				{/* Header */}
-				<div className="flex items-center gap-4 mb-8">
+				<div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-8">
 					<Button variant="outline" size="icon" asChild>
 						<Link to="/">
 							<ArrowLeft className="h-4 w-4" />
 						</Link>
 					</Button>
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900">Complete Your Chauffeur Booking</h1>
-						<p className="text-gray-600">Based on your instant quote</p>
+						<h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Complete Your Chauffeur Booking</h1>
+						<p className="text-sm sm:text-base text-gray-600">Based on your instant quote</p>
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+				<div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
 					{/* Quote Information Panel - Left Side */}
-					<div className="xl:col-span-2">
-						<div className="sticky top-8">
+					<div className="lg:col-span-2 order-2 lg:order-1">
+						<div className="lg:sticky lg:top-8">
 							<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
 								{/* Quote Header */}
-								<div className="h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center relative">
+								<div className="h-48 sm:h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center relative">
 									<div className="text-center">
 										<div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 mx-auto">
 											<Calculator className="w-10 h-10 text-primary/60" />
@@ -992,34 +1016,34 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 					</div>
 
 					{/* Booking Form Panel - Right Side */}
-					<div className="xl:col-span-3">
+					<div className="lg:col-span-3 order-1 lg:order-2">
 						<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-							<div className="bg-primary p-8">
-								<h1 className="text-3xl font-bold text-white mb-2">Book Your Chauffeur</h1>
-								<p className="text-primary-foreground/90">Complete your chauffeur booking in just a few steps</p>
+							<div className="bg-primary p-4 sm:p-6 lg:p-8">
+								<h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">Book Your Chauffeur</h1>
+								<p className="text-sm sm:text-base text-primary-foreground/90">Complete your chauffeur booking in just a few steps</p>
 							</div>
 
-							<div className="p-8 space-y-8">
+							<div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
 								{/* Contact Information Section */}
-								<div className="space-y-6">
-									<div className="flex items-center gap-4">
-										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-											<span className="text-white text-lg font-bold">1</span>
+								<div className="space-y-4 sm:space-y-6">
+									<div className="flex items-center gap-3 sm:gap-4">
+										<div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+											<span className="text-white text-sm sm:text-lg font-bold">1</span>
 										</div>
 										<div>
-											<h3 className="text-xl font-bold text-gray-900">Contact Information</h3>
-											<p className="text-gray-500 text-sm">We'll use this to reach you about your booking</p>
+											<h3 className="text-lg sm:text-xl font-bold text-gray-900">Contact Information</h3>
+											<p className="text-gray-500 text-xs sm:text-sm">We'll use this to reach you about your booking</p>
 										</div>
 									</div>
 
-									<div className="space-y-5 pl-0 sm:pl-14">
+									<div className="space-y-4 sm:space-y-5 pl-0 sm:pl-14">
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Full Name *</label>
+											<label className="block text-sm font-semibold text-gray-800 mb-2 sm:mb-3">Full Name *</label>
 											<Input
 												placeholder="Enter your full name"
 												value={formData.customerName || ""}
 												onChange={(e) => updateFormData("customerName", e.target.value)}
-												className={`w-full h-12 text-base ${formErrors.customerName ? "border-red-500" : ""}`}
+												className={`w-full h-10 sm:h-12 text-sm sm:text-base ${formErrors.customerName ? "border-red-500" : ""}`}
 											/>
 											{formErrors.customerName && (
 												<p className="text-red-500 text-sm mt-1">{formErrors.customerName}</p>
@@ -1027,13 +1051,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										</div>
 
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Email Address *</label>
+											<label className="block text-sm font-semibold text-gray-800 mb-2 sm:mb-3">Email Address *</label>
 											<Input
 												type="email"
 												placeholder="Enter your email"
 												value={formData.customerEmail || ""}
 												onChange={(e) => updateFormData("customerEmail", e.target.value)}
-												className={`w-full h-12 text-base ${formErrors.customerEmail ? "border-red-500" : ""}`}
+												className={`w-full h-10 sm:h-12 text-sm sm:text-base ${formErrors.customerEmail ? "border-red-500" : ""}`}
 											/>
 											{formErrors.customerEmail && (
 												<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
@@ -1041,13 +1065,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										</div>
 
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number *</label>
+											<label className="block text-sm font-semibold text-gray-800 mb-2 sm:mb-3">Phone Number *</label>
 											<Input
 												type="tel"
 												placeholder="Enter your phone number"
 												value={formData.customerPhone || ""}
 												onChange={(e) => updateFormData("customerPhone", e.target.value)}
-												className={`w-full h-12 text-base ${formErrors.customerPhone ? "border-red-500" : ""}`}
+												className={`w-full h-10 sm:h-12 text-sm sm:text-base ${formErrors.customerPhone ? "border-red-500" : ""}`}
 											/>
 											{formErrors.customerPhone && (
 												<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
@@ -1057,23 +1081,23 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								</div>
 
 								{/* Booking Details Section */}
-								<div className="space-y-6">
-									<div className="flex items-center gap-4">
-										<div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
-											<span className="text-white text-lg font-bold">2</span>
+								<div className="space-y-4 sm:space-y-6">
+									<div className="flex items-center gap-3 sm:gap-4">
+										<div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+											<span className="text-white text-sm sm:text-lg font-bold">2</span>
 										</div>
 										<div>
-											<h3 className="text-xl font-bold text-gray-900">Booking Details</h3>
-											<p className="text-gray-500 text-sm">Tell us about your chauffeur service needs</p>
+											<h3 className="text-lg sm:text-xl font-bold text-gray-900">Booking Details</h3>
+											<p className="text-gray-500 text-xs sm:text-sm">Tell us about your chauffeur service needs</p>
 										</div>
 									</div>
 
-									<div className="space-y-5 pl-0 sm:pl-14">
+									<div className="space-y-4 sm:space-y-5 pl-0 sm:pl-14">
 										{/* Passengers and Luggage side by side */}
-										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 											<div>
 												<label className="block text-sm font-semibold text-gray-800 mb-1">Number of Passengers *</label>
-												<p className="text-xs text-gray-600 mb-3">Maximum capacity: {carData?.seatingCapacity || 8} passengers</p>
+												<p className="text-xs text-gray-600 mb-2 sm:mb-3">Maximum capacity: {carData?.seatingCapacity || 8} passengers</p>
 												<Input
 													type="number"
 													min="1"
@@ -1081,7 +1105,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 													placeholder="e.g. 2"
 													value={formData.passengerCount || ""}
 													onChange={(e) => updateFormData("passengerCount", e.target.value ? parseInt(e.target.value) : undefined)}
-													className={`w-full h-12 text-base ${formErrors.passengerCount ? "border-red-500" : ""}`}
+													className={`w-full h-10 sm:h-12 text-sm sm:text-base ${formErrors.passengerCount ? "border-red-500" : ""}`}
 												/>
 												{formErrors.passengerCount && (
 													<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
@@ -1090,7 +1114,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 											<div>
 												<label className="block text-sm font-semibold text-gray-800 mb-1">Luggage Pieces *</label>
-												<p className="text-xs text-gray-600 mb-3">Maximum capacity: {carData?.luggageCapacity || 10} pieces of luggage</p>
+												<p className="text-xs text-gray-600 mb-2 sm:mb-3">Maximum capacity: {carData?.luggageCapacity || 10} pieces of luggage</p>
 												<Input
 													type="number"
 													min="0"
@@ -1098,7 +1122,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 													placeholder="e.g. 3"
 													value={formData.luggageCount || ""}
 													onChange={(e) => updateFormData("luggageCount", e.target.value ? parseInt(e.target.value) : undefined)}
-													className={`w-full h-12 text-base ${formErrors.luggageCount ? "border-red-500" : ""}`}
+													className={`w-full h-10 sm:h-12 text-sm sm:text-base ${formErrors.luggageCount ? "border-red-500" : ""}`}
 												/>
 												{formErrors.luggageCount && (
 													<p className="text-red-500 text-sm mt-1">{formErrors.luggageCount}</p>
@@ -1181,10 +1205,10 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								</div>
 
 								{/* Action Button */}
-								<div className="pt-4">
+								<div className="pt-3 sm:pt-4">
 									<Button
 										onClick={handleSubmit}
-										className="w-full h-14 text-lg font-bold"
+										className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold"
 										disabled={createBookingMutation.isPending}
 									>
 										{createBookingMutation.isPending ? (

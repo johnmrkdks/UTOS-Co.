@@ -158,20 +158,31 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to view bookings",
 					});
 				}
-				
+
 				const userRole = await getUserRole(db, userId);
-				
+
+				console.log("🔍 Admin Bookings List Debug:");
+				console.log("- User ID:", userId);
+				console.log("- User Role:", userRole);
+				console.log("- Input params:", input);
+
 				// Apply role-based filtering
 				if (userRole === 'admin' || userRole === 'super_admin') {
 					// Admins can see all bookings
 					const bookings = await getBookingsService(db, input);
+					console.log("- Bookings result:", {
+						total: bookings?.total || 0,
+						count: bookings?.data?.length || 0,
+						hasData: !!bookings?.data,
+						firstBooking: bookings?.data?.[0] || null
+					});
 					return bookings;
 				} else if (userRole === 'driver') {
 					// Drivers can only see their assigned bookings
@@ -301,16 +312,28 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
+				console.log("🔍 DEBUG createCustomBooking - RECEIVED INPUT:");
+				console.log("📦 Input data:", JSON.stringify(input, null, 2));
+				console.log("🛑 Stops in input:", input.stops ? input.stops.length : 'No stops');
+				console.log("👤 Session data:", JSON.stringify(session, null, 2));
+
 				// Better Auth anonymous plugin - check both user and session structures
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new Error("User session is required. Please sign in or create a guest account.");
 				}
-				
+
+				console.log("📝 Calling createCustomBookingService with userId:", userId);
 				const newBooking = await createCustomBookingService(db, { ...input, userId });
+				console.log("✅ Custom booking created successfully:", newBooking.id);
 				return newBooking;
 			} catch (error) {
+				console.error("❌ TRPC Error in createCustomBooking:", {
+					error: error instanceof Error ? error.message : String(error),
+					stack: error instanceof Error ? error.stack : undefined,
+					input: JSON.stringify(input, null, 2)
+				});
 				handleTRPCError(error);
 			}
 		}),
@@ -393,11 +416,20 @@ export const bookingsRouter = router({
 	// Instant quote calculation (can be public for quote generation)
 	calculateInstantQuote: publicProcedure
 		.input(CalculateInstantQuoteSchema)
-		.query(async ({ ctx: { db }, input }) => {
+		.query(async ({ ctx: { db, env }, input }) => {
 			try {
-				const quote = await calculateInstantQuoteService(db, input);
+				console.log("🔍 calculateInstantQuote - Input received:", JSON.stringify(input, null, 2));
+				console.log("🔍 calculateInstantQuote - Environment keys:", Object.keys(env || {}));
+				console.log("🔍 calculateInstantQuote - Has Google Maps key:", !!env?.GOOGLE_MAPS_API_KEY);
+
+				const quote = await calculateInstantQuoteService(db, input, env);
+
+				console.log("✅ calculateInstantQuote - Quote calculated successfully:", JSON.stringify(quote, null, 2));
 				return quote;
 			} catch (error) {
+				console.error("❌ calculateInstantQuote - Error:", error);
+				console.error("❌ calculateInstantQuote - Error message:", error instanceof Error ? error.message : String(error));
+				console.error("❌ calculateInstantQuote - Error stack:", error instanceof Error ? error.stack : undefined);
 				handleTRPCError(error);
 			}
 		}),
@@ -405,9 +437,9 @@ export const bookingsRouter = router({
 	// Booking status management
 	updateStatus: protectedProcedure
 		.input(UpdateBookingStatusSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
-				const updatedBooking = await updateBookingStatusService(db, input);
+				const updatedBooking = await updateBookingStatusService(db, input, env);
 				return updatedBooking;
 			} catch (error) {
 				handleTRPCError(error);
@@ -417,9 +449,9 @@ export const bookingsRouter = router({
 	// Driver assignment
 	assignDriver: protectedProcedure
 		.input(AssignDriverSchema)
-		.mutation(async ({ ctx: { db }, input }) => {
+		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
-				const updatedBooking = await assignDriverService(db, input);
+				const updatedBooking = await assignDriverService(db, input, env);
 				return updatedBooking;
 			} catch (error) {
 				handleTRPCError(error);

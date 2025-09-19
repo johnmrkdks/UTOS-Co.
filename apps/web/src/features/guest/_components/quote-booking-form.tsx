@@ -17,6 +17,12 @@ const quoteBookingSchema = z.object({
 	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
 	scheduledPickupTime: z.date({
 		required_error: "Please select a pickup date and time",
+	}).refine((date) => {
+		const now = new Date();
+		const hoursUntilPickup = (date.getTime() - now.getTime()) / (1000 * 60 * 60);
+		return hoursUntilPickup >= 1;
+	}, {
+		message: "Custom bookings require at least 1 hour advance notice",
 	}),
 	specialRequirements: z.string().optional(),
 });

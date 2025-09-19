@@ -76,8 +76,8 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 					toDate.setHours(23, 59, 59, 999);
 					if (new Date(booking.scheduledPickupTime) > toDate) return false;
 				}
-				if (filters.minAmount && (booking.quotedAmount / 100) < filters.minAmount) return false;
-				if (filters.maxAmount && (booking.quotedAmount / 100) > filters.maxAmount) return false;
+				if (filters.minAmount && booking.quotedAmount < filters.minAmount) return false;
+				if (filters.maxAmount && booking.quotedAmount > filters.maxAmount) return false;
 				
 				return true;
 			})
@@ -219,7 +219,7 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 														<div className="flex items-center text-xs">
 															<DollarSign className="h-3 w-3 mr-1" />
 															<span className="font-medium">
-																${(booking.quotedAmount / 100).toFixed(2)}
+																${booking.quotedAmount.toFixed(2)}
 															</span>
 														</div>
 													</div>

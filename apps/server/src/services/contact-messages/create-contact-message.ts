@@ -1,5 +1,5 @@
 import { createContactMessage as createContactMessageData } from "@/data/contact-messages";
-import type { Database } from "@/types";
+import type { DB } from "@/db";
 
 interface CreateContactMessageInput {
 	name: string;
@@ -8,7 +8,7 @@ interface CreateContactMessageInput {
 }
 
 export async function createContactMessage(
-	db: Database,
+	db: DB,
 	input: CreateContactMessageInput
 ) {
 	const contactMessage = await createContactMessageData(db, {

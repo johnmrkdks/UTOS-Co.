@@ -27,6 +27,8 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 		const developmentOnlyPaths = [
 			"/admin/dashboard/analytics",
 			"/admin/dashboard/admin-testing",
+			"/admin/dashboard/report",
+			"/admin/dashboard/settings",
 		];
 
 		if (developmentOnlyPaths.includes(route.path) && !isDevelopment) {

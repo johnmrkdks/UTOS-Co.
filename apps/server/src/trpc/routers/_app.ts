@@ -25,6 +25,7 @@ import { customerProfileRouter } from "./customer-profile";
 import { instantQuoteRouter } from "./instant-quote";
 import { analyticsRouter } from "./analytics";
 import { contactMessagesRouter } from "./contact-messages";
+import { authRouter } from "./auth";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -70,6 +71,7 @@ export const appRouter = router({
 	instantQuote: instantQuoteRouter,
 	analytics: analyticsRouter,
 	contactMessages: contactMessagesRouter,
+	auth: authRouter,
 });
 
 // Export type definition of API

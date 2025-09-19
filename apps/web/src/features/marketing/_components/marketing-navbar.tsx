@@ -32,6 +32,7 @@ import {
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { BrandLogo } from "@/components/brand-logo";
+import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
 
 type HeaderProps = {
 	className?: string;
@@ -147,6 +148,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 					</div>
 				</div>
 			</div>
+
 
 		</div>
 	);
@@ -424,7 +426,6 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 						variant="outline"
 						className="w-full flex items-center justify-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
 						onClick={() => {
-							onClose();
 							signOutWithConfirmation.openSignOutDialog();
 						}}
 					>
@@ -437,6 +438,21 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 					</div>
 				)}
 			</div>
+
+			{/* Sign Out Confirmation Dialog */}
+			{session && (
+				<SignOutConfirmationDialog
+					isOpen={signOutWithConfirmation.isDialogOpen}
+					onClose={signOutWithConfirmation.closeSignOutDialog}
+					onConfirm={async () => {
+						await signOutWithConfirmation.confirmSignOut();
+						onClose(); // Close the mobile sheet after successful sign out
+					}}
+					userRole={session.user.role}
+					userName={session.user.name}
+					isLoading={signOutWithConfirmation.isSigningOut}
+				/>
+			)}
 		</>
 	);
 }

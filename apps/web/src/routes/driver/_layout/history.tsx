@@ -66,8 +66,12 @@ function HistoryPage() {
 	// Handle opening booking details dialog (same as trips.tsx)
 	const handleOpenBookingDetails = (booking: any) => {
 		// Convert trip data structure to booking data structure for the dialog
-		// Note: We need to get the original booking data to access extraCharges
+		// Note: We need to get the original booking data to access extraCharges and extras
 		const originalBooking = bookingsData?.data?.find((b: any) => b.id === booking.id);
+
+		// Debug logging
+		console.log("DEBUG: Original booking data:", originalBooking);
+		console.log("DEBUG: Extras data:", (originalBooking as any)?.extras);
 
 		const bookingData = {
 			id: booking.id,
@@ -81,6 +85,7 @@ function HistoryPage() {
 			finalAmount: booking.finalAmount,
 			quotedAmount: originalBooking?.quotedAmount || booking.finalAmount, // Use original quoted amount
 			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
+			extras: (originalBooking as any)?.extras || [], // Get extras breakdown from original booking
 			car: null // TODO: Add car information to history data
 		};
 
@@ -453,32 +458,111 @@ function HistoryPage() {
 									<div className="space-y-2">
 										{/* Base trip fare */}
 										<div className="flex justify-between items-center">
-											<span className="text-sm text-gray-600">Trip Fare:</span>
+											<span className="text-sm text-gray-600">Base Trip Fare:</span>
 											<span className="text-sm font-semibold">
-												${((selectedBookingForDetails.quotedAmount || selectedBookingForDetails.finalAmount || 0) / 100).toFixed(2)}
+												${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
 											</span>
 										</div>
 
-										{/* Extras if any */}
-										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+										{/* Extras breakdown if any */}
+										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+											<div className="space-y-2">
+												<div className="text-sm font-medium text-gray-700 mt-3 mb-2">Extra Charges:</div>
+												{selectedBookingForDetails.extras.map((extra: any, index: number) => (
+													<div key={index} className="bg-gray-50 rounded-lg p-3 space-y-2">
+														{extra.additionalWaitTime > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">Additional Wait Time:</span>
+																<span className="text-xs font-semibold text-amber-600">
+																	{extra.additionalWaitTime} minutes
+																</span>
+															</div>
+														)}
+														{extra.unscheduledStops > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">Unscheduled Stops:</span>
+																<span className="text-xs font-semibold text-blue-600">
+																	+${(extra.unscheduledStops || 0).toFixed(2)}
+																</span>
+															</div>
+														)}
+														{extra.parkingCharges > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">Parking Charges:</span>
+																<span className="text-xs font-semibold text-purple-600">
+																	+${(extra.parkingCharges || 0).toFixed(2)}
+																</span>
+															</div>
+														)}
+														{extra.tollCharges > 0 && (
+															<div className="flex items-center justify-between">
+																<span className="text-xs text-gray-600">
+																	Toll Charges{extra.tollLocation ? ` (${extra.tollLocation})` : ''}:
+																</span>
+																<span className="text-xs font-semibold text-orange-600">
+																	+${(extra.tollCharges || 0).toFixed(2)}
+																</span>
+															</div>
+														)}
+														{extra.otherChargesAmount > 0 && (
+															<div className="space-y-1">
+																<div className="flex items-center justify-between">
+																	<span className="text-xs text-gray-600">Other Charges:</span>
+																	<span className="text-xs font-semibold text-red-600">
+																		+${(extra.otherChargesAmount || 0).toFixed(2)}
+																	</span>
+																</div>
+																{extra.otherChargesDescription && (
+																	<p className="text-xs text-gray-500 italic">
+																		{extra.otherChargesDescription}
+																	</p>
+																)}
+															</div>
+														)}
+														{extra.notes && (
+															<div className="pt-1 border-t border-gray-200">
+																<p className="text-xs text-gray-500">
+																	<span className="font-medium">Notes:</span> {extra.notes}
+																</p>
+															</div>
+														)}
+													</div>
+												))}
+											</div>
+										)}
+
+										{/* Simple extras total if no detailed breakdown available */}
+										{(!selectedBookingForDetails.extras || selectedBookingForDetails.extras.length === 0) &&
+										 (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) && (
 											<div className="flex justify-between items-center">
-												<span className="text-sm text-gray-600">Extras:</span>
-												<span className="text-sm font-semibold text-green-600">
-													+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
+												<span className="text-sm text-gray-600">Additional Charges:</span>
+												<span className="text-sm font-semibold text-orange-600">
+													+${(selectedBookingForDetails.extraCharges || 0).toFixed(2)}
 												</span>
 											</div>
-										) : null}
+										)}
+
+										{/* Show total extras amount if we have detailed breakdown */}
+										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+											<div className="flex justify-between items-center bg-orange-50 px-3 py-2 rounded">
+												<span className="text-sm font-medium text-orange-700">Total Additional Charges:</span>
+												<span className="text-sm font-bold text-orange-700">
+													+${(selectedBookingForDetails.extraCharges || 0).toFixed(2)}
+												</span>
+											</div>
+										)}
 
 										{/* Divider if there are extras */}
-										{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
+										{((selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0) ||
+										  (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0)) && (
 											<div className="border-t border-gray-200"></div>
-										) : null}
+										)}
 
 										{/* Total */}
 										<div className="flex justify-between items-center">
-											<span className="text-base font-bold text-gray-900">Total:</span>
+											<span className="text-base font-bold text-gray-900">Total Charged:</span>
 											<span className="text-lg font-bold text-gray-900">
-												${((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+												${(selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
 											</span>
 										</div>
 									</div>

@@ -28,7 +28,10 @@ function RouteComponent() {
 
 	// Handle OAuth callback redirect
 	useEffect(() => {
-		if (session?.user && search.redirect) {
+		// Don't redirect if session is still loading or user is signing out
+		if (!session?.user) return;
+
+		if (search.redirect) {
 			navigate({
 				to: search.redirect,
 				resetScroll: true
@@ -36,12 +39,17 @@ function RouteComponent() {
 			return;
 		}
 
-		// Auto-redirect drivers to their dashboard
-		if (session?.user?.role === "driver") {
-			navigate({ to: "/driver", resetScroll: true });
-		} else if (session?.user?.role === "admin" || session?.user?.role === "super_admin") {
-			navigate({ to: "/admin/dashboard", resetScroll: true });
-		}
+		// Add a small delay for auto-redirects to prevent race conditions during sign-out
+		const redirectTimer = setTimeout(() => {
+			// Auto-redirect drivers to their dashboard
+			if (session?.user?.role === "driver") {
+				navigate({ to: "/driver", resetScroll: true });
+			} else if (session?.user?.role === "admin" || session?.user?.role === "super_admin") {
+				navigate({ to: "/admin/dashboard", resetScroll: true });
+			}
+		}, 50);
+
+		return () => clearTimeout(redirectTimer);
 	}, [session, search.redirect, navigate]);
 
 	return <Home />;

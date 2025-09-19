@@ -37,15 +37,15 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 	}
 
 	if (variant === "summary") {
-		const pricePerKm = pricing?.pricePerKm || 0;
+		const additionalKmRate = pricing?.additionalKmRate || 0;
 		return (
 			<div className={className}>
-				<span>From ${pricing?.firstKmRate || 0}{pricePerKm > 0 ? ` + $${pricePerKm}/km` : ''}</span>
+				<span>From ${pricing?.firstKmRate || 0}{additionalKmRate > 0 ? ` + $${additionalKmRate}/km` : ''}</span>
 			</div>
 		);
 	}
 
-	const pricePerKm = pricing?.pricePerKm || 0;
+	const additionalKmRate = pricing?.additionalKmRate || 0;
 	return (
 		<div className={className}>
 			<div className="text-2xl font-bold text-primary">

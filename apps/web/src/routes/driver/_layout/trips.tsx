@@ -250,13 +250,11 @@ function DriverTripsComponent() {
 	const handleSubmitExtras = () => {
 		if (selectedBooking) {
 			const totalExtrasAmount = calculateTotalExtras();
-			const extrasAmountInCents = Math.round(totalExtrasAmount * 100);
-
 			// Update booking with extras amount and move to next status
 			updateStatusMutation.mutate({
 				id: selectedBooking.id,
 				status: 'awaiting_extras',
-				extraCharges: extrasAmountInCents,
+				extraCharges: totalExtrasAmount, // Store as dollar amount
 			} as any);
 		}
 
@@ -325,12 +323,12 @@ function DriverTripsComponent() {
 			const extrasForBackend = {
 				additionalWaitTime: extrasData.additionalWaitTime || 0,
 				unscheduledStops: extrasData.unscheduledStops || 0,
-				parkingCharges: Math.round((extrasData.parkingCharges || 0) * 100), // Convert to cents
-				tollCharges: Math.round((extrasData.tollCharges || 0) * 100), // Convert to cents
+				parkingCharges: extrasData.parkingCharges || 0, // Store as dollar amount
+				tollCharges: extrasData.tollCharges || 0, // Store as dollar amount
 				location: extrasData.location || '',
 				otherCharges: {
 					description: extrasData.otherCharges?.description || '',
-					amount: Math.round((extrasData.otherCharges?.amount || 0) * 100), // Convert to cents
+					amount: extrasData.otherCharges?.amount || 0, // Store as dollar amount
 				},
 				extraType: extrasData.extraType || 'general',
 				notes: extrasData.notes || '',
@@ -1141,7 +1139,7 @@ function DriverTripsComponent() {
 											<div className="flex items-center justify-between">
 												<span className="text-green-700 text-sm">Trip Fare:</span>
 												<span className="text-green-800 font-semibold">
-													${((selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+													${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
 												</span>
 											</div>
 
@@ -1150,7 +1148,7 @@ function DriverTripsComponent() {
 												<div className="flex items-center justify-between">
 													<span className="text-green-700 text-sm">Extras:</span>
 													<span className="text-green-700 font-semibold">
-														+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
+														+${(selectedBookingForDetails.extraCharges || 0).toFixed(2)}
 													</span>
 												</div>
 											) : null}
@@ -1181,10 +1179,10 @@ function DriverTripsComponent() {
 													${(() => {
 														// If trip is completed, show finalAmount (includes extras)
 														if (['completed', 'cancelled'].includes(selectedBookingForDetails.status) || !selectedTripForClose) {
-															return ((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2);
+															return (selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0).toFixed(2);
 														}
 														// If trip is being closed with extras, show original + extras preview
-														const baseAmount = (selectedBookingForDetails.quotedAmount || 0) / 100;
+														const baseAmount = selectedBookingForDetails.quotedAmount || 0;
 														const extrasAmount = selectedTripForClose?.id === selectedBookingForDetails.id ? calculateTotalExtrasCharges() : 0;
 														return (baseAmount + extrasAmount).toFixed(2);
 													})()}
@@ -1202,7 +1200,7 @@ function DriverTripsComponent() {
 													<div className="flex items-center justify-between">
 														<span className="text-green-700 text-sm">Trip Fare:</span>
 														<span className="text-green-800 font-semibold">
-															${((selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2)}
+															${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
 														</span>
 													</div>
 
@@ -1211,7 +1209,7 @@ function DriverTripsComponent() {
 														<div className="flex items-center justify-between">
 															<span className="text-green-700 text-sm">Extras:</span>
 															<span className="text-green-700 font-semibold">
-																+${(selectedBookingForDetails.extraCharges / 100).toFixed(2)}
+																+${(selectedBookingForDetails.extraCharges || 0).toFixed(2)}
 															</span>
 														</div>
 													) : null}
@@ -1242,10 +1240,10 @@ function DriverTripsComponent() {
 															${(() => {
 																// If trip is completed, show finalAmount (includes extras)
 																if (['completed', 'cancelled'].includes(selectedBookingForDetails.status) || !selectedTripForClose) {
-																	return ((selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0) / 100).toFixed(2);
+																	return (selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0).toFixed(2);
 																}
 																// If trip is being closed with extras, show original + extras preview
-																const baseAmount = (selectedBookingForDetails.quotedAmount || 0) / 100;
+																const baseAmount = selectedBookingForDetails.quotedAmount || 0;
 																const extrasAmount = selectedTripForClose?.id === selectedBookingForDetails.id ? calculateTotalExtrasCharges() : 0;
 																return (baseAmount + extrasAmount).toFixed(2);
 															})()}

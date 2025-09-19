@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "@/trpc/init";
 import { getMailService } from "@workspace/mail";
+import { sendDriverAssignmentNotification, sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
 
 const sendEmailSchema = z.object({
 	to: z.string().email(),
@@ -57,6 +58,16 @@ const sendBookingConfirmationSchema = z.object({
 		amount: z.number().positive(),
 		currency: z.string().default("AUD"),
 	}),
+});
+
+const sendDriverAssignmentNotificationSchema = z.object({
+	bookingId: z.string().min(1),
+	driverId: z.string().min(1),
+});
+
+const sendTripStatusNotificationSchema = z.object({
+	bookingId: z.string().min(1),
+	status: z.string().min(1),
 });
 
 export const mailRouter = router({
@@ -255,8 +266,8 @@ export const mailRouter = router({
 					});
 				}
 
-				return { 
-					success: true, 
+				return {
+					success: true,
 					message: "Test email sent successfully",
 					timestamp: new Date().toISOString()
 				};
@@ -265,6 +276,62 @@ export const mailRouter = router({
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Failed to send test email",
+				});
+			}
+		}),
+
+	// Driver assignment notification
+	sendDriverAssignmentNotification: publicProcedure
+		.input(sendDriverAssignmentNotificationSchema)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				const result = await sendDriverAssignmentNotification({
+					bookingId: input.bookingId,
+					driverId: input.driverId,
+					env: ctx.env,
+				});
+
+				if (!result.success) {
+					throw new TRPCError({
+						code: "INTERNAL_SERVER_ERROR",
+						message: result.message,
+					});
+				}
+
+				return result;
+			} catch (error) {
+				console.error("Error in sendDriverAssignmentNotification:", error);
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: error instanceof Error ? error.message : "Failed to send driver assignment notification",
+				});
+			}
+		}),
+
+	// Trip status notification
+	sendTripStatusNotification: publicProcedure
+		.input(sendTripStatusNotificationSchema)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				const result = await sendTripStatusNotification({
+					bookingId: input.bookingId,
+					status: input.status,
+					env: ctx.env,
+				});
+
+				if (!result.success) {
+					throw new TRPCError({
+						code: "INTERNAL_SERVER_ERROR",
+						message: result.message,
+					});
+				}
+
+				return result;
+			} catch (error) {
+				console.error("Error in sendTripStatusNotification:", error);
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: error instanceof Error ? error.message : "Failed to send trip status notification",
 				});
 			}
 		}),

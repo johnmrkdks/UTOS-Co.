@@ -164,7 +164,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 						<TableHead>Assigned Car</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead>Approval</TableHead>
-						<TableHead>Verification</TableHead>
+						{/* <TableHead>Verification</TableHead> */}
 						<TableHead>Registered</TableHead>
 						<TableHead className="w-[50px]">Actions</TableHead>
 					</TableRow>
@@ -199,8 +199,9 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 									{driver.isApproved ? "Approved" : "Pending"}
 								</Badge>
 							</TableCell>
-							<TableCell>
-								<Badge 
+							{/* Hidden Verification column */}
+							{/* <TableCell>
+								<Badge
 									variant={
 										driver.verificationStatus === "verified" ? "default" :
 										driver.verificationStatus === "rejected" ? "destructive" :
@@ -220,7 +221,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 									 driver.verificationStatus === "pending_documents" ? "Pending Docs" :
 									 "Pending"}
 								</Badge>
-							</TableCell>
+							</TableCell> */}
 							<TableCell>
 								{new Date(driver.createdAt).toLocaleDateString()}
 							</TableCell>
@@ -368,7 +369,7 @@ function DriversTableSkeleton() {
 					<TableHead>Assigned Car</TableHead>
 					<TableHead>Status</TableHead>
 					<TableHead>Approval</TableHead>
-					<TableHead>Verification</TableHead>
+					{/* <TableHead>Verification</TableHead> */}
 					<TableHead>Registered</TableHead>
 					<TableHead className="w-[50px]">Actions</TableHead>
 				</TableRow>
@@ -391,7 +392,7 @@ function DriversTableSkeleton() {
 						</TableCell>
 						<TableCell><Skeleton className="h-6 w-16" /></TableCell>
 						<TableCell><Skeleton className="h-6 w-20" /></TableCell>
-						<TableCell><Skeleton className="h-6 w-24" /></TableCell>
+						{/* <TableCell><Skeleton className="h-6 w-24" /></TableCell> */}
 						<TableCell><Skeleton className="h-4 w-20" /></TableCell>
 						<TableCell><Skeleton className="h-8 w-8" /></TableCell>
 					</TableRow>

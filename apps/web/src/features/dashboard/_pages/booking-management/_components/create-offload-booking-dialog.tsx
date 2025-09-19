@@ -48,7 +48,7 @@ export function CreateOffloadBookingDialog() {
 			originAddress: data.pickupAddress,
 			destinationAddress: data.destinationAddress,
 			vehicleType: data.vehicleType,
-			quotedAmount: Math.round(data.price * 100), // Convert to cents
+			quotedAmount: data.price, // Store as dollar amount
 			scheduledPickupTime: data.scheduledPickupTime.toISOString(),
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,

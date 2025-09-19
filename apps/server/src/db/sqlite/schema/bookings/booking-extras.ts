@@ -12,24 +12,24 @@ export const bookingExtras = sqliteTable("booking_extras", {
 	// Wait times (in minutes)
 	additionalWaitTime: integer("additional_wait_time").default(0),
 
-	// Charges (in cents)
-	unscheduledStops: integer("unscheduled_stops").default(0),
-	parkingCharges: integer("parking_charges").default(0),
-	tollCharges: integer("toll_charges").default(0),
+	// Charges (in dollars with decimal precision)
+	unscheduledStops: real("unscheduled_stops").default(0),
+	parkingCharges: real("parking_charges").default(0),
+	tollCharges: real("toll_charges").default(0),
 	tollLocation: text("toll_location"), // where tolls were taken
-	
+
 	// Other charges
 	otherChargesDescription: text("other_charges_description"),
-	otherChargesAmount: integer("other_charges_amount").default(0),
-	
+	otherChargesAmount: real("other_charges_amount").default(0),
+
 	// Extra type classification
 	extraType: text("extra_type").notNull().$type<'general' | 'driver' | 'operator'>().default('general'),
-	
+
 	// Additional notes
 	notes: text("notes"),
-	
+
 	// Total calculated extras
-	totalExtraAmount: integer("total_extra_amount").notNull().default(0),
+	totalExtraAmount: real("total_extra_amount").notNull().default(0),
 
 	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),

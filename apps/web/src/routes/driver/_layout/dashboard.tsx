@@ -56,7 +56,7 @@ function DriverDashboardComponent() {
 	const driverStats = {
 		totalEarnings: bookings
 			.filter(b => b.status === 'completed')
-			.reduce((sum, b) => sum + (b.finalAmount || b.quotedAmount || 0), 0) / 100, // Convert from cents
+			.reduce((sum, b) => sum + (b.finalAmount || b.quotedAmount || 0), 0), // Amount in dollars
 		thisWeekEarnings: driver.totalRides ? Math.floor(driver.totalRides * 0.15) * 45.5 : 0,
 		totalTrips: bookings.filter(b => b.status === 'completed').length,
 		thisWeekTrips: driver.totalRides ? Math.floor(driver.totalRides * 0.15) : 0,

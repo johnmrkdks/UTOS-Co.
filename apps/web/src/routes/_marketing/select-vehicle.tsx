@@ -10,6 +10,8 @@ const vehicleSelectionSearchSchema = z.object({
 	destinationLat: z.string().optional(),
 	destinationLng: z.string().optional(),
 	stops: z.string().optional(), // JSON string of stops
+	selectedCarId: z.string().optional(),
+	fromCustomerArea: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_marketing/select-vehicle")({

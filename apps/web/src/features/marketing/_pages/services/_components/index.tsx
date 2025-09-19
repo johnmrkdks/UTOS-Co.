@@ -43,21 +43,38 @@ export function Services({ className, ...props }: ServicesProps) {
 		limit: 12 // Increased to show more cars in fleet section
 	});
 	
-	const services = packagesData?.data?.map((pkg: any) => ({
-		id: pkg.id,
-		icon: serviceIcons[pkg.serviceType] || Building,
-		title: pkg.name,
-		description: pkg.description,
-		bannerImageUrl: pkg.bannerImageUrl,
-		features: [
-			`Max ${pkg.maxPassengers} passengers`,
-			pkg.includesDriver ? "Professional chauffeur" : "Self-drive",
-			pkg.includesFuel ? "Fuel included" : "Fuel not included",
-			pkg.includesTolls ? "Tolls included" : "Tolls separate"
-		].filter(Boolean),
-		price: `From $${(pkg.fixedPrice / 100).toFixed(0)}`,
-		popular: pkg.serviceType === "transfer" // Mark airport transfers as popular
-	})) || [];
+	const services = packagesData?.data?.map((pkg: any) => {
+		// Helper function to get the correct price display
+		const getPriceDisplay = () => {
+			const rateType = pkg.packageServiceType?.rateType;
+
+			if (rateType === 'hourly' && pkg.hourlyRate) {
+				return `From $${pkg.hourlyRate.toFixed(2)}/hr`;
+			} else if (rateType === 'fixed' && pkg.fixedPrice) {
+				return `From $${pkg.fixedPrice.toFixed(2)}`;
+			} else {
+				// Fallback logic
+				if (pkg.hourlyRate && pkg.hourlyRate > 0) {
+					return `From $${pkg.hourlyRate.toFixed(2)}/hr`;
+				} else if (pkg.fixedPrice && pkg.fixedPrice > 0) {
+					return `From $${pkg.fixedPrice.toFixed(2)}`;
+				} else {
+					return "Contact for Price";
+				}
+			}
+		};
+
+		return {
+			id: pkg.id,
+			icon: serviceIcons[pkg.serviceType] || Building,
+			title: pkg.name,
+			description: pkg.description,
+			bannerImageUrl: pkg.bannerImageUrl,
+			features: [],
+			price: getPriceDisplay(),
+			popular: pkg.serviceType === "transfer" // Mark airport transfers as popular
+		};
+	}) || [];
 	
 	const fleetHighlights = carsData?.data?.map((car: any) => ({
 		id: car.id,
@@ -182,16 +199,18 @@ export function Services({ className, ...props }: ServicesProps) {
 										{service.description}
 									</p>
 
-									<ul className="space-y-3 mb-8">
-										{service.features.map((feature: any, featureIndex: number) => (
-											<li key={featureIndex} className="flex items-center text-muted-foreground">
-												<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-													<div className="w-2 h-2 bg-primary rounded-full" />
-												</div>
-												{feature}
-											</li>
-										))}
-									</ul>
+									{service.features.length > 0 && (
+										<ul className="space-y-3 mb-8">
+											{service.features.map((feature: any, featureIndex: number) => (
+												<li key={featureIndex} className="flex items-center text-muted-foreground">
+													<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+														<div className="w-2 h-2 bg-primary rounded-full" />
+													</div>
+													{feature}
+												</li>
+											))}
+										</ul>
+									)}
 
 									<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
 										<Button
