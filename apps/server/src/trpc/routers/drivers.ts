@@ -8,6 +8,7 @@ import { deleteDriverService, DeleteDriverServiceSchema } from "@/services/drive
 import { assignDriverService, AssignDriverServiceSchema } from "@/services/bookings/assign-driver";
 import { getCurrentDriverService, GetCurrentDriverServiceSchema } from "@/services/drivers/get-current-driver";
 import { verifyDriverDocumentsService, VerifyDriverDocumentsServiceSchema } from "@/services/drivers/verify-driver-documents";
+import { updateDriverProfileService, UpdateDriverProfileServiceSchema } from "@/services/drivers/update-driver-profile";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -111,6 +112,20 @@ export const driversRouter = router({
 				}
 
 				const result = await deleteDriverService(db, input);
+				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+	updateProfile: protectedProcedure
+		.input(UpdateDriverProfileServiceSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				if (!session?.user?.id) {
+					throw new Error("Unauthorized: Authentication required");
+				}
+
+				const result = await updateDriverProfileService(db, input);
 				return result;
 			} catch (error) {
 				handleTRPCError(error);

@@ -135,6 +135,30 @@ function HistoryPage() {
 						<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
 					</div>
 
+					{/* Customer, Pax, and Vehicle info */}
+					<div className="space-y-2 mb-3">
+						{/* First row: Customer and Pax */}
+						<div className="flex items-center gap-4">
+							<div className="flex items-center gap-1.5 text-xs text-gray-600">
+								<UserIcon className="h-3.5 w-3.5 text-gray-500" />
+								<span className="font-medium">{(trip as any).customerName}</span>
+							</div>
+							<div className="flex items-center gap-1 text-xs text-gray-600">
+								<UsersIcon className="h-3.5 w-3.5 text-gray-500" />
+								<span className="font-medium">{(trip as any).passengerCount || 1} pax</span>
+							</div>
+						</div>
+						{/* Second row: Vehicle info (if available) */}
+						{((trip as any).car?.name || (trip as any).assignedCar?.name || (trip as any).carName) && (
+							<div className="flex items-center gap-1 text-xs text-gray-600">
+								<CarIcon className="h-3.5 w-3.5 text-gray-500" />
+								<span className="font-medium">
+									{(trip as any).car?.name || (trip as any).assignedCar?.name || (trip as any).carName}
+								</span>
+							</div>
+						)}
+					</div>
+
 					<div className="flex items-center justify-between">
 						{/* Left side - Route info */}
 						<div className="flex-1 min-w-0 space-y-2">

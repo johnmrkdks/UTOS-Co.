@@ -172,11 +172,11 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 													Assigned Vehicle
 												</p>
 												<div className="flex items-center gap-2">
-													<span className="text-sm">{(selectedDriver as any).car.name}</span>
-													<Badge variant="outline">{selectedDriver.car.licensePlate}</Badge>
-													{selectedDriver.car.status && (
-														<Badge variant={selectedDriver.car.status === "available" ? "default" : "secondary"}>
-															{selectedDriver.car.status}
+													<span className="text-sm">{(selectedDriver as any).car?.name}</span>
+													<Badge variant="outline">{(selectedDriver as any).car?.licensePlate}</Badge>
+													{(selectedDriver as any).car?.status && (
+														<Badge variant={(selectedDriver as any).car?.status === "available" ? "default" : "secondary"}>
+															{(selectedDriver as any).car?.status}
 														</Badge>
 													)}
 												</div>

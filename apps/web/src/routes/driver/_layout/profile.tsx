@@ -5,6 +5,7 @@ import { Badge } from "@workspace/ui/components/badge";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { Progress } from "@workspace/ui/components/progress";
 import { useUserQuery } from '@/hooks/query/use-user-query';
+import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
 import { PersonalInfoTab } from '@/features/driver/_components/profile-tabs/personal-info-tab';
 import { DocumentsTab } from '@/features/driver/_components/profile-tabs/documents-tab';
 import { StatisticsTab } from '@/features/driver/_components/profile-tabs/statistics-tab';
@@ -22,25 +23,26 @@ export const Route = createFileRoute('/driver/_layout/profile')({
 function DriverProfileComponent() {
 	const navigate = useNavigate();
 	const { session } = useUserQuery();
+	const { data: driverData, isLoading: isDriverLoading } = useCurrentDriverQuery();
 
 	const user = session?.user;
 
-	// Mock driver profile data - in real app, this would come from API
+	// Use real driver profile data from API
 	const driverProfile = {
 		personalInfo: {
 			name: user?.name || "",
 			email: user?.email || "",
-			phoneNumber: "+61 412 345 678",
-			address: "123 Collins Street, Melbourne VIC 3000",
-			dateOfBirth: "1990-05-15",
+			phoneNumber: driverData?.phoneNumber || "",
+			address: driverData?.address || "",
+			dateOfBirth: driverData?.dateOfBirth || "",
 		},
 		emergencyContact: {
-			name: "Sarah Johnson",
-			phone: "+61 423 456 789",
+			name: driverData?.emergencyContactName || "",
+			phone: driverData?.emergencyContactPhone || "",
 		},
 		licenseInfo: {
-			number: "VIC123456789",
-			expiry: "2025-12-31",
+			number: driverData?.licenseNumber || "",
+			expiry: driverData?.licenseExpiry || "",
 		},
 		applicationStatus: {
 			submitted: true,
@@ -130,11 +132,18 @@ function DriverProfileComponent() {
 			</Card> */}
 
 			{/* Personal Information */}
-			<PersonalInfoTab
-				driverProfile={driverProfile}
-				userEmail={user?.email}
-				userName={user?.name}
-			/>
+			{isDriverLoading ? (
+				<div className="flex items-center justify-center py-12">
+					<div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mb-4"></div>
+					<p className="text-gray-500 text-center">Loading driver profile...</p>
+				</div>
+			) : (
+				<PersonalInfoTab
+					driverProfile={driverProfile}
+					userEmail={user?.email}
+					userName={user?.name}
+				/>
+			)}
 
 			{/* Hidden sections for now */}
 			{/* <Tabs defaultValue="personal" className="space-y-4">

@@ -47,6 +47,7 @@ import { TripConfirmationDialog } from "@/features/driver/_components/trip-confi
 import { useCloseTripWithExtrasMutation, useCloseTripWithoutExtrasMutation } from "@/features/driver/_hooks/query/use-close-trip-mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { trpc } from "@/trpc";
+import { BookingTypeBadge } from "@/components/booking-type-badge";
 
 export const Route = createFileRoute('/driver/_layout/trips')({
 	component: DriverTripsComponent,
@@ -748,60 +749,68 @@ function DriverTripsComponent() {
 													</Badge>
 												</div>
 
-												{/* Route - More aggressive truncation for mobile */}
-												<div className="flex items-center justify-between space-y-1 mb-2">
-													<div className="flex flex-col items-start gap-2">
+												{/* Route - Full width for mobile */}
+												<div className="space-y-2 mb-2">
+													<div className="flex items-center gap-2">
+														<div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+														<p className="text-xs text-gray-700 truncate">
+															{booking.originAddress.length > 45
+																? booking.originAddress.substring(0, 45) + '...'
+																: booking.originAddress}
+														</p>
+													</div>
+													{/* Stops (if any) */}
+													{(booking as any).stops && (booking as any).stops.length > 0 && (
 														<div className="flex items-center gap-2">
-															<div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
-															<p className="text-xs text-gray-700 truncate flex-1 max-w-[200px]">
-																{booking.originAddress.length > 35
-																	? booking.originAddress.substring(0, 35) + '...'
-																	: booking.originAddress}
+															<div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+															<p className="text-xs text-blue-600 truncate">
+																{(booking as any).stops?.length || 0} stop{((booking as any).stops?.length || 0) > 1 ? 's' : ''}
 															</p>
 														</div>
-														{/* Stops (if any) */}
-														{(booking as any).stops && (booking as any).stops.length > 0 && (
-															<div className="flex items-center gap-2">
-																<div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-																<p className="text-xs text-blue-600 truncate flex-1 max-w-[200px]">
-																	{(booking as any).stops?.length || 0} stop{((booking as any).stops?.length || 0) > 1 ? 's' : ''}
-																</p>
-															</div>
-														)}
-														<div className="flex items-center gap-2 justify-between">
-															<div className="flex items-center gap-2 flex-1">
-																<div className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></div>
-																<p className="text-xs text-gray-700 truncate max-w-[200px]">
-																	{booking.destinationAddress.length > 35
-																		? booking.destinationAddress.substring(0, 35) + '...'
-																		: booking.destinationAddress}
-																</p>
-															</div>
-														</div>
+													)}
+													<div className="flex items-center gap-2">
+														<div className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></div>
+														<p className="text-xs text-gray-700 truncate">
+															{booking.destinationAddress.length > 45
+																? booking.destinationAddress.substring(0, 45) + '...'
+																: booking.destinationAddress}
+														</p>
 													</div>
-													{/* Arrow icon at the end of route info */}
-													<ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
 												</div>
 
-												{/* Customer, Pax, and Vehicle - Compact */}
-												<div className="flex items-center justify-between">
-													<div className="flex items-center gap-3">
+												{/* Customer info with status badge inline */}
+												<div className="space-y-2">
+													{/* Customer info with status badge */}
+													<div className="flex items-center justify-between">
 														<div className="flex items-center gap-1.5">
 															<UserIcon className="h-3.5 w-3.5 text-gray-500" />
 															<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
 														</div>
+														<BookingTypeBadge booking={booking} />
+													</div>
+													{/* Passenger count and Vehicle info */}
+													<div className="flex items-center justify-between">
 														<div className="flex items-center gap-1">
 															<UsersIcon className="h-3.5 w-3.5 text-gray-500" />
 															<span className="text-xs text-gray-600">{booking.passengerCount || 1} pax</span>
 														</div>
-														{(booking.car?.name || booking.assignedCar?.name) && (
-															<div className="flex items-center gap-1">
-																<CarIcon className="h-3.5 w-3.5 text-gray-500" />
-																<span className="text-xs text-gray-600 truncate max-w-[80px]">
-																	{booking.car?.name || booking.assignedCar?.name}
-																</span>
-															</div>
-														)}
+														<div className="flex items-center gap-1">
+															<CarIcon className="h-3.5 w-3.5 text-gray-500" />
+															<span className="text-xs text-gray-600 font-medium text-right">
+																{(() => {
+																	console.log('Full booking object keys:', Object.keys(booking));
+																	console.log('Booking car data:', {
+																		car: booking.car,
+																		carId: booking.carId,
+																		assignedCar: booking.assignedCar,
+																		carName: booking.carName,
+																		vehicleName: booking.vehicleName,
+																		vehicle: booking.vehicle
+																	});
+																	return booking.car?.name || booking.carName || booking.vehicleName || booking.vehicle?.name || 'Unassigned';
+																})()}
+															</span>
+														</div>
 													</div>
 												</div>
 											</>
@@ -881,11 +890,11 @@ function DriverTripsComponent() {
 															<UsersIcon className="h-4 w-4 text-gray-500" />
 															<span className="text-sm text-gray-600">{booking.passengerCount || 1} pax</span>
 														</div>
-														{(booking.car?.name || booking.assignedCar?.name) && (
+														{(booking.car?.name || booking.assignedCar?.name || booking.carName) && (
 															<div className="flex items-center gap-1">
 																<CarIcon className="h-4 w-4 text-gray-500" />
 																<span className="text-sm text-gray-600">
-																	{booking.car?.name || booking.assignedCar?.name}
+																	{booking.car?.name || booking.assignedCar?.name || booking.carName}
 																</span>
 															</div>
 														)}

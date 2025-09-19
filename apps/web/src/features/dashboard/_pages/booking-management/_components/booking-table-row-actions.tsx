@@ -17,11 +17,12 @@ import { useUnassignCarMutation } from "../_hooks/query/use-unassign-car-mutatio
 interface BookingTableRowActionsProps {
 	row: Row<Booking>;
 	onEditBooking?: (booking: Booking) => void;
+	onCancelBooking?: (booking: Booking) => void;
 	onArchiveBooking?: (booking: Booking, isArchiving: boolean) => void;
 	onDeleteBooking?: (booking: Booking) => void;
 }
 
-export function BookingTableRowActions({ row, onEditBooking, onArchiveBooking, onDeleteBooking }: BookingTableRowActionsProps) {
+export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, onArchiveBooking, onDeleteBooking }: BookingTableRowActionsProps) {
 	const { 
 		openBookingDetailsDialog, 
 		openAssignDriverDialog,
@@ -59,12 +60,12 @@ export function BookingTableRowActions({ row, onEditBooking, onArchiveBooking, o
 
 	const handleUnassignDriver = (booking: Booking) => {
 		console.log("🚫 Unassigning driver from booking:", booking.id);
-		unassignDriverMutation.mutate({ bookingId: booking.id });
+		(unassignDriverMutation.mutate as any)({ bookingId: booking.id });
 	};
 
 	const handleUnassignCar = (booking: Booking) => {
 		console.log("🚫 Unassigning car from booking:", booking.id);
-		unassignCarMutation.mutate({ bookingId: booking.id });
+		(unassignCarMutation.mutate as any)({ bookingId: booking.id });
 	};
 
 	const handleArchiveBooking = (booking: Booking) => {

@@ -112,7 +112,7 @@ export function EditCancelDialogs({
 		const [hours, minutes] = editData.scheduledPickupTime.split(':').map(Number);
 		const scheduledPickupTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
 
-		editMutation.mutate({
+		(editMutation.mutate as any)({
 			bookingId: booking.id,
 			scheduledPickupTime: scheduledPickupTime.toISOString(),
 			customerName: editData.customerName,
@@ -131,7 +131,7 @@ export function EditCancelDialogs({
 	const handleCancel = () => {
 		if (!booking?.id || !booking?.canCancel) return;
 
-		cancelMutation.mutate({
+		(cancelMutation.mutate as any)({
 			bookingId: booking.id,
 			cancellationReason: cancellationReason || undefined,
 		}, {

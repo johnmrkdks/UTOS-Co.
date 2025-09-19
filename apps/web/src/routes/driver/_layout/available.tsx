@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { MapPinIcon, ClockIcon, UsersIcon, DollarSignIcon, Loader2Icon, CheckCircleIcon, UserIcon, ArrowLeft, Phone, User } from "lucide-react";
+import { MapPinIcon, ClockIcon, UsersIcon, DollarSignIcon, Loader2Icon, CheckCircleIcon, UserIcon, CarIcon, ArrowLeft, Phone, User } from "lucide-react";
 import { format } from "date-fns";
 import { useDriverBookingsQuery } from "@/hooks/query/use-driver-bookings-query";
 import { useUpdateBookingStatusMutation } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-update-booking-status-mutation";
@@ -275,25 +275,45 @@ function AvailableTripsPage() {
 								</div>
 							</div>
 
-							{/* Customer and Action */}
-							<div className="flex items-center justify-between pt-3 border-t border-gray-100">
-								<div className="flex items-center gap-4">
+							{/* Customer info with badges inline */}
+							<div className="space-y-2 pt-3 border-t border-gray-100">
+								{/* Customer info with badges */}
+								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2 text-sm text-gray-600">
 										<UserIcon className="h-4 w-4 text-gray-400" />
 										<span className="font-medium">{trip.customerName || 'Customer'}</span>
 									</div>
+									<div className="flex gap-2">
+										<BookingTypeBadge booking={trip} />
+										<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-2 py-0.5 text-xs">
+											<CheckCircleIcon className="w-3 h-3 mr-1" />
+											Assigned
+										</Badge>
+									</div>
+								</div>
+								{/* Passenger count and Vehicle info */}
+								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-1 text-sm text-gray-600">
 										<UsersIcon className="h-4 w-4 text-gray-400" />
 										<span className="font-medium">{trip.passengerCount || 1} pax</span>
 									</div>
-								</div>
-
-								<div className="flex gap-2">
-									<BookingTypeBadge booking={trip} />
-									<Badge className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1">
-										<CheckCircleIcon className="w-4 h-4 mr-1" />
-										Assigned
-									</Badge>
+									<div className="flex items-center gap-1 text-sm text-gray-600">
+										<CarIcon className="h-4 w-4 text-gray-400" />
+										<span className="font-medium text-right">
+											{(() => {
+												console.log('Full trip object keys:', Object.keys(trip));
+												console.log('Trip car data:', {
+													car: trip.car,
+													carId: trip.carId,
+													assignedCar: trip.assignedCar,
+													carName: trip.carName,
+													vehicleName: trip.vehicleName,
+													vehicle: trip.vehicle
+												});
+												return trip.car?.name || trip.carName || trip.vehicleName || trip.vehicle?.name || 'Unassigned';
+											})()}
+										</span>
+									</div>
 								</div>
 							</div>
 						</>

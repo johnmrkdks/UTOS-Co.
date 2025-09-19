@@ -4,8 +4,9 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { useUpdateProfileMutation } from "@/hooks/auth/use-update-profile-mutation";
+import { useUpdateDriverProfileMutation } from "@/features/driver/_hooks/query/use-update-driver-profile-mutation";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
 import {
 	UserIcon,
 	PhoneIcon,
@@ -22,6 +23,7 @@ interface PersonalInfoTabProps {
 
 export function PersonalInfoTab({ driverProfile, userEmail, userName }: PersonalInfoTabProps) {
 	const { session } = useUserQuery();
+	const { data: driverData } = useCurrentDriverQuery();
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({
 		name: "",
@@ -35,58 +37,104 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 		licenseExpiry: "",
 	});
 
-	const updateProfileMutation = useUpdateProfileMutation();
+	const updateDriverProfileMutation = useUpdateDriverProfileMutation();
 
-	// Update form data when session loads
+	// Update form data when session loads (driver data is optional)
 	useEffect(() => {
 		if (session?.user) {
 			setFormData({
 				name: session.user.name || "",
 				email: session.user.email || "",
-				phone: session.user.phone || driverProfile.personalInfo.phoneNumber || "",
-				address: driverProfile.personalInfo.address || "",
-				dateOfBirth: driverProfile.personalInfo.dateOfBirth || "",
-				emergencyContactName: driverProfile.emergencyContact.name || "",
-				emergencyContactPhone: driverProfile.emergencyContact.phone || "",
-				licenseNumber: driverProfile.licenseInfo.number || "",
-				licenseExpiry: driverProfile.licenseInfo.expiry || "",
+				phone: (session.user as any)?.phone || driverData?.phoneNumber || "",
+				address: driverData?.address || "",
+				dateOfBirth: driverData?.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : "",
+				emergencyContactName: driverData?.emergencyContactName || "",
+				emergencyContactPhone: driverData?.emergencyContactPhone || "",
+				licenseNumber: driverData?.licenseNumber || "",
+				licenseExpiry: driverData?.licenseExpiry ? new Date(driverData.licenseExpiry).toISOString().split('T')[0] : "",
 			});
 		}
-	}, [session?.user, driverProfile]);
+	}, [session?.user, driverData]);
 
 	const handleSave = async () => {
 		try {
 			console.log("🔄 Starting driver profile save process");
 			console.log("Current form data:", formData);
 			console.log("Current session user:", session?.user);
+			console.log("Current driver data:", driverData);
 
-			// Prepare update data - only include fields that changed for basic profile (name, phone)
-			const updateData: any = {};
-			let hasChanges = false;
+			if (!driverData?.id) {
+				console.log("⚠️ Cannot update driver data: no driver record found");
+				return;
+			}
 
+			// Prepare comprehensive update data
+			const currentDateOfBirth = driverData?.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : "";
+			const currentLicenseExpiry = driverData?.licenseExpiry ? new Date(driverData.licenseExpiry).toISOString().split('T')[0] : "";
+
+			const updateData: any = {
+				driverId: driverData.id,
+			};
+
+			// Add user-related updates
 			if (formData.name !== session?.user?.name) {
 				updateData.name = formData.name;
-				hasChanges = true;
 				console.log("📝 Name changed from:", session?.user?.name, "to:", formData.name);
 			}
 
-			if (formData.phone !== session?.user?.phone) {
+			if (formData.phone !== (session?.user as any)?.phone) {
 				updateData.phone = formData.phone;
-				hasChanges = true;
-				console.log("📞 Phone changed from:", session?.user?.phone, "to:", formData.phone);
+				console.log("📞 Phone changed from:", (session?.user as any)?.phone, "to:", formData.phone);
 			}
 
-			if (hasChanges) {
-				console.log("⚡ Executing driver profile update with:", updateData);
-				await updateProfileMutation.mutateAsync(updateData);
-				console.log("✅ Driver profile update completed successfully");
-			} else {
-				console.log("⚠️ No changes detected, nothing to update");
+			// Add driver-specific updates
+			if (formData.address !== driverData?.address) {
+				updateData.address = formData.address;
+				console.log("🏠 Address changed from:", driverData?.address, "to:", formData.address);
 			}
+
+			if (formData.dateOfBirth !== currentDateOfBirth) {
+				updateData.dateOfBirth = formData.dateOfBirth ? new Date(formData.dateOfBirth).getTime() : null;
+				console.log("📅 Date of birth changed from:", currentDateOfBirth, "to:", formData.dateOfBirth);
+			}
+
+			if (formData.emergencyContactName !== driverData?.emergencyContactName) {
+				updateData.emergencyContactName = formData.emergencyContactName;
+				console.log("👤 Emergency contact name changed from:", driverData?.emergencyContactName, "to:", formData.emergencyContactName);
+			}
+
+			if (formData.emergencyContactPhone !== driverData?.emergencyContactPhone) {
+				updateData.emergencyContactPhone = formData.emergencyContactPhone;
+				console.log("📞 Emergency contact phone changed from:", driverData?.emergencyContactPhone, "to:", formData.emergencyContactPhone);
+			}
+
+			if (formData.licenseNumber !== driverData?.licenseNumber && formData.licenseNumber) {
+				updateData.licenseNumber = formData.licenseNumber;
+				console.log("🪪 License number changed from:", driverData?.licenseNumber, "to:", formData.licenseNumber);
+			}
+
+			if (formData.licenseExpiry !== currentLicenseExpiry && formData.licenseExpiry) {
+				updateData.licenseExpiry = new Date(formData.licenseExpiry).getTime();
+				console.log("📅 License expiry changed from:", currentLicenseExpiry, "to:", formData.licenseExpiry);
+			}
+
+			// Check if any changes were made
+			const hasChanges = Object.keys(updateData).length > 1; // More than just driverId
+
+			if (!hasChanges) {
+				console.log("⚠️ No changes detected, nothing to update");
+				setIsEditing(false);
+				return;
+			}
+
+			// Execute the comprehensive update
+			console.log("⚡ Executing comprehensive driver profile update with:", updateData);
+			await updateDriverProfileMutation.mutateAsync(updateData);
+			console.log("✅ Driver profile update completed successfully");
 
 			setIsEditing(false);
 		} catch (error) {
-			// Errors are handled by the mutation hook
+			// Errors are handled by the mutation hooks
 			console.error("❌ Error saving driver profile:", error);
 		}
 	};
@@ -269,25 +317,25 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 									setFormData({
 										name: session.user.name || "",
 										email: session.user.email || "",
-										phone: session.user.phone || driverProfile.personalInfo.phoneNumber || "",
-										address: driverProfile.personalInfo.address || "",
-										dateOfBirth: driverProfile.personalInfo.dateOfBirth || "",
-										emergencyContactName: driverProfile.emergencyContact.name || "",
-										emergencyContactPhone: driverProfile.emergencyContact.phone || "",
-										licenseNumber: driverProfile.licenseInfo.number || "",
-										licenseExpiry: driverProfile.licenseInfo.expiry || "",
+										phone: (session.user as any)?.phone || driverData?.phoneNumber || "",
+										address: driverData?.address || "",
+										dateOfBirth: driverData?.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : "",
+										emergencyContactName: driverData?.emergencyContactName || "",
+										emergencyContactPhone: driverData?.emergencyContactPhone || "",
+										licenseNumber: driverData?.licenseNumber || "",
+										licenseExpiry: driverData?.licenseExpiry ? new Date(driverData.licenseExpiry).toISOString().split('T')[0] : "",
 									});
 								}
 							}}
-							disabled={updateProfileMutation.isPending}
+							disabled={updateDriverProfileMutation.isPending}
 						>
 							Cancel
 						</Button>
 						<Button
 							onClick={handleSave}
-							disabled={updateProfileMutation.isPending}
+							disabled={updateDriverProfileMutation.isPending}
 						>
-							{updateProfileMutation.isPending ? (
+							{updateDriverProfileMutation.isPending ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Saving...
