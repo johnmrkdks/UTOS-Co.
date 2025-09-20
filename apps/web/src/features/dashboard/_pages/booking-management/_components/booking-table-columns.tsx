@@ -14,13 +14,13 @@ export interface Booking {
 	status: string;
 	customerName: string;
 	customerPhone: string;
-	customerEmail?: string;
+	customerEmail?: string | null;
 	originAddress: string;
 	destinationAddress: string;
 	stops?: Array<{ id: string; address: string; }>;
 	scheduledPickupTime: string;
 	quotedAmount: number;
-	carId: string;
+	carId: string | null;
 	userId: string;
 	isArchived?: boolean | null;
 	car?: {

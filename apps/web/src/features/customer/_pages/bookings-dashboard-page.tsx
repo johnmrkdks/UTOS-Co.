@@ -20,19 +20,16 @@ export function CustomerBookingsDashboardPage() {
 	const stats = useMemo(() => {
 		const upcoming = bookings.filter(b =>
 			new Date(b.scheduledPickupTime) > new Date() &&
-			!["completed", "cancelled"].includes(b.status)
+			!["completed", "cancelled", "driver_en_route", "in_progress", "arrived_pickup", "passenger_on_board"].includes(b.status)
 		).length;
 
-		const inProgress = bookings.filter(b => b.status === "in_progress").length;
+		const inProgress = bookings.filter(b =>
+			["driver_en_route", "in_progress", "arrived_pickup", "passenger_on_board"].includes(b.status)
+		).length;
 		const completed = bookings.filter(b => b.status === "completed").length;
 		const total = bookings.length;
 
-		// Calculate total spend
-		const totalSpent = bookings
-			.filter(b => b.status === "completed")
-			.reduce((sum, b) => sum + ((b as any).amount || 0), 0);
-
-		return { upcoming, inProgress, completed, total, totalSpent };
+		return { upcoming, inProgress, completed, total };
 	}, [bookings]);
 
 	// Get recent bookings for quick overview
@@ -78,18 +75,6 @@ export function CustomerBookingsDashboardPage() {
 			changeText: 'Total trips completed',
 			changeType: 'positive'
 		},
-		{
-			id: 'total-spent',
-			title: 'Total Spent',
-			value: `$${(stats.totalSpent / 100).toFixed(0)}`,
-			icon: Package,
-			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
-			iconBg: 'bg-purple-500',
-			showIcon: true,
-			showBackgroundIcon: true,
-			changeText: 'On completed bookings',
-			changeType: 'neutral'
-		}
 	];
 
 	if (isLoading) {
@@ -127,7 +112,7 @@ export function CustomerBookingsDashboardPage() {
 			</div>
 
 			{/* Stats Cards */}
-			<div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+			<div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
 				{dashboardStatsData.map((data) => (
 					<AnalyticsCard
 						key={data.id}

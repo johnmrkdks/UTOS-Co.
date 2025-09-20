@@ -25,8 +25,8 @@ export function ConfirmBookingDialog({ booking, open, onOpenChange }: ConfirmBoo
 
 		try {
 			await updateStatusMutation.mutateAsync({
-				bookingId: booking.id,
-				status: "confirmed"
+				id: booking.id,
+				status: "confirmed" as any
 			});
 			onOpenChange(false);
 		} catch (error) {

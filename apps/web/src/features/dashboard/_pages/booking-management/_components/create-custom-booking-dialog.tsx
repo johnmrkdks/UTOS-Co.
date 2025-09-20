@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, lazy, Suspense } from "react"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog"

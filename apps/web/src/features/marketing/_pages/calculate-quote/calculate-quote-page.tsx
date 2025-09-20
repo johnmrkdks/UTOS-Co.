@@ -363,7 +363,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 														<GooglePlacesInput
 															value={field.value}
 															onChange={field.onChange}
-															onPlaceSelected={setOriginGeometry}
+															onPlaceSelect={setOriginGeometry}
 															placeholder="Enter pickup address"
 														/>
 													</FormControl>
@@ -383,7 +383,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 														<GooglePlacesInput
 															value={field.value}
 															onChange={field.onChange}
-															onPlaceSelected={setDestinationGeometry}
+															onPlaceSelect={setDestinationGeometry}
 															placeholder="Enter destination address"
 														/>
 													</FormControl>
@@ -405,7 +405,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 																<GooglePlacesInput
 																	value={stopField.value}
 																	onChange={stopField.onChange}
-																	onPlaceSelected={(geometry) => {
+																	onPlaceSelect={(geometry) => {
 																		const newStopsGeometry = [...stopsGeometry];
 																		newStopsGeometry[index] = geometry;
 																		setStopsGeometry(newStopsGeometry);

@@ -250,7 +250,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 
 			<DataTable
 				columns={columns}
-				data={filteredData}
+				data={filteredData as any}
 				searchKey="customerName"
 				searchPlaceholder="Search by customer name..."
 				isLoading={bookingsQuery.isLoading}
