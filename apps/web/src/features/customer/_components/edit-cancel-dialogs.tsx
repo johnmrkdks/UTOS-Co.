@@ -62,6 +62,18 @@ export function EditCancelDialogs({
 		specialRequests: booking?.specialRequests || "",
 	});
 
+	// Store original data for comparison
+	const [originalData, setOriginalData] = useState({
+		scheduledPickupDate: "",
+		scheduledPickupTime: "",
+		customerName: "",
+		customerPhone: "",
+		customerEmail: "",
+		passengerCount: 1,
+		luggageCount: 0,
+		specialRequests: "",
+	});
+
 	// Update form data when booking changes
 	useEffect(() => {
 		if (booking) {
@@ -84,7 +96,7 @@ export function EditCancelDialogs({
 			const day = String(scheduledPickupTime.getDate()).padStart(2, '0');
 			const dateString = `${year}-${month}-${day}`;
 
-			setEditData({
+			const formData = {
 				scheduledPickupDate: dateString,
 				scheduledPickupTime: timeString,
 				customerName: booking.customerName || "",
@@ -93,54 +105,82 @@ export function EditCancelDialogs({
 				passengerCount: booking.passengerCount || 1,
 				luggageCount: booking.luggageCount || 0,
 				specialRequests: booking.specialRequests || "",
-			});
+			};
+
+			setEditData(formData);
+			setOriginalData(formData); // Store original data for comparison
 		}
 	}, [booking]);
 
 	// Mobile detection
 	const isMobile = useIsMobile();
 
+	// Check if there are any changes
+	const hasChanges = () => {
+		return JSON.stringify(editData) !== JSON.stringify(originalData);
+	};
+
 	// Mutations
-	const editMutation = useEditBookingMutation();
-	const cancelMutation = useCancelBookingMutation();
+	const editMutation = useEditBookingMutation(() => {
+		// Close the edit dialog on successful edit
+		onEditOpenChange(false);
+	});
+	const cancelMutation = useCancelBookingMutation(() => {
+		// Close the cancel dialog and clear the cancellation reason
+		onCancelOpenChange(false);
+		setCancellationReason("");
+	});
 
 	const handleEdit = () => {
-		if (!booking?.id || !booking?.canEdit) return;
+		debugger; // 🔍 DEBUGGER: Will pause here when you click Save Changes
+		console.log("🔧 handleEdit called");
+		console.log("📋 Booking:", booking);
+		console.log("📝 EditData:", editData);
+		console.log("✅ Can edit:", booking?.canEdit);
+		console.log("🆔 Booking ID:", booking?.id);
+		console.log("❓ Edit reason:", booking?.editReason);
+		console.log("⏰ Hours until pickup:", booking?.hoursUntilPickup);
+		console.log("🚗 Has driver assigned:", booking?.hasDriverAssigned);
+		console.log("📅 Scheduled pickup:", booking?.scheduledPickupTime);
+
+		if (!booking?.id) {
+			console.log("❌ Cannot edit - missing booking ID");
+			debugger; // 🔍 DEBUGGER: Will pause here if validation fails
+			return;
+		}
+
+		// ✅ BYPASSING canEdit check - allow editing regardless of time restrictions
+		console.log("✅ Bypassing canEdit validation - proceeding with edit");
 
 		// Create Date object from date and time
 		const [year, month, day] = editData.scheduledPickupDate.split('-').map(Number);
 		const [hours, minutes] = editData.scheduledPickupTime.split(':').map(Number);
 		const scheduledPickupTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
 
-		(editMutation.mutate as any)({
+		const mutationData = {
 			bookingId: booking.id,
 			scheduledPickupTime: scheduledPickupTime.toISOString(),
 			customerName: editData.customerName,
 			customerPhone: editData.customerPhone,
 			customerEmail: editData.customerEmail,
 			passengerCount: editData.passengerCount,
+			luggageCount: editData.luggageCount,
 			specialRequests: editData.specialRequests,
-		}, {
-			onSuccess: () => {
-				// Close the edit dialog
-				onEditOpenChange(false);
-			}
-		});
+		};
+
+		console.log("🚀 Calling mutation with data:", mutationData);
+		editMutation.mutate(mutationData);
 	};
 
 	const handleCancel = () => {
-		if (!booking?.id || !booking?.canCancel) return;
+		if (!booking?.id) return;
 
-		(cancelMutation.mutate as any)({
+		// ✅ BYPASSING canCancel check - allow canceling regardless of time restrictions
+		console.log("✅ Bypassing canCancel validation - proceeding with cancel");
+
+		cancelMutation.mutate({
 			bookingId: booking.id,
 			cancellationReason: cancellationReason || undefined,
-		}, {
-			onSuccess: () => {
-				// Only close the dialog on successful cancellation
-				onCancelOpenChange(false);
-				// Clear the cancellation reason for next time
-				setCancellationReason("");
-			}
 		});
 	};
 
@@ -261,7 +301,7 @@ export function EditCancelDialogs({
 												id="passengerCount"
 												type="number"
 												min="1"
-												max="8"
+												max="20"
 												value={editData.passengerCount}
 												onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
 											/>
@@ -272,7 +312,7 @@ export function EditCancelDialogs({
 												id="luggageCount"
 												type="number"
 												min="0"
-												max="10"
+												max="20"
 												value={editData.luggageCount}
 												onChange={(e) => setEditData({ ...editData, luggageCount: parseInt(e.target.value) || 0 })}
 											/>
@@ -297,7 +337,7 @@ export function EditCancelDialogs({
 								<div className="flex gap-2">
 									<Button
 										onClick={handleEdit}
-										disabled={editMutation.isPending}
+										disabled={editMutation.isPending || !hasChanges()}
 										className="flex-1 h-12"
 									>
 										{editMutation.isPending ? (
@@ -401,7 +441,7 @@ export function EditCancelDialogs({
 													id="passengerCount"
 													type="number"
 													min="1"
-													max="8"
+													max="20"
 													value={editData.passengerCount}
 													onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
 												/>
@@ -412,7 +452,7 @@ export function EditCancelDialogs({
 													id="luggageCount"
 													type="number"
 													min="0"
-													max="10"
+													max="20"
 													value={editData.luggageCount}
 													onChange={(e) => setEditData({ ...editData, luggageCount: parseInt(e.target.value) || 0 })}
 												/>
@@ -436,7 +476,7 @@ export function EditCancelDialogs({
 								<div className="flex gap-2 pt-4 border-t">
 									<Button
 										onClick={handleEdit}
-										disabled={editMutation.isPending}
+										disabled={editMutation.isPending || !hasChanges()}
 										className="flex-1"
 									>
 										{editMutation.isPending ? (

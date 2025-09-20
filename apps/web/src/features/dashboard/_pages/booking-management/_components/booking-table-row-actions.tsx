@@ -8,7 +8,7 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import type { Row } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X, Archive, ArchiveRestore, Trash2, CheckCircle } from "lucide-react";
 import type { Booking } from "./booking-table-columns";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { useUnassignDriverMutation } from "../_hooks/query/use-unassign-driver-mutation";
@@ -63,6 +63,7 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 		console.log("📋 Opening update status dialog for booking:", booking.id);
 		openChangeStatusDialog(booking);
 	};
+
 
 	const handleUnassignDriver = (booking: Booking) => {
 		console.log("🚫 Opening unassign driver confirmation for booking:", booking.id);
@@ -122,6 +123,7 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 					<DropdownMenuSeparator />
 
 					{/* Edit Actions */}
+
 					<DropdownMenuItem onClick={() => handleEditBooking(booking)}>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit booking
@@ -137,10 +139,21 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 					{/* Assignment Actions */}
 					{booking.status !== "cancelled" && booking.status !== "completed" && (
 						<>
-							<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
-								<UserCheck className="mr-2 h-4 w-4" />
-								{booking.driver ? "Reassign driver" : "Assign driver"}
-							</DropdownMenuItem>
+							{/* Driver assignment - only allow if booking is confirmed */}
+							{['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress'].includes(booking.status) ? (
+								<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
+									<UserCheck className="mr-2 h-4 w-4" />
+									{booking.driver ? "Reassign driver" : "Assign driver"}
+								</DropdownMenuItem>
+							) : (
+								<DropdownMenuItem disabled className="flex-col items-start py-2">
+									<div className="flex items-center w-full">
+										<UserCheck className="mr-2 h-4 w-4 opacity-50" />
+										<span className="opacity-50">Assign driver</span>
+									</div>
+									<span className="text-xs text-muted-foreground ml-6">(Confirm first)</span>
+								</DropdownMenuItem>
+							)}
 
 							{/* Unassign driver - only show if driver is assigned and status allows */}
 							{booking.driver && ['confirmed', 'driver_assigned'].includes(booking.status) && (

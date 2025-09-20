@@ -14,6 +14,7 @@ import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-manageme
 import { AssignCarDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-car-dialog";
 import { EditBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/edit-booking-dialog";
 import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-management/_components/change-status-dialog";
+import { ConfirmBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/confirm-booking-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive } from "lucide-react";
@@ -47,7 +48,10 @@ function BookingManagementContent() {
 		closeEditBookingDialog,
 		isChangeStatusDialogOpen,
 		selectedBookingForStatus,
-		closeChangeStatusDialog
+		closeChangeStatusDialog,
+		isConfirmBookingDialogOpen,
+		selectedBookingForConfirm,
+		closeConfirmBookingDialog
 	} = useBookingManagementModalProvider();
 
 	const [filters, setFilters] = useState<BookingFiltersType>({});
@@ -314,6 +318,11 @@ function BookingManagementContent() {
 				booking={selectedBookingForStatus}
 				open={isChangeStatusDialogOpen}
 				onOpenChange={closeChangeStatusDialog}
+			/>
+			<ConfirmBookingDialog
+				booking={selectedBookingForConfirm}
+				open={isConfirmBookingDialogOpen}
+				onOpenChange={closeConfirmBookingDialog}
 			/>
 		</PaddingLayout>
 	)

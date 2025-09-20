@@ -9,35 +9,41 @@ interface BookingManagementModalState {
 	isAssignCarDialogOpen: boolean;
 	isEditBookingDialogOpen: boolean;
 	isChangeStatusDialogOpen: boolean;
+	isConfirmBookingDialogOpen: boolean;
 	selectedBookingId: string | null;
 	selectedBookingForDriver: any | null;
 	selectedBookingForCar: any | null;
 	selectedBookingForEdit: any | null;
 	selectedBookingForStatus: any | null;
-	
+	selectedBookingForConfirm: any | null;
+	preSelectedStatus: string | null;
+
 	openCreatePackageBookingDialog: () => void;
 	closeCreatePackageBookingDialog: () => void;
-	
+
 	openCreateCustomBookingDialog: () => void;
 	closeCreateCustomBookingDialog: () => void;
 
 	openCreateOffloadBookingDialog: () => void;
 	closeCreateOffloadBookingDialog: () => void;
-	
+
 	openBookingDetailsDialog: (bookingId: string) => void;
 	closeBookingDetailsDialog: () => void;
-	
+
 	openAssignDriverDialog: (booking: any) => void;
 	closeAssignDriverDialog: () => void;
-	
+
 	openAssignCarDialog: (booking: any) => void;
 	closeAssignCarDialog: () => void;
-	
+
 	openEditBookingDialog: (booking: any) => void;
 	closeEditBookingDialog: () => void;
-	
-	openChangeStatusDialog: (booking: any) => void;
+
+	openChangeStatusDialog: (booking: any, preSelectedStatus?: string) => void;
 	closeChangeStatusDialog: () => void;
+
+	openConfirmBookingDialog: (booking: any) => void;
+	closeConfirmBookingDialog: () => void;
 }
 
 export const useBookingManagementModalProvider = create<BookingManagementModalState>((set) => ({
@@ -49,11 +55,14 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	isAssignCarDialogOpen: false,
 	isEditBookingDialogOpen: false,
 	isChangeStatusDialogOpen: false,
+	isConfirmBookingDialogOpen: false,
 	selectedBookingId: null,
 	selectedBookingForDriver: null,
 	selectedBookingForCar: null,
 	selectedBookingForEdit: null,
 	selectedBookingForStatus: null,
+	selectedBookingForConfirm: null,
+	preSelectedStatus: null,
 	
 	openCreatePackageBookingDialog: () => set({ isCreatePackageBookingDialogOpen: true }),
 	closeCreatePackageBookingDialog: () => set({ isCreatePackageBookingDialogOpen: false }),
@@ -112,15 +121,29 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 		selectedBookingForEdit: null 
 	}),
 	
-	openChangeStatusDialog: (booking: any) => {
-		console.log("📋 Modal provider - opening change status dialog for booking:", booking.id);
-		set({ 
-			isChangeStatusDialogOpen: true, 
-			selectedBookingForStatus: booking 
+	openChangeStatusDialog: (booking: any, preSelectedStatus?: string) => {
+		console.log("📋 Modal provider - opening change status dialog for booking:", booking.id, "with pre-selected status:", preSelectedStatus);
+		set({
+			isChangeStatusDialogOpen: true,
+			selectedBookingForStatus: booking,
+			preSelectedStatus: preSelectedStatus || null
 		});
 	},
-	closeChangeStatusDialog: () => set({ 
-		isChangeStatusDialogOpen: false, 
-		selectedBookingForStatus: null 
+	closeChangeStatusDialog: () => set({
+		isChangeStatusDialogOpen: false,
+		selectedBookingForStatus: null,
+		preSelectedStatus: null
+	}),
+
+	openConfirmBookingDialog: (booking: any) => {
+		console.log("✅ Modal provider - opening confirm booking dialog for booking:", booking.id);
+		set({
+			isConfirmBookingDialogOpen: true,
+			selectedBookingForConfirm: booking
+		});
+	},
+	closeConfirmBookingDialog: () => set({
+		isConfirmBookingDialogOpen: false,
+		selectedBookingForConfirm: null
 	}),
 }));

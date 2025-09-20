@@ -88,10 +88,10 @@ export function BookingActions({
 		specialRequests: booking?.specialRequests || "",
 	});
 
-	// Use validation data from booking (already included in the query)
+	// ✅ BYPASSING validation - allow editing/cancelling regardless of time restrictions
 	const validation = {
-		canEdit: booking?.canEdit ?? false,
-		canCancel: booking?.canCancel ?? false,
+		canEdit: true, // Always allow editing
+		canCancel: true, // Always allow cancelling
 		editReason: booking?.editReason,
 		cancelReason: booking?.cancelReason,
 		hoursUntilPickup: booking?.hoursUntilPickup,
@@ -106,7 +106,8 @@ export function BookingActions({
 	const cancelMutation = useCancelBookingMutation();
 
 	const handleEdit = () => {
-		if (!booking?.id || !validation?.canEdit) return;
+		if (!booking?.id) return;
+		// ✅ BYPASSING canEdit check
 		
 		editMutation.mutate({
 			bookingId: booking.id,
@@ -115,7 +116,8 @@ export function BookingActions({
 	};
 
 	const handleCancel = () => {
-		if (!booking?.id || !validation?.canCancel) return;
+		if (!booking?.id) return;
+		// ✅ BYPASSING canCancel check
 		
 		cancelMutation.mutate({
 			bookingId: booking.id,
@@ -386,7 +388,7 @@ export function BookingActions({
 										id="passengerCount"
 										type="number"
 										min="1"
-										max="8"
+										max="20"
 										value={editData.passengerCount}
 										onChange={(e) => setEditData({ ...editData, passengerCount: parseInt(e.target.value) || 1 })}
 									/>

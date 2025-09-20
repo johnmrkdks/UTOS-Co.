@@ -122,10 +122,10 @@ export function BookingDetailsDialog() {
 	return (
 		<>
 			<Dialog open={isBookingDetailsDialogOpen} onOpenChange={closeBookingDetailsDialog}>
-			<DialogContent className="!max-w-[90vw] max-h-[95vh] overflow-hidden p-0">
+			<DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden p-0">
 				{/* Simple Header */}
 				<div className="flex items-center justify-between p-4 border-b bg-soft-beige">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-3 flex-1 min-w-0">
 						<h2 className="text-xl font-semibold">Booking Details</h2>
 						<Badge variant="outline" className="text-xs">
 							{booking.bookingType === "package" ? "Package" : "Custom"}
@@ -134,19 +134,11 @@ export function BookingDetailsDialog() {
 							{booking.status.replace("_", " ").toUpperCase()}
 						</Badge>
 					</div>
-					<div className="flex items-center gap-3">
-						<div className="text-right">
-							<div className="text-lg font-bold text-primary">
-								${booking.quotedAmount.toFixed(2)}
-							</div>
-							<div className="text-xs text-gray-500 font-mono">{booking.id}</div>
+					<div className="text-right flex-shrink-0 ml-4">
+						<div className="text-lg font-bold text-primary">
+							${booking.quotedAmount.toFixed(2)}
 						</div>
-						<DialogClose asChild>
-							<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-								<X className="h-4 w-4" />
-								<span className="sr-only">Close</span>
-							</Button>
-						</DialogClose>
+						<div className="text-xs text-gray-500 font-mono">#{booking.id.slice(-6)}</div>
 					</div>
 				</div>
 
@@ -384,14 +376,26 @@ export function BookingDetailsDialog() {
 												<span className="text-sm text-gray-500">No driver assigned</span>
 											)}
 										</div>
-										<Button
-											onClick={() => setIsAssignDriverDialogOpen(true)}
-											variant="outline"
-											className="border-primary text-primary hover:bg-primary/5"
-										>
-											<UserPlus className="h-4 w-4 mr-2" />
-											{booking.driverId ? "Reassign" : "Assign"} Driver
-										</Button>
+										{['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress'].includes(booking.status) ? (
+											<Button
+												onClick={() => setIsAssignDriverDialogOpen(true)}
+												variant="outline"
+												className="border-primary text-primary hover:bg-primary/5"
+											>
+												<UserPlus className="h-4 w-4 mr-2" />
+												{booking.driverId ? "Reassign" : "Assign"} Driver
+											</Button>
+										) : (
+											<Button
+												disabled
+												variant="outline"
+												className="opacity-50"
+											>
+												<UserPlus className="h-4 w-4 mr-2 opacity-50" />
+												Assign Driver
+												<span className="ml-2 text-xs">(Confirm first)</span>
+											</Button>
+										)}
 									</div>
 								</div>
 							</div>
@@ -485,6 +489,13 @@ export function BookingDetailsDialog() {
 							</div>
 						</div>
 					</div>
+				</div>
+
+				{/* Footer with Close Button */}
+				<div className="flex justify-end p-4 border-t bg-gray-50">
+					<Button variant="outline" onClick={closeBookingDetailsDialog}>
+						Close
+					</Button>
 				</div>
 				</DialogContent>
 			</Dialog>
