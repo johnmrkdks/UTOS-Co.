@@ -75,7 +75,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		onCancelBooking,
 		onArchiveBooking,
 		onDeleteBooking,
-		enableRowSelection = true,
+		enableRowSelection = false,
 		compact = false
 	} = options;
 

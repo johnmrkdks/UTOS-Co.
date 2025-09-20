@@ -370,25 +370,32 @@ function generateTripStatusEmailTemplate(
 export async function sendDriverAssignmentNotification(data: DriverAssignmentEmailData): Promise<{ success: boolean; message: string }> {
 	try {
 		const { bookingId, driverId, env } = data;
+		console.log(`📧 EMAIL SERVICE: Starting driver assignment notification for booking ${bookingId}, driver ${driverId}`);
 
 		// Get booking details
+		console.log(`📧 EMAIL SERVICE: Fetching booking details for booking ${bookingId}`);
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
+		console.log(`📧 EMAIL SERVICE: Booking details fetched. Driver user email: ${bookingDetails.driverUser?.email}`);
 
 		if (!bookingDetails.driverUser?.email) {
+			console.log(`❌ EMAIL SERVICE: Driver email not found for driver ${driverId}`);
 			throw new Error("Driver email not found");
 		}
 
 		// Generate email template
 		const driverName = bookingDetails.driverUser.name || "Driver";
+		console.log(`📧 EMAIL SERVICE: Generating email template for driver ${driverName}`);
 		const template = generateDriverAssignmentEmailTemplate(driverName, bookingDetails);
 
 		// Send email
+		console.log(`📧 EMAIL SERVICE: Getting mail service and sending email to ${bookingDetails.driverUser.email}`);
 		const mailService = getMailService(env);
 		const success = await mailService.sendEmail({
 			to: bookingDetails.driverUser.email,
 			subject: template.subject,
 			html: template.html,
 		});
+		console.log(`📧 EMAIL SERVICE: Email send result: ${success}`);
 
 		if (!success) {
 			throw new Error("Failed to send driver assignment email");

@@ -90,17 +90,25 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 	const result = await updateBooking(db, { id: data.id, data: updateData });
 
 	// Send email notifications after successful booking update
+	console.log(`🔍 EMAIL DEBUG: Checking email notification conditions for booking ${data.id}`);
+	console.log(`🔍 EMAIL DEBUG: env available: ${!!env}, result available: ${!!result}, status: ${data.status}`);
+
 	if (env && result) {
+		console.log(`✅ EMAIL DEBUG: Entering email notification block for status ${data.status}`);
 		try {
 			switch (data.status) {
 				case BookingStatusEnum.DriverAssigned:
+					console.log(`🚗 EMAIL DEBUG: Driver assignment case - driverId: ${data.driverId}`);
 					if (data.driverId) {
+						console.log(`📧 EMAIL DEBUG: Calling sendDriverAssignmentNotification for booking ${data.id}, driver ${data.driverId}`);
 						await sendDriverAssignmentNotification({
 							bookingId: data.id,
 							driverId: data.driverId,
 							env,
 						});
-						console.log(`Driver assignment notification sent for booking ${data.id}`);
+						console.log(`✅ Driver assignment notification sent for booking ${data.id}`);
+					} else {
+						console.log(`❌ EMAIL DEBUG: No driverId provided for driver assignment`);
 					}
 					break;
 
