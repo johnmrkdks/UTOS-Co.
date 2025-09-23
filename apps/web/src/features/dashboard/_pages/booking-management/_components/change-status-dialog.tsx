@@ -66,7 +66,7 @@ export function ChangeStatusDialog({
 
 		updateStatusMutation.mutate({
 			id: booking.id,
-			status: selectedStatus,
+			status: selectedStatus as any,
 		}, {
 			onSuccess: () => {
 				onOpenChange(false);

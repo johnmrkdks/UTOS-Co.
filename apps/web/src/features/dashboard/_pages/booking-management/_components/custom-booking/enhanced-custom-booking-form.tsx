@@ -20,7 +20,7 @@ import { useGetUsersQuery } from "../../../drivers/_hooks/query/use-get-users-qu
 // Enhanced schema with stops and luggage support
 const createEnhancedCustomBookingSchema = z.object({
 	carId: z.string().min(1, "Please select a car"),
-	userId: z.string().min(1, "Please select a user").default("user-1"),
+	userId: z.string().optional(),
 	originAddress: z.string().min(1, "Origin address is required"),
 	originLatitude: z.number().optional(),
 	originLongitude: z.number().optional(),
@@ -33,7 +33,7 @@ const createEnhancedCustomBookingSchema = z.object({
 		longitude: z.number().optional(),
 		waitingTime: z.number().min(0).default(5),
 		notes: z.string().optional(),
-	})).optional().default([]),
+	})).default([]),
 	scheduledPickupDate: z.string().min(1, "Please select a pickup date"),
 	scheduledPickupTime: z.string().min(1, "Please select a pickup time"),
 	customerName: z.string().min(1, "Customer name is required"),
@@ -88,10 +88,10 @@ export function EnhancedCustomBookingForm({
 	})
 
 	const form = useForm<EnhancedCustomBookingForm>({
-		resolver: zodResolver(createEnhancedCustomBookingSchema),
+		resolver: zodResolver(createEnhancedCustomBookingSchema) as any,
 		mode: "onChange", // Optimize validation
 		defaultValues: {
-			userId: users?.data?.[0]?.id || "",
+			userId: users?.users?.[0]?.id || "",
 			passengerCount: 1,
 			luggageCount: 0,
 			customerEmail: "",
@@ -249,7 +249,7 @@ export function EnhancedCustomBookingForm({
 
 	return (
 		<Form {...form as any}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" data-enhanced-booking-form>
+			<form onSubmit={form.handleSubmit(handleSubmit as any)} className="space-y-6" data-enhanced-booking-form>
 				{/* Car Selection */}
 				<Card>
 					<CardHeader>

@@ -4,6 +4,14 @@ interface BookingTypeBadgeProps {
 	booking: {
 		bookingType?: string;
 		packageId?: string;
+		estimatedDuration?: number; // in minutes - contains client-booked hours for hourly services
+		package?: {
+			packageServiceType?: {
+				rateType?: 'fixed' | 'hourly';
+				name?: string;
+			};
+			duration?: number; // in minutes - package default duration
+		};
 	};
 	className?: string;
 }
@@ -16,9 +24,27 @@ export function BookingTypeBadge({ booking, className }: BookingTypeBadgeProps) 
 	const getBadgeConfig = () => {
 		switch (bookingType) {
 			case 'package':
+				// For package bookings, show service type (fixed/hourly)
+				const serviceType = booking.package?.packageServiceType?.rateType;
+				const isHourly = serviceType === 'hourly';
+
+				// For hourly services, use client-booked hours from estimatedDuration
+				const clientBookedHours = isHourly && booking.estimatedDuration
+					? Math.round(booking.estimatedDuration / 60)
+					: null;
+
+				let text = 'Service';
+				if (isHourly) {
+					text = clientBookedHours ? `Hourly (${clientBookedHours}h)` : 'Hourly';
+				} else if (serviceType === 'fixed') {
+					text = 'Fixed Service';
+				}
+
 				return {
-					text: 'Service',
-					className: 'bg-blue-100 text-blue-800 border-0'
+					text,
+					className: isHourly
+						? 'bg-green-100 text-green-800 border-0'
+						: 'bg-blue-100 text-blue-800 border-0'
 				};
 			case 'custom':
 				return {

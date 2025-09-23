@@ -18,7 +18,11 @@ export async function getBookings(db: DB, options: ResourceList) {
 				},
 				car: true,
 				user: true,
-				package: true,
+				package: {
+					with: {
+						packageServiceType: true, // Include service type for fixed/hourly identification
+					},
+				},
 				extras: true, // Include extras data
 				stops: true, // Include stops data
 			},

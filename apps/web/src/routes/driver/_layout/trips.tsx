@@ -32,6 +32,7 @@ import {
 	ActivityIcon,
 	CircleDot,
 	ChevronRight,
+	User,
 } from "lucide-react";
 import { useState, useMemo } from 'react';
 import { Input } from "@workspace/ui/components/input";
@@ -57,6 +58,25 @@ function DriverTripsComponent() {
 	const { data: rawCurrentDriver, isLoading: isDriverLoading } = useCurrentDriverQuery();
 	const queryClient = useQueryClient();
 	const [searchQuery, setSearchQuery] = useState('');
+
+	// Consistent status display function
+	const getStatusDisplayText = (status: string) => {
+		switch (status) {
+			case 'driver_en_route':
+			case 'in_progress': // Map legacy 'in_progress' status to 'EN ROUTE' for consistency
+				return 'EN ROUTE';
+			case 'arrived_pickup':
+				return 'AT PICKUP';
+			case 'passenger_on_board':
+				return 'ON BOARD';
+			case 'dropped_off':
+				return 'DROPPED OFF';
+			case 'awaiting_extras':
+				return 'AWAITING EXTRAS';
+			default:
+				return status.replace('_', ' ').toUpperCase();
+		}
+	};
 	const [passengerDetailsOpen, setPassengerDetailsOpen] = useState(false);
 	const [selectedBooking, setSelectedBooking] = useState<any>(null);
 	const [extrasDialogOpen, setExtrasDialogOpen] = useState(false);
@@ -745,7 +765,7 @@ function DriverTripsComponent() {
 																booking.status === 'confirmed' ? 'secondary' : 'outline'}
 														className="text-xs px-2 py-0.5"
 													>
-														{booking.status === 'driver_en_route' ? 'IN PROGRESS' : booking.status.replace('_', ' ').toUpperCase()}
+														{getStatusDisplayText(booking.status)}
 													</Badge>
 												</div>
 
@@ -812,6 +832,29 @@ function DriverTripsComponent() {
 															</span>
 														</div>
 													</div>
+													{/* Service type and client-booked duration info */}
+													{booking.packageId && (
+														<div className="flex items-center gap-1.5 mt-2">
+															{booking.package?.packageServiceType?.rateType === 'hourly' ? (
+																<>
+																	<TimerIcon className="h-3.5 w-3.5 text-green-500" />
+																	<span className="text-xs text-green-600 font-medium">
+																		{booking.package?.name || 'Hourly Service'}
+																		{booking.estimatedDuration && (
+																			<span> • {Math.round(booking.estimatedDuration / 60)}h booked</span>
+																		)}
+																	</span>
+																</>
+															) : (
+																<>
+																	<CircleDot className="h-3.5 w-3.5 text-blue-500" />
+																	<span className="text-xs text-blue-600 font-medium">
+																		{booking.package?.name || 'Fixed Service'}
+																	</span>
+																</>
+															)}
+														</div>
+													)}
 												</div>
 											</>
 										) : (
@@ -841,7 +884,7 @@ function DriverTripsComponent() {
 																booking.status === 'confirmed' ? 'secondary' : 'outline'}
 														className="text-xs font-medium"
 													>
-														{booking.status === 'driver_en_route' ? 'IN PROGRESS' : booking.status.replace('_', ' ').toUpperCase()}
+														{getStatusDisplayText(booking.status)}
 													</Badge>
 												</div>
 
@@ -898,6 +941,29 @@ function DriverTripsComponent() {
 																</span>
 															</div>
 														)}
+														{/* Service type and client-booked duration info */}
+														{booking.packageId && (
+															<div className="flex items-center gap-1">
+																{booking.package?.packageServiceType?.rateType === 'hourly' ? (
+																	<>
+																		<TimerIcon className="h-4 w-4 text-green-500" />
+																		<span className="text-sm text-green-600 font-medium">
+																			{booking.package?.name || 'Hourly Service'}
+																			{booking.estimatedDuration && (
+																				<span> ({Math.round(booking.estimatedDuration / 60)}h booked)</span>
+																			)}
+																		</span>
+																	</>
+																) : (
+																	<>
+																		<CircleDot className="h-4 w-4 text-blue-500" />
+																		<span className="text-sm text-blue-600 font-medium">
+																			{booking.package?.name || 'Fixed Service'}
+																		</span>
+																	</>
+																)}
+															</div>
+														)}
 													</div>
 												</div>
 											</>
@@ -916,88 +982,185 @@ function DriverTripsComponent() {
 
 			{/* Navigation Location Selection Modal */}
 			<Dialog open={showMapsModal} onOpenChange={setShowMapsModal}>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle className="flex items-center gap-2">
-							<NavigationIcon className="h-5 w-5" />
-							Start navigation to
-						</DialogTitle>
-						<DialogDescription>
-							You can only navigate to the drop off location once the passenger is in the vehicle.
-						</DialogDescription>
-					</DialogHeader>
+				<DialogContent
+					showCloseButton={false}
+					className={cn(
+						isMobile
+							? "!max-w-none !w-screen !h-screen !m-0 !p-0 !top-0 !left-0 !translate-x-0 !translate-y-0 !rounded-none"
+							: "max-w-md"
+					)}>
+					{isMobile ? (
+						// Mobile full-screen layout matching existing theme
+						<div className="bg-white h-full flex flex-col">
+							{/* Header matching your existing theme */}
+							<div className="flex items-center justify-between p-4 border-b">
+								<div className="flex items-center gap-2">
+									<NavigationIcon className="h-5 w-5" />
+									<h2 className="text-lg font-semibold">Start navigation to</h2>
+								</div>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-8 w-8 p-0"
+									onClick={() => setShowMapsModal(false)}
+								>
+									<X className="h-4 w-4" />
+								</Button>
+							</div>
 
-					<div className="space-y-3 py-4">
-						{/* Pickup Location */}
-						<Button
-							variant="outline"
-							className="w-full justify-start p-4 h-auto"
-							onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.originAddress, 'pickup')}
-						>
-							<div className="flex items-start gap-3 text-left">
-								<div className="w-3 h-3 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-								<div className="flex-1 min-w-0">
-									<div className="text-sm font-medium text-gray-900 mb-1">Pickup location</div>
-									<div className="text-xs text-gray-600 leading-relaxed">
-										{selectedMapsBooking?.originAddress}
+							{/* Content exactly matching your design */}
+							<div className="p-4 space-y-3">
+								{/* Pickup Location - exactly like your design */}
+								<div
+									className="bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer"
+									onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.originAddress, 'pickup')}
+								>
+									<div className="flex items-start gap-3">
+										<div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
+										<div className="flex-1 min-w-0">
+											<div className="text-sm font-medium text-green-800 mb-1">Pickup location</div>
+											<div className="text-sm text-green-700 break-words">
+												{selectedMapsBooking?.originAddress}
+											</div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</Button>
 
-						{/* Stops (if any) */}
-						{selectedMapsBooking?.stops && selectedMapsBooking.stops.length > 0 && (
-							<div className="space-y-2">
-								<div className="text-sm font-medium text-gray-700 px-1">
-									Intermediate Stops ({selectedMapsBooking.stops.length})
-								</div>
-								{selectedMapsBooking.stops.map((stop: any, index: number) => (
-									<Button
-										key={stop.id || index}
-										variant="outline"
-										className="w-full justify-start p-4 h-auto bg-blue-50 border-blue-200"
-										onClick={() => navigateToLocation(stop.address, 'pickup')}
-									>
-										<div className="flex items-start gap-3 text-left">
-											<div className="w-3 h-3 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-											<div className="flex-1 min-w-0">
-												<div className="text-sm font-medium text-blue-900 mb-1">Stop {index + 1}</div>
-												<div className="text-xs text-blue-700 leading-relaxed">
-													{stop.address}
+								{/* Stops (if any) */}
+								{selectedMapsBooking?.stops && selectedMapsBooking.stops.length > 0 && (
+									selectedMapsBooking.stops.map((stop: any, index: number) => (
+										<div
+											key={stop.id || index}
+											className="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer"
+											onClick={() => navigateToLocation(stop.address, 'pickup')}
+										>
+											<div className="flex items-start gap-3">
+												<div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+												<div className="flex-1 min-w-0">
+													<div className="text-sm font-medium text-blue-800 mb-1">Stop {index + 1}</div>
+													<div className="text-sm text-blue-700 break-words">
+														{stop.address}
+													</div>
 												</div>
 											</div>
 										</div>
-									</Button>
-								))}
-							</div>
-						)}
+									))
+								)}
 
-						{/* Dropoff Location */}
-						<Button
-							variant="outline"
-							className="w-full justify-start p-4 h-auto"
-							onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.destinationAddress, 'dropoff')}
-						>
-							<div className="flex items-start gap-3 text-left">
-								<div className="w-3 h-3 rounded-full bg-red-500 mt-1 flex-shrink-0"></div>
-								<div className="flex-1 min-w-0">
-									<div className="text-sm font-medium text-gray-900 mb-1">Dropoff location</div>
-									<div className="text-xs text-gray-600 leading-relaxed">
-										{selectedMapsBooking?.destinationAddress}
+								{/* Dropoff Location - exactly like your design */}
+								<div
+									className="bg-red-50 border border-red-200 rounded-lg p-4 cursor-pointer"
+									onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.destinationAddress, 'dropoff')}
+								>
+									<div className="flex items-start gap-3">
+										<div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+										<div className="flex-1 min-w-0">
+											<div className="text-sm font-medium text-red-800 mb-1">Dropoff location</div>
+											<div className="text-sm text-red-700 break-words">
+												{selectedMapsBooking?.destinationAddress}
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
-						</Button>
 
-						{/* Cancel */}
-						<Button
-							variant="ghost"
-							className="w-full mt-4"
-							onClick={() => setShowMapsModal(false)}
-						>
-							Cancel
-						</Button>
-					</div>
+							{/* Cancel button at bottom of screen */}
+							<div className="mt-auto p-4 border-t bg-white">
+								<Button
+									variant="ghost"
+									className="w-full"
+									onClick={() => setShowMapsModal(false)}
+								>
+									Cancel
+								</Button>
+							</div>
+						</div>
+					) : (
+						// Desktop layout (existing)
+						<>
+							<DialogHeader className="space-y-2">
+								<DialogTitle className="flex items-center gap-2 text-base">
+									<NavigationIcon className="h-5 w-5 flex-shrink-0" />
+									<span>Start navigation to</span>
+								</DialogTitle>
+								<DialogDescription className="text-xs leading-relaxed">
+									You can only navigate to the drop off location once the passenger is in the vehicle.
+								</DialogDescription>
+							</DialogHeader>
+
+							<div className="space-y-3 py-4">
+								{/* Desktop Pickup Location */}
+								<Button
+									variant="outline"
+									className="w-full justify-start p-4 h-auto"
+									onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.originAddress, 'pickup')}
+								>
+									<div className="flex items-start gap-3 text-left w-full">
+										<div className="w-3 h-3 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+										<div className="flex-1 min-w-0">
+											<div className="text-sm font-medium text-gray-900 mb-1">Pickup location</div>
+											<div className="text-xs text-gray-600 leading-relaxed break-words">
+												{selectedMapsBooking?.originAddress}
+											</div>
+										</div>
+									</div>
+								</Button>
+
+								{/* Desktop Stops */}
+								{selectedMapsBooking?.stops && selectedMapsBooking.stops.length > 0 && (
+									<div className="space-y-2">
+										<div className="text-sm font-medium text-gray-700 px-1">
+											Intermediate Stops ({selectedMapsBooking.stops.length})
+										</div>
+										{selectedMapsBooking.stops.map((stop: any, index: number) => (
+											<Button
+												key={stop.id || index}
+												variant="outline"
+												className="w-full justify-start h-auto p-4 bg-blue-50 border-blue-200"
+												onClick={() => navigateToLocation(stop.address, 'pickup')}
+											>
+												<div className="flex items-start gap-3 text-left w-full">
+													<div className="w-3 h-3 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+													<div className="flex-1 min-w-0">
+														<div className="text-sm font-medium text-blue-900 mb-1">Stop {index + 1}</div>
+														<div className="text-xs text-blue-700 leading-relaxed break-words">
+															{stop.address}
+														</div>
+													</div>
+												</div>
+											</Button>
+										))}
+									</div>
+								)}
+
+								{/* Desktop Dropoff Location */}
+								<Button
+									variant="outline"
+									className="w-full justify-start p-4 h-auto"
+									onClick={() => selectedMapsBooking && navigateToLocation(selectedMapsBooking.destinationAddress, 'dropoff')}
+								>
+									<div className="flex items-start gap-3 text-left w-full">
+										<div className="w-3 h-3 rounded-full bg-red-500 mt-1 flex-shrink-0"></div>
+										<div className="flex-1 min-w-0">
+											<div className="text-sm font-medium text-gray-900 mb-1">Dropoff location</div>
+											<div className="text-xs text-gray-600 leading-relaxed break-words">
+												{selectedMapsBooking?.destinationAddress}
+											</div>
+										</div>
+									</div>
+								</Button>
+
+								{/* Desktop Cancel */}
+								<Button
+									variant="ghost"
+									className="w-full mt-4"
+									onClick={() => setShowMapsModal(false)}
+								>
+									Cancel
+								</Button>
+							</div>
+						</>
+					)}
 				</DialogContent>
 			</Dialog>
 
@@ -1020,12 +1183,13 @@ function DriverTripsComponent() {
 				<DialogContent
 					className={cn(
 						"[&>button]:hidden", // Hide default close button
-						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
+						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50 max-h-[90vh]"
 					)}
 				>
 					{selectedBookingForDetails && (
 						<div className={cn(
-							isMobile ? "flex flex-col h-full" : "flex flex-col"
+							"flex flex-col",
+							isMobile ? "h-full min-h-full" : "h-full max-h-[90vh]"
 						)}>
 							{/* Compact Header with gradient background */}
 							<div className={cn(
@@ -1043,7 +1207,7 @@ function DriverTripsComponent() {
 												Trip ID: {selectedBookingForDetails.id.slice(-6).toUpperCase()}
 											</span>
 											<Badge className="bg-white/20 text-white border-white/30 text-xs px-2 py-0.5">
-												{selectedBookingForDetails.status.replace('_', ' ').toUpperCase()}
+												{getStatusDisplayText(selectedBookingForDetails.status)}
 											</Badge>
 										</div>
 									</div>
@@ -1059,16 +1223,47 @@ function DriverTripsComponent() {
 								</Button>
 							</div>
 
-							{/* Scrollable Content with improved design */}
+							{/* Scrollable Content Area */}
 							<div className={cn(
-								"p-4 space-y-4",
-								isMobile ? "flex-1 overflow-y-auto pb-32" : ""
+								"flex-1 overflow-y-auto",
+								isMobile ? "" : ""
 							)}>
+								<div className="p-4 space-y-4">
+								{/* Service Information Card (for package bookings) */}
+								{selectedBookingForDetails.packageId && (
+									<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+										<h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+											<ActivityIcon className="h-4 w-4 text-primary" />
+											Service Details
+										</h3>
+										<div className="space-y-2">
+											<div className="flex items-start gap-2">
+												<div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-blue-700 mb-0.5">Service Type</p>
+													<p className="text-xs text-gray-900 font-medium">
+														{selectedBookingForDetails.package?.name || 'Service Package'}
+													</p>
+													{selectedBookingForDetails.package?.packageServiceType?.rateType === 'hourly' && (
+														<p className="text-xs text-green-600 font-medium mt-1">
+															{selectedBookingForDetails.estimatedDuration ? (
+																<>Client Booked: {Math.round(selectedBookingForDetails.estimatedDuration / 60)} hour{Math.round(selectedBookingForDetails.estimatedDuration / 60) !== 1 ? 's' : ''}</>
+															) : (
+																'Hourly Service'
+															)}
+														</p>
+													)}
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
+
 								{/* Compact Route Information Card */}
 								<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
 									<h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
 										<MapPinIcon className="h-4 w-4 text-primary" />
-										Trip Route
+										{selectedBookingForDetails.packageId ? 'Trip Route' : 'Journey Route'}
 									</h3>
 									<div className="space-y-2">
 										<div className="flex items-start gap-2">
@@ -1115,6 +1310,34 @@ function DriverTripsComponent() {
 									</div>
 								</div>
 
+								{/* Customer Information Card */}
+								<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+									<h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+										<UserIcon className="h-4 w-4 text-primary" />
+										Customer Details
+									</h3>
+									<div className="space-y-2">
+										<div className="flex items-center gap-2">
+											<div className="w-2.5 h-2.5 rounded-full bg-gray-400 mt-0.5 flex-shrink-0"></div>
+											<div className="flex-1">
+												<p className="text-sm font-medium text-gray-900">{selectedBookingForDetails.customerName}</p>
+											</div>
+										</div>
+										{selectedBookingForDetails.customerPhone && (
+											<div className="flex items-center gap-2">
+												<PhoneIcon className="h-3 w-3 text-gray-400 ml-0.5" />
+												<p className="text-xs text-gray-600">{selectedBookingForDetails.customerPhone}</p>
+											</div>
+										)}
+										<div className="flex items-center gap-2">
+											<UsersIcon className="h-3 w-3 text-gray-400 ml-0.5" />
+											<p className="text-xs text-gray-600">
+												{selectedBookingForDetails.passengerCount || 1} passenger{(selectedBookingForDetails.passengerCount || 1) !== 1 ? 's' : ''}
+											</p>
+										</div>
+									</div>
+								</div>
+
 								{/* Compact Vehicle Information */}
 								{selectedBookingForDetails.car && (
 									<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
@@ -1130,43 +1353,78 @@ function DriverTripsComponent() {
 									</div>
 								)}
 
+								{/* Client-Booked Duration Information for Hourly Services */}
+								{(selectedBookingForDetails.packageId &&
+								  selectedBookingForDetails.package?.packageServiceType?.rateType === 'hourly' &&
+								  selectedBookingForDetails.estimatedDuration) && (
+									<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+										<div className="flex items-center gap-2.5">
+											<div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+												<TimerIcon className="h-4 w-4 text-green-600" />
+											</div>
+											<div>
+												<p className="text-sm font-medium text-gray-900">
+													{Math.round(selectedBookingForDetails.estimatedDuration / 60)} Hour{Math.round(selectedBookingForDetails.estimatedDuration / 60) !== 1 ? 's' : ''} Booked
+												</p>
+												<p className="text-xs text-gray-500">Client booked service duration</p>
+											</div>
+										</div>
+									</div>
+								)}
 
-								{/* Compact Customer Information Card - Moved down for easier access */}
-								<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+
+								</div>
+							</div>
+
+							{/* Sticky Customer Contact Info - Above Action Buttons */}
+							<div className="flex-shrink-0 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-t border-gray-200">
+								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center flex-shrink-0">
-											<UserIcon className="h-5 w-5 text-primary" />
+										<div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+											<User className="h-5 w-5 text-white" />
 										</div>
 										<div className="flex-1 min-w-0">
 											<p className="font-semibold text-sm text-gray-900 truncate">{selectedBookingForDetails.customerName}</p>
 											<p className="text-xs text-gray-600">{selectedBookingForDetails.customerPhone}</p>
 										</div>
-										<div className="flex gap-1.5">
-											<Button
-												variant="outline"
-												size="sm"
-												className="h-9 w-9 p-0 rounded-full shadow-sm hover:shadow-md transition-shadow"
-												onClick={() => window.location.href = `tel:${selectedBookingForDetails.customerPhone}`}
-											>
-												<PhoneIcon className="h-4 w-4 text-green-600" />
-											</Button>
-											<Button
-												variant="outline"
-												size="sm"
-												className="h-9 w-9 p-0 rounded-full shadow-sm hover:shadow-md transition-shadow"
-												onClick={() => window.location.href = `sms:${selectedBookingForDetails.customerPhone}`}
-											>
-												<MessageSquare className="h-4 w-4 text-blue-600" />
-											</Button>
-										</div>
+									</div>
+									<div className="flex gap-2">
+										<Button
+											variant="outline"
+											size={isMobile ? "default" : "sm"}
+											className={cn(
+												"rounded-full shadow-sm hover:shadow-md transition-shadow border-green-200 hover:border-green-300 bg-green-50 hover:bg-green-100",
+												isMobile ? "h-11 w-11 p-0" : "h-9 w-9 p-0"
+											)}
+											onClick={() => window.location.href = `tel:${selectedBookingForDetails.customerPhone}`}
+										>
+											<PhoneIcon className={cn(
+												"text-green-600",
+												isMobile ? "h-5 w-5" : "h-4 w-4"
+											)} />
+										</Button>
+										<Button
+											variant="outline"
+											size={isMobile ? "default" : "sm"}
+											className={cn(
+												"rounded-full shadow-sm hover:shadow-md transition-shadow border-blue-200 hover:border-blue-300 bg-blue-50 hover:bg-blue-100",
+												isMobile ? "h-11 w-11 p-0" : "h-9 w-9 p-0"
+											)}
+											onClick={() => window.location.href = `sms:${selectedBookingForDetails.customerPhone}`}
+										>
+											<MessageSquare className={cn(
+												"text-blue-600",
+												isMobile ? "h-5 w-5" : "h-4 w-4"
+											)} />
+										</Button>
 									</div>
 								</div>
 							</div>
 
-							{/* Enhanced Actions - Sticky at bottom for mobile */}
+							{/* Enhanced Actions - Flex positioned at bottom */}
 							<div className={cn(
-								"p-4 bg-white border-t border-gray-200",
-								isMobile ? "fixed bottom-0 left-0 right-0 z-50 shadow-2xl safe-area-pb" : "rounded-b-lg"
+								"flex-shrink-0 p-4 bg-white border-t border-gray-200",
+								isMobile ? "shadow-2xl" : "rounded-b-lg"
 							)}>
 								{/* Navigation or Fare Display based on trip status */}
 								{['completed', 'no_show'].includes(selectedBookingForDetails.status) ? (

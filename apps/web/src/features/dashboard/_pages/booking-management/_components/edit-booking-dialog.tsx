@@ -17,8 +17,8 @@ import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutatio
 import type { Booking } from "./booking-table-columns";
 
 const editBookingSchema = z.object({
-	scheduledPickupDate: z.string({ required_error: "Please select a pickup date" }).min(1, "Please select a pickup date"),
-	scheduledPickupTime: z.string({ required_error: "Please select a pickup time" }).min(1, "Please select a pickup time"),
+	scheduledPickupDate: z.string({ message: "Please select a pickup date" }).min(1, "Please select a pickup date"),
+	scheduledPickupTime: z.string({ message: "Please select a pickup time" }).min(1, "Please select a pickup time"),
 	notes: z.string().optional(),
 	quotedAmount: z.number().positive("Amount must be positive"),
 	customerName: z.string().min(1, "Customer name is required"),

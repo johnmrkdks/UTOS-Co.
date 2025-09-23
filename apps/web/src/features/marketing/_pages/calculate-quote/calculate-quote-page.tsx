@@ -477,7 +477,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 								<div className="flex items-center gap-3">
 									{selectedCar.images && selectedCar.images.length > 0 && (
 										<img
-											src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
+											src={selectedCar.images.find((img: any) => img.isMain)?.url || selectedCar.images[0].url}
 											alt={selectedCar.name}
 											className="w-16 h-12 object-cover rounded border"
 										/>
@@ -619,7 +619,7 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 										{selectedCar.images && selectedCar.images.length > 0 && (
 											<div className="mb-4">
 												<img
-													src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
+													src={selectedCar.images.find((img: any) => img.isMain)?.url || selectedCar.images[0].url}
 													alt={selectedCar.name}
 													className="w-full h-48 object-cover rounded-lg border"
 												/>

@@ -17,7 +17,7 @@ export function CreateOffloadBookingDialog() {
 	const { isCreateOffloadBookingDialogOpen, closeCreateOffloadBookingDialog } = useBookingManagementModalProvider();
 	const createOffloadBookingMutation = useCreateOffloadBookingMutation();
 
-	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+	const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 	const [selectedTime, setSelectedTime] = useState("");
 	const [pickupAddress, setPickupAddress] = useState("");
 	const [destinationAddress, setDestinationAddress] = useState("");
@@ -62,7 +62,7 @@ export function CreateOffloadBookingDialog() {
 			await createOffloadBookingMutation.mutateAsync(bookingData);
 			// Reset form and close dialog only on success
 			reset();
-			setSelectedDate(null);
+			setSelectedDate(undefined);
 			setSelectedTime("");
 			setPickupAddress("");
 			setDestinationAddress("");
@@ -75,7 +75,7 @@ export function CreateOffloadBookingDialog() {
 
 	const handleClose = () => {
 		reset();
-		setSelectedDate(null);
+		setSelectedDate(undefined);
 		setSelectedTime("");
 		setPickupAddress("");
 		setDestinationAddress("");

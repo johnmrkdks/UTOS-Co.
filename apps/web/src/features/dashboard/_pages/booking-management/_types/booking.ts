@@ -10,7 +10,7 @@ export const createCustomBookingSchema = z.object({
 	destinationLatitude: z.number().optional(),
 	destinationLongitude: z.number().optional(),
 	scheduledPickupTime: z.date({
-		required_error: "Pickup time is required",
+		message: "Pickup time is required",
 	}),
 	customerName: z.string().min(1, "Customer name is required"),
 	customerPhone: z.string().min(1, "Customer phone is required"),

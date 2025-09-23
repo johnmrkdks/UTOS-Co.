@@ -16,7 +16,7 @@ const quoteBookingSchema = z.object({
 	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
 	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
 	scheduledPickupTime: z.date({
-		required_error: "Please select a pickup date and time",
+		message: "Please select a pickup date and time",
 	}).refine((date) => {
 		const now = new Date();
 		const hoursUntilPickup = (date.getTime() - now.getTime()) / (1000 * 60 * 60);

@@ -115,7 +115,7 @@ function RouteComponent() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<PackageServiceTypesTable data={serviceTypes} isLoading={serviceTypesLoading} />
+								<PackageServiceTypesTable data={serviceTypes as any} isLoading={serviceTypesLoading} />
 							</CardContent>
 						</Card>
 

@@ -227,7 +227,7 @@ export function UnifiedBookingPage() {
 					selectedCar={selectedCar}
 					onConfirm={handleBookingConfirm}
 					onBack={() => goToStep("booking-details")}
-					isProcessing={currentStep === "processing"}
+					isProcessing={false}
 				/>
 			)}
 

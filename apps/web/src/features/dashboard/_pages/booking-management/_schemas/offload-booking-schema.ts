@@ -27,7 +27,7 @@ export const offloadBookingSchema = z.object({
 		.max(999999, "Price must be less than $999,999"),
 	scheduledPickupTime: z
 		.date({
-			required_error: "Pickup date and time is required",
+			message: "Pickup date and time is required",
 		}),
 	// Customer information
 	customerName: z

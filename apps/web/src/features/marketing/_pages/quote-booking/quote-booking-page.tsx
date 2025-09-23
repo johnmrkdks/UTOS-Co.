@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
 import { queryClient } from "@/trpc";
 import { useCreateCustomBookingFromQuoteMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
@@ -72,6 +73,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 	// Use user query for authenticated users only
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
+	const { data: profileData, isLoading: profileLoading } = useCustomerProfileQuery();
 
 
 	// Get quote ID from either path parameter (customer routes) or search parameter (public routes)
@@ -139,14 +141,15 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 	// Pre-populate form data for authenticated users
 	useEffect(() => {
-		if (sessionData?.user) {
+		if (sessionData?.user && profileData?.user) {
 			setFormData(prev => ({
 				...prev,
-				customerName: prev.customerName || sessionData.user.name || "",
-				customerEmail: prev.customerEmail || sessionData.user.email || "",
+				customerName: prev.customerName || profileData.user.name || "",
+				customerEmail: prev.customerEmail || profileData.user.email || "",
+				customerPhone: prev.customerPhone || profileData.user.phone || "",
 			}));
 		}
-	}, [sessionData]);
+	}, [sessionData, profileData]);
 
 	// Extract quote data - prioritize secure quote, fallback to URL params
 	const quoteData = secureQuoteData ? {
@@ -816,7 +819,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	}
 
 	return (
-		<div ref={scrollContainerRef} className="min-h-screen bg-gray-50">
+		<div ref={scrollContainerRef as any} className="min-h-screen bg-gray-50">
 			<div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
 				{/* Header */}
 				<div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-8">

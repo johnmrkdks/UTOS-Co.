@@ -17,6 +17,7 @@ import { DateTimePicker } from "@/components/date-time-picker";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
 import { createLocalDateForBackend } from "@/utils/timezone";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
 import { createServiceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
@@ -46,6 +47,7 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 
 	const navigate = useNavigate();
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
+	const { data: profileData, isLoading: profileLoading } = useCustomerProfileQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
 
 	// Create schema for hourly service - ensure minimum 20 passengers
@@ -75,15 +77,16 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 
 	// Pre-populate with user data if authenticated
 	useEffect(() => {
-		if (sessionData?.user) {
+		if (sessionData?.user && profileData?.user) {
 			const currentValues = form.getValues();
 			form.reset({
 				...currentValues,
-				customerName: currentValues.customerName || sessionData.user.name || "",
-				customerEmail: currentValues.customerEmail || sessionData.user.email || "",
+				customerName: currentValues.customerName || profileData.user.name || "",
+				customerEmail: currentValues.customerEmail || profileData.user.email || "",
+				customerPhone: currentValues.customerPhone || profileData.user.phone || "",
 			});
 		}
-	}, [sessionData, form]);
+	}, [sessionData, profileData, form]);
 
 	// Update form hours when local hours state changes
 	useEffect(() => {
@@ -653,7 +656,7 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 									<Button
 										type="submit"
 										size="lg"
-										disabled={createBookingMutation.isPending || !pickupLocation || !destination || !selectedDate || !selectedTime}
+										disabled={createBookingMutation.isPending || profileLoading || !pickupLocation || !destination || !selectedDate || !selectedTime}
 										className="w-full h-14 text-lg font-bold"
 									>
 										{createBookingMutation.isPending ? (

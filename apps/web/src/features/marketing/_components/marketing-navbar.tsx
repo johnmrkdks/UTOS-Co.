@@ -448,7 +448,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 						await signOutWithConfirmation.confirmSignOut();
 						onClose(); // Close the mobile sheet after successful sign out
 					}}
-					userRole={session.user.role}
+					userRole={(session.user.role || "user") as any}
 					userName={session.user.name}
 					isLoading={signOutWithConfirmation.isSigningOut}
 				/>

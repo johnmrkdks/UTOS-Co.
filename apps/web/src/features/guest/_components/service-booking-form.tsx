@@ -16,6 +16,7 @@ import { DateTimePicker } from "@/components/date-time-picker";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
 import { createLocalDateForBackend } from "@/utils/timezone";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
 import { createServiceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
@@ -46,6 +47,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 	const navigate = useNavigate();
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
+	const { data: profileData, isLoading: profileLoading } = useCustomerProfileQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
 
 	// Determine if this is an hourly service
@@ -78,15 +80,16 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 	// Pre-populate with user data if authenticated
 	useEffect(() => {
-		if (sessionData?.user) {
+		if (sessionData?.user && profileData?.user) {
 			const currentValues = form.getValues();
 			form.reset({
 				...currentValues,
-				customerName: currentValues.customerName || sessionData.user.name || "",
-				customerEmail: currentValues.customerEmail || sessionData.user.email || "",
+				customerName: currentValues.customerName || profileData.user.name || "",
+				customerEmail: currentValues.customerEmail || profileData.user.email || "",
+				customerPhone: currentValues.customerPhone || profileData.user.phone || "",
 			});
 		}
-	}, [sessionData, form]);
+	}, [sessionData, profileData, form]);
 
 	const onSubmit = async (data: ServiceBookingFormData) => {
 		// Check authentication before allowing booking
@@ -462,14 +465,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 									<Button
 										type="submit"
 										className="w-full h-14 text-lg font-bold"
-										disabled={createBookingMutation.isPending || sessionLoading}
+										disabled={createBookingMutation.isPending || sessionLoading || profileLoading}
 									>
 										{createBookingMutation.isPending ? (
 											<>
 												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
 												Creating Your Booking...
 											</>
-										) : sessionLoading ? (
+										) : sessionLoading || profileLoading ? (
 											<>
 												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
 												Loading...

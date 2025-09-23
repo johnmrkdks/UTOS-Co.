@@ -106,7 +106,7 @@ export function InstantQuoteWidget() {
 			params.set("selectedCarId", search.carId);
 			navigate({
 				to: "/calculate-quote",
-				search: Object.fromEntries(params),
+				search: Object.fromEntries(params) as any,
 				resetScroll: true
 			});
 		} else {
