@@ -246,36 +246,99 @@ export const mailRouter = router({
 			testEmail: z.string().email(),
 		}))
 		.mutation(async ({ input, ctx }) => {
+			let mailService: any = null;
 			try {
-				const mailService = getMailService(ctx.env);
-				const success = await mailService.sendEmail({
-					to: input.testEmail,
-					subject: "Down Under Chauffeur - Email System Test",
-					html: `
-						<h2>Email System Test</h2>
-						<p>This is a test email to verify that the Down Under Chauffeur email system is working correctly.</p>
-						<p>If you receive this email, the OAuth 2.0 integration with Gmail is functioning properly.</p>
-						<p>Test sent at: ${new Date().toISOString()}</p>
-					`,
+				// Add timeout for the entire operation
+				const testEmailPromise = (async () => {
+					mailService = getMailService(ctx.env);
+
+					// Validate configuration first
+					const config = ctx.env;
+					const requiredEnvVars = [
+						'GOOGLE_CLIENT_ID', 'GMAIL_CLIENT_ID',
+						'GOOGLE_CLIENT_SECRET', 'GMAIL_CLIENT_SECRET',
+						'GOOGLE_EMAIL_REFRESH_TOKEN', 'GMAIL_REFRESH_TOKEN',
+						'GOOGLE_EMAIL_USER', 'GMAIL_USER'
+					];
+
+					const hasRequiredConfig = requiredEnvVars.some(varName => (config as any)[varName]);
+					if (!hasRequiredConfig) {
+						throw new Error("Missing required email configuration environment variables");
+					}
+
+					const success = await mailService.sendEmail({
+						to: input.testEmail,
+						subject: "Down Under Chauffeur - Email System Test",
+						html: `
+							<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+								<h2 style="color: #2563eb;">Email System Test</h2>
+								<p>This is a test email to verify that the Down Under Chauffeur email system is working correctly.</p>
+								<p>If you receive this email, the OAuth 2.0 integration with Gmail is functioning properly.</p>
+								<div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
+									<strong>Test Details:</strong><br>
+									Test sent at: ${new Date().toISOString()}<br>
+									Recipient: ${input.testEmail}<br>
+									Status: ✅ Connection Successful
+								</div>
+								<p><em>This is an automated test email from Down Under Chauffeur system.</em></p>
+							</div>
+						`,
+					});
+
+					return success;
+				})();
+
+				// Race with timeout
+				const timeoutPromise = new Promise<boolean>((_, reject) => {
+					setTimeout(() => reject(new Error('Email test timeout after 60 seconds')), 60000);
 				});
+
+				const success = await Promise.race([testEmailPromise, timeoutPromise]);
 
 				if (!success) {
 					throw new TRPCError({
 						code: "INTERNAL_SERVER_ERROR",
-						message: "Failed to send test email",
+						message: "Failed to send test email - email service returned false",
 					});
 				}
 
 				return {
 					success: true,
 					message: "Test email sent successfully",
-					timestamp: new Date().toISOString()
+					timestamp: new Date().toISOString(),
+					recipient: input.testEmail
 				};
 			} catch (error) {
 				console.error("Error in testEmailConnection:", error);
+
+				// Cleanup on error
+				if (mailService && typeof mailService.cleanup === 'function') {
+					try {
+						await mailService.cleanup();
+					} catch (cleanupError) {
+						console.error("Error during cleanup:", cleanupError);
+					}
+				}
+
+				// Provide more specific error messages
+				let errorMessage = "Failed to send test email";
+				if (error instanceof Error) {
+					if (error.message.includes('timeout')) {
+						errorMessage = "Email test timed out - possible network connectivity issue";
+					} else if (error.message.includes('IPv4') || error.message.includes('resolve')) {
+						errorMessage = "Network connectivity issue - unable to resolve email server";
+					} else if (error.message.includes('authentication')) {
+						errorMessage = "Email authentication failed - check OAuth2 credentials";
+					} else if (error.message.includes('Missing required')) {
+						errorMessage = error.message;
+					} else {
+						errorMessage = `Email service error: ${error.message}`;
+					}
+				}
+
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: "Failed to send test email",
+					message: errorMessage,
 				});
 			}
 		}),

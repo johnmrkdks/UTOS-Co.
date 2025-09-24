@@ -11,6 +11,11 @@ import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
 
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
+	referenceNumber: text("reference_number").$defaultFn(() => {
+		// Generate a 6-digit reference number (e.g., DUC-234567)
+		const number = Math.floor(100000 + Math.random() * 900000);
+		return `DUC-${number}`;
+	}),
 	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
 
 	carId: text("car_id")
