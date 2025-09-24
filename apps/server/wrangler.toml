@@ -43,13 +43,13 @@ binding = 'BUCKET'
 bucket_name = 'down-under-chauffeur-test-bucket'
 preview_bucket_name = 'down-under-chauffeur-test-bucket'
 
-[env.staging]
+[env.staging.vars]
 NODE_ENV = "staging"
-CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
+CORS_ORIGIN = "https://down-under-chauffeur-staging.davannarts.workers.dev"
 
 # Better Auth
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
-BETTER_AUTH_URL="down-under-chauffeur-server-staging.davannarts.workers.dev"
+BETTER_AUTH_URL="https://down-under-chauffeur-server-staging.davannarts.workers.dev"
 
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
@@ -81,7 +81,7 @@ bucket_name = 'down-under-chauffeur-bucket'
 preview_bucket_name = "down-under-chauffeur-bucket"
 
 
-[env.production]
+[env.production.vars]
 NODE_ENV = "production"
 CORS_ORIGIN = "https://downunderchauffeurs.com"
 
