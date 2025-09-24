@@ -12,7 +12,7 @@ VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 
 
 [env.staging.vars]
-VITE_SERVER_URL = "down-under-chauffeur-server-staging.davannarts.workers.dev"
+VITE_SERVER_URL = "https://down-under-chauffeur-server-staging.davannarts.workers.dev"
 VITE_CLIENT_URL = "https://down-under-chauffeur-staging.davannarts.workers.dev"
 VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 

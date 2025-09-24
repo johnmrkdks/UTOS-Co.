@@ -71,8 +71,8 @@ CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "down-under-chauffeur-db"
-database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
-preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
+preview_database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
 migrations_dir = "./drizzle/migrations/sqlite"
 
 [[env.staging.r2_buckets]]
