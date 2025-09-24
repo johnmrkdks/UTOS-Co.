@@ -3,13 +3,16 @@ main = "src/index.ts"
 compatibility_date = "2025-06-15"
 compatibility_flags = ["nodejs_compat"]
 
+[observability.logs]
+enabled = true
+
 [vars]
-NODE_ENV = "production"
-CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
+NODE_ENV = "development"
+CORS_ORIGIN = "http://localhost:3001"
 
 # Better Auth
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
-BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
+BETTER_AUTH_URL="http://localhost:3000"
 
 # Google OAuth
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
@@ -20,27 +23,97 @@ GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 
 
 # Cloudflare R2
-CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
 CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
 CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
-CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-test-bucket"
 CLOUDFLARE_R2_REGION = "oc" # Oceania
-CLOUDFLARE_R2_S3_ENDPOINT = "https://982e002f72f3d258dd99f8aaf8a68a82.r2.cloudflarestorage.com"
-CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
-
+CLOUDFLARE_R2_S3_ENDPOINT = "REDACTED_R2_ENDPOINT"
+CLOUDFLARE_R2_PUBLIC_URL = "REDACTED_R2_PUBLIC_URL"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "down-under-chauffeur-db"
-database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
-preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
-#preview_database_id = "DB"
+database_name = "down-under-chauffeur-test-db"
+database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
 migrations_dir = "./drizzle/migrations/sqlite"
 
 [[r2_buckets]]
 binding = 'BUCKET'
-bucket_name = 'down-under-chauffeur-bucket'
-preview_bucket_name = "down-under-chauffeur-test-bucket"
+bucket_name = 'down-under-chauffeur-test-bucket'
+preview_bucket_name = 'down-under-chauffeur-test-bucket'
 
-[observability.logs]
-enabled = true
+[env.staging]
+NODE_ENV = "staging"
+CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
+
+# Better Auth
+BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
+BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
+
+GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_OAUTH_REFRESH_TOKEN"
+GOOGLE_EMAIL_USER = "johnmrk.au@gmail.com"
+GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+
+
+# Cloudflare R2
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
+CLOUDFLARE_R2_REGION = "oc" # Oceania
+CLOUDFLARE_R2_S3_ENDPOINT = "https://982e002f72f3d258dd99f8aaf8a68a82.r2.cloudflarestorage.com/down-under-chauffeur-bucket"
+CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "down-under-chauffeur-staging-db"
+database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+migrations_dir = "./drizzle/migrations/sqlite"
+
+[[env.staging.r2_buckets]]
+binding = 'BUCKET'
+bucket_name = 'down-under-chauffeur-bucket'
+preview_bucket_name = "down-under-chauffeur-bucket"
+
+
+[env.production]
+NODE_ENV = "production"
+CORS_ORIGIN = "https://downunderchauffeurs.com"
+
+# Better Auth
+BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
+BETTER_AUTH_URL="https://api.downunderchauffeurs.com"
+
+# Google OAuth
+GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_OAUTH_REFRESH_TOKEN"
+GOOGLE_EMAIL_USER = "johnmrk.au@gmail.com"
+GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+
+# Cloudflare R2
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
+CLOUDFLARE_R2_BUCKET_NAME = "downunderchauffeurs-bucket"
+CLOUDFLARE_R2_REGION = "oc" # Oceania
+CLOUDFLARE_R2_S3_ENDPOINT = "https://8357cb0b206399da0d4027d5f6961df9.r2.cloudflarestorage.com/downunderchauffeurs-bucket"
+CLOUDFLARE_R2_PUBLIC_URL = "https://cdn.downunderchauffeurs.com/downunderchauffeurs-bucket"
+
+[[env.production.routes]]
+pattern = "api.downunderchauffeurs.com"
+custom_domain = true
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "downunderchauffeurs-db"
+database_id = "e03c212d-bd91-46ca-a218-1950cbb1e4ea"
+preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+migrations_dir = "./drizzle/migrations/sqlite"
+
+[[env.production.r2_buckets]]
+binding = 'BUCKET'
+bucket_name = 'downunderchauffeurs-bucket'
