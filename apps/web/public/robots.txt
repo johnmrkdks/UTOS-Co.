@@ -1,0 +1,30 @@
+# Down Under Chauffeurs - Robots.txt
+User-agent: *
+Allow: /
+
+# Important pages for search engines
+Allow: /services
+Allow: /fleet
+Allow: /contact-us
+Allow: /calculate-quote
+
+# Disallow admin and internal areas
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /driver/
+Disallow: /customer/
+Disallow: /auth/
+
+# Disallow temporary and development paths
+Disallow: /api/
+Disallow: /_auth/
+Disallow: /_marketing/book-quote/
+Disallow: /guest/
+
+# Allow search engines to crawl assets
+Allow: /assets/
+Allow: /favicon.ico
+Allow: /logo.png
+
+# Sitemap location
+Sitemap: https://downunderchauffeurs.com/sitemap.xml
