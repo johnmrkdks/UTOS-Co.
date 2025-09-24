@@ -4,23 +4,25 @@ compatibility_date = "2025-04-03"
 [assets]
 not_found_handling = "single-page-application"
 
-VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 
 [vars]
 NODE_ENV = "development"
 VITE_SERVER_URL = "http://localhost:3000"
 VITE_CLIENT_URL = "http://localhost:3001"
+VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 
 
 [env.staging]
 NODE_ENV = "staging"
 VITE_SERVER_URL = "https://down-under-chauffeur-server.davannarts.workers.dev"
 VITE_CLIENT_URL = "https://down-under-chauffeur.davannarts.workers.dev"
+VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 
 
 [env.production]
 NODE_ENV = "production"
 VITE_SERVER_URL = "https://api.downunderchauffeurs.com"
 VITE_CLIENT_URL = "https://downunderchauffeurs.com"
+VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
 
 

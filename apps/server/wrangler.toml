@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [observability.logs]
 enabled = true
 
-[vars]
+[env.development]
 NODE_ENV = "development"
 CORS_ORIGIN = "http://localhost:3001"
 
@@ -49,7 +49,7 @@ CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
 
 # Better Auth
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
-BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
+BETTER_AUTH_URL="down-under-chauffeur-server-staging.davannarts.workers.dev"
 
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
@@ -70,7 +70,7 @@ CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"
-database_name = "down-under-chauffeur-staging-db"
+database_name = "down-under-chauffeur-db"
 database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
 preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
 migrations_dir = "./drizzle/migrations/sqlite"
