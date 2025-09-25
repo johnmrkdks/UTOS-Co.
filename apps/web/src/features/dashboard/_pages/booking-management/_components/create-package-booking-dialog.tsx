@@ -471,6 +471,7 @@ export function CreatePackageBookingDialog() {
 										form.setValue("scheduledPickupTime", dateTime);
 									}
 								}}
+								allowPastDates={true}
 							/>
 						</div>
 

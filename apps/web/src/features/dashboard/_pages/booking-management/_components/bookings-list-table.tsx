@@ -15,9 +15,11 @@ interface BookingsListTableProps {
 	filters?: BookingFilters;
 	compact?: boolean;
 	isArchived?: boolean;
+	hasDriver?: boolean;
+	hasCar?: boolean;
 }
 
-export function BookingsListTable({ bookingType, status, filters, compact = false, isArchived }: BookingsListTableProps) {
+export function BookingsListTable({ bookingType, status, filters, compact = false, isArchived, hasDriver, hasCar }: BookingsListTableProps) {
 	const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
 	const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 	const [bulkOperationsDialogOpen, setBulkOperationsDialogOpen] = useState(false);
@@ -62,6 +64,14 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		// Apply archive filter
 		if (isArchived !== undefined) {
 			filtered = filtered.filter(b => Boolean(b.isArchived) === isArchived);
+		}
+
+		// Apply driver and car assignment filters
+		if (hasDriver !== undefined) {
+			filtered = filtered.filter(b => Boolean(b.driverId) === hasDriver);
+		}
+		if (hasCar !== undefined) {
+			filtered = filtered.filter(b => Boolean(b.carId) === hasCar);
 		}
 
 		// Apply advanced filters

@@ -1372,6 +1372,35 @@ function DriverTripsComponent() {
 									</div>
 								)}
 
+								{/* Customer Special Requests */}
+								{selectedBookingForDetails.specialRequests && (
+									<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+										<h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-blue-600" />
+											Customer Special Requests
+										</h3>
+										<div className="bg-blue-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBookingForDetails.specialRequests}
+											</p>
+										</div>
+									</div>
+								)}
+
+								{/* Additional Notes Section */}
+								{selectedBookingForDetails.additionalNotes && (
+									<div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+										<h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-primary" />
+											Additional Notes
+										</h3>
+										<div className="bg-gray-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBookingForDetails.additionalNotes}
+											</p>
+										</div>
+									</div>
+								)}
 
 								</div>
 							</div>

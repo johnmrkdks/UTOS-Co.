@@ -768,6 +768,7 @@ export const bookingsRouter = router({
 			passengerCount: z.number().optional(),
 			luggageCount: z.number().optional(),
 			specialRequests: z.string().optional(),
+			additionalNotes: z.string().optional(),
 		}))
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {

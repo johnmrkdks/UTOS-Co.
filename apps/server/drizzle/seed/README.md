@@ -1,6 +1,6 @@
 # Database Seeder
 
-This directory contains the seeder files for populating the Down Under Chauffeur database with initial data.
+This directory contains the seeder files for populating the Down Under Chauffeurs database with initial data.
 
 ## Files
 

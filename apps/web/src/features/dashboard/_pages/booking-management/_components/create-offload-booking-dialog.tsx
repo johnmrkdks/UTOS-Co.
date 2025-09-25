@@ -54,7 +54,7 @@ export function CreateOffloadBookingDialog() {
 			customerPhone: data.customerPhone,
 			passengerCount: data.passengerCount || 1,
 			luggageCount: data.luggageCount || 0,
-			notes: data.notes || "",
+			additionalNotes: data.notes || "",
 			bookingType: "offload" as const,
 		};
 
@@ -321,6 +321,7 @@ export function CreateOffloadBookingDialog() {
 									}}
 									dateError={errors.scheduledPickupTime?.message}
 									timeError={errors.scheduledPickupTime?.message}
+									allowPastDates={true}
 								/>
 							</div>
 
@@ -354,19 +355,17 @@ export function CreateOffloadBookingDialog() {
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex gap-3 pt-2">
+					<div className="flex justify-end gap-3 pt-2">
 						<Button
 							type="button"
 							variant="outline"
 							onClick={handleClose}
-							className="flex-1"
 							disabled={isSubmitting}
 						>
 							Cancel
 						</Button>
 						<Button
 							type="submit"
-							className="flex-1"
 							disabled={isSubmitting}
 						>
 							{isSubmitting ? "Creating..." : "Create Offload Booking"}

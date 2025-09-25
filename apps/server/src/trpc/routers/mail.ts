@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "@/trpc/init";
 import { getMailService } from "@workspace/mail";
 import { sendDriverAssignmentNotification, sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import { BUSINESS_INFO } from "@/constants/business-info";
 
 const sendEmailSchema = z.object({
 	to: z.string().email(),
@@ -268,11 +269,11 @@ export const mailRouter = router({
 
 					const success = await mailService.sendEmail({
 						to: input.testEmail,
-						subject: "Down Under Chauffeur - Email System Test",
+						subject: `${BUSINESS_INFO.business.name} - Email System Test`,
 						html: `
 							<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 								<h2 style="color: #2563eb;">Email System Test</h2>
-								<p>This is a test email to verify that the Down Under Chauffeur email system is working correctly.</p>
+								<p>This is a test email to verify that the ${BUSINESS_INFO.business.name} email system is working correctly.</p>
 								<p>If you receive this email, the OAuth 2.0 integration with Gmail is functioning properly.</p>
 								<div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
 									<strong>Test Details:</strong><br>
@@ -280,7 +281,7 @@ export const mailRouter = router({
 									Recipient: ${input.testEmail}<br>
 									Status: ✅ Connection Successful
 								</div>
-								<p><em>This is an automated test email from Down Under Chauffeur system.</em></p>
+								<p><em>This is an automated test email from ${BUSINESS_INFO.business.name} system.</em></p>
 							</div>
 						`,
 					});

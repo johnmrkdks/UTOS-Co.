@@ -248,6 +248,34 @@ function AvailableTripsPage() {
 								)}
 							</div>
 
+							{/* Notes Section - Mobile */}
+							{(trip.specialRequests || trip.additionalNotes) && (
+								<div className="mb-3 space-y-2">
+									{trip.specialRequests && (
+										<div className="bg-blue-50 rounded-md p-2 border border-blue-100">
+											<div className="flex items-center gap-1 mb-1">
+												<MessageSquare className="h-3 w-3 text-blue-600" />
+												<span className="text-xs font-semibold text-blue-800">Special Requests</span>
+											</div>
+											<p className="text-xs text-blue-700 line-clamp-2 leading-tight">
+												{trip.specialRequests}
+											</p>
+										</div>
+									)}
+									{trip.additionalNotes && (
+										<div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+											<div className="flex items-center gap-1 mb-1">
+												<MessageSquare className="h-3 w-3 text-orange-600" />
+												<span className="text-xs font-semibold text-orange-800">Additional Notes</span>
+											</div>
+											<p className="text-xs text-orange-700 line-clamp-2 leading-tight">
+												{trip.additionalNotes}
+											</p>
+										</div>
+									)}
+								</div>
+							)}
+
 							{/* Customer, Pax, and Car - Compact Bottom Row */}
 							<div className="flex items-center gap-2 pt-2 border-t border-gray-100">
 								<div className="flex items-center gap-1 text-xs text-gray-600">
@@ -364,6 +392,34 @@ function AvailableTripsPage() {
 									</>
 								)}
 							</div>
+
+							{/* Notes Section - Desktop */}
+							{(trip.specialRequests || trip.additionalNotes) && (
+								<div className="mb-3 space-y-2">
+									{trip.specialRequests && (
+										<div className="bg-blue-50 rounded-md p-2 border border-blue-100">
+											<div className="flex items-center gap-1 mb-1">
+												<MessageSquare className="h-3 w-3 text-blue-600" />
+												<span className="text-xs font-semibold text-blue-800">Special Requests</span>
+											</div>
+											<p className="text-xs text-blue-700 line-clamp-2 leading-tight">
+												{trip.specialRequests}
+											</p>
+										</div>
+									)}
+									{trip.additionalNotes && (
+										<div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+											<div className="flex items-center gap-1 mb-1">
+												<MessageSquare className="h-3 w-3 text-orange-600" />
+												<span className="text-xs font-semibold text-orange-800">Additional Notes</span>
+											</div>
+											<p className="text-xs text-orange-700 line-clamp-2 leading-tight">
+												{trip.additionalNotes}
+											</p>
+										</div>
+									)}
+								</div>
+							)}
 
 							{/* Footer - Compact Row */}
 							<div className="flex items-center justify-between pt-2 border-t border-gray-100">
@@ -654,37 +710,105 @@ function AvailableTripsPage() {
 								{/* Trip Details */}
 								<div className="bg-white rounded-lg p-4 border border-gray-200">
 									<h3 className="font-semibold text-gray-900 mb-3">Trip Details</h3>
-									<div className="grid grid-cols-2 gap-4 text-sm">
-										{/* Show client-booked duration for hourly packages */}
-										{selectedBookingForDetails.packageId &&
-										 selectedBookingForDetails.package?.packageServiceType?.rateType === 'hourly' &&
-										 selectedBookingForDetails.estimatedDuration && (
+									<div className="space-y-3">
+										{/* Booking Type and ID */}
+										<div className="grid grid-cols-2 gap-4 text-sm">
 											<div>
-												<span className="text-gray-600">Client Booked:</span>
-												<p className="font-medium text-green-600">
-													{Math.round(selectedBookingForDetails.estimatedDuration / 60)} hour{Math.round(selectedBookingForDetails.estimatedDuration / 60) !== 1 ? 's' : ''}
+												<span className="text-gray-600">Booking Type:</span>
+												<p className="font-medium capitalize">
+													{selectedBookingForDetails.bookingType?.replace('_', ' ') || 'Unknown'}
+												</p>
+											</div>
+											<div>
+												<span className="text-gray-600">Booking ID:</span>
+												<p className="font-medium font-mono text-sm">
+													#{selectedBookingForDetails.id?.slice(-6) || 'N/A'}
+												</p>
+											</div>
+										</div>
+
+										{/* Package/Service Name if applicable */}
+										{selectedBookingForDetails.packageId && selectedBookingForDetails.package?.name && (
+											<div>
+												<span className="text-gray-600">Service:</span>
+												<p className="font-medium text-blue-600">
+													{selectedBookingForDetails.package.name}
 												</p>
 											</div>
 										)}
-										{selectedBookingForDetails.estimatedDistance && (
-											<div>
-												<span className="text-gray-600">Distance:</span>
-												<p className="font-medium">{(selectedBookingForDetails.estimatedDistance / 1000).toFixed(1)} km</p>
-											</div>
-										)}
-										{selectedBookingForDetails.estimatedDuration && (
-											<div>
-												<span className="text-gray-600">Travel Duration:</span>
-												<p className="font-medium">{Math.round(selectedBookingForDetails.estimatedDuration / 60)} min</p>
-											</div>
-										)}
+
+										{/* Vehicle Details */}
 										<div>
-											<span className="text-gray-600">Fare:</span>
-											<p className="font-medium text-primary">${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}</p>
+											<span className="text-gray-600">Vehicle:</span>
+											<p className="font-medium">
+												{selectedBookingForDetails.car?.name ||
+												 selectedBookingForDetails.carName ||
+												 selectedBookingForDetails.vehicleName ||
+												 selectedBookingForDetails.vehicle?.name ||
+												 'Vehicle not assigned'}
+											</p>
 										</div>
-										<div>
-											<span className="text-gray-600">Status:</span>
-											<p className="font-medium capitalize">{selectedBookingForDetails.status?.replace('_', ' ')}</p>
+
+										{/* Trip metrics in a grid */}
+										<div className="grid grid-cols-2 gap-4 text-sm">
+											{/* Show client-booked duration for hourly packages */}
+											{selectedBookingForDetails.packageId &&
+											 selectedBookingForDetails.package?.packageServiceType?.rateType === 'hourly' &&
+											 selectedBookingForDetails.estimatedDuration && (
+												<div>
+													<span className="text-gray-600">Client Booked:</span>
+													<p className="font-medium text-green-600">
+														{Math.round(selectedBookingForDetails.estimatedDuration / 60)} hour{Math.round(selectedBookingForDetails.estimatedDuration / 60) !== 1 ? 's' : ''}
+													</p>
+												</div>
+											)}
+											{selectedBookingForDetails.estimatedDistance && (
+												<div>
+													<span className="text-gray-600">Distance:</span>
+													<p className="font-medium">{(selectedBookingForDetails.estimatedDistance / 1000).toFixed(1)} km</p>
+												</div>
+											)}
+											{selectedBookingForDetails.estimatedDuration && !selectedBookingForDetails.packageId && (
+												<div>
+													<span className="text-gray-600">Travel Duration:</span>
+													<p className="font-medium">{Math.round(selectedBookingForDetails.estimatedDuration / 60)} min</p>
+												</div>
+											)}
+											<div>
+												<span className="text-gray-600">Fare:</span>
+												<p className="font-medium text-primary">${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}</p>
+											</div>
+											<div>
+												<span className="text-gray-600">Luggage:</span>
+												<p className="font-medium">{selectedBookingForDetails.luggageCount || 0} piece{(selectedBookingForDetails.luggageCount || 0) !== 1 ? 's' : ''}</p>
+											</div>
+											<div>
+												<span className="text-gray-600">Status:</span>
+												<p className="font-medium capitalize">{selectedBookingForDetails.status?.replace('_', ' ')}</p>
+											</div>
+										</div>
+
+										{/* Booking Time Info */}
+										<div className="pt-2 border-t border-gray-100">
+											<div className="grid grid-cols-2 gap-4 text-sm">
+												<div>
+													<span className="text-gray-600">Created:</span>
+													<p className="font-medium text-xs">
+														{selectedBookingForDetails.createdAt
+															? format(new Date(selectedBookingForDetails.createdAt), "MMM dd, h:mm a")
+															: 'N/A'
+														}
+													</p>
+												</div>
+												{selectedBookingForDetails.confirmedAt && (
+													<div>
+														<span className="text-gray-600">Confirmed:</span>
+														<p className="font-medium text-xs">
+															{format(new Date(selectedBookingForDetails.confirmedAt), "MMM dd, h:mm a")}
+														</p>
+													</div>
+												)}
+											</div>
 										</div>
 									</div>
 								</div>
@@ -692,10 +816,33 @@ function AvailableTripsPage() {
 								{/* Special Requests */}
 								{selectedBookingForDetails.specialRequests && (
 									<div className="bg-white rounded-lg p-4 border border-gray-200">
-										<h3 className="font-semibold text-gray-900 mb-2">Special Requests</h3>
-										<p className="text-sm text-gray-700">{selectedBookingForDetails.specialRequests}</p>
+										<h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-blue-600" />
+											Special Requests
+										</h3>
+										<div className="bg-blue-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBookingForDetails.specialRequests}
+											</p>
+										</div>
 									</div>
 								)}
+
+								{/* Additional Notes */}
+								{selectedBookingForDetails.additionalNotes && (
+									<div className="bg-white rounded-lg p-4 border border-gray-200">
+										<h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-orange-600" />
+											Additional Notes
+										</h3>
+										<div className="bg-orange-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBookingForDetails.additionalNotes}
+											</p>
+										</div>
+									</div>
+								)}
+
 								</div>
 							</div>
 

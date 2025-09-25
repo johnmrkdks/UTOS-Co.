@@ -1,4 +1,5 @@
 import { updateBooking } from "@/data/bookings/update-booking";
+import { getBookingById } from "@/data/bookings/get-booking-by-id";
 import type { DB } from "@/db";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 import type { UpdateBooking } from "@/schemas/shared";
@@ -20,6 +21,25 @@ export const UpdateBookingStatusSchema = z.object({
 export type UpdateBookingStatusParams = z.infer<typeof UpdateBookingStatusSchema>;
 
 export async function updateBookingStatusService(db: DB, data: UpdateBookingStatusParams, env?: Env) {
+	// For statuses that require starting a trip, validate car assignment
+	const statusesRequiringCar = [
+		BookingStatusEnum.DriverEnRoute,
+		BookingStatusEnum.InProgress, // Legacy status
+		BookingStatusEnum.PassengerOnBoard,
+	];
+
+	if (statusesRequiringCar.includes(data.status)) {
+		// Get the current booking to check car assignment
+		const existingBooking = await getBookingById(db, data.id);
+
+		if (!existingBooking) {
+			throw new Error("Booking not found");
+		}
+
+		if (!existingBooking.carId) {
+			throw new Error("Cannot start trip: No car assigned to this booking. Please assign a vehicle before starting the trip.");
+		}
+	}
 	const updateData: UpdateBooking = {
 		id: data.id,
 		status: data.status,

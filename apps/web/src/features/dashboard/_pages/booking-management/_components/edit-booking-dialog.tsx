@@ -72,7 +72,7 @@ export function EditBookingDialog({
 			setFormData({
 				scheduledPickupDate: dateString,
 				scheduledPickupTime: timeString,
-				notes: booking.notes || "",
+				notes: booking.additionalNotes || "",
 				quotedAmount: booking.quotedAmount || 0,
 				customerName: booking.customerName || "",
 				customerPhone: booking.customerPhone || "",
@@ -132,23 +132,26 @@ export function EditBookingDialog({
 			return;
 		}
 
-		// Convert date and time back to ISO string for backend
-		const scheduledPickupTime = createLocalDateForBackend(
+		// Convert date and time back to Date object for backend
+		const scheduledPickupTimeString = createLocalDateForBackend(
 			formData.scheduledPickupDate!,
 			formData.scheduledPickupTime!
 		);
+		const scheduledPickupTime = new Date(scheduledPickupTimeString);
 
 		editBookingMutation.mutate({
 			id: booking.id,
-			customerName: formData.customerName!,
-			customerPhone: formData.customerPhone!,
-			customerEmail: formData.customerEmail || "",
-			scheduledPickupTime,
-			notes: formData.notes || "",
-			quotedAmount: formData.quotedAmount || 0, // Store as dollar amount
-			passengerCount: formData.passengerCount!,
-			luggageCount: formData.luggageCount!,
-			specialRequests: formData.specialRequests || "",
+			data: {
+				customerName: formData.customerName!,
+				customerPhone: formData.customerPhone!,
+				customerEmail: formData.customerEmail || "",
+				scheduledPickupTime,
+				additionalNotes: formData.notes || "",
+				quotedAmount: formData.quotedAmount || 0, // Store as dollar amount
+				passengerCount: formData.passengerCount!,
+				luggageCount: formData.luggageCount!,
+				specialRequests: formData.specialRequests || "",
+			}
 		}, {
 			onSuccess: () => {
 				onOpenChange(false);
@@ -237,6 +240,7 @@ export function EditBookingDialog({
 							timeError={formErrors.scheduledPickupTime}
 							dateLabel="Pickup Date *"
 							timeLabel="Pickup Time *"
+							allowPastDates={true}
 						/>
 
 						{/* Passengers and Luggage */}

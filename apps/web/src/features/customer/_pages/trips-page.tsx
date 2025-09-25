@@ -943,6 +943,36 @@ export function CustomerTripsPage() {
 										</span>
 									</div>
 								</div>
+
+								{/* Special Requests */}
+								{selectedBooking.specialRequests && (
+									<div className="bg-white rounded-lg p-4 border">
+										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-blue-600" />
+											Your Special Requests
+										</h3>
+										<div className="bg-blue-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBooking.specialRequests}
+											</p>
+										</div>
+									</div>
+								)}
+
+								{/* Additional Notes */}
+								{selectedBooking.additionalNotes && (
+									<div className="bg-white rounded-lg p-4 border">
+										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-primary" />
+											Additional Notes
+										</h3>
+										<div className="bg-gray-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBooking.additionalNotes}
+											</p>
+										</div>
+									</div>
+								)}
 							</div>
 						</div>
 					)}

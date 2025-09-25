@@ -86,6 +86,8 @@ function HistoryPage() {
 			quotedAmount: originalBooking?.quotedAmount || booking.finalAmount, // Use original quoted amount
 			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
 			extras: (originalBooking as any)?.extras || [], // Get extras breakdown from original booking
+			specialRequests: originalBooking?.specialRequests || null, // Include special requests
+			additionalNotes: originalBooking?.additionalNotes || null, // Include additional notes
 			car: null // TODO: Add car information to history data
 		};
 
@@ -472,6 +474,36 @@ function HistoryPage() {
 										</div>
 									</div>
 								</div>
+
+								{/* Special Requests */}
+								{selectedBookingForDetails.specialRequests && (
+									<div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+										<h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-blue-600" />
+											Special Requests
+										</h3>
+										<div className="bg-blue-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+												{selectedBookingForDetails.specialRequests}
+											</p>
+										</div>
+									</div>
+								)}
+
+								{/* Additional Notes */}
+								{selectedBookingForDetails.additionalNotes && (
+									<div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+										<h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-orange-600" />
+											Additional Notes
+										</h3>
+										<div className="bg-orange-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+												{selectedBookingForDetails.additionalNotes}
+											</p>
+										</div>
+									</div>
+								)}
 
 								{/* Trip Fare Information */}
 								<div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">

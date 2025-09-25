@@ -123,12 +123,10 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 					<DropdownMenuSeparator />
 
 					{/* Edit Actions */}
-
-					{/* HIDDEN: Edit booking functionality is currently disabled */}
-					{/* <DropdownMenuItem onClick={() => handleEditBooking(booking)}>
+					<DropdownMenuItem onClick={() => handleEditBooking(booking)}>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit booking
-					</DropdownMenuItem> */}
+					</DropdownMenuItem>
 
 					<DropdownMenuItem onClick={() => handleChangeStatus(booking)}>
 						<Activity className="mr-2 h-4 w-4" />

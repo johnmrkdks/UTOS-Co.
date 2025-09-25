@@ -14,7 +14,7 @@ export const CreateOffloadBookingServiceSchema = z.object({
 	customerPhone: z.string().min(1, "Customer phone is required"),
 	passengerCount: z.number().int().min(1).max(20).optional(),
 	luggageCount: z.number().int().min(0).max(50).optional(),
-	notes: z.string().optional(),
+	additionalNotes: z.string().optional(),
 	bookingType: z.literal("offload"),
 });
 
@@ -46,7 +46,7 @@ export async function createOffloadBookingService(db: DB, data: CreateOffloadBoo
 		customerPhone: data.customerPhone,
 		passengerCount: data.passengerCount || 1,
 		luggageCount: data.luggageCount || 0,
-		specialRequests: data.notes || "",
+		additionalNotes: data.additionalNotes || "",
 		status: "confirmed" as const, // Offload bookings start as confirmed
 	};
 

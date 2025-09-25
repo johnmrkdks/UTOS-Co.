@@ -246,7 +246,7 @@ async function generateSeedSQL() {
 	
 	const currentTime = Math.floor(Date.now() / 1000);
 	
-	let sql = "-- Down Under Chauffeur Database Seed Data\n\n";
+	let sql = "-- Down Under Chauffeurs Database Seed Data\n\n";
 	
 	// Skip Super Admin User creation
 	// sql += "-- Super Admin User\n";

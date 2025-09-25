@@ -18,6 +18,7 @@ interface EditBookingData {
 	passengerCount?: number;
 	luggageCount?: number;
 	specialRequests?: string;
+	additionalNotes?: string;
 }
 
 export async function editBooking(

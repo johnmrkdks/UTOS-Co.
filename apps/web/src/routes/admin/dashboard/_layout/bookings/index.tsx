@@ -17,7 +17,7 @@ import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-manageme
 import { ConfirmBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/confirm-booking-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive } from "lucide-react";
+import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive, CheckCircle } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
@@ -77,6 +77,9 @@ function BookingManagementContent() {
 	const activeBookings = bookingsData.filter(b =>
 		["driver_assigned", "in_progress"].includes(b.status)
 	).length;
+	const readyBookings = bookingsData.filter(b =>
+		b.driverId && b.carId && ["confirmed", "driver_assigned"].includes(b.status)
+	).length;
 	const archivedBookings = bookingsData.filter(b => b.isArchived === true).length;
 
 	// Analytics card data for booking management
@@ -113,6 +116,18 @@ function BookingManagementContent() {
 			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
 			iconBg: 'bg-green-500',
 			changeText: 'Scheduled for today',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'ready',
+			title: 'Ready',
+			value: readyBookings,
+			icon: CheckCircle,
+			bgGradient: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
+			iconBg: 'bg-emerald-500',
+			changeText: 'Driver & car assigned',
 			changeType: 'positive',
 			showIcon: true,
 			showBackgroundIcon: true
@@ -168,7 +183,7 @@ function BookingManagementContent() {
 				</div>
 			</div>
 
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
 				{bookingManagementStatsData.map((data) => (
 					<AnalyticsCard
 						key={data.id}
@@ -192,6 +207,7 @@ function BookingManagementContent() {
 				<TabsList>
 					<TabsTrigger value="all">All Bookings</TabsTrigger>
 					<TabsTrigger value="pending">Pending</TabsTrigger>
+					<TabsTrigger value="ready">Ready</TabsTrigger>
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
 					<TabsTrigger value="custom">Custom Bookings</TabsTrigger>
 					<TabsTrigger value="offload">Offloads</TabsTrigger>
@@ -258,6 +274,22 @@ function BookingManagementContent() {
 						<CardContent>
 							<Suspense fallback={<Loader />}>
 								<BookingsListTable status="pending" filters={filters} />
+							</Suspense>
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="ready" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Ready Bookings</CardTitle>
+							<CardDescription>
+								Bookings with both driver and car assigned, ready to begin service.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Suspense fallback={<Loader />}>
+								<BookingsListTable hasDriver={true} hasCar={true} filters={filters} />
 							</Suspense>
 						</CardContent>
 					</Card>

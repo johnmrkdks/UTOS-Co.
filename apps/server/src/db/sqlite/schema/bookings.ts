@@ -62,6 +62,7 @@ export const bookings = sqliteTable("bookings", {
 	passengerCount: integer("passenger_count").notNull().default(1),
 	luggageCount: integer("luggage_count").default(0),
 	specialRequests: text("special_requests"),
+	additionalNotes: text("additional_notes"), // Operational notes for drivers/admins
 
 	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
 	isArchived: integer("is_archived", { mode: "boolean" }),

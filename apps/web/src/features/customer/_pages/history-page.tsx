@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { Calendar, Package, Car, Clock, MapPin, Users, CheckCircle, AlertTriangle, ArrowRightIcon, Loader2, Star, DollarSign, X, ChevronRight } from "lucide-react";
+import { Calendar, Package, Car, Clock, MapPin, Users, CheckCircle, AlertTriangle, ArrowRightIcon, Loader2, Star, DollarSign, X, ChevronRight, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@workspace/ui/lib/utils";
 import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-bookings-query";
@@ -558,6 +558,43 @@ export function CustomerHistoryPage() {
 										  (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0)) && (
 											<div className="border-t border-gray-200"></div>
 										)}
+									</div>
+								</div>
+
+								{/* Special Requests */}
+								{selectedBookingForDetails.specialRequests && (
+									<div className="bg-white rounded-lg p-4 border">
+										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-blue-600" />
+											Special Requests
+										</h3>
+										<div className="bg-blue-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBookingForDetails.specialRequests}
+											</p>
+										</div>
+									</div>
+								)}
+
+								{/* Additional Notes */}
+								{selectedBookingForDetails.additionalNotes && (
+									<div className="bg-white rounded-lg p-4 border">
+										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<MessageSquare className="h-4 w-4 text-orange-600" />
+											Additional Notes
+										</h3>
+										<div className="bg-orange-50 rounded-lg p-3">
+											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+												{selectedBookingForDetails.additionalNotes}
+											</p>
+										</div>
+									</div>
+								)}
+
+								{/* Final Invoice */}
+								<div className="bg-white rounded-lg p-4 border">
+									<h3 className="font-semibold text-gray-900 mb-3">Invoice</h3>
+									<div className="space-y-2">
 
 										{/* Total */}
 										<div className="flex items-center justify-between">

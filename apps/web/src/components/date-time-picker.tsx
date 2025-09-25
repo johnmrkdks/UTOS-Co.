@@ -17,6 +17,7 @@ interface DateTimePickerProps {
 	dateLabel?: string;
 	timeLabel?: string;
 	className?: string;
+	allowPastDates?: boolean; // Deprecated - no longer used, kept for compatibility
 }
 
 
@@ -29,7 +30,8 @@ export function DateTimePicker({
 	timeError,
 	dateLabel = "Pickup Date *",
 	timeLabel = "Pickup Time *",
-	className = ""
+	className = "",
+	allowPastDates = false
 }: DateTimePickerProps) {
 	return (
 		<div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-5", className)}>
@@ -57,7 +59,15 @@ export function DateTimePicker({
 							mode="single"
 							selected={selectedDate}
 							onSelect={onDateChange}
-							disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+							disabled={(date) => {
+								// Always disable dates before 1900
+								if (date < new Date("1900-01-01")) return true;
+
+								// For both admin and customer flows, disable past dates but allow today
+								const today = new Date();
+								today.setHours(0, 0, 0, 0); // Reset to start of day
+								return date < today;
+							}}
 							initialFocus
 						/>
 					</PopoverContent>

@@ -7,6 +7,7 @@ import { cars } from "@/db/sqlite/schema/cars";
 import { packages } from "@/db/sqlite/schema/packages";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import { getMailService, renderTripStatusEmail, renderDriverAssignmentEmail } from "@workspace/mail";
+import { BUSINESS_INFO } from "@/constants/business-info";
 import type { Env } from "@/types/env";
 
 interface DriverAssignmentEmailData {
@@ -548,7 +549,7 @@ function generateDriverAssignmentEmailTemplate(
 	<div class="email-container">
 		<div class="header">
 			<h1 class="header-title">New Booking Assignment</h1>
-			<p class="header-subtitle">Down Under Chauffeurs</p>
+			<p class="header-subtitle">${BUSINESS_INFO.business.name}</p>
 		</div>
 
 		<div class="content">
@@ -643,7 +644,7 @@ function generateDriverAssignmentEmailTemplate(
 		</div>
 
 		<div class="footer">
-			<h3 class="footer-brand">Down Under Chauffeurs</h3>
+			<h3 class="footer-brand">${BUSINESS_INFO.business.name}</h3>
 			<p class="footer-tagline">Premium Luxury Transportation Services</p>
 
 			<div class="footer-links">
@@ -655,7 +656,7 @@ function generateDriverAssignmentEmailTemplate(
 			</div>
 
 			<p class="footer-disclaimer">
-				This is an automated notification from Down Under Chauffeurs.<br>
+				This is an automated notification from ${BUSINESS_INFO.business.name}.<br>
 				For support or questions, please contact our customer service team.
 			</p>
 		</div>
@@ -695,26 +696,51 @@ function generateTripStatusEmailTemplate(
 	let statusIcon = "";
 
 	switch (status) {
-		case "in_progress":
-		case "passenger_on_board":
-			statusTitle = "Your Trip Has Started";
-			statusMessage = "Your driver has started your trip. You should now be en route to your destination.";
-			statusIcon = "🚗";
+		case "confirmed":
+			statusTitle = "Booking Confirmed";
+			statusMessage = "Your booking has been confirmed. We will assign a driver and notify you soon.";
+			statusIcon = "✅";
+			break;
+		case "driver_assigned":
+			statusTitle = "Driver Assigned";
+			statusMessage = "A driver has been assigned to your booking. They will be in touch closer to your pickup time.";
+			statusIcon = "👤";
 			break;
 		case "driver_en_route":
-			statusTitle = "Your Trip Has Started";
-			statusMessage = "Your driver has started your trip and is now en route to your destination. You should be on your way!";
+			statusTitle = "Driver En Route to Pickup";
+			statusMessage = "Your driver is now en route to your pickup location. Please be ready for pickup.";
 			statusIcon = "🚗";
 			break;
 		case "arrived_pickup":
-			statusTitle = "Driver Has Arrived at Destination";
-			statusMessage = "Your driver has arrived at your destination. Your trip is now complete.";
+			statusTitle = "Driver Has Arrived at Pickup Location";
+			statusMessage = "Your driver has arrived at your pickup location and is ready to begin your trip.";
 			statusIcon = "📍";
+			break;
+		case "in_progress":
+		case "passenger_on_board":
+			statusTitle = "Trip in Progress";
+			statusMessage = "Your trip has started and you are now en route to your destination.";
+			statusIcon = "🚙";
+			break;
+		case "dropped_off":
+			statusTitle = "Dropped Off at Destination";
+			statusMessage = "You have been safely dropped off at your destination. Your trip is nearly complete.";
+			statusIcon = "🏁";
 			break;
 		case "completed":
 			statusTitle = "Trip Completed";
-			statusMessage = "Your trip has been completed successfully. Thank you for choosing Down Under Chauffeurs!";
+			statusMessage = `Your trip has been completed successfully. Thank you for choosing ${BUSINESS_INFO.business.name}!`;
 			statusIcon = "✅";
+			break;
+		case "cancelled":
+			statusTitle = "Booking Cancelled";
+			statusMessage = "Your booking has been cancelled. If you have any questions, please contact us.";
+			statusIcon = "❌";
+			break;
+		case "no_show":
+			statusTitle = "No Show Recorded";
+			statusMessage = "Our driver was unable to locate you at the pickup location. Please contact us if there was an issue.";
+			statusIcon = "⚠️";
 			break;
 		default:
 			statusTitle = "Booking Status Update";
@@ -1146,9 +1172,9 @@ function generateTripStatusEmailTemplate(
 		<body>
 			<div class="email-wrapper">
 				<div class="header">
-					<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Down Under Chauffeurs" class="logo" />
+					<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="${BUSINESS_INFO.business.name}" class="logo" />
 					<h1 class="header-title">${statusTitle}</h1>
-					<p class="header-subtitle">Down Under Chauffeurs</p>
+					<p class="header-subtitle">${BUSINESS_INFO.business.name}</p>
 				</div>
 
 				<div class="content">
@@ -1198,7 +1224,7 @@ function generateTripStatusEmailTemplate(
 
 					${status === "completed" ? `
 					<div class="cta-section" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac;">
-						<h3 class="cta-title">Thank You for Choosing Down Under Chauffeurs</h3>
+						<h3 class="cta-title">Thank You for Choosing ${BUSINESS_INFO.business.name}</h3>
 						<p style="color: ${colors.mutedForeground}; margin: 0 0 24px 0; font-size: 16px;">We hope you enjoyed your luxury travel experience. Your feedback is valuable to us.</p>
 					</div>
 					` : ''}
@@ -1216,7 +1242,7 @@ function generateTripStatusEmailTemplate(
 				</div>
 
 				<div class="footer">
-					<h4 class="footer-brand">Down Under Chauffeurs</h4>
+					<h4 class="footer-brand">${BUSINESS_INFO.business.name}</h4>
 					<p class="footer-tagline">Premium Luxury Transportation Services</p>
 					<div class="footer-links">
 						<a href="${websiteUrl}" class="footer-link">Our Website</a>
@@ -1226,7 +1252,7 @@ function generateTripStatusEmailTemplate(
 						<a href="${websiteUrl}/contact-us" class="footer-link">Contact</a>
 					</div>
 					<p class="footer-contact">
-						This is an automated notification from Down Under Chauffeurs.<br>
+						This is an automated notification from ${BUSINESS_INFO.business.name}.<br>
 						For support or questions, please contact our customer service team.
 					</p>
 				</div>
@@ -1350,12 +1376,12 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 				statusMessage = "Your driver has started your trip and is now en route to your destination. You should be on your way!";
 				break;
 			case "arrived_pickup":
-				statusTitle = "Driver Has Arrived at Destination";
-				statusMessage = "Your driver has arrived at your destination. Your trip is now complete.";
+				statusTitle = "Driver Has Arrived at Pickup Location";
+				statusMessage = "Your driver has arrived at your pickup location and is ready to begin your trip.";
 				break;
 			case "completed":
 				statusTitle = "Trip Completed";
-				statusMessage = "Your trip has been completed successfully. Thank you for choosing Down Under Chauffeurs!";
+				statusMessage = `Your trip has been completed successfully. Thank you for choosing ${BUSINESS_INFO.business.name}!`;
 				break;
 			default:
 				statusTitle = "Booking Status Update";

@@ -47,7 +47,8 @@ import {
 	CreditCard,
 	Edit3,
 	X,
-	CircleDot
+	CircleDot,
+	MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -275,8 +276,8 @@ export function BookingDetailsDialog() {
 								</div>
 							</div>
 
-							{/* Vehicle & Special Requests */}
-							{(booking.car || booking.specialRequests) && (
+							{/* Vehicle & Notes */}
+							{(booking.car || booking.specialRequests || (booking as any).additionalNotes) && (
 								<div className="space-y-3">
 									{booking.car && (
 										<div className="bg-soft-beige p-4 rounded-lg border">
@@ -290,10 +291,27 @@ export function BookingDetailsDialog() {
 									{booking.specialRequests && (
 										<div className="bg-soft-beige p-4 rounded-lg border">
 											<div className="flex items-center gap-3 mb-2">
-												<AlertCircle className="h-5 w-5 text-primary" />
+												<MessageSquare className="h-5 w-5 text-blue-600" />
 												<h3 className="font-semibold">Special Requests</h3>
 											</div>
-											<div className="text-sm">{booking.specialRequests}</div>
+											<div className="bg-blue-50 rounded-lg p-3">
+												<div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+													{booking.specialRequests}
+												</div>
+											</div>
+										</div>
+									)}
+									{(booking as any).additionalNotes && (
+										<div className="bg-soft-beige p-4 rounded-lg border">
+											<div className="flex items-center gap-3 mb-2">
+												<MessageSquare className="h-5 w-5 text-orange-600" />
+												<h3 className="font-semibold">Additional Notes</h3>
+											</div>
+											<div className="bg-orange-50 rounded-lg p-3">
+												<div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+													{(booking as any).additionalNotes}
+												</div>
+											</div>
 										</div>
 									)}
 								</div>
