@@ -867,7 +867,7 @@ export const bookingsRouter = router({
 				notes: z.string().default(''),
 			}),
 		}))
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
 				
@@ -902,9 +902,10 @@ export const bookingsRouter = router({
 
 				const result = await closeTripWithExtras(
 					db,
-					input.bookingId, 
-					driverProfile.id, 
+					input.bookingId,
+					driverProfile.id,
 					input.extrasData,
+					env,
 					input.isNoShow
 				);
 
@@ -920,10 +921,10 @@ export const bookingsRouter = router({
 			bookingId: z.string(),
 			isNoShow: z.boolean().default(false),
 		}))
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
@@ -955,8 +956,9 @@ export const bookingsRouter = router({
 
 				const result = await closeTripWithoutExtras(
 					db,
-					input.bookingId, 
+					input.bookingId,
 					driverProfile.id,
+					env,
 					input.isNoShow
 				);
 

@@ -13,11 +13,31 @@ export interface TripStatusData {
 	originAddress: string;
 	destinationAddress?: string;
 	driverName: string;
+	driverPhone?: string;
+	driverEmail?: string;
 	vehicleInfo: string;
 	websiteUrl: string;
 	status?: string; // For status-based styling
 	stops?: Array<{ address: string }>; // For intermediate stops
 	passengerCount?: number;
+	// Fare breakdown fields (for completed trips)
+	baseFare?: number;
+	distanceFare?: number;
+	extraCharges?: number;
+	finalAmount?: number;
+	actualDistance?: number;
+	estimatedDistance?: number;
+	// Detailed extras breakdown
+	extrasDetails?: {
+		additionalWaitTime?: number;
+		unscheduledStops?: number;
+		parkingCharges?: number;
+		tollCharges?: number;
+		tollLocation?: string;
+		otherChargesDescription?: string;
+		otherChargesAmount?: number;
+		notes?: string;
+	};
 }
 
 export interface DriverAssignmentData {

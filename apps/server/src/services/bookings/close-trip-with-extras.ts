@@ -2,6 +2,8 @@ import { bookings, bookingExtras } from "@/db/sqlite/schema";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
+import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import type { Env } from "@/types/env";
 
 export interface ExtrasFormData {
 	additionalWaitTime: number; // in minutes
@@ -22,6 +24,7 @@ export async function closeTripWithExtras(
 	bookingId: string,
 	driverId: string,
 	extrasData: ExtrasFormData,
+	env?: Env,
 	isNoShow: boolean = false
 ) {
 	try {
@@ -44,14 +47,15 @@ export async function closeTripWithExtras(
 			throw new Error("Booking is already completed");
 		}
 
-		// Calculate total extras amount
-		const totalExtrasAmount = 
-			extrasData.parkingCharges + 
-			extrasData.tollCharges + 
-			extrasData.otherCharges.amount;
+		// Calculate total extras amount with proper decimal precision
+		const totalExtrasAmount = Math.round((
+			extrasData.parkingCharges +
+			extrasData.tollCharges +
+			extrasData.otherCharges.amount
+		) * 100) / 100;
 
-		// Calculate new final amount (original quoted amount + extras)
-		const newFinalAmount = (booking.finalAmount || booking.quotedAmount) + totalExtrasAmount;
+		// Calculate new final amount (original quoted amount + extras) with proper decimal precision
+		const newFinalAmount = Math.round(((booking.finalAmount || booking.quotedAmount) + totalExtrasAmount) * 100) / 100;
 
 		// Determine the final status based on whether it's a no-show
 		const finalStatus = isNoShow ? BookingStatusEnum.NoShow : BookingStatusEnum.Completed;
@@ -95,6 +99,22 @@ export async function closeTripWithExtras(
 			extras: extrasRecord
 		};
 
+		// Send completion email notification
+		if (env && finalStatus === BookingStatusEnum.Completed) {
+			console.log(`📧 CLOSE TRIP DEBUG: Sending completion email for booking ${bookingId}`);
+			try {
+				await sendTripStatusNotification({
+					bookingId,
+					status: "completed",
+					env,
+				});
+				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId}`);
+			} catch (emailError) {
+				console.error(`❌ CLOSE TRIP EMAIL: Failed to send completion email for booking ${bookingId}:`, emailError);
+				// Don't fail the booking completion if email fails
+			}
+		}
+
 		return {
 			success: true,
 			data: result,
@@ -111,6 +131,7 @@ export async function closeTripWithoutExtras(
 	db: DB,
 	bookingId: string,
 	driverId: string,
+	env?: Env,
 	isNoShow: boolean = false
 ) {
 	try {
@@ -141,7 +162,7 @@ export async function closeTripWithoutExtras(
 			.update(bookings)
 			.set({
 				status: finalStatus,
-				finalAmount: booking.finalAmount || booking.quotedAmount, // Keep original amount
+				finalAmount: Math.round((booking.finalAmount || booking.quotedAmount) * 100) / 100, // Keep original amount with proper precision
 				serviceCompletedAt: new Date(),
 				actualDropoffTime: isNoShow ? null : new Date(),
 				updatedAt: new Date(),
@@ -149,6 +170,22 @@ export async function closeTripWithoutExtras(
 			.where(eq(bookings.id, bookingId))
 			.returning()
 			.get();
+
+		// Send completion email notification
+		if (env && finalStatus === BookingStatusEnum.Completed) {
+			console.log(`📧 CLOSE TRIP DEBUG: Sending completion email for booking ${bookingId} (no extras)`);
+			try {
+				await sendTripStatusNotification({
+					bookingId,
+					status: "completed",
+					env,
+				});
+				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId} (no extras)`);
+			} catch (emailError) {
+				console.error(`❌ CLOSE TRIP EMAIL: Failed to send completion email for booking ${bookingId}:`, emailError);
+				// Don't fail the booking completion if email fails
+			}
+		}
 
 		return {
 			success: true,

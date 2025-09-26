@@ -25,11 +25,31 @@ interface TripStatusEmailProps {
 	originAddress: string;
 	destinationAddress?: string;
 	driverName: string;
+	driverPhone?: string;
+	driverEmail?: string;
 	vehicleInfo: string;
 	websiteUrl: string;
 	status?: string; // For status-based styling
 	stops?: Array<{ address: string }>; // For intermediate stops
 	passengerCount?: number;
+	// Fare breakdown fields (for completed trips)
+	baseFare?: number;
+	distanceFare?: number;
+	extraCharges?: number;
+	finalAmount?: number;
+	actualDistance?: number;
+	estimatedDistance?: number;
+	// Detailed extras breakdown
+	extrasDetails?: {
+		additionalWaitTime?: number;
+		unscheduledStops?: number;
+		parkingCharges?: number;
+		tollCharges?: number;
+		tollLocation?: string;
+		otherChargesDescription?: string;
+		otherChargesAmount?: number;
+		notes?: string;
+	};
 }
 
 export function TripStatusEmail({
@@ -43,11 +63,21 @@ export function TripStatusEmail({
 	originAddress = "Sydney Opera House, Sydney NSW, Australia",
 	destinationAddress = "T1, Departure Plaza, Mascot NSW, Australia",
 	driverName = "Your Driver",
+	driverPhone,
+	driverEmail,
 	vehicleInfo = "Assigned Vehicle",
 	websiteUrl = "https://downunderchauffeurs.com",
 	status = "confirmed",
 	stops = [],
 	passengerCount = 1,
+	// Fare breakdown props
+	baseFare,
+	distanceFare,
+	extraCharges,
+	finalAmount,
+	actualDistance,
+	estimatedDistance,
+	extrasDetails,
 }: TripStatusEmailProps) {
 	// Status-based styling matching driver trips page
 	const getStatusStyle = () => {
@@ -76,7 +106,7 @@ export function TripStatusEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>{statusTitle} - Down Under Chauffeurs</Preview>
+			<Preview>{statusTitle} - Booking #{bookingReference.slice(-6)} - {customerName}</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
@@ -95,151 +125,254 @@ export function TripStatusEmail({
 								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
 								<Text style={brandTagline}>Premium Luxury Transportation Services</Text>
 							</Column>
-							<Column style={{ width: '120px', verticalAlign: 'middle', textAlign: 'right' }}>
-								<Text style={{ ...statusBadge, backgroundColor: statusStyle.badgeColor }}>
-									{statusTitle}
-								</Text>
-							</Column>
 						</Row>
 					</Section>
 
 					{/* Content Header */}
 					<Section style={contentHeader}>
-						<Heading style={headerTitle}>Trip Status Update</Heading>
-						<Text style={headerSubtitle}>Your booking status has been updated</Text>
+						<Heading style={headerTitle}>{statusTitle}</Heading>
+						<Text style={headerSubtitle}>{statusMessage}</Text>
+						{/* Content uniqueness marker */}
+						<span style={{ fontSize: '0px', color: 'transparent', lineHeight: '0px' }}>{bookingReference.slice(-4)}.{customerName.slice(0,2)}</span>
 					</Section>
 
-					{/* Main Trip Card - Inspired by driver trips cards */}
+					{/* Compact Trip Card */}
 					<Section style={{ ...tripCard, borderLeftColor: statusStyle.borderLeftColor }}>
-						{/* Trip Header - Time and Reference */}
-						<Section style={tripHeader}>
+						{/* Trip Header */}
+						<Row>
+							<Column style={{ width: '60%' }}>
+								<Text style={tripTime}>{pickupTime}</Text>
+								<Text style={tripDate}>{pickupDate}</Text>
+							</Column>
+							<Column style={{ width: '40%', textAlign: 'right' }}>
+								<Text style={tripReference}>#{bookingReference.slice(-6)}</Text>
+							</Column>
+						</Row>
+
+
+						{/* Essential Trip Info */}
+						<Section style={tripDetails}>
 							<Row>
-								<Column style={{ width: '60%' }}>
-									<Text style={tripTime}>{pickupTime}</Text>
-									<Text style={tripDate}>{pickupDate}</Text>
-								</Column>
-								<Column style={{ width: '40%', textAlign: 'right' }}>
-									<Text style={tripReference}>#{bookingReference.slice(-6)}</Text>
-								</Column>
-							</Row>
-						</Section>
-
-						{/* Status Message */}
-						<Section style={statusMessageSection}>
-							<Text style={statusText}>{statusMessage}</Text>
-						</Section>
-
-						{/* Route Information - Matching driver trips layout */}
-						<Section style={routeSection}>
-							<Heading style={sectionTitle}>Journey Route</Heading>
-
-							{/* Pickup Location */}
-							<Row style={routeRow}>
-								<Column style={{ width: '20px', paddingRight: '12px' }}>
-									<div style={{ ...routeIcon, backgroundColor: '#22c55e' }}></div>
-								</Column>
 								<Column>
-									<Text style={routeLabel}>Pick up</Text>
-									<Text style={routeAddress}>{originAddress}</Text>
+									<Text style={detailLabel}>Pickup</Text>
+									<Text style={detailValue}>{originAddress}</Text>
 								</Column>
 							</Row>
-
-							{/* Stops (if any) */}
-							{stops && stops.length > 0 && stops.map((stop, index) => (
-								<Row key={index} style={routeRow}>
-									<Column style={{ width: '20px', paddingRight: '12px' }}>
-										<div style={{ ...routeConnector }}></div>
-										<div style={{ ...routeIcon, backgroundColor: '#3b82f6' }}></div>
-									</Column>
-									<Column>
-										<Text style={routeLabel}>Stop {index + 1}</Text>
-										<Text style={routeAddress}>{stop.address}</Text>
-									</Column>
-								</Row>
-							))}
-
-							{/* Destination */}
 							{destinationAddress && (
-								<Row style={routeRow}>
-									<Column style={{ width: '20px', paddingRight: '12px' }}>
-										<div style={{ ...routeConnector }}></div>
-										<div style={{ ...routeIcon, backgroundColor: '#ef4444' }}></div>
-									</Column>
+								<Row>
 									<Column>
-										<Text style={routeLabel}>Drop off</Text>
-										<Text style={routeAddress}>{destinationAddress}</Text>
+										<Text style={detailLabel}>Drop off</Text>
+										<Text style={detailValue}>{destinationAddress}</Text>
 									</Column>
 								</Row>
 							)}
-						</Section>
-
-						{/* Trip Details - Compact info like driver trips */}
-						<Section style={tripDetails}>
-							<Row>
-								<Column style={{ width: '50%' }}>
-									<Text style={detailLabel}>Customer</Text>
-									<Text style={detailValue}>{customerName}</Text>
-								</Column>
-								<Column style={{ width: '50%' }}>
-									<Text style={detailLabel}>Passengers</Text>
-									<Text style={detailValue}>{passengerCount} pax</Text>
-								</Column>
-							</Row>
 							<Hr style={detailSeparator} />
 							<Row>
 								<Column style={{ width: '50%' }}>
 									<Text style={detailLabel}>Driver</Text>
 									<Text style={detailValue}>{driverName}</Text>
+									{driverPhone && (
+										<>
+											<Text style={detailLabel}>Phone</Text>
+											<Text style={detailValue}>
+												<a href={`tel:${driverPhone}`} style={contactLink}>{driverPhone}</a>
+											</Text>
+										</>
+									)}
+									{driverEmail && (
+										<>
+											<Text style={detailLabel}>Email</Text>
+											<Text style={detailValue}>
+												<a href={`mailto:${driverEmail}`} style={contactLink}>{driverEmail}</a>
+											</Text>
+										</>
+									)}
 								</Column>
 								<Column style={{ width: '50%' }}>
 									<Text style={detailLabel}>Vehicle</Text>
 									<Text style={detailValue}>{vehicleInfo}</Text>
 								</Column>
 							</Row>
-							<Row>
-								<Column>
-									<Text style={detailLabel}>Service</Text>
-									<Text style={detailValue}>{serviceType}</Text>
-								</Column>
-							</Row>
 						</Section>
 
-						{/* CTA Section */}
+						{/* Fare Breakdown Section (only for completed trips) */}
+						{status === 'completed' && finalAmount && (
+							<Section style={fareBreakdownSection}>
+								<Heading style={fareBreakdownTitle}>Trip Summary & Fare Breakdown</Heading>
+
+								{/* Trip Details */}
+								<Section style={tripSummary}>
+									<Row>
+										<Column style={{ width: '50%' }}>
+											<Text style={summaryLabel}>Trip Distance</Text>
+											<Text style={summaryValue}>
+												{actualDistance ?
+													`${(actualDistance / 1000).toFixed(1)} km` :
+													estimatedDistance ? `${(estimatedDistance / 1000).toFixed(1)} km (estimated)` :
+													'N/A'
+												}
+												{estimatedDistance && actualDistance && (
+													<Text style={estimatedText}>
+														{' '}(Est: {(estimatedDistance / 1000).toFixed(1)} km)
+													</Text>
+												)}
+											</Text>
+										</Column>
+										<Column style={{ width: '50%' }}>
+											<Text style={summaryLabel}>Total Amount</Text>
+											<Text style={{...summaryValue, fontSize: '18px', fontWeight: '600', color: '#059669'}}>
+												${finalAmount.toFixed(2)}
+											</Text>
+										</Column>
+									</Row>
+								</Section>
+
+								{/* Fare Breakdown */}
+								{((typeof baseFare === 'number' && baseFare > 0) || (typeof distanceFare === 'number' && distanceFare > 0) || (typeof extraCharges === 'number' && extraCharges > 0)) && (
+									<Section style={fareDetails}>
+										<Text style={fareBreakdownSubtitle}>Fare Breakdown</Text>
+
+										{(typeof baseFare === 'number' && baseFare > 0) && (
+											<Row style={fareRow}>
+												<Column style={{ width: '70%' }}>
+													<Text style={fareLabel}>Base Fare</Text>
+												</Column>
+												<Column style={{ width: '30%', textAlign: 'right' }}>
+													<Text style={fareAmount}>${baseFare.toFixed(2)}</Text>
+												</Column>
+											</Row>
+										)}
+
+										{(typeof distanceFare === 'number' && distanceFare > 0) && (
+											<Row style={fareRow}>
+												<Column style={{ width: '70%' }}>
+													<Text style={fareLabel}>Distance Fare</Text>
+												</Column>
+												<Column style={{ width: '30%', textAlign: 'right' }}>
+													<Text style={fareAmount}>${distanceFare.toFixed(2)}</Text>
+												</Column>
+											</Row>
+										)}
+
+										{(typeof extraCharges === 'number' && extraCharges > 0) && (
+											<>
+												<Row style={fareRow}>
+													<Column style={{ width: '70%' }}>
+														<Text style={fareLabel}>Additional Charges</Text>
+													</Column>
+													<Column style={{ width: '30%', textAlign: 'right' }}>
+														<Text style={fareAmount}>${extraCharges.toFixed(2)}</Text>
+													</Column>
+												</Row>
+												{/* Detailed Extras Breakdown */}
+												{extrasDetails && (
+													<Section style={{ marginTop: '8px', marginBottom: '12px', paddingLeft: '12px' }}>
+														{(typeof extrasDetails.additionalWaitTime === 'number' && extrasDetails.additionalWaitTime > 0) && (
+															<Row style={{ marginBottom: '4px' }}>
+																<Column style={{ width: '80%' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		• Additional wait time ({extrasDetails.additionalWaitTime} min)
+																	</Text>
+																</Column>
+															</Row>
+														)}
+														{(typeof extrasDetails.unscheduledStops === 'number' && extrasDetails.unscheduledStops > 0) && (
+															<Row style={{ marginBottom: '4px' }}>
+																<Column style={{ width: '80%' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		• Unscheduled stops ({extrasDetails.unscheduledStops})
+																	</Text>
+																</Column>
+															</Row>
+														)}
+														{(typeof extrasDetails.parkingCharges === 'number' && extrasDetails.parkingCharges > 0) && (
+															<Row style={{ marginBottom: '4px' }}>
+																<Column style={{ width: '70%' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		• Parking charges
+																	</Text>
+																</Column>
+																<Column style={{ width: '30%', textAlign: 'right' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		${extrasDetails.parkingCharges.toFixed(2)}
+																	</Text>
+																</Column>
+															</Row>
+														)}
+														{(typeof extrasDetails.tollCharges === 'number' && extrasDetails.tollCharges > 0) && (
+															<Row style={{ marginBottom: '4px' }}>
+																<Column style={{ width: '70%' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		• Toll charges{extrasDetails.tollLocation ? ` (${extrasDetails.tollLocation})` : ''}
+																	</Text>
+																</Column>
+																<Column style={{ width: '30%', textAlign: 'right' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		${extrasDetails.tollCharges.toFixed(2)}
+																	</Text>
+																</Column>
+															</Row>
+														)}
+														{(typeof extrasDetails.otherChargesAmount === 'number' && extrasDetails.otherChargesAmount > 0) && (
+															<Row style={{ marginBottom: '4px' }}>
+																<Column style={{ width: '70%' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		• {extrasDetails.otherChargesDescription || 'Other charges'}
+																	</Text>
+																</Column>
+																<Column style={{ width: '30%', textAlign: 'right' }}>
+																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
+																		${extrasDetails.otherChargesAmount.toFixed(2)}
+																	</Text>
+																</Column>
+															</Row>
+														)}
+													</Section>
+												)}
+											</>
+										)}
+
+										<Hr style={fareTotal} />
+										<Row style={fareRow}>
+											<Column style={{ width: '70%' }}>
+												<Text style={fareTotalLabel}>Total</Text>
+											</Column>
+											<Column style={{ width: '30%', textAlign: 'right' }}>
+												<Text style={fareTotalAmount}>${finalAmount.toFixed(2)}</Text>
+											</Column>
+										</Row>
+									</Section>
+								)}
+
+								<Text style={transparencyNote}>
+									This breakdown shows how your fare was calculated for complete transparency.
+									{/* Inline uniqueness */}
+									<span style={{ fontSize: '0px', color: 'transparent' }}> #{bookingReference}</span>
+								</Text>
+							</Section>
+						)}
+
+						{/* Simple CTA */}
 						<Section style={ctaSection}>
-							<Heading style={ctaTitle}>Manage Your Journey</Heading>
-							<Row>
-								<Column style={{ textAlign: "center", paddingRight: "10px" }}>
-									<Button style={ctaButton} href={`${websiteUrl}/customer/bookings`}>
-										View My Bookings
-									</Button>
-								</Column>
-								<Column style={{ textAlign: "center", paddingLeft: "10px" }}>
-									<Button style={ctaButton} href={`${websiteUrl}/contact-us`}>
-										Contact Support
-									</Button>
-								</Column>
-							</Row>
+							<Button style={ctaButton} href={`${websiteUrl}/customer/bookings`}>
+								View My Bookings
+							</Button>
 							<Text style={contactText}>
-								Need immediate assistance? Call us at{" "}
-								<a href="tel:+61-XXX-XXX-XXX" style={contactLink}>+61 XXX XXX XXX</a>
+								Need help? Call{" "}
+								<a href="tel:+61422693233" style={contactLink}>+61 422 693 233</a>
 							</Text>
 						</Section>
 					</Section>
 
-					{/* Footer */}
+					{/* Compact Footer */}
 					<Section style={footer}>
-						<Heading style={footerBrand}>Down Under Chauffeurs</Heading>
-						<Text style={footerTagline}>Premium Luxury Transportation Services</Text>
-						<Text style={footerLinks}>
-							<a href={websiteUrl} style={footerLink}>Our Website</a>
-							{" | "}
-							<a href={`${websiteUrl}/services`} style={footerLink}>Services</a>
-							{" | "}
-							<a href={`${websiteUrl}/contact-us`} style={footerLink}>Contact</a>
-						</Text>
+						<Text style={footerBrand}>Down Under Chauffeurs</Text>
 						<Text style={footerDisclaimer}>
-							This is an automated notification from Down Under Chauffeurs.<br />
-							For support or questions, please contact our customer service team.
+							Automated notification | <a href={`${websiteUrl}/contact-us`} style={footerLink}>Contact Support</a>
+						</Text>
+						{/* Anti-clipping measures */}
+						<Text style={{ fontSize: '1px', color: '#ffffff', lineHeight: '1px', opacity: 0, overflow: 'hidden', display: 'none' }}>
+							Unique: {bookingReference}-{customerName.replace(/\s/g, '')}-{new Date().getTime().toString().slice(-6)}-{Math.random().toString(36).substr(2, 5)}
 						</Text>
 					</Section>
 				</Container>
@@ -252,24 +385,24 @@ export function TripStatusEmail({
 const main = {
 	fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 	margin: "0",
-	padding: "20px",
-	background: "#f9fafb", // Gray-50 like driver interface
-	color: "#374151",
-	lineHeight: "1.6",
+	padding: "10px",
+	background: "#f8fafc",
+	color: "#1e293b",
+	lineHeight: "1.5",
 };
 
 const container = {
 	maxWidth: "600px",
 	margin: "0 auto",
 	background: "#ffffff",
-	borderRadius: "12px",
+	borderRadius: "8px",
 	overflow: "hidden",
-	boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+	boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
 	border: "1px solid #e5e7eb",
 };
 
 const logoHeader = {
-	padding: "24px 24px 20px",
+	padding: "16px 20px",
 	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
 	borderBottom: "none",
 };
@@ -296,7 +429,7 @@ const brandTagline = {
 };
 
 const contentHeader = {
-	padding: "20px 24px 16px",
+	padding: "16px 20px 12px",
 	background: "white",
 	borderBottom: "1px solid #e5e7eb",
 };
@@ -304,13 +437,13 @@ const contentHeader = {
 const headerTitle = {
 	fontSize: "20px",
 	fontWeight: "600",
-	color: "#111827",
+	color: "#0f172a", // Darker for better contrast
 	margin: "0 0 4px 0",
 };
 
 const headerSubtitle = {
 	fontSize: "14px",
-	color: "#6b7280",
+	color: "#475569", // Better contrast
 	margin: "0",
 	fontWeight: "400",
 };
@@ -331,7 +464,7 @@ const tripCard = {
 	border: "1px solid #e5e7eb",
 	borderLeftWidth: "4px",
 	borderLeftStyle: "solid" as const,
-	padding: "24px",
+	padding: "18px",
 	margin: "0",
 };
 
@@ -342,7 +475,7 @@ const tripHeader = {
 const tripTime = {
 	fontSize: "18px",
 	fontWeight: "600",
-	color: "#111827",
+	color: "#0f172a", // Darker for better contrast
 	margin: "0",
 };
 
@@ -373,51 +506,7 @@ const statusText = {
 	margin: "0",
 };
 
-const routeSection = {
-	marginBottom: "24px",
-};
-
-const sectionTitle = {
-	fontSize: "16px",
-	fontWeight: "600",
-	color: "#111827",
-	margin: "0 0 16px 0",
-};
-
-const routeRow = {
-	marginBottom: "12px",
-};
-
-const routeIcon = {
-	width: "8px",
-	height: "8px",
-	borderRadius: "50%",
-	display: "inline-block",
-};
-
-const routeConnector = {
-	width: "2px",
-	height: "12px",
-	background: "#e5e7eb",
-	margin: "2px auto",
-	display: "block",
-};
-
-const routeLabel = {
-	fontSize: "12px",
-	fontWeight: "600",
-	color: "#6b7280",
-	margin: "0 0 2px 0",
-	textTransform: "uppercase" as const,
-	letterSpacing: "0.025em",
-};
-
-const routeAddress = {
-	fontSize: "14px",
-	color: "#374151",
-	margin: "0",
-	lineHeight: "1.4",
-};
+// Removed unused route styles to reduce size
 
 const tripDetails = {
 	padding: "16px 0",
@@ -432,7 +521,7 @@ const detailLabel = {
 
 const detailValue = {
 	fontSize: "14px",
-	color: "#111827",
+	color: "#0f172a", // Darker for better contrast
 	margin: "0 0 12px 0",
 	fontWeight: "500",
 };
@@ -445,18 +534,10 @@ const detailSeparator = {
 
 const ctaSection = {
 	textAlign: "center" as const,
-	margin: "32px 0 24px",
-	padding: "24px 20px",
+	margin: "20px 0 16px",
+	padding: "16px",
 	background: "#f8fafc",
 	borderRadius: "8px",
-	borderTop: "1px solid #e2e8f0",
-};
-
-const ctaTitle = {
-	fontSize: "18px",
-	fontWeight: "600",
-	color: "#111827",
-	margin: "0 0 16px 0",
 };
 
 const ctaButton = {
@@ -525,6 +606,112 @@ const footerDisclaimer = {
 	color: "#94a3b8",
 	margin: "16px 0 0 0",
 	lineHeight: "1.5",
+};
+
+// Fare Breakdown Styles
+const fareBreakdownSection = {
+	background: "#f0f9ff",
+	border: "2px solid #0ea5e9",
+	borderRadius: "8px",
+	padding: "16px",
+	margin: "16px 0",
+};
+
+const fareBreakdownTitle = {
+	fontSize: "18px",
+	fontWeight: "600",
+	color: "#0c4a6e",
+	margin: "0 0 16px 0",
+	textAlign: "center" as const,
+};
+
+const fareBreakdownSubtitle = {
+	fontSize: "14px",
+	fontWeight: "600",
+	color: "#475569",
+	margin: "0 0 12px 0",
+};
+
+const tripSummary = {
+	background: "white",
+	borderRadius: "6px",
+	padding: "12px",
+	marginBottom: "12px",
+	border: "1px solid #e2e8f0",
+};
+
+const summaryLabel = {
+	fontSize: "12px",
+	fontWeight: "600",
+	color: "#64748b",
+	margin: "0 0 4px 0",
+};
+
+const summaryValue = {
+	fontSize: "14px",
+	fontWeight: "500",
+	color: "#0f172a",
+	margin: "0 0 8px 0",
+};
+
+const estimatedText = {
+	fontSize: "12px",
+	color: "#64748b",
+	fontStyle: "italic" as const,
+};
+
+const fareDetails = {
+	background: "white",
+	borderRadius: "8px",
+	padding: "16px",
+	marginBottom: "16px",
+	border: "1px solid #e2e8f0",
+};
+
+const fareRow = {
+	marginBottom: "8px",
+};
+
+const fareLabel = {
+	fontSize: "14px",
+	color: "#475569",
+	margin: "0",
+};
+
+const fareAmount = {
+	fontSize: "14px",
+	fontWeight: "500",
+	color: "#0f172a",
+	margin: "0",
+};
+
+const fareTotal = {
+	border: "none",
+	borderTop: "2px solid #e2e8f0",
+	margin: "12px 0 8px 0",
+};
+
+const fareTotalLabel = {
+	fontSize: "16px",
+	fontWeight: "600",
+	color: "#0f172a",
+	margin: "0",
+};
+
+const fareTotalAmount = {
+	fontSize: "16px",
+	fontWeight: "600",
+	color: "#059669",
+	margin: "0",
+};
+
+const transparencyNote = {
+	fontSize: "12px",
+	color: "#64748b",
+	fontStyle: "italic" as const,
+	textAlign: "center" as const,
+	margin: "16px 0 0 0",
+	lineHeight: "1.4",
 };
 
 export default TripStatusEmail;

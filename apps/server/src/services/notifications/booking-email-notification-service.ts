@@ -6,6 +6,7 @@ import { users } from "@/db/sqlite/schema/users";
 import { cars } from "@/db/sqlite/schema/cars";
 import { packages } from "@/db/sqlite/schema/packages";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
+import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
 import { getMailService, renderTripStatusEmail, renderDriverAssignmentEmail } from "@workspace/mail";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import type { Env } from "@/types/env";
@@ -30,6 +31,7 @@ interface BookingDetailsForEmail {
 	car?: any;
 	package?: any;
 	stops?: any[];
+	extras?: any;
 }
 
 /**
@@ -52,7 +54,7 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
 	console.log(`📧 EMAIL SERVICE: Found booking, getting related data...`);
 
 	// Get related data separately to avoid column limit issues
-	const [driver, customer, car, packageData, stops] = await Promise.all([
+	const [driver, customer, car, packageData, stops, extras] = await Promise.all([
 		// Get driver and driver user data
 		booking.driverId ?
 			db.select({
@@ -88,7 +90,13 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
 		db.select()
 			.from(bookingStops)
 			.where(eq(bookingStops.bookingId, bookingId))
-			.orderBy(bookingStops.stopOrder)
+			.orderBy(bookingStops.stopOrder),
+
+		// Get booking extras
+		db.select()
+			.from(bookingExtras)
+			.where(eq(bookingExtras.bookingId, bookingId))
+			.get()
 	]);
 
 	console.log(`📧 EMAIL SERVICE: Retrieved all related data for booking ${bookingId}`);
@@ -101,6 +109,7 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
 		car,
 		package: packageData,
 		stops,
+		extras,
 	};
 }
 
@@ -148,7 +157,7 @@ function generateDriverAssignmentEmailTemplate(
 
 	// Service type and vehicle info
 	const serviceType = pkg ? `Package Service: ${pkg.title}` : "Custom Booking";
-	const vehicleInfo = car ? `${car.brand} ${car.model} (${car.category})` : "Vehicle to be assigned";
+	const vehicleInfo = car?.name || "Vehicle to be assigned";
 
 	// Format booking reference for display - use reference number or last 6 digits of ID
 	const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
@@ -749,13 +758,13 @@ function generateTripStatusEmailTemplate(
 	}
 
 	const serviceType = pkg?.title || "Custom Trip";
-	const vehicleInfo = car ? `${car.brand} ${car.model}` : "Assigned Vehicle";
+	const vehicleInfo = car?.name || "Assigned Vehicle";
 	const driverName = driverUser?.name || "Your Driver";
 
 	// Format booking reference for display - use reference number or last 6 digits of ID
 	const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
 
-	const subject = `${statusTitle} - Booking ${bookingReference}`;
+	const subject = `${statusTitle} - Booking #${bookingReference}`;
 
 	// Website base URL
 	const websiteUrl = "https://downunderchauffeurs.com";
@@ -1297,7 +1306,7 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 		});
 
 		const serviceType = pkg?.title || "Custom Trip";
-		const vehicleInfo = car ? `${car.brand} ${car.model}` : "Assigned Vehicle";
+		const vehicleInfo = car?.name || "Assigned Vehicle";
 		const driverName = driverUser.name || "Driver";
 		const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
 
@@ -1353,39 +1362,13 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 export async function sendTripStatusNotification(data: TripStatusEmailData): Promise<{ success: boolean; message: string }> {
 	try {
 		const { bookingId, status, env } = data;
+		console.log(`📧 TRIP EMAIL DEBUG: sendTripStatusNotification called for booking ${bookingId}, status: ${status}`);
 
 		// Get booking details
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
 
 		if (!bookingDetails.customer?.email) {
 			throw new Error("Customer email not found");
-		}
-
-		// Status-specific content
-		let statusTitle = "";
-		let statusMessage = "";
-
-		switch (status) {
-			case "in_progress":
-			case "passenger_on_board":
-				statusTitle = "Your Trip Has Started";
-				statusMessage = "Your driver has started your trip. You should now be en route to your destination.";
-				break;
-			case "driver_en_route":
-				statusTitle = "Your Trip Has Started";
-				statusMessage = "Your driver has started your trip and is now en route to your destination. You should be on your way!";
-				break;
-			case "arrived_pickup":
-				statusTitle = "Driver Has Arrived at Pickup Location";
-				statusMessage = "Your driver has arrived at your pickup location and is ready to begin your trip.";
-				break;
-			case "completed":
-				statusTitle = "Trip Completed";
-				statusMessage = `Your trip has been completed successfully. Thank you for choosing ${BUSINESS_INFO.business.name}!`;
-				break;
-			default:
-				statusTitle = "Booking Status Update";
-				statusMessage = "Your booking status has been updated.";
 		}
 
 		// Format pickup date and time
@@ -1403,12 +1386,40 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		});
 
 		const serviceType = pkg?.title || "Custom Trip";
-		const vehicleInfo = car ? `${car.brand} ${car.model}` : "Assigned Vehicle";
+		const vehicleInfo = car?.name || "Assigned Vehicle";
 		const driverName = driverUser?.name || "Your Driver";
 		const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
 
+		// Status-specific content (after booking reference is defined)
+		let statusTitle = "";
+		let statusMessage = "";
+
+		switch (status) {
+			case "in_progress":
+			case "passenger_on_board":
+				statusTitle = "Your Trip Has Started";
+				statusMessage = "Your driver has started your trip. You are now en route to your destination.";
+				break;
+			case "driver_en_route":
+				statusTitle = "Driver En Route to Pickup";
+				statusMessage = "Your driver is now on their way to your pickup location. Please be ready for pickup.";
+				break;
+			case "arrived_pickup":
+				statusTitle = "Driver Has Arrived";
+				statusMessage = "Your driver has arrived at your pickup location and is ready to begin your trip.";
+				break;
+			case "completed":
+				statusTitle = "Booking Completed";
+				statusMessage = `Your booking (#${bookingReference}) has been successfully completed. Thank you for choosing us—we look forward to serving you again on your next journey.`;
+				break;
+			default:
+				statusTitle = "Trip Status Update";
+				statusMessage = "Your booking status has been updated.";
+		}
+
 		// Generate React Email template with additional driver trips inspired data
-		const template = await renderTripStatusEmail({
+		// Debug logging to check email data
+		const emailData = {
 			customerName: bookingDetails.customer.name || "Customer",
 			statusTitle,
 			statusMessage,
@@ -1419,21 +1430,47 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 			originAddress: booking.originAddress || booking.pickupAddress,
 			destinationAddress: booking.destinationAddress,
 			driverName,
+			driverPhone: bookingDetails.driver?.phoneNumber,
+			driverEmail: bookingDetails.driverUser?.email,
 			vehicleInfo,
 			websiteUrl: "https://downunderchauffeurs.com",
 			// Additional props to match driver trips design
 			status: status,
 			stops: stops?.map(stop => ({ address: stop.address })) || [],
 			passengerCount: booking.passengerCount || 1,
-		});
+			// Fare breakdown data (for completed trips)
+			baseFare: booking.baseFare,
+			distanceFare: booking.distanceFare,
+			extraCharges: booking.extraCharges,
+			finalAmount: booking.finalAmount,
+			actualDistance: booking.actualDistance,
+			estimatedDistance: booking.estimatedDistance,
+			// Detailed extras breakdown
+			extrasDetails: bookingDetails.extras ? {
+				additionalWaitTime: bookingDetails.extras.additionalWaitTime,
+				unscheduledStops: bookingDetails.extras.unscheduledStops,
+				parkingCharges: bookingDetails.extras.parkingCharges,
+				tollCharges: bookingDetails.extras.tollCharges,
+				tollLocation: bookingDetails.extras.tollLocation,
+				otherChargesDescription: bookingDetails.extras.otherChargesDescription,
+				otherChargesAmount: bookingDetails.extras.otherChargesAmount,
+				notes: bookingDetails.extras.notes,
+			} : undefined,
+		};
+
+		console.log(`📧 EMAIL TEMPLATE DEBUG: Email data for booking ${bookingId}:`, JSON.stringify(emailData, null, 2));
+
+		const template = await renderTripStatusEmail(emailData);
 
 		// Send email
+		console.log(`📧 TRIP EMAIL DEBUG: Getting mail service and sending email to ${bookingDetails.customer.email}`);
 		const mailService = getMailService(env);
 		const success = await mailService.sendEmail({
 			to: bookingDetails.customer.email,
 			subject: template.subject,
 			html: template.html,
 		});
+		console.log(`📧 TRIP EMAIL DEBUG: Email send result: ${success}`);
 
 		if (!success) {
 			throw new Error("Failed to send trip status email");
