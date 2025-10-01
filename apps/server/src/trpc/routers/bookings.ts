@@ -21,6 +21,7 @@ import { validateBookingOperations } from "@/services/bookings/validate-booking-
 import { closeTripWithExtras, closeTripWithoutExtras } from "@/services/bookings/close-trip-with-extras";
 import { archiveBookingService, ArchiveBookingServiceSchema } from "@/services/bookings/archive-booking";
 import { bulkArchiveBookingsService, bulkDeleteBookingsService, BulkArchiveBookingsSchema, BulkDeleteBookingsSchema } from "@/services/bookings/bulk-booking-operations";
+import { sendBookingConfirmationEmail, sendAdminNewBookingEmail } from "@/services/notifications/booking-email-notification-service";
 import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -270,7 +271,7 @@ export const bookingsRouter = router({
 	// Package booking procedures (allow guest users)
 	createPackageBooking: guestProcedure
 		.input(CreatePackageBookingSchema.omit({ userId: true }))
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				console.log("🔍 DEBUG createPackageBooking - START");
 				console.log("📥 Input received:", JSON.stringify(input, null, 2));
@@ -300,7 +301,20 @@ export const bookingsRouter = router({
 				console.log("🏃‍♂️ Calling createPackageBookingService...");
 				const newBooking = await createPackageBookingService(db, processedInput);
 				console.log("✅ Service returned successfully:", newBooking?.id);
-				
+
+				// Send booking confirmation and admin notification emails
+				try {
+					console.log("📧 Sending booking confirmation and admin notification emails...");
+					await Promise.all([
+						sendBookingConfirmationEmail(newBooking.id, env),
+						sendAdminNewBookingEmail(newBooking.id, env),
+					]);
+					console.log("✅ Emails sent successfully");
+				} catch (emailError) {
+					console.error("❌ Error sending emails:", emailError);
+					// Don't fail the booking creation if emails fail
+				}
+
 				return newBooking;
 			} catch (error) {
 				console.error("💥 ERROR in createPackageBooking:", error);
@@ -312,7 +326,7 @@ export const bookingsRouter = router({
 	// Custom booking procedures (allow guest users)
 	createCustomBooking: guestProcedure
 		.input(CreateCustomBookingSchema)
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				console.log("🔍 DEBUG createCustomBooking - RECEIVED INPUT:");
 				console.log("📦 Input data:", JSON.stringify(input, null, 2));
@@ -329,6 +343,20 @@ export const bookingsRouter = router({
 				console.log("📝 Calling createCustomBookingService with userId:", userId);
 				const newBooking = await createCustomBookingService(db, { ...input, userId });
 				console.log("✅ Custom booking created successfully:", newBooking.id);
+
+				// Send booking confirmation and admin notification emails
+				try {
+					console.log("📧 Sending booking confirmation and admin notification emails...");
+					await Promise.all([
+						sendBookingConfirmationEmail(newBooking.id, env),
+						sendAdminNewBookingEmail(newBooking.id, env),
+					]);
+					console.log("✅ Emails sent successfully");
+				} catch (emailError) {
+					console.error("❌ Error sending emails:", emailError);
+					// Don't fail the booking creation if emails fail
+				}
+
 				return newBooking;
 			} catch (error) {
 				console.error("❌ TRPC Error in createCustomBooking:", {
@@ -343,7 +371,7 @@ export const bookingsRouter = router({
 	// Create custom booking from instant quote (allow guest users)
 	createCustomBookingFromQuote: guestProcedure
 		.input(CreateCustomBookingFromQuoteSchema)
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				console.log("🔍 DEBUG createCustomBookingFromQuote - RECEIVED INPUT:");
 				console.log("📦 Input data:", JSON.stringify(input, null, 2));
@@ -364,6 +392,20 @@ export const bookingsRouter = router({
 
 				const newBooking = await createCustomBookingFromQuoteService(db, inputWithUserId);
 				console.log("✅ Custom booking created successfully:", newBooking.id);
+
+				// Send booking confirmation and admin notification emails
+				try {
+					console.log("📧 Sending booking confirmation and admin notification emails...");
+					await Promise.all([
+						sendBookingConfirmationEmail(newBooking.id, env),
+						sendAdminNewBookingEmail(newBooking.id, env),
+					]);
+					console.log("✅ Emails sent successfully");
+				} catch (emailError) {
+					console.error("❌ Error sending emails:", emailError);
+					// Don't fail the booking creation if emails fail
+				}
+
 				return newBooking;
 			} catch (error) {
 				console.error("❌ TRPC Error in createCustomBookingFromQuote:", {

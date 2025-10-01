@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings } from "@/db/sqlite/schema/bookings";
 import { drivers } from "@/db/sqlite/schema/drivers";
@@ -7,7 +7,8 @@ import { cars } from "@/db/sqlite/schema/cars";
 import { packages } from "@/db/sqlite/schema/packages";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
-import { getMailService, renderTripStatusEmail, renderDriverAssignmentEmail } from "@workspace/mail";
+import { UserRoleEnum } from "@/db/sqlite/enums";
+import { getMailService, renderTripStatusEmail, renderDriverAssignmentEmail, renderBookingConfirmationEmail, renderAdminNewBookingEmail } from "@workspace/mail";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import type { Env } from "@/types/env";
 
@@ -1482,6 +1483,209 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		};
 	} catch (error) {
 		console.error("Error sending trip status notification:", error);
+		return {
+			success: false,
+			message: error instanceof Error ? error.message : "Unknown error occurred",
+		};
+	}
+}
+/**
+ * Send booking confirmation email to customer
+ */
+export async function sendBookingConfirmationEmail(bookingId: string, env: Env) {
+	try {
+		console.log(`📧 BOOKING CONFIRMATION: Starting email for booking ${bookingId}`);
+
+		// Get booking details
+		const bookingDetails = await getBookingDetailsForEmail(bookingId);
+
+		if (!bookingDetails.customer || !bookingDetails.customer.email) {
+			throw new Error("Customer email not found");
+		}
+
+		const { booking, customer, car, package: pkg, stops } = bookingDetails;
+
+		// Format pickup date and time
+		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
+		const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		});
+		const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+
+		// Determine service type
+		let serviceType = "Custom Booking";
+		if (booking.bookingType === "package" && pkg) {
+			serviceType = `Package: ${pkg.name}`;
+		} else if (booking.bookingType === "car") {
+			serviceType = "Car Rental";
+		}
+
+		// Get vehicle info
+		let vehicleInfo = "Luxury Vehicle";
+		if (car) {
+			vehicleInfo = `${car.brand} ${car.model}`;
+		}
+
+		// Generate booking reference
+		const bookingReference = booking.referenceNumber || `DUC-${booking.id}`;
+
+		// Generate email template
+		const template = await renderBookingConfirmationEmail({
+			customerName: customer.name || "Customer",
+			bookingReference,
+			serviceType,
+			pickupDate,
+			pickupTime,
+			originAddress: booking.originAddress || booking.pickupAddress,
+			destinationAddress: booking.destinationAddress,
+			vehicleInfo,
+			websiteUrl: "https://downunderchauffeurs.com",
+			stops: stops?.map(stop => ({ address: stop.address })) || [],
+			passengerCount: booking.passengerCount || 1,
+			quotedAmount: booking.quotedAmount,
+		});
+
+		// Send email
+		console.log(`📧 BOOKING CONFIRMATION: Sending email to ${customer.email}`);
+		const mailService = getMailService(env);
+		const success = await mailService.sendEmail({
+			to: customer.email,
+			subject: template.subject,
+			html: template.html,
+		});
+		console.log(`📧 BOOKING CONFIRMATION: Email send result: ${success}`);
+
+		if (!success) {
+			throw new Error("Failed to send booking confirmation email");
+		}
+
+		return {
+			success: true,
+			message: `Booking confirmation sent to ${customer.email}`,
+		};
+	} catch (error) {
+		console.error("Error sending booking confirmation:", error);
+		return {
+			success: false,
+			message: error instanceof Error ? error.message : "Unknown error occurred",
+		};
+	}
+}
+
+/**
+ * Send new booking notification to admin
+ */
+export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
+	try {
+		console.log(`📧 ADMIN NOTIFICATION: Starting email for new booking ${bookingId}`);
+
+		// Get booking details
+		const bookingDetails = await getBookingDetailsForEmail(bookingId);
+
+		if (!bookingDetails.customer || !bookingDetails.customer.email) {
+			throw new Error("Customer information not found");
+		}
+
+		const { booking, customer, car, package: pkg, stops } = bookingDetails;
+
+		// Format pickup date and time
+		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
+		const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		});
+		const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+
+		// Determine service type
+		let serviceType = "Custom Booking";
+		if (booking.bookingType === "package" && pkg) {
+			serviceType = `Package: ${pkg.name}`;
+		} else if (booking.bookingType === "car") {
+			serviceType = "Car Rental";
+		}
+
+		// Get vehicle info
+		let vehicleInfo = "Luxury Vehicle";
+		if (car) {
+			vehicleInfo = `${car.brand} ${car.model}`;
+		}
+
+		// Generate booking reference
+		const bookingReference = booking.referenceNumber || `DUC-${booking.id}`;
+
+		// Get all admin and super_admin users
+		const adminUsers = await db.select()
+			.from(users)
+			.where(
+				or(
+					eq(users.role, UserRoleEnum.Admin),
+					eq(users.role, UserRoleEnum.SuperAdmin)
+				)
+			);
+
+		if (!adminUsers || adminUsers.length === 0) {
+			console.log("⚠️ No admin users found, skipping admin notification");
+			return {
+				success: false,
+				message: "No admin users found to notify",
+			};
+		}
+
+		console.log(`📧 ADMIN NOTIFICATION: Found ${adminUsers.length} admin users`);
+
+		// Generate email template
+		const template = await renderAdminNewBookingEmail({
+			customerName: customer.name || "Customer",
+			customerEmail: customer.email,
+			customerPhone: customer.phoneNumber,
+			bookingReference,
+			serviceType,
+			pickupDate,
+			pickupTime,
+			originAddress: booking.originAddress || booking.pickupAddress,
+			destinationAddress: booking.destinationAddress,
+			vehicleInfo,
+			websiteUrl: "https://downunderchauffeurs.com",
+			stops: stops?.map(stop => ({ address: stop.address })) || [],
+			passengerCount: booking.passengerCount || 1,
+			quotedAmount: booking.quotedAmount,
+		});
+
+		// Send email to all admins
+		const mailService = getMailService(env);
+		const emailResults = await Promise.allSettled(
+			adminUsers.map(admin => {
+				console.log(`📧 ADMIN NOTIFICATION: Sending email to ${admin.email}`);
+				return mailService.sendEmail({
+					to: admin.email,
+					subject: template.subject,
+					html: template.html,
+				});
+			})
+		);
+
+		const successCount = emailResults.filter(result => result.status === 'fulfilled' && result.value).length;
+		const failureCount = emailResults.length - successCount;
+
+		console.log(`📧 ADMIN NOTIFICATION: Sent to ${successCount}/${adminUsers.length} admins (${failureCount} failed)`);
+
+		return {
+			success: successCount > 0,
+			message: `Admin notifications sent to ${successCount}/${adminUsers.length} admins`,
+		};
+	} catch (error) {
+		console.error("Error sending admin notification:", error);
 		return {
 			success: false,
 			message: error instanceof Error ? error.message : "Unknown error occurred",

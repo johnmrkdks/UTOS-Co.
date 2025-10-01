@@ -15,6 +15,8 @@
 		"preview": "wrangler build && wrangler dev",
 		"start": "wrangler dev",
 		"deploy": "wrangler types && wrangler deploy",
+		"deploy:staging": "wrangler types && wrangler deploy --env staging",
+		"deploy:production": "wrangler types && wrangler deploy --env production",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
 		"db:push-d1": "drizzle-kit push --config=drizzle.d1-config.ts",
 		"db:push-supabase": "drizzle-kit push --config=drizzle.supabase-config.ts",

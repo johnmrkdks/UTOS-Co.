@@ -7,12 +7,16 @@
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"dev": "vite --port=3001 --host",
 		"build": "vite build",
+		"build:staging": "vite build --mode staging",
+		"build:production": "vite build --mode production",
 		"serve": "vite preview",
 		"start": "vite",
 		"check-types": "tsc --noEmit",
 		"wrangler:dev": "wrangler dev --port=3001",
 		"preview": "pnpm run build && wrangler dev",
-		"deploy": "wrangler deploy"
+		"deploy": "wrangler deploy",
+		"deploy:staging": "pnpm run build:staging && wrangler deploy",
+		"deploy:production": "pnpm run build:production && wrangler deploy"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.9.0",

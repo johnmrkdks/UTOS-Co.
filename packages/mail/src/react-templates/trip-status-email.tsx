@@ -354,7 +354,7 @@ export function TripStatusEmail({
 
 						{/* Simple CTA */}
 						<Section style={ctaSection}>
-							<Button style={ctaButton} href={`${websiteUrl}/customer/bookings`}>
+							<Button style={ctaButton} href={`${websiteUrl}/my-bookings`}>
 								View My Bookings
 							</Button>
 							<Text style={contactText}>
