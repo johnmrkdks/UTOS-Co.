@@ -6,7 +6,8 @@ import { CarStatusEnum } from "@/types";
 export interface CarSelectionParams {
 	passengerCount: number;
 	scheduledPickupTime: Date;
-	preferredCategoryId?: string;
+	preferredCarId?: string; // Specific car ID from quote
+	preferredCategoryId?: string; // Fallback to category preference
 }
 
 export async function selectAvailableCarService(db: DB, params: CarSelectionParams) {
@@ -50,7 +51,7 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 	}
 
 	// Filter by passenger capacity
-	const suitableCars = availableCars.filter(car => 
+	const suitableCars = availableCars.filter(car =>
 		car.seatingCapacity >= params.passengerCount
 	);
 
@@ -58,12 +59,24 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 		throw new Error(`No cars available with capacity for ${params.passengerCount} passengers`);
 	}
 
-	// If preferred category is specified, try to find a car in that category
+	// PRIORITY 1: If a specific car ID is requested (from quote), try to use that exact car
+	if (params.preferredCarId) {
+		const exactCarMatch = suitableCars.find(car => car.id === params.preferredCarId);
+		if (exactCarMatch) {
+			console.log("✅ Found exact car match from quote:", exactCarMatch.id);
+			return exactCarMatch;
+		} else {
+			console.warn(`⚠️ Preferred car ${params.preferredCarId} not available, falling back to category/sorting`);
+		}
+	}
+
+	// PRIORITY 2: If preferred category is specified, try to find a car in that category
 	if (params.preferredCategoryId) {
-		const categoryMatch = suitableCars.find(car => 
+		const categoryMatch = suitableCars.find(car =>
 			car.categoryId === params.preferredCategoryId
 		);
 		if (categoryMatch) {
+			console.log("✅ Found category match:", categoryMatch.categoryId);
 			return categoryMatch;
 		}
 	}

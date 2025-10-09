@@ -28,6 +28,8 @@ interface AdminNewBookingEmailProps {
 	websiteUrl: string;
 	stops?: Array<{ address: string }>;
 	passengerCount?: number;
+	luggageCount?: number;
+	specialRequests?: string;
 	quotedAmount?: number;
 }
 
@@ -46,6 +48,8 @@ export function AdminNewBookingEmail({
 	websiteUrl = "https://downunderchauffeurs.com",
 	stops = [],
 	passengerCount = 1,
+	luggageCount = 0,
+	specialRequests,
 	quotedAmount,
 }: AdminNewBookingEmailProps) {
 	return (
@@ -176,6 +180,27 @@ export function AdminNewBookingEmail({
 									<Text style={detailValue}>{passengerCount}</Text>
 								</Column>
 							</Row>
+
+							<Hr style={detailSeparator} />
+
+							<Row>
+								<Column style={{ width: '50%' }}>
+									<Text style={detailLabel}>Luggage</Text>
+									<Text style={detailValue}>{luggageCount} piece{luggageCount !== 1 ? 's' : ''}</Text>
+								</Column>
+							</Row>
+
+							{specialRequests && (
+								<>
+									<Hr style={detailSeparator} />
+									<Row>
+										<Column>
+											<Text style={detailLabel}>Special Requests</Text>
+											<Text style={detailValue}>{specialRequests}</Text>
+										</Column>
+									</Row>
+								</>
+							)}
 
 							{quotedAmount && (
 								<>

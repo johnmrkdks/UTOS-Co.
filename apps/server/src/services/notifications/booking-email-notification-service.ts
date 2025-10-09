@@ -1576,7 +1576,7 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		// Get vehicle info
 		let vehicleInfo = "Luxury Vehicle";
 		if (car) {
-			vehicleInfo = `${car.brand} ${car.model}`;
+			vehicleInfo = car.name || "Luxury Vehicle";
 		}
 
 		// Generate booking reference
@@ -1662,7 +1662,7 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 		// Get vehicle info
 		let vehicleInfo = "Luxury Vehicle";
 		if (car) {
-			vehicleInfo = `${car.brand} ${car.model}`;
+			vehicleInfo = car.name || "Luxury Vehicle";
 		}
 
 		// Generate booking reference
@@ -1703,6 +1703,8 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 			websiteUrl: "https://downunderchauffeurs.com",
 			stops: stops?.map(stop => ({ address: stop.address })) || [],
 			passengerCount: booking.passengerCount || 1,
+			luggageCount: booking.luggageCount || 0,
+			specialRequests: booking.specialRequests,
 			quotedAmount: booking.quotedAmount,
 		});
 

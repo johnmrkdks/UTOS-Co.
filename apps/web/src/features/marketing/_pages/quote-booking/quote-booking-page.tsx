@@ -138,6 +138,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
 	const [date, setDate] = useState<Date>();
+	const [bookingResult, setBookingResult] = useState<any>(null);
 
 	// Pre-populate form data for authenticated users
 	useEffect(() => {
@@ -306,7 +307,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 				passengerCount: formData.passengerCount!,
 				luggageCount: formData.luggageCount!,
 				specialRequests: formData.specialRequests,
-				preferredCategoryId: preselectedCarId,
+				preferredCarId: preselectedCarId, // Fixed: Use preferredCarId instead of preferredCategoryId
 			};
 
 			console.log("📦 Quote booking payload:", bookingPayload);
@@ -315,6 +316,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 			const result = await createBookingMutation.mutateAsync(bookingPayload);
 
 			console.log("✅ Quote booking successful:", result);
+			setBookingResult(result);
 			setStep("confirmation");
 
 			// Scroll to top after confirmation
@@ -417,16 +419,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 																</div>
 															)}
 														</>
-													) : (
-														<>
-															<div className="font-medium text-sm text-gray-900">
-																Vehicle from your quote
-															</div>
-															<div className="text-xs text-muted-foreground mt-1">
-																Using standard capacity limits (8 passengers, 10 luggage)
-															</div>
-														</>
-													)}
+													) : null}
 												</div>
 											</div>
 										</div>
@@ -626,6 +619,13 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 							<div>
 								<h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
 								<p className="text-sm sm:text-base text-gray-600">Your custom booking has been submitted successfully</p>
+								{bookingResult?.referenceNumber && (
+									<div className="mt-3 inline-block bg-primary/10 border-2 border-primary rounded-full px-4 py-2">
+										<p className="text-sm font-semibold text-primary">
+											Reference: #{bookingResult.referenceNumber}
+										</p>
+									</div>
+								)}
 								{!sessionData?.user && (
 									<p className="text-sm text-blue-600 mt-2">
 										💡 Tip: Create an account to easily manage your bookings
@@ -711,73 +711,134 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 								</div>
 							</div>
 
-							{/* Journey Summary */}
-							<div className="bg-gray-50 rounded-lg p-4">
-								<div className="grid grid-cols-2 gap-4 text-sm">
-									<div>
-										<span className="text-gray-600">Distance:</span>
-										<p className="font-medium text-gray-900">{quoteData.distance?.toFixed(1)} km</p>
-									</div>
-									<div>
-										<span className="text-gray-600">Duration:</span>
-										<p className="font-medium text-gray-900">{quoteData.duration} min</p>
-									</div>
-									{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
-										<div className="col-span-2">
-											<span className="text-gray-600">Stops:</span>
-											<p className="font-medium text-gray-900">{secureQuoteData.stops.length} intermediate stop{secureQuoteData.stops.length > 1 ? 's' : ''}</p>
-										</div>
-									)}
-								</div>
-							</div>
 						</div>
 
-						<div className="grid grid-cols-2 gap-4 text-sm">
-							<div>
-								<span className="text-gray-600">Date & Time:</span>
-								<p className="font-medium">
-									{formData.scheduledPickupDate && formData.scheduledPickupTime ? (
-										(() => {
-											// Parse the date string directly without timezone conversion
-											const [year, month, day] = formData.scheduledPickupDate.split('-');
-											const [hours, minutes] = formData.scheduledPickupTime.split(':');
-											
-											// Format date parts manually to avoid timezone issues
-											const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-											const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-											
-											// Create a date object just for getting day of week (this should be safe)
-											const tempDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-											const dayOfWeek = dayNames[tempDate.getDay()];
-											
-											// Format time to 12-hour format
-											const hour24 = parseInt(hours);
-											const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-											const ampm = hour24 >= 12 ? 'PM' : 'AM';
-											
-											return `${dayOfWeek}, ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year} at ${hour12}:${minutes} ${ampm}`;
-										})()
+						{/* Selected Vehicle */}
+						{carId && (
+							<div className="bg-white rounded-lg border p-4">
+								<h4 className="font-medium text-gray-900 mb-3 text-sm">Selected Vehicle</h4>
+								<div className="flex items-center gap-3">
+									{carData?.images && carData.images.length > 0 ? (
+										<div className="w-20 h-16 bg-gray-200 rounded border overflow-hidden flex-shrink-0">
+											<img
+												src={carData.images.find((img: any) => img.isMain)?.url || carData.images[0].url}
+												alt={carData.name}
+												className="w-full h-full object-cover"
+											/>
+										</div>
 									) : (
-										`${formData.scheduledPickupDate} at ${formData.scheduledPickupTime}`
+										<div className="w-20 h-16 bg-primary/10 rounded border flex items-center justify-center flex-shrink-0">
+											<Car className="w-8 h-8 text-primary/60" />
+										</div>
 									)}
-								</p>
+									<div className="flex-1 min-w-0">
+										{carLoading ? (
+											<>
+												<div className="font-medium text-sm text-gray-900">
+													Loading vehicle details...
+												</div>
+												<div className="text-xs text-muted-foreground mt-1">
+													Please wait
+												</div>
+											</>
+										) : carData ? (
+											<>
+												<div className="font-medium text-base text-gray-900">
+													{carData.name}
+												</div>
+												<div className="text-sm text-muted-foreground mt-0.5">
+													{carData.category?.name || 'Premium Vehicle'} • {carData.seatingCapacity} seats
+												</div>
+												{carData.features && carData.features.length > 0 && (
+													<div className="flex flex-wrap gap-1 mt-2">
+														{carData.features.slice(0, 3).map((feature: any) => (
+															<Badge key={feature.id} variant="secondary" className="text-xs px-2 py-0.5">
+																{feature.name}
+															</Badge>
+														))}
+														{carData.features.length > 3 && (
+															<Badge variant="secondary" className="text-xs px-2 py-0.5">
+																+{carData.features.length - 3} more
+															</Badge>
+														)}
+													</div>
+												)}
+											</>
+										) : (
+											<>
+												<div className="font-medium text-base text-gray-900">
+													Premium Vehicle
+												</div>
+												<div className="text-sm text-muted-foreground mt-0.5">
+													Selected from your quote
+												</div>
+											</>
+										)}
+									</div>
+								</div>
 							</div>
-							<div>
-								<span className="text-gray-600">Passengers:</span>
-								<p className="font-medium">{formData.passengerCount || 0} passenger{(formData.passengerCount || 0) !== 1 ? 's' : ''}</p>
+						)}
+
+						<div className="space-y-3 text-sm">
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<span className="text-gray-600">Date & Time:</span>
+									<p className="font-medium">
+										{formData.scheduledPickupDate && formData.scheduledPickupTime ? (
+											(() => {
+												// Parse the date string directly without timezone conversion
+												const [year, month, day] = formData.scheduledPickupDate.split('-');
+												const [hours, minutes] = formData.scheduledPickupTime.split(':');
+
+												// Format date parts manually to avoid timezone issues
+												const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+												const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+												// Create a date object just for getting day of week (this should be safe)
+												const tempDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+												const dayOfWeek = dayNames[tempDate.getDay()];
+
+												// Format time to 12-hour format
+												const hour24 = parseInt(hours);
+												const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+												const ampm = hour24 >= 12 ? 'PM' : 'AM';
+
+												return `${dayOfWeek}, ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year} at ${hour12}:${minutes} ${ampm}`;
+											})()
+										) : (
+											`${formData.scheduledPickupDate} at ${formData.scheduledPickupTime}`
+										)}
+									</p>
+								</div>
+								<div>
+									<span className="text-gray-600">Passengers:</span>
+									<p className="font-medium">{formData.passengerCount || 0} passenger{(formData.passengerCount || 0) !== 1 ? 's' : ''}</p>
+								</div>
+								<div>
+									<span className="text-gray-600">Luggage:</span>
+									<p className="font-medium">{formData.luggageCount || 0} piece{(formData.luggageCount || 0) !== 1 ? 's' : ''}</p>
+								</div>
+								<div>
+									<span className="text-gray-600">Distance:</span>
+									<p className="font-medium">{quoteData.distance?.toFixed(1)} km</p>
+								</div>
+								{secureQuoteData?.stops && secureQuoteData.stops.length > 0 && (
+									<div>
+										<span className="text-gray-600">Stops:</span>
+										<p className="font-medium">{secureQuoteData.stops.length} intermediate stop{secureQuoteData.stops.length > 1 ? 's' : ''}</p>
+									</div>
+								)}
+								<div>
+									<span className="text-gray-600">Estimated Fare:</span>
+									<p className="font-medium text-primary">${quoteData.totalFare.toFixed(2)}</p>
+								</div>
 							</div>
-							<div>
-								<span className="text-gray-600">Luggage:</span>
-								<p className="font-medium">{formData.luggageCount || 0} piece{(formData.luggageCount || 0) !== 1 ? 's' : ''}</p>
-							</div>
-							<div>
-								<span className="text-gray-600">Distance:</span>
-								<p className="font-medium">{quoteData.distance.toFixed(1)} km</p>
-							</div>
-							<div>
-								<span className="text-gray-600">Estimated Fare:</span>
-								<p className="font-medium text-primary">${quoteData.totalFare.toFixed(2)}</p>
-							</div>
+							{formData.specialRequests && (
+								<div>
+									<span className="text-gray-600">Special Requests:</span>
+									<p className="font-medium text-sm mt-1 p-3 bg-gray-50 rounded-lg border">{formData.specialRequests}</p>
+								</div>
+							)}
 						</div>
 							</CardContent>
 						</Card>
@@ -972,16 +1033,57 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 											</h3>
 											<div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
 												<div className="flex items-center gap-3">
-													<div className="w-16 h-12 bg-primary/10 rounded border flex items-center justify-center">
-														<Car className="w-6 h-6 text-primary/60" />
-													</div>
+													{carData?.images && carData.images.length > 0 ? (
+														<div className="w-16 h-12 bg-gray-200 rounded border overflow-hidden">
+															<img
+																src={carData.images.find((img: any) => img.isMain)?.url || carData.images[0].url}
+																alt={carData.name}
+																className="w-full h-full object-cover"
+															/>
+														</div>
+													) : (
+														<div className="w-16 h-12 bg-primary/10 rounded border flex items-center justify-center">
+															<Car className="w-6 h-6 text-primary/60" />
+														</div>
+													)}
 													<div className="flex-1 min-w-0">
-														<div className="font-medium text-sm text-gray-900">
-															Vehicle from your quote
-														</div>
-														<div className="text-xs text-muted-foreground mt-1">
-															Confirmed for booking
-														</div>
+														{carLoading ? (
+															<>
+																<div className="font-medium text-sm text-gray-900">
+																	Loading vehicle details...
+																</div>
+																<div className="text-xs text-muted-foreground mt-1">
+																	Please wait
+																</div>
+															</>
+														) : carData ? (
+															<>
+																<div className="font-medium text-sm text-gray-900">
+																	{carData.name}
+																</div>
+																<div className="text-xs text-muted-foreground mt-1">
+																	{carData.category?.name || 'Premium Vehicle'} • {carData.seatingCapacity} seats
+																</div>
+																{carData.features && carData.features.length > 0 && (
+																	<div className="flex flex-wrap gap-1 mt-1">
+																		{carData.features.slice(0, 2).map((feature: any) => (
+																			<Badge key={feature.id} variant="secondary" className="text-xs px-1.5 py-0.5">
+																				{feature.name}
+																			</Badge>
+																		))}
+																	</div>
+																)}
+															</>
+														) : (
+															<>
+																<div className="font-medium text-sm text-gray-900">
+																	Premium Vehicle
+																</div>
+																<div className="text-xs text-muted-foreground mt-1">
+																	Selected from your quote
+																</div>
+															</>
+														)}
 													</div>
 												</div>
 											</div>

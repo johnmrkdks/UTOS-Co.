@@ -43,8 +43,10 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	passengerCount: z.number().int().min(1).default(1),
 	luggageCount: z.number().int().min(0).default(0),
 	specialRequests: z.string().optional(),
-	
-	// Optional car preference
+
+	// Optional car preference (specific car ID from quote)
+	preferredCarId: z.string().optional(),
+	// Legacy field for backward compatibility
 	preferredCategoryId: z.string().optional(),
 });
 
@@ -55,6 +57,7 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 		userId: data.userId,
 		scheduledPickupTime: data.scheduledPickupTime,
 		passengerCount: data.passengerCount,
+		preferredCarId: data.preferredCarId,
 		preferredCategoryId: data.preferredCategoryId
 	});
 
@@ -76,7 +79,8 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 	const selectedCar = await selectAvailableCarService(db, {
 		passengerCount: data.passengerCount,
 		scheduledPickupTime: data.scheduledPickupTime,
-		preferredCategoryId: data.preferredCategoryId,
+		preferredCarId: data.preferredCarId, // Specific car from quote
+		preferredCategoryId: data.preferredCategoryId, // Fallback to category
 	});
 	
 	if (!selectedCar) {
