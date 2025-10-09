@@ -38,6 +38,11 @@ export const offloadBookingSchema = z.object({
 		.string()
 		.min(1, "Customer phone is required")
 		.regex(/^[\+\-\s\d\(\)]+$/, "Please enter a valid phone number"),
+	customerEmail: z
+		.string()
+		.email("Please enter a valid email address")
+		.optional()
+		.or(z.literal("")),
 	passengerCount: z
 		.number()
 		.int("Passenger count must be a whole number")

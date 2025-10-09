@@ -22,7 +22,7 @@ export const CreateCustomBookingSchema = z.object({
 	estimatedDuration: z.number().int().optional(), // in seconds
 	
 	// Distance and pricing estimates
-	estimatedDistance: z.number().int().optional(), // in meters
+	estimatedDistance: z.number().optional(), // in kilometers with decimal precision
 	baseFare: z.number(),
 	distanceFare: z.number(),
 	timeFare: z.number().optional(),

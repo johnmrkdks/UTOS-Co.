@@ -56,7 +56,7 @@ export function TripStatusEmail({
 	customerName = "Customer",
 	statusTitle = "Trip Status Update",
 	statusMessage = "Your trip status has been updated.",
-	bookingReference = "DUC-123456",
+	bookingReference = "123456",
 	serviceType = "Custom Trip",
 	pickupDate = "Friday, September 19, 2025",
 	pickupTime = "05:30 PM",
@@ -106,7 +106,7 @@ export function TripStatusEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>{statusTitle} - Booking #{bookingReference.slice(-6)} - {customerName}</Preview>
+			<Preview>{statusTitle} - Booking #{bookingReference} - {customerName}</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
@@ -145,7 +145,7 @@ export function TripStatusEmail({
 								<Text style={tripDate}>{pickupDate}</Text>
 							</Column>
 							<Column style={{ width: '40%', textAlign: 'right' }}>
-								<Text style={tripReference}>#{bookingReference.slice(-6)}</Text>
+								<Text style={tripReference}>#{bookingReference}</Text>
 							</Column>
 						</Row>
 

@@ -27,7 +27,8 @@
 		"db:migrate-d1": "drizzle-kit migrate --config=drizzle.d1-config.ts",
 		"db:migrate-supabase": "drizzle-kit migrate --config=drizzle.supabase-config.ts",
 		"db:seed": "wrangler d1 execute DB --remote --file=drizzle/seed/seed.sql",
-		"db:seed-generate": "bun drizzle/seed/generate-seed-sql.ts"
+		"db:seed-generate": "bun drizzle/seed/generate-seed-sql.ts",
+		"migrate:distance": "bun scripts/migrate-distance.ts"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.855.0",
@@ -38,6 +39,8 @@
 		"@trpc/server": "^11.4.2",
 		"@workspace/mail": "workspace:*",
 		"better-auth": "catalog:",
+		"date-fns": "^4.1.0",
+		"date-fns-tz": "^3.2.0",
 		"dotenv": "^16.4.7",
 		"drizzle-orm": "^0.44.5",
 		"drizzle-seed": "^0.3.1",

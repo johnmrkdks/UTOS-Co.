@@ -185,7 +185,7 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 																	{booking.customerName}
 																</p>
 																<p className="text-xs text-muted-foreground">
-																	#{booking.id.slice(-6)}
+																	#{(booking as any).referenceNumber || 'N/A'}
 																</p>
 															</div>
 														</div>

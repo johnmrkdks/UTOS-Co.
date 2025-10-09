@@ -139,7 +139,7 @@ export function BookingDetailsDialog() {
 						<div className="text-lg font-bold text-primary">
 							${booking.quotedAmount.toFixed(2)}
 						</div>
-						<div className="text-xs text-gray-500 font-mono">#{booking.id.slice(-6)}</div>
+						<div className="text-xs text-gray-500 font-mono">#{(booking as any).referenceNumber || 'N/A'}</div>
 					</div>
 				</div>
 

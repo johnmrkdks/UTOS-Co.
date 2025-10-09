@@ -9,6 +9,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { useGetDriverBookingsQuery } from "@/features/driver/_hooks/query/use-get-driver-bookings-query";
 import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
+import { BookingTypeBadge } from "@/components/booking-type-badge";
 
 export const Route = createFileRoute("/driver/_layout/history")({
 	component: HistoryPage,
@@ -50,7 +51,15 @@ function HistoryPage() {
 			finalAmount: booking.finalAmount || booking.quotedAmount || 0,
 			distance: (booking.actualDistance || booking.estimatedDistance) ? `${((booking.actualDistance || booking.estimatedDistance) / 1000).toFixed(1)} km` : "N/A",
 			duration: (booking.estimatedDuration) ? `${Math.round(booking.estimatedDuration / 60)} min` : "N/A",
-			status: booking.status as "completed" | "cancelled" | "no_show"
+			status: booking.status as "completed" | "cancelled" | "no_show",
+			// Pass through booking type and offload fields for badge
+			bookingType: booking.bookingType,
+			packageId: booking.packageId,
+			package: booking.package,
+			estimatedDuration: booking.estimatedDuration,
+			offloaderName: booking.offloaderName,
+			jobType: booking.jobType,
+			vehicleType: booking.vehicleType
 		})).filter(trip => ['completed', 'cancelled', 'no_show'].includes(trip.status));
 	}, [bookingsData]);
 
@@ -134,7 +143,13 @@ function HistoryPage() {
 					{/* Booking ID and Date/Time */}
 					<div className="flex items-center justify-between mb-3">
 						<span className="text-sm font-semibold text-gray-900">Trip #{trip.id.slice(-6)}</span>
-						<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
+						<div className="flex items-center gap-2">
+							<BookingTypeBadge booking={trip as any} />
+							{trip.bookingType === 'offload' && trip.offloaderName && (
+								<span className="text-xs text-orange-600 font-medium">({trip.offloaderName})</span>
+							)}
+							<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
+						</div>
 					</div>
 
 					{/* Customer, Pax, and Vehicle info */}

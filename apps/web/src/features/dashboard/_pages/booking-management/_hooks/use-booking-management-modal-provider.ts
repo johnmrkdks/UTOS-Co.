@@ -74,10 +74,9 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	closeCreateOffloadBookingDialog: () => set({ isCreateOffloadBookingDialogOpen: false }),
 	
 	openBookingDetailsDialog: (bookingId: string) => {
-		console.log("🚀 Modal provider - opening booking details dialog for ID:", bookingId);
-		set({ 
-			isBookingDetailsDialogOpen: true, 
-			selectedBookingId: bookingId 
+		set({
+			isBookingDetailsDialogOpen: true,
+			selectedBookingId: bookingId
 		});
 	},
 	closeBookingDetailsDialog: () => set({ 
@@ -86,10 +85,9 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	}),
 	
 	openAssignDriverDialog: (booking: any) => {
-		console.log("🚗 Modal provider - opening assign driver dialog for booking:", booking.id);
-		set({ 
-			isAssignDriverDialogOpen: true, 
-			selectedBookingForDriver: booking 
+		set({
+			isAssignDriverDialogOpen: true,
+			selectedBookingForDriver: booking
 		});
 	},
 	closeAssignDriverDialog: () => set({ 
@@ -98,10 +96,9 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	}),
 	
 	openAssignCarDialog: (booking: any) => {
-		console.log("🚙 Modal provider - opening assign car dialog for booking:", booking.id);
-		set({ 
-			isAssignCarDialogOpen: true, 
-			selectedBookingForCar: booking 
+		set({
+			isAssignCarDialogOpen: true,
+			selectedBookingForCar: booking
 		});
 	},
 	closeAssignCarDialog: () => set({ 
@@ -110,10 +107,9 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	}),
 	
 	openEditBookingDialog: (booking: any) => {
-		console.log("✏️ Modal provider - opening edit booking dialog for booking:", booking.id);
-		set({ 
-			isEditBookingDialogOpen: true, 
-			selectedBookingForEdit: booking 
+		set({
+			isEditBookingDialogOpen: true,
+			selectedBookingForEdit: booking
 		});
 	},
 	closeEditBookingDialog: () => set({ 
@@ -122,7 +118,6 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	}),
 	
 	openChangeStatusDialog: (booking: any, preSelectedStatus?: string) => {
-		console.log("📋 Modal provider - opening change status dialog for booking:", booking.id, "with pre-selected status:", preSelectedStatus);
 		set({
 			isChangeStatusDialogOpen: true,
 			selectedBookingForStatus: booking,
@@ -136,7 +131,6 @@ export const useBookingManagementModalProvider = create<BookingManagementModalSt
 	}),
 
 	openConfirmBookingDialog: (booking: any) => {
-		console.log("✅ Modal provider - opening confirm booking dialog for booking:", booking.id);
 		set({
 			isConfirmBookingDialogOpen: true,
 			selectedBookingForConfirm: booking

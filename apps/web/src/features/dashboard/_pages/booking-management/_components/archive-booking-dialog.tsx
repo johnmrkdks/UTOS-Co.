@@ -72,8 +72,8 @@ export function ArchiveBookingDialog({
 				<div className="rounded-lg bg-muted p-4">
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm">
-							<span className="font-medium">Booking ID:</span>
-							<span className="font-mono">{booking.id}</span>
+							<span className="font-medium">Booking Reference:</span>
+							<span className="font-mono">{(booking as any).referenceNumber || 'N/A'}</span>
 						</div>
 						<div className="flex justify-between text-sm">
 							<span className="font-medium">Customer:</span>

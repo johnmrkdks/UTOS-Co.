@@ -41,17 +41,14 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 	const [unassignCarDialogOpen, setUnassignCarDialogOpen] = useState(false);
 
 	const handleAssignDriver = (booking: Booking) => {
-		console.log("🚗 Opening assign driver dialog for booking:", booking.id);
 		openAssignDriverDialog(booking);
 	};
 
 	const handleAssignCar = (booking: Booking) => {
-		console.log("🚙 Opening assign car dialog for booking:", booking.id);
 		openAssignCarDialog(booking);
 	};
 
 	const handleEditBooking = (booking: Booking) => {
-		console.log("✏️ Opening edit booking dialog for booking:", booking.id);
 		if (onEditBooking) {
 			onEditBooking(booking);
 		} else {
@@ -60,44 +57,35 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 	};
 
 	const handleChangeStatus = (booking: Booking) => {
-		console.log("📋 Opening update status dialog for booking:", booking.id);
 		openChangeStatusDialog(booking);
 	};
 
-
 	const handleUnassignDriver = (booking: Booking) => {
-		console.log("🚫 Opening unassign driver confirmation for booking:", booking.id);
 		setUnassignDriverDialogOpen(true);
 	};
 
 	const handleUnassignCar = (booking: Booking) => {
-		console.log("🚫 Opening unassign car confirmation for booking:", booking.id);
 		setUnassignCarDialogOpen(true);
 	};
 
 	const confirmUnassignDriver = () => {
-		console.log("✅ Confirming unassign driver for booking:", booking.id);
 		(unassignDriverMutation.mutate as any)({ bookingId: booking.id });
 		setUnassignDriverDialogOpen(false);
 	};
 
 	const confirmUnassignCar = () => {
-		console.log("✅ Confirming unassign car for booking:", booking.id);
 		(unassignCarMutation.mutate as any)({ bookingId: booking.id });
 		setUnassignCarDialogOpen(false);
 	};
 
 	const handleArchiveBooking = (booking: Booking) => {
-		console.log("📁 Archiving booking:", booking.id);
 		if (onArchiveBooking) {
-			// Toggle archive state: null/false -> true, true -> false
 			const newArchiveState = booking.isArchived ? false : true;
 			onArchiveBooking(booking, newArchiveState);
 		}
 	};
 
 	const handleDeleteBooking = (booking: Booking) => {
-		console.log("🗑️ Deleting booking:", booking.id);
 		if (onDeleteBooking) {
 			onDeleteBooking(booking);
 		}

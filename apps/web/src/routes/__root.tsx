@@ -11,6 +11,8 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { ModalProvider } from "@/hooks/use-modal";
+import { SessionProvider } from "@/providers/session-provider";
+import { useTimezoneSync } from "@/hooks/use-timezone-sync";
 import React from "react";
 
 export type RouterAppContext = {
@@ -193,6 +195,9 @@ function RootComponent() {
 	type ModifierKey = 'Alt' | 'Control' | 'Meta' | 'Shift';
 	type KeyboardKey = ModifierKey | (string & {});
 
+	// Auto-sync timezone on login
+	useTimezoneSync();
+
 	// Prevent iOS zoom on input focus
 	React.useEffect(() => {
 		const preventZoom = () => {
@@ -227,13 +232,14 @@ function RootComponent() {
 	}, []);
 
 	return (
-		<ModalProvider>
-			<HeadContent />
-			<div className="grid grid-rows-[auto_1fr] h-svh">
-				{/* {isFetching ? <Loader /> : <Outlet />} */}
-				<Outlet />
-			</div>
-			<Toaster 
+		<SessionProvider>
+			<ModalProvider>
+				<HeadContent />
+				<div className="grid grid-rows-[auto_1fr] h-svh">
+					{/* {isFetching ? <Loader /> : <Outlet />} */}
+					<Outlet />
+				</div>
+				<Toaster 
 				richColors 
 				position="top-center"
 				toastOptions={{
@@ -259,6 +265,7 @@ function RootComponent() {
 						render: <TanStackRouterDevtoolsPanel />,
 					},
 				]} />
-		</ModalProvider>
+			</ModalProvider>
+		</SessionProvider>
 	);
 }

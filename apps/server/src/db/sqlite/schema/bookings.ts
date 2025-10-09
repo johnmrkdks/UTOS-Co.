@@ -8,14 +8,11 @@ import { createId } from "@paralleldrive/cuid2";
 import { drivers } from "@/db/sqlite/schema/drivers";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
+import { offloadBookingDetails } from "@/db/sqlite/schema/bookings/offload-booking-details";
 
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
-	referenceNumber: text("reference_number").$defaultFn(() => {
-		// Generate a 6-digit reference number (e.g., DUC-234567)
-		const number = Math.floor(100000 + Math.random() * 900000);
-		return `DUC-${number}`;
-	}),
+	referenceNumber: text("reference_number"), // Generated in application code using system settings prefix
 	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
 
 	carId: text("car_id")
@@ -39,13 +36,14 @@ export const bookings = sqliteTable("bookings", {
 
 	// Timing
 	scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }).notNull(),
+	timezone: text("timezone"), // Booking-specific timezone (e.g., "Australia/Melbourne"), falls back to system default if null
 	estimatedDuration: integer("estimated_duration"), // in seconds
 	actualPickupTime: integer("actual_pickup_time", { mode: "timestamp" }),
 	actualDropoffTime: integer("actual_dropoff_time", { mode: "timestamp" }),
 
 	// Distance & pricing
-	estimatedDistance: integer("estimated_distance"), // in meters
-	actualDistance: integer("actual_distance"), // in meters
+	estimatedDistance: real("estimated_distance"), // in kilometers with decimal precision (e.g., 15.5)
+	actualDistance: real("actual_distance"), // in kilometers with decimal precision (e.g., 15.5)
 
 	// Pricing (different models for package vs custom) - ALL AMOUNTS IN DOLLARS WITH DECIMAL PRECISION
 	quotedAmount: real("quoted_amount").notNull(), // initial quote in dollars (e.g., 45.75)
@@ -84,6 +82,10 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	package: one(packages, { fields: [bookings.packageId], references: [packages.id] }),
 	stops: many(bookingStops),
 	extras: many(bookingExtras),
+	offloadDetails: one(offloadBookingDetails, {
+		fields: [bookings.id],
+		references: [offloadBookingDetails.bookingId],
+	}),
 }));
 
 // Relations are defined in cars.ts to avoid circular imports

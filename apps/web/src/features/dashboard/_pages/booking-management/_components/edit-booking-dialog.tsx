@@ -27,6 +27,10 @@ const editBookingSchema = z.object({
 	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
 	luggageCount: z.number().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
 	specialRequests: z.string().optional(),
+	// Offload booking specific fields
+	offloaderName: z.string().optional(),
+	jobType: z.string().optional(),
+	vehicleType: z.string().optional(),
 });
 
 type EditBookingFormData = z.infer<typeof editBookingSchema>;
@@ -76,10 +80,14 @@ export function EditBookingDialog({
 				quotedAmount: booking.quotedAmount || 0,
 				customerName: booking.customerName || "",
 				customerPhone: booking.customerPhone || "",
-				customerEmail: booking.customerEmail || "",
+				customerEmail: booking.customerEmail ?? "", // Use nullish coalescing to handle null
 				passengerCount: booking.passengerCount || 1,
 				luggageCount: booking.luggageCount || 0,
 				specialRequests: booking.specialRequests || "",
+				// Offload booking specific fields
+				offloaderName: (booking as any).offloaderName || "",
+				jobType: (booking as any).jobType || "",
+				vehicleType: (booking as any).vehicleType || "",
 			});
 		}
 	}, [booking]);
@@ -106,6 +114,10 @@ export function EditBookingDialog({
 				luggageCount: formData.luggageCount || 0,
 				notes: formData.notes || "",
 				specialRequests: formData.specialRequests || "",
+				// Offload booking specific fields
+				offloaderName: formData.offloaderName || "",
+				jobType: formData.jobType || "",
+				vehicleType: formData.vehicleType || "",
 			};
 
 			editBookingSchema.parse(cleanedFormData);
@@ -145,13 +157,17 @@ export function EditBookingDialog({
 				customerName: formData.customerName!,
 				customerPhone: formData.customerPhone!,
 				customerEmail: formData.customerEmail || "",
-				scheduledPickupTime,
+				scheduledPickupTime: scheduledPickupTime.toISOString(), // Convert to ISO string for tRPC serialization
 				additionalNotes: formData.notes || "",
 				quotedAmount: formData.quotedAmount || 0, // Store as dollar amount
 				passengerCount: formData.passengerCount!,
 				luggageCount: formData.luggageCount!,
 				specialRequests: formData.specialRequests || "",
-			}
+				// Include offload booking specific fields
+				offloaderName: formData.offloaderName || undefined,
+				jobType: formData.jobType || undefined,
+				vehicleType: formData.vehicleType || undefined,
+			} as any // Use 'as any' to bypass type checking since the schema is auto-generated
 		}, {
 			onSuccess: () => {
 				onOpenChange(false);
@@ -161,18 +177,23 @@ export function EditBookingDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-				<DialogHeader>
-					<DialogTitle className="flex items-center gap-2">
-						<EditIcon className="h-5 w-5 text-primary" />
-						Edit Booking
-					</DialogTitle>
-					<DialogDescription>
-						Update booking details for {booking?.id}
-					</DialogDescription>
-				</DialogHeader>
+			<DialogContent className="!max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+				{/* Sticky Header */}
+				<div className="sticky top-0 bg-white z-10 border-b px-6 pt-6 pb-4">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2">
+							<EditIcon className="h-5 w-5 text-primary" />
+							Edit Booking
+						</DialogTitle>
+						<DialogDescription>
+							Update booking details for {booking?.id}
+						</DialogDescription>
+					</DialogHeader>
+				</div>
 
-				<div className="space-y-6">
+				{/* Scrollable Content */}
+				<div className="flex-1 overflow-y-auto px-6 py-4">
+					<div className="space-y-6">
 					{/* Customer Information */}
 					<div className="space-y-4">
 						<h3 className="text-lg font-semibold">Customer Information</h3>
@@ -297,29 +318,68 @@ export function EditBookingDialog({
 						</div>
 					</div>
 
+					{/* Offload Booking Specific Fields */}
+					{booking?.bookingType === 'offload' && (
+						<div className="space-y-4 border-t pt-4">
+							<h3 className="text-lg font-semibold text-orange-700">Offload Booking Details</h3>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div>
+									<label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+									<Input
+										placeholder="Offloader company name"
+										value={formData.offloaderName || ""}
+										onChange={(e) => updateFormData("offloaderName", e.target.value)}
+									/>
+								</div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+									<Input
+										placeholder="e.g., Transfer, Tour"
+										value={formData.jobType || ""}
+										onChange={(e) => updateFormData("jobType", e.target.value)}
+									/>
+								</div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
+									<Input
+										placeholder="e.g., Sedan, SUV"
+										value={formData.vehicleType || ""}
+										onChange={(e) => updateFormData("vehicleType", e.target.value)}
+									/>
+								</div>
+							</div>
+						</div>
+					)}
+
 					{/* Notes */}
 					<div className="space-y-4">
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+							<label className="block text-sm font-medium text-gray-700 mb-2">Driver Notes (Optional)</label>
 							<Textarea
-								placeholder="Additional notes or special requests"
+								placeholder="Internal operational notes for drivers and admins..."
 								className="min-h-[80px]"
 								value={formData.notes || ""}
 								onChange={(e) => updateFormData("notes", e.target.value)}
 							/>
+							<p className="text-xs text-gray-500 mt-1">Only visible to drivers and admins</p>
 						</div>
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-2">Special Requests (Optional)</label>
+							<label className="block text-sm font-medium text-gray-700 mb-2">Client Special Requests (Optional)</label>
 							<Textarea
-								placeholder="Any special requirements, accessibility needs, or requests..."
+								placeholder="Customer's special requirements, accessibility needs, or requests..."
 								className="min-h-[80px]"
 								value={formData.specialRequests || ""}
 								onChange={(e) => updateFormData("specialRequests", e.target.value)}
 							/>
+							<p className="text-xs text-gray-500 mt-1">Visible to customer and shown in booking confirmation</p>
 						</div>
 					</div>
+					</div>
+				</div>
 
-					<div className="flex gap-3 pt-4">
+				{/* Sticky Footer */}
+				<div className="sticky bottom-0 bg-white z-10 border-t px-6 py-4">
+					<div className="flex gap-3">
 						<Button
 							type="button"
 							variant="outline"

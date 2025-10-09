@@ -27,7 +27,7 @@ export interface CarSpecificQuote {
 	firstKmFare: number;
 	additionalKmFare: number;
 	totalAmount: number;
-	estimatedDistance: number; // in meters
+	estimatedDistance: number; // in kilometers with decimal precision
 	estimatedDuration: number; // in seconds
 	car: {
 		id: string;
@@ -231,7 +231,7 @@ export async function calculateCarSpecificQuoteService(
 		firstKmFare,
 		additionalKmFare,
 		totalAmount,
-		estimatedDistance: Math.round(totalDistance),
+		estimatedDistance: parseFloat((totalDistance / 1000).toFixed(3)), // Convert meters to kilometers with 3 decimal precision
 		estimatedDuration: Math.round(totalDuration),
 		breakdown: {
 			firstKmRate: pricing.firstKmRate,

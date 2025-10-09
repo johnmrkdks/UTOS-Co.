@@ -262,7 +262,7 @@ export function CustomerTripsPage() {
 											{format(new Date(booking.scheduledPickupTime), "h:mm a")}
 										</span>
 										<span className="text-xs text-gray-400 font-mono">
-											#{booking.id.slice(-6)}
+											#{(booking as any).referenceNumber || 'N/A'}
 										</span>
 									</div>
 									<span className="text-xs text-gray-500">
@@ -397,7 +397,7 @@ export function CustomerTripsPage() {
 											{format(new Date(booking.scheduledPickupTime), "h:mm a")}
 										</span>
 										<span className="text-xs text-gray-400 font-mono">
-											#{booking.id.slice(-6)}
+											#{(booking as any).referenceNumber || 'N/A'}
 										</span>
 									</div>
 									<span className="text-xs text-gray-500">
@@ -783,7 +783,7 @@ export function CustomerTripsPage() {
 									<DialogTitle className="text-left flex items-center gap-2">
 										Trip Details
 										<span className="text-xs text-gray-400 font-mono">
-											#{selectedBooking.id.slice(-6)}
+											#{(selectedBooking as any).referenceNumber || 'N/A'}
 										</span>
 									</DialogTitle>
 								</DialogHeader>

@@ -136,7 +136,7 @@ export function BookingDetailsPage() {
 					<CardHeader className="pb-3">
 						<CardTitle className="text-base">Trip Information</CardTitle>
 						<CardDescription className="text-xs">
-							Booking ID: {booking.id}
+							Booking Reference: {(booking as any).referenceNumber || 'N/A'}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">

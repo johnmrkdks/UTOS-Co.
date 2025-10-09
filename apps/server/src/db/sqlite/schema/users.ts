@@ -9,6 +9,7 @@ export const users = sqliteTable("users", {
 	emailVerified: integer("email_verified", { mode: "boolean" }).notNull(),
 	image: text("image"),
 	phone: text("phone"), // User's phone number
+	timezone: text("timezone"), // User's timezone (auto-detected from browser on signup/first booking)
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.default(sql`(unixepoch())`),

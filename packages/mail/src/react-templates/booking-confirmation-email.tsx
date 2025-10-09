@@ -30,7 +30,7 @@ interface BookingConfirmationEmailProps {
 
 export function BookingConfirmationEmail({
 	customerName = "Customer",
-	bookingReference = "DUC-123456",
+	bookingReference = "123456",
 	serviceType = "Custom Trip",
 	pickupDate = "Friday, September 19, 2025",
 	pickupTime = "05:30 PM",
@@ -45,7 +45,7 @@ export function BookingConfirmationEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>Booking Confirmed - #{bookingReference.slice(-6)} - {customerName}</Preview>
+			<Preview>Booking Confirmed - #{bookingReference} - {customerName}</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
@@ -75,7 +75,7 @@ export function BookingConfirmationEmail({
 								<Text style={bookingDate}>{pickupDate}</Text>
 							</Column>
 							<Column style={{ width: '40%', textAlign: 'right' as const }}>
-								<Text style={bookingReferenceStyle}>#{bookingReference.slice(-6)}</Text>
+								<Text style={bookingReferenceStyle}>#{bookingReference}</Text>
 							</Column>
 						</Row>
 

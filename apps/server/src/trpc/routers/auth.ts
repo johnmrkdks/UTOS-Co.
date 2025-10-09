@@ -5,6 +5,7 @@ import { setPasswordForUserService, SetPasswordForUserServiceSchema } from "@/se
 import { getUserAccountsService, GetUserAccountsServiceSchema } from "@/services/auth/get-user-accounts";
 import { updateUserPhoneService, UpdateUserPhoneServiceSchema } from "@/services/auth/update-user-phone";
 import { updateUserProfileService, UpdateUserProfileServiceSchema } from "@/services/auth/update-user-profile";
+import { updateUserTimezoneService, UpdateUserTimezoneServiceSchema } from "@/services/auth/update-user-timezone";
 
 export const authRouter = router({
 	// Set password for users who only have social accounts (like Google)
@@ -86,6 +87,27 @@ export const authRouter = router({
 				return result;
 			} catch (error) {
 				console.error("Error updating user profile:", error);
+				handleTRPCError(error);
+			}
+		}),
+
+	// Update user timezone (auto-called on login from frontend)
+	updateUserTimezone: protectedProcedure
+		.input(z.object({ timezone: z.string() }))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				if (!session?.user?.id) {
+					throw new Error("User not authenticated");
+				}
+
+				const result = await updateUserTimezoneService(db, {
+					userId: session.user.id,
+					timezone: input.timezone,
+				});
+
+				return result;
+			} catch (error) {
+				console.error("Error updating user timezone:", error);
 				handleTRPCError(error);
 			}
 		}),

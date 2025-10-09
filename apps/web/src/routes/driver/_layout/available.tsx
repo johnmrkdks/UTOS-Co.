@@ -148,7 +148,23 @@ function AvailableTripsPage() {
 
 							{/* Type Badge and Distance */}
 							<div className="flex items-center justify-between mb-3">
-								<BookingTypeBadge booking={trip} />
+								<div className="flex items-center gap-2">
+									<BookingTypeBadge booking={trip} />
+									{trip.bookingType === 'offload' && (
+										<>
+											{console.log('🔍 Available - Offload booking data:', {
+												bookingType: trip.bookingType,
+												offloaderName: (trip as any).offloaderName,
+												jobType: (trip as any).jobType,
+												vehicleType: (trip as any).vehicleType,
+												allKeys: Object.keys(trip)
+											})}
+											{(trip as any).offloaderName && (
+												<span className="text-xs text-orange-600 font-medium">({(trip as any).offloaderName})</span>
+											)}
+										</>
+									)}
+								</div>
 								{trip.estimatedDistance && (
 									<div className="flex items-center gap-2 text-xs text-gray-500">
 										<span>{formatDistance(trip.estimatedDistance)}km</span>
@@ -317,6 +333,9 @@ function AvailableTripsPage() {
 								</div>
 								<div className="flex items-center gap-2">
 									<BookingTypeBadge booking={trip} />
+									{trip.bookingType === 'offload' && (trip as any).offloaderName && (
+										<span className="text-xs text-orange-600 font-medium">({(trip as any).offloaderName})</span>
+									)}
 									<Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold px-3 py-1">
 										${formatCurrency(totalAmount)}
 									</Badge>

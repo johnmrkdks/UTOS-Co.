@@ -7,10 +7,25 @@ import { cars } from "@/db/sqlite/schema/cars";
 import { packages } from "@/db/sqlite/schema/packages";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
+import { systemSettings } from "@/db/sqlite/schema/settings";
 import { UserRoleEnum } from "@/db/sqlite/enums";
 import { getMailService, renderTripStatusEmail, renderDriverAssignmentEmail, renderBookingConfirmationEmail, renderAdminNewBookingEmail } from "@workspace/mail";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import type { Env } from "@/types/env";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
+
+/**
+ * Get system timezone from settings (cached)
+ */
+let cachedTimezone: string | null = null;
+async function getSystemTimezone(): Promise<string> {
+	if (cachedTimezone) return cachedTimezone;
+
+	const settings = await db.select().from(systemSettings).limit(1);
+	cachedTimezone = settings[0]?.timezone || "Australia/Sydney";
+	return cachedTimezone;
+}
 
 interface DriverAssignmentEmailData {
 	bookingId: string;
@@ -123,18 +138,32 @@ function generateDriverAssignmentEmailTemplate(
 ): { subject: string; html: string } {
 	const { booking, customer, car, package: pkg, stops } = bookingDetails;
 
-	// Format pickup date and time - use scheduledPickupTime field
+	// Format pickup date and time using booking timezone or system default
 	const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-	const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
+	const systemTimezone = "Australia/Sydney"; // Default system timezone
+	const effectiveTimezone = booking.timezone || systemTimezone; // Booking timezone takes priority
+
+	console.log("📅 TIMEZONE DEBUG:", {
+		bookingId: booking.id,
+		rawTimestamp: pickupDateTime,
+		bookingTimezone: booking.timezone,
+		systemTimezone,
+		effectiveTimezone,
+		utcDate: new Date(pickupDateTime).toISOString(),
 	});
-	const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
-		hour: "2-digit",
-		minute: "2-digit",
+
+	// Convert UTC to effective timezone
+	const dateObj = new Date(pickupDateTime);
+	const zonedDate = toZonedTime(dateObj, effectiveTimezone);
+
+	console.log("📅 TIMEZONE RESULT:", {
+		zonedDate: zonedDate.toISOString(),
+		formattedDate: format(zonedDate, "EEEE, MMMM d, yyyy"),
+		formattedTime: format(zonedDate, "h:mm a"),
 	});
+
+	const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+	const pickupTime = format(zonedDate, "h:mm a");
 
 	// Build route information
 	const pickupAddress = booking.originAddress || booking.pickupAddress;
@@ -161,7 +190,7 @@ function generateDriverAssignmentEmailTemplate(
 	const vehicleInfo = car?.name || "Vehicle to be assigned";
 
 	// Format booking reference for display - use reference number or last 6 digits of ID
-	const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
+	const bookingReference = booking.referenceNumber || "N/A";
 
 	const subject = `New Booking Assignment - ${bookingReference}`;
 
@@ -688,16 +717,20 @@ function generateTripStatusEmailTemplate(
 	const { booking, driverUser, car, package: pkg } = bookingDetails;
 
 	// Format pickup date and time - use scheduledPickupTime field
+	// Display time in UTC (as stored) without timezone conversion
 	const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
 	const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
 		weekday: "long",
 		year: "numeric",
 		month: "long",
 		day: "numeric",
+		timeZone: "UTC",
 	});
 	const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
 		hour: "2-digit",
 		minute: "2-digit",
+		hour12: true,
+		timeZone: "UTC",
 	});
 
 	// Status-specific content
@@ -763,7 +796,7 @@ function generateTripStatusEmailTemplate(
 	const driverName = driverUser?.name || "Your Driver";
 
 	// Format booking reference for display - use reference number or last 6 digits of ID
-	const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
+	const bookingReference = booking.referenceNumber || "N/A";
 
 	const subject = `${statusTitle} - Booking #${bookingReference}`;
 
@@ -1295,21 +1328,23 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 		// Format pickup date and time
 		const { booking, driverUser, car, package: pkg, stops, customer } = bookingDetails;
 		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-		const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
-			weekday: "long",
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-		const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
-			hour: "2-digit",
-			minute: "2-digit",
-		});
+
+		// Format pickup date and time using timezone priority:
+		// 1. booking.timezone (specific booking override)
+		// 2. driverUser.timezone (driver's preferred timezone)
+		// 3. systemSettings.timezone (default: Australia/Sydney)
+		const systemTimezone = await getSystemTimezone();
+		const effectiveTimezone = booking.timezone || driverUser.timezone || systemTimezone;
+
+		const dateObj = new Date(pickupDateTime);
+		const zonedDate = toZonedTime(dateObj, effectiveTimezone);
+		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+		const pickupTime = format(zonedDate, "h:mm a");
 
 		const serviceType = pkg?.title || "Custom Trip";
 		const vehicleInfo = car?.name || "Assigned Vehicle";
 		const driverName = driverUser.name || "Driver";
-		const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
+		const bookingReference = booking.referenceNumber || "N/A";
 
 		// Generate React Email template for driver assignment
 		console.log(`📧 EMAIL SERVICE: Generating React email template for driver ${driverName}`);
@@ -1372,24 +1407,39 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 			throw new Error("Customer email not found");
 		}
 
-		// Format pickup date and time
-		const { booking, driverUser, car, package: pkg, stops } = bookingDetails;
+		// Format pickup date and time using timezone priority
+		const { booking, driverUser, car, package: pkg, stops, customer } = bookingDetails;
 		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-		const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
-			weekday: "long",
-			year: "numeric",
-			month: "long",
-			day: "numeric",
+		const systemTimezone = await getSystemTimezone();
+		// Priority: booking.timezone > customer.timezone > systemSettings.timezone
+		const effectiveTimezone = booking.timezone || customer.timezone || systemTimezone;
+
+		console.log("📅 TIMEZONE DEBUG:", {
+			bookingId: booking.id,
+			rawTimestamp: pickupDateTime,
+			bookingTimezone: booking.timezone,
+			systemTimezone,
+			effectiveTimezone,
+			utcDate: new Date(pickupDateTime).toISOString(),
 		});
-		const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
-			hour: "2-digit",
-			minute: "2-digit",
+
+		// Convert UTC to effective timezone
+		const dateObj = new Date(pickupDateTime);
+		const zonedDate = toZonedTime(dateObj, effectiveTimezone);
+
+		console.log("📅 TIMEZONE RESULT:", {
+			zonedDate: zonedDate.toISOString(),
+			formattedDate: format(zonedDate, "EEEE, MMMM d, yyyy"),
+			formattedTime: format(zonedDate, "h:mm a"),
 		});
+
+		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+		const pickupTime = format(zonedDate, "h:mm a");
 
 		const serviceType = pkg?.title || "Custom Trip";
 		const vehicleInfo = car?.name || "Assigned Vehicle";
 		const driverName = driverUser?.name || "Your Driver";
-		const bookingReference = booking.referenceNumber || booking.id.slice(-6).toUpperCase();
+		const bookingReference = booking.referenceNumber || "N/A";
 
 		// Status-specific content (after booking reference is defined)
 		let statusTitle = "";
@@ -1506,17 +1556,14 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		const { booking, customer, car, package: pkg, stops } = bookingDetails;
 
 		// Format pickup date and time
+		// Display time in UTC (as stored) without timezone conversion
 		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-		const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
-			weekday: "long",
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-		const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
-			hour: "2-digit",
-			minute: "2-digit",
-		});
+		// Format pickup date and time using booking's timezone
+		const userTimezone = booking.timezone || "Australia/Sydney"; // Default to Sydney if not set
+		const dateObj = new Date(pickupDateTime);
+		const zonedDate = toZonedTime(dateObj, userTimezone);
+		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+		const pickupTime = format(zonedDate, "h:mm a");
 
 		// Determine service type
 		let serviceType = "Custom Booking";
@@ -1533,7 +1580,7 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		}
 
 		// Generate booking reference
-		const bookingReference = booking.referenceNumber || `DUC-${booking.id}`;
+		const bookingReference = booking.referenceNumber || "N/A";
 
 		// Generate email template
 		const template = await renderBookingConfirmationEmail({
@@ -1595,17 +1642,14 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 		const { booking, customer, car, package: pkg, stops } = bookingDetails;
 
 		// Format pickup date and time
+		// Display time in UTC (as stored) without timezone conversion
 		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-		const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
-			weekday: "long",
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-		const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
-			hour: "2-digit",
-			minute: "2-digit",
-		});
+		// Format pickup date and time using booking's timezone
+		const userTimezone = booking.timezone || "Australia/Sydney"; // Default to Sydney if not set
+		const dateObj = new Date(pickupDateTime);
+		const zonedDate = toZonedTime(dateObj, userTimezone);
+		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+		const pickupTime = format(zonedDate, "h:mm a");
 
 		// Determine service type
 		let serviceType = "Custom Booking";
@@ -1622,7 +1666,7 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 		}
 
 		// Generate booking reference
-		const bookingReference = booking.referenceNumber || `DUC-${booking.id}`;
+		const bookingReference = booking.referenceNumber || "N/A";
 
 		// Get all admin and super_admin users
 		const adminUsers = await db.select()

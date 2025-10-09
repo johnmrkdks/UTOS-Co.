@@ -28,7 +28,7 @@ export interface InstantQuote {
 	firstKmFare: number;
 	additionalKmFare: number;
 	totalAmount: number;
-	estimatedDistance: number; // in meters
+	estimatedDistance: number; // in kilometers with decimal precision
 	estimatedDuration: number; // in seconds
 	breakdown: {
 		firstKmRate: number;
@@ -247,7 +247,7 @@ export async function calculateInstantQuoteService(
 		firstKmFare,
 		additionalKmFare,
 		totalAmount,
-		estimatedDistance: Math.round(totalDistance),
+		estimatedDistance: parseFloat((totalDistance / 1000).toFixed(3)),
 		estimatedDuration: Math.round(totalDuration)
 	});
 
@@ -255,7 +255,7 @@ export async function calculateInstantQuoteService(
 		firstKmFare,
 		additionalKmFare,
 		totalAmount,
-		estimatedDistance: Math.round(totalDistance), // in meters
+		estimatedDistance: parseFloat((totalDistance / 1000).toFixed(3)), // Convert meters to kilometers with 3 decimal precision
 		estimatedDuration: Math.round(totalDuration), // in seconds
 		breakdown: {
 			firstKmRate: pricing.firstKmRate,

@@ -25,6 +25,7 @@ export async function getBookings(db: DB, options: ResourceList) {
 				},
 				extras: true, // Include extras data
 				stops: true, // Include stops data
+				offloadDetails: true, // Include offload booking details
 			},
 		}),
 		filterBuilder: new RQBFilterBuilder(bookings),

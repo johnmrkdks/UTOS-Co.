@@ -33,7 +33,7 @@ interface DriverAssignmentEmailProps {
 export function DriverAssignmentEmail({
 	driverName = "Driver",
 	customerName = "Customer",
-	bookingReference = "DUC-123456",
+	bookingReference = "123456",
 	serviceType = "Custom Trip",
 	pickupDate = "Friday, September 19, 2025",
 	pickupTime = "05:30 PM",
@@ -91,7 +91,7 @@ export function DriverAssignmentEmail({
 									<Text style={tripDate}>{pickupDate}</Text>
 								</Column>
 								<Column style={{ width: '40%', textAlign: 'right' }}>
-									<Text style={tripReference}>#{bookingReference.slice(-6)}</Text>
+									<Text style={tripReference}>#{bookingReference}</Text>
 								</Column>
 							</Row>
 						</Section>

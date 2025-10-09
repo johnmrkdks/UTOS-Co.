@@ -8,6 +8,7 @@ import { UserCheck, Ban, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { ArchiveBookingDialog } from "./archive-booking-dialog";
 import { BulkOperationsDialog } from "./bulk-operations-dialog";
 import { useArchiveBookingMutation } from "../_hooks/query/use-archive-booking-mutation";
+import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 
 interface BookingsListTableProps {
 	bookingType?: "package" | "custom" | "offload";
@@ -26,6 +27,9 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 	const [selectedBookingForArchive, setSelectedBookingForArchive] = useState<Booking | null>(null);
 	const [isArchivingOperation, setIsArchivingOperation] = useState(true);
 	const [bulkOperationType, setBulkOperationType] = useState<"archive" | "unarchive" | "delete">("archive");
+
+	// Get modal provider functions
+	const { openEditBookingDialog } = useBookingManagementModalProvider();
 	
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 1000, // Removed practical limit for now - will implement pagination later
@@ -33,19 +37,6 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
 	});
-
-	// Debug logging
-	console.log("🔍 BookingsListTable Debug:");
-	console.log("- Query status:", {
-		isLoading: bookingsQuery.isLoading,
-		isError: bookingsQuery.isError,
-		error: bookingsQuery.error
-	});
-	console.log("- Raw data:", bookingsQuery.data);
-	console.log("- Data count:", bookingsQuery.data?.data?.length);
-	console.log("- Booking type filter:", bookingType);
-	console.log("- Status filter:", status);
-	console.log("- Archive filter:", isArchived);
 
 	// Apply filters to the data
 	const filteredData = useMemo(() => {
@@ -140,8 +131,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 
 	// Action handlers
 	const handleEditBooking = (booking: Booking) => {
-		// TODO: Implement edit booking functionality
-		console.log("Edit booking:", booking.id);
+		openEditBookingDialog(booking);
 	};
 
 	const handleCancelBooking = (booking: Booking) => {

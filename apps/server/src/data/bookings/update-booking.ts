@@ -20,6 +20,11 @@ export async function updateBooking(db: DB, { id, data }: UpdateBookingParams) {
 		updateData.bookingType = data.bookingType as BookingTypeEnum;
 	}
 
+	// Convert scheduledPickupTime from ISO string to Date if it's a string
+	if (updateData.scheduledPickupTime && typeof updateData.scheduledPickupTime === 'string') {
+		updateData.scheduledPickupTime = new Date(updateData.scheduledPickupTime);
+	}
+
 	const [updatedBooking] = await db.update(bookings).set(updateData).where(eq(bookings.id, id)).returning();
 	return updatedBooking;
 }

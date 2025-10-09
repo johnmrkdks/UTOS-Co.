@@ -58,6 +58,7 @@ import { Route as AdminDashboardLayoutIndexRouteImport } from './routes/admin/da
 import { Route as DashboardLayoutCarDetailsCarIdRouteImport } from './routes/dashboard/_layout/car-details.$carId'
 import { Route as DashboardLayoutBookServiceServiceIdRouteImport } from './routes/dashboard/_layout/book-service/$serviceId'
 import { Route as DashboardLayoutBookAppointmentCarIdRouteImport } from './routes/dashboard/_layout/book-appointment.$carId'
+import { Route as AdminDashboardLayoutSettingsRouteImport } from './routes/admin/dashboard/_layout/settings'
 import { Route as AdminDashboardLayoutTodaysScheduledIndexRouteImport } from './routes/admin/dashboard/_layout/todays-scheduled/index'
 import { Route as AdminDashboardLayoutSettingsIndexRouteImport } from './routes/admin/dashboard/_layout/settings/index'
 import { Route as AdminDashboardLayoutReportIndexRouteImport } from './routes/admin/dashboard/_layout/report/index'
@@ -73,6 +74,8 @@ import { Route as AdminDashboardLayoutBookingsIndexRouteImport } from './routes/
 import { Route as AdminDashboardLayoutBoardIndexRouteImport } from './routes/admin/dashboard/_layout/board/index'
 import { Route as AdminDashboardLayoutAnalyticsIndexRouteImport } from './routes/admin/dashboard/_layout/analytics/index'
 import { Route as AdminDashboardLayoutAdminTestingIndexRouteImport } from './routes/admin/dashboard/_layout/admin-testing/index'
+import { Route as AdminDashboardLayoutSettingsSecurityRouteImport } from './routes/admin/dashboard/_layout/settings/security'
+import { Route as AdminDashboardLayoutSettingsAccountRouteImport } from './routes/admin/dashboard/_layout/settings/account'
 import { Route as AdminDashboardLayoutDriversOnboardingRouteImport } from './routes/admin/dashboard/_layout/drivers/onboarding'
 import { Route as AdminDashboardLayoutCarsAddCarRouteImport } from './routes/admin/dashboard/_layout/cars/add-car'
 
@@ -343,6 +346,12 @@ const DashboardLayoutBookAppointmentCarIdRoute =
     path: '/$carId',
     getParentRoute: () => DashboardLayoutBookAppointmentRoute,
   } as any)
+const AdminDashboardLayoutSettingsRoute =
+  AdminDashboardLayoutSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
 const AdminDashboardLayoutTodaysScheduledIndexRoute =
   AdminDashboardLayoutTodaysScheduledIndexRouteImport.update({
     id: '/todays-scheduled/',
@@ -351,9 +360,9 @@ const AdminDashboardLayoutTodaysScheduledIndexRoute =
   } as any)
 const AdminDashboardLayoutSettingsIndexRoute =
   AdminDashboardLayoutSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => AdminDashboardLayoutRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminDashboardLayoutSettingsRoute,
   } as any)
 const AdminDashboardLayoutReportIndexRoute =
   AdminDashboardLayoutReportIndexRouteImport.update({
@@ -433,6 +442,18 @@ const AdminDashboardLayoutAdminTestingIndexRoute =
     path: '/admin-testing/',
     getParentRoute: () => AdminDashboardLayoutRoute,
   } as any)
+const AdminDashboardLayoutSettingsSecurityRoute =
+  AdminDashboardLayoutSettingsSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AdminDashboardLayoutSettingsRoute,
+  } as any)
+const AdminDashboardLayoutSettingsAccountRoute =
+  AdminDashboardLayoutSettingsAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AdminDashboardLayoutSettingsRoute,
+  } as any)
 const AdminDashboardLayoutDriversOnboardingRoute =
   AdminDashboardLayoutDriversOnboardingRouteImport.update({
     id: '/drivers/onboarding',
@@ -487,12 +508,15 @@ export interface FileRoutesByFullPath {
   '/my-bookings/trips': typeof MyBookingsLayoutTripsRoute
   '/driver/': typeof DriverLayoutIndexRoute
   '/my-bookings/': typeof MyBookingsLayoutIndexRoute
+  '/admin/dashboard/settings': typeof AdminDashboardLayoutSettingsRouteWithChildren
   '/dashboard/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
   '/dashboard/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
   '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
   '/admin/dashboard/': typeof AdminDashboardLayoutIndexRoute
   '/admin/dashboard/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
   '/admin/dashboard/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
+  '/admin/dashboard/settings/account': typeof AdminDashboardLayoutSettingsAccountRoute
+  '/admin/dashboard/settings/security': typeof AdminDashboardLayoutSettingsSecurityRoute
   '/admin/dashboard/admin-testing': typeof AdminDashboardLayoutAdminTestingIndexRoute
   '/admin/dashboard/analytics': typeof AdminDashboardLayoutAnalyticsIndexRoute
   '/admin/dashboard/board': typeof AdminDashboardLayoutBoardIndexRoute
@@ -506,7 +530,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard/publications': typeof AdminDashboardLayoutPublicationsIndexRoute
   '/admin/dashboard/published': typeof AdminDashboardLayoutPublishedIndexRoute
   '/admin/dashboard/report': typeof AdminDashboardLayoutReportIndexRoute
-  '/admin/dashboard/settings': typeof AdminDashboardLayoutSettingsIndexRoute
+  '/admin/dashboard/settings/': typeof AdminDashboardLayoutSettingsIndexRoute
   '/admin/dashboard/todays-scheduled': typeof AdminDashboardLayoutTodaysScheduledIndexRoute
 }
 export interface FileRoutesByTo {
@@ -553,6 +577,8 @@ export interface FileRoutesByTo {
   '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
   '/admin/dashboard/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
   '/admin/dashboard/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
+  '/admin/dashboard/settings/account': typeof AdminDashboardLayoutSettingsAccountRoute
+  '/admin/dashboard/settings/security': typeof AdminDashboardLayoutSettingsSecurityRoute
   '/admin/dashboard/admin-testing': typeof AdminDashboardLayoutAdminTestingIndexRoute
   '/admin/dashboard/analytics': typeof AdminDashboardLayoutAnalyticsIndexRoute
   '/admin/dashboard/board': typeof AdminDashboardLayoutBoardIndexRoute
@@ -618,12 +644,15 @@ export interface FileRoutesById {
   '/my-bookings/_layout/trips': typeof MyBookingsLayoutTripsRoute
   '/driver/_layout/': typeof DriverLayoutIndexRoute
   '/my-bookings/_layout/': typeof MyBookingsLayoutIndexRoute
+  '/admin/dashboard/_layout/settings': typeof AdminDashboardLayoutSettingsRouteWithChildren
   '/dashboard/_layout/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
   '/dashboard/_layout/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
   '/dashboard/_layout/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
   '/admin/dashboard/_layout/': typeof AdminDashboardLayoutIndexRoute
   '/admin/dashboard/_layout/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
   '/admin/dashboard/_layout/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
+  '/admin/dashboard/_layout/settings/account': typeof AdminDashboardLayoutSettingsAccountRoute
+  '/admin/dashboard/_layout/settings/security': typeof AdminDashboardLayoutSettingsSecurityRoute
   '/admin/dashboard/_layout/admin-testing/': typeof AdminDashboardLayoutAdminTestingIndexRoute
   '/admin/dashboard/_layout/analytics/': typeof AdminDashboardLayoutAnalyticsIndexRoute
   '/admin/dashboard/_layout/board/': typeof AdminDashboardLayoutBoardIndexRoute
@@ -683,12 +712,15 @@ export interface FileRouteTypes {
     | '/my-bookings/trips'
     | '/driver/'
     | '/my-bookings/'
+    | '/admin/dashboard/settings'
     | '/dashboard/book-appointment/$carId'
     | '/dashboard/book-service/$serviceId'
     | '/dashboard/car-details/$carId'
     | '/admin/dashboard/'
     | '/admin/dashboard/cars/add-car'
     | '/admin/dashboard/drivers/onboarding'
+    | '/admin/dashboard/settings/account'
+    | '/admin/dashboard/settings/security'
     | '/admin/dashboard/admin-testing'
     | '/admin/dashboard/analytics'
     | '/admin/dashboard/board'
@@ -702,7 +734,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/publications'
     | '/admin/dashboard/published'
     | '/admin/dashboard/report'
-    | '/admin/dashboard/settings'
+    | '/admin/dashboard/settings/'
     | '/admin/dashboard/todays-scheduled'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -749,6 +781,8 @@ export interface FileRouteTypes {
     | '/dashboard/car-details/$carId'
     | '/admin/dashboard/cars/add-car'
     | '/admin/dashboard/drivers/onboarding'
+    | '/admin/dashboard/settings/account'
+    | '/admin/dashboard/settings/security'
     | '/admin/dashboard/admin-testing'
     | '/admin/dashboard/analytics'
     | '/admin/dashboard/board'
@@ -813,12 +847,15 @@ export interface FileRouteTypes {
     | '/my-bookings/_layout/trips'
     | '/driver/_layout/'
     | '/my-bookings/_layout/'
+    | '/admin/dashboard/_layout/settings'
     | '/dashboard/_layout/book-appointment/$carId'
     | '/dashboard/_layout/book-service/$serviceId'
     | '/dashboard/_layout/car-details/$carId'
     | '/admin/dashboard/_layout/'
     | '/admin/dashboard/_layout/cars/add-car'
     | '/admin/dashboard/_layout/drivers/onboarding'
+    | '/admin/dashboard/_layout/settings/account'
+    | '/admin/dashboard/_layout/settings/security'
     | '/admin/dashboard/_layout/admin-testing/'
     | '/admin/dashboard/_layout/analytics/'
     | '/admin/dashboard/_layout/board/'
@@ -1204,6 +1241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutBookAppointmentCarIdRouteImport
       parentRoute: typeof DashboardLayoutBookAppointmentRoute
     }
+    '/admin/dashboard/_layout/settings': {
+      id: '/admin/dashboard/_layout/settings'
+      path: '/settings'
+      fullPath: '/admin/dashboard/settings'
+      preLoaderRoute: typeof AdminDashboardLayoutSettingsRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
     '/admin/dashboard/_layout/todays-scheduled/': {
       id: '/admin/dashboard/_layout/todays-scheduled/'
       path: '/todays-scheduled'
@@ -1213,10 +1257,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/dashboard/_layout/settings/': {
       id: '/admin/dashboard/_layout/settings/'
-      path: '/settings'
-      fullPath: '/admin/dashboard/settings'
+      path: '/'
+      fullPath: '/admin/dashboard/settings/'
       preLoaderRoute: typeof AdminDashboardLayoutSettingsIndexRouteImport
-      parentRoute: typeof AdminDashboardLayoutRoute
+      parentRoute: typeof AdminDashboardLayoutSettingsRoute
     }
     '/admin/dashboard/_layout/report/': {
       id: '/admin/dashboard/_layout/report/'
@@ -1308,6 +1352,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/dashboard/admin-testing'
       preLoaderRoute: typeof AdminDashboardLayoutAdminTestingIndexRouteImport
       parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/settings/security': {
+      id: '/admin/dashboard/_layout/settings/security'
+      path: '/security'
+      fullPath: '/admin/dashboard/settings/security'
+      preLoaderRoute: typeof AdminDashboardLayoutSettingsSecurityRouteImport
+      parentRoute: typeof AdminDashboardLayoutSettingsRoute
+    }
+    '/admin/dashboard/_layout/settings/account': {
+      id: '/admin/dashboard/_layout/settings/account'
+      path: '/account'
+      fullPath: '/admin/dashboard/settings/account'
+      preLoaderRoute: typeof AdminDashboardLayoutSettingsAccountRouteImport
+      parentRoute: typeof AdminDashboardLayoutSettingsRoute
     }
     '/admin/dashboard/_layout/drivers/onboarding': {
       id: '/admin/dashboard/_layout/drivers/onboarding'
@@ -1503,7 +1561,29 @@ const MyBookingsRouteWithChildren = MyBookingsRoute._addFileChildren(
   MyBookingsRouteChildren,
 )
 
+interface AdminDashboardLayoutSettingsRouteChildren {
+  AdminDashboardLayoutSettingsAccountRoute: typeof AdminDashboardLayoutSettingsAccountRoute
+  AdminDashboardLayoutSettingsSecurityRoute: typeof AdminDashboardLayoutSettingsSecurityRoute
+  AdminDashboardLayoutSettingsIndexRoute: typeof AdminDashboardLayoutSettingsIndexRoute
+}
+
+const AdminDashboardLayoutSettingsRouteChildren: AdminDashboardLayoutSettingsRouteChildren =
+  {
+    AdminDashboardLayoutSettingsAccountRoute:
+      AdminDashboardLayoutSettingsAccountRoute,
+    AdminDashboardLayoutSettingsSecurityRoute:
+      AdminDashboardLayoutSettingsSecurityRoute,
+    AdminDashboardLayoutSettingsIndexRoute:
+      AdminDashboardLayoutSettingsIndexRoute,
+  }
+
+const AdminDashboardLayoutSettingsRouteWithChildren =
+  AdminDashboardLayoutSettingsRoute._addFileChildren(
+    AdminDashboardLayoutSettingsRouteChildren,
+  )
+
 interface AdminDashboardLayoutRouteChildren {
+  AdminDashboardLayoutSettingsRoute: typeof AdminDashboardLayoutSettingsRouteWithChildren
   AdminDashboardLayoutIndexRoute: typeof AdminDashboardLayoutIndexRoute
   AdminDashboardLayoutCarsAddCarRoute: typeof AdminDashboardLayoutCarsAddCarRoute
   AdminDashboardLayoutDriversOnboardingRoute: typeof AdminDashboardLayoutDriversOnboardingRoute
@@ -1520,11 +1600,12 @@ interface AdminDashboardLayoutRouteChildren {
   AdminDashboardLayoutPublicationsIndexRoute: typeof AdminDashboardLayoutPublicationsIndexRoute
   AdminDashboardLayoutPublishedIndexRoute: typeof AdminDashboardLayoutPublishedIndexRoute
   AdminDashboardLayoutReportIndexRoute: typeof AdminDashboardLayoutReportIndexRoute
-  AdminDashboardLayoutSettingsIndexRoute: typeof AdminDashboardLayoutSettingsIndexRoute
   AdminDashboardLayoutTodaysScheduledIndexRoute: typeof AdminDashboardLayoutTodaysScheduledIndexRoute
 }
 
 const AdminDashboardLayoutRouteChildren: AdminDashboardLayoutRouteChildren = {
+  AdminDashboardLayoutSettingsRoute:
+    AdminDashboardLayoutSettingsRouteWithChildren,
   AdminDashboardLayoutIndexRoute: AdminDashboardLayoutIndexRoute,
   AdminDashboardLayoutCarsAddCarRoute: AdminDashboardLayoutCarsAddCarRoute,
   AdminDashboardLayoutDriversOnboardingRoute:
@@ -1550,8 +1631,6 @@ const AdminDashboardLayoutRouteChildren: AdminDashboardLayoutRouteChildren = {
   AdminDashboardLayoutPublishedIndexRoute:
     AdminDashboardLayoutPublishedIndexRoute,
   AdminDashboardLayoutReportIndexRoute: AdminDashboardLayoutReportIndexRoute,
-  AdminDashboardLayoutSettingsIndexRoute:
-    AdminDashboardLayoutSettingsIndexRoute,
   AdminDashboardLayoutTodaysScheduledIndexRoute:
     AdminDashboardLayoutTodaysScheduledIndexRoute,
 }

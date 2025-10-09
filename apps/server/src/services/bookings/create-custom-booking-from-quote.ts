@@ -27,7 +27,7 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	// Timing
 	scheduledPickupTime: z.string().transform((str) => new Date(str)),
 	estimatedDuration: z.number().int().optional(), // in seconds
-	estimatedDistance: z.number().int().optional(), // in meters
+	estimatedDistance: z.number().optional(), // in kilometers with decimal precision
 	
 	// Pricing from quote (in dollars with decimal precision)
 	baseFare: z.number(),

@@ -52,6 +52,7 @@ export function CreateOffloadBookingDialog() {
 			scheduledPickupTime: data.scheduledPickupTime.toISOString(),
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,
+			customerEmail: data.customerEmail || "",
 			passengerCount: data.passengerCount || 1,
 			luggageCount: data.luggageCount || 0,
 			additionalNotes: data.notes || "",
@@ -241,6 +242,21 @@ export function CreateOffloadBookingDialog() {
 								/>
 								{errors.customerPhone && (
 									<p className="text-sm text-red-600">{errors.customerPhone.message}</p>
+								)}
+							</div>
+
+							{/* Customer Email */}
+							<div className="space-y-2">
+								<Label htmlFor="customerEmail">Customer Email (Optional)</Label>
+								<Input
+									id="customerEmail"
+									type="email"
+									placeholder="customer@example.com"
+									{...register("customerEmail")}
+									className={errors.customerEmail ? "border-red-500" : ""}
+								/>
+								{errors.customerEmail && (
+									<p className="text-sm text-red-600">{errors.customerEmail.message}</p>
 								)}
 							</div>
 
