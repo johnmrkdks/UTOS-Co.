@@ -88,6 +88,8 @@ export interface AdminNewBookingData {
 	websiteUrl: string;
 	stops?: Array<{ address: string }>;
 	passengerCount?: number;
+	luggageCount?: number;
+	specialRequests?: string;
 	quotedAmount?: number;
 }
 
@@ -116,9 +118,7 @@ export async function renderBookingConfirmationEmail(data: BookingConfirmationDa
 
 export async function renderAdminNewBookingEmail(data: AdminNewBookingData): Promise<{ subject: string; html: string }> {
 	const html = await render(AdminNewBookingEmail(data));
-	// Show only last 6 characters of reference (e.g., #ABC123 instead of DUC-ABC123)
-	const shortRef = `#${data.bookingReference.slice(-6)}`;
-	const subject = `🔔 New Booking - ${shortRef}`;
+	const subject = `New Booking - ${data.bookingReference}`;
 
 	return { subject, html };
 }

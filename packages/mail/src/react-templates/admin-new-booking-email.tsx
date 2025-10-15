@@ -55,7 +55,7 @@ export function AdminNewBookingEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>New Booking Alert - #{bookingReference} - {customerName}</Preview>
+			<Preview>New Booking Alert - {bookingReference} - {customerName}</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
@@ -70,7 +70,7 @@ export function AdminNewBookingEmail({
 
 					{/* Alert Header */}
 					<Section style={alertHeader}>
-						<Heading style={alertTitle}>🔔 New Booking Received</Heading>
+						<Heading style={alertTitle}>New Booking Received</Heading>
 						<Text style={alertSubtitle}>
 							A new booking has been created and requires driver assignment.
 						</Text>
@@ -85,7 +85,7 @@ export function AdminNewBookingEmail({
 								<Text style={bookingDate}>{pickupDate}</Text>
 							</Column>
 							<Column style={{ width: '40%', textAlign: 'right' as const }}>
-								<Text style={bookingReferenceStyle}>#{bookingReference}</Text>
+								<Text style={bookingReferenceStyle}>{bookingReference}</Text>
 							</Column>
 						</Row>
 

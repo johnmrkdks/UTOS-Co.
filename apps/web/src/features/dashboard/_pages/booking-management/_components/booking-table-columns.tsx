@@ -50,6 +50,15 @@ export interface Booking {
 			phone?: string;
 		};
 	};
+	offloadDetails?: {
+		id: string;
+		bookingId: string;
+		offloaderName: string;
+		jobType: string;
+		vehicleType: string;
+		createdAt: string;
+		updatedAt: string;
+	} | null;
 	createdAt: string;
 	[key: string]: any;
 }

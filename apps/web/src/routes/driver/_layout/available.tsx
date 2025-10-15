@@ -80,10 +80,10 @@ function AvailableTripsPage() {
 
 		// Better car name handling
 		const getCarDisplayName = () => {
-			if (trip.selectedCar?.name) return trip.selectedCar.name;
+			if (trip.car?.name) return trip.car.name;
 
-			const make = trip.selectedCar?.make;
-			const model = trip.selectedCar?.model;
+			const make = trip.car?.make;
+			const model = trip.car?.model;
 
 			if (make && model) return `${make} ${model}`;
 			if (make) return make;
@@ -148,21 +148,12 @@ function AvailableTripsPage() {
 
 							{/* Type Badge and Distance */}
 							<div className="flex items-center justify-between mb-3">
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-2 flex-wrap">
 									<BookingTypeBadge booking={trip} />
-									{trip.bookingType === 'offload' && (
-										<>
-											{console.log('🔍 Available - Offload booking data:', {
-												bookingType: trip.bookingType,
-												offloaderName: (trip as any).offloaderName,
-												jobType: (trip as any).jobType,
-												vehicleType: (trip as any).vehicleType,
-												allKeys: Object.keys(trip)
-											})}
-											{(trip as any).offloaderName && (
-												<span className="text-xs text-orange-600 font-medium">({(trip as any).offloaderName})</span>
-											)}
-										</>
+									{trip.bookingType === 'offload' && trip.offloadDetails && (
+										<Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+											{trip.offloadDetails.offloaderName}
+										</Badge>
 									)}
 								</div>
 								{trip.estimatedDistance && (
@@ -264,6 +255,29 @@ function AvailableTripsPage() {
 								)}
 							</div>
 
+							{/* Offloader Details Section - Mobile */}
+							{trip.bookingType === 'offload' && trip.offloadDetails && (
+								<div className="mb-3">
+									<div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+										<div className="flex items-center gap-1 mb-1">
+											<CarIcon className="h-3 w-3 text-orange-600" />
+											<span className="text-xs font-semibold text-orange-800">Offload Booking</span>
+										</div>
+										<div className="space-y-1">
+											<div className="text-xs text-orange-700">
+												<span className="font-medium">Company:</span> {trip.offloadDetails.offloaderName}
+											</div>
+											<div className="text-xs text-orange-700">
+												<span className="font-medium">Job Type:</span> {trip.offloadDetails.jobType}
+											</div>
+											<div className="text-xs text-orange-700">
+												<span className="font-medium">Vehicle:</span> {trip.offloadDetails.vehicleType}
+											</div>
+										</div>
+									</div>
+								</div>
+							)}
+
 							{/* Notes Section - Mobile */}
 							{(trip.specialRequests || trip.additionalNotes) && (
 								<div className="mb-3 space-y-2">
@@ -331,10 +345,12 @@ function AvailableTripsPage() {
 										</div>
 									</div>
 								</div>
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-2 flex-wrap">
 									<BookingTypeBadge booking={trip} />
-									{trip.bookingType === 'offload' && (trip as any).offloaderName && (
-										<span className="text-xs text-orange-600 font-medium">({(trip as any).offloaderName})</span>
+									{trip.bookingType === 'offload' && trip.offloadDetails && (
+										<Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+											{trip.offloadDetails.offloaderName}
+										</Badge>
 									)}
 									<Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold px-3 py-1">
 										${formatCurrency(totalAmount)}
@@ -411,6 +427,29 @@ function AvailableTripsPage() {
 									</>
 								)}
 							</div>
+
+							{/* Offloader Details Section - Desktop */}
+							{trip.bookingType === 'offload' && trip.offloadDetails && (
+								<div className="mb-3">
+									<div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+										<div className="flex items-center gap-1 mb-1">
+											<CarIcon className="h-3 w-3 text-orange-600" />
+											<span className="text-xs font-semibold text-orange-800">Offload Booking</span>
+										</div>
+										<div className="space-y-1">
+											<div className="text-xs text-orange-700">
+												<span className="font-medium">Company:</span> {trip.offloadDetails.offloaderName}
+											</div>
+											<div className="text-xs text-orange-700">
+												<span className="font-medium">Job Type:</span> {trip.offloadDetails.jobType}
+											</div>
+											<div className="text-xs text-orange-700">
+												<span className="font-medium">Vehicle:</span> {trip.offloadDetails.vehicleType}
+											</div>
+										</div>
+									</div>
+								</div>
+							)}
 
 							{/* Notes Section - Desktop */}
 							{(trip.specialRequests || trip.additionalNotes) && (
@@ -831,6 +870,30 @@ function AvailableTripsPage() {
 										</div>
 									</div>
 								</div>
+
+								{/* Offloader Details */}
+								{selectedBookingForDetails.bookingType === 'offload' && selectedBookingForDetails.offloadDetails && (
+									<div className="bg-white rounded-lg p-4 border border-gray-200">
+										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<CarIcon className="h-4 w-4 text-orange-600" />
+											Offload Booking Details
+										</h3>
+										<div className="bg-orange-50 rounded-lg p-3 space-y-2">
+											<div>
+												<span className="text-xs text-orange-600 font-medium">Company:</span>
+												<p className="text-sm text-orange-800 font-medium">{selectedBookingForDetails.offloadDetails.offloaderName}</p>
+											</div>
+											<div>
+												<span className="text-xs text-orange-600 font-medium">Job Type:</span>
+												<p className="text-sm text-orange-800">{selectedBookingForDetails.offloadDetails.jobType}</p>
+											</div>
+											<div>
+												<span className="text-xs text-orange-600 font-medium">Vehicle Type:</span>
+												<p className="text-sm text-orange-800">{selectedBookingForDetails.offloadDetails.vehicleType}</p>
+											</div>
+										</div>
+									</div>
+								)}
 
 								{/* Special Requests */}
 								{selectedBookingForDetails.specialRequests && (

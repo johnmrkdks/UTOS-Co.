@@ -24,8 +24,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 		staleTime: 5 * 60 * 1000,
 		// Keep in cache for 10 minutes
 		gcTime: 10 * 60 * 1000,
-		// Only refetch on mount if data is stale
-		refetchOnMount: false,
+		// Refetch on mount if data is stale (important after login)
+		refetchOnMount: "always",
 		// Don't refetch on window focus
 		refetchOnWindowFocus: false,
 		// Don't refetch on reconnect

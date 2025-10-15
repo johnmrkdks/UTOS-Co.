@@ -84,10 +84,10 @@ export function EditBookingDialog({
 				passengerCount: booking.passengerCount || 1,
 				luggageCount: booking.luggageCount || 0,
 				specialRequests: booking.specialRequests || "",
-				// Offload booking specific fields
-				offloaderName: (booking as any).offloaderName || "",
-				jobType: (booking as any).jobType || "",
-				vehicleType: (booking as any).vehicleType || "",
+				// Offload booking specific fields - access from nested offloadDetails object
+				offloaderName: booking.offloadDetails?.offloaderName || "",
+				jobType: booking.offloadDetails?.jobType || "",
+				vehicleType: booking.offloadDetails?.vehicleType || "",
 			});
 		}
 	}, [booking]);
@@ -157,16 +157,12 @@ export function EditBookingDialog({
 				customerName: formData.customerName!,
 				customerPhone: formData.customerPhone!,
 				customerEmail: formData.customerEmail || "",
-				scheduledPickupTime: scheduledPickupTime.toISOString(), // Convert to ISO string for tRPC serialization
+				scheduledPickupTime: scheduledPickupTime, // Send as Date object for tRPC serialization
 				additionalNotes: formData.notes || "",
 				quotedAmount: formData.quotedAmount || 0, // Store as dollar amount
 				passengerCount: formData.passengerCount!,
 				luggageCount: formData.luggageCount!,
 				specialRequests: formData.specialRequests || "",
-				// Include offload booking specific fields
-				offloaderName: formData.offloaderName || undefined,
-				jobType: formData.jobType || undefined,
-				vehicleType: formData.vehicleType || undefined,
 			} as any // Use 'as any' to bypass type checking since the schema is auto-generated
 		}, {
 			onSuccess: () => {

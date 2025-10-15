@@ -85,8 +85,8 @@ export function CreateOffloadBookingDialog() {
 
 	return (
 		<Dialog open={isCreateOffloadBookingDialogOpen} onOpenChange={handleClose}>
-			<DialogContent className="!max-w-6xl max-h-[90vh] overflow-y-auto">
-				<DialogHeader>
+			<DialogContent className="!max-w-6xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+				<DialogHeader className="sticky top-0 z-10 bg-background border-b px-6 pt-6 pb-4">
 					<DialogTitle className="flex items-center gap-2">
 						<TruckIcon className="h-5 w-5 text-orange-600" />
 						Create Offload Booking
@@ -96,9 +96,11 @@ export function CreateOffloadBookingDialog() {
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-					{/* 2-Column Layout */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+					{/* Scrollable Content Area */}
+					<div className="flex-1 overflow-y-auto px-6 py-6">
+						{/* 2-Column Layout */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 						{/* Left Column - Booking Details */}
 						<div className="space-y-4">
 							<div className="pb-2 border-b">
@@ -368,10 +370,11 @@ export function CreateOffloadBookingDialog() {
 								</div>
 							)}
 						</div>
+						</div>
 					</div>
 
-					{/* Action Buttons */}
-					<div className="flex justify-end gap-3 pt-2">
+					{/* Action Buttons - Sticky Footer */}
+					<div className="sticky bottom-0 z-10 bg-background border-t px-6 py-4 flex justify-end gap-3">
 						<Button
 							type="button"
 							variant="outline"

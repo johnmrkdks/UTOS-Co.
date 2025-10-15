@@ -3,6 +3,7 @@ import { useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { Logo } from "@/components/logo";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
 import { AuthCTA } from "./navbar/auth-cta";
@@ -317,9 +318,12 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 				{session && (
 					<div className="p-4 border-b">
 						<div className="flex items-center space-x-3">
-							<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-								<UserIcon className="h-6 w-6 text-primary" />
-							</div>
+							<Avatar className="w-12 h-12">
+								<AvatarImage src={session?.user?.image ?? undefined} alt="Profile image" />
+								<AvatarFallback className="bg-primary/10 text-primary text-lg">
+									{session?.user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+								</AvatarFallback>
+							</Avatar>
 							<div className="flex-1">
 								<p className="text-sm font-medium text-gray-900">{session?.user.name}</p>
 								<p className="text-xs text-gray-500">{session?.user.email}</p>

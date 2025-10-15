@@ -209,6 +209,19 @@ export const AssignDriverSchema = z.object({
 export type AssignDriverParams = z.infer<typeof AssignDriverSchema>;
 
 export async function assignDriverService(db: DB, data: AssignDriverParams, env?: Env) {
+	// Validate that car is assigned before allowing driver assignment
+	const existingBooking = await getBookingById(db, data.bookingId);
+
+	if (!existingBooking) {
+		throw ErrorFactory.notFound("Booking");
+	}
+
+	if (!existingBooking.carId) {
+		throw ErrorFactory.badRequest(
+			"Cannot assign driver - no vehicle assigned to this booking. Please assign a vehicle first before assigning a driver."
+		);
+	}
+
 	return await updateBookingStatusService(db, {
 		id: data.bookingId,
 		status: BookingStatusEnum.DriverAssigned,

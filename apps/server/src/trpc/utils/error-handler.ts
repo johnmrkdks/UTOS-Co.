@@ -27,14 +27,20 @@ export const mapAppErrorToTRPC = (error: AppError): TRPCError => {
 };
 
 export const handleTRPCError = (error: unknown): never => {
+	console.error("🔴 handleTRPCError - Error caught:", error);
+
 	if (error instanceof AppError) {
+		console.error("🔴 Error is AppError:", error.code, error.message);
 		throw mapAppErrorToTRPC(error);
 	}
 
 	// Handle database/Drizzle errors
 	if (error instanceof Error) {
+		console.error("🔴 Error is standard Error:", error.name, error.message);
+
 		if (error.message?.includes('UNIQUE constraint failed') ||
 			error.message?.includes('duplicate key')) {
+			console.error("🔴 Duplicate entry error detected");
 			const appError = ErrorFactory.duplicateEntry('Resource');
 			throw mapAppErrorToTRPC(appError);
 		}
@@ -42,17 +48,26 @@ export const handleTRPCError = (error: unknown): never => {
 		// Handle Zod validation errors
 		if (error.name === 'ZodError') {
 			const zodError = error as any;
+			console.error("🔴 Zod validation error detected");
+			console.error("🔴 Zod errors:", JSON.stringify(zodError.errors, null, 2));
+
 			const details = zodError.errors?.map((e: any) => ({
 				field: e.path?.join('.'),
 				message: e.message,
-				code: e.code
+				code: e.code,
+				received: e.received,
+				expected: e.expected,
 			})) || [];
+
+			console.error("🔴 Formatted validation errors:", JSON.stringify(details, null, 2));
+
 			const appError = ErrorFactory.validation('Validation failed', details);
 			throw mapAppErrorToTRPC(appError);
 		}
 	}
 
 	// Default to internal server error
+	console.error("🔴 Falling back to internal server error");
 	const appError = ErrorFactory.internal('Something went wrong');
 	throw mapAppErrorToTRPC(appError);
 };

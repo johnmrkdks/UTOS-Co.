@@ -807,21 +807,12 @@ function DriverTripsComponent() {
 															<UserIcon className="h-3.5 w-3.5 text-gray-500" />
 															<span className="text-xs text-gray-600 truncate">{booking.customerName}</span>
 														</div>
-														<div className="flex items-center gap-1.5">
+														<div className="flex items-center gap-1.5 flex-wrap">
 															<BookingTypeBadge booking={booking} />
-															{booking.bookingType === 'offload' && (
-																<>
-																	{console.log('🔍 Offload booking data:', {
-																		bookingType: booking.bookingType,
-																		offloaderName: (booking as any).offloaderName,
-																		jobType: (booking as any).jobType,
-																		vehicleType: (booking as any).vehicleType,
-																		allKeys: Object.keys(booking)
-																	})}
-																	{(booking as any).offloaderName && (
-																		<span className="text-xs text-orange-600 font-medium truncate">({(booking as any).offloaderName})</span>
-																	)}
-																</>
+															{booking.bookingType === 'offload' && booking.offloadDetails && (
+																<Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+																	{booking.offloadDetails.offloaderName}
+																</Badge>
 															)}
 														</div>
 													</div>
@@ -873,6 +864,29 @@ function DriverTripsComponent() {
 														</div>
 													)}
 												</div>
+
+												{/* Offloader Details Section - Mobile */}
+												{booking.bookingType === 'offload' && booking.offloadDetails && (
+													<div className="mt-3">
+														<div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+															<div className="flex items-center gap-1 mb-1">
+																<CarIcon className="h-3 w-3 text-orange-600" />
+																<span className="text-xs font-semibold text-orange-800">Offload Booking</span>
+															</div>
+															<div className="space-y-1">
+																<div className="text-xs text-orange-700">
+																	<span className="font-medium">Company:</span> {booking.offloadDetails.offloaderName}
+																</div>
+																<div className="text-xs text-orange-700">
+																	<span className="font-medium">Job Type:</span> {booking.offloadDetails.jobType}
+																</div>
+																<div className="text-xs text-orange-700">
+																	<span className="font-medium">Vehicle:</span> {booking.offloadDetails.vehicleType}
+																</div>
+															</div>
+														</div>
+													</div>
+												)}
 											</>
 										) : (
 											// Desktop layout (unchanged)
@@ -948,8 +962,10 @@ function DriverTripsComponent() {
 														</div>
 														<div className="flex items-center gap-2">
 															<BookingTypeBadge booking={booking} />
-															{booking.bookingType === 'offload' && (booking as any).offloaderName && (
-																<span className="text-xs text-orange-600 font-medium">({(booking as any).offloaderName})</span>
+															{booking.bookingType === 'offload' && booking.offloadDetails && (
+																<Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+																	{booking.offloadDetails.offloaderName}
+																</Badge>
 															)}
 														</div>
 														<div className="flex items-center gap-1">
@@ -989,6 +1005,32 @@ function DriverTripsComponent() {
 														)}
 													</div>
 												</div>
+
+												{/* Offloader Details Section - Desktop */}
+												{booking.bookingType === 'offload' && booking.offloadDetails && (
+													<div className="mt-3">
+														<div className="bg-orange-50 rounded-md p-3 border border-orange-100">
+															<div className="flex items-center gap-1.5 mb-2">
+																<CarIcon className="h-4 w-4 text-orange-600" />
+																<span className="text-sm font-semibold text-orange-800">Offload Booking Details</span>
+															</div>
+															<div className="grid grid-cols-3 gap-3">
+																<div>
+																	<span className="text-xs text-orange-600 font-medium">Company:</span>
+																	<p className="text-sm text-orange-700">{booking.offloadDetails.offloaderName}</p>
+																</div>
+																<div>
+																	<span className="text-xs text-orange-600 font-medium">Job Type:</span>
+																	<p className="text-sm text-orange-700">{booking.offloadDetails.jobType}</p>
+																</div>
+																<div>
+																	<span className="text-xs text-orange-600 font-medium">Vehicle:</span>
+																	<p className="text-sm text-orange-700">{booking.offloadDetails.vehicleType}</p>
+																</div>
+															</div>
+														</div>
+													</div>
+												)}
 											</>
 										)}
 									</CardContent>
@@ -1283,46 +1325,40 @@ function DriverTripsComponent() {
 								)}
 
 								{/* Offload Booking Information Card */}
-								{selectedBookingForDetails.bookingType === 'offload' && (
+								{selectedBookingForDetails.bookingType === 'offload' && selectedBookingForDetails.offloadDetails && (
 									<div className="bg-orange-50 rounded-xl p-3 shadow-sm border border-orange-100">
 										<h3 className="text-sm font-semibold text-orange-900 mb-2 flex items-center gap-2">
 											<TruckIcon className="h-4 w-4 text-orange-600" />
 											Offload Booking Details
 										</h3>
 										<div className="space-y-2">
-											{(selectedBookingForDetails as any).offloaderName && (
-												<div className="flex items-start gap-2">
-													<div className="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
-													<div className="flex-1 min-w-0">
-														<p className="text-xs font-medium text-orange-700 mb-0.5">Company Name</p>
-														<p className="text-xs text-gray-900 font-medium">
-															{(selectedBookingForDetails as any).offloaderName}
-														</p>
-													</div>
+											<div className="flex items-start gap-2">
+												<div className="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-orange-700 mb-0.5">Company Name</p>
+													<p className="text-xs text-gray-900 font-medium">
+														{selectedBookingForDetails.offloadDetails.offloaderName}
+													</p>
 												</div>
-											)}
-											{(selectedBookingForDetails as any).jobType && (
-												<div className="flex items-start gap-2">
-													<div className="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
-													<div className="flex-1 min-w-0">
-														<p className="text-xs font-medium text-orange-700 mb-0.5">Job Type</p>
-														<p className="text-xs text-gray-900 font-medium">
-															{(selectedBookingForDetails as any).jobType}
-														</p>
-													</div>
+											</div>
+											<div className="flex items-start gap-2">
+												<div className="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-orange-700 mb-0.5">Job Type</p>
+													<p className="text-xs text-gray-900 font-medium">
+														{selectedBookingForDetails.offloadDetails.jobType}
+													</p>
 												</div>
-											)}
-											{(selectedBookingForDetails as any).vehicleType && (
-												<div className="flex items-start gap-2">
-													<div className="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
-													<div className="flex-1 min-w-0">
-														<p className="text-xs font-medium text-orange-700 mb-0.5">Vehicle Type</p>
-														<p className="text-xs text-gray-900 font-medium">
-															{(selectedBookingForDetails as any).vehicleType}
-														</p>
-													</div>
+											</div>
+											<div className="flex items-start gap-2">
+												<div className="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></div>
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-orange-700 mb-0.5">Vehicle Type</p>
+													<p className="text-xs text-gray-900 font-medium">
+														{selectedBookingForDetails.offloadDetails.vehicleType}
+													</p>
 												</div>
-											)}
+											</div>
 										</div>
 									</div>
 								)}

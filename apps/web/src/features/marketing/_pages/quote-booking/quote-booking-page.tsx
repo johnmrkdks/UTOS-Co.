@@ -1254,6 +1254,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 											timeError={formErrors.scheduledPickupTime}
 											dateLabel="Pickup Date *"
 											timeLabel="Pickup Time *"
+											allowPastTimes={true}
 										/>
 
 										<div>

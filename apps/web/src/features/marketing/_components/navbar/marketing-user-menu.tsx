@@ -9,10 +9,12 @@ import {
 import { Link } from "@tanstack/react-router";
 import { LogOutIcon, UserIcon, SettingsIcon, UserCircleIcon, Calendar } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { AuthCTA } from "./auth-cta";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
+import { getNameInitials } from "@/utils/format";
 
 export function MarketingUserMenu() {
 	const { session, isPending, signOutWithConfirmation } = useUserQuery();
@@ -46,12 +48,11 @@ export function MarketingUserMenu() {
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button
-						variant="outline"
-						size="icon"
-						className="rounded-full shadow-none transition-all duration-200 hover:scale-105 hover:shadow-md"
-					>
-						<UserIcon className="h-5 w-5 transition-transform duration-200" />
+					<Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+						<Avatar>
+							<AvatarImage src={session?.user?.image ?? undefined} alt="Profile image" />
+							<AvatarFallback>{getNameInitials(session?.user?.name!)}</AvatarFallback>
+						</Avatar>
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent

@@ -1,9 +1,8 @@
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import { Outlet, useLocation } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
-import { useLocation } from "@tanstack/react-router";
 import { Loader } from "@/components/loader";
 import {
 	DriverTopNavigation,
@@ -14,7 +13,6 @@ import {
 } from "../navigation";
 
 export function DriverLayout() {
-	const navigate = useNavigate();
 	const location = useLocation();
 	const { session, isPending, signOutWithConfirmation } = useUserQuery();
 	const { data: currentDriver } = useCurrentDriverQuery();
@@ -37,17 +35,8 @@ export function DriverLayout() {
 		);
 	}
 
-	// Redirect if not authenticated (only after loading is complete)
-	if (!user) {
-		navigate({ to: '/' });
-		return null;
-	}
-
-	// Redirect if not driver
-	if (user && user.role !== 'driver') {
-		navigate({ to: '/dashboard' });
-		return null;
-	}
+	// Authentication and role checks are now handled in route beforeLoad
+	// No need for redirect logic here
 
 	// Driver status based on actual driver data with fallbacks
 	const driver = {

@@ -7,6 +7,7 @@
  *   pnpm tsx scripts/run-distance-migration.ts
  */
 
+// @ts-nocheck - Migration script, better-sqlite3 is a dev-only dependency
 import { drizzle } from "drizzle-orm/d1";
 import Database from "better-sqlite3";
 import { sql } from "drizzle-orm";

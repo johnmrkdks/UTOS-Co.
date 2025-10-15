@@ -57,9 +57,7 @@ function HistoryPage() {
 			packageId: booking.packageId,
 			package: booking.package,
 			estimatedDuration: booking.estimatedDuration,
-			offloaderName: booking.offloaderName,
-			jobType: booking.jobType,
-			vehicleType: booking.vehicleType
+			offloadDetails: booking.offloadDetails
 		})).filter(trip => ['completed', 'cancelled', 'no_show'].includes(trip.status));
 	}, [bookingsData]);
 
@@ -145,8 +143,10 @@ function HistoryPage() {
 						<span className="text-sm font-semibold text-gray-900">Trip #{trip.id.slice(-6)}</span>
 						<div className="flex items-center gap-2">
 							<BookingTypeBadge booking={trip as any} />
-							{trip.bookingType === 'offload' && trip.offloaderName && (
-								<span className="text-xs text-orange-600 font-medium">({trip.offloaderName})</span>
+							{trip.bookingType === 'offload' && trip.offloadDetails && (
+								<Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+									{trip.offloadDetails.offloaderName}
+								</Badge>
 							)}
 							<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
 						</div>
@@ -211,6 +211,29 @@ function HistoryPage() {
 						</div>
 						<ChevronRight className="w-5 h-5 text-gray-400" />
 					</div>
+
+					{/* Offloader Details Section */}
+					{trip.bookingType === 'offload' && trip.offloadDetails && (
+						<div className="mt-3 pt-3 border-t border-gray-100">
+							<div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+								<div className="flex items-center gap-1 mb-1">
+									<CarIcon className="h-3 w-3 text-orange-600" />
+									<span className="text-xs font-semibold text-orange-800">Offload Booking</span>
+								</div>
+								<div className="space-y-1">
+									<div className="text-xs text-orange-700">
+										<span className="font-medium">Company:</span> {trip.offloadDetails.offloaderName}
+									</div>
+									<div className="text-xs text-orange-700">
+										<span className="font-medium">Job Type:</span> {trip.offloadDetails.jobType}
+									</div>
+									<div className="text-xs text-orange-700">
+										<span className="font-medium">Vehicle:</span> {trip.offloadDetails.vehicleType}
+									</div>
+								</div>
+							</div>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 		);
@@ -489,6 +512,30 @@ function HistoryPage() {
 										</div>
 									</div>
 								</div>
+
+								{/* Offloader Details */}
+								{selectedBookingForDetails.bookingType === 'offload' && selectedBookingForDetails.offloadDetails && (
+									<div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+										<h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+											<CarIcon className="h-4 w-4 text-orange-600" />
+											Offload Booking Details
+										</h3>
+										<div className="bg-orange-50 rounded-lg p-3 space-y-2">
+											<div>
+												<span className="text-xs text-orange-600 font-medium">Company:</span>
+												<p className="text-sm text-orange-800 font-medium">{selectedBookingForDetails.offloadDetails.offloaderName}</p>
+											</div>
+											<div>
+												<span className="text-xs text-orange-600 font-medium">Job Type:</span>
+												<p className="text-sm text-orange-800">{selectedBookingForDetails.offloadDetails.jobType}</p>
+											</div>
+											<div>
+												<span className="text-xs text-orange-600 font-medium">Vehicle Type:</span>
+												<p className="text-sm text-orange-800">{selectedBookingForDetails.offloadDetails.vehicleType}</p>
+											</div>
+										</div>
+									</div>
+								)}
 
 								{/* Special Requests */}
 								{selectedBookingForDetails.specialRequests && (

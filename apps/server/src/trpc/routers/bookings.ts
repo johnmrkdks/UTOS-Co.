@@ -227,32 +227,52 @@ export const bookingsRouter = router({
 		.input(UpdateBookingServiceSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
+				console.log("🔍 DEBUG bookings.update - START");
+				console.log("📥 Input received:", JSON.stringify(input, null, 2));
+				console.log("📅 scheduledPickupTime type:", typeof input.data.scheduledPickupTime);
+				console.log("📅 scheduledPickupTime value:", input.data.scheduledPickupTime);
+				console.log("👤 Session object:", JSON.stringify(session, null, 2));
+
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				
+				console.log("🆔 Extracted userId:", userId);
+
 				if (!userId) {
+					console.error("❌ No userId found in session");
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to update bookings",
 					});
 				}
-				
+
 				const userRole = await getUserRole(db, userId);
-				
+				console.log("👤 User role:", userRole);
+
 				// Get the booking first to check ownership
+				console.log("🔍 Fetching existing booking with id:", input.id);
 				const existingBooking = await getBookingService(db, { id: input.id });
-				
+
 				if (!existingBooking) {
+					console.error("❌ Booking not found for id:", input.id);
 					throw new TRPCError({
 						code: "NOT_FOUND",
 						message: "Booking not found",
 					});
 				}
-				
+
+				console.log("📋 Existing booking found:", {
+					id: existingBooking.id,
+					status: existingBooking.status,
+					bookingType: existingBooking.bookingType,
+					scheduledPickupTime: existingBooking.scheduledPickupTime,
+				});
+
 				// Apply role-based access control
 				if (userRole === 'admin' || userRole === 'super_admin') {
+					console.log("✅ Admin access granted");
 					// Admins can update any booking
 				} else {
+					console.error("❌ Non-admin user attempting to use admin endpoint");
 					// Regular users and drivers cannot update bookings via this endpoint
 					// They should use the specific editBooking endpoint which has proper validation
 					throw new TRPCError({
@@ -260,10 +280,20 @@ export const bookingsRouter = router({
 						message: "Only admins can use this update endpoint. Use editBooking for customer updates.",
 					});
 				}
-				
+
+				console.log("🚀 Calling updateBookingService...");
+				console.log("📝 Update data:", JSON.stringify(input.data, null, 2));
+
 				const updatedBooking = await updateBookingService(db, input);
+
+				console.log("✅ Booking updated successfully:", updatedBooking?.id);
+				console.log("📋 Updated booking data:", JSON.stringify(updatedBooking, null, 2));
+
 				return updatedBooking;
 			} catch (error) {
+				console.error("💥 ERROR in bookings.update:", error);
+				console.error("📚 Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+				console.error("🔍 Input that caused error:", JSON.stringify(input, null, 2));
 				handleTRPCError(error);
 			}
 		}),

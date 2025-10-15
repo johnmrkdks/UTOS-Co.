@@ -59,6 +59,55 @@ export async function requireDriver() {
 	return session;
 }
 
+export function getDashboardPath(userRole: string | undefined | null): string {
+	switch (userRole) {
+		case "admin":
+		case "super_admin":
+			return "/admin/dashboard";
+		case "driver":
+			return "/driver";
+		case "user":
+			return "/dashboard";
+		default:
+			return "/";
+	}
+}
+
+/**
+ * Unified post-login redirect handler for both email/password and OAuth
+ * Invalidates session cache, fetches fresh session, and redirects to appropriate dashboard
+ */
+export async function handlePostLoginRedirect(params: {
+	queryClient: any;
+	navigate: any;
+	redirectPath?: string;
+}): Promise<void> {
+	const { queryClient, navigate, redirectPath } = params;
+
+	// Invalidate the session query to force refetch
+	await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+
+	// Fetch the updated session to get user role
+	const session = await authClient.getSession();
+	const userRole = session?.data?.user?.role;
+
+	// Determine redirect path based on role
+	const defaultDashboard = getDashboardPath(userRole);
+	const finalRedirect = redirectPath || defaultDashboard;
+
+	console.log("🚀 Post-login redirect:", {
+		userRole,
+		defaultDashboard,
+		redirectPath,
+		finalRedirect
+	});
+
+	// Navigate to the appropriate dashboard
+	navigate({
+		to: finalRedirect,
+	});
+}
+
 export async function redirectIfAuthenticated() {
 	const session = await authClient.getSession();
 	console.log("🔍 redirectIfAuthenticated - Session check:", {
@@ -71,17 +120,8 @@ export async function redirectIfAuthenticated() {
 	if (session?.data?.user) {
 		const userRole = session.data.user.role;
 		console.log("🚀 Redirecting authenticated user with role:", userRole);
-		switch (userRole) {
-			case "admin":
-			case "super_admin":
-				throw redirect({ to: "/admin/dashboard" });
-			case "driver":
-				throw redirect({ to: "/driver" });
-			case "user":
-				throw redirect({ to: "/" });
-			default:
-				throw redirect({ to: "/" });
-		}
+		const dashboardPath = getDashboardPath(userRole);
+		throw redirect({ to: dashboardPath });
 	} else {
 		console.log("✅ No valid session data found, allowing access to auth page");
 	}
