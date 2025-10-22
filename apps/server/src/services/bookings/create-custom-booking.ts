@@ -1,5 +1,5 @@
+import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
-import { createBookingStops } from "@/data/bookings/create-booking-stops";
 import type { DB } from "@/db";
 import { BookingTypeEnum, BookingStatusEnum } from "@/db/sqlite/enums";
 import type { InsertBooking } from "@/schemas/shared";
@@ -8,7 +8,7 @@ import { z } from "zod";
 export const CreateCustomBookingSchema = z.object({
 	carId: z.string(),
 	userId: z.string(),
-	
+
 	// Route information
 	originAddress: z.string(),
 	originLatitude: z.number().optional(),
@@ -16,18 +16,18 @@ export const CreateCustomBookingSchema = z.object({
 	destinationAddress: z.string(),
 	destinationLatitude: z.number().optional(),
 	destinationLongitude: z.number().optional(),
-	
+
 	// Timing
 	scheduledPickupTime: z.string().datetime().transform((str) => new Date(str)),
 	estimatedDuration: z.number().int().optional(), // in seconds
-	
+
 	// Distance and pricing estimates
 	estimatedDistance: z.number().optional(), // in kilometers with decimal precision
 	baseFare: z.number(),
 	distanceFare: z.number(),
 	timeFare: z.number().optional(),
 	quotedAmount: z.number(),
-	
+
 	// Customer details
 	customerName: z.string(),
 	customerPhone: z.string(),
@@ -35,7 +35,7 @@ export const CreateCustomBookingSchema = z.object({
 	passengerCount: z.number().int().min(1).default(1),
 	luggageCount: z.number().int().min(0).default(0),
 	specialRequests: z.string().optional(),
-	
+
 	// Stops for custom bookings
 	stops: z.array(z.object({
 		address: z.string(),
@@ -55,42 +55,42 @@ export async function createCustomBookingService(db: DB, data: CreateCustomBooki
 	if (hoursUntilPickup < 1) {
 		throw new Error("Custom bookings require at least 1 hour advance notice");
 	}
-	
+
 	// Prepare booking data
 	const bookingData: InsertBooking = {
 		bookingType: BookingTypeEnum.Custom,
 		carId: data.carId,
 		userId: data.userId,
-		
+
 		originAddress: data.originAddress,
 		originLatitude: data.originLatitude,
 		originLongitude: data.originLongitude,
 		destinationAddress: data.destinationAddress,
 		destinationLatitude: data.destinationLatitude,
 		destinationLongitude: data.destinationLongitude,
-		
+
 		scheduledPickupTime: data.scheduledPickupTime,
 		estimatedDuration: data.estimatedDuration,
 		estimatedDistance: data.estimatedDistance,
-		
+
 		// Custom booking pricing breakdown
 		quotedAmount: data.quotedAmount,
 		baseFare: data.baseFare,
 		distanceFare: data.distanceFare,
 		timeFare: data.timeFare,
-		
+
 		customerName: data.customerName,
 		customerPhone: data.customerPhone,
 		customerEmail: data.customerEmail,
 		passengerCount: data.passengerCount,
 		luggageCount: data.luggageCount,
 		specialRequests: data.specialRequests,
-		
+
 		status: BookingStatusEnum.Pending,
 	};
-	
+
 	const newBooking = await createBooking(db, bookingData);
-	
+
 	// Create stops if provided
 	if (data.stops && data.stops.length > 0) {
 		const stopsData = data.stops.map((stop, index) => ({
@@ -102,9 +102,9 @@ export async function createCustomBookingService(db: DB, data: CreateCustomBooki
 			waitingTime: stop.waitingTime,
 			notes: stop.notes,
 		}));
-		
+
 		await createBookingStops(db, stopsData);
 	}
-	
+
 	return newBooking;
 }

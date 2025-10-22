@@ -1,5 +1,5 @@
+import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
-import { createBookingStops } from "@/data/bookings/create-booking-stops";
 import { getPackage } from "@/data/packages/get-package";
 import type { DB } from "@/db";
 import { BookingTypeEnum, BookingStatusEnum } from "@/db/sqlite/enums";
@@ -10,7 +10,7 @@ export const CreatePackageBookingSchema = z.object({
 	packageId: z.string(),
 	carId: z.string().nullable(),
 	userId: z.string(),
-	
+
 	// Route information
 	originAddress: z.string(),
 	originLatitude: z.number().optional(),
@@ -18,10 +18,10 @@ export const CreatePackageBookingSchema = z.object({
 	destinationAddress: z.string(),
 	destinationLatitude: z.number().optional(),
 	destinationLongitude: z.number().optional(),
-	
+
 	// Timing
 	scheduledPickupTime: z.coerce.date(),
-	
+
 	// Customer details
 	customerName: z.string(),
 	customerPhone: z.string(),
@@ -32,7 +32,7 @@ export const CreatePackageBookingSchema = z.object({
 
 	// Duration for hourly services
 	serviceDuration: z.number().int().min(1).optional(),
-	
+
 	// Optional stops for package bookings
 	stops: z.array(z.object({
 		address: z.string(),
@@ -51,20 +51,20 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 		console.log("🔍 DEBUG createPackageBookingService - START");
 		console.log("📦 Service data received:", JSON.stringify(data, null, 2));
 		console.log("📅 scheduledPickupTime type:", typeof data.scheduledPickupTime, "value:", data.scheduledPickupTime);
-		
+
 		// Validate package exists and is available
 		console.log("🔍 Looking up package:", data.packageId);
 		const packageInfo = await getPackage(db, { id: data.packageId });
 		console.log("📦 Package found:", packageInfo ? "Yes" : "No", packageInfo?.name);
-		
+
 		if (!packageInfo) {
 			throw new Error("Package not found");
 		}
-		
+
 		if (!packageInfo.isAvailable) {
 			throw new Error("Package is not available");
 		}
-		
+
 		// Validate passenger count doesn't exceed system limit (20 passengers max)
 		if (data.passengerCount > 20) {
 			throw new Error(`Maximum 20 passengers allowed per booking`);
@@ -88,10 +88,10 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 		if (isHourlyService && !data.serviceDuration) {
 			throw new Error("Service duration is required for hourly services");
 		}
-		
+
 		// Note: Advance booking time validation removed per CEO requirements
 		// Clients should be able to book anytime
-		
+
 		// Prepare booking data
 		console.log("📝 Preparing booking data...");
 		const bookingData: InsertBooking = {
@@ -99,14 +99,14 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			packageId: data.packageId,
 			carId: data.carId,
 			userId: data.userId,
-			
+
 			originAddress: data.originAddress,
 			originLatitude: data.originLatitude,
 			originLongitude: data.originLongitude,
 			destinationAddress: data.destinationAddress,
 			destinationLatitude: data.destinationLatitude,
 			destinationLongitude: data.destinationLongitude,
-			
+
 			scheduledPickupTime: data.scheduledPickupTime,
 
 			// Store service duration in estimated duration for hourly services
@@ -121,21 +121,21 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			finalAmount: isHourlyService && packageInfo.hourlyRate && data.serviceDuration
 				? packageInfo.hourlyRate * data.serviceDuration
 				: packageInfo.fixedPrice || 0,
-			
+
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,
 			customerEmail: data.customerEmail,
 			passengerCount: data.passengerCount,
 			luggageCount: data.luggageCount,
 			specialRequests: data.specialRequests,
-			
+
 			status: BookingStatusEnum.Pending,
 		};
-		
+
 		console.log("💾 Calling createBooking with:", JSON.stringify(bookingData, null, 2));
 		const newBooking = await createBooking(db, bookingData);
 		console.log("✅ Booking created successfully with ID:", newBooking.id);
-		
+
 		// Create stops if provided
 		if (data.stops && data.stops.length > 0) {
 			console.log("🛑 Creating stops:", data.stops.length);
@@ -148,11 +148,11 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 				waitingTime: stop.waitingTime,
 				notes: stop.notes,
 			}));
-			
+
 			await createBookingStops(db, stopsData);
 			console.log("✅ Stops created successfully");
 		}
-		
+
 		return newBooking;
 	} catch (error) {
 		console.error("💥 ERROR in createPackageBookingService:", error);

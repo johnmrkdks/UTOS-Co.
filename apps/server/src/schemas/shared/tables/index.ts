@@ -15,6 +15,7 @@ export * from "./account";
 export * from "./booking";
 export * from "./booking-extra";
 export * from "./booking-stop";
+export * from "./offload-booking-details";
 export * from "./driver";
 export * from "./package";
 export * from "./package-category";

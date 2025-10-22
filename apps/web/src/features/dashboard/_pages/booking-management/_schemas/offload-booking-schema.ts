@@ -17,6 +17,17 @@ export const offloadBookingSchema = z.object({
 		.string()
 		.min(1, "Destination address is required")
 		.max(255, "Destination address must be less than 255 characters"),
+	stops: z.array(z.object({
+		stopOrder: z.number(),
+		address: z
+			.string()
+			.min(1, "Stop address is required")
+			.max(255, "Stop address must be less than 255 characters"),
+		latitude: z.number().nullable().optional(),
+		longitude: z.number().nullable().optional(),
+		waitingTime: z.number().int().min(0).optional(), // in minutes
+		notes: z.string().max(200).optional(),
+	})),
 	vehicleType: z
 		.string()
 		.min(1, "Vehicle type is required")

@@ -1,18 +1,9 @@
 import type { DB } from "@/db";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
+import type { InsertBookingStop } from "@/types";
 import { eq } from "drizzle-orm";
 
-type InsertBookingStop = typeof bookingStops.$inferInsert;
-
-export interface CreateBookingStopData {
-	bookingId: string;
-	stopOrder: number;
-	address: string;
-	latitude?: number;
-	longitude?: number;
-	waitingTime?: number;
-	notes?: string;
-}
+export type CreateBookingStopData = InsertBookingStop;
 
 export async function createBookingStops(db: DB, stops: CreateBookingStopData[]) {
 	if (stops.length === 0) {
@@ -35,25 +26,8 @@ export async function createBookingStops(db: DB, stops: CreateBookingStopData[])
 
 	// Insert all stops
 	const createdStops = await db.insert(bookingStops).values(insertData).returning();
-	
+
 	return createdStops;
 }
 
-export async function getBookingStops(db: DB, bookingId: string) {
-	const stops = await db
-		.select()
-		.from(bookingStops)
-		.where(eq(bookingStops.bookingId, bookingId))
-		.orderBy(bookingStops.stopOrder);
-	
-	return stops;
-}
 
-export async function deleteBookingStops(db: DB, bookingId: string) {
-	const deletedStops = await db
-		.delete(bookingStops)
-		.where(eq(bookingStops.bookingId, bookingId))
-		.returning();
-	
-	return deletedStops;
-}

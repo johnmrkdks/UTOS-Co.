@@ -126,12 +126,23 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 					{/* Assignment Actions */}
 					{booking.status !== "cancelled" && booking.status !== "completed" && (
 						<>
-							{/* Driver assignment - only allow if booking is confirmed */}
+							{/* Driver assignment - only allow if booking is confirmed AND has a car assigned */}
 							{['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress'].includes(booking.status) ? (
-								<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
-									<UserCheck className="mr-2 h-4 w-4" />
-									{booking.driver ? "Reassign driver" : "Assign driver"}
-								</DropdownMenuItem>
+								// For confirmed status, require car to be assigned first
+								booking.status === 'confirmed' && !booking.car ? (
+									<DropdownMenuItem disabled className="flex-col items-start py-2">
+										<div className="flex items-center w-full">
+											<UserCheck className="mr-2 h-4 w-4 opacity-50" />
+											<span className="opacity-50">Assign driver</span>
+										</div>
+										<span className="text-xs text-muted-foreground ml-6">(Assign car first)</span>
+									</DropdownMenuItem>
+								) : (
+									<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
+										<UserCheck className="mr-2 h-4 w-4" />
+										{booking.driver ? "Reassign driver" : "Assign driver"}
+									</DropdownMenuItem>
+								)
 							) : (
 								<DropdownMenuItem disabled className="flex-col items-start py-2">
 									<div className="flex items-center w-full">

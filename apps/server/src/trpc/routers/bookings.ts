@@ -8,7 +8,6 @@ import { createBookingService, CreateBookingServiceSchema } from "@/services/boo
 import { createPackageBookingService, CreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
 import { createCustomBookingService, CreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
 import { createCustomBookingFromQuoteService, CreateCustomBookingFromQuoteSchema } from "@/services/bookings/create-custom-booking-from-quote";
-import { createOffloadBookingService, CreateOffloadBookingServiceSchema } from "@/services/bookings/create-offload-booking";
 import { calculateInstantQuoteService, CalculateInstantQuoteSchema } from "@/services/bookings/calculate-instant-quote";
 import { updateBookingStatusService, UpdateBookingStatusSchema, assignDriverService, AssignDriverSchema } from "@/services/bookings/update-booking-status";
 import { DeleteBookingServiceSchema, deleteBookingService } from "@/services/bookings/delete-booking";
@@ -29,6 +28,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { users } from "@/db/sqlite/schema/users";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { createOffloadBookingService, CreateOffloadBookingServiceSchema } from "@/services/bookings/create-offload-booking";
 
 // Helper function to get user role from database
 const getUserRole = async (db: any, userId: string) => {
@@ -53,26 +53,26 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to delete bookings",
 					});
 				}
-				
+
 				const userRole = await getUserRole(db, userId);
-				
+
 				// Get the booking first to check ownership
 				const existingBooking = await getBookingService(db, input);
-				
+
 				if (!existingBooking) {
 					throw new TRPCError({
 						code: "NOT_FOUND",
 						message: "Booking not found",
 					});
 				}
-				
+
 				// Apply role-based access control
 				if (userRole === 'admin' || userRole === 'super_admin') {
 					// Admins can delete any booking
@@ -84,7 +84,7 @@ export const bookingsRouter = router({
 						message: "Only admins can delete bookings. Use cancelBooking to cancel your bookings.",
 					});
 				}
-				
+
 				const deletedBooking = await deleteBookingService(db, input);
 				return deletedBooking;
 			} catch (error) {
@@ -97,25 +97,25 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to view bookings",
 					});
 				}
-				
+
 				const userRole = await getUserRole(db, userId);
-				
+
 				const booking = await getBookingService(db, input);
-				
+
 				if (!booking) {
 					throw new TRPCError({
 						code: "NOT_FOUND",
 						message: "Booking not found",
 					});
 				}
-				
+
 				// Apply role-based access control
 				if (userRole === 'admin' || userRole === 'super_admin') {
 					// Admins can see any booking
@@ -128,7 +128,7 @@ export const bookingsRouter = router({
 
 					if (!driverProfile) {
 						throw new TRPCError({
-							code: "FORBIDDEN", 
+							code: "FORBIDDEN",
 							message: "User is not registered as a driver",
 						});
 					}
@@ -139,7 +139,7 @@ export const bookingsRouter = router({
 							message: "You can only view your assigned bookings",
 						});
 					}
-					
+
 					return booking;
 				} else {
 					// Regular users (customers) can only see their own bookings
@@ -149,7 +149,7 @@ export const bookingsRouter = router({
 							message: "You can only view your own bookings",
 						});
 					}
-					
+
 					return booking;
 				}
 			} catch (error) {
@@ -195,7 +195,7 @@ export const bookingsRouter = router({
 
 					if (!driverProfile) {
 						throw new TRPCError({
-							code: "FORBIDDEN", 
+							code: "FORBIDDEN",
 							message: "User is not registered as a driver",
 						});
 					}
@@ -306,28 +306,28 @@ export const bookingsRouter = router({
 				console.log("🔍 DEBUG createPackageBooking - START");
 				console.log("📥 Input received:", JSON.stringify(input, null, 2));
 				console.log("👤 Session object:", JSON.stringify(session, null, 2));
-				
+
 				// Better Auth anonymous plugin - check both user and session structures
 				const userId = session?.user?.id || session?.session?.userId;
 				console.log("🆔 Extracted userId:", userId);
-				
+
 				if (!userId) {
 					console.error("❌ No userId found in session");
 					throw new Error("User session is required. Please sign in or create a guest account.");
 				}
-				
+
 				console.log("📅 Original scheduledPickupTime:", input.scheduledPickupTime, typeof input.scheduledPickupTime);
-				
+
 				// Convert scheduledPickupTime string to Date object and add userId
 				const processedInput = {
 					...input,
 					scheduledPickupTime: new Date(input.scheduledPickupTime),
 					userId
 				};
-				
+
 				console.log("📝 Processed input:", JSON.stringify(processedInput, null, 2));
 				console.log("🕐 Processed scheduledPickupTime:", processedInput.scheduledPickupTime, typeof processedInput.scheduledPickupTime);
-				
+
 				console.log("🏃‍♂️ Calling createPackageBookingService...");
 				const newBooking = await createPackageBookingService(db, processedInput);
 				console.log("✅ Service returned successfully:", newBooking?.id);
@@ -449,40 +449,85 @@ export const bookingsRouter = router({
 
 	// Create offload booking (admin only)
 	createOffloadBooking: protectedProcedure
+		.use(async ({ next, rawInput }) => {
+			console.log("\n" + "🟡".repeat(40));
+			console.log("🔍 PRE-VALIDATION - RAW INPUT RECEIVED:");
+			console.log(JSON.stringify(rawInput, null, 2));
+			console.log("🟡".repeat(40) + "\n");
+
+			try {
+				const result = await next();
+				return result;
+			} catch (error) {
+				console.error("\n" + "🔴".repeat(40));
+				console.error("❌ MIDDLEWARE ERROR:");
+				console.error("Error:", error instanceof Error ? error.message : String(error));
+				if (error instanceof z.ZodError) {
+					console.error("🔴 VALIDATION FAILED:");
+					console.error(JSON.stringify(error.issues, null, 2));
+				}
+				console.error("🔴".repeat(40) + "\n");
+				throw error;
+			}
+		})
 		.input(CreateOffloadBookingServiceSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				console.log("🔍 DEBUG createOffloadBooking - RECEIVED INPUT:");
-				console.log("📦 Input data:", JSON.stringify(input, null, 2));
+				console.log("\n" + "=".repeat(80));
+				console.log("🔍 DEBUG createOffloadBooking - START");
+				console.log("=".repeat(80));
+				console.log("📥 RECEIVED INPUT:");
+				console.log(JSON.stringify(input, null, 2));
+				console.log("\n📊 INPUT ANALYSIS:");
+				console.log("- originAddress:", input.originAddress);
+				console.log("- destinationAddress:", input.destinationAddress);
+				console.log("- quotedAmount:", input.quotedAmount, "Type:", typeof input.quotedAmount);
+				console.log("- scheduledPickupTime:", input.scheduledPickupTime, "Type:", typeof input.scheduledPickupTime);
+				console.log("- offloadDetails:", JSON.stringify(input.offloadDetails, null, 2));
+				console.log("- stops:", JSON.stringify(input.stops, null, 2));
+				console.log("- stops length:", input.stops?.length || 0);
 
 				// Check if user is admin or super_admin
 				const userId = session?.user?.id || session?.session?.userId;
 				if (!userId) {
+					console.error("❌ Authentication failed: No user ID in session");
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "Authentication required",
 					});
 				}
 
+				console.log("👤 User ID:", userId);
 				const userRole = await getUserRole(db, userId);
+				console.log("👤 User role:", userRole);
+
 				if (!userRole || !['admin', 'super_admin'].includes(userRole)) {
+					console.error("❌ Authorization failed: User role is", userRole);
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Admin access required to create offload bookings",
 					});
 				}
 
-				console.log("🚀 Creating offload booking for user:", userId, "with role:", userRole);
+				console.log("🚀 Calling createOffloadBookingService...");
 				const newBooking = await createOffloadBookingService(db, input, userId);
-				console.log("✅ Offload booking created successfully:", newBooking?.id);
+				console.log("✅ Offload booking created successfully!");
+				console.log("📋 Booking ID:", newBooking?.id);
+				console.log("=".repeat(80) + "\n");
 
 				return newBooking;
 			} catch (error) {
-				console.error("❌ TRPC Error in createOffloadBooking:", {
-					error: error instanceof Error ? error.message : String(error),
-					stack: error instanceof Error ? error.stack : undefined,
-					input: JSON.stringify(input, null, 2)
-				});
+				console.error("\n" + "=".repeat(80));
+				console.error("❌ TRPC Error in createOffloadBooking");
+				console.error("=".repeat(80));
+				console.error("Error message:", error instanceof Error ? error.message : String(error));
+				console.error("Error stack:", error instanceof Error ? error.stack : undefined);
+				console.error("Input that caused error:", JSON.stringify(input, null, 2));
+				if (error instanceof z.ZodError) {
+					console.error("🔴 VALIDATION ERROR - Zod Issues:");
+					console.error(JSON.stringify(error.issues, null, 2));
+				}
+				console.error("=".repeat(80) + "\n");
 				handleTRPCError(error);
 			}
 		}),
@@ -541,16 +586,16 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to view bookings",
 					});
 				}
-				
+
 				const userRole = await getUserRole(db, userId);
-				
+
 				// Apply role-based filtering
 				if (userRole === 'admin' || userRole === 'super_admin') {
 					// Admins can see all bookings
@@ -564,7 +609,7 @@ export const bookingsRouter = router({
 
 					if (!driverProfile) {
 						throw new TRPCError({
-							code: "FORBIDDEN", 
+							code: "FORBIDDEN",
 							message: "User is not registered as a driver",
 						});
 					}
@@ -698,14 +743,14 @@ export const bookingsRouter = router({
 			try {
 				// Ensure user can only see their own bookings
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to view bookings",
 					});
 				}
-				
+
 				// Force filter by the authenticated user's ID only
 				const bookings = await getBookingsService(db, {
 					...input,
@@ -729,7 +774,7 @@ export const bookingsRouter = router({
 			try {
 				// Get the current user's driver profile
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
@@ -770,18 +815,18 @@ export const bookingsRouter = router({
 			console.log("🔍 validateOperations - START");
 			console.log("📥 Input:", JSON.stringify(input, null, 2));
 			console.log("👤 Session:", JSON.stringify(session, null, 2));
-			
+
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
 				console.log("🆔 Extracted userId:", userId);
-				
+
 				if (!userId) {
 					console.error("❌ No userId found in session");
 					throw new Error("User session is required");
 				}
 
 				console.log("🔍 Querying booking with ID:", input.bookingId);
-				
+
 				// Get the booking first
 				const [booking] = await db
 					.select()
@@ -812,7 +857,7 @@ export const bookingsRouter = router({
 				console.log("🔍 Calling validateBookingOperations...");
 				const validation = await validateBookingOperations(db, booking);
 				console.log("✅ Validation result:", JSON.stringify(validation, null, 2));
-				
+
 				return validation;
 			} catch (error) {
 				console.error("💥 ERROR in validateOperations:", error);
@@ -884,16 +929,16 @@ export const bookingsRouter = router({
 			try {
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to view available trips",
 					});
 				}
-				
+
 				const userRole = await getUserRole(db, userId);
-				
+
 				// Only drivers can access available trips
 				if (userRole !== 'driver') {
 					throw new TRPCError({
@@ -901,7 +946,7 @@ export const bookingsRouter = router({
 						message: "Only drivers can view available trips",
 					});
 				}
-				
+
 				// Get bookings that don't have a driver assigned yet
 				const bookings = await getBookingsService(db, {
 					...input,
@@ -913,7 +958,7 @@ export const bookingsRouter = router({
 						driverId: null as any,
 					},
 				});
-				
+
 				return bookings;
 			} catch (error) {
 				handleTRPCError(error);
@@ -942,7 +987,7 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
-				
+
 				if (!userId) {
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
@@ -951,7 +996,7 @@ export const bookingsRouter = router({
 				}
 
 				const userRole = await getUserRole(db, userId);
-				
+
 				// Only drivers can close trips
 				if (userRole !== 'driver') {
 					throw new TRPCError({
@@ -967,7 +1012,7 @@ export const bookingsRouter = router({
 
 				if (!driverProfile) {
 					throw new TRPCError({
-						code: "FORBIDDEN", 
+						code: "FORBIDDEN",
 						message: "User is not registered as a driver",
 					});
 				}
@@ -1005,7 +1050,7 @@ export const bookingsRouter = router({
 				}
 
 				const userRole = await getUserRole(db, userId);
-				
+
 				// Only drivers can close trips
 				if (userRole !== 'driver') {
 					throw new TRPCError({
@@ -1021,7 +1066,7 @@ export const bookingsRouter = router({
 
 				if (!driverProfile) {
 					throw new TRPCError({
-						code: "FORBIDDEN", 
+						code: "FORBIDDEN",
 						message: "User is not registered as a driver",
 					});
 				}

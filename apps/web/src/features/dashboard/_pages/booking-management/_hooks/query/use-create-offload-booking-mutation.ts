@@ -12,9 +12,7 @@ export const useCreateOffloadBookingMutation = () => {
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 
-			toast.success("Offload booking created successfully", {
-				description: `Booking for ${data?.offloaderName} has been added to the system.`,
-			});
+			toast.success("Offload booking created successfully");
 		},
 		onError: (error) => {
 			console.error("Error creating offload booking:", error);
