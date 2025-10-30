@@ -1,7 +1,6 @@
 import type { DB } from "@/db";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import type { InsertBookingStop } from "@/types";
-import { eq } from "drizzle-orm";
 
 export type CreateBookingStopData = InsertBookingStop;
 

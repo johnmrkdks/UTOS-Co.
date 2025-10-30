@@ -11,7 +11,7 @@ import { PackageSchema } from "./package";
 import { BookingExtraSchema } from "./booking-extra";
 import { BookingStopSchema } from "./booking-stop";
 import { OffloadBookingDetailsSchema } from "./offload-booking-details";
-import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
 
 export const BookingSchema = createSelectSchema(bookings, {
 	createdAt: z.union([z.date(), z.string()]),
@@ -26,6 +26,8 @@ export const BookingSchema = createSelectSchema(bookings, {
 });
 export const InsertBookingSchema = createInsertSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum),
+	bookingType: z.nativeEnum(BookingTypeEnum)
+
 });
 export const UpdateBookingSchema = createUpdateSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum).optional(),
