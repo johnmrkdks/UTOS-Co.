@@ -7,6 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 enabled = true
 
 [env.development]
+remote = true
 NODE_ENV = "development"
 CORS_ORIGIN = "http://localhost:3001"
 
@@ -36,12 +37,15 @@ CLOUDFLARE_R2_PUBLIC_URL = "REDACTED_R2_PUBLIC_URL"
 binding = "DB"
 database_name = "down-under-chauffeur-test-db"
 database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
 migrations_dir = "./drizzle/migrations/sqlite"
+remote = true
 
 [[r2_buckets]]
 binding = 'BUCKET'
 bucket_name = 'down-under-chauffeur-test-bucket'
 preview_bucket_name = 'down-under-chauffeur-test-bucket'
+remote = true
 
 [env.staging.vars]
 NODE_ENV = "staging"

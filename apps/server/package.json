@@ -11,7 +11,7 @@
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"check-types": "tsc --noEmit",
 		"compile": "pnpm build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-		"dev": "wrangler types && wrangler dev --port=3000 --remote",
+		"dev": "wrangler types && wrangler dev --port=3000",
 		"preview": "wrangler build && wrangler dev",
 		"start": "wrangler dev",
 		"deploy": "wrangler types && wrangler deploy --env=\"\"",
@@ -53,7 +53,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20250726.0",
+		"@cloudflare/workers-types": "^4.20251011.0",
 		"@types/lodash": "^4.17.20",
 		"@types/node": "catalog:",
 		"@types/qs": "^6.14.0",
