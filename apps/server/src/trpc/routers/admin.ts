@@ -10,10 +10,6 @@ export const adminRouter = router({
 		.input(CreateDriverUserServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				console.log("=== tRPC DEBUG: createDriverUser mutation called ===");
-				console.log("tRPC Input:", JSON.stringify(input, null, 2));
-				console.log("tRPC DB context:", !!db ? "DB available" : "DB not available");
-
 				const result = await createDriverUserService(db, input);
 
 				console.log("=== tRPC DEBUG: createDriverUser mutation successful ===");

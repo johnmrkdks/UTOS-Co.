@@ -11,6 +11,7 @@ type TRPCContext = {
 	session: Awaited<ReturnType<typeof auth.api.getSession>>;
 	db: DB;
 	env: Env;
+	req: Request;
 };
 
 export async function createContext({
@@ -24,6 +25,7 @@ export async function createContext({
 		session,
 		db,
 		env: context.env,
+		req: context.req.raw,
 	};
 }
 

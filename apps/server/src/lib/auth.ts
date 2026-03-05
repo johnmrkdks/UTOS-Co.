@@ -11,6 +11,27 @@ import {
 	superAdminRole,
 	userRole,
 } from "./permissions";
+import { customVerify } from "./scrypt";
+import {
+	hashPassword as hashBetterAuthPassword,
+	verifyPassword as verifyBetterAuthPassword,
+} from "better-auth/crypto";
+
+/** Supports both better-auth default format and our legacy customHash format for backward compatibility */
+async function verifyPasswordCompat({
+	password,
+	hash,
+}: {
+	password: string;
+	hash: string;
+}): Promise<boolean> {
+	// Better-auth format: "salt:key" (hex)
+	if (hash.includes(":")) {
+		return verifyBetterAuthPassword({ password, hash });
+	}
+	// Legacy customHash format (base64)
+	return customVerify({ password, hash });
+}
 
 const plugins: BetterAuthOptions["plugins"] = [
 	admin({
@@ -32,7 +53,11 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false, // Allow login without verification, but encourage verification
-		// Use better-auth default scrypt (works in Workers with nodejs_compat)
+		password: {
+			hash: hashBetterAuthPassword,
+			// Verify supports both better-auth format and legacy customHash for backward compatibility
+			verify: verifyPasswordCompat,
+		},
 	},
 	socialProviders: {
 		google: {
