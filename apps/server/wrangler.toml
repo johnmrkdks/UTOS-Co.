@@ -7,7 +7,8 @@ compatibility_flags = ["nodejs_compat"]
 enabled = true
 
 [env.development]
-remote = true
+# Use local D1 (SQLite) when remote dev database is unavailable
+remote = false
 NODE_ENV = "development"
 CORS_ORIGIN = "http://localhost:3001"
 
@@ -21,7 +22,7 @@ GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
 GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
 GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
-GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
 
 # Cloudflare R2
@@ -32,6 +33,23 @@ CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-test-bucket"
 CLOUDFLARE_R2_REGION = "oc" # Oceania
 CLOUDFLARE_R2_S3_ENDPOINT = "REDACTED_R2_ENDPOINT"
 CLOUDFLARE_R2_PUBLIC_URL = "REDACTED_R2_PUBLIC_URL"
+
+# Local D1 for development (SQLite file in .wrangler/state/v3/d1/)
+# Use: pnpm dev (runs wrangler dev --env development)
+# database_id required for wrangler d1 execute --local to find the DB
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "down-under-chauffeur-test-db"
+database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+migrations_dir = "./drizzle/migrations/sqlite"
+remote = false
+
+# Local R2 for development (when using remote=false)
+[[env.development.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "down-under-chauffeur-test-bucket"
+preview_bucket_name = "down-under-chauffeur-test-bucket"
+remote = false
 
 [[d1_databases]]
 binding = "DB"
@@ -60,7 +78,7 @@ GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
 GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
 GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
-GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
 
 # Cloudflare R2
@@ -99,7 +117,7 @@ GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
 GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
 GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
 GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
-GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
 # Cloudflare R2
 CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"

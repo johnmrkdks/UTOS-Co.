@@ -1,6 +1,9 @@
 -- Migration: Convert distance fields from integer (meters) to real (kilometers)
 -- Converts existing meter values to kilometers with decimal precision
 
+-- Add reference_number if not exists (required before 0006_complex_xorn runs)
+ALTER TABLE bookings ADD COLUMN reference_number TEXT;
+
 -- Create new bookings table with real distance fields
 CREATE TABLE `bookings_new` AS SELECT * FROM `bookings` WHERE 1=0;
 
@@ -57,6 +60,7 @@ CREATE TABLE `bookings_new` (
 );
 
 -- Copy data, converting meters to kilometers
+-- Schema after 0004 may lack: timezone, luggage_count, additional_notes, is_archived
 INSERT INTO bookings_new
 SELECT
 	id,
@@ -74,18 +78,18 @@ SELECT
 	destination_latitude,
 	destination_longitude,
 	scheduled_pickup_time,
-	timezone,
+	NULL as timezone,
 	estimated_duration,
 	actual_pickup_time,
 	actual_dropoff_time,
 	CASE
 		WHEN estimated_distance IS NOT NULL THEN CAST(estimated_distance AS REAL) / 1000.0
 		ELSE NULL
-	END as estimated_distance,  -- Convert meters to kilometers
+	END as estimated_distance,
 	CASE
 		WHEN actual_distance IS NOT NULL THEN CAST(actual_distance AS REAL) / 1000.0
 		ELSE NULL
-	END as actual_distance,      -- Convert meters to kilometers
+	END as actual_distance,
 	quoted_amount,
 	final_amount,
 	base_fare,
@@ -96,11 +100,11 @@ SELECT
 	customer_phone,
 	customer_email,
 	passenger_count,
-	luggage_count,
+	0 as luggage_count,
 	special_requests,
-	additional_notes,
+	NULL as additional_notes,
 	status,
-	is_archived,
+	NULL as is_archived,
 	confirmed_at,
 	driver_en_route_at,
 	service_started_at,

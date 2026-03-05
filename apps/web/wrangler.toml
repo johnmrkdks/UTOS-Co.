@@ -8,18 +8,18 @@ not_found_handling = "single-page-application"
 [vars]
 VITE_SERVER_URL = "http://localhost:3000"
 VITE_CLIENT_URL = "http://localhost:3001"
-VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
 
 [env.staging.vars]
 VITE_SERVER_URL = "https://down-under-chauffeur-server-staging.davannarts.workers.dev"
 VITE_CLIENT_URL = "https://down-under-chauffeur-staging.davannarts.workers.dev"
-VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
 
 [env.production.vars]
 VITE_SERVER_URL = "https://api.downunderchauffeurs.com"
 VITE_CLIENT_URL = "https://downunderchauffeurs.com"
-VITE_GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
 

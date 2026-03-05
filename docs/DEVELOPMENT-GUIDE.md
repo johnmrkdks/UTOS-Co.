@@ -15,8 +15,9 @@
 - `pnpm db:studio` - Open database studio UI
 - `pnpm db:generate` - Generate database migrations
 - `pnpm db:migrate` - Run database migrations
+- `pnpm db:seed-local` - Seed the local development database (when using local D1)
 
-Note: Database commands support both D1 and Supabase configurations. Use specific suffixes in server directory:
+Note: Development uses a **local SQLite database** by default (see [LOCAL-DATABASE-HEIDISQL.md](./LOCAL-DATABASE-HEIDISQL.md) for HeidiSQL setup). Database commands support both D1 and Supabase configurations. Use specific suffixes in server directory:
 - `-d1` for Cloudflare D1 (development and production)
 
 ### Package Manager

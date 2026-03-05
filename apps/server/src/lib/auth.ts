@@ -11,7 +11,6 @@ import {
 	superAdminRole,
 	userRole,
 } from "./permissions";
-import { customHash, customVerify } from "./scrypt";
 
 const plugins: BetterAuthOptions["plugins"] = [
 	admin({
@@ -33,10 +32,7 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false, // Allow login without verification, but encourage verification
-		password: {
-			hash: customHash,
-			verify: customVerify,
-		},
+		// Use better-auth default scrypt (works in Workers with nodejs_compat)
 	},
 	socialProviders: {
 		google: {

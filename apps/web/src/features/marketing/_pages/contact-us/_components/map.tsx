@@ -10,7 +10,7 @@ export function ContactUsMap({ className, ...props }: ContactUsMapProps) {
 			<iframe
 				title="Map"
 				className="h-full w-full border-0"
-				src="https://www.google.com/maps/embed/v1/place?q=Sydney,+New+South+Wales,+Australia&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+				src={`https://www.google.com/maps/embed/v1/place?q=Sydney,+New+South+Wales,+Australia&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}`}
 			/>
 		</div>
 	);

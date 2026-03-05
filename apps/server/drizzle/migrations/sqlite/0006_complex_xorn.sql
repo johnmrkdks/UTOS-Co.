@@ -1,5 +1,5 @@
 ALTER TABLE `pricing_config` RENAME TO `pricing_configs`;--> statement-breakpoint
-CREATE TABLE `booking_policies` (
+CREATE TABLE IF NOT EXISTS `booking_policies` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -14,7 +14,7 @@ CREATE TABLE `booking_policies` (
 	`updated_at` integer DEFAULT (unixepoch())
 );
 --> statement-breakpoint
-CREATE TABLE `contact_messages` (
+CREATE TABLE IF NOT EXISTS `contact_messages` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`email` text NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE `contact_messages` (
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `customer_profiles` (
+CREATE TABLE IF NOT EXISTS `customer_profiles` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`phone` text,
@@ -46,7 +46,7 @@ CREATE TABLE `customer_profiles` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `booking_extras` (
+CREATE TABLE IF NOT EXISTS `booking_extras` (
 	`id` text PRIMARY KEY NOT NULL,
 	`booking_id` text NOT NULL,
 	`additional_wait_time` integer DEFAULT 0,
@@ -64,7 +64,7 @@ CREATE TABLE `booking_extras` (
 	FOREIGN KEY (`booking_id`) REFERENCES `bookings`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `offload_booking_details` (
+CREATE TABLE IF NOT EXISTS `offload_booking_details` (
 	`id` text PRIMARY KEY NOT NULL,
 	`booking_id` text NOT NULL,
 	`offloader_name` text NOT NULL,
@@ -75,8 +75,8 @@ CREATE TABLE `offload_booking_details` (
 	FOREIGN KEY (`booking_id`) REFERENCES `bookings`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `offload_booking_details_booking_id_unique` ON `offload_booking_details` (`booking_id`);--> statement-breakpoint
-CREATE TABLE `instant_quotes` (
+CREATE UNIQUE INDEX IF NOT EXISTS `offload_booking_details_booking_id_unique` ON `offload_booking_details` (`booking_id`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `instant_quotes` (
 	`id` text PRIMARY KEY NOT NULL,
 	`origin_address` text NOT NULL,
 	`destination_address` text NOT NULL,
@@ -101,11 +101,11 @@ CREATE TABLE `instant_quotes` (
 	FOREIGN KEY (`car_id`) REFERENCES `cars`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE INDEX `instant_quotes_expires_at_idx` ON `instant_quotes` (`expires_at`);--> statement-breakpoint
-CREATE INDEX `instant_quotes_car_id_idx` ON `instant_quotes` (`car_id`);--> statement-breakpoint
-CREATE INDEX `instant_quotes_created_at_idx` ON `instant_quotes` (`created_at`);--> statement-breakpoint
-CREATE INDEX `instant_quotes_client_ip_idx` ON `instant_quotes` (`client_ip`);--> statement-breakpoint
-CREATE TABLE `package_service_types` (
+CREATE INDEX IF NOT EXISTS `instant_quotes_expires_at_idx` ON `instant_quotes` (`expires_at`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `instant_quotes_car_id_idx` ON `instant_quotes` (`car_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `instant_quotes_created_at_idx` ON `instant_quotes` (`created_at`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `instant_quotes_client_ip_idx` ON `instant_quotes` (`client_ip`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `package_service_types` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -117,8 +117,8 @@ CREATE TABLE `package_service_types` (
 	`updated_at` integer DEFAULT (unixepoch())
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `package_service_types_name_unique` ON `package_service_types` (`name`);--> statement-breakpoint
-CREATE TABLE `system_settings` (
+CREATE UNIQUE INDEX IF NOT EXISTS `package_service_types_name_unique` ON `package_service_types` (`name`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `system_settings` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`timezone` text DEFAULT 'Australia/Sydney' NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()),
@@ -143,7 +143,7 @@ INSERT INTO `__new_pricing_configs`("id", "name", "car_id", "first_km_rate", "fi
 DROP TABLE `pricing_configs`;--> statement-breakpoint
 ALTER TABLE `__new_pricing_configs` RENAME TO `pricing_configs`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;--> statement-breakpoint
-CREATE INDEX `pricing_configs_car_id_idx` ON `pricing_configs` (`car_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `pricing_configs_car_id_idx` ON `pricing_configs` (`car_id`);--> statement-breakpoint
 CREATE TABLE `__new_packages` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -180,8 +180,8 @@ CREATE TABLE `__new_packages` (
 INSERT INTO `__new_packages`("id", "name", "description", "category_id", "service_type_id", "banner_image_url", "duration", "max_distance", "fixed_price", "hourly_rate", "extra_km_price", "extra_hour_price", "deposit_required", "max_passengers", "advance_booking_hours", "cancellation_hours", "includes_driver", "includes_fuel", "includes_tolls", "includes_waiting", "waiting_time_minutes", "is_available", "is_published", "available_days", "available_time_start", "available_time_end", "created_at", "updated_at") SELECT "id", "name", "description", "category_id", "service_type_id", "banner_image_url", "duration", "max_distance", "fixed_price", "hourly_rate", "extra_km_price", "extra_hour_price", "deposit_required", "max_passengers", "advance_booking_hours", "cancellation_hours", "includes_driver", "includes_fuel", "includes_tolls", "includes_waiting", "waiting_time_minutes", "is_available", "is_published", "available_days", "available_time_start", "available_time_end", "created_at", "updated_at" FROM `packages`;--> statement-breakpoint
 DROP TABLE `packages`;--> statement-breakpoint
 ALTER TABLE `__new_packages` RENAME TO `packages`;--> statement-breakpoint
-CREATE INDEX `packages_name_idx` ON `packages` (`name`);--> statement-breakpoint
-CREATE INDEX `packages_published_availability_idx` ON `packages` (`is_published`,`is_available`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `packages_name_idx` ON `packages` (`name`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `packages_published_availability_idx` ON `packages` (`is_published`,`is_available`);--> statement-breakpoint
 CREATE TABLE `__new_bookings` (
 	`id` text PRIMARY KEY NOT NULL,
 	`reference_number` text,
@@ -278,13 +278,13 @@ CREATE TABLE `__new_cars` (
 INSERT INTO `__new_cars`("id", "name", "description", "license_plate", "vin_number", "model_id", "body_type_id", "fuel_type_id", "transmission_type_id", "drive_type_id", "condition_type_id", "category_id", "color", "doors", "seating_capacity", "luggage_capacity", "available_for_packages", "available_for_custom", "current_latitude", "current_longitude", "last_location_update", "insurance_expiry", "registration_expiry", "last_service_date", "next_service_due", "is_active", "is_available", "is_published", "status", "created_at", "updated_at") SELECT "id", "name", "description", "license_plate", "vin_number", "model_id", "body_type_id", "fuel_type_id", "transmission_type_id", "drive_type_id", "condition_type_id", "category_id", "color", "doors", "seating_capacity", "luggage_capacity", "available_for_packages", "available_for_custom", "current_latitude", "current_longitude", "last_location_update", "insurance_expiry", "registration_expiry", "last_service_date", "next_service_due", "is_active", "is_available", "is_published", "status", "created_at", "updated_at" FROM `cars`;--> statement-breakpoint
 DROP TABLE `cars`;--> statement-breakpoint
 ALTER TABLE `__new_cars` RENAME TO `cars`;--> statement-breakpoint
-CREATE UNIQUE INDEX `cars_license_plate_unique` ON `cars` (`license_plate`);--> statement-breakpoint
-CREATE INDEX `cars_availability_idx` ON `cars` (`is_available`,`is_active`);--> statement-breakpoint
-CREATE INDEX `cars_published_availability_idx` ON `cars` (`is_published`,`is_active`,`is_available`);--> statement-breakpoint
-CREATE INDEX `cars_category_idx` ON `cars` (`category_id`);--> statement-breakpoint
-CREATE INDEX `cars_status_idx` ON `cars` (`status`);--> statement-breakpoint
-CREATE INDEX `cars_location_idx` ON `cars` (`current_latitude`,`current_longitude`);--> statement-breakpoint
-CREATE INDEX `cars_license_plate_idx` ON `cars` (`license_plate`);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS `cars_license_plate_unique` ON `cars` (`license_plate`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `cars_availability_idx` ON `cars` (`is_available`,`is_active`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `cars_published_availability_idx` ON `cars` (`is_published`,`is_active`,`is_available`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `cars_category_idx` ON `cars` (`category_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `cars_status_idx` ON `cars` (`status`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `cars_location_idx` ON `cars` (`current_latitude`,`current_longitude`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `cars_license_plate_idx` ON `cars` (`license_plate`);--> statement-breakpoint
 CREATE TABLE `__new_drivers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text,

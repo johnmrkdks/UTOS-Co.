@@ -11,7 +11,7 @@
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"check-types": "tsc --noEmit",
 		"compile": "pnpm build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-		"dev": "wrangler types && wrangler dev --port=3000",
+		"dev": "wrangler types && wrangler dev --env development --port=3000",
 		"preview": "wrangler build && wrangler dev",
 		"start": "wrangler dev",
 		"deploy": "wrangler types && wrangler deploy --env=\"\"",
@@ -27,7 +27,11 @@
 		"db:migrate-d1": "drizzle-kit migrate --config=drizzle.d1-config.ts",
 		"db:migrate-supabase": "drizzle-kit migrate --config=drizzle.supabase-config.ts",
 		"db:seed": "wrangler d1 execute DB --remote --file=drizzle/seed/seed.sql",
+		"db:migrate-local": "wrangler d1 migrations apply DB --local --env development",
+		"db:seed-local": "wrangler d1 execute DB --local --env development --file=drizzle/seed/seed.sql",
+		"db:seed-body-types": "wrangler d1 execute DB --local --env development --file=drizzle/seed/seed-body-types.sql",
 		"db:seed-generate": "bun drizzle/seed/generate-seed-sql.ts",
+		"create-admin": "npx tsx scripts/create-admin.ts",
 		"migrate:distance": "bun scripts/migrate-distance.ts"
 	},
 	"dependencies": {

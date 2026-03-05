@@ -159,6 +159,20 @@ const carFeatures = [
 	{ name: "Ambient Lighting", description: "Customizable interior lighting" },
 ];
 
+// Body Types - Luxury vehicle body styles
+const carBodyTypes = [
+	{ name: "Sedan" },
+	{ name: "SUV" },
+	{ name: "Coupe" },
+	{ name: "Convertible" },
+	{ name: "Wagon" },
+	{ name: "Hatchback" },
+	{ name: "Van" },
+	{ name: "Minibus" },
+	{ name: "Limousine" },
+	{ name: "Saloon" },
+];
+
 // Other data arrays (fuel types, transmission types, etc.)
 const carFuelTypes = [
 	{ name: "Petrol", description: "Traditional gasoline engine" },
@@ -284,6 +298,14 @@ async function generateSeedSQL() {
 	}
 	sql += "\n";
 	
+	// Car Body Types
+	sql += "-- Car Body Types\n";
+	for (const bodyType of carBodyTypes) {
+		const id = createId();
+		sql += `INSERT INTO car_body_types (id, name, created_at, updated_at) VALUES ('${id}', '${escapeSQL(bodyType.name)}', ${currentTime}, ${currentTime});\n`;
+	}
+	sql += "\n";
+
 	// Car Features
 	sql += "-- Car Features\n";
 	for (const feature of carFeatures) {
