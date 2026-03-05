@@ -8,9 +8,10 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import type { Row } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X, Archive, ArchiveRestore, Trash2, CheckCircle } from "lucide-react";
+import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X, Archive, ArchiveRestore, Trash2, CheckCircle, Ban } from "lucide-react";
 import type { Booking } from "./booking-table-columns";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import { canCancelBooking } from "@/lib/booking-status-config";
 import { useUnassignDriverMutation } from "../_hooks/query/use-unassign-driver-mutation";
 import { useUnassignCarMutation } from "../_hooks/query/use-unassign-car-mutation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@workspace/ui/components/alert-dialog";
@@ -184,6 +185,17 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 							)}
 							<DropdownMenuSeparator />
 						</>
+					)}
+
+					{/* Cancel booking - only for cancellable statuses */}
+					{canCancelBooking(booking.status) && onCancelBooking && (
+						<DropdownMenuItem
+							onClick={() => onCancelBooking(booking)}
+							className="text-red-600 hover:text-red-700"
+						>
+							<Ban className="mr-2 h-4 w-4" />
+							Cancel booking
+						</DropdownMenuItem>
 					)}
 
 					{/* Archive/Restore Actions */}

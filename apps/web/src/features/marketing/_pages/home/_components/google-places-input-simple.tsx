@@ -184,7 +184,7 @@ export function GooglePlacesInput({
 				createPortal(
 					<div
 						data-address-dropdown
-						className="fixed z-[9999] bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto"
+						className="fixed z-[9999] pointer-events-auto bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto"
 						style={{
 							top: dropdownPosition.top,
 							left: dropdownPosition.left,

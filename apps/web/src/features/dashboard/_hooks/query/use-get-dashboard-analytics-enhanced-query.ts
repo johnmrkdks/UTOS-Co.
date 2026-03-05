@@ -1,8 +1,38 @@
 import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import { subDays, subMonths, subYears, startOfDay, endOfDay } from "date-fns";
 
-export const useGetDashboardAnalyticsEnhancedQuery = () => {
-	return useQuery(trpc.analytics.getDashboardAnalytics.queryOptions({}));
+export type DateRangePreset = "7d" | "30d" | "90d" | "1y";
+
+function getDateRangeFromPreset(preset: DateRangePreset): { start: Date; end: Date } {
+	const end = endOfDay(new Date());
+	let start: Date;
+	switch (preset) {
+		case "7d":
+			start = startOfDay(subDays(end, 7));
+			break;
+		case "30d":
+			start = startOfDay(subDays(end, 30));
+			break;
+		case "90d":
+			start = startOfDay(subDays(end, 90));
+			break;
+		case "1y":
+			start = startOfDay(subYears(end, 1));
+			break;
+		default:
+			start = startOfDay(subDays(end, 30));
+	}
+	return { start, end };
+}
+
+export const useGetDashboardAnalyticsEnhancedQuery = (dateRangePreset?: DateRangePreset) => {
+	const dateRange = dateRangePreset ? getDateRangeFromPreset(dateRangePreset) : undefined;
+	return useQuery(
+		trpc.analytics.getDashboardAnalytics.queryOptions({
+			dateRange: dateRange ? { start: dateRange.start, end: dateRange.end } : undefined,
+		})
+	);
 };
 
 // Helper to format analytics data for display
@@ -18,9 +48,9 @@ export const formatDashboardAnalytics = (analytics: any) => {
 				activePackages: 0,
 				totalDrivers: 0,
 				activeDrivers: 0,
-				avgRating: 4.8, // Mock until ratings system is implemented
+				avgRating: 0,
 				completionRate: 0,
-				totalReviews: 0, // Mock
+				totalReviews: 0,
 			},
 			recentActivity: [],
 		};
@@ -52,9 +82,9 @@ export const formatDashboardAnalytics = (analytics: any) => {
 		completionRate: analytics.completionRate,
 		cancellationRate: analytics.cancellationRate,
 		
-		// Mock data for features not yet implemented
-		avgRating: 4.8,
-		totalReviews: Math.max(analytics.completedBookings * 0.7, 0), // Assume 70% of completed bookings have reviews
+		// Reviews (from booking_reviews)
+		avgRating: analytics.reviews?.averageRating ?? 0,
+		totalReviews: analytics.reviews?.totalReviews ?? 0,
 		
 		// Growth metrics
 		bookingGrowth: analytics.bookingGrowth,

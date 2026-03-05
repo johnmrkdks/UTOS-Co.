@@ -28,77 +28,42 @@ import {
 	MapPin
 } from "lucide-react";
 
-// Mock data - in real implementation, this would come from API
-const mockPackageAnalytics = {
-	overview: {
-		totalPackages: 24,
-		activePackages: 18,
-		publishedPackages: 15,
-		totalBookings: 142,
-		totalRevenue: 28450.00,
-		averageRating: 4.6,
-		conversionRate: 23.5,
-	},
-	topPerformingPackages: [
-		{
-			id: "1",
-			name: "Sydney Airport Transfer",
-			bookings: 45,
-			revenue: 6750.00,
-			rating: 4.8,
-			conversionRate: 32,
-		},
-		{
-			id: "2", 
-			name: "Blue Mountains Day Tour",
-			bookings: 28,
-			revenue: 8400.00,
-			rating: 4.9,
-			conversionRate: 45,
-		},
-		{
-			id: "3",
-			name: "Harbour Bridge Experience",
-			bookings: 22,
-			revenue: 5280.00,
-			rating: 4.5,
-			conversionRate: 28,
-		},
-		{
-			id: "4",
-			name: "Corporate Event Transfer",
-			bookings: 18,
-			revenue: 5400.00,
-			rating: 4.7,
-			conversionRate: 35,
-		},
-		{
-			id: "5",
-			name: "Wedding Package Deluxe",
-			bookings: 12,
-			revenue: 3600.00,
-			rating: 4.9,
-			conversionRate: 55,
-		},
-	],
-	bookingTrends: [
-		{ month: "Jan", bookings: 18, revenue: 4200 },
-		{ month: "Feb", bookings: 22, revenue: 5100 },
-		{ month: "Mar", bookings: 25, revenue: 6800 },
-		{ month: "Apr", bookings: 19, revenue: 4900 },
-		{ month: "May", bookings: 28, revenue: 7200 },
-		{ month: "Jun", bookings: 30, revenue: 8100 },
-	],
-	packageTypeDistribution: [
-		{ name: "Transfer", value: 45, color: "#8884d8" },
-		{ name: "Tour", value: 30, color: "#82ca9d" },
-		{ name: "Event", value: 15, color: "#ffc658" },
-		{ name: "Hourly", value: 10, color: "#ff7c7c" },
-	],
-};
+import { useGetDashboardAnalyticsEnhancedQuery } from "@/features/dashboard/_hooks/query/use-get-dashboard-analytics-enhanced-query";
 
 export function PackageAnalyticsDashboard() {
-	const { overview, topPerformingPackages, bookingTrends, packageTypeDistribution } = mockPackageAnalytics;
+	const { data: analytics } = useGetDashboardAnalyticsEnhancedQuery();
+
+	const overview = {
+		totalPackages: analytics?.totalPackages ?? 0,
+		activePackages: analytics?.activePackages ?? 0,
+		publishedPackages: analytics?.publishedPackages ?? 0,
+		totalBookings: analytics?.totalBookings ?? 0,
+		totalRevenue: (analytics?.totalRevenue ?? 0) / 100,
+		averageRating: analytics?.reviews?.averageRating ?? 0,
+		conversionRate: analytics?.totalBookings && analytics?.totalPackages
+			? Math.round((analytics.totalBookings / Math.max(1, analytics.totalPackages * 10)) * 100)
+			: 0,
+	};
+
+	const totalByType = (analytics?.revenueByType?.package?.count ?? 0) +
+		(analytics?.revenueByType?.custom?.count ?? 0) +
+		(analytics?.revenueByType?.offload?.count ?? 0);
+	const packageTypeDistribution = analytics?.revenueByType && totalByType > 0
+		? [
+			{ name: "Package", value: analytics.revenueByType.package.count, pct: Math.round((analytics.revenueByType.package.count / totalByType) * 100), color: "#8884d8" },
+			{ name: "Custom", value: analytics.revenueByType.custom.count, pct: Math.round((analytics.revenueByType.custom.count / totalByType) * 100), color: "#82ca9d" },
+			{ name: "Offload", value: analytics.revenueByType.offload.count, pct: Math.round((analytics.revenueByType.offload.count / totalByType) * 100), color: "#ffc658" },
+		].filter((d) => d.value > 0)
+		: [];
+
+	const bookingTrends = analytics?.revenueGrowth
+		? [
+			{ month: "This Month", bookings: analytics.bookingGrowth?.thisMonth ?? 0, revenue: (analytics.revenueGrowth.thisMonth ?? 0) / 100 },
+			{ month: "Last Month", bookings: analytics.bookingGrowth?.lastMonth ?? 0, revenue: (analytics.revenueGrowth.lastMonth ?? 0) / 100 },
+		]
+		: [];
+
+	const topPerformingPackages = [];
 
 	return (
 		<div className="space-y-4">
@@ -210,6 +175,7 @@ export function PackageAnalyticsDashboard() {
 						<CardDescription>Distribution by service type</CardDescription>
 					</CardHeader>
 					<CardContent>
+						{packageTypeDistribution.length > 0 ? (
 						<div className="h-[200px]">
 							<ResponsiveContainer width="100%" height="100%">
 								<PieChart>
@@ -231,6 +197,9 @@ export function PackageAnalyticsDashboard() {
 								</PieChart>
 							</ResponsiveContainer>
 						</div>
+						) : (
+							<p className="text-sm text-muted-foreground py-8 text-center">No booking data yet.</p>
+						)}
 						<div className="grid grid-cols-2 gap-4 mt-4">
 							{packageTypeDistribution.map((item, index) => (
 								<div key={index} className="flex items-center gap-2">
@@ -239,7 +208,7 @@ export function PackageAnalyticsDashboard() {
 										style={{ backgroundColor: item.color }}
 									/>
 									<span className="text-sm">{item.name}</span>
-									<span className="text-sm font-medium ml-auto">{item.value}%</span>
+									<span className="text-sm font-medium ml-auto">{item.pct ?? item.value}%</span>
 								</div>
 							))}
 						</div>
@@ -255,7 +224,9 @@ export function PackageAnalyticsDashboard() {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
-						{topPerformingPackages.map((pkg, index) => (
+						{topPerformingPackages.length === 0 ? (
+							<p className="text-sm text-muted-foreground py-4">Package-level performance data will appear here as bookings grow.</p>
+						) : topPerformingPackages.map((pkg, index) => (
 							<div key={pkg.id} className="flex items-center space-x-4 p-4 border rounded-lg">
 								<div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
 									{index + 1}

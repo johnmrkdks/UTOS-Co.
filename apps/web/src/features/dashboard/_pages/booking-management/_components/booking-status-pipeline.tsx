@@ -9,8 +9,10 @@ import { useState, useMemo } from "react";
 import type { BookingFilters } from "./booking-filters";
 import { KanbanProvider, KanbanBoard, KanbanCards, KanbanCard } from "@/components/kanban";
 import type { KanbanItemProps, KanbanColumnProps } from "@/components/kanban";
-import { getAllStatuses, getStatusConfig, type BookingStatus } from "@/lib/booking-status-config";
+import { getAllStatuses, getStatusConfig, getNextStatus, isFinalStatus, type BookingStatus } from "@/lib/booking-status-config";
 import { StatusActionButton } from "@/components/status-badge";
+import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
+import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 
 interface BookingStatusPipelineProps {
 	filters?: BookingFilters;
@@ -52,7 +54,9 @@ const statusColumns: StatusColumn[] = getAllStatuses().map((statusId) => {
 
 export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 	const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
-	
+	const updateStatusMutation = useUpdateBookingStatusMutation();
+	const { openBookingDetailsDialog } = useBookingManagementModalProvider();
+
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
 	});
@@ -97,9 +101,21 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 			}));
 	}, [bookingsQuery.data?.data, filters]);
 
-	const handleDataChange = (newData: BookingKanbanItem[]) => {
-		// TODO: Implement status update API call
-		console.log('Status update needed:', newData);
+	const handleDataChange = async (newData: BookingKanbanItem[]) => {
+		// Find items that changed column (status) and update via API
+		for (const item of newData) {
+			const original = kanbanData.find((k) => k.id === item.id);
+			if (original && original.column !== item.column) {
+				try {
+					await updateStatusMutation.mutateAsync({
+						id: item.id,
+						status: item.column as any,
+					});
+				} catch {
+					// Error handled by mutation toast
+				}
+			}
+		}
 	};
 
 	const getColumnBookings = (columnId: string) => {
@@ -231,20 +247,27 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 															className="h-6 px-2 text-xs"
 															onClick={(e) => {
 																e.stopPropagation();
-																// TODO: Open booking details
+																openBookingDetailsDialog(booking.id);
 															}}
 														>
 															View
 														</Button>
 
-														<StatusActionButton
-															status={booking.column}
-															onClick={() => {
-																// TODO: Handle status transition
-																console.log(`Transition from ${booking.column} to next status`);
-															}}
-															size="sm"
-														/>
+														{!isFinalStatus(booking.column) && (
+															<StatusActionButton
+																status={booking.column}
+																onClick={() => {
+																	const nextStatus = getNextStatus(booking.column);
+																	if (nextStatus !== booking.column) {
+																		updateStatusMutation.mutate({
+																			id: booking.id,
+																			status: nextStatus as any,
+																		});
+																	}
+																}}
+																size="sm"
+															/>
+														)}
 													</div>
 												</div>
 											</KanbanCard>

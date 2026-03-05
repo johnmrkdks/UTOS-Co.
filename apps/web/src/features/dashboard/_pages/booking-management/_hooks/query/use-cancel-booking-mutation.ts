@@ -5,7 +5,7 @@ import { toast } from "sonner";
 export const useCancelBookingMutation = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation(trpc.bookings.cancel.mutationOptions({
+	return useMutation(trpc.bookings.cancelBooking.mutationOptions({
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.listByType.queryKey() });

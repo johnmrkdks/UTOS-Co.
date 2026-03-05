@@ -60,6 +60,7 @@
 		"lucide-react": "catalog:",
 		"next-themes": "^0.4.6",
 		"react": "catalog:",
+		"react-big-calendar": "^1.19.4",
 		"react-day-picker": "^9.8.1",
 		"react-dom": "catalog:",
 		"react-hook-form": "catalog:",

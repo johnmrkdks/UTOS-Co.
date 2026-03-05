@@ -29,6 +29,8 @@ import { z } from "zod";
 import { users } from "@/db/sqlite/schema/users";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 import { createOffloadBookingService, CreateOffloadBookingServiceSchema } from "@/services/bookings/create-offload-booking";
+import { createBookingReviewService, CreateBookingReviewSchema } from "@/services/reviews/create-booking-review";
+import { hasBookingReviewService, HasBookingReviewSchema } from "@/services/reviews/has-booking-review";
 
 // Helper function to get user role from database
 const getUserRole = async (db: any, userId: string) => {
@@ -1176,6 +1178,35 @@ export const bookingsRouter = router({
 
 				const result = await bulkDeleteBookingsService(db, input);
 				return result;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Create review for completed booking (customer only)
+	createReview: protectedProcedure
+		.input(CreateBookingReviewSchema)
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				const userId = session?.user?.id || session?.session?.userId;
+				if (!userId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "You must be logged in to submit a review",
+					});
+				}
+				return await createBookingReviewService(db, input, userId);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	// Check if booking has a review
+	hasReview: protectedProcedure
+		.input(HasBookingReviewSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				return await hasBookingReviewService(db, input);
 			} catch (error) {
 				handleTRPCError(error);
 			}

@@ -5,13 +5,20 @@ import { Star, Users, Clock, DollarSign, Award, TrendingUp } from "lucide-react"
 
 interface DriverAnalyticsProps {
 	dateRange: string;
+	analytics?: {
+		totalDrivers: number;
+		activeDrivers: number;
+		pendingDrivers: number;
+	};
 }
 
-export function DriverAnalytics({ dateRange }: DriverAnalyticsProps) {
+export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) {
 	const driverData = {
-		totalDrivers: 18,
-		activeDrivers: 15,
-		utilizationRate: 83.3,
+		totalDrivers: analytics?.totalDrivers ?? 18,
+		activeDrivers: analytics?.activeDrivers ?? 15,
+		utilizationRate: (analytics?.totalDrivers && analytics.totalDrivers > 0)
+			? Math.round(((analytics.activeDrivers ?? 0) / analytics.totalDrivers) * 100)
+			: 83.3,
 		averageRating: 4.6,
 		topPerformers: [
 			{ 

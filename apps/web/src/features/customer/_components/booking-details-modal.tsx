@@ -24,6 +24,7 @@ import {
 	CheckCircle,
 	Package,
 	MessageSquare,
+	Star,
 	X,
 	Edit3,
 	XCircle,
@@ -45,6 +46,8 @@ import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutatio
 import { useCancelBookingMutation } from "../_hooks/query/use-cancel-booking-mutation";
 import { useValidateBookingOperationsQuery } from "../_hooks/query/use-validate-booking-operations-query";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
+import { useHasBookingReviewQuery } from "../_hooks/query/use-has-booking-review-query";
+import { BookingReviewForm } from "./booking-review-form";
 
 interface BookingDetailsModalProps {
 	booking: any; // TODO: Add proper booking type
@@ -701,6 +704,22 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 										)}
 									</div>
 								</div>
+							</div>
+						)}
+
+						{/* Leave a Review - for completed bookings without review */}
+						{booking.status === "completed" && !hasReview && (
+							<div className="space-y-4">
+								<h4 className="font-semibold flex items-center gap-2">
+									<Star className="h-4 w-4" />
+									Share Your Experience
+								</h4>
+								<BookingReviewForm
+									bookingId={booking.id}
+									onSuccess={() => {
+										// Refetch will be triggered by query invalidation in mutation
+									}}
+								/>
 							</div>
 						)}
 

@@ -7,6 +7,7 @@ import { BookingManagementModalProviders } from "@/features/dashboard/_pages/boo
 import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
 import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
 import { BookingFilters, type BookingFilters as BookingFiltersType } from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
+import { BookingCalendar } from "@/features/dashboard/_pages/booking-management/_components/booking-calendar";
 import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
 import { CreateOffloadBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-offload-booking-dialog";
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
@@ -17,7 +18,7 @@ import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-manageme
 import { ConfirmBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/confirm-booking-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive, CheckCircle } from "lucide-react";
+import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive, CheckCircle, CalendarDays } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
@@ -206,6 +207,10 @@ function BookingManagementContent() {
 			<Tabs defaultValue="all" className="space-y-4">
 				<TabsList>
 					<TabsTrigger value="all">All Bookings</TabsTrigger>
+					<TabsTrigger value="calendar">
+						<CalendarDays className="h-4 w-4 mr-1" />
+						Calendar
+					</TabsTrigger>
 					<TabsTrigger value="pending">Pending</TabsTrigger>
 					<TabsTrigger value="ready">Ready</TabsTrigger>
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
@@ -230,6 +235,21 @@ function BookingManagementContent() {
 					</Card>
 				</TabsContent>
 
+				<TabsContent value="calendar" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Booking Calendar</CardTitle>
+							<CardDescription>
+								View all jobs by date. Click any booking to open details.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Suspense fallback={<Loader />}>
+								<BookingCalendar filters={filters} />
+							</Suspense>
+						</CardContent>
+					</Card>
+				</TabsContent>
 
 				<TabsContent value="package" className="space-y-4">
 					<Card>
