@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { createPortal } from "react-dom"
+
+const DEBOUNCE_MS = 300
+const MIN_CHARS = 2
 import { MapPin, Loader2, X } from "lucide-react"
 import { Input } from "@workspace/ui/components/input"
 import { cn } from "@workspace/ui/lib/utils"
@@ -29,8 +32,8 @@ export function GooglePlacesInput({
 	const [showSuggestions, setShowSuggestions] = useState(false)
 	const [selectedIndex, setSelectedIndex] = useState(-1)
 	const suggestionsRef = useRef<HTMLDivElement>(null)
-	// Use wrapper ref for dropdown positioning - Input may not forward ref when inside FormControl
 	const inputWrapperRef = useRef<HTMLDivElement>(null)
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
 	const {
@@ -44,18 +47,27 @@ export function GooglePlacesInput({
 		types: ["geocode", "establishment"],
 	})
 
-	const handleInputChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newValue = e.target.value
-		onChange(newValue)
-		setSelectedIndex(-1)
+	const handleInputChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const newValue = e.target.value
+			onChange(newValue)
+			setSelectedIndex(-1)
 
-		if (newValue.trim() && isLoaded) {
-			await getPlacePredictions(newValue)
-			setShowSuggestions(true)
-		} else {
-			setShowSuggestions(false)
-		}
-	}, [onChange, isLoaded, getPlacePredictions])
+			if (debounceRef.current) clearTimeout(debounceRef.current)
+
+			if (newValue.trim().length < MIN_CHARS) {
+				setShowSuggestions(false)
+				return
+			}
+
+			debounceRef.current = setTimeout(async () => {
+				debounceRef.current = null
+				await getPlacePredictions(newValue)
+				setShowSuggestions(true)
+			}, DEBOUNCE_MS)
+		},
+		[onChange, getPlacePredictions]
+	)
 
 	const handlePlaceSelect = useCallback(
 		async (predictionIndex: number) => {
@@ -127,7 +139,10 @@ export function GooglePlacesInput({
 			}
 		}
 		document.addEventListener('mousedown', handleClickOutside)
-		return () => document.removeEventListener('mousedown', handleClickOutside)
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside)
+			if (debounceRef.current) clearTimeout(debounceRef.current)
+		}
 	}, [])
 
 	return (

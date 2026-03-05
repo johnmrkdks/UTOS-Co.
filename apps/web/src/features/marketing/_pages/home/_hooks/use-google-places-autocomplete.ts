@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader"
 
 interface PlaceResult {
 	placeId: string
@@ -18,28 +19,25 @@ interface UseGooglePlacesAutocompleteOptions {
 	types?: string[]
 }
 
-// Extend Window for Maps bootstrap - avoid conflict with other google types
-interface GoogleMapsWindow extends Window {
-	__googleMapsBootstrapped?: Promise<void>
+// Types for new Places API
+interface AutocompleteSuggestionType {
+	fetchAutocompleteSuggestions: (
+		req: AutocompleteRequest
+	) => Promise<{ suggestions: Array<{ placePrediction: PlacePrediction }> }>
 }
 
 interface AutocompleteRequest {
 	input: string
-	sessionToken?: AutocompleteSessionToken
+	sessionToken?: unknown
 	includedRegionCodes?: string[]
-	includedPrimaryTypes?: string[]
 }
 
-interface AutocompleteSessionToken {}
-
-interface AutocompleteSuggestion {
-	placePrediction: {
-		placeId: string
-		text: { text: string }
-		mainText?: { text: string }
-		secondaryText?: { text: string }
-		toPlace: () => PlaceObject
-	}
+interface PlacePrediction {
+	placeId: string
+	text: { text: string }
+	mainText?: { text: string }
+	secondaryText?: { text: string }
+	toPlace: () => PlaceObject
 }
 
 interface PlaceObject {
@@ -48,45 +46,27 @@ interface PlaceObject {
 	location?: { lat: () => number; lng: () => number }
 }
 
-// Bootstrap loader for Maps API - enables importLibrary() for new Places API
-// See: https://developers.google.com/maps/documentation/javascript/load-maps-js-api
-const BOOTSTRAP_LOADER =
-	"(g=>{var h,a,k,p='The Google Maps JavaScript API',c='google',l='importLibrary',q='__ib__',m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement('script'));e.set('libraries',[...r]+'');for(k in g)e.set(k.replace(/[A-Z]/g,t=>'_'+t[0].toLowerCase()),g[k]);e.set('callback',c+'.maps.'+q);a.src='https://maps.'+c+'apis.com/maps/api/js?'+e;d[q]=f;a.onerror=()=>h=n(Error(p+' could not load.'));a.nonce=m.querySelector('script[nonce]')?.nonce||'';m.head.append(a)}));d[l]?console.warn(p+' only loads once. Ignoring:',g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})"
+let loadPromise: Promise<void> | null = null
 
-function loadGoogleMapsApi(): Promise<void> {
-	if (typeof window === "undefined") return Promise.reject(new Error("window undefined"))
-	const win = window as GoogleMapsWindow
-	if (win.__googleMapsBootstrapped) return win.__googleMapsBootstrapped
+function ensureGoogleMapsLoaded(): Promise<void> {
+	if (loadPromise) return loadPromise
 
-	const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE"
-	const existingBootstrap = document.querySelector('script[data-google-maps-bootstrap]')
-	if (existingBootstrap) {
-		win.__googleMapsBootstrapped = new Promise((resolve) => {
-			const check = () => {
-				if ((window as any).google?.maps?.importLibrary) resolve()
-				else setTimeout(check, 50)
-			}
-			check()
-		})
-		return win.__googleMapsBootstrapped
+	const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
+	if (!apiKey) {
+		loadPromise = Promise.reject(new Error("VITE_GOOGLE_MAPS_API_KEY is not set"))
+		return loadPromise
 	}
 
-	win.__googleMapsBootstrapped = new Promise((resolve, reject) => {
-		const script = document.createElement("script")
-		script.setAttribute("data-google-maps-bootstrap", "true")
-		script.textContent = `${BOOTSTRAP_LOADER}({key:${JSON.stringify(apiKey)},v:"weekly"});`
-		script.onload = () => {
-			const check = () => {
-				if ((window as any).google?.maps?.importLibrary) resolve()
-				else setTimeout(check, 50)
-			}
-			check()
-		}
-		script.onerror = () => reject(new Error("Failed to load Google Maps JavaScript API"))
-		document.head.appendChild(script)
-	})
+	loadPromise = (async () => {
+		setOptions({
+			key: apiKey,
+			v: "weekly",
+		})
+		// Load places library - this triggers the actual API load
+		await importLibrary("places")
+	})()
 
-	return win.__googleMapsBootstrapped
+	return loadPromise
 }
 
 export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocompleteOptions = {}) {
@@ -94,21 +74,19 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [predictions, setPredictions] = useState<PlaceResult[]>([])
 	const [isLoading, setIsLoading] = useState(false)
-	const suggestionsRef = useRef<AutocompleteSuggestion[]>([])
-	const sessionTokenRef = useRef<AutocompleteSessionToken | undefined>(undefined)
+	const suggestionsRef = useRef<Array<{ placePrediction: PlacePrediction }>>([])
+	const sessionTokenRef = useRef<unknown>(null)
 
-	// Load Google Maps API with bootstrap loader (supports importLibrary for new Places API)
+	// Load Google Maps API on mount
 	useEffect(() => {
-		if (typeof window === "undefined") return
-
-		loadGoogleMapsApi()
+		ensureGoogleMapsLoaded()
 			.then(() => setIsLoaded(true))
 			.catch((err) => console.error("Failed to load Google Maps:", err))
 	}, [])
 
 	// Fetch suggestions using new AutocompleteSuggestion API
 	const getPlacePredictions = async (input: string): Promise<PlaceResult[]> => {
-		if (!isLoaded || !input.trim()) {
+		if (!input.trim()) {
 			setPredictions([])
 			suggestionsRef.current = []
 			return []
@@ -117,8 +95,13 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 		setIsLoading(true)
 
 		try {
+			if (!isLoaded) {
+				await ensureGoogleMapsLoaded()
+				setIsLoaded(true)
+			}
+
 			const { AutocompleteSuggestion, AutocompleteSessionToken } =
-				await (window as any).google.maps.importLibrary("places")
+				await importLibrary("places") as { AutocompleteSuggestion: AutocompleteSuggestionType; AutocompleteSessionToken: new () => unknown }
 
 			// New session token for each typing session (billing best practice)
 			sessionTokenRef.current = new AutocompleteSessionToken()
@@ -128,14 +111,13 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 				sessionToken: sessionTokenRef.current,
 				includedRegionCodes: [options.componentRestrictions?.country || "au"],
 			}
-			// Omitting includedPrimaryTypes returns all types (addresses, establishments, etc.)
 
 			const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request)
-			suggestionsRef.current = suggestions
+			suggestionsRef.current = suggestions ?? []
 
-			const results: PlaceResult[] = suggestions
-				.filter((s: AutocompleteSuggestion) => s.placePrediction)
-				.map((s: AutocompleteSuggestion) => {
+			const results: PlaceResult[] = (suggestions ?? [])
+				.filter((s) => s?.placePrediction)
+				.map((s) => {
 					const p = s.placePrediction
 					return {
 						placeId: p.placeId,
@@ -148,7 +130,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 			setPredictions(results)
 			return results
 		} catch (err) {
-			console.error("Autocomplete error:", err)
+			console.error("Places Autocomplete error:", err)
 			setPredictions([])
 			suggestionsRef.current = []
 			return []
@@ -157,7 +139,7 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 		}
 	}
 
-	// Fetch place details using Place.fetchFields (new API) - must use same session as predictions
+	// Fetch place details using Place.fetchFields (new API)
 	const fetchPlaceDetails = async (
 		predictionIndex: number
 	): Promise<{ placeId: string; description: string; geometry?: { location: { lat: () => number; lng: () => number } } } | null> => {
