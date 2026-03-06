@@ -8,8 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AuthRouteImport } from './routes/_auth'
@@ -66,6 +64,7 @@ import { Route as AdminDashboardLayoutPublishedIndexRouteImport } from './routes
 import { Route as AdminDashboardLayoutPublicationsIndexRouteImport } from './routes/admin/dashboard/_layout/publications/index'
 import { Route as AdminDashboardLayoutPricingConfigIndexRouteImport } from './routes/admin/dashboard/_layout/pricing-config/index'
 import { Route as AdminDashboardLayoutPackagesIndexRouteImport } from './routes/admin/dashboard/_layout/packages/index'
+import { Route as AdminDashboardLayoutInvoicesIndexRouteImport } from './routes/admin/dashboard/_layout/invoices/index'
 import { Route as AdminDashboardLayoutInboxIndexRouteImport } from './routes/admin/dashboard/_layout/inbox/index'
 import { Route as AdminDashboardLayoutDriversIndexRouteImport } from './routes/admin/dashboard/_layout/drivers/index'
 import { Route as AdminDashboardLayoutCarsIndexRouteImport } from './routes/admin/dashboard/_layout/cars/index'
@@ -79,37 +78,12 @@ import { Route as AdminDashboardLayoutSettingsAccountRouteImport } from './route
 import { Route as AdminDashboardLayoutDriversOnboardingRouteImport } from './routes/admin/dashboard/_layout/drivers/onboarding'
 import { Route as AdminDashboardLayoutCarsAddCarRouteImport } from './routes/admin/dashboard/_layout/cars/add-car'
 
-const MyBookingsRouteImport = createFileRoute('/my-bookings')()
-const DriverRouteImport = createFileRoute('/driver')()
-const DashboardRouteImport = createFileRoute('/dashboard')()
-const AdminDashboardRouteImport = createFileRoute('/admin/dashboard')()
-
-const MyBookingsRoute = MyBookingsRouteImport.update({
-  id: '/my-bookings',
-  path: '/my-bookings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DriverRoute = DriverRouteImport.update({
-  id: '/driver',
-  path: '/driver',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MarketingRoute = MarketingRouteImport.update({
   id: '/_marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/admin/dashboard',
-  path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
@@ -394,6 +368,12 @@ const AdminDashboardLayoutPackagesIndexRoute =
     path: '/packages/',
     getParentRoute: () => AdminDashboardLayoutRoute,
   } as any)
+const AdminDashboardLayoutInvoicesIndexRoute =
+  AdminDashboardLayoutInvoicesIndexRouteImport.update({
+    id: '/invoices/',
+    path: '/invoices/',
+    getParentRoute: () => AdminDashboardLayoutRoute,
+  } as any)
 const AdminDashboardLayoutInboxIndexRoute =
   AdminDashboardLayoutInboxIndexRouteImport.update({
     id: '/inbox/',
@@ -525,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard/cars': typeof AdminDashboardLayoutCarsIndexRoute
   '/admin/dashboard/drivers': typeof AdminDashboardLayoutDriversIndexRoute
   '/admin/dashboard/inbox': typeof AdminDashboardLayoutInboxIndexRoute
+  '/admin/dashboard/invoices': typeof AdminDashboardLayoutInvoicesIndexRoute
   '/admin/dashboard/packages': typeof AdminDashboardLayoutPackagesIndexRoute
   '/admin/dashboard/pricing-config': typeof AdminDashboardLayoutPricingConfigIndexRoute
   '/admin/dashboard/publications': typeof AdminDashboardLayoutPublicationsIndexRoute
@@ -548,14 +529,11 @@ export interface FileRoutesByTo {
   '/select-vehicle': typeof MarketingSelectVehicleRoute
   '/services': typeof MarketingServicesRoute
   '/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
-  '/driver': typeof DriverLayoutIndexRoute
-  '/my-bookings': typeof MyBookingsLayoutIndexRoute
   '/': typeof MarketingIndexRoute
   '/account/settings': typeof MarketingAccountSettingsRoute
   '/book-car/$carId': typeof MarketingBookCarCarIdRoute
   '/book-quote/$quoteId': typeof MarketingBookQuoteQuoteIdRoute
   '/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
-  '/admin/dashboard': typeof AdminDashboardLayoutIndexRoute
   '/dashboard/book-appointment': typeof DashboardLayoutBookAppointmentRouteWithChildren
   '/dashboard/calculate-quote': typeof DashboardLayoutCalculateQuoteRoute
   '/dashboard/cars': typeof DashboardLayoutCarsRoute
@@ -572,9 +550,12 @@ export interface FileRoutesByTo {
   '/my-bookings/dashboard': typeof MyBookingsLayoutDashboardRoute
   '/my-bookings/history': typeof MyBookingsLayoutHistoryRoute
   '/my-bookings/trips': typeof MyBookingsLayoutTripsRoute
+  '/driver': typeof DriverLayoutIndexRoute
+  '/my-bookings': typeof MyBookingsLayoutIndexRoute
   '/dashboard/book-appointment/$carId': typeof DashboardLayoutBookAppointmentCarIdRoute
   '/dashboard/book-service/$serviceId': typeof DashboardLayoutBookServiceServiceIdRoute
   '/dashboard/car-details/$carId': typeof DashboardLayoutCarDetailsCarIdRoute
+  '/admin/dashboard': typeof AdminDashboardLayoutIndexRoute
   '/admin/dashboard/cars/add-car': typeof AdminDashboardLayoutCarsAddCarRoute
   '/admin/dashboard/drivers/onboarding': typeof AdminDashboardLayoutDriversOnboardingRoute
   '/admin/dashboard/settings/account': typeof AdminDashboardLayoutSettingsAccountRoute
@@ -587,6 +568,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard/cars': typeof AdminDashboardLayoutCarsIndexRoute
   '/admin/dashboard/drivers': typeof AdminDashboardLayoutDriversIndexRoute
   '/admin/dashboard/inbox': typeof AdminDashboardLayoutInboxIndexRoute
+  '/admin/dashboard/invoices': typeof AdminDashboardLayoutInvoicesIndexRoute
   '/admin/dashboard/packages': typeof AdminDashboardLayoutPackagesIndexRoute
   '/admin/dashboard/pricing-config': typeof AdminDashboardLayoutPricingConfigIndexRoute
   '/admin/dashboard/publications': typeof AdminDashboardLayoutPublicationsIndexRoute
@@ -613,18 +595,14 @@ export interface FileRoutesById {
   '/_marketing/select-vehicle': typeof MarketingSelectVehicleRoute
   '/_marketing/services': typeof MarketingServicesRoute
   '/_marketing/terms-and-conditions': typeof MarketingTermsAndConditionsRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
-  '/driver': typeof DriverRouteWithChildren
   '/driver/_layout': typeof DriverLayoutRouteWithChildren
-  '/my-bookings': typeof MyBookingsRouteWithChildren
   '/my-bookings/_layout': typeof MyBookingsLayoutRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
   '/_marketing/account/settings': typeof MarketingAccountSettingsRoute
   '/_marketing/book-car/$carId': typeof MarketingBookCarCarIdRoute
   '/_marketing/book-quote/$quoteId': typeof MarketingBookQuoteQuoteIdRoute
   '/_marketing/book-service/$serviceId': typeof MarketingBookServiceServiceIdRoute
-  '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/dashboard/_layout': typeof AdminDashboardLayoutRouteWithChildren
   '/dashboard/_layout/book-appointment': typeof DashboardLayoutBookAppointmentRouteWithChildren
   '/dashboard/_layout/calculate-quote': typeof DashboardLayoutCalculateQuoteRoute
@@ -661,6 +639,7 @@ export interface FileRoutesById {
   '/admin/dashboard/_layout/cars/': typeof AdminDashboardLayoutCarsIndexRoute
   '/admin/dashboard/_layout/drivers/': typeof AdminDashboardLayoutDriversIndexRoute
   '/admin/dashboard/_layout/inbox/': typeof AdminDashboardLayoutInboxIndexRoute
+  '/admin/dashboard/_layout/invoices/': typeof AdminDashboardLayoutInvoicesIndexRoute
   '/admin/dashboard/_layout/packages/': typeof AdminDashboardLayoutPackagesIndexRoute
   '/admin/dashboard/_layout/pricing-config/': typeof AdminDashboardLayoutPricingConfigIndexRoute
   '/admin/dashboard/_layout/publications/': typeof AdminDashboardLayoutPublicationsIndexRoute
@@ -729,6 +708,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/cars'
     | '/admin/dashboard/drivers'
     | '/admin/dashboard/inbox'
+    | '/admin/dashboard/invoices'
     | '/admin/dashboard/packages'
     | '/admin/dashboard/pricing-config'
     | '/admin/dashboard/publications'
@@ -752,14 +732,11 @@ export interface FileRouteTypes {
     | '/select-vehicle'
     | '/services'
     | '/terms-and-conditions'
-    | '/driver'
-    | '/my-bookings'
     | '/'
     | '/account/settings'
     | '/book-car/$carId'
     | '/book-quote/$quoteId'
     | '/book-service/$serviceId'
-    | '/admin/dashboard'
     | '/dashboard/book-appointment'
     | '/dashboard/calculate-quote'
     | '/dashboard/cars'
@@ -776,9 +753,12 @@ export interface FileRouteTypes {
     | '/my-bookings/dashboard'
     | '/my-bookings/history'
     | '/my-bookings/trips'
+    | '/driver'
+    | '/my-bookings'
     | '/dashboard/book-appointment/$carId'
     | '/dashboard/book-service/$serviceId'
     | '/dashboard/car-details/$carId'
+    | '/admin/dashboard'
     | '/admin/dashboard/cars/add-car'
     | '/admin/dashboard/drivers/onboarding'
     | '/admin/dashboard/settings/account'
@@ -791,6 +771,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/cars'
     | '/admin/dashboard/drivers'
     | '/admin/dashboard/inbox'
+    | '/admin/dashboard/invoices'
     | '/admin/dashboard/packages'
     | '/admin/dashboard/pricing-config'
     | '/admin/dashboard/publications'
@@ -816,18 +797,14 @@ export interface FileRouteTypes {
     | '/_marketing/select-vehicle'
     | '/_marketing/services'
     | '/_marketing/terms-and-conditions'
-    | '/dashboard'
     | '/dashboard/_layout'
-    | '/driver'
     | '/driver/_layout'
-    | '/my-bookings'
     | '/my-bookings/_layout'
     | '/_marketing/'
     | '/_marketing/account/settings'
     | '/_marketing/book-car/$carId'
     | '/_marketing/book-quote/$quoteId'
     | '/_marketing/book-service/$serviceId'
-    | '/admin/dashboard'
     | '/admin/dashboard/_layout'
     | '/dashboard/_layout/book-appointment'
     | '/dashboard/_layout/calculate-quote'
@@ -864,6 +841,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/_layout/cars/'
     | '/admin/dashboard/_layout/drivers/'
     | '/admin/dashboard/_layout/inbox/'
+    | '/admin/dashboard/_layout/invoices/'
     | '/admin/dashboard/_layout/packages/'
     | '/admin/dashboard/_layout/pricing-config/'
     | '/admin/dashboard/_layout/publications/'
@@ -876,35 +854,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   MarketingRoute: typeof MarketingRouteWithChildren
-  DashboardRoute: typeof DashboardRouteWithChildren
-  DriverRoute: typeof DriverRouteWithChildren
-  MyBookingsRoute: typeof MyBookingsRouteWithChildren
-  AdminDashboardRoute: typeof AdminDashboardRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/my-bookings': {
-      id: '/my-bookings'
-      path: '/my-bookings'
-      fullPath: '/my-bookings'
-      preLoaderRoute: typeof MyBookingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/driver': {
-      id: '/driver'
-      path: '/driver'
-      fullPath: '/driver'
-      preLoaderRoute: typeof DriverRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_marketing': {
       id: '/_marketing'
       path: ''
@@ -919,13 +872,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/dashboard': {
-      id: '/admin/dashboard'
-      path: '/admin/dashboard'
-      fullPath: '/admin/dashboard'
-      preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_marketing/': {
       id: '/_marketing/'
       path: '/'
@@ -935,21 +881,21 @@ declare module '@tanstack/react-router' {
     }
     '/my-bookings/_layout': {
       id: '/my-bookings/_layout'
-      path: '/my-bookings'
+      path: ''
       fullPath: '/my-bookings'
       preLoaderRoute: typeof MyBookingsLayoutRouteImport
       parentRoute: typeof MyBookingsRoute
     }
     '/driver/_layout': {
       id: '/driver/_layout'
-      path: '/driver'
+      path: ''
       fullPath: '/driver'
       preLoaderRoute: typeof DriverLayoutRouteImport
       parentRoute: typeof DriverRoute
     }
     '/dashboard/_layout': {
       id: '/dashboard/_layout'
-      path: '/dashboard'
+      path: ''
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardLayoutRouteImport
       parentRoute: typeof DashboardRoute
@@ -1180,7 +1126,7 @@ declare module '@tanstack/react-router' {
     }
     '/admin/dashboard/_layout': {
       id: '/admin/dashboard/_layout'
-      path: '/admin/dashboard'
+      path: ''
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardLayoutRouteImport
       parentRoute: typeof AdminDashboardRoute
@@ -1295,6 +1241,13 @@ declare module '@tanstack/react-router' {
       path: '/packages'
       fullPath: '/admin/dashboard/packages'
       preLoaderRoute: typeof AdminDashboardLayoutPackagesIndexRouteImport
+      parentRoute: typeof AdminDashboardLayoutRoute
+    }
+    '/admin/dashboard/_layout/invoices/': {
+      id: '/admin/dashboard/_layout/invoices/'
+      path: '/invoices'
+      fullPath: '/admin/dashboard/invoices'
+      preLoaderRoute: typeof AdminDashboardLayoutInvoicesIndexRouteImport
       parentRoute: typeof AdminDashboardLayoutRoute
     }
     '/admin/dashboard/_layout/inbox/': {
@@ -1440,223 +1393,9 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
-interface DashboardLayoutBookAppointmentRouteChildren {
-  DashboardLayoutBookAppointmentCarIdRoute: typeof DashboardLayoutBookAppointmentCarIdRoute
-}
-
-const DashboardLayoutBookAppointmentRouteChildren: DashboardLayoutBookAppointmentRouteChildren =
-  {
-    DashboardLayoutBookAppointmentCarIdRoute:
-      DashboardLayoutBookAppointmentCarIdRoute,
-  }
-
-const DashboardLayoutBookAppointmentRouteWithChildren =
-  DashboardLayoutBookAppointmentRoute._addFileChildren(
-    DashboardLayoutBookAppointmentRouteChildren,
-  )
-
-interface DashboardLayoutRouteChildren {
-  DashboardLayoutBookAppointmentRoute: typeof DashboardLayoutBookAppointmentRouteWithChildren
-  DashboardLayoutCalculateQuoteRoute: typeof DashboardLayoutCalculateQuoteRoute
-  DashboardLayoutCarsRoute: typeof DashboardLayoutCarsRoute
-  DashboardLayoutInstantQuoteRoute: typeof DashboardLayoutInstantQuoteRoute
-  DashboardLayoutQuoteResultsRoute: typeof DashboardLayoutQuoteResultsRoute
-  DashboardLayoutServicesRoute: typeof DashboardLayoutServicesRoute
-  DashboardLayoutBookServiceServiceIdRoute: typeof DashboardLayoutBookServiceServiceIdRoute
-  DashboardLayoutCarDetailsCarIdRoute: typeof DashboardLayoutCarDetailsCarIdRoute
-}
-
-const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
-  DashboardLayoutBookAppointmentRoute:
-    DashboardLayoutBookAppointmentRouteWithChildren,
-  DashboardLayoutCalculateQuoteRoute: DashboardLayoutCalculateQuoteRoute,
-  DashboardLayoutCarsRoute: DashboardLayoutCarsRoute,
-  DashboardLayoutInstantQuoteRoute: DashboardLayoutInstantQuoteRoute,
-  DashboardLayoutQuoteResultsRoute: DashboardLayoutQuoteResultsRoute,
-  DashboardLayoutServicesRoute: DashboardLayoutServicesRoute,
-  DashboardLayoutBookServiceServiceIdRoute:
-    DashboardLayoutBookServiceServiceIdRoute,
-  DashboardLayoutCarDetailsCarIdRoute: DashboardLayoutCarDetailsCarIdRoute,
-}
-
-const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(
-  DashboardLayoutRouteChildren,
-)
-
-interface DashboardRouteChildren {
-  DashboardLayoutRoute: typeof DashboardLayoutRouteWithChildren
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardLayoutRoute: DashboardLayoutRouteWithChildren,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
-
-interface DriverLayoutRouteChildren {
-  DriverLayoutAvailableRoute: typeof DriverLayoutAvailableRoute
-  DriverLayoutDashboardRoute: typeof DriverLayoutDashboardRoute
-  DriverLayoutHistoryRoute: typeof DriverLayoutHistoryRoute
-  DriverLayoutOnboardingRoute: typeof DriverLayoutOnboardingRoute
-  DriverLayoutProfileRoute: typeof DriverLayoutProfileRoute
-  DriverLayoutSettingsRoute: typeof DriverLayoutSettingsRoute
-  DriverLayoutTripsRoute: typeof DriverLayoutTripsRoute
-  DriverLayoutIndexRoute: typeof DriverLayoutIndexRoute
-}
-
-const DriverLayoutRouteChildren: DriverLayoutRouteChildren = {
-  DriverLayoutAvailableRoute: DriverLayoutAvailableRoute,
-  DriverLayoutDashboardRoute: DriverLayoutDashboardRoute,
-  DriverLayoutHistoryRoute: DriverLayoutHistoryRoute,
-  DriverLayoutOnboardingRoute: DriverLayoutOnboardingRoute,
-  DriverLayoutProfileRoute: DriverLayoutProfileRoute,
-  DriverLayoutSettingsRoute: DriverLayoutSettingsRoute,
-  DriverLayoutTripsRoute: DriverLayoutTripsRoute,
-  DriverLayoutIndexRoute: DriverLayoutIndexRoute,
-}
-
-const DriverLayoutRouteWithChildren = DriverLayoutRoute._addFileChildren(
-  DriverLayoutRouteChildren,
-)
-
-interface DriverRouteChildren {
-  DriverLayoutRoute: typeof DriverLayoutRouteWithChildren
-}
-
-const DriverRouteChildren: DriverRouteChildren = {
-  DriverLayoutRoute: DriverLayoutRouteWithChildren,
-}
-
-const DriverRouteWithChildren =
-  DriverRoute._addFileChildren(DriverRouteChildren)
-
-interface MyBookingsLayoutRouteChildren {
-  MyBookingsLayoutDashboardRoute: typeof MyBookingsLayoutDashboardRoute
-  MyBookingsLayoutHistoryRoute: typeof MyBookingsLayoutHistoryRoute
-  MyBookingsLayoutTripsRoute: typeof MyBookingsLayoutTripsRoute
-  MyBookingsLayoutIndexRoute: typeof MyBookingsLayoutIndexRoute
-}
-
-const MyBookingsLayoutRouteChildren: MyBookingsLayoutRouteChildren = {
-  MyBookingsLayoutDashboardRoute: MyBookingsLayoutDashboardRoute,
-  MyBookingsLayoutHistoryRoute: MyBookingsLayoutHistoryRoute,
-  MyBookingsLayoutTripsRoute: MyBookingsLayoutTripsRoute,
-  MyBookingsLayoutIndexRoute: MyBookingsLayoutIndexRoute,
-}
-
-const MyBookingsLayoutRouteWithChildren =
-  MyBookingsLayoutRoute._addFileChildren(MyBookingsLayoutRouteChildren)
-
-interface MyBookingsRouteChildren {
-  MyBookingsLayoutRoute: typeof MyBookingsLayoutRouteWithChildren
-}
-
-const MyBookingsRouteChildren: MyBookingsRouteChildren = {
-  MyBookingsLayoutRoute: MyBookingsLayoutRouteWithChildren,
-}
-
-const MyBookingsRouteWithChildren = MyBookingsRoute._addFileChildren(
-  MyBookingsRouteChildren,
-)
-
-interface AdminDashboardLayoutSettingsRouteChildren {
-  AdminDashboardLayoutSettingsAccountRoute: typeof AdminDashboardLayoutSettingsAccountRoute
-  AdminDashboardLayoutSettingsSecurityRoute: typeof AdminDashboardLayoutSettingsSecurityRoute
-  AdminDashboardLayoutSettingsIndexRoute: typeof AdminDashboardLayoutSettingsIndexRoute
-}
-
-const AdminDashboardLayoutSettingsRouteChildren: AdminDashboardLayoutSettingsRouteChildren =
-  {
-    AdminDashboardLayoutSettingsAccountRoute:
-      AdminDashboardLayoutSettingsAccountRoute,
-    AdminDashboardLayoutSettingsSecurityRoute:
-      AdminDashboardLayoutSettingsSecurityRoute,
-    AdminDashboardLayoutSettingsIndexRoute:
-      AdminDashboardLayoutSettingsIndexRoute,
-  }
-
-const AdminDashboardLayoutSettingsRouteWithChildren =
-  AdminDashboardLayoutSettingsRoute._addFileChildren(
-    AdminDashboardLayoutSettingsRouteChildren,
-  )
-
-interface AdminDashboardLayoutRouteChildren {
-  AdminDashboardLayoutSettingsRoute: typeof AdminDashboardLayoutSettingsRouteWithChildren
-  AdminDashboardLayoutIndexRoute: typeof AdminDashboardLayoutIndexRoute
-  AdminDashboardLayoutCarsAddCarRoute: typeof AdminDashboardLayoutCarsAddCarRoute
-  AdminDashboardLayoutDriversOnboardingRoute: typeof AdminDashboardLayoutDriversOnboardingRoute
-  AdminDashboardLayoutAdminTestingIndexRoute: typeof AdminDashboardLayoutAdminTestingIndexRoute
-  AdminDashboardLayoutAnalyticsIndexRoute: typeof AdminDashboardLayoutAnalyticsIndexRoute
-  AdminDashboardLayoutBoardIndexRoute: typeof AdminDashboardLayoutBoardIndexRoute
-  AdminDashboardLayoutBookingsIndexRoute: typeof AdminDashboardLayoutBookingsIndexRoute
-  AdminDashboardLayoutBookmarksIndexRoute: typeof AdminDashboardLayoutBookmarksIndexRoute
-  AdminDashboardLayoutCarsIndexRoute: typeof AdminDashboardLayoutCarsIndexRoute
-  AdminDashboardLayoutDriversIndexRoute: typeof AdminDashboardLayoutDriversIndexRoute
-  AdminDashboardLayoutInboxIndexRoute: typeof AdminDashboardLayoutInboxIndexRoute
-  AdminDashboardLayoutPackagesIndexRoute: typeof AdminDashboardLayoutPackagesIndexRoute
-  AdminDashboardLayoutPricingConfigIndexRoute: typeof AdminDashboardLayoutPricingConfigIndexRoute
-  AdminDashboardLayoutPublicationsIndexRoute: typeof AdminDashboardLayoutPublicationsIndexRoute
-  AdminDashboardLayoutPublishedIndexRoute: typeof AdminDashboardLayoutPublishedIndexRoute
-  AdminDashboardLayoutReportIndexRoute: typeof AdminDashboardLayoutReportIndexRoute
-  AdminDashboardLayoutTodaysScheduledIndexRoute: typeof AdminDashboardLayoutTodaysScheduledIndexRoute
-}
-
-const AdminDashboardLayoutRouteChildren: AdminDashboardLayoutRouteChildren = {
-  AdminDashboardLayoutSettingsRoute:
-    AdminDashboardLayoutSettingsRouteWithChildren,
-  AdminDashboardLayoutIndexRoute: AdminDashboardLayoutIndexRoute,
-  AdminDashboardLayoutCarsAddCarRoute: AdminDashboardLayoutCarsAddCarRoute,
-  AdminDashboardLayoutDriversOnboardingRoute:
-    AdminDashboardLayoutDriversOnboardingRoute,
-  AdminDashboardLayoutAdminTestingIndexRoute:
-    AdminDashboardLayoutAdminTestingIndexRoute,
-  AdminDashboardLayoutAnalyticsIndexRoute:
-    AdminDashboardLayoutAnalyticsIndexRoute,
-  AdminDashboardLayoutBoardIndexRoute: AdminDashboardLayoutBoardIndexRoute,
-  AdminDashboardLayoutBookingsIndexRoute:
-    AdminDashboardLayoutBookingsIndexRoute,
-  AdminDashboardLayoutBookmarksIndexRoute:
-    AdminDashboardLayoutBookmarksIndexRoute,
-  AdminDashboardLayoutCarsIndexRoute: AdminDashboardLayoutCarsIndexRoute,
-  AdminDashboardLayoutDriversIndexRoute: AdminDashboardLayoutDriversIndexRoute,
-  AdminDashboardLayoutInboxIndexRoute: AdminDashboardLayoutInboxIndexRoute,
-  AdminDashboardLayoutPackagesIndexRoute:
-    AdminDashboardLayoutPackagesIndexRoute,
-  AdminDashboardLayoutPricingConfigIndexRoute:
-    AdminDashboardLayoutPricingConfigIndexRoute,
-  AdminDashboardLayoutPublicationsIndexRoute:
-    AdminDashboardLayoutPublicationsIndexRoute,
-  AdminDashboardLayoutPublishedIndexRoute:
-    AdminDashboardLayoutPublishedIndexRoute,
-  AdminDashboardLayoutReportIndexRoute: AdminDashboardLayoutReportIndexRoute,
-  AdminDashboardLayoutTodaysScheduledIndexRoute:
-    AdminDashboardLayoutTodaysScheduledIndexRoute,
-}
-
-const AdminDashboardLayoutRouteWithChildren =
-  AdminDashboardLayoutRoute._addFileChildren(AdminDashboardLayoutRouteChildren)
-
-interface AdminDashboardRouteChildren {
-  AdminDashboardLayoutRoute: typeof AdminDashboardLayoutRouteWithChildren
-}
-
-const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
-  AdminDashboardLayoutRoute: AdminDashboardLayoutRouteWithChildren,
-}
-
-const AdminDashboardRouteWithChildren = AdminDashboardRoute._addFileChildren(
-  AdminDashboardRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   MarketingRoute: MarketingRouteWithChildren,
-  DashboardRoute: DashboardRouteWithChildren,
-  DriverRoute: DriverRouteWithChildren,
-  MyBookingsRoute: MyBookingsRouteWithChildren,
-  AdminDashboardRoute: AdminDashboardRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

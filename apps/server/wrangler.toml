@@ -10,7 +10,8 @@ enabled = true
 # Use local D1 (SQLite) when remote dev database is unavailable
 remote = false
 NODE_ENV = "development"
-CORS_ORIGIN = "http://localhost:3001"
+# Comma-separated origins for dev (web may run on 3001, 3003, etc.)
+CORS_ORIGIN = "http://localhost:3001,http://localhost:3003"
 
 # Better Auth
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"

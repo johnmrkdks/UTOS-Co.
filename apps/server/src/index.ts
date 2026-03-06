@@ -10,10 +10,17 @@ import { logger } from "hono/logger";
 const app = new Hono();
 
 app.use(logger());
+
+// Parse CORS_ORIGIN - supports comma-separated list for multiple origins
+const corsOrigins = (env.CORS_ORIGIN || "")
+	.split(",")
+	.map((o) => o.trim())
+	.filter(Boolean);
+
 app.use(
 	"*",
 	cors({
-		origin: env.CORS_ORIGIN || "",
+		origin: corsOrigins.length > 0 ? corsOrigins : ["http://localhost:3001", "http://localhost:3003"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		exposeHeaders: ["Content-Length"],

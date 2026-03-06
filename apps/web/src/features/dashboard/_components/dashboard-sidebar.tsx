@@ -65,7 +65,7 @@ export function DashboardSidebar() {
 	};
 
 	return (
-		<Sidebar collapsible="none" className="bg-soft-beige border-r">
+		<Sidebar collapsible="none" className="bg-soft-beige border-r print:hidden">
 			<SidebarHeader>
 				<DashboardCompanyLogo />
 			</SidebarHeader>

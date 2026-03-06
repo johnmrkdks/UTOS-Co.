@@ -23,7 +23,7 @@ function RouteComponent() {
 		<SidebarProvider>
 			<DashboardSidebar />
 			<SidebarInset className="relative">
-				<DashboardNavbar className="sticky top-0 z-10" />
+				<DashboardNavbar className="sticky top-0 z-10 print:hidden" />
 				<div className="flex w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 min-h-[calc(100vh-var(--navbar-height,60px))] overflow-hidden">
 					<div ref={scrollContainerRef as any} className="flex-1 relative overflow-y-auto overflow-x-hidden">
 						{routerState.status === 'pending' && (

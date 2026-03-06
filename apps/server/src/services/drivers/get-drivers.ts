@@ -18,6 +18,7 @@ export async function getDriversService(db: DB, params: ResourceList) {
 			isAvailable: drivers.isAvailable,
 			rating: drivers.rating,
 			totalRides: drivers.totalRides,
+			commissionRate: drivers.commissionRate,
 			createdAt: drivers.createdAt,
 			updatedAt: drivers.updatedAt,
 			user: {

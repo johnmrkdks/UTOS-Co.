@@ -51,6 +51,9 @@ export const drivers = sqliteTable("drivers", {
 	rating: real("rating").default(5.0),
 	totalRides: integer("total_rides").default(0),
 
+	// Invoice/payment - driver's share of job price (0-100, default 50 = 50/50 split)
+	commissionRate: integer("commission_rate").default(50),
+
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.default(sql`(unixepoch())`),

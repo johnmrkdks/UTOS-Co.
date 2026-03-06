@@ -119,7 +119,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				content: "telephone=yes",
 			},
 			{
-				name: "apple-mobile-web-app-capable",
+				name: "mobile-web-app-capable",
 				content: "yes",
 			},
 			{
@@ -177,7 +177,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			{
 				rel: "preconnect",
 				href: "https://fonts.gstatic.com",
-				crossorigin: "anonymous",
+				crossOrigin: "anonymous",
 			},
 			// DNS Prefetch for external resources
 			{

@@ -27,6 +27,7 @@ import { analyticsRouter } from "./analytics";
 import { contactMessagesRouter } from "./contact-messages";
 import { authRouter } from "./auth";
 import { systemSettingsRouter } from "./system-settings";
+import { invoicesRouter } from "./invoices";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {
@@ -74,6 +75,7 @@ export const appRouter = router({
 	contactMessages: contactMessagesRouter,
 	auth: authRouter,
 	systemSettings: systemSettingsRouter,
+	invoices: invoicesRouter,
 });
 
 // Export type definition of API

@@ -57,6 +57,7 @@
 		"better-auth": "catalog:",
 		"date-fns": "^4.1.0",
 		"date-fns-tz": "^3.2.0",
+		"html2pdf.js": "^0.14.0",
 		"lucide-react": "catalog:",
 		"next-themes": "^0.4.6",
 		"react": "catalog:",

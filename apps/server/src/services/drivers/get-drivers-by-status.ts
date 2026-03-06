@@ -38,6 +38,7 @@ export const getDriversByStatusService = async (
 			isActive: drivers.isActive,
 			rating: drivers.rating,
 			totalRides: drivers.totalRides,
+			commissionRate: drivers.commissionRate,
 			createdAt: drivers.createdAt,
 			updatedAt: drivers.updatedAt,
 		})

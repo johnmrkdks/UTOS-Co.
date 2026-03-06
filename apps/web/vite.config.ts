@@ -12,7 +12,12 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       tailwindcss(),
-      tanstackRouter({}),
+      tanstackRouter({
+        // Output to .tanstack/ to avoid EPERM/file-lock issues on Windows when
+        // the generator renames temp -> src/routeTree.gen.ts (IDE/Vite lock the file)
+        generatedRouteTree: path.resolve(__dirname, ".tanstack/routeTree.gen.ts"),
+        tmpDir: path.resolve(__dirname, ".tanstack/tmp"),
+      }),
       react(),
       cloudflare({
         configPath: cfEnvironment ? undefined : 'wrangler.toml',

@@ -49,7 +49,7 @@ export const auth = betterAuth({
 		schema,
 		usePlural: true,
 	}),
-	trustedOrigins: [env.CORS_ORIGIN],
+	trustedOrigins: (env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean),
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false, // Allow login without verification, but encourage verification

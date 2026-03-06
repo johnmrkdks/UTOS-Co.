@@ -4,14 +4,14 @@ import { scan } from "react-scan";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
 import { Loader } from "./components/loader";
-import { routeTree } from "./routeTree.gen";
+import { routeTree } from "../.tanstack/routeTree.gen";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/trpc";
 import { StrictMode } from "react";
 
 scan({
-	enabled: true,
+	enabled: import.meta.env.DEV,
 });
 
 const router = createRouter({

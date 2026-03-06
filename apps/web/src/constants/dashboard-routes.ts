@@ -10,6 +10,7 @@ import {
 	ClipboardListIcon,
 	DollarSignIcon,
 	EyeIcon,
+	FileTextIcon,
 	FlaskConicalIcon,
 	InboxIcon,
 	LayoutDashboardIcon,
@@ -53,6 +54,11 @@ const ALL_DASHBOARD_OVERVIEW_ROUTES: RouteConfig[] = [
 		label: "Reports",
 		path: "/admin/dashboard/report",
 		icon: ClipboardListIcon,
+	},
+	{
+		label: "Invoices",
+		path: "/admin/dashboard/invoices",
+		icon: FileTextIcon,
 	},
 ];
 

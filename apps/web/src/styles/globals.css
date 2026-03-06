@@ -60,3 +60,23 @@ input[type="number"] {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
   }
+
+/* Invoice print styles */
+@media print {
+  body {
+    background: white !important;
+  }
+  /* Hide dashboard chrome when printing invoice */
+  [data-sidebar="sidebar"],
+  [data-sidebar="trigger"],
+  [data-sidebar="rail"],
+  [data-sidebar="sheet"],
+  [role="tablist"],
+  .invoice-print-page .print\:hidden {
+    display: none !important;
+  }
+  .invoice-document {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
