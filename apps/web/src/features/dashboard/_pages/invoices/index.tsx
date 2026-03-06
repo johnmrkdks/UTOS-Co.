@@ -2,19 +2,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { DriverInvoiceForm } from "./_components/driver-invoice-form";
 import { CompanyInvoiceForm } from "./_components/company-invoice-form";
-import { TruckIcon, Building2Icon } from "lucide-react";
+import { InvoiceSentLogs } from "./_components/invoice-sent-logs";
+import { TruckIcon, Building2Icon, HistoryIcon } from "lucide-react";
 
 export function InvoicesPage() {
 	return (
 		<Tabs defaultValue="driver" className="space-y-4">
-			<TabsList className="grid w-full max-w-md grid-cols-2 print:hidden">
+			<TabsList className="grid w-full max-w-lg grid-cols-3 print:hidden">
 				<TabsTrigger value="driver" className="flex items-center gap-2">
 					<TruckIcon className="h-4 w-4" />
-					Driver Invoices
+					Driver
 				</TabsTrigger>
 				<TabsTrigger value="company" className="flex items-center gap-2">
 					<Building2Icon className="h-4 w-4" />
-					Company Invoices
+					Company
+				</TabsTrigger>
+				<TabsTrigger value="logs" className="flex items-center gap-2">
+					<HistoryIcon className="h-4 w-4" />
+					Sent Logs
 				</TabsTrigger>
 			</TabsList>
 
@@ -44,6 +49,10 @@ export function InvoicesPage() {
 						<CompanyInvoiceForm />
 					</CardContent>
 				</Card>
+			</TabsContent>
+
+			<TabsContent value="logs" className="space-y-4">
+				<InvoiceSentLogs />
 			</TabsContent>
 		</Tabs>
 	);

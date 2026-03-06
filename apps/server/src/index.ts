@@ -20,7 +20,7 @@ const corsOrigins = (env.CORS_ORIGIN || "")
 app.use(
 	"*",
 	cors({
-		origin: corsOrigins.length > 0 ? corsOrigins : ["http://localhost:3001", "http://localhost:3003"],
+		origin: corsOrigins.length > 0 ? corsOrigins : ["http://localhost:3001", "http://localhost:3002", "http://localhost:3003"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		exposeHeaders: ["Content-Length"],

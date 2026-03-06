@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
 	Select,
@@ -10,8 +11,11 @@ import {
 	SelectValue,
 } from "@workspace/ui/components/select";
 import { trpc } from "@/trpc";
-import { Loader2Icon, PrinterIcon } from "lucide-react";
+import { Loader2Icon, FileDownIcon, MailIcon } from "lucide-react";
+import { format } from "date-fns";
+import { elementToPdfBlob, sanitizeFilename } from "./pdf-utils";
 import { InvoiceDocument } from "./invoice-document";
+import { toast } from "sonner";
 
 const PRESETS = [
 	{ label: "This week", getRange: () => getWeekRange(new Date()) },
@@ -65,7 +69,9 @@ function subtractMonths(date: Date, months: number) {
 }
 
 export function CompanyInvoiceForm() {
+	const invoiceRef = useRef<HTMLDivElement>(null);
 	const [companyName, setCompanyName] = useState<string>("");
+	const [companyEmail, setCompanyEmail] = useState<string>("");
 	const [startDate, setStartDate] = useState<string>("");
 	const [endDate, setEndDate] = useState<string>("");
 	const [preset, setPreset] = useState<string>("");
@@ -98,8 +104,65 @@ export function CompanyInvoiceForm() {
 		invoiceQuery.refetch();
 	};
 
-	const handlePrint = () => {
-		window.print();
+	const queryClient = useQueryClient();
+	const sendToCompanyMutation = useMutation(
+		trpc.invoices.sendCompanyInvoice.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: trpc.invoices.listSentLogs.queryKey() });
+				toast.success("Invoice sent to company");
+			},
+			onError: (err) => toast.error(err.message || "Failed to send invoice"),
+		})
+	);
+
+	const handleDownloadPdf = async () => {
+		if (!invoice || !invoiceRef.current) return;
+		try {
+			await new Promise((r) => setTimeout(r, 100));
+			const el = invoiceRef.current;
+			if (!el) return;
+			const blob = await elementToPdfBlob(el);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${sanitizeFilename(companyName || "Company")}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
+			a.click();
+			URL.revokeObjectURL(url);
+			toast.success("Invoice downloaded");
+		} catch (err) {
+			toast.error("Failed to generate PDF");
+			console.error(err);
+		}
+	};
+
+	const handleSendToCompany = async () => {
+		if (!invoice || !invoiceRef.current || !companyEmail.trim()) {
+			toast.error("Please enter company email to send invoice");
+			return;
+		}
+		try {
+			await new Promise((r) => setTimeout(r, 100));
+			const el = invoiceRef.current;
+			if (!el) return;
+			const blob = await elementToPdfBlob(el);
+			const buffer = await blob.arrayBuffer();
+			const bytes = new Uint8Array(buffer);
+			let binary = "";
+			for (let i = 0; i < bytes.byteLength; i++) {
+				binary += String.fromCharCode(bytes[i]);
+			}
+			const base64 = btoa(binary);
+			sendToCompanyMutation.mutate({
+				companyName,
+				companyEmail: companyEmail.trim(),
+				startDate: startDate ? new Date(startDate) : new Date(0),
+				endDate: endDate ? new Date(endDate) : new Date(),
+				pdfBase64: base64,
+			});
+		} catch (err) {
+			toast.error("Failed to generate PDF for email");
+			console.error(err);
+		}
 	};
 
 	return (
@@ -172,14 +235,39 @@ export function CompanyInvoiceForm() {
 
 			{invoice && (
 				<div className="space-y-4">
-					<div className="flex items-center justify-between print:hidden">
+					<div className="flex flex-wrap items-center gap-2 print:hidden">
 						<h3 className="text-lg font-semibold">Invoice Preview</h3>
-						<Button variant="outline" size="sm" onClick={handlePrint}>
-							<PrinterIcon className="mr-2 h-4 w-4" />
-							Print / Save PDF
+						<Button variant="outline" size="sm" onClick={handleDownloadPdf}>
+							<FileDownIcon className="mr-2 h-4 w-4" />
+							Download PDF
 						</Button>
+						<div className="flex items-center gap-2">
+							<Input
+								type="email"
+								placeholder="Company email"
+								value={companyEmail}
+								onChange={(e) => setCompanyEmail(e.target.value)}
+								className="w-64"
+							/>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleSendToCompany}
+								disabled={sendToCompanyMutation.isPending || !companyEmail.trim()}
+							>
+								{sendToCompanyMutation.isPending ? (
+									<Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+								) : (
+									<MailIcon className="mr-2 h-4 w-4" />
+								)}
+								Send to Company
+							</Button>
+						</div>
 					</div>
-					<div className="rounded-lg border bg-white p-8 print:border-0 print:shadow-none print:p-0">
+					<div
+						ref={invoiceRef}
+						className="rounded-lg border bg-white p-8 print:border-0 print:shadow-none print:p-0"
+					>
 						<InvoiceDocument type="company" data={invoice} />
 					</div>
 				</div>

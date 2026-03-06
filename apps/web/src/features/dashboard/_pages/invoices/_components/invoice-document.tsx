@@ -142,34 +142,29 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 				style={{
 					display: "flex",
 					flexDirection: "column",
-					gap: 24,
+					gap: 8,
 					marginBottom: 32,
 				}}
-				className="sm:flex-row sm:justify-between sm:items-start"
 			>
-				<div>
-					<h2
-						style={{
-							fontSize: "1.25rem",
-							fontWeight: 600,
-							color: colors.gray900,
-						}}
-					>
-						{type === "driver" ? "Driver Commission Invoice" : "Tax Invoice"}
-					</h2>
-					<p style={{ fontSize: "0.875rem", color: colors.gray500, marginTop: 4 }}>
-						Invoice #{invoiceNumber}
-					</p>
-				</div>
-				<div style={{ textAlign: "right", fontSize: "0.875rem" }}>
-					<p>
-						<strong>Invoice date:</strong> {format(invoiceDate, "dd MMMM yyyy")}
-					</p>
-					<p>
-						<strong>Period:</strong> {format(startDate, "dd MMM yyyy")} –{" "}
-						{format(endDate, "dd MMM yyyy")}
-					</p>
-				</div>
+				<h2
+					style={{
+						fontSize: "1.25rem",
+						fontWeight: 600,
+						color: colors.gray900,
+					}}
+				>
+					{type === "driver" ? "Driver Commission Invoice" : "Tax Invoice"}
+				</h2>
+				<p style={{ fontSize: "0.875rem", color: colors.gray500 }}>
+					Invoice #{invoiceNumber}
+				</p>
+				<p style={{ fontSize: "0.875rem", color: colors.gray600 }}>
+					<strong>Invoice date:</strong> {format(invoiceDate, "dd MMMM yyyy")}
+				</p>
+				<p style={{ fontSize: "0.875rem", color: colors.gray600 }}>
+					<strong>Period:</strong> {format(startDate, "dd MMM yyyy")} –{" "}
+					{format(endDate, "dd MMM yyyy")}
+				</p>
 			</div>
 
 			{/* Bill to */}
@@ -194,17 +189,9 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 					BILL TO
 				</p>
 				{type === "driver" ? (
-					<>
-						<p style={{ fontWeight: 500, color: colors.gray900 }}>
-							{data.driver.name}
-						</p>
-						<p style={{ fontSize: "0.875rem", color: colors.gray600 }}>
-							{data.driver.email}
-						</p>
-						<p style={{ fontSize: "0.875rem", color: colors.gray500, marginTop: 4 }}>
-							Commission rate: {data.driver.commissionRate}%
-						</p>
-					</>
+					<p style={{ fontWeight: 500, color: colors.gray900 }}>
+						{data.driver.name}
+					</p>
 				) : (
 					<p style={{ fontWeight: 500, color: colors.gray900 }}>
 						{data.companyName}
@@ -245,7 +232,11 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 											{job.referenceNumber}
 										</td>
 										<td style={{ padding: "8px" }}>{job.transferType}</td>
-										<td style={{ padding: "8px" }}>{job.distanceKm?.toFixed(1) ?? "-"} km</td>
+										<td style={{ padding: "8px" }}>
+											{job.distanceKm != null && job.distanceKm > 0
+												? `${job.distanceKm.toFixed(1)} km`
+												: "-"}
+										</td>
 										<td style={{ padding: "8px" }}>{job.originSuburb}</td>
 										<td style={{ padding: "8px" }}>{job.destinationSuburb}</td>
 										<td style={{ padding: "8px", textAlign: "right", fontWeight: 500 }}>
@@ -259,7 +250,11 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 											{job.referenceNumber}
 										</td>
 										<td style={{ padding: "8px" }}>{job.transferType}</td>
-										<td style={{ padding: "8px" }}>{job.distanceKm?.toFixed(1) ?? "-"} km</td>
+										<td style={{ padding: "8px" }}>
+											{job.distanceKm != null && job.distanceKm > 0
+												? `${job.distanceKm.toFixed(1)} km`
+												: "-"}
+										</td>
 										<td style={{ padding: "8px" }}>{job.originSuburb}</td>
 										<td style={{ padding: "8px" }}>{job.destinationSuburb}</td>
 										<td style={{ padding: "8px", textAlign: "right" }}>
@@ -325,7 +320,9 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 					{BUSINESS_INFO.phone.display}.
 				</p>
 				<p style={{ marginTop: 8, color: colors.gray400 }}>
-					{BUSINESS_INFO.business.name} • {BUSINESS_INFO.invoice.address}
+					{BUSINESS_INFO.business.name}
+					{BUSINESS_INFO.invoice.abn ? ` • ABN: ${BUSINESS_INFO.invoice.abn}` : ""} •{" "}
+					{BUSINESS_INFO.invoice.address}
 				</p>
 			</footer>
 		</div>

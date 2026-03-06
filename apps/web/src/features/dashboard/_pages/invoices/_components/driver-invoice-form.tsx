@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -13,7 +13,7 @@ import { trpc } from "@/trpc";
 import { Loader2Icon, FileDownIcon, MailIcon } from "lucide-react";
 import { InvoiceDocument } from "./invoice-document";
 import { format } from "date-fns";
-import html2pdf from "html2pdf.js";
+import { elementToPdfBlob, sanitizeFilename } from "./pdf-utils";
 import { toast } from "sonner";
 
 const PRESETS = [
@@ -69,10 +69,6 @@ function subtractMonths(date: Date, months: number) {
 
 const COMMISSION_OPTIONS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as const;
 
-function sanitizeFilename(name: string): string {
-	return name.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_");
-}
-
 export function DriverInvoiceForm() {
 	const invoiceRef = useRef<HTMLDivElement>(null);
 	const [driverId, setDriverId] = useState<string>("");
@@ -126,19 +122,13 @@ export function DriverInvoiceForm() {
 			await new Promise((r) => setTimeout(r, 100));
 			const el = invoiceRef.current;
 			if (!el) return;
-			const driverName = sanitizeFilename(invoice.driver.name || "Driver");
-			const invoiceDate = format(new Date(), "yyyy-MM-dd");
-			const filename = `${driverName}_${invoiceDate}.pdf`;
-			await html2pdf()
-				.set({
-					margin: 10,
-					filename,
-					image: { type: "jpeg", quality: 0.98 },
-					html2canvas: { scale: 2, useCORS: true },
-					jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-				})
-				.from(el)
-				.save();
+			const blob = await elementToPdfBlob(el);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${sanitizeFilename(invoice.driver.name || "Driver")}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
+			a.click();
+			URL.revokeObjectURL(url);
 			toast.success("Invoice downloaded");
 		} catch (err) {
 			toast.error("Failed to generate PDF");
@@ -146,9 +136,13 @@ export function DriverInvoiceForm() {
 		}
 	};
 
+	const queryClient = useQueryClient();
 	const sendToDriverMutation = useMutation(
 		trpc.invoices.sendDriverInvoice.mutationOptions({
-			onSuccess: () => toast.success("Invoice sent to driver"),
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: trpc.invoices.listSentLogs.queryKey() });
+				toast.success("Invoice sent to driver");
+			},
 			onError: (err) => toast.error(err.message || "Failed to send invoice"),
 		})
 	);
@@ -159,15 +153,7 @@ export function DriverInvoiceForm() {
 			await new Promise((r) => setTimeout(r, 100));
 			const el = invoiceRef.current;
 			if (!el) return;
-			const worker = html2pdf()
-				.set({
-					margin: 10,
-					image: { type: "jpeg", quality: 0.98 },
-					html2canvas: { scale: 2, useCORS: true },
-					jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-				})
-				.from(el);
-			const blob = await worker.outputPdf("blob");
+			const blob = await elementToPdfBlob(el);
 			const buffer = await blob.arrayBuffer();
 			const bytes = new Uint8Array(buffer);
 			let binary = "";
@@ -202,7 +188,7 @@ export function DriverInvoiceForm() {
 						<SelectContent>
 							{drivers.map((d) => (
 								<SelectItem key={d.id} value={d.id}>
-									{d.user?.name ?? "Unknown"} ({d.user?.email})
+									{d.user?.name ?? "Unknown"}
 								</SelectItem>
 							))}
 						</SelectContent>

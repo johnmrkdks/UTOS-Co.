@@ -13,6 +13,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { ModalProvider } from "@/hooks/use-modal";
 import { SessionProvider } from "@/providers/session-provider";
 import { useTimezoneSync } from "@/hooks/use-timezone-sync";
+import { NotFound } from "@/components/not-found";
 import React from "react";
 
 export type RouterAppContext = {
@@ -22,6 +23,7 @@ export type RouterAppContext = {
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	component: RootComponent,
+	notFoundComponent: NotFound,
 	head: () => ({
 		meta: [
 			{

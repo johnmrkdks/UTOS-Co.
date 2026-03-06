@@ -216,9 +216,12 @@ importers:
       date-fns-tz:
         specifier: ^3.2.0
         version: 3.2.0(date-fns@4.1.0)
-      html2pdf.js:
-        specifier: ^0.14.0
-        version: 0.14.0
+      html2canvas-pro:
+        specifier: ^1.6.3
+        version: 1.6.7
+      jspdf:
+        specifier: ^4.2.0
+        version: 4.2.0
       lucide-react:
         specifier: 'catalog:'
         version: 0.473.0(react@19.1.1)
@@ -4720,12 +4723,13 @@ packages:
     resolution: {integrity: sha512-qY60FjREgVZL03vJU6IfMV4GDjGBIoOyvuFdpBDIX9yTlDw0TjxVBQp+P8NvpdIXNJvfWBTNul7fsAQJq2FNpg==}
     engines: {node: '>=14'}
 
+  html2canvas-pro@1.6.7:
+    resolution: {integrity: sha512-BzuCTXx0jf2TfnrJrtjMCY1FR9rxlPdy7yLWt9ZMhZm7Ylaw9MLb7agSheqv2mT/ARduBHDAqvJIFlbxrZfyOA==}
+    engines: {node: '>=16.0.0'}
+
   html2canvas@1.4.1:
     resolution: {integrity: sha512-fPU6BHNpsyIhr8yyMpTLLxAbkaK8ArIBcmZIRiBLiDhjeqvXolaEmDGmELFuX9I4xDcaKKcJl+TKZLqruBbmWA==}
     engines: {node: '>=8.0.0'}
-
-  html2pdf.js@0.14.0:
-    resolution: {integrity: sha512-yvNJgE/8yru2UeGflkPdjW8YEY+nDH5X7/2WG4uiuSCwYiCp8PZ8EKNiTAa6HxJ1NjC51fZSIEq6xld5CADKBQ==}
 
   htmlparser2@8.0.2:
     resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
@@ -10701,6 +10705,7 @@ snapshots:
   dompurify@3.3.2:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
+    optional: true
 
   domutils@3.2.2:
     dependencies:
@@ -11463,16 +11468,16 @@ snapshots:
       htmlparser2: 8.0.2
       selderee: 0.11.0
 
-  html2canvas@1.4.1:
+  html2canvas-pro@1.6.7:
     dependencies:
       css-line-break: 2.1.0
       text-segmentation: 1.0.3
 
-  html2pdf.js@0.14.0:
+  html2canvas@1.4.1:
     dependencies:
-      dompurify: 3.3.2
-      html2canvas: 1.4.1
-      jspdf: 4.2.0
+      css-line-break: 2.1.0
+      text-segmentation: 1.0.3
+    optional: true
 
   htmlparser2@8.0.2:
     dependencies:

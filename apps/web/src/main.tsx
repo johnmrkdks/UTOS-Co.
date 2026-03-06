@@ -4,6 +4,7 @@ import { scan } from "react-scan";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
 import { Loader } from "./components/loader";
+import { NotFound } from "./components/not-found";
 import { routeTree } from "../.tanstack/routeTree.gen";
 
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ const router = createRouter({
 	routeTree,
 	defaultPreload: "intent",
 	defaultPendingComponent: () => <Loader />,
+	defaultNotFoundComponent: NotFound,
 	context: { trpc, queryClient },
 	// Enable TanStack Router's built-in scroll restoration
 	scrollRestoration: true,
