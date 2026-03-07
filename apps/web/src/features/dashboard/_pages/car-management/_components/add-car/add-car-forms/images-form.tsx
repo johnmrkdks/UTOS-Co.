@@ -14,8 +14,7 @@ import type { z } from "zod/v3"
 import { CarImageSchema } from "@/features/dashboard/_pages/car-management/_schemas/car-schema"
 import { useState, useCallback, useMemo } from "react"
 import { Progress } from "@workspace/ui/components/progress"
-import { useCreatePresignedUrlMutation } from "@/hooks/query/file/use-create-presigned-url-mutation"
-import { useUploadMutation } from "@/hooks/query/file/use-upload-mutation"
+import { useProxyUploadMutation } from "@/hooks/query/file/use-proxy-upload-mutation"
 
 type ImagesFormProps = {
 	control: Control<AddCarFormValues>
@@ -104,20 +103,21 @@ function ImagesUploader({
 	errorMessage
 }: ImagesUploaderProps) {
 	const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
-	const createPresignedUrlMutation = useCreatePresignedUrlMutation()
-	const uploadMutation = useUploadMutation()
+	const proxyUploadMutation = useProxyUploadMutation()
 
 	// Memoize safe value to prevent unnecessary re-renders
 	const safeValue = useMemo(() => Array.isArray(value) ? value : [], [value])
 
 	// Helper function to update image order and main status
 	const updateImageOrder = useCallback((images: CarImage[]) => {
-		return images.map((img, index) => ({
-			...img,
-			order: index + 1,
-			isMain: index === 0,
-			altText: img.altText || `Car Image ${index + 1}`,
-		}))
+		return images
+			.filter((img): img is CarImage => img != null)
+			.map((img, index) => ({
+				...img,
+				order: index + 1,
+				isMain: index === 0,
+				altText: img?.altText || `Car Image ${index + 1}`,
+			}))
 	}, [])
 
 	// Optimized file upload handler
@@ -136,34 +136,16 @@ function ImagesUploader({
 					// Update progress for this file
 					setUploadProgress(prev => ({ ...prev, [fileId]: 0 }))
 
-					const presignedData = await createPresignedUrlMutation.mutateAsync({
+					// Proxy upload via our API (avoids R2 CORS)
+					const result = await proxyUploadMutation.mutateAsync({
 						entityType: "cars",
-						fileName: file.name,
-						fileType: file.type,
-						fileSize: file.size,
-					})
-
-					// Simulate progress during upload
-					const progressInterval = setInterval(() => {
-						setUploadProgress(prev => {
-							const current = prev[fileId] || 0
-							if (current < 90) {
-								return { ...prev, [fileId]: current + 10 }
-							}
-							return prev
-						})
-					}, 100)
-
-					await uploadMutation.mutateAsync({
-						url: presignedData.url,
 						file,
 					})
 
-					clearInterval(progressInterval)
 					setUploadProgress(prev => ({ ...prev, [fileId]: 100 }))
 
 					return {
-						url: presignedData.imageUrl,
+						url: result.imageUrl,
 						altText: `Car Image ${safeValue.length + 1}`,
 						order: 0, // Will be updated by updateImageOrder
 						isMain: false, // Will be updated by updateImageOrder
@@ -176,6 +158,7 @@ function ImagesUploader({
 						delete newProgress[fileId]
 						return newProgress
 					})
+					removeFile(fileId)
 					return null
 				}
 			})
@@ -193,7 +176,7 @@ function ImagesUploader({
 		} catch (error) {
 			console.error('Upload process failed:', error)
 		}
-	}, [safeValue, maxFiles, createPresignedUrlMutation, uploadMutation, onChange, updateImageOrder])
+	}, [safeValue, maxFiles, proxyUploadMutation, onChange, updateImageOrder, removeFile])
 
 	// File upload hook configuration
 	const [
@@ -248,8 +231,12 @@ function ImagesUploader({
 
 		reorderFiles(sourceIndex, destinationIndex)
 
+		// Only update form value when we have matching data (files and safeValue in sync)
+		if (safeValue.length === 0) return
+
 		const reorderedImages = Array.from(safeValue)
 		const [removedImage] = reorderedImages.splice(sourceIndex, 1)
+		if (removedImage == null) return
 		reorderedImages.splice(destinationIndex, 0, removedImage)
 
 		const updatedImages = updateImageOrder(reorderedImages)

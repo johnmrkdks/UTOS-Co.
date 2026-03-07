@@ -15,6 +15,7 @@
 		"preview": "wrangler build && wrangler dev",
 		"start": "wrangler dev",
 		"deploy": "wrangler types && wrangler deploy --env=\"\"",
+		"deploy:dev": "wrangler types && wrangler deploy --env staging",
 		"deploy:staging": "wrangler types && wrangler deploy --env staging",
 		"deploy:production": "wrangler types && wrangler deploy --env production",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
@@ -32,7 +33,9 @@
 		"db:seed-body-types": "wrangler d1 execute DB --local --env development --file=drizzle/seed/seed-body-types.sql",
 		"db:seed-generate": "bun drizzle/seed/generate-seed-sql.ts",
 		"create-admin": "npx tsx scripts/create-admin.ts",
-		"migrate:distance": "bun scripts/migrate-distance.ts"
+		"migrate:distance": "bun scripts/migrate-distance.ts",
+		"r2-cors:staging": "wrangler r2 bucket cors set down-under-chauffeur-bucket --file r2-cors.json --env staging",
+		"r2-cors:production": "wrangler r2 bucket cors set downunderchauffeurs-bucket --file r2-cors.json --env production"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.855.0",

@@ -4,6 +4,7 @@ import type { R2Bucket } from "@cloudflare/workers-types";
 export type Env = {
 	DB: DB;
 	BUCKET: R2Bucket;
+	BETTER_AUTH_URL?: string;
 	GOOGLE_MAPS_API_KEY?: string;
 	// Email configuration
 	GOOGLE_CLIENT_ID?: string;

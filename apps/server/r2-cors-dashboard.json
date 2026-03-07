@@ -1,0 +1,25 @@
+[
+  {
+    "AllowedOrigins": [
+      "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev",
+      "https://downunderchauffeurs.com",
+      "https://down-under-chauffeur-dev.luppy.workers.dev",
+      "http://localhost:3001",
+      "http://localhost:3002",
+      "http://localhost:3003"
+    ],
+    "AllowedMethods": ["GET", "PUT", "HEAD"],
+    "AllowedHeaders": [
+      "Content-Type",
+      "Content-Length",
+      "x-amz-content-sha256",
+      "x-amz-metadata-directive",
+      "x-amz-storage-class",
+      "x-amz-checksum-crc32",
+      "x-amz-sdk-checksum-algorithm",
+      "x-id"
+    ],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]

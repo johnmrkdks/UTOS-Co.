@@ -7,24 +7,25 @@ export function useCarPricingStatusSafe() {
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 
-	const pricingConfigMap = useMemo(() => {
+	const { pricingConfigMap, hasGlobalConfig } = useMemo(() => {
 		// Early return if loading or error to prevent issues
 		if (isLoading || isError || !pricingConfigsData?.data) {
-			return new Map<string, any>();
+			return { pricingConfigMap: new Map<string, any>(), hasGlobalConfig: false };
 		}
 		
 		try {
-			// Safe filtering and mapping
-			const validConfigs = (pricingConfigsData.data || [])
-				.filter((config: any) => config && config.carId)
-				.slice(0, 100); // Additional safety limit
-			
-			return new Map(
-				validConfigs.map((config: any) => [config.carId, config])
+			const configs = (pricingConfigsData.data || []).filter((c: any) => c);
+			const carSpecificMap = new Map(
+				configs
+					.filter((config: any) => config.carId)
+					.slice(0, 100)
+					.map((config: any) => [config.carId, config])
 			);
+			const hasGlobal = configs.some((c: any) => !c.carId);
+			return { pricingConfigMap: carSpecificMap, hasGlobalConfig: hasGlobal };
 		} catch (error) {
 			console.warn('Error processing pricing config data:', error);
-			return new Map<string, any>();
+			return { pricingConfigMap: new Map<string, any>(), hasGlobalConfig: false };
 		}
 	}, [pricingConfigsData, isLoading, isError]);
 
@@ -35,7 +36,8 @@ export function useCarPricingStatusSafe() {
 		}
 		
 		try {
-			return pricingConfigMap.has(carId);
+			// Car has pricing if: car-specific config exists OR global config exists
+			return pricingConfigMap.has(carId) || hasGlobalConfig;
 		} catch (error) {
 			console.warn('Error checking pricing config for car:', carId, error);
 			return false;

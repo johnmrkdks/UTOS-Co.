@@ -1,7 +1,9 @@
 import { db } from "@/db";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import * as schema from "@/db/sqlite/schema";
 import {
@@ -49,7 +51,26 @@ export const auth = betterAuth({
 		schema,
 		usePlural: true,
 	}),
-	trustedOrigins: (env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean),
+	hooks: {
+		after: createAuthMiddleware(async (ctx) => {
+			// Ensure new users get role "user" so dashboard loads (Better Auth admin plugin doesn't set default on sign-up)
+			const newSession = ctx.context.newSession;
+			if (newSession?.user) {
+				const user = newSession.user;
+				if (!user.role) {
+					await db
+						.update(schema.users)
+						.set({ role: "user" })
+						.where(eq(schema.users.id, user.id));
+				}
+			}
+		}),
+	},
+	trustedOrigins: [
+		...(env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean),
+		env.BETTER_AUTH_URL || "",
+		"https://*.downunderchauffeurs.workers.dev",
+	].filter(Boolean),
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false, // Allow login without verification, but encourage verification
@@ -77,4 +98,19 @@ export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
 	plugins,
 	configs,
+	advanced: {
+		// Safari ITP: share cookies across subdomains so email/password login works on Safari iOS
+		// Only when API is on workers.dev or production domain (not localhost)
+		...(env.BETTER_AUTH_URL && !env.BETTER_AUTH_URL.includes("localhost") && {
+			crossSubDomainCookies: {
+				enabled: true,
+				domain:
+					env.COOKIE_DOMAIN ||
+					(env.BETTER_AUTH_URL.includes("workers.dev") ? "downunderchauffeurs.workers.dev" : "downunderchauffeurs.com"),
+			},
+			useSecureCookies: true,
+		}),
+		// In development, relax CSRF for cross-origin
+		...(env.NODE_ENV === "development" && { disableCSRFCheck: true }),
+	},
 });

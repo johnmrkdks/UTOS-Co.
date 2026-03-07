@@ -7,7 +7,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig(({ mode }) => {
   // Determine the Cloudflare environment based on Vite mode
-  const cfEnvironment = mode === 'production' ? 'production' : mode === 'staging' ? 'staging' : undefined;
+  const cfEnvironment = mode === 'production' ? 'production' : mode === 'staging' ? 'staging' : mode === 'dev' ? 'dev' : undefined;
 
   return {
     plugins: [

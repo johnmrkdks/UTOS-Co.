@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 import { BookingDetailsModal } from "@/features/customer/_components/booking-details-modal";
 
-export const Route = createFileRoute("/_marketing/dashboard")({
+export const Route = createFileRoute("/_marketing/dashboard-overview")({
 	component: CustomerDashboard,
 });
 

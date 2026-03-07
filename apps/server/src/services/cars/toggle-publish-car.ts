@@ -1,6 +1,6 @@
 import type { DB } from "@/db";
 import { cars, pricingConfig } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 export const TogglePublishCarServiceSchema = z.object({
@@ -14,12 +14,12 @@ export async function togglePublishCarService(
 	db: DB,
 	{ id, isPublished }: TogglePublishCarService,
 ) {
-	// If trying to publish (isPublished = true), check for pricing config
+	// If trying to publish (isPublished = true), check for pricing config (car-specific or global)
 	if (isPublished) {
 		const existingPricingConfig = await db
 			.select()
 			.from(pricingConfig)
-			.where(eq(pricingConfig.carId, id))
+			.where(or(eq(pricingConfig.carId, id), isNull(pricingConfig.carId)))
 			.limit(1);
 
 		if (existingPricingConfig.length === 0) {

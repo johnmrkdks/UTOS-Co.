@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { getDashboardPath } from "@/utils/auth";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
 import { useLocation } from "@tanstack/react-router";
 import { Loader } from "@/components/loader";
@@ -43,7 +44,7 @@ export function CustomerBookingsLayout() {
 
 	// Redirect if not customer
 	if (user && user.role !== 'user') {
-		navigate({ to: '/dashboard' });
+		navigate({ to: getDashboardPath(user.role) });
 		return null;
 	}
 

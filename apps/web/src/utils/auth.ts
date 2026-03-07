@@ -67,7 +67,7 @@ export function getDashboardPath(userRole: string | undefined | null): string {
 		case "driver":
 			return "/driver";
 		case "user":
-			return "/dashboard";
+			return "/dashboard/services";
 		default:
 			return "/";
 	}

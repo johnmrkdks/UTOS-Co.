@@ -52,6 +52,43 @@ bucket_name = "down-under-chauffeur-test-bucket"
 preview_bucket_name = "down-under-chauffeur-test-bucket"
 remote = false
 
+# Deployed dev environment - uses my-dev-db, domain-style URLs (dev.downunderchauffeurs.com)
+[env.dev.vars]
+NODE_ENV = "development"
+CORS_ORIGIN = "https://down-under-chauffeur-dev.luppy.workers.dev,http://localhost:3001,http://localhost:3002,http://localhost:3003"
+
+# Better Auth
+BETTER_AUTH_SECRET = "sdNWG3346gApFEayd0QfPFsEjTLcibq2"
+BETTER_AUTH_URL = "https://down-under-chauffeur-server-dev.luppy.workers.dev"
+
+# Google OAuth
+GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
+GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
+GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+
+# Cloudflare R2 (use test bucket for dev)
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-test-bucket"
+CLOUDFLARE_R2_REGION = "oc"
+CLOUDFLARE_R2_S3_ENDPOINT = "REDACTED_R2_ENDPOINT"
+CLOUDFLARE_R2_PUBLIC_URL = "REDACTED_R2_PUBLIC_URL"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "my-dev-db"
+database_id = "38bee8af-29e6-43ed-9bd4-3bff0f95f325"
+migrations_dir = "./drizzle/migrations/sqlite"
+
+[[env.dev.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "down-under-chauffeur-test-bucket"
+preview_bucket_name = "down-under-chauffeur-test-bucket"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "down-under-chauffeur-test-db"
@@ -67,12 +104,14 @@ preview_bucket_name = 'down-under-chauffeur-test-bucket'
 remote = true
 
 [env.staging.vars]
-NODE_ENV = "staging"
-CORS_ORIGIN = "https://down-under-chauffeur-staging.davannarts.workers.dev"
+# Staging = development (account 8357cb0b, my-dev-db)
+NODE_ENV = "development"
+CORS_ORIGIN = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
 
-# Better Auth
+# Better Auth (Safari iOS: cross-subdomain cookies for email/password login)
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
-BETTER_AUTH_URL="https://down-under-chauffeur-server-staging.davannarts.workers.dev"
+BETTER_AUTH_URL="https://down-under-chauffeur-server-staging.downunderchauffeurs.workers.dev"
+COOKIE_DOMAIN="downunderchauffeurs.workers.dev"
 
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
@@ -88,14 +127,14 @@ CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
 CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
 CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
 CLOUDFLARE_R2_REGION = "oc" # Oceania
-CLOUDFLARE_R2_S3_ENDPOINT = "https://982e002f72f3d258dd99f8aaf8a68a82.r2.cloudflarestorage.com/down-under-chauffeur-bucket"
+CLOUDFLARE_R2_S3_ENDPOINT = "https://8357cb0b206399da0d4027d5f6961df9.r2.cloudflarestorage.com/down-under-chauffeur-bucket"
 CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"
-database_name = "down-under-chauffeur-db"
-database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
-preview_database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
+database_name = "my-dev-db"
+database_id = "38bee8af-29e6-43ed-9bd4-3bff0f95f325"
+preview_database_id = "38bee8af-29e6-43ed-9bd4-3bff0f95f325"
 migrations_dir = "./drizzle/migrations/sqlite"
 
 [[env.staging.r2_buckets]]
@@ -108,9 +147,10 @@ preview_bucket_name = "down-under-chauffeur-bucket"
 NODE_ENV = "production"
 CORS_ORIGIN = "https://downunderchauffeurs.com"
 
-# Better Auth
+# Better Auth (Safari iOS: cross-subdomain cookies for email/password login)
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
 BETTER_AUTH_URL="https://api.downunderchauffeurs.com"
+COOKIE_DOMAIN="downunderchauffeurs.com"
 
 # Google OAuth
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
