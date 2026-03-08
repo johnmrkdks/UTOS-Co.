@@ -47,7 +47,9 @@ export async function createPresignedUrlService({ entityType, fileName, fileType
 			expiresIn: 60 * 5, // 5 minutes
 		});
 
-		const imageUrl = `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+		// Use proxy URL so images load even if R2 public access is disabled
+		const baseUrl = env.BETTER_AUTH_URL?.replace(/\/$/, "") || "";
+		const imageUrl = baseUrl ? `${baseUrl}/api/images/${key}` : `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
 
 		return {
 			url,

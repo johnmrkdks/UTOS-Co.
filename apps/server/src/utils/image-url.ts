@@ -7,7 +7,7 @@ export function toProxyImageUrl(url: string | null | undefined, baseUrl: string)
 	if (url.startsWith(`${base}/api/images/`)) return url;
 	try {
 		const urlObj = new URL(url);
-		if (urlObj.hostname.includes("r2.dev")) {
+		if (urlObj.hostname.includes("r2.dev") || urlObj.hostname.includes("r2.cloudflarestorage")) {
 			const key = urlObj.pathname.replace(/^\//, "");
 			return `${base}/api/images/${key}`;
 		}

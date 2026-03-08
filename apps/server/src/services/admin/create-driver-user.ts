@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
 import { users, accounts } from "@/db/sqlite/schema";
-import { hashPassword } from "better-auth/crypto";
+import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
 import { eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -30,8 +30,8 @@ export const createDriverUserService = async (
 			throw new Error("User with this email already exists");
 		}
 
-		// Hash password using better-auth's default (matches sign-in verification)
-		const hashedPassword = await hashPassword(input.password);
+		// Hash password with PBKDF2 (Workers-friendly, stays within free tier CPU limit)
+		const hashedPassword = await hashPasswordPbkdf2(input.password);
 
 		const userId = createId();
 		const accountId = createId();

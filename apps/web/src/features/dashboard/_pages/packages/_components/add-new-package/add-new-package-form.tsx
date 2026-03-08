@@ -8,14 +8,14 @@ import { Badge } from "@workspace/ui/components/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useCreatePackageMutation } from "../../_hooks/query/use-create-package-mutation";
 import { useGetPackageServiceTypesQuery } from "../../_hooks/query/use-get-package-service-types-query";
 import { Loader2, Upload, X } from "lucide-react";
 import { Progress } from "@workspace/ui/components/progress";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { useCreatePresignedUrlMutation } from "@/hooks/query/file/use-create-presigned-url-mutation";
-import { useUploadMutation } from "@/hooks/query/file/use-upload-mutation";
+import { useProxyUploadMutation } from "@/hooks/query/file/use-proxy-upload-mutation";
+import { toast } from "sonner";
 
 const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
@@ -55,8 +55,8 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(0);
 	const createPackageMutation = useCreatePackageMutation();
-	const createPresignedUrlMutation = useCreatePresignedUrlMutation();
-	const uploadMutation = useUploadMutation();
+	const proxyUploadMutation = useProxyUploadMutation();
+	const uploadedBannerUrlRef = useRef<string | null>(null);
 	const { data: serviceTypesData } = useGetPackageServiceTypesQuery();
 
 	const serviceTypes = serviceTypesData?.data || [];
@@ -106,30 +106,25 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			const file = fileWrapper.file as File;
 			setUploadProgress(10);
 
-			// Get presigned URL
-			const presignedData = await createPresignedUrlMutation.mutateAsync({
+			// Upload via server proxy (avoids R2 CORS issues)
+			const result = await proxyUploadMutation.mutateAsync({
 				entityType: "packages",
-				fileName: file.name,
-				fileType: file.type,
-				fileSize: file.size,
-			});
-
-			setUploadProgress(50);
-
-			// Upload file to R2
-			await uploadMutation.mutateAsync({
-				url: presignedData.url,
 				file,
 			});
 
 			setUploadProgress(100);
 
-			// Update form with image URL
-			form.setValue("bannerImageUrl", presignedData.imageUrl);
-			
+			// Update form and ref so we never lose the URL (form state can lag)
+			uploadedBannerUrlRef.current = result.imageUrl;
+			form.setValue("bannerImageUrl", result.imageUrl, { shouldValidate: true });
 		} catch (error) {
 			console.error("Image upload failed:", error);
 			setUploadProgress(0);
+			uploadedBannerUrlRef.current = null;
+			removeFile(fileWrapper.id);
+			toast.error("Image upload failed", {
+				description: error instanceof Error ? error.message : "Please try again",
+			});
 		}
 	};
 
@@ -139,21 +134,25 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 		
 		setIsSubmitting(true);
 		try {
-			// Store price values directly in dollars
+			// Use ref for banner URL - form state can lag after setValue from async upload
+			const bannerUrl = uploadedBannerUrlRef.current ?? data.bannerImageUrl;
 			const packageData = {
 				...data,
+				bannerImageUrl: bannerUrl || undefined,
 				fixedPrice: data.fixedPrice || null,
 				hourlyRate: data.hourlyRate || null,
 				maxPassengers: data.maxPassengers || 4, // Default to 4 if not set
 			};
 			
 			console.log("💰 Package data with prices in dollars:", JSON.stringify(packageData, null, 2));
+			console.log("🖼️ Banner URL being sent:", packageData.bannerImageUrl || "(none)");
 			console.log("🚀 Calling createPackageMutation...");
 			
 			const result = await createPackageMutation.mutateAsync(packageData);
 			
 			console.log("✅ Package created successfully:", JSON.stringify(result, null, 2));
 			
+			uploadedBannerUrlRef.current = null;
 			form.reset();
 			onSuccess?.();
 		} catch (error) {
@@ -324,13 +323,20 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 									<FormLabel>Banner Image</FormLabel>
 									<FormControl>
 										<div className="space-y-3">
-											{imageFiles.length > 0 ? (
+											{imageFiles.length > 0 || field.value ? (
 												<div className="relative group">
 													<img
-														src={imageFiles[0].preview}
+														src={imageFiles[0]?.preview || field.value}
 														alt="Package banner preview"
 														className="w-full h-40 object-cover rounded-lg border"
+														onError={(e) => {
+															e.currentTarget.style.display = "none";
+															e.currentTarget.nextElementSibling?.classList.remove("hidden");
+														}}
 													/>
+													<div className="hidden w-full h-40 bg-muted flex items-center justify-center rounded-lg border">
+														<p className="text-sm text-muted-foreground">Image not available</p>
+													</div>
 													{uploadProgress > 0 && uploadProgress < 100 && (
 														<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
 															<div className="bg-white p-2 rounded space-y-2 min-w-[120px]">
@@ -345,7 +351,8 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														size="sm"
 														className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
 														onClick={() => {
-															removeFile(imageFiles[0].id);
+															if (imageFiles[0]) removeFile(imageFiles[0].id);
+															uploadedBannerUrlRef.current = null;
 															field.onChange("");
 															form.setValue("bannerImageUrl", "");
 															setUploadProgress(0);
@@ -381,9 +388,13 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							Cancel
 						</Button>
 					</DialogClose>
-					<Button type="submit" size="sm" disabled={isSubmitting}>
+					<Button
+						type="submit"
+						size="sm"
+						disabled={isSubmitting || (uploadProgress > 0 && uploadProgress < 100)}
+					>
 						{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-						Create Package
+						{uploadProgress > 0 && uploadProgress < 100 ? "Uploading..." : "Create Package"}
 					</Button>
 				</DialogFooter>
 			</form>

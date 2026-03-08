@@ -1,6 +1,8 @@
+import { env } from "cloudflare:workers";
 import { getPackageById } from "@/data/packages/get-package-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
+import { toProxyImageUrl } from "@/utils/image-url";
 import { z } from "zod";
 
 export const GetPackageServiceSchema = z.object({
@@ -14,6 +16,12 @@ export async function getPackageService(db: DB, { id }: GetPackageByIdParams) {
 
 	if (!packageItem) {
 		throw ErrorFactory.notFound("Package not found.");
+	}
+
+	const baseUrl = env.BETTER_AUTH_URL?.replace(/\/$/, "") || "";
+	if (baseUrl && (packageItem as any).bannerImageUrl) {
+		(packageItem as any).bannerImageUrl =
+			toProxyImageUrl((packageItem as any).bannerImageUrl, baseUrl) ?? (packageItem as any).bannerImageUrl;
 	}
 
 	return packageItem;
