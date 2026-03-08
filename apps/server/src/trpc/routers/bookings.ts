@@ -6,7 +6,7 @@ import { bookings } from "@/db/sqlite/schema";
 import { eq } from "drizzle-orm";
 import { createBookingService, CreateBookingServiceSchema } from "@/services/bookings/create-booking";
 import { createPackageBookingService, CreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
-import { createCustomBookingService, CreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
+import { createCustomBookingService, CreateCustomBookingSchema, AdminCreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
 import { createCustomBookingFromQuoteService, CreateCustomBookingFromQuoteSchema } from "@/services/bookings/create-custom-booking-from-quote";
 import { calculateInstantQuoteService, CalculateInstantQuoteSchema } from "@/services/bookings/calculate-instant-quote";
 import { updateBookingStatusService, UpdateBookingStatusSchema, assignDriverService, AssignDriverSchema } from "@/services/bookings/update-booking-status";
@@ -31,12 +31,25 @@ import { BookingStatusEnum } from "@/db/sqlite/enums";
 import { createOffloadBookingService, CreateOffloadBookingServiceSchema } from "@/services/bookings/create-offload-booking";
 import { createBookingReviewService, CreateBookingReviewSchema } from "@/services/reviews/create-booking-review";
 import { hasBookingReviewService, HasBookingReviewSchema } from "@/services/reviews/has-booking-review";
+import { getBookingByShareToken } from "@/data/bookings/get-booking-by-share-token";
+import { updateBookingStatusByTokenService, UpdateBookingStatusByTokenSchema } from "@/services/bookings/update-booking-status-by-token";
+import { generateBookingShareTokenService } from "@/services/bookings/generate-booking-share-token";
 
 // Helper function to get user role from database
 const getUserRole = async (db: any, userId: string) => {
 	const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
 	return user[0]?.role;
 };
+
+async function requireAdmin(db: any, userId: string) {
+	const role = await getUserRole(db, userId);
+	if (role !== "admin" && role !== "super_admin") {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Admin access required",
+		});
+	}
+}
 
 export const bookingsRouter = router({
 	create: protectedProcedure
@@ -400,6 +413,43 @@ export const bookingsRouter = router({
 			}
 		}),
 
+	/** Admin/Super Admin: Create custom booking for client (existing or walk-in/phone) */
+	adminCreateCustomBooking: protectedProcedure
+		.input(AdminCreateCustomBookingSchema)
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
+			try {
+				const adminUserId = session?.user?.id || session?.session?.userId;
+				if (!adminUserId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Authentication required",
+					});
+				}
+				await requireAdmin(db, adminUserId);
+
+				// Use client's userId if provided (existing client), else admin's (walk-in/phone)
+				const userId = input.userId ?? adminUserId;
+
+				const newBooking = await createCustomBookingService(db, {
+					...input,
+					userId,
+				});
+
+				try {
+					await Promise.all([
+						sendBookingConfirmationEmail(newBooking.id, env),
+						sendAdminNewBookingEmail(newBooking.id, env),
+					]);
+				} catch (emailError) {
+					console.error("Error sending emails:", emailError);
+				}
+
+				return newBooking;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
 	// Create custom booking from instant quote (allow guest users)
 	createCustomBookingFromQuote: guestProcedure
 		.input(CreateCustomBookingFromQuoteSchema)
@@ -574,6 +624,57 @@ export const bookingsRouter = router({
 			try {
 				const updatedBooking = await assignDriverService(db, input, env);
 				return updatedBooking;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Public: Get booking by share token (for client tracking / driver job links - no auth) */
+	getByShareToken: publicProcedure
+		.input(z.object({ shareToken: z.string().min(1) }))
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const booking = await getBookingByShareToken(db, input.shareToken);
+				if (!booking) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Booking not found. The share link may be invalid.",
+					});
+				}
+				return booking;
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Public: Update booking status via share token (for driver job link - no auth) */
+	updateStatusByShareToken: publicProcedure
+		.input(UpdateBookingStatusByTokenSchema)
+		.mutation(async ({ ctx: { db, env }, input }) => {
+			try {
+				return await updateBookingStatusByTokenService(db, input, env);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Admin/Driver: Generate share token for booking (for legacy bookings without one) */
+	generateShareToken: protectedProcedure
+		.input(z.object({ bookingId: z.string() }))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			try {
+				const userId = session?.user?.id || session?.session?.userId;
+				if (!userId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required" });
+				const role = await getUserRole(db, userId);
+				const booking = await getBookingService(db, { id: input.bookingId });
+				if (!booking) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+				// Admin or assigned driver can generate
+				const isAdmin = role === "admin" || role === "super_admin";
+				const isAssignedDriver = booking.driverId && booking.driver?.userId === userId;
+				if (!isAdmin && !isAssignedDriver) {
+					throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+				}
+				return await generateBookingShareTokenService(db, input.bookingId);
 			} catch (error) {
 				handleTRPCError(error);
 			}

@@ -11,6 +11,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
 import { BookingTypeBadge } from "@/components/booking-type-badge";
+import { formatDistanceKm } from "@/utils/format";
 
 export const Route = createFileRoute("/driver/_layout/available")({
 	component: AvailableTripsPage,
@@ -75,7 +76,7 @@ function AvailableTripsPage() {
 
 	const TripCard = ({ trip }: { trip: any }) => {
 		const formatCurrency = (amount: number) => amount.toFixed(2);
-		const formatDistance = (meters: number) => (meters / 1000).toFixed(1);
+		const formatDistance = (km: number) => Number(km).toFixed(1); // DB stores km (display only)
 		const formatDuration = (seconds: number) => Math.round(seconds / 60);
 
 		// Better car name handling
@@ -823,7 +824,7 @@ function AvailableTripsPage() {
 											{selectedBookingForDetails.estimatedDistance && (
 												<div>
 													<span className="text-gray-600">Distance:</span>
-													<p className="font-medium">{(selectedBookingForDetails.estimatedDistance / 1000).toFixed(1)} km</p>
+													<p className="font-medium">{formatDistanceKm(selectedBookingForDetails.estimatedDistance)}</p>
 												</div>
 											)}
 											{selectedBookingForDetails.estimatedDuration && !selectedBookingForDetails.packageId && (

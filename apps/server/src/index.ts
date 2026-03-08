@@ -10,12 +10,18 @@ import { uploadFileService } from "@/services/file/upload-file";
 
 const DEFAULT_ORIGINS = ["http://localhost:3001", "http://localhost:3002", "http://localhost:3003"];
 
-/** Trusted domains - origin must match one of these patterns */
+/** Trusted domains - origin must match one of these patterns (used when CORS_ORIGIN env may not be loaded) */
 const TRUSTED_DOMAIN_PATTERNS = [
 	/^https:\/\/[a-z0-9-]+\.downunderchauffeurs\.workers\.dev$/i,
 	/^https:\/\/downunderchauffeurs\.com$/i,
 	/^https:\/\/[a-z0-9-]+\.downunderchauffeurs\.com$/i,
 	/^http:\/\/localhost(:\d+)?$/,
+];
+
+/** Hardcoded fallback origins for staging/production (used when env fails or 503) */
+const FALLBACK_ORIGINS = [
+	"https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev",
+	"https://downunderchauffeurs.com",
 ];
 
 function getAllowedOrigins(): string[] {
@@ -25,6 +31,8 @@ function getAllowedOrigins(): string[] {
 
 function isOriginAllowed(origin: string | null): boolean {
 	if (!origin) return false;
+	// Fallback origins (work even when env.CORS_ORIGIN is empty/unavailable)
+	if (FALLBACK_ORIGINS.includes(origin)) return true;
 	const allowed = getAllowedOrigins();
 	if (allowed.includes(origin)) return true;
 	// Allow trusted domain patterns
@@ -41,14 +49,13 @@ function isOriginAllowed(origin: string | null): boolean {
 
 function addCorsToResponse(response: Response, request: Request): Response {
 	const origin = request.headers.get("Origin");
-	if (!origin || !isOriginAllowed(origin)) return response;
-	const headers = new Headers(response.headers);
-	headers.set("Access-Control-Allow-Origin", origin);
-	headers.set("Access-Control-Allow-Credentials", "true");
-	headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-	headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-	headers.set("Vary", "Origin");
-	return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+	const corsHeaders = buildCorsHeaders(origin);
+	if (corsHeaders.get("Access-Control-Allow-Origin")) {
+		const headers = new Headers(response.headers);
+		corsHeaders.forEach((v, k) => headers.set(k, v));
+		return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+	}
+	return response;
 }
 
 const app = new Hono();
@@ -60,7 +67,7 @@ app.use(
 	cors({
 		origin: (origin) => (origin && isOriginAllowed(origin) ? origin : null),
 		allowHeaders: ["Content-Type", "Authorization"],
-		allowMethods: ["GET", "POST", "OPTIONS"],
+		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		exposeHeaders: ["Content-Length"],
 		maxAge: 600,
 		credentials: true,
@@ -71,15 +78,7 @@ app.use(
 app.on(["POST", "GET", "OPTIONS"], "/api/auth/**", async (c) => {
 	// Handle CORS preflight immediately - don't pass to auth handler
 	if (c.req.method === "OPTIONS") {
-		const origin = c.req.header("Origin");
-		const headers = new Headers();
-		if (origin && isOriginAllowed(origin)) {
-			headers.set("Access-Control-Allow-Origin", origin);
-			headers.set("Access-Control-Allow-Credentials", "true");
-			headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-			headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-			headers.set("Access-Control-Max-Age", "600");
-		}
+		const headers = buildCorsHeaders(c.req.header("Origin"));
 		return new Response(null, { status: 204, headers });
 	}
 	try {
@@ -88,13 +87,7 @@ app.on(["POST", "GET", "OPTIONS"], "/api/auth/**", async (c) => {
 	} catch (err) {
 		console.error("Auth handler error:", err);
 		const headers = new Headers({ "Content-Type": "application/json" });
-		const origin = c.req.header("Origin");
-		if (origin && isOriginAllowed(origin)) {
-			headers.set("Access-Control-Allow-Origin", origin);
-			headers.set("Access-Control-Allow-Credentials", "true");
-			headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-			headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-		}
+		buildCorsHeaders(c.req.header("Origin")).forEach((v, k) => headers.set(k, v));
 		return new Response(JSON.stringify({ error: "Authentication failed" }), { status: 503, headers });
 	}
 });
@@ -167,22 +160,29 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
+/** Build CORS headers for a response - always include the three required headers */
+function buildCorsHeaders(origin: string | null): Headers {
+	const headers = new Headers();
+	if (origin && isOriginAllowed(origin)) {
+		headers.set("Access-Control-Allow-Origin", origin);
+		headers.set("Access-Control-Allow-Credentials", "true");
+		headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+		headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+		headers.set("Access-Control-Max-Age", "86400");
+		headers.set("Vary", "Origin");
+	}
+	return headers;
+}
+
 // Wrap app to add CORS to ALL responses (catches 503s and errors that bypass middleware)
 export default {
 	async fetch(request: Request, env: unknown, ctx: ExecutionContext) {
-		// Handle CORS preflight for auth at the very top - critical for sign-in to work
 		const url = new URL(request.url);
-		if (request.method === "OPTIONS" && url.pathname.startsWith("/api/auth/")) {
-			const origin = request.headers.get("Origin");
-			const headers = new Headers();
-			if (origin && isOriginAllowed(origin)) {
-				headers.set("Access-Control-Allow-Origin", origin);
-				headers.set("Access-Control-Allow-Credentials", "true");
-				headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-				headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-				headers.set("Access-Control-Max-Age", "86400");
-				headers.set("Vary", "Origin");
-			}
+		const origin = request.headers.get("Origin");
+
+		// Handle CORS preflight (OPTIONS) for ALL API routes at the very top - before any app code
+		if (request.method === "OPTIONS") {
+			const headers = buildCorsHeaders(origin);
 			return new Response(null, { status: 204, headers });
 		}
 		try {
@@ -190,14 +190,8 @@ export default {
 			return addCorsToResponse(response, request);
 		} catch (err) {
 			console.error("Worker fetch error:", err);
-			const origin = request.headers.get("Origin");
 			const headers = new Headers({ "Content-Type": "application/json" });
-			if (origin && isOriginAllowed(origin)) {
-				headers.set("Access-Control-Allow-Origin", origin);
-				headers.set("Access-Control-Allow-Credentials", "true");
-				headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-				headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-			}
+			buildCorsHeaders(request.headers.get("Origin")).forEach((v, k) => headers.set(k, v));
 			return new Response(JSON.stringify({ error: "Service unavailable" }), { status: 503, headers });
 		}
 	},

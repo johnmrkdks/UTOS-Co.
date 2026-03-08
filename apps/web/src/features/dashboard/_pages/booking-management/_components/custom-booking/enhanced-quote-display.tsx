@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
 import { Calculator, MapPin, Clock, DollarSign, Route, Navigation, CheckCircle } from "lucide-react"
 import type { QuoteResult } from "../../_types/booking"
+import { formatDistanceKm } from "@/utils/format"
 import type { EnhancedCustomBookingForm } from "./enhanced-custom-booking-form"
 import { useGetPricingConfigsQuery } from "../../../pricing-config/_hooks/query/use-get-pricing-configs-query"
 
@@ -38,7 +39,6 @@ export function EnhancedQuoteDisplay({
 		limit: 1
 	})
 	const formatPrice = (price: number) => `$${price.toFixed(2)}`
-	const formatDistance = (meters: number) => `${(meters / 1000).toFixed(1)} km`
 	const formatDuration = (seconds: number) => {
 		const minutes = Math.round(seconds / 60)
 		const hours = Math.floor(minutes / 60)
@@ -318,7 +318,7 @@ export function EnhancedQuoteDisplay({
 										<span className="text-xs text-muted-foreground">Distance</span>
 									</div>
 									<p className="text-sm font-medium">
-										{formatDistance(quote.estimatedDistance)}
+										{formatDistanceKm(quote.estimatedDistance)}
 									</p>
 								</div>
 								<div className="text-center">
@@ -358,7 +358,7 @@ export function EnhancedQuoteDisplay({
 						{quote.distanceFare > 0 && (
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">
-									Distance Fare ({formatDistance(quote.estimatedDistance)})
+									Distance Fare ({formatDistanceKm(quote.estimatedDistance)})
 								</span>
 								<span className="text-sm font-medium">{formatPrice(quote.distanceFare)}</span>
 							</div>

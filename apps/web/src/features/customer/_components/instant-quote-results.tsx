@@ -13,6 +13,7 @@ import {
 	ChevronRight
 } from "lucide-react";
 import { type QuoteResult, type RouteData } from "../_types/instant-quote";
+import { formatDistanceKm } from "@/utils/format";
 
 interface InstantQuoteResultsProps {
 	quote: QuoteResult;
@@ -76,7 +77,7 @@ export function InstantQuoteResults({
 					<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg mt-4">
 						<MapPin className="h-3 w-3" />
 						<span>
-							{(quote.estimatedDistance / 1000).toFixed(1)} km • {Math.round(quote.estimatedDuration / 60)} min journey
+							{formatDistanceKm(quote.estimatedDistance)} • {Math.round(quote.estimatedDuration / 60)} min journey
 						</span>
 					</div>
 				</CardContent>

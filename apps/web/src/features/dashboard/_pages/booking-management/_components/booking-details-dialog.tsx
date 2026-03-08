@@ -17,15 +17,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
+import { Input } from "@workspace/ui/components/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { Progress } from "@workspace/ui/components/progress";
 import { useGetBookingByIdQuery } from "../_hooks/query/use-get-booking-by-id-query";
+import { useGenerateBookingShareTokenMutation } from "../_hooks/query/use-generate-booking-share-token-mutation";
 import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
 import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { AssignDriverDialog } from "./assign-driver-dialog";
 import { AssignCarDialog } from "./assign-car-dialog";
 import { format } from "date-fns";
+import { formatDistanceKm } from "@/utils/format";
 import {
 	User,
 	Phone,
@@ -48,6 +51,8 @@ import {
 	Edit3,
 	X,
 	CircleDot,
+	Share2,
+	Copy,
 	MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
@@ -92,6 +97,7 @@ export function BookingDetailsDialog() {
 
 	const updateStatusMutation = useUpdateBookingStatusMutation();
 	const assignDriverMutation = useAssignDriverMutation();
+	const generateShareTokenMutation = useGenerateBookingShareTokenMutation(selectedBookingId ?? undefined);
 
 	const handleStatusUpdate = (newStatus: string) => {
 		if (!selectedBookingId || !newStatus) return;
@@ -231,7 +237,7 @@ export function BookingDetailsDialog() {
 									<div className="flex items-center justify-between text-sm">
 										{booking.estimatedDistance && (
 											<div className="text-gray-600">
-												<span className="font-medium">{(booking.estimatedDistance / 1000).toFixed(1)} km</span>
+												<span className="font-medium">{formatDistanceKm(booking.estimatedDistance)}</span>
 											</div>
 										)}
 										{booking.estimatedDuration && (
@@ -274,6 +280,70 @@ export function BookingDetailsDialog() {
 										</div>
 									)}
 								</div>
+							</div>
+
+							{/* Share Links */}
+							<div className="bg-soft-beige p-4 rounded-lg border">
+								<div className="flex items-center gap-3 mb-3">
+									<Share2 className="h-5 w-5 text-primary" />
+									<h3 className="font-semibold">Share Links</h3>
+								</div>
+								{(booking as any).shareToken ? (
+									<div className="space-y-3">
+										<div>
+											<p className="text-xs text-gray-500 mb-1">Client tracking (share with customer)</p>
+											<div className="flex gap-2">
+												<Input
+													readOnly
+													value={`${typeof window !== "undefined" ? window.location.origin : ""}/track/${(booking as any).shareToken}`}
+													className="text-sm font-mono"
+												/>
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => {
+														navigator.clipboard.writeText(`${window.location.origin}/track/${(booking as any).shareToken}`);
+														toast.success("Tracking link copied");
+													}}
+												>
+													<Copy className="h-4 w-4" />
+												</Button>
+											</div>
+										</div>
+										<div>
+											<p className="text-xs text-gray-500 mb-1">Driver job (share with driver)</p>
+											<div className="flex gap-2">
+												<Input
+													readOnly
+													value={`${typeof window !== "undefined" ? window.location.origin : ""}/driver-job/${(booking as any).shareToken}`}
+													className="text-sm font-mono"
+												/>
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => {
+														navigator.clipboard.writeText(`${window.location.origin}/driver-job/${(booking as any).shareToken}`);
+														toast.success("Driver link copied");
+													}}
+												>
+													<Copy className="h-4 w-4" />
+												</Button>
+											</div>
+										</div>
+									</div>
+								) : (
+									<div>
+										<p className="text-sm text-muted-foreground mb-2">Generate shareable links for client tracking and driver updates.</p>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => generateShareTokenMutation.mutate({ bookingId: selectedBookingId! })}
+											disabled={generateShareTokenMutation.isPending}
+										>
+											{generateShareTokenMutation.isPending ? "Generating..." : "Generate Share Links"}
+										</Button>
+									</div>
+								)}
 							</div>
 
 							{/* Vehicle & Notes */}

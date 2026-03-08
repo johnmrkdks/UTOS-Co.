@@ -49,6 +49,13 @@ export const CreateCustomBookingSchema = z.object({
 
 export type CreateCustomBookingParams = z.infer<typeof CreateCustomBookingSchema>;
 
+/** Admin creates booking for client - userId optional: when absent use admin's (walk-in/phone client) */
+export const AdminCreateCustomBookingSchema = CreateCustomBookingSchema.extend({
+	userId: z.string().optional(),
+});
+
+export type AdminCreateCustomBookingParams = z.infer<typeof AdminCreateCustomBookingSchema>;
+
 export async function createCustomBookingService(db: DB, data: CreateCustomBookingParams) {
 	// Validate minimum booking time (e.g., 1 hour in advance)
 	const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);

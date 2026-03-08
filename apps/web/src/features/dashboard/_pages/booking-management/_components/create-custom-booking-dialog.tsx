@@ -22,7 +22,7 @@ import type { QuoteResult } from "../_types/booking"
 import { useGetCarsQuery } from "../../car-management/_hooks/query/car/use-get-cars-query"
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider"
 import { useCalculateInstantQuoteMutation } from "../_hooks/query/use-calculate-instant-quote-mutation"
-import { useCreateCustomBookingMutation } from "../_hooks/query/use-create-custom-booking-mutation"
+import { useAdminCreateCustomBookingMutation } from "../_hooks/query/use-admin-create-custom-booking-mutation"
 import { createLocalDateForBackend } from "@/utils/timezone"
 
 export function CreateCustomBookingDialog() {
@@ -38,7 +38,7 @@ export function CreateCustomBookingDialog() {
 	})
 
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation()
-	const createCustomBookingMutation = useCreateCustomBookingMutation(() => {
+	const createCustomBookingMutation = useAdminCreateCustomBookingMutation(() => {
 		closeCreateCustomBookingDialog()
 		setQuote(null)
 		setCurrentFormData({})
@@ -114,6 +114,10 @@ export function CreateCustomBookingDialog() {
 			toast.error("Please calculate a quote first")
 			return
 		}
+		if (currentFormData.clientType === "existing" && !data.userId) {
+			toast.error("Please select an existing customer")
+			return
+		}
 
 		// Convert date and time to ISO string for backend
 		const scheduledPickupTime = createLocalDateForBackend(
@@ -131,10 +135,10 @@ export function CreateCustomBookingDialog() {
 			notes: stop.notes || "",
 		})) || []
 
-		// Prepare the booking data for submission
+		// Prepare the booking data for submission (admin creates for client - userId optional for walk-in)
 		const bookingData = {
 			carId: data.carId,
-			userId: data.userId,
+			userId: data.userId || undefined, // Omit for walk-in; backend uses admin's userId
 			originAddress: data.originAddress,
 			originLatitude: data.originLatitude,
 			originLongitude: data.originLongitude,
@@ -178,7 +182,7 @@ export function CreateCustomBookingDialog() {
 
 	return (
 		<Dialog open={isCreateCustomBookingDialogOpen} onOpenChange={handleClose}>
-			<DialogContent className="w-full !max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+			<DialogContent className="w-full !max-w-6xl max-h-[90vh] overflow-hidden flex flex-col" showCloseButton={false}>
 				<DialogHeader className="flex-shrink-0">
 					<div className="flex items-center justify-between">
 						<div>
@@ -211,6 +215,7 @@ export function CreateCustomBookingDialog() {
 									isSubmitting={createCustomBookingMutation.isPending}
 									isCalculatingQuote={isCalculatingQuote}
 									quote={quote}
+									isAdminContext
 								/>
 							</Suspense>
 						</div>

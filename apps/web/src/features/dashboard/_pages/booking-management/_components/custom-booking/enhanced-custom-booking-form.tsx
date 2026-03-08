@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Calculator, Plus, X, MapPin, Navigation, Users, Package2, Clock, Car } from "lucide-react"
+import { Calculator, Plus, X, MapPin, Navigation, Users, Package2, Clock, Car, Phone, UserPlus } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
 import { Input } from "@workspace/ui/components/input"
@@ -11,8 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Badge } from "@workspace/ui/components/badge"
 import { Separator } from "@workspace/ui/components/separator"
+import { RadioGroup, RadioGroupItem } from "@workspace/ui/components/radio-group"
+import { Label } from "@workspace/ui/components/label"
 import { DateTimePicker } from "@/components/date-time-picker"
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple"
+import { format } from "date-fns"
 import { createLocalDateForBackend } from "@/utils/timezone"
 import type { QuoteResult } from "../../_types/booking"
 import { useGetUsersQuery } from "../../../drivers/_hooks/query/use-get-users-query"
@@ -64,6 +67,8 @@ interface EnhancedBookingFormProps {
 	isSubmitting: boolean
 	isCalculatingQuote: boolean
 	quote: QuoteResult | null
+	/** When true (admin dashboard), show walk-in/phone vs existing client toggle */
+	isAdminContext?: boolean
 }
 
 export function EnhancedCustomBookingForm({
@@ -75,23 +80,27 @@ export function EnhancedCustomBookingForm({
 	isSubmitting,
 	isCalculatingQuote,
 	quote,
+	isAdminContext = false,
 }: EnhancedBookingFormProps) {
 	const [originGeometry, setOriginGeometry] = useState<any>(null)
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null)
 	const [stopsGeometry, setStopsGeometry] = useState<any[]>([])
 	const [selectedCar, setSelectedCar] = useState<any>(null)
+	const [clientType, setClientType] = useState<"walk_in" | "existing">(isAdminContext ? "walk_in" : "existing")
 
-	// Fetch users for selection
-	const { data: users, isLoading: usersLoading } = useGetUsersQuery({
-		role: "user", // Only fetch customers
-		limit: 100
+	// Fetch users for selection (only when admin context with existing client, or non-admin)
+	const { data: usersData, isLoading: usersLoading } = useGetUsersQuery({
+		roleFilter: "clients",
+		limit: 100,
+		enabled: !isAdminContext || clientType === "existing",
 	})
+	const clientUsers = usersData?.users ?? []
 
 	const form = useForm<EnhancedCustomBookingForm>({
 		resolver: zodResolver(createEnhancedCustomBookingSchema) as any,
 		mode: "onChange", // Optimize validation
 		defaultValues: {
-			userId: users?.users?.[0]?.id || "",
+			userId: "",
 			passengerCount: 1,
 			luggageCount: 0,
 			customerEmail: "",
@@ -101,6 +110,23 @@ export function EnhancedCustomBookingForm({
 			scheduledPickupTime: "",
 		},
 	})
+
+	// When switching to walk-in, clear userId
+	useEffect(() => {
+		if (isAdminContext && clientType === "walk_in") {
+			form.setValue("userId", "")
+		}
+	}, [isAdminContext, clientType, form])
+
+	// When existing client selects a user from dropdown, pre-fill customer fields
+	const handleUserSelect = useCallback((userId: string) => {
+		const user = clientUsers.find((u) => u.id === userId)
+		if (user) {
+			form.setValue("customerName", user.name ?? "")
+			form.setValue("customerPhone", user.phone ?? "")
+			form.setValue("customerEmail", user.email ?? "")
+		}
+	}, [clientUsers, form])
 
 	const { fields: stopFields, append: appendStop, remove: removeStop } = useFieldArray({
 		control: form.control,
@@ -147,11 +173,12 @@ export function EnhancedCustomBookingForm({
 		luggageCount,
 		specialRequests,
 		stops,
+		clientType: isAdminContext ? clientType : ("existing" as const),
 		originLatitude: originGeometry?.location?.lat(),
 		originLongitude: originGeometry?.location?.lng(),
 		destinationLatitude: destinationGeometry?.location?.lat(),
 		destinationLongitude: destinationGeometry?.location?.lng(),
-	}), [carId, userId, originAddress, destinationAddress, scheduledPickupDate, scheduledPickupTime, passengerCount, customerName, customerPhone, customerEmail, luggageCount, specialRequests, stops, originGeometry, destinationGeometry])
+	}), [carId, userId, originAddress, destinationAddress, scheduledPickupDate, scheduledPickupTime, passengerCount, customerName, customerPhone, customerEmail, luggageCount, specialRequests, stops, isAdminContext, clientType, originGeometry, destinationGeometry])
 
 	// Debounced form change notification to reduce excessive updates
 	useEffect(() => {
@@ -335,47 +362,80 @@ export function EnhancedCustomBookingForm({
 					</CardContent>
 				</Card>
 
-				{/* Customer Selection */}
+				{/* Customer Selection - Admin: walk-in vs existing; Non-admin: existing only */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Users className="h-5 w-5" />
-							Customer Selection
+							Customer
 						</CardTitle>
 						<CardDescription>
-							Select the customer for this booking
+							{isAdminContext
+								? "Create booking for a walk-in/phone client or select an existing registered customer"
+								: "Select the customer for this booking"}
 						</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<FormField
-							control={form.control}
-							name="userId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Customer *</FormLabel>
-									<Select onValueChange={field.onChange} defaultValue={field.value} disabled={usersLoading}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder={usersLoading ? "Loading customers..." : "Select a customer"} />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{users?.data?.map((user) => (
-												<SelectItem key={user.id} value={user.id}>
-													<div className="flex items-center justify-between w-full">
-														<span>{user.name || user.email}</span>
-														<Badge variant="outline" className="ml-2">
-															{user.email}
-														</Badge>
-													</div>
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+					<CardContent className="space-y-4">
+						{isAdminContext && (
+							<RadioGroup
+								value={clientType}
+								onValueChange={(v) => setClientType(v as "walk_in" | "existing")}
+								className="flex gap-4"
+							>
+								<div className="flex items-center space-x-2">
+									<RadioGroupItem value="walk_in" id="walk_in" />
+									<Label htmlFor="walk_in" className="flex items-center gap-2 cursor-pointer font-normal">
+										<Phone className="h-4 w-4" />
+										Walk-in / Phone client (no account)
+									</Label>
+								</div>
+								<div className="flex items-center space-x-2">
+									<RadioGroupItem value="existing" id="existing" />
+									<Label htmlFor="existing" className="flex items-center gap-2 cursor-pointer font-normal">
+										<UserPlus className="h-4 w-4" />
+										Existing registered customer
+									</Label>
+								</div>
+							</RadioGroup>
+						)}
+						{(!isAdminContext || clientType === "existing") && (
+							<FormField
+								control={form.control}
+								name="userId"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Customer {!isAdminContext ? "*" : "(when existing)"}</FormLabel>
+										<Select
+											value={field.value}
+											onValueChange={(v) => {
+												field.onChange(v)
+												handleUserSelect(v)
+											}}
+											disabled={usersLoading}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder={usersLoading ? "Loading customers..." : "Select a customer"} />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{clientUsers.map((user) => (
+													<SelectItem key={user.id} value={user.id}>
+														<div className="flex items-center justify-between w-full">
+															<span>{user.name || user.email}</span>
+															<Badge variant="outline" className="ml-2">
+																{user.email}
+															</Badge>
+														</div>
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
 					</CardContent>
 				</Card>
 
@@ -525,8 +585,16 @@ export function EnhancedCustomBookingForm({
 																type="number"
 																min="0"
 																max="60"
-																{...field}
-																onChange={(e) => field.onChange(Number(e.target.value))}
+																value={field.value ?? ""}
+																onChange={(e) => {
+																	const v = e.target.value
+																	field.onChange(v === "" ? undefined : Number(v))
+																}}
+																onBlur={(e) => {
+																	const v = e.target.value
+																	if (v === "" || Number(v) < 0) field.onChange(0)
+																	field.onBlur()
+																}}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -608,35 +676,15 @@ export function EnhancedCustomBookingForm({
 						<CardDescription>Set pickup time and passenger information</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{/* Date & Time Picker */}
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<FormField
-								control={form.control as any}
-								name="scheduledPickupDate"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Pickup Date *</FormLabel>
-										<FormControl>
-											<Input type="date" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control as any}
-								name="scheduledPickupTime"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Pickup Time *</FormLabel>
-										<FormControl>
-											<Input type="time" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
+						{/* Date & Time Picker - quick selection with calendar and time grid */}
+						<DateTimePicker
+							selectedDate={scheduledPickupDate ? new Date(scheduledPickupDate + "T12:00:00") : undefined}
+							selectedTime={scheduledPickupTime || undefined}
+							onDateChange={(date) => form.setValue("scheduledPickupDate", date ? format(date, "yyyy-MM-dd") : "", { shouldValidate: true })}
+							onTimeChange={(time) => form.setValue("scheduledPickupTime", time, { shouldValidate: true })}
+							dateError={form.formState.errors.scheduledPickupDate?.message}
+							timeError={form.formState.errors.scheduledPickupTime?.message}
+						/>
 
 						{/* Passengers & Luggage */}
 						<div className="grid grid-cols-2 gap-4">
@@ -651,8 +699,16 @@ export function EnhancedCustomBookingForm({
 												type="number"
 												min="1"
 												max={selectedCar?.maxPassengers || 8}
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value ?? ""}
+												onChange={(e) => {
+													const v = e.target.value
+													field.onChange(v === "" ? undefined : Number(v))
+												}}
+												onBlur={(e) => {
+													const v = e.target.value
+													if (v === "" || Number(v) < 1) field.onChange(1)
+													field.onBlur()
+												}}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -670,8 +726,16 @@ export function EnhancedCustomBookingForm({
 												type="number"
 												min="0"
 												max={selectedCar?.maxLuggage || 10}
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value ?? ""}
+												onChange={(e) => {
+													const v = e.target.value
+													field.onChange(v === "" ? undefined : Number(v))
+												}}
+												onBlur={(e) => {
+													const v = e.target.value
+													if (v === "" || Number(v) < 0) field.onChange(0)
+													field.onBlur()
+												}}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -723,17 +787,6 @@ export function EnhancedCustomBookingForm({
 				>
 					Hidden Calculate Quote
 				</Button>
-
-				{/* Submit Button */}
-				<Button type="submit" className="w-full" disabled={isSubmitting || !quote} size="lg">
-					{isSubmitting ? "Creating Booking..." : "Create Booking"}
-				</Button>
-
-				{!quote && (
-					<p className="text-sm text-muted-foreground text-center">
-						Please calculate a quote before creating the booking
-					</p>
-				)}
 			</form>
 		</Form>
 	)

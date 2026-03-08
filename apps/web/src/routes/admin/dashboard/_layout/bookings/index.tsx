@@ -18,7 +18,7 @@ import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-manageme
 import { ConfirmBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/confirm-booking-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, RouteIcon, Clock, Activity, TruckIcon, Archive, CheckCircle, CalendarDays } from "lucide-react";
+import { CalendarPlus, Clock, Activity, TruckIcon, Archive, CheckCircle, CalendarDays, Calendar } from "lucide-react";
 import { Suspense, useState } from "react";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 
@@ -173,6 +173,14 @@ function BookingManagementContent() {
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">Booking Management</h2>
 				<div className="flex items-center space-x-2">
+					<Button
+						onClick={openCreateCustomBookingDialog}
+						variant="default"
+						className="flex items-center gap-2"
+					>
+						<Calendar className="h-4 w-4" />
+						Create Custom Booking
+					</Button>
 					<Button
 						onClick={openCreateOffloadBookingDialog}
 						variant="outline"

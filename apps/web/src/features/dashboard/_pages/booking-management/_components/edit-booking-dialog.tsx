@@ -8,7 +8,8 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { EditIcon, Loader } from "lucide-react";
+import { EditIcon, Loader, Plus, Trash2 } from "lucide-react";
+import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
 import * as z from "zod";
 import React, { useState } from "react";
 import { DateTimePicker } from "@/components/date-time-picker";
@@ -31,6 +32,13 @@ const editBookingSchema = z.object({
 	offloaderName: z.string().optional(),
 	jobType: z.string().optional(),
 	vehicleType: z.string().optional(),
+	// Stops (between pickup and destination)
+	stops: z.array(z.object({
+		address: z.string().min(1, "Address is required"),
+		stopOrder: z.number(),
+		latitude: z.number().optional(),
+		longitude: z.number().optional(),
+	})).optional(),
 });
 
 type EditBookingFormData = z.infer<typeof editBookingSchema>;
@@ -73,6 +81,15 @@ export function EditBookingDialog({
 			const day = String(scheduledPickupTime.getDate()).padStart(2, '0');
 			const dateString = `${year}-${month}-${day}`;
 
+			const sortedStops = (booking.stops || [])
+				.sort((a: { stopOrder: number }, b: { stopOrder: number }) => a.stopOrder - b.stopOrder)
+				.map((s: { address: string; stopOrder: number; latitude?: number; longitude?: number }) => ({
+					address: s.address,
+					stopOrder: s.stopOrder,
+					latitude: s.latitude,
+					longitude: s.longitude,
+				}));
+
 			setFormData({
 				scheduledPickupDate: dateString,
 				scheduledPickupTime: timeString,
@@ -84,20 +101,46 @@ export function EditBookingDialog({
 				passengerCount: booking.passengerCount || 1,
 				luggageCount: booking.luggageCount || 0,
 				specialRequests: booking.specialRequests || "",
-				// Offload booking specific fields - access from nested offloadDetails object
 				offloaderName: booking.offloadDetails?.offloaderName || "",
 				jobType: booking.offloadDetails?.jobType || "",
 				vehicleType: booking.offloadDetails?.vehicleType || "",
+				stops: sortedStops.length > 0 ? sortedStops : [],
 			});
 		}
 	}, [booking]);
 
 	const updateFormData = (field: keyof EditBookingFormData, value: any) => {
 		setFormData(prev => ({ ...prev, [field]: value }));
-		// Clear error when user starts typing
 		if (formErrors[field]) {
 			setFormErrors(prev => ({ ...prev, [field]: "" }));
 		}
+	};
+
+	const addStop = () => {
+		const currentStops = formData.stops || [];
+		setFormData(prev => ({
+			...prev,
+			stops: [...currentStops, { address: "", stopOrder: currentStops.length + 1 }],
+		}));
+	};
+
+	const removeStop = (index: number) => {
+		const currentStops = formData.stops || [];
+		const newStops = currentStops.filter((_, i) => i !== index).map((s, i) => ({ ...s, stopOrder: i + 1 }));
+		setFormData(prev => ({ ...prev, stops: newStops }));
+	};
+
+	const updateStopAddress = (index: number, address: string, lat?: number, lng?: number) => {
+		const currentStops = formData.stops || [];
+		const newStops = [...currentStops];
+		newStops[index] = {
+			...newStops[index],
+			address,
+			...(lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng)
+				? { latitude: lat, longitude: lng }
+				: { latitude: undefined, longitude: undefined }),
+		};
+		setFormData(prev => ({ ...prev, stops: newStops }));
 	};
 
 	const validateForm = () => {
@@ -151,19 +194,29 @@ export function EditBookingDialog({
 		);
 		const scheduledPickupTime = new Date(scheduledPickupTimeString);
 
+		const stopsPayload = (formData.stops || [])
+			.filter((s) => s.address?.trim())
+			.map((s, i) => ({
+				address: s.address.trim(),
+				stopOrder: i + 1,
+				waitingTime: 0,
+				...(s.latitude != null && s.longitude != null ? { latitude: s.latitude, longitude: s.longitude } : {}),
+			}));
+
 		editBookingMutation.mutate({
 			id: booking.id,
 			data: {
 				customerName: formData.customerName!,
 				customerPhone: formData.customerPhone!,
 				customerEmail: formData.customerEmail || "",
-				scheduledPickupTime: scheduledPickupTime, // Send as Date object for tRPC serialization
+				scheduledPickupTime: scheduledPickupTime,
 				additionalNotes: formData.notes || "",
-				quotedAmount: formData.quotedAmount || 0, // Store as dollar amount
+				quotedAmount: formData.quotedAmount || 0,
 				passengerCount: formData.passengerCount!,
 				luggageCount: formData.luggageCount!,
 				specialRequests: formData.specialRequests || "",
-			} as any // Use 'as any' to bypass type checking since the schema is auto-generated
+			} as any,
+			stops: stopsPayload,
 		}, {
 			onSuccess: () => {
 				onOpenChange(false);
@@ -259,6 +312,50 @@ export function EditBookingDialog({
 							timeLabel="Pickup Time *"
 							allowPastDates={true}
 						/>
+
+						{/* Additional Stops */}
+						<div className="space-y-3">
+							<div className="flex items-center justify-between">
+								<label className="block text-sm font-medium text-gray-700">Additional Stops</label>
+								<Button type="button" variant="outline" size="sm" onClick={addStop}>
+									<Plus className="h-4 w-4 mr-1" />
+									Add Stop
+								</Button>
+							</div>
+							<p className="text-xs text-gray-500">Add intermediate stops between pickup and destination (e.g. client requests an extra stop before the trip)</p>
+							{(formData.stops || []).map((stop, index) => (
+								<div key={index} className="flex gap-2 items-center">
+									<span className="text-sm font-medium text-gray-500 w-8 shrink-0">Stop {index + 1}</span>
+									<div className="flex-1 min-w-0">
+										<GooglePlacesInput
+											value={stop.address}
+											onChange={(value) => updateStopAddress(index, value)}
+											onPlaceSelect={(place) => {
+												const lat = place.geometry?.location?.lat?.();
+												const lng = place.geometry?.location?.lng?.();
+												updateStopAddress(
+													index,
+													place.description,
+													lat,
+													lng
+												);
+											}}
+											placeholder="Enter address..."
+											className="w-full"
+										/>
+									</div>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon"
+										onClick={() => removeStop(index)}
+										className="text-destructive hover:text-destructive shrink-0"
+									>
+										<Trash2 className="h-4 w-4" />
+									</Button>
+								</div>
+							))}
+						</div>
 
 						{/* Passengers and Luggage */}
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">

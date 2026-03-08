@@ -10,6 +10,7 @@ import { useGetDriverBookingsQuery } from "@/features/driver/_hooks/query/use-ge
 import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
 import { BookingTypeBadge } from "@/components/booking-type-badge";
+import { formatDistanceKm } from "@/utils/format";
 
 export const Route = createFileRoute("/driver/_layout/history")({
 	component: HistoryPage,
@@ -49,7 +50,7 @@ function HistoryPage() {
 			completedTime: booking.serviceCompletedAt ? new Date(booking.serviceCompletedAt) : null,
 			passengers: booking.passengerCount || 1,
 			finalAmount: booking.finalAmount || booking.quotedAmount || 0,
-			distance: (booking.actualDistance || booking.estimatedDistance) ? `${((booking.actualDistance || booking.estimatedDistance) / 1000).toFixed(1)} km` : "N/A",
+			distance: (booking.actualDistance ?? booking.estimatedDistance) != null ? formatDistanceKm(booking.actualDistance ?? booking.estimatedDistance) : "N/A",
 			duration: (booking.estimatedDuration) ? `${Math.round(booking.estimatedDuration / 60)} min` : "N/A",
 			status: booking.status as "completed" | "cancelled" | "no_show",
 			// Pass through booking type and offload fields for badge

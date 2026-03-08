@@ -13,6 +13,7 @@ import { offloadBookingDetails } from "@/db/sqlite/schema/bookings/offload-booki
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
 	referenceNumber: text("reference_number"), // Generated in application code using system settings prefix
+	shareToken: text("share_token"), // Unique token for shareable tracking/update links (no auth)
 	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
 
 	carId: text("car_id")

@@ -33,6 +33,7 @@ import {
 	Navigation,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
+import { formatDistanceKm } from "@/utils/format";
 import { useState, useEffect } from "react";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
@@ -212,10 +213,6 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 		return `${minutes}m`;
 	};
 
-	const formatDistance = (meters: number) => {
-		const km = meters / 1000;
-		return `${km.toFixed(1)} km`;
-	};
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -555,7 +552,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 								{booking.estimatedDistance && (
 									<div className="p-3 bg-muted/50 rounded-lg">
 										<p className="text-sm font-medium text-muted-foreground">Estimated Distance</p>
-										<p className="font-semibold">{formatDistance(booking.estimatedDistance)}</p>
+										<p className="font-semibold">{formatDistanceKm(booking.estimatedDistance)}</p>
 									</div>
 								)}
 							</div>
