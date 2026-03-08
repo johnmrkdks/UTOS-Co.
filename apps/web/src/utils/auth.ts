@@ -25,6 +25,16 @@ export async function requireAdmin() {
 	return session;
 }
 
+export async function requireSuperAdmin() {
+	const session = await requireAuth();
+	if (session?.user.role !== "super_admin") {
+		throw redirect({
+			to: "/admin/dashboard",
+		});
+	}
+	return session;
+}
+
 export async function getAuth() {
 	const session = await authClient.getSession();
 	if (!session) {

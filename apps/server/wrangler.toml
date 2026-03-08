@@ -106,6 +106,7 @@ remote = true
 [env.staging.vars]
 # Staging = development (account 8357cb0b, my-dev-db)
 NODE_ENV = "development"
+# Explicit staging web origin - must match exactly for CORS
 CORS_ORIGIN = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
 
 # Better Auth (Safari iOS: cross-subdomain cookies for email/password login)

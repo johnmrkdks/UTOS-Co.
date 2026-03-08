@@ -16,6 +16,7 @@ import {
 	LayoutDashboardIcon,
 	Package2Icon,
 	SettingsIcon,
+	UserCogIcon,
 	UsersIcon,
 } from "lucide-react";
 
@@ -97,6 +98,15 @@ const ALL_DASHBOARD_INVENTORY_ROUTES: RouteConfig[] = [
 		label: "Publications",
 		path: "/admin/dashboard/publications",
 		icon: EyeIcon,
+	},
+];
+
+// Super Admin only - User Management
+export const SUPER_ADMIN_ROUTES: RouteConfig[] = [
+	{
+		label: "User Management",
+		path: "/admin/dashboard/users",
+		icon: UserCogIcon,
 	},
 ];
 
