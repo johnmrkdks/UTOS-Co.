@@ -19,8 +19,7 @@ export const bookings = sqliteTable("bookings", {
 	carId: text("car_id")
 		.references(() => cars.id, { onDelete: "cascade" }),
 	userId: text("user_id")
-		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
+		.references(() => users.id, { onDelete: "cascade" }), // Null for guest bookings
 	driverId: text("driver_id").references(() => drivers.id),
 	packageId: text("package_id").references(() => packages.id, { onDelete: "cascade" }),
 
@@ -62,15 +61,23 @@ export const bookings = sqliteTable("bookings", {
 	luggageCount: integer("luggage_count").default(0),
 	specialRequests: text("special_requests"),
 	additionalNotes: text("additional_notes"), // Operational notes for drivers/admins
+	tollPreference: text("toll_preference").default("toll"), // "toll" | "no_toll" - route preference
 
 	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
 	isArchived: integer("is_archived", { mode: "boolean" }),
+	isGuestBooking: integer("is_guest_booking", { mode: "boolean" }).default(false),
 
 	// Booking timeline tracking
 	confirmedAt: integer("confirmed_at", { mode: "timestamp" }),
 	driverEnRouteAt: integer("driver_en_route_at", { mode: "timestamp" }),
 	serviceStartedAt: integer("service_started_at", { mode: "timestamp" }),
 	serviceCompletedAt: integer("service_completed_at", { mode: "timestamp" }),
+
+	// Email sent tracking (duplicate prevention)
+	confirmationEmailSentAt: integer("confirmation_email_sent_at", { mode: "timestamp" }),
+	driverAssignmentEmailSentAt: integer("driver_assignment_email_sent_at", { mode: "timestamp" }),
+	driverAssignmentEmailSentToDriverId: text("driver_assignment_email_sent_to_driver_id"), // Track which driver we sent to (for reassignment)
+	completionSummaryEmailSentAt: integer("completion_summary_email_sent_at", { mode: "timestamp" }),
 
 	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),

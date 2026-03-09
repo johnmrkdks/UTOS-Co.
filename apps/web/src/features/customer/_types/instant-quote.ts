@@ -1,4 +1,4 @@
-export type Step = "input" | "results" | "car-selection" | "booking-details" | "confirmation" | "processing" | "success";
+export type Step = "input" | "results" | "car-selection" | "auth-choice" | "booking-details" | "confirmation" | "processing" | "success";
 
 export interface Stop {
 	id: string;
@@ -32,4 +32,5 @@ export interface RouteData {
 	stops: Stop[];
 	passengerCount?: number;
 	luggageCount?: number;
+	tollPreference?: "toll" | "no_toll";
 }

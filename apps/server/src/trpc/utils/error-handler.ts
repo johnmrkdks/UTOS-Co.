@@ -45,6 +45,17 @@ export const handleTRPCError = (error: unknown): never => {
 			throw mapAppErrorToTRPC(appError);
 		}
 
+		// Handle known quote/config errors as BAD_REQUEST (client can show message)
+		if (
+			error.message?.includes('No pricing configuration') ||
+			error.message?.includes('Google Maps API key') ||
+			error.message?.includes('API key')
+		) {
+			console.error("🔴 Config/quote error:", error.message);
+			const appError = ErrorFactory.badRequest(error.message);
+			throw mapAppErrorToTRPC(appError);
+		}
+
 		// Handle Zod validation errors
 		if (error.name === 'ZodError') {
 			const zodError = error as any;
@@ -66,8 +77,12 @@ export const handleTRPCError = (error: unknown): never => {
 		}
 	}
 
-	// Default to internal server error
-	console.error("🔴 Falling back to internal server error");
-	const appError = ErrorFactory.internal('Something went wrong');
+	// Default to internal server error - preserve original message when meaningful
+	const message =
+		error instanceof Error && error.message && !error.message.includes("at ")
+			? error.message
+			: "Something went wrong";
+	console.error("🔴 Falling back to internal server error:", message);
+	const appError = ErrorFactory.internal(message);
 	throw mapAppErrorToTRPC(appError);
 };

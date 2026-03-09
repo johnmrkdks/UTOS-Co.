@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Car,
@@ -8,7 +8,8 @@ import {
 	ChevronDown,
 	ChevronRight,
 	LogIn,
-	Loader2
+	Loader2,
+	User
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -78,26 +79,23 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 		carsData.data.find(car => car.id === quote.carId) : null;
 
 
+	const handleSignInAndBook = () => {
+		if (!quote) return;
+		const redirectPath = `/book-quote/${search.quoteId}`;
+		navigate({
+			to: "/sign-in",
+			search: { redirect: redirectPath },
+			resetScroll: true
+		});
+	};
+
 	const handleBookAuthenticated = () => {
 		if (!quote) return;
-
-		if (session?.user) {
-			// User is authenticated - route to book-quote
-			navigate({
-				to: "/book-quote/$quoteId",
-				params: { quoteId: search.quoteId },
-				resetScroll: true
-			});
-		} else {
-			// User not authenticated, redirect to sign-in with appropriate redirect
-			const redirectPath = `/book-quote/${search.quoteId}`;
-
-			navigate({
-				to: "/sign-in",
-				search: { redirect: redirectPath },
-				resetScroll: true
-			});
-		}
+		navigate({
+			to: "/book-quote/$quoteId",
+			params: { quoteId: search.quoteId },
+			resetScroll: true
+		});
 	};
 
 	// Loading state
@@ -397,23 +395,40 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					{/* Action Buttons */}
 					<div className="space-y-3 pb-6">
 						{session?.user ? (
-							// User is authenticated - show only account booking
+							// User is authenticated - show book button
 							<Button
 								onClick={handleBookAuthenticated}
 								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
 							>
 								Book
-								<LogIn className="ml-2 h-5 w-5" />
+								<ChevronRight className="ml-2 h-5 w-5" />
 							</Button>
 						) : (
-							// User is not authenticated - only show sign in option
-							<Button
-								onClick={handleBookAuthenticated}
-								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
-							>
-								Sign In & Book
-								<LogIn className="ml-2 h-5 w-5" />
-							</Button>
+							// User is not authenticated - show sign in OR continue as guest
+							<>
+								<Button
+									onClick={handleSignInAndBook}
+									className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
+								>
+									<LogIn className="mr-2 h-5 w-5" />
+									Sign In & Book
+								</Button>
+								<Button
+									asChild
+									variant="outline"
+									className="w-full h-12 text-base font-semibold"
+								>
+									<Link
+										to="/book-quote/$quoteId"
+										params={{ quoteId: search.quoteId }}
+										search={{ guest: "1" }}
+										resetScroll
+									>
+										<User className="mr-2 h-5 w-5" />
+										Continue as Guest
+									</Link>
+								</Button>
+							</>
 						)}
 
 						<Button
@@ -429,9 +444,11 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 						<p className="text-xs text-muted-foreground">
 							* Prices are estimates and may vary based on traffic and other factors
 						</p>
-						<p className="text-xs text-primary">
-							Sign in required to complete booking
-						</p>
+						{!session?.user && (
+							<p className="text-xs text-muted-foreground">
+								Sign in or create an account to complete your booking
+							</p>
+						)}
 					</div>
 				</div>
 			</div>

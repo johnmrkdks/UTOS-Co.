@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { authClient } from "@/lib/auth-client";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { signUpSchema } from "@/features/auth/_schemas/sign-up-schema";
@@ -31,6 +32,7 @@ export default function SignUpForm({ className, ...props }: SignUpFromProps) {
 		from: "/",
 	});
 	const search = useSearch({ strict: false }) as any;
+	const queryClient = useQueryClient();
 	const { isPending } = authClient.useSession();
 	const mutation = useSignUpMutation();
 
@@ -50,7 +52,9 @@ export default function SignUpForm({ className, ...props }: SignUpFromProps) {
 
 	const onSubmit = async (data: FormValues) => {
 		mutation.mutate(data, {
-			onSuccess: () => {
+			onSuccess: async () => {
+				// Invalidate session so destination page gets fresh data
+				await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 				const redirectPath = search.redirect || "/";
 				navigate({
 					to: redirectPath,

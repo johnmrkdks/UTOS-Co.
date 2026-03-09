@@ -13,13 +13,11 @@ import {
 	superAdminRole,
 	userRole,
 } from "./permissions";
+import { hashPasswordPbkdf2, verifyPasswordPbkdf2 } from "./pbkdf2-password";
 import { customVerify } from "./scrypt";
-import {
-	hashPassword as hashBetterAuthPassword,
-	verifyPassword as verifyBetterAuthPassword,
-} from "better-auth/crypto";
+import { verifyPassword as verifyBetterAuthPassword } from "better-auth/crypto";
 
-/** Supports both better-auth default format and our legacy customHash format for backward compatibility */
+/** Supports PBKDF2 (Workers-friendly), better-auth scrypt, and legacy customHash for backward compatibility */
 async function verifyPasswordCompat({
 	password,
 	hash,
@@ -27,11 +25,15 @@ async function verifyPasswordCompat({
 	password: string;
 	hash: string;
 }): Promise<boolean> {
-	// Better-auth format: "salt:key" (hex)
+	// PBKDF2 format (fast, stays within Workers free tier CPU limit)
+	if (hash.startsWith("pbkdf2$")) {
+		return verifyPasswordPbkdf2({ password, hash });
+	}
+	// Better-auth format: "salt:key" (hex, scrypt - may exceed CPU on free tier)
 	if (hash.includes(":")) {
 		return verifyBetterAuthPassword({ password, hash });
 	}
-	// Legacy customHash format (base64)
+	// Legacy customHash format (base64, scrypt)
 	return customVerify({ password, hash });
 }
 
@@ -75,8 +77,8 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: false, // Allow login without verification, but encourage verification
 		password: {
-			hash: hashBetterAuthPassword,
-			// Verify supports both better-auth format and legacy customHash for backward compatibility
+			hash: hashPasswordPbkdf2,
+			// Verify: PBKDF2 (fast), better-auth scrypt, legacy customHash
 			verify: verifyPasswordCompat,
 		},
 	},

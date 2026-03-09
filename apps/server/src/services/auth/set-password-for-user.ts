@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { DB } from "@/db";
 import { users, accounts } from "@/db/sqlite/schema";
-import { hashPassword } from "better-auth/crypto";
+import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
 import { eq, and } from "drizzle-orm";
 
 export const SetPasswordForUserServiceSchema = z.object({
@@ -55,9 +55,9 @@ export const setPasswordForUserService = async (
 			throw new Error("User already has a password set. Use changePassword instead.");
 		}
 
-		// Hash the password using better-auth's default (matches sign-in verification)
+		// Hash the password with PBKDF2 (Workers-friendly, stays within free tier CPU limit)
 		console.log("DEBUG: Hashing password");
-		const hashedPassword = await hashPassword(input.password);
+		const hashedPassword = await hashPasswordPbkdf2(input.password);
 		console.log("DEBUG: Password hashed successfully");
 
 		// Generate account ID

@@ -13,6 +13,7 @@ export type BookingStatus =
 	| "in_progress"
 	| "dropped_off"
 	| "awaiting_extras"
+	| "awaiting_pricing_review"
 	| "completed"
 	| "cancelled"
 	| "no_show";
@@ -149,6 +150,18 @@ export const BOOKING_STATUS_CONFIG: Record<BookingStatus, StatusConfig> = {
 		actionLabel: "Complete Trip",
 		actionColor: "text-emerald-600 hover:text-emerald-700"
 	},
+	awaiting_pricing_review: {
+		bg: "bg-amber-50",
+		text: "text-amber-800",
+		border: "border-amber-300",
+		label: "AWAITING PRICING REVIEW",
+		shortLabel: "Pricing Review",
+		description: "Admin must finalize amount (waiting time added)",
+		kanbanBg: "bg-amber-50 border-amber-300",
+		kanbanHeader: "bg-amber-100",
+		actionLabel: "Finalize Amount",
+		actionColor: "text-emerald-600 hover:text-emerald-700"
+	},
 	completed: {
 		bg: "bg-emerald-50",
 		text: "text-emerald-700",
@@ -215,6 +228,8 @@ export function getNextStatus(currentStatus: string): string {
 			return 'awaiting_extras';
 		case 'awaiting_extras':
 			return 'completed';
+		case 'awaiting_pricing_review':
+			return 'completed';
 		default:
 			return currentStatus;
 	}
@@ -234,6 +249,7 @@ export function getAllStatuses(): BookingStatus[] {
 		"in_progress",
 		"dropped_off",
 		"awaiting_extras",
+		"awaiting_pricing_review",
 		"completed",
 		"cancelled",
 		"no_show"
@@ -248,8 +264,15 @@ export function isFinalStatus(status: string): boolean {
 }
 
 /**
+ * Check if booking needs admin to finalize amount (driver added waiting time)
+ */
+export function isAwaitingPricingReview(status: string): boolean {
+	return status === "awaiting_pricing_review";
+}
+
+/**
  * Check if a status allows cancellation
  */
 export function canCancelBooking(status: string): boolean {
-	return !["completed", "cancelled", "no_show", "dropped_off", "awaiting_extras"].includes(status);
+	return !["completed", "cancelled", "no_show", "dropped_off", "awaiting_extras", "awaiting_pricing_review"].includes(status);
 }

@@ -7,6 +7,7 @@ type SessionContextType = {
 	session: Session | null;
 	isPending: boolean;
 	isLoading: boolean;
+	isFetching: boolean;
 	refetch: () => void;
 };
 
@@ -14,7 +15,7 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
 	// Use React Query directly with aggressive caching
-	const { data: session, isPending, isLoading, refetch } = useQuery({
+	const { data: session, isPending, isLoading, isFetching, refetch } = useQuery({
 		queryKey: ["auth-session"],
 		queryFn: async () => {
 			const result = await authClient.getSession();
@@ -40,6 +41,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 				session: session ?? null,
 				isPending,
 				isLoading,
+				isFetching,
 				refetch,
 			}}
 		>

@@ -106,8 +106,8 @@ remote = true
 [env.staging.vars]
 # Staging = development (account 8357cb0b, my-dev-db)
 NODE_ENV = "development"
-# Explicit staging web origin - must match exactly for CORS
-CORS_ORIGIN = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
+# Comma-separated allowed origins for CORS (also hardcoded in index.ts ALLOWED_ORIGINS)
+CORS_ORIGIN = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev,https://downunderchauffeurs.com,https://down-under-chauffeur-dev.luppy.workers.dev,http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
 # Better Auth (Safari iOS: cross-subdomain cookies for email/password login)
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
@@ -120,6 +120,10 @@ GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
 GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
 GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
 GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+
+# Resend - REQUIRED for emails in Cloudflare Workers (nodemailer/SMTP does not work)
+# Get API key at https://resend.com (free: 100/day). Add as secret: wrangler secret put RESEND_API_KEY --env staging
+# RESEND_FROM_EMAIL = verified domain in Resend, e.g. bookings@downunderchauffeurs.com
 
 
 # Cloudflare R2

@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, useParams, useSearch } from "@tanstack/react-router";
 import { QuoteBookingPage } from "@/features/marketing/_pages/quote-booking/quote-booking-page";
 import { z } from "zod";
 
@@ -11,6 +11,8 @@ const bookQuoteSearchSchema = z.object({
 	duration: z.string().optional(),
 	totalFare: z.string().optional(),
 	carId: z.string().optional(),
+	// Guest booking flow (no account required)
+	guest: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_marketing/book-quote/$quoteId")({
@@ -20,7 +22,6 @@ export const Route = createFileRoute("/_marketing/book-quote/$quoteId")({
 
 function BookQuotePageComponent() {
 	const { quoteId } = useParams({ from: "/_marketing/book-quote/$quoteId" });
-	console.log("🎯 BookQuotePageComponent - quoteId from params:", quoteId);
-	console.log("🎯 BookQuotePageComponent - route matched");
-	return <QuoteBookingPage isCustomerArea={false} pathQuoteId={quoteId} />;
+	const search = useSearch({ from: "/_marketing/book-quote/$quoteId" });
+	return <QuoteBookingPage isCustomerArea={false} pathQuoteId={quoteId} isGuestFlow={search.guest === "1"} />;
 }

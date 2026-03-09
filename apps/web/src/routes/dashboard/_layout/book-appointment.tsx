@@ -8,6 +8,8 @@ const bookingSearchSchema = z.object({
 	token: z.string().optional(),
 	// From direct car selection
 	carId: z.string().optional(),
+	// Restore quote after sign-up
+	restore: z.string().optional(),
 });
 
 export const Route = createFileRoute("/dashboard/_layout/book-appointment")({

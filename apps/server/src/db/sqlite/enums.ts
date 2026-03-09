@@ -8,6 +8,7 @@ export enum UserRoleEnum {
 export enum BookingTypeEnum {
 	Package = "package",     // Fixed service packages
 	Custom = "custom",       // Custom route/instant quote
+	Guest = "guest",        // Guest booking (no account)
 	Offload = "offload"      // Manual bookings from other companies
 }
 
@@ -21,6 +22,7 @@ export enum BookingStatusEnum {
 	InProgress = "in_progress",    // Service started (legacy - same as PassengerOnBoard)
 	DroppedOff = "dropped_off",    // Passenger dropped off at destination
 	AwaitingExtras = "awaiting_extras", // Waiting for extras (tolls, parking, etc.)
+	AwaitingPricingReview = "awaiting_pricing_review", // Driver closed with waiting time - admin must finalize amount
 	Completed = "completed",       // Service finished
 	Cancelled = "cancelled",       // Cancelled by customer/admin
 	NoShow = "no_show",           // Customer didn't show up

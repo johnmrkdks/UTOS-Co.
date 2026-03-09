@@ -189,11 +189,21 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 							{/* Banner Image */}
 							<div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
 								{pkg.bannerImageUrl ? (
-									<img
-										src={pkg.bannerImageUrl}
-										alt={pkg.name}
-										className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-									/>
+									<>
+										<img
+											src={pkg.bannerImageUrl}
+											alt={pkg.name}
+											className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+											onError={(e) => {
+												e.currentTarget.style.display = "none";
+												const fallback = e.currentTarget.nextElementSibling;
+												if (fallback instanceof HTMLElement) fallback.classList.remove("hidden");
+											}}
+										/>
+										<div className="hidden w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+											<Package className="h-12 w-12 text-slate-400" />
+										</div>
+									</>
 								) : (
 									<div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-100 to-slate-200">
 										<Package className="h-12 w-12 text-slate-400" />

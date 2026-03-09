@@ -9,7 +9,8 @@ export async function cancelBooking(
 	db: DB,
 	bookingId: string,
 	userId: string,
-	cancellationReason?: string
+	cancellationReason?: string,
+	userRole?: string
 ) {
 	// Get the booking with user verification
 	const [existingBooking] = await db
@@ -24,7 +25,16 @@ export async function cancelBooking(
 		});
 	}
 
-	if (existingBooking.userId !== userId) {
+	// Guest bookings (userId is null) can only be cancelled by admins
+	const isAdmin = userRole === "admin" || userRole === "super_admin";
+	if (existingBooking.userId === null) {
+		if (!isAdmin) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Guest bookings can only be cancelled by administrators. Please contact support.",
+			});
+		}
+	} else if (existingBooking.userId !== userId) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: "You can only cancel your own bookings",

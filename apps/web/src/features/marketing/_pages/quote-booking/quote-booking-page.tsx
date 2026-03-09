@@ -32,7 +32,7 @@ import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
 import { queryClient } from "@/trpc";
-import { useCreateCustomBookingFromQuoteMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
+import { useCreateCustomBookingFromQuoteMutation, useCreateCustomBookingFromQuoteAsGuestMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
 import { useGetCarQuery } from "@/features/customer/_hooks/query/use-get-car-query";
 import { authClient } from "@/lib/auth-client";
@@ -61,9 +61,10 @@ type QuoteBookingFormData = z.infer<ReturnType<typeof createQuoteBookingFormSche
 interface QuoteBookingPageProps {
 	isCustomerArea?: boolean;
 	pathQuoteId?: string; // For customer routes that use path parameters
+	isGuestFlow?: boolean; // Guest booking (no account required)
 }
 
-export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteBookingPageProps) {
+export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestFlow = false }: QuoteBookingPageProps) {
 	const search = useSearch({ strict: false }) as any;
 	const navigate = useNavigate();
 
@@ -92,8 +93,9 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	console.log("- secureQuoteError:", secureQuoteError);
 	console.log("- secureQuoteData:", secureQuoteData);
 
-	// Mutation for creating booking from quote
+	// Mutation for creating booking from quote (authenticated or guest)
 	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
+	const createGuestBookingMutation = useCreateCustomBookingFromQuoteAsGuestMutation();
 	
 	// Get car details if carId is available in quote data
 	const carId = (secureQuoteData?.carId) || (search?.carId) || "";
@@ -251,19 +253,23 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 		// Car is already selected from the quote, use the pre-selected car
 		const preselectedCarId = quoteData.carId;
 
-		// Only authenticated users can book - require session
-		if (!sessionData?.user) {
+		// Only authenticated users can book - unless in guest flow
+		if (!isGuestFlow && !sessionData?.user) {
 			toast.error("Please sign in to complete your booking.");
 			navigate({ to: "/sign-in", resetScroll: true });
 			return;
 		}
 
-		const effectiveUserInfo = {
-			id: sessionData.user.id,
-			name: sessionData.user.name || formData.customerName || 'User',
-			email: sessionData.user.email || formData.customerEmail || '',
-			isGuest: false,
-		};
+		const effectiveUserInfo = isGuestFlow
+			? { id: "", name: formData.customerName || "",
+				email: formData.customerEmail || "",
+				isGuest: true as const }
+			: {
+				id: sessionData!.user.id,
+				name: sessionData!.user.name || formData.customerName || 'User',
+				email: sessionData!.user.email || formData.customerEmail || '',
+				isGuest: false as const,
+			};
 
 		console.log("👤 User info for booking:", effectiveUserInfo);
 
@@ -280,7 +286,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 
 			const bookingPayload = {
-				userId: effectiveUserInfo.id,
+				...(isGuestFlow ? { isGuest: true as const } : { userId: effectiveUserInfo.id }),
 				originAddress: quoteData.origin,
 				destinationAddress: quoteData.destination,
 				// Include stops from the secure quote data
@@ -312,8 +318,10 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 
 			console.log("📦 Quote booking payload:", bookingPayload);
 
-			// Use the mutation hook to create booking
-			const result = await createBookingMutation.mutateAsync(bookingPayload);
+			// Use the appropriate mutation (guest vs authenticated)
+			const result = isGuestFlow
+				? await createGuestBookingMutation.mutateAsync(bookingPayload)
+				: await createBookingMutation.mutateAsync(bookingPayload);
 
 			console.log("✅ Quote booking successful:", result);
 			setBookingResult(result);
@@ -352,8 +360,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 	}
 
 	// Check authentication requirement for users with valid quote data
-	// If user has quote data but is not authenticated, redirect to sign-in
-	if (!sessionLoading && !sessionData?.user && (secureQuoteData || (quoteData.origin && quoteData.destination && quoteData.totalFare))) {
+	// Skip auth check when in guest flow (Continue as Guest)
+	if (!isGuestFlow && !sessionLoading && !sessionData?.user && (secureQuoteData || (quoteData.origin && quoteData.destination && quoteData.totalFare))) {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
@@ -532,6 +540,22 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 										>
 											<LogIn className="mr-2 h-5 w-5" />
 											Sign In to Continue
+										</Button>
+
+										<Button
+											asChild
+											variant="outline"
+											className="w-full h-12 text-base font-semibold"
+										>
+											<Link
+												to="/book-quote/$quoteId"
+												params={{ quoteId }}
+												search={{ guest: "1" }}
+												resetScroll
+											>
+												<User className="mr-2 h-5 w-5" />
+												Continue as Guest
+											</Link>
 										</Button>
 
 										<Button
@@ -1315,22 +1339,24 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId }: QuoteB
 									<Button
 										onClick={handleSubmit}
 										className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold"
-										disabled={createBookingMutation.isPending}
+										disabled={createBookingMutation.isPending || createGuestBookingMutation.isPending}
 									>
-										{createBookingMutation.isPending ? (
+										{(createBookingMutation.isPending || createGuestBookingMutation.isPending) ? (
 											<>
 												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
 												Creating Your Booking...
 											</>
 										) : sessionData?.user ? (
 											"Book Now"
+										) : isGuestFlow ? (
+											"Book"
 										) : (
 											"Sign In & Book"
 										)}
 									</Button>
 
 									{/* Help Messages */}
-									{createBookingMutation.isPending && (
+									{(createBookingMutation.isPending || createGuestBookingMutation.isPending) && (
 										<div className="mt-2 p-2 bg-yellow-50 rounded text-sm text-yellow-800">
 											<div>📤 Processing your booking...</div>
 										</div>

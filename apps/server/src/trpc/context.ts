@@ -1,4 +1,5 @@
 import type { Context as HonoContext } from "hono";
+import { env as cloudflareEnv } from "cloudflare:workers";
 import { auth } from "@/lib/auth";
 import { db, type DB } from "@/db";
 import type { Env } from "@/types/env";
@@ -21,10 +22,13 @@ export async function createContext({
 		headers: context.req.raw.headers,
 	});
 
+	// Use context.env from Hono (passed via app.fetch request) or fallback to cloudflare:workers env
+	const env = (context.env ?? cloudflareEnv) as Env;
+
 	return {
 		session,
 		db,
-		env: context.env,
+		env,
 		req: context.req.raw,
 	};
 }

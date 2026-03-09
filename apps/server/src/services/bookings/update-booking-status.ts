@@ -3,7 +3,7 @@ import { getBookingById } from "@/data/bookings/get-booking-by-id";
 import type { DB } from "@/db";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 import type { UpdateBooking } from "@/schemas/shared";
-import { sendDriverAssignmentNotification, sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import { sendDriverAssignmentNotification, sendTripStatusNotification, sendBookingConfirmationEmail } from "@/services/notifications/booking-email-notification-service";
 import type { Env } from "@/types/env";
 import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
@@ -128,11 +128,24 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 		// Send email notifications after successful booking update
 		console.log(`📧 EMAIL DEBUG: Checking email notification conditions for booking ${data.id}`);
 		console.log(`📧 EMAIL DEBUG: env available: ${!!env}, result available: ${!!result}, status: ${data.status}`);
+		if (!env) {
+			console.error(`❌ EMAIL DEBUG: env is missing - emails will not be sent. Check tRPC context passes env.`);
+		}
 
 		if (env && result) {
 		console.log(`✅ EMAIL DEBUG: Entering email notification block for status ${data.status}`);
 		try {
 			switch (data.status) {
+				case BookingStatusEnum.Confirmed:
+					// Send booking confirmation email when admin confirms the booking
+					try {
+						await sendBookingConfirmationEmail(data.id, env);
+						console.log(`✅ Booking confirmation email sent for booking ${data.id}`);
+					} catch (emailError) {
+						console.error(`❌ Failed to send booking confirmation email:`, emailError);
+					}
+					break;
+
 				case BookingStatusEnum.DriverAssigned:
 					console.log(`🚗 EMAIL DEBUG: Driver assignment case - driverId: ${data.driverId}`);
 					if (data.driverId) {
@@ -150,26 +163,28 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 
 				case BookingStatusEnum.InProgress:
 				case BookingStatusEnum.PassengerOnBoard:
-					console.log(`📧 EMAIL DEBUG: Trip status case - InProgress/PassengerOnBoard`);
-					await sendTripStatusNotification({
-						bookingId: data.id,
-						status: data.status,
-						env,
-					});
-					console.log(`✅ Trip status notification sent for booking ${data.id}, status: ${data.status}`);
-					break;
-
 				case BookingStatusEnum.DriverEnRoute:
 				case BookingStatusEnum.ArrivedPickup:
+				case BookingStatusEnum.DroppedOff:
+				case BookingStatusEnum.AwaitingExtras:
+				case BookingStatusEnum.AwaitingPricingReview:
+				case BookingStatusEnum.Cancelled:
+				case BookingStatusEnum.NoShow:
+				case BookingStatusEnum.Failed:
+				case BookingStatusEnum.Pending:
+					// No client email on driver status updates - only on confirmed and completed
+					console.log(`⏭️ EMAIL DEBUG: Skipping client email for status: ${data.status}`);
+					break;
+
 				case BookingStatusEnum.Completed:
-					console.log(`🎯 EMAIL DEBUG: COMPLETION EMAIL CASE - Processing completed status for booking ${data.id}`);
-					console.log(`📧 EMAIL DEBUG: Trip status case - ${data.status}`);
+					// Send completion summary email to client
+					console.log(`📧 EMAIL DEBUG: Sending completion email to client for booking ${data.id}`);
 					await sendTripStatusNotification({
 						bookingId: data.id,
-						status: data.status,
+						status: "completed",
 						env,
 					});
-					console.log(`✅ COMPLETION EMAIL: Trip status notification sent for booking ${data.id}, status: ${data.status}`);
+					console.log(`✅ Completion email sent to client for booking ${data.id}`);
 					break;
 
 				default:

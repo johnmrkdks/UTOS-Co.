@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
 import { users, accounts } from "@/db/sqlite/schema";
-import { hashPassword } from "better-auth/crypto";
+import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
 import { eq, and, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -86,7 +86,7 @@ export const updateUserCredentialsService = async (
 				)
 				.limit(1);
 
-			const hashedPassword = await hashPassword(input.password);
+			const hashedPassword = await hashPasswordPbkdf2(input.password);
 
 			if (credentialAccount) {
 				await db

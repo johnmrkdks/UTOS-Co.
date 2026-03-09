@@ -51,6 +51,11 @@ export function BookingTypeBadge({ booking, className }: BookingTypeBadgeProps) 
 					text: 'Custom',
 					className: 'bg-purple-100 text-purple-800 border-0'
 				};
+			case 'guest':
+				return {
+					text: 'Guest',
+					className: 'bg-amber-100 text-amber-800 border-0'
+				};
 			case 'offload':
 				return {
 					text: 'Offload',

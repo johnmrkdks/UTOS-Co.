@@ -29,6 +29,7 @@ interface BookingKanbanItem extends KanbanItemProps {
 	bookingType: string;
 	car?: { name: string };
 	createdAt: string;
+	isGuestBooking?: boolean;
 }
 
 // Status column interface
@@ -98,6 +99,7 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 				bookingType: booking.bookingType,
 				car: booking.car,
 				createdAt: booking.createdAt,
+				isGuestBooking: booking.isGuestBooking,
 			}));
 	}, [bookingsQuery.data?.data, filters]);
 
@@ -197,9 +199,16 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 																</AvatarFallback>
 															</Avatar>
 															<div>
-																<p className="text-sm font-medium truncate">
-																	{booking.customerName}
-																</p>
+																<div className="flex items-center gap-1.5">
+																	<p className="text-sm font-medium truncate">
+																		{booking.customerName}
+																	</p>
+																	{booking.isGuestBooking && (
+																		<Badge variant="outline" className="text-[10px] px-1 py-0 h-4 font-normal">
+																			Guest
+																		</Badge>
+																	)}
+																</div>
 																<p className="text-xs text-muted-foreground">
 																	#{(booking as any).referenceNumber || 'N/A'}
 																</p>

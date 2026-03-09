@@ -70,7 +70,7 @@ export function ConfirmBookingDialog({ booking, open, onOpenChange }: ConfirmBoo
 						<div className="text-sm text-gray-600">
 							<p><strong>Customer:</strong> {booking.customerName || 'N/A'}</p>
 							<p><strong>Amount:</strong> ${booking.quotedAmount?.toFixed(2) || '0.00'}</p>
-							<p><strong>Type:</strong> {booking.bookingType === "package" ? "Package" : "Custom"}</p>
+							<p><strong>Type:</strong> {booking.bookingType === "package" ? "Package" : booking.bookingType === "guest" ? "Guest" : "Custom"}</p>
 						</div>
 					</div>
 				)}

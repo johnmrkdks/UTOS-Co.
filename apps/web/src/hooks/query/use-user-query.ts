@@ -6,7 +6,7 @@ import { useSession } from "@/providers/session-provider";
 export const useUserQuery = () => {
 	const navigate = useNavigate();
 	// Use the cached session from SessionProvider instead of authClient.useSession()
-	const { session, isPending } = useSession();
+	const { session, isPending, isFetching } = useSession();
 
 	function handleLogout() {
 		authClient.signOut({
@@ -26,6 +26,7 @@ export const useUserQuery = () => {
 	return {
 		session,
 		isPending,
+		isFetching,
 		handleLogout,
 		signOutWithConfirmation
 	};

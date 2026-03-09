@@ -6,7 +6,11 @@ export type Env = {
 	BUCKET: R2Bucket;
 	BETTER_AUTH_URL?: string;
 	GOOGLE_MAPS_API_KEY?: string;
-	// Email configuration
+	// Email: Resend (works in Cloudflare Workers - preferred)
+	RESEND_API_KEY?: string;
+	RESEND_FROM_EMAIL?: string;
+	RESEND_FROM_NAME?: string;
+	// Email: Gmail OAuth (nodemailer - does NOT work in Workers)
 	GOOGLE_CLIENT_ID?: string;
 	GMAIL_CLIENT_ID?: string;
 	GOOGLE_CLIENT_SECRET?: string;

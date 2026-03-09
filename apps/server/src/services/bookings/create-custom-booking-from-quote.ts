@@ -7,7 +7,8 @@ import { selectAvailableCarService } from "@/services/cars/select-available-car"
 import { z } from "zod";
 
 export const CreateCustomBookingFromQuoteSchema = z.object({
-	userId: z.string(),
+	userId: z.string().optional(),
+	isGuest: z.boolean().optional().default(false),
 
 	// Route information from quote
 	originAddress: z.string(),
@@ -48,13 +49,20 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	preferredCarId: z.string().optional(),
 	// Legacy field for backward compatibility
 	preferredCategoryId: z.string().optional(),
+
+	// Route preference: "toll" (use toll roads) or "no_toll" (avoid tolls)
+	tollPreference: z.enum(["toll", "no_toll"]).optional().default("toll"),
 });
 
 export type CreateCustomBookingFromQuoteParams = z.infer<typeof CreateCustomBookingFromQuoteSchema>;
 
 export async function createCustomBookingFromQuoteService(db: DB, data: CreateCustomBookingFromQuoteParams) {
+	const effectiveUserId = data.isGuest ? null : (data.userId ?? null);
+	const isGuestBooking = !!data.isGuest;
+
 	console.log("🔄 Starting createCustomBookingFromQuoteService with data:", {
-		userId: data.userId,
+		userId: effectiveUserId ?? "(guest - no user)",
+		isGuestBooking,
 		scheduledPickupTime: data.scheduledPickupTime,
 		passengerCount: data.passengerCount,
 		preferredCarId: data.preferredCarId,
@@ -90,11 +98,12 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 
 	console.log("✅ Selected car:", { id: selectedCar.id, name: selectedCar.model?.name });
 
-	// Prepare booking data
+	// Prepare booking data (userId is null for guest bookings - no user record)
 	const bookingData: InsertBooking = {
-		bookingType: BookingTypeEnum.Custom,
+		bookingType: isGuestBooking ? BookingTypeEnum.Guest : BookingTypeEnum.Custom,
 		carId: selectedCar.id,
-		userId: data.userId,
+		...(effectiveUserId != null ? { userId: effectiveUserId } : { userId: null }),
+		isGuestBooking,
 
 		originAddress: data.originAddress,
 		originLatitude: data.originLatitude,
@@ -120,6 +129,7 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 		passengerCount: data.passengerCount,
 		luggageCount: data.luggageCount,
 		specialRequests: data.specialRequests,
+		tollPreference: data.tollPreference || "toll",
 
 		status: BookingStatusEnum.Pending,
 	};
