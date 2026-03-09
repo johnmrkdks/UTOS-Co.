@@ -24,6 +24,7 @@ import { useGetBookingByIdQuery } from "../_hooks/query/use-get-booking-by-id-qu
 import { useGenerateBookingShareTokenMutation } from "../_hooks/query/use-generate-booking-share-token-mutation";
 import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
 import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
+import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutation";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { AssignDriverDialog } from "./assign-driver-dialog";
 import { AssignCarDialog } from "./assign-car-dialog";
@@ -56,13 +57,14 @@ import {
 	MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const statusOptions = [
 	{ value: "pending", label: "Pending", color: "warning", icon: Timer, description: "Awaiting confirmation" },
 	{ value: "confirmed", label: "Confirmed", color: "success", icon: CheckCircle, description: "Booking confirmed" },
 	{ value: "driver_assigned", label: "Driver Assigned", color: "info", icon: UserPlus, description: "Driver ready" },
 	{ value: "in_progress", label: "In Progress", color: "primary", icon: Navigation, description: "Service active" },
+	{ value: "awaiting_pricing_review", label: "Pricing Review", color: "warning", icon: AlertCircle, description: "Admin must finalize amount" },
 	{ value: "completed", label: "Completed", color: "success", icon: CheckCircle, description: "Service complete" },
 	{ value: "cancelled", label: "Cancelled", color: "destructive", icon: X, description: "Booking cancelled" },
 ];
@@ -73,6 +75,7 @@ const getStatusProgress = (status: string): number => {
 		case "confirmed": return 40;
 		case "driver_assigned": return 60;
 		case "in_progress": return 80;
+		case "awaiting_pricing_review": return 90;
 		case "completed": return 100;
 		case "cancelled": return 0;
 		default: return 0;
@@ -89,6 +92,9 @@ export function BookingDetailsDialog() {
 	const [selectedStatus, setSelectedStatus] = useState<string>("");
 	const [isAssignDriverDialogOpen, setIsAssignDriverDialogOpen] = useState(false);
 	const [isAssignCarDialogOpen, setIsAssignCarDialogOpen] = useState(false);
+	const [editFinalAmount, setEditFinalAmount] = useState<string>("");
+	const [editExtraCharges, setEditExtraCharges] = useState<string>("");
+	const [editWaitingTimeCharge, setEditWaitingTimeCharge] = useState<string>("");
 
 	const bookingQuery = useGetBookingByIdQuery(
 		{ id: selectedBookingId! },
@@ -97,6 +103,7 @@ export function BookingDetailsDialog() {
 
 	const updateStatusMutation = useUpdateBookingStatusMutation();
 	const assignDriverMutation = useAssignDriverMutation();
+	const editBookingMutation = useEditBookingMutation();
 	const generateShareTokenMutation = useGenerateBookingShareTokenMutation(selectedBookingId ?? undefined);
 
 	const handleStatusUpdate = (newStatus: string) => {
@@ -121,6 +128,46 @@ export function BookingDetailsDialog() {
 	console.log("📋 Has driverId:", booking?.driverId);
 	console.log("📋 Assign driver dialog open:", isAssignDriverDialogOpen);
 
+	// Sync edit amount fields when booking changes
+	useEffect(() => {
+		if (booking) {
+			// For awaiting_pricing_review: leave Final Amount empty so we auto-compute quoted + extras + waiting time
+			// Pre-filling with old finalAmount would exclude the waiting time when admin only adds waiting charge
+			const isAwaitingPricing = booking.status === "awaiting_pricing_review";
+			setEditFinalAmount(!isAwaitingPricing && booking.finalAmount != null ? String(booking.finalAmount) : "");
+			setEditExtraCharges(booking.extraCharges != null && booking.extraCharges > 0 ? String(booking.extraCharges) : "");
+			setEditWaitingTimeCharge("");
+		}
+	}, [booking?.id, booking?.finalAmount, booking?.extraCharges, booking?.status]);
+
+	const handleFinalizeAmount = () => {
+		if (!selectedBookingId || !booking) return;
+		const finalAmountVal = editFinalAmount ? parseFloat(editFinalAmount) : undefined;
+		const waitingTimeChargeVal = editWaitingTimeCharge ? parseFloat(editWaitingTimeCharge) : 0;
+		const existingExtraCharges = booking.extraCharges ?? 0;
+		const totalExtraCharges = existingExtraCharges + (Number.isNaN(waitingTimeChargeVal) ? 0 : waitingTimeChargeVal);
+		const quotedAmount = booking.quotedAmount ?? 0;
+		// Always set finalAmount: use admin input, or compute quotedAmount + totalExtraCharges (includes waiting time)
+		const finalAmount = (finalAmountVal != null && !Number.isNaN(finalAmountVal))
+			? finalAmountVal
+			: Math.round((quotedAmount + totalExtraCharges) * 100) / 100;
+		const data: Record<string, unknown> = {
+			status: "completed",
+			extraCharges: totalExtraCharges,
+			finalAmount,
+		};
+		editBookingMutation.mutate(
+			{ id: selectedBookingId, data },
+			{
+				onSuccess: () => {
+					bookingQuery.refetch();
+					toast.success("Amount finalized. Client will receive summary email.");
+					closeBookingDetailsDialog();
+				},
+			}
+		);
+	};
+
 	if (!booking) return null;
 
 	const currentStatus = statusOptions.find(s => s.value === booking.status);
@@ -135,7 +182,7 @@ export function BookingDetailsDialog() {
 					<div className="flex items-center gap-3 flex-1 min-w-0">
 						<h2 className="text-xl font-semibold">Booking Details</h2>
 						<Badge variant="outline" className="text-xs">
-							{booking.bookingType === "package" ? "Package" : "Custom"}
+							{booking.bookingType === "package" ? "Package" : booking.bookingType === "guest" ? "Guest" : "Custom"}
 						</Badge>
 						<Badge variant={currentStatus?.color as any || "secondary"} className="text-xs">
 							{booking.status.replace("_", " ").toUpperCase()}
@@ -499,32 +546,72 @@ export function BookingDetailsDialog() {
 										<div className="text-sm text-gray-600 mb-2">Package booking - Fixed pricing</div>
 									) : (
 										<div className="space-y-1 text-sm">
-											{booking.baseFare && (
+											{booking.baseFare != null && booking.baseFare > 0 && (
 												<div className="flex justify-between">
 													<span>Base fare:</span>
 													<span>${booking.baseFare.toFixed(2)}</span>
 												</div>
 											)}
-											{booking.distanceFare && (
+											{booking.distanceFare != null && booking.distanceFare > 0 && (
 												<div className="flex justify-between">
 													<span>Distance:</span>
 													<span>${booking.distanceFare.toFixed(2)}</span>
 												</div>
 											)}
-											{booking.timeFare && (
+											{booking.timeFare != null && booking.timeFare > 0 && (
 												<div className="flex justify-between">
 													<span>Time:</span>
 													<span>${booking.timeFare.toFixed(2)}</span>
 												</div>
 											)}
-											{booking.extraCharges && booking.extraCharges > 0 && (
-												<div className="flex justify-between">
-													<span>Extra charges:</span>
-													<span>${booking.extraCharges.toFixed(2)}</span>
-												</div>
-											)}
 										</div>
 									)}
+									{/* Fare breakdown: tolls, parking, waiting time, other (for all booking types) */}
+									{(() => {
+										const extras = (booking as { extras?: Array<{ tollCharges?: number; parkingCharges?: number; otherChargesAmount?: number }> })?.extras;
+										const tollCharges = extras?.reduce((s, e) => s + (e.tollCharges ?? 0), 0) ?? 0;
+										const parkingCharges = extras?.reduce((s, e) => s + (e.parkingCharges ?? 0), 0) ?? 0;
+										const otherCharges = extras?.reduce((s, e) => s + (e.otherChargesAmount ?? 0), 0) ?? 0;
+										const extraTotal = booking.extraCharges ?? 0;
+										const waitingTimeCharge = Math.max(0, extraTotal - tollCharges - parkingCharges - otherCharges);
+										const hasBreakdown = tollCharges > 0 || parkingCharges > 0 || waitingTimeCharge > 0 || otherCharges > 0;
+										if (!hasBreakdown && extraTotal > 0) {
+											return (
+												<div className="flex justify-between text-sm">
+													<span>Extra charges:</span>
+													<span>${extraTotal.toFixed(2)}</span>
+												</div>
+											);
+										}
+										return hasBreakdown ? (
+											<div className="space-y-1 text-sm">
+												{tollCharges > 0 && (
+													<div className="flex justify-between">
+														<span>Tolls:</span>
+														<span>${tollCharges.toFixed(2)}</span>
+													</div>
+												)}
+												{parkingCharges > 0 && (
+													<div className="flex justify-between">
+														<span>Parking:</span>
+														<span>${parkingCharges.toFixed(2)}</span>
+													</div>
+												)}
+												{waitingTimeCharge > 0 && (
+													<div className="flex justify-between">
+														<span>Waiting time:</span>
+														<span>${waitingTimeCharge.toFixed(2)}</span>
+													</div>
+												)}
+												{otherCharges > 0 && (
+													<div className="flex justify-between">
+														<span>Other charges:</span>
+														<span>${otherCharges.toFixed(2)}</span>
+													</div>
+												)}
+											</div>
+										) : null;
+									})()}
 									<div className="border-t pt-2 mt-2">
 										<div className="flex justify-between items-center">
 											<span className="font-semibold">Total Amount:</span>
@@ -541,6 +628,71 @@ export function BookingDetailsDialog() {
 											</div>
 										)}
 									</div>
+
+									{/* Finalize Amount - for bookings awaiting pricing review */}
+									{booking.status === "awaiting_pricing_review" && (
+										<div className="mt-4 pt-4 border-t border-amber-200 bg-amber-50/50 rounded-lg p-3 space-y-3">
+											<div className="flex items-center gap-2 text-amber-800 font-medium">
+												<AlertCircle className="h-4 w-4" />
+												<span>Finalize amount & send client summary</span>
+											</div>
+											{/* Driver's waiting time - from booking extras */}
+											{(() => {
+												const extras = (booking as { extras?: Array<{ additionalWaitTime?: number | null }> } | undefined)?.extras;
+												const totalWaitMins = extras?.reduce((sum, e) => sum + (e.additionalWaitTime ?? 0), 0) ?? 0;
+												return totalWaitMins > 0 ? (
+													<div className="p-2 rounded bg-amber-100/80 border border-amber-200">
+														<div className="text-sm font-medium text-amber-800">Driver added waiting time</div>
+														<div className="text-lg font-semibold text-amber-900">{totalWaitMins} minutes</div>
+													</div>
+												) : null;
+											})()}
+											<p className="text-sm text-amber-700">
+												Tolls and parking (from driver) are automatically included in the total. Add the waiting time charge, then complete to send the summary email to the client.
+											</p>
+											<div className="grid grid-cols-2 gap-3">
+												<div>
+													<label className="block text-xs font-medium text-gray-600 mb-1">Waiting time charge ($)</label>
+													<Input
+														type="number"
+														step="0.01"
+														min="0"
+														placeholder="0.00"
+														value={editWaitingTimeCharge}
+														onChange={(e) => setEditWaitingTimeCharge(e.target.value)}
+													/>
+												</div>
+												<div>
+													<label className="block text-xs font-medium text-gray-600 mb-1">Final Amount ($)</label>
+													<Input
+														type="number"
+														step="0.01"
+														placeholder={String(
+															Math.round(((booking.quotedAmount ?? 0) + (booking.extraCharges ?? 0) + (Number(editWaitingTimeCharge) || 0)) * 100) / 100
+														)}
+														value={editFinalAmount}
+														onChange={(e) => setEditFinalAmount(e.target.value)}
+													/>
+												</div>
+											</div>
+											{(booking.extraCharges != null && booking.extraCharges > 0) && (
+												<p className="text-xs text-amber-700">
+													Tolls & parking (auto-included): ${booking.extraCharges.toFixed(2)}
+												</p>
+											)}
+											<Button
+												onClick={handleFinalizeAmount}
+												disabled={editBookingMutation.isPending}
+												className="w-full bg-amber-600 hover:bg-amber-700"
+											>
+												{editBookingMutation.isPending ? (
+													<Timer className="h-4 w-4 animate-spin" />
+												) : (
+													"Finalize Amount & Send Summary"
+												)}
+											</Button>
+										</div>
+									)}
 								</div>
 							</div>
 

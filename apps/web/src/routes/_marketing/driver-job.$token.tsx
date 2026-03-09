@@ -1,6 +1,7 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useGetBookingByShareTokenQuery } from "@/features/booking-tracking/_hooks/use-get-booking-by-share-token-query";
 import { useUpdateBookingStatusByTokenMutation } from "@/features/booking-tracking/_hooks/use-update-booking-status-by-token-mutation";
+import { useCloseTripWithExtrasByShareTokenMutation, useCloseTripWithoutExtrasByShareTokenMutation } from "@/features/booking-tracking/_hooks/use-close-trip-by-share-token-mutations";
 import { format } from "date-fns";
 import {
 	MapPin,
@@ -15,11 +16,15 @@ import {
 } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
 import { BOOKING_STATUS_CONFIG, getNextStatus, isFinalStatus, type BookingStatus } from "@/lib/booking-status-config";
 import { formatDistanceKm } from "@/utils/format";
 import { cn } from "@workspace/ui/lib/utils";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { CloseTripOptionsDialog } from "@/features/driver/_components/close-trip-options-dialog";
+import { CloseTripExtrasForm, type ExtrasFormData } from "@/features/driver/_components/close-trip-extras-form";
+import { TripConfirmationDialog } from "@/features/driver/_components/trip-confirmation-dialog";
 
 function getGoogleMapsUrl(address: string, lat?: number | null, lng?: number | null): string {
 	if (lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng)) {
@@ -36,6 +41,14 @@ function DriverJobPage() {
 	const { token } = useParams({ from: "/_marketing/driver-job/$token" });
 	const { data: booking, isLoading, error } = useGetBookingByShareTokenQuery(token);
 	const updateStatus = useUpdateBookingStatusByTokenMutation(token);
+	const closeWithExtras = useCloseTripWithExtrasByShareTokenMutation(token);
+	const closeWithoutExtras = useCloseTripWithoutExtrasByShareTokenMutation(token);
+
+	const [closeTripOptionsOpen, setCloseTripOptionsOpen] = useState(false);
+	const [closeTripExtrasOpen, setCloseTripExtrasOpen] = useState(false);
+	const [tripConfirmationOpen, setTripConfirmationOpen] = useState(false);
+	const [isNoShow, setIsNoShow] = useState(false);
+	const [extrasData, setExtrasData] = useState<ExtrasFormData | undefined>(undefined);
 
 	const isMobile = useMemo(() => {
 		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -43,6 +56,74 @@ function DriverJobPage() {
 
 	const handleStatusUpdate = (status: string) => {
 		updateStatus.mutate({ shareToken: token, status: status as any });
+	};
+
+	// External drivers: when at dropped_off/awaiting_extras, open close-trip flow (cannot mark completed)
+	const handleAddExtrasClick = () => {
+		setCloseTripOptionsOpen(true);
+	};
+
+	const handleCloseTripOption = (option: "close" | "close-with-extras" | "no-show" | "no-show-with-extras" | "close-later") => {
+		setCloseTripOptionsOpen(false);
+		if (option === "close") {
+			closeWithoutExtras.mutate({ shareToken: token, isNoShow: false });
+		} else if (option === "close-with-extras") {
+			setIsNoShow(false);
+			setCloseTripExtrasOpen(true);
+		} else if (option === "no-show") {
+			closeWithoutExtras.mutate({ shareToken: token, isNoShow: true });
+		} else if (option === "no-show-with-extras") {
+			setIsNoShow(true);
+			setCloseTripExtrasOpen(true);
+		}
+		// close-later: just close dialog, no action
+	};
+
+	const handleExtrasSubmit = (data: ExtrasFormData) => {
+		setExtrasData(data);
+		setCloseTripExtrasOpen(false);
+		setTripConfirmationOpen(true);
+	};
+
+	const handleExtrasBack = () => {
+		setCloseTripExtrasOpen(false);
+		setCloseTripOptionsOpen(true);
+	};
+
+	const calculateTotalExtrasCharges = () => {
+		if (!extrasData) return 0;
+		return (extrasData.parkingCharges || 0) + (extrasData.tollCharges || 0) + (extrasData.otherCharges?.amount || 0);
+	};
+
+	const handleTripConfirmation = () => {
+		if (!extrasData) return;
+		const extrasForBackend = {
+			additionalWaitTime: extrasData.additionalWaitTime || 0,
+			unscheduledStops: extrasData.unscheduledStops || 0,
+			parkingCharges: extrasData.parkingCharges || 0,
+			tollCharges: extrasData.tollCharges || 0,
+			location: extrasData.location || "",
+			otherCharges: {
+				description: extrasData.otherCharges?.description || "",
+				amount: extrasData.otherCharges?.amount || 0,
+			},
+			extraType: (extrasData.extraType || "general") as "general" | "driver" | "operator",
+			notes: extrasData.notes || "",
+		};
+		closeWithExtras.mutate(
+			{ shareToken: token, isNoShow, extrasData: extrasForBackend },
+			{
+				onSuccess: () => {
+					setTripConfirmationOpen(false);
+					setExtrasData(undefined);
+				},
+			}
+		);
+	};
+
+	const handleTripConfirmationBack = () => {
+		setTripConfirmationOpen(false);
+		setCloseTripExtrasOpen(true);
 	};
 
 	if (isLoading) {
@@ -68,18 +149,13 @@ function DriverJobPage() {
 
 	const statusConfig = BOOKING_STATUS_CONFIG[(booking.status as BookingStatus) ?? "pending"];
 	const nextStatus = getNextStatus(booking.status);
-	const canUpdate =
+	// External drivers can update status except to "completed" - they must add extras and submit
+	const isAtCloseStage = ["dropped_off", "awaiting_extras"].includes(booking.status);
+	const canUpdateStatus =
 		!isFinalStatus(booking.status) &&
-		[
-			"driver_assigned",
-			"confirmed",
-			"driver_en_route",
-			"arrived_pickup",
-			"passenger_on_board",
-			"in_progress",
-			"dropped_off",
-			"awaiting_extras",
-		].includes(booking.status);
+		!isAtCloseStage &&
+		["driver_assigned", "confirmed", "driver_en_route", "arrived_pickup", "passenger_on_board", "in_progress"].includes(booking.status);
+	const showAddExtrasButton = isAtCloseStage;
 
 	const isPackageBooking = !!booking.packageId;
 	const serviceType = booking.package?.packageServiceType?.rateType;
@@ -387,7 +463,27 @@ function DriverJobPage() {
 
 			{/* Sticky action button */}
 			<div className={cn("flex-shrink-0 p-4 bg-white border-t border-gray-200", isMobile ? "shadow-2xl" : "")}>
-				{canUpdate && nextStatus !== booking.status ? (
+				{showAddExtrasButton ? (
+					<div className="space-y-2">
+						<p className="text-xs text-center text-gray-500">
+							Add tolls, parking, waiting time. Admin will finalize the amount.
+						</p>
+						<Button
+							className="w-full h-12 text-base font-semibold"
+							onClick={handleAddExtrasClick}
+							disabled={closeWithExtras.isPending || closeWithoutExtras.isPending}
+						>
+							{closeWithExtras.isPending || closeWithoutExtras.isPending ? (
+								<>
+									<Loader2 className="h-5 w-5 animate-spin mr-2" />
+									Submitting...
+								</>
+							) : (
+								"Add extras & submit"
+							)}
+						</Button>
+					</div>
+				) : canUpdateStatus && nextStatus !== booking.status ? (
 					<Button
 						className="w-full h-12 text-base font-semibold"
 						onClick={() => handleStatusUpdate(nextStatus)}
@@ -413,6 +509,32 @@ function DriverJobPage() {
 					</div>
 				)}
 			</div>
+
+			{/* Close trip dialogs - for external drivers to add extras */}
+			<CloseTripOptionsDialog
+				open={closeTripOptionsOpen}
+				onOpenChange={setCloseTripOptionsOpen}
+				booking={booking}
+				onSelectOption={handleCloseTripOption}
+			/>
+			<CloseTripExtrasForm
+				open={closeTripExtrasOpen}
+				onOpenChange={setCloseTripExtrasOpen}
+				booking={booking}
+				isNoShow={isNoShow}
+				onSubmit={handleExtrasSubmit}
+				onBack={handleExtrasBack}
+			/>
+			<TripConfirmationDialog
+				open={tripConfirmationOpen}
+				onOpenChange={setTripConfirmationOpen}
+				booking={booking}
+				extrasData={extrasData}
+				totalCharges={calculateTotalExtrasCharges()}
+				onConfirm={handleTripConfirmation}
+				onGoBack={handleTripConfirmationBack}
+				isSubmitting={closeWithExtras.isPending}
+			/>
 		</div>
 	);
 }

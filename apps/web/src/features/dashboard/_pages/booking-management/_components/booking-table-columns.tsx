@@ -60,6 +60,7 @@ export interface Booking {
 		updatedAt: string;
 	} | null;
 	createdAt: string;
+	isGuestBooking?: boolean | null;
 	[key: string]: any;
 }
 
@@ -197,7 +198,14 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<div className="flex items-center space-x-2">
 				<User className="h-4 w-4 text-muted-foreground" />
 				<div>
-					<div className="font-medium text-xs truncate">{row.getValue("customerName")}</div>
+					<div className="flex items-center gap-1.5">
+						<span className="font-medium text-xs truncate">{row.getValue("customerName")}</span>
+						{row.original.isGuestBooking && (
+							<Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+								Guest
+							</Badge>
+						)}
+					</div>
 					<div className="text-xs text-muted-foreground flex items-center gap-1">
 						<Phone className="h-3 w-3" />
 						<span className="truncate">{row.original.customerPhone}</span>
@@ -205,7 +213,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 				</div>
 			</div>
 		),
-		size: 160,
+		size: 180,
 	});
 
 	if (!compact) {

@@ -23,6 +23,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 		defaultValues: {
 			originAddress: initialData?.originAddress || "",
 			destinationAddress: initialData?.destinationAddress || "",
+			tollPreference: initialData?.tollPreference || "toll",
 			stops: initialData?.stops || [],
 			originLatitude: initialData?.originLatitude || 0,
 			originLongitude: initialData?.originLongitude || 0,
@@ -47,6 +48,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 			const result = await calculateQuoteMutation.mutateAsync({
 				originAddress: data.originAddress,
 				destinationAddress: data.destinationAddress,
+				tollPreference: data.tollPreference || "toll",
 				originLatitude: data.originLatitude,
 				originLongitude: data.originLongitude,
 				destinationLatitude: data.destinationLatitude,
@@ -63,7 +65,8 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 				destinationLongitude: data.destinationLongitude,
 				stops: data.stops || [],
 				passengerCount: data.passengerCount || 1,
-				luggageCount: data.luggageCount || 0
+				luggageCount: data.luggageCount || 0,
+				tollPreference: data.tollPreference || "toll"
 			};
 
 			if (result) {
@@ -153,6 +156,42 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 												}
 											}}
 										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						{/* Toll preference */}
+						<FormField
+							control={form.control as any}
+							name="tollPreference"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Route preference</FormLabel>
+									<FormControl>
+										<div className="flex gap-4">
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="radio"
+													value="toll"
+													checked={field.value === "toll"}
+													onChange={() => field.onChange("toll")}
+													className="rounded-full"
+												/>
+												<span>Use toll roads</span>
+											</label>
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="radio"
+													value="no_toll"
+													checked={field.value === "no_toll"}
+													onChange={() => field.onChange("no_toll")}
+													className="rounded-full"
+												/>
+												<span>No toll roads</span>
+											</label>
+										</div>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

@@ -36,6 +36,7 @@ export function BookingDetailsStep({
 			scheduledPickupTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
 			specialRequests: "",
 			selectedCarId: selectedCarId,
+			tollPreference: "toll" as const,
 		}
 	});
 
@@ -159,6 +160,42 @@ export function BookingDetailsStep({
 								)}
 							/>
 						</div>
+
+						{/* Toll preference */}
+						<FormField
+							control={form.control as any}
+							name="tollPreference"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Route preference</FormLabel>
+									<FormControl>
+										<div className="flex gap-4">
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="radio"
+													value="toll"
+													checked={field.value === "toll"}
+													onChange={() => field.onChange("toll")}
+													className="rounded-full"
+												/>
+												<span>Use toll roads</span>
+											</label>
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="radio"
+													value="no_toll"
+													checked={field.value === "no_toll"}
+													onChange={() => field.onChange("no_toll")}
+													className="rounded-full"
+												/>
+												<span>No toll roads</span>
+											</label>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
 						{/* Pickup Date/Time */}
 						<FormField

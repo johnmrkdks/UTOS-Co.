@@ -223,6 +223,7 @@ function BookingManagementContent() {
 					<TabsTrigger value="ready">Ready</TabsTrigger>
 					<TabsTrigger value="package">Package Bookings</TabsTrigger>
 					<TabsTrigger value="custom">Custom Bookings</TabsTrigger>
+					<TabsTrigger value="guest">Guest Bookings</TabsTrigger>
 					<TabsTrigger value="offload">Offloads</TabsTrigger>
 					<TabsTrigger value="archived">Archived</TabsTrigger>
 				</TabsList>
@@ -286,6 +287,22 @@ function BookingManagementContent() {
 						<CardContent>
 							<Suspense fallback={<Loader />}>
 								<BookingsListTable bookingType="custom" filters={filters} />
+							</Suspense>
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="guest" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle>Guest Bookings</CardTitle>
+							<CardDescription>
+								Bookings made without an account.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Suspense fallback={<Loader />}>
+								<BookingsListTable bookingType="guest" filters={filters} />
 							</Suspense>
 						</CardContent>
 					</Card>

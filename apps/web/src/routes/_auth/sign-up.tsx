@@ -13,8 +13,11 @@ const signUpSearchSchema = z.object({
 
 export const Route = createFileRoute("/_auth/sign-up")({
 	validateSearch: signUpSearchSchema,
-	beforeLoad: async () => {
-		await redirectIfAuthenticated();
+	beforeLoad: async ({ search, context }) => {
+		await redirectIfAuthenticated({
+			redirectUrl: search.redirect,
+			queryClient: context.queryClient,
+		});
 	},
 	component: RouteComponent,
 });

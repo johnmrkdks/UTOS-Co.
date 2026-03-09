@@ -19,7 +19,7 @@ export function useInstantQuoteFlow() {
 	};
 
 	const startBookingFlow = () => {
-		setCurrentStep("car-selection");
+		setCurrentStep("auth-choice");
 	};
 
 	return {

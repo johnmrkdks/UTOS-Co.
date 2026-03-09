@@ -8,12 +8,13 @@ import { storeSecureQuote, type SecureQuoteData } from "@/services/quotes/instan
 export const CalculateInstantQuoteSchema = z.object({
 	originAddress: z.string().min(1, "Origin address is required"),
 	destinationAddress: z.string().min(1, "Destination address is required"),
+	tollPreference: z.enum(["toll", "no_toll"]).optional().default("toll"),
 	originLatitude: z.number().optional(),
 	originLongitude: z.number().optional(),
 	destinationLatitude: z.number().optional(),
 	destinationLongitude: z.number().optional(),
 	carId: z.string().optional(),
-	scheduledPickupTime: z.coerce.date().optional().default(new Date()),
+	scheduledPickupTime: z.coerce.date().optional().default(() => new Date()),
 	stops: z.array(z.object({
 		address: z.string(),
 		latitude: z.number().optional(),
@@ -79,7 +80,7 @@ export async function calculateInstantQuoteService(
 					mode: "driving",
 					units: "metric",
 					avoidHighways: false,
-					avoidTolls: false,
+					avoidTolls: data.tollPreference === "no_toll",
 				}, env);
 				
 				if (response.rows[0]?.elements[0]?.status === "OK") {
@@ -99,7 +100,7 @@ export async function calculateInstantQuoteService(
 				mode: "driving",
 				units: "metric",
 				avoidHighways: false,
-				avoidTolls: false,
+				avoidTolls: data.tollPreference === "no_toll",
 			}, env);
 			
 			if (finalResponse.rows[0]?.elements[0]?.status === "OK") {
@@ -115,7 +116,7 @@ export async function calculateInstantQuoteService(
 				mode: "driving",
 				units: "metric",
 				avoidHighways: false,
-				avoidTolls: false,
+				avoidTolls: data.tollPreference === "no_toll",
 			}, env);
 
 			if (response.rows[0]?.elements[0]?.status === "OK") {

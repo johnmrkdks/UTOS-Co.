@@ -2,8 +2,8 @@ import { bookings, bookingExtras } from "@/db/sqlite/schema";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
-import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
 import type { Env } from "@/types/env";
+import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
 
 export interface ExtrasFormData {
 	additionalWaitTime: number; // in minutes
@@ -57,8 +57,14 @@ export async function closeTripWithExtras(
 		// Calculate new final amount (original quoted amount + extras) with proper decimal precision
 		const newFinalAmount = Math.round(((booking.finalAmount || booking.quotedAmount) + totalExtrasAmount) * 100) / 100;
 
-		// Determine the final status based on whether it's a no-show
-		const finalStatus = isNoShow ? BookingStatusEnum.NoShow : BookingStatusEnum.Completed;
+		// When driver adds waiting time: defer completion email until admin finalizes amount
+		// When only tolls/parking (no waiting time): complete immediately and send email
+		const hasWaitingTime = extrasData.additionalWaitTime > 0;
+		const finalStatus = isNoShow
+			? BookingStatusEnum.NoShow
+			: hasWaitingTime
+				? BookingStatusEnum.AwaitingPricingReview
+				: BookingStatusEnum.Completed;
 
 		// Update booking status and amounts
 		const updatedBooking = await db
@@ -99,20 +105,17 @@ export async function closeTripWithExtras(
 			extras: extrasRecord
 		};
 
-		// Send completion email notification
+		// When Completed (no waiting time): send completion email immediately
+		// When AwaitingPricingReview: do NOT send - admin will trigger after finalizing amount
 		if (env && finalStatus === BookingStatusEnum.Completed) {
-			console.log(`📧 CLOSE TRIP DEBUG: Sending completion email for booking ${bookingId}`);
 			try {
-				await sendTripStatusNotification({
-					bookingId,
-					status: "completed",
-					env,
-				});
-				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId}`);
+				await sendTripStatusNotification({ bookingId, status: "completed", env });
+				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId} (extras, no waiting time)`);
 			} catch (emailError) {
-				console.error(`❌ CLOSE TRIP EMAIL: Failed to send completion email for booking ${bookingId}:`, emailError);
-				// Don't fail the booking completion if email fails
+				console.error(`❌ CLOSE TRIP EMAIL: Failed to send:`, emailError);
 			}
+		} else if (finalStatus === BookingStatusEnum.AwaitingPricingReview) {
+			console.log(`📧 CLOSE TRIP DEBUG: Booking ${bookingId} awaiting admin pricing review (driver added waiting time)`);
 		}
 
 		return {

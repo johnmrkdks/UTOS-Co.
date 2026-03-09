@@ -16,7 +16,7 @@ import { canCancelBooking } from "@/lib/booking-status-config";
 import { toast } from "sonner";
 
 interface BookingsListTableProps {
-	bookingType?: "package" | "custom" | "offload";
+	bookingType?: "package" | "custom" | "guest" | "offload";
 	status?: string;
 	filters?: BookingFilters;
 	compact?: boolean;

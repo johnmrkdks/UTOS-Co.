@@ -1,94 +1,98 @@
-import { env } from "cloudflare:workers";
+import { env as cloudflareEnv } from "cloudflare:workers";
 import { trpcServer } from "@hono/trpc-server";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/_app";
 import { auth } from "@/lib/auth";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { uploadFileService } from "@/services/file/upload-file";
 
-const DEFAULT_ORIGINS = ["http://localhost:3001", "http://localhost:3002", "http://localhost:3003"];
+/** Explicit allowed origins - no env dependency to avoid crashes */
+const ALLOWED_ORIGINS = new Set([
+	"https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev",
+	"https://downunderchauffeurs.com",
+	"https://down-under-chauffeur-dev.luppy.workers.dev",
+	"http://localhost:3001",
+	"http://localhost:3002",
+	"http://localhost:3003",
+]);
 
-/** Trusted domains - origin must match one of these patterns (used when CORS_ORIGIN env may not be loaded) */
+/** Trusted domain patterns */
 const TRUSTED_DOMAIN_PATTERNS = [
 	/^https:\/\/[a-z0-9-]+\.downunderchauffeurs\.workers\.dev$/i,
 	/^https:\/\/downunderchauffeurs\.com$/i,
 	/^https:\/\/[a-z0-9-]+\.downunderchauffeurs\.com$/i,
+	/^https:\/\/[a-z0-9-]+\.luppy\.workers\.dev$/i,
 	/^http:\/\/localhost(:\d+)?$/,
 ];
 
-/** Hardcoded fallback origins for staging/production (used when env fails or 503) */
-const FALLBACK_ORIGINS = [
-	"https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev",
-	"https://downunderchauffeurs.com",
-];
-
-function getAllowedOrigins(): string[] {
-	const raw = (env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean);
-	return raw.length > 0 ? raw : DEFAULT_ORIGINS;
-}
-
 function isOriginAllowed(origin: string | null): boolean {
 	if (!origin) return false;
-	// Fallback origins (work even when env.CORS_ORIGIN is empty/unavailable)
-	if (FALLBACK_ORIGINS.includes(origin)) return true;
-	const allowed = getAllowedOrigins();
-	if (allowed.includes(origin)) return true;
-	// Allow trusted domain patterns
-	if (TRUSTED_DOMAIN_PATTERNS.some((p) => p.test(origin))) return true;
-	// Fallback: allow any origin from our domains (handles edge cases)
-	if (
-		origin.startsWith("https://") &&
-		(origin.includes("downunderchauffeurs.workers.dev") || origin.includes("downunderchauffeurs.com"))
-	) {
-		return true;
-	}
-	return false;
+	if (ALLOWED_ORIGINS.has(origin)) return true;
+	return TRUSTED_DOMAIN_PATTERNS.some((p) => p.test(origin));
 }
 
+/** Build CORS headers - never throws */
+function buildCorsHeaders(origin: string | null): Headers {
+	const headers = new Headers();
+	headers.set("Vary", "Origin");
+	if (origin && isOriginAllowed(origin)) {
+		headers.set("Access-Control-Allow-Origin", origin);
+		headers.set("Access-Control-Allow-Credentials", "true");
+		headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+		headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+		headers.set("Access-Control-Max-Age", "86400");
+	}
+	return headers;
+}
+
+/** Merge CORS headers onto response - never throws, falls back to original response on error */
 function addCorsToResponse(response: Response, request: Request): Response {
-	const origin = request.headers.get("Origin");
-	const corsHeaders = buildCorsHeaders(origin);
-	if (corsHeaders.get("Access-Control-Allow-Origin")) {
+	try {
+		const origin = request.headers.get("Origin");
+		const corsHeaders = buildCorsHeaders(origin);
+		if (!corsHeaders.get("Access-Control-Allow-Origin")) return response;
 		const headers = new Headers(response.headers);
 		corsHeaders.forEach((v, k) => headers.set(k, v));
 		return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+	} catch {
+		return response;
 	}
-	return response;
+}
+
+/** JSON error response with CORS headers - use for all error paths */
+function jsonErrorWithCors(
+	request: Request,
+	body: { error: string; code?: string },
+	status: number,
+): Response {
+	const headers = new Headers({ "Content-Type": "application/json" });
+	buildCorsHeaders(request.headers.get("Origin")).forEach((v, k) => headers.set(k, v));
+	return new Response(JSON.stringify(body), { status, headers });
 }
 
 const app = new Hono();
 
 app.use(logger());
 
-app.use(
-	"*",
-	cors({
-		origin: (origin) => (origin && isOriginAllowed(origin) ? origin : null),
-		allowHeaders: ["Content-Type", "Authorization"],
-		allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-		exposeHeaders: ["Content-Length"],
-		maxAge: 600,
-		credentials: true,
-	}),
-);
-
-// Auth routes: wrap response to ensure CORS headers on all responses (including errors/503)
+// Auth routes: custom CORS + try/catch to prevent Worker crashes, CORS on every response
 app.on(["POST", "GET", "OPTIONS"], "/api/auth/**", async (c) => {
-	// Handle CORS preflight immediately - don't pass to auth handler
+	const origin = c.req.header("Origin") ?? null;
+	const corsHeaders = buildCorsHeaders(origin);
+
+	// OPTIONS preflight - return immediately with CORS headers
 	if (c.req.method === "OPTIONS") {
-		const headers = buildCorsHeaders(c.req.header("Origin"));
-		return new Response(null, { status: 204, headers });
+		return new Response(null, { status: 204, headers: corsHeaders });
 	}
+
 	try {
 		const response = await auth.handler(c.req.raw);
 		return addCorsToResponse(response, c.req.raw);
 	} catch (err) {
-		console.error("Auth handler error:", err);
-		const headers = new Headers({ "Content-Type": "application/json" });
-		buildCorsHeaders(c.req.header("Origin")).forEach((v, k) => headers.set(k, v));
-		return new Response(JSON.stringify({ error: "Authentication failed" }), { status: 503, headers });
+		const msg = err instanceof Error ? err.message : String(err);
+		const stack = err instanceof Error ? err.stack : "";
+		console.error("Auth handler error:", msg, stack);
+		return jsonErrorWithCors(c.req.raw, { error: "Authentication failed", code: "AUTH_ERROR" }, 503);
 	}
 });
 
@@ -99,7 +103,7 @@ app.get("/api/images/*", async (c) => {
 		return c.json({ error: "Missing image path" }, 400);
 	}
 	try {
-		const object = await env.BUCKET.get(path);
+		const object = await cloudflareEnv.BUCKET.get(path);
 		if (!object) {
 			return c.json({ error: "Not found" }, 404);
 		}
@@ -160,39 +164,35 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
-/** Build CORS headers for a response - always include the three required headers */
-function buildCorsHeaders(origin: string | null): Headers {
-	const headers = new Headers();
-	if (origin && isOriginAllowed(origin)) {
-		headers.set("Access-Control-Allow-Origin", origin);
-		headers.set("Access-Control-Allow-Credentials", "true");
-		headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-		headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-		headers.set("Access-Control-Max-Age", "86400");
-		headers.set("Vary", "Origin");
-	}
-	return headers;
-}
-
-// Wrap app to add CORS to ALL responses (catches 503s and errors that bypass middleware)
+// Top-level fetch: OPTIONS first, then app; wrap ALL in try/catch so CORS is always on errors
 export default {
 	async fetch(request: Request, env: unknown, ctx: ExecutionContext) {
-		const url = new URL(request.url);
 		const origin = request.headers.get("Origin");
 
-		// Handle CORS preflight (OPTIONS) for ALL API routes at the very top - before any app code
+		// OPTIONS preflight - handle FIRST with minimal code path (no app, no auth)
 		if (request.method === "OPTIONS") {
 			const headers = buildCorsHeaders(origin);
 			return new Response(null, { status: 204, headers });
 		}
+
 		try {
 			const response = await app.fetch(request, env, ctx);
 			return addCorsToResponse(response, request);
 		} catch (err) {
-			console.error("Worker fetch error:", err);
-			const headers = new Headers({ "Content-Type": "application/json" });
-			buildCorsHeaders(request.headers.get("Origin")).forEach((v, k) => headers.set(k, v));
-			return new Response(JSON.stringify({ error: "Service unavailable" }), { status: 503, headers });
+			const errMsg = err instanceof Error ? err.message : String(err);
+			const errStack = err instanceof Error ? err.stack : undefined;
+			console.error("Worker fetch error:", errMsg, errStack);
+			try {
+				return jsonErrorWithCors(request, { error: "Service unavailable", code: "FETCH_ERROR" }, 503);
+			} catch (fallbackErr) {
+				// Last resort: minimal response with CORS (origin echo required for credentials)
+				const h = new Headers({ "Content-Type": "application/json" });
+				if (origin && isOriginAllowed(origin)) {
+					h.set("Access-Control-Allow-Origin", origin);
+					h.set("Access-Control-Allow-Credentials", "true");
+				}
+				return new Response('{"error":"Service unavailable"}', { status: 503, headers: h });
+			}
 		}
 	},
 };

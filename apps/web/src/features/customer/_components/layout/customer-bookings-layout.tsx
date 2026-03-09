@@ -16,7 +16,7 @@ import { useCustomerBookingsNavigation } from "../navigation/use-customer-bookin
 export function CustomerBookingsLayout() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { session, isPending, signOutWithConfirmation } = useUserQuery();
+	const { session, isPending, isFetching, signOutWithConfirmation } = useUserQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const navigationItems = useCustomerBookingsNavigation();
 
@@ -27,8 +27,8 @@ export function CustomerBookingsLayout() {
 
 	const user = session?.user;
 
-	// Show loading while session is being fetched
-	if (isPending) {
+	// Show loading while session is being fetched or refetching (prevents redirect loop)
+	if (isPending || isFetching) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<Loader />
@@ -36,7 +36,7 @@ export function CustomerBookingsLayout() {
 		);
 	}
 
-	// Redirect if not authenticated (only after loading is complete)
+	// Redirect if not authenticated (only after fetch is complete)
 	if (!user) {
 		navigate({ to: '/sign-in' });
 		return null;

@@ -77,7 +77,7 @@ export function getDashboardPath(userRole: string | undefined | null): string {
 		case "driver":
 			return "/driver";
 		case "user":
-			return "/dashboard/services";
+			return "/my-bookings/dashboard";
 		default:
 			return "/";
 	}
@@ -118,22 +118,38 @@ export async function handlePostLoginRedirect(params: {
 	});
 }
 
-export async function redirectIfAuthenticated() {
+function parseRedirectUrl(url: string): { to: string; search?: Record<string, string> } {
+	if (!url.startsWith("/")) return { to: url };
+	const [path, searchStr] = url.split("?");
+	if (!searchStr) return { to: path };
+	const search: Record<string, string> = {};
+	for (const pair of searchStr.split("&")) {
+		const [k, v] = pair.split("=");
+		if (k && v) search[decodeURIComponent(k)] = decodeURIComponent(v);
+	}
+	return { to: path, search };
+}
+
+export async function redirectIfAuthenticated(options?: {
+	redirectUrl?: string;
+	queryClient?: { invalidateQueries: (opts: { queryKey: string[] }) => Promise<unknown> };
+}) {
 	const session = await authClient.getSession();
-	console.log("🔍 redirectIfAuthenticated - Session check:", {
-		hasSession: !!session,
-		sessionData: session?.data,
-		userRole: session?.data?.user?.role
-	});
 
 	// Check if session exists AND has valid data
 	if (session?.data?.user) {
+		// Invalidate session cache so destination page gets fresh data (prevents redirect loop)
+		if (options?.queryClient) {
+			await options.queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+		}
+
 		const userRole = session.data.user.role;
-		console.log("🚀 Redirecting authenticated user with role:", userRole);
-		const dashboardPath = getDashboardPath(userRole);
-		throw redirect({ to: dashboardPath });
-	} else {
-		console.log("✅ No valid session data found, allowing access to auth page");
+		const target =
+			options?.redirectUrl && options.redirectUrl.startsWith("/")
+				? parseRedirectUrl(options.redirectUrl)
+				: { to: getDashboardPath(userRole) };
+
+		throw redirect(target);
 	}
 }
 

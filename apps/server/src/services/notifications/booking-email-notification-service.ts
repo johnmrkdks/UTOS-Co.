@@ -9,11 +9,19 @@ import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
 import { systemSettings } from "@/db/sqlite/schema/settings";
 import { UserRoleEnum } from "@/db/sqlite/enums";
-import { getMailService, renderTripStatusEmail, renderDriverAssignmentEmail, renderBookingConfirmationEmail, renderAdminNewBookingEmail } from "@workspace/mail";
+import { getMailService, renderAdminNewBookingEmail } from "@workspace/mail";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import type { Env } from "@/types/env";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+
+/** Basic email validation - must have @ and domain */
+function isValidEmail(email: string | null | undefined): boolean {
+	if (!email || typeof email !== "string") return false;
+	const trimmed = email.trim();
+	if (trimmed.length < 5) return false;
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+}
 
 /**
  * Get system timezone from settings (cached)
@@ -82,11 +90,13 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
 			.where(eq(drivers.id, booking.driverId))
 			.get() : null,
 
-		// Get customer data
-		db.select()
-			.from(users)
-			.where(eq(users.id, booking.userId))
-			.get(),
+		// Get customer data (guest bookings have no userId - use booking's customer fields)
+		booking.userId
+			? db.select()
+				.from(users)
+				.where(eq(users.id, booking.userId))
+				.get()
+			: Promise.resolve(null),
 
 		// Get car data
 		booking.carId ?
@@ -117,11 +127,20 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
 
 	console.log(`📧 EMAIL SERVICE: Retrieved all related data for booking ${bookingId}`);
 
+	// For guest bookings (no userId), build customer from booking's customer fields
+	const effectiveCustomer = customer ?? (booking.userId ? null : {
+		name: booking.customerName,
+		email: booking.customerEmail,
+		phone: booking.customerPhone,
+		phoneNumber: booking.customerPhone,
+		timezone: booking.timezone,
+	});
+
 	return {
 		booking,
 		driver: driver?.driver || null,
 		driverUser: driver?.driverUser || null,
-		customer,
+		customer: effectiveCustomer,
 		car,
 		package: packageData,
 		stops,
@@ -141,27 +160,9 @@ function generateDriverAssignmentEmailTemplate(
 	// Format pickup date and time using booking timezone or system default
 	const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
 	const systemTimezone = "Australia/Sydney"; // Default system timezone
-	const effectiveTimezone = booking.timezone || systemTimezone; // Booking timezone takes priority
-
-	console.log("📅 TIMEZONE DEBUG:", {
-		bookingId: booking.id,
-		rawTimestamp: pickupDateTime,
-		bookingTimezone: booking.timezone,
-		systemTimezone,
-		effectiveTimezone,
-		utcDate: new Date(pickupDateTime).toISOString(),
-	});
-
-	// Convert UTC to effective timezone
+	const effectiveTimezone = booking.timezone || systemTimezone;
 	const dateObj = new Date(pickupDateTime);
 	const zonedDate = toZonedTime(dateObj, effectiveTimezone);
-
-	console.log("📅 TIMEZONE RESULT:", {
-		zonedDate: zonedDate.toISOString(),
-		formattedDate: format(zonedDate, "EEEE, MMMM d, yyyy"),
-		formattedTime: format(zonedDate, "h:mm a"),
-	});
-
 	const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
 	const pickupTime = format(zonedDate, "h:mm a");
 
@@ -194,515 +195,93 @@ function generateDriverAssignmentEmailTemplate(
 
 	const subject = `New Booking Assignment - ${bookingReference}`;
 
-	// Website base URL
-	const websiteUrl = "https://downunderchauffeurs.com";
+	const websiteUrl = BUSINESS_INFO.business.websiteUrl;
+	const customerName = customer?.name || booking.customerName || "Not provided";
+	const customerEmail = customer?.email || booking.customerEmail || "Not provided";
 
-	// Convert oklch colors to standard CSS
-	const colors = {
-		primary: '#22818e', // oklch(0.45 0.08 180) converted
-		primaryLight: '#86d6e5', // oklch(0.75 0.18 180) converted
-		background: '#ffffff', // oklch(1 0 0)
-		foreground: '#3c3c3c', // oklch(0.235 0 0)
-		beige: '#f7f2ee', // oklch(0.9404 0.0446 107.23)
-		softBeige: '#faf8f5', // oklch(0.9726 0.0132 111.27)
-		warmBeige: '#f5f0eb', // oklch(0.9373 0.0283 111.44)
-		darkBeige: '#e8ddd4', // oklch(0.8736 0.0344 111.97)
-	};
-
+	// Table-based layout for email client compatibility
 	const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
+	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>${subject}</title>
-	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-	<style>
-		body {
-			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-			margin: 0;
-			padding: 20px;
-			background: linear-gradient(135deg, ${colors.beige} 0%, ${colors.softBeige} 100%);
-			color: ${colors.foreground};
-			line-height: 1.6;
-		}
-
-		.email-container {
-			max-width: 650px;
-			margin: 0 auto;
-			background: ${colors.background};
-			border-radius: 24px;
-			overflow: hidden;
-			box-shadow:
-				0 25px 50px -12px rgba(0, 0, 0, 0.15),
-				0 0 0 1px rgba(34, 129, 142, 0.1);
-		}
-
-		.header {
-			background: linear-gradient(135deg, ${colors.primary} 0%, #1a6e78 100%);
-			padding: 50px 40px;
-			text-align: center;
-			position: relative;
-		}
-
-		.header::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			height: 6px;
-			background: linear-gradient(90deg, ${colors.primaryLight} 0%, ${colors.primary} 50%, #1a6e78 100%);
-		}
-
-		.header-title {
-			font-family: 'Playfair Display', Georgia, serif;
-			font-size: 36px;
-			font-weight: 600;
-			color: white;
-			margin: 0 0 8px 0;
-			letter-spacing: -0.5px;
-		}
-
-		.header-subtitle {
-			font-size: 18px;
-			color: rgba(255, 255, 255, 0.9);
-			margin: 0;
-			font-weight: 300;
-		}
-
-		.content {
-			padding: 50px 40px;
-			background: ${colors.background};
-		}
-
-		.greeting {
-			font-size: 20px;
-			margin-bottom: 16px;
-			color: ${colors.foreground};
-		}
-
-		.intro-text {
-			font-size: 16px;
-			color: #64748b;
-			margin-bottom: 40px;
-			line-height: 1.7;
-		}
-
-		.assignment-highlight {
-			background: linear-gradient(135deg, ${colors.softBeige} 0%, ${colors.warmBeige} 100%);
-			border: 2px solid ${colors.primary};
-			border-radius: 20px;
-			padding: 40px;
-			margin: 40px 0;
-			text-align: center;
-			position: relative;
-		}
-
-		.assignment-highlight::before {
-			content: '✓';
-			position: absolute;
-			top: -15px;
-			left: 50%;
-			transform: translateX(-50%);
-			background: ${colors.primary};
-			color: white;
-			width: 30px;
-			height: 30px;
-			border-radius: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-weight: bold;
-			font-size: 16px;
-		}
-
-		.assignment-title {
-			font-family: 'Playfair Display', Georgia, serif;
-			font-size: 28px;
-			font-weight: 600;
-			color: ${colors.primary};
-			margin: 0 0 20px 0;
-		}
-
-		.booking-ref {
-			font-size: 18px;
-			color: ${colors.foreground};
-			margin: 12px 0;
-		}
-
-		.pickup-datetime {
-			font-size: 20px;
-			color: ${colors.primary};
-			font-weight: 600;
-			margin: 16px 0;
-		}
-
-		.section-card {
-			background: ${colors.softBeige};
-			border-radius: 16px;
-			padding: 32px;
-			margin: 32px 0;
-			border-left: 6px solid ${colors.primary};
-		}
-
-		.section-title {
-			font-family: 'Playfair Display', Georgia, serif;
-			font-size: 24px;
-			font-weight: 600;
-			color: ${colors.primary};
-			margin: 0 0 24px 0;
-		}
-
-		.detail-grid {
-			display: grid;
-			gap: 16px;
-		}
-
-		.detail-row {
-			display: flex;
-			padding: 12px 0;
-			border-bottom: 1px solid rgba(34, 129, 142, 0.1);
-		}
-
-		.detail-row:last-child {
-			border-bottom: none;
-		}
-
-		.detail-label {
-			font-weight: 600;
-			color: #475569;
-			min-width: 140px;
-			flex-shrink: 0;
-		}
-
-		.detail-value {
-			color: ${colors.foreground};
-			flex: 1;
-		}
-
-		.route-info {
-			background: white;
-			padding: 20px;
-			border-radius: 12px;
-			margin-top: 16px;
-			border: 1px solid rgba(34, 129, 142, 0.15);
-		}
-
-		.next-steps {
-			background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
-			border: 2px solid #f59e0b;
-			border-radius: 16px;
-			padding: 32px;
-			margin: 40px 0;
-		}
-
-		.next-steps-title {
-			font-family: 'Playfair Display', Georgia, serif;
-			font-size: 22px;
-			font-weight: 600;
-			color: #b45309;
-			margin: 0 0 20px 0;
-		}
-
-		.steps-list {
-			margin: 0;
-			padding-left: 20px;
-			color: #b45309;
-		}
-
-		.steps-list li {
-			margin-bottom: 8px;
-			line-height: 1.6;
-		}
-
-		.cta-container {
-			text-align: center;
-			margin: 50px 0;
-		}
-
-		.cta-button {
-			display: inline-block;
-			background: linear-gradient(135deg, ${colors.primary} 0%, #1a6e78 100%);
-			color: white;
-			padding: 18px 36px;
-			text-decoration: none;
-			border-radius: 12px;
-			font-weight: 600;
-			font-size: 16px;
-			margin: 8px 12px;
-			box-shadow:
-				0 8px 25px rgba(34, 129, 142, 0.3),
-				0 2px 6px rgba(34, 129, 142, 0.2);
-			transition: all 0.3s ease;
-		}
-
-		.cta-button:hover {
-			transform: translateY(-2px);
-			box-shadow:
-				0 12px 35px rgba(34, 129, 142, 0.4),
-				0 4px 12px rgba(34, 129, 142, 0.3);
-		}
-
-		.contact-info {
-			text-align: center;
-			padding: 24px;
-			background: rgba(34, 129, 142, 0.05);
-			border-radius: 12px;
-			margin: 32px 0;
-		}
-
-		.contact-info p {
-			margin: 8px 0;
-			color: #64748b;
-		}
-
-		.contact-info a {
-			color: ${colors.primary};
-			text-decoration: none;
-			font-weight: 500;
-		}
-
-		.footer {
-			background: linear-gradient(135deg, ${colors.beige} 0%, ${colors.darkBeige} 100%);
-			padding: 40px;
-			text-align: center;
-			border-top: 1px solid rgba(34, 129, 142, 0.1);
-		}
-
-		.footer-brand {
-			font-family: 'Playfair Display', Georgia, serif;
-			font-size: 24px;
-			font-weight: 600;
-			color: ${colors.primary};
-			margin: 0 0 8px 0;
-		}
-
-		.footer-tagline {
-			font-size: 16px;
-			color: #64748b;
-			margin: 0 0 24px 0;
-			font-weight: 300;
-		}
-
-		.footer-links {
-			margin: 20px 0;
-		}
-
-		.footer-links a {
-			color: ${colors.primary};
-			text-decoration: none;
-			font-weight: 500;
-			margin: 0 8px;
-		}
-
-		.footer-links a:hover {
-			text-decoration: underline;
-		}
-
-		.footer-disclaimer {
-			font-size: 14px;
-			color: #94a3b8;
-			margin-top: 24px;
-			line-height: 1.5;
-		}
-
-		/* Dark mode support */
-		@media (prefers-color-scheme: dark) {
-			.email-container {
-				background: #1e293b;
-				color: #e2e8f0;
-			}
-
-			.content {
-				background: #1e293b;
-			}
-
-			.section-card {
-				background: #334155;
-			}
-
-			.route-info {
-				background: #475569;
-				border-color: rgba(134, 214, 229, 0.3);
-			}
-
-			.detail-row {
-				border-bottom-color: rgba(134, 214, 229, 0.2);
-			}
-
-			.detail-value {
-				color: #e2e8f0;
-			}
-
-			.contact-info {
-				background: rgba(134, 214, 229, 0.1);
-			}
-		}
-
-		/* Mobile responsiveness */
-		@media (max-width: 600px) {
-			body {
-				padding: 10px;
-			}
-
-			.email-container {
-				border-radius: 16px;
-			}
-
-			.header {
-				padding: 30px 20px;
-			}
-
-			.header-title {
-				font-size: 28px;
-			}
-
-			.content {
-				padding: 30px 20px;
-			}
-
-			.assignment-highlight, .section-card, .next-steps {
-				padding: 24px 20px;
-			}
-
-			.detail-row {
-				flex-direction: column;
-			}
-
-			.detail-label {
-				min-width: auto;
-				margin-bottom: 4px;
-				font-size: 14px;
-			}
-
-			.cta-button {
-				display: block;
-				margin: 12px auto;
-				width: fit-content;
-			}
-		}
-	</style>
 </head>
-<body>
-	<div class="email-container">
-		<div class="header">
-			<h1 class="header-title">New Booking Assignment</h1>
-			<p class="header-subtitle">${BUSINESS_INFO.business.name}</p>
-		</div>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6;color:#1e293b;background:#f8fafc;">
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+		<tr>
+			<td style="padding:28px 32px;background:#22818e;text-align:center;">
+				<h1 style="margin:0 0 4px 0;font-size:26px;font-weight:600;color:#fff;">New Booking Assignment</h1>
+				<p style="margin:0;font-size:14px;color:rgba(255,255,255,0.9);">${BUSINESS_INFO.business.name}</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding:32px;">
+				<p style="margin:0 0 16px 0;font-size:17px;color:#334155;">Hello <strong>${driverName}</strong>,</p>
+				<p style="margin:0 0 24px 0;font-size:15px;color:#64748b;line-height:1.6;">You have been assigned a new premium booking. Please review the details below.</p>
 
-		<div class="content">
-			<p class="greeting">Hello <strong>${driverName}</strong>,</p>
-			<p class="intro-text">You have been assigned a new premium booking. Please review the details below and confirm your availability through the driver portal.</p>
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;background:#f8fafc;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Assignment Details</td></tr>
+					<tr><td style="padding:16px 20px;">
+						<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Booking Reference</p>
+						<p style="margin:0 0 16px 0;font-size:16px;color:#22818e;font-weight:600;">${bookingReference}</p>
+						<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Scheduled Pickup</p>
+						<p style="margin:0;font-size:16px;color:#1e293b;">${pickupDate} at ${pickupTime}</p>
+					</td></tr>
+				</table>
 
-			<div class="assignment-highlight">
-				<h2 class="assignment-title">Assignment Details</h2>
-				<p class="booking-ref"><strong>Booking Reference:</strong> ${bookingReference}</p>
-				<p class="pickup-datetime"><strong>Scheduled Pickup:</strong> ${pickupDate} at ${pickupTime}</p>
-			</div>
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Trip Information</td></tr>
+					<tr><td style="padding:16px 20px;">
+						<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Service</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${serviceType}</td></tr>
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Vehicle</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${vehicleInfo}</td></tr>
+							${booking.passengerCount ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Passengers</td></tr><tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.passengerCount}</td></tr>` : ''}
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Route</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;line-height:1.6;">${routeInfo}</td></tr>
+							${booking.specialRequirements ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Special Requirements</td></tr><tr><td style="padding:0;font-size:15px;color:#1e293b;">${booking.specialRequirements}</td></tr>` : ''}
+						</table>
+					</td></tr>
+				</table>
 
-			<div class="section-card">
-				<h3 class="section-title">Trip Information</h3>
-				<div class="detail-grid">
-					<div class="detail-row">
-						<span class="detail-label">Service Type:</span>
-						<span class="detail-value">${serviceType}</span>
-					</div>
-					<div class="detail-row">
-						<span class="detail-label">Vehicle:</span>
-						<span class="detail-value">${vehicleInfo}</span>
-					</div>
-					${booking.passengerCount ? `
-					<div class="detail-row">
-						<span class="detail-label">Passengers:</span>
-						<span class="detail-value">${booking.passengerCount}</span>
-					</div>
-					` : ''}
-					<div class="detail-row">
-						<span class="detail-label">Route:</span>
-						<div class="detail-value">
-							<div class="route-info">${routeInfo}</div>
-						</div>
-					</div>
-					${booking.specialRequirements ? `
-					<div class="detail-row">
-						<span class="detail-label">Special Requirements:</span>
-						<span class="detail-value">${booking.specialRequirements}</span>
-					</div>
-					` : ''}
-				</div>
-			</div>
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Customer Information</td></tr>
+					<tr><td style="padding:16px 20px;">
+						<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Name</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${customerName}</td></tr>
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Email</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${customerEmail}</td></tr>
+							${booking.customerPhone ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Phone</td></tr><tr><td style="padding:0;font-size:15px;"><a href="tel:${booking.customerPhone}" style="color:#22818e;text-decoration:none;">${booking.customerPhone}</a></td></tr>` : ''}
+						</table>
+					</td></tr>
+				</table>
 
-			<div class="section-card">
-				<h3 class="section-title">Customer Information</h3>
-				<div class="detail-grid">
-					<div class="detail-row">
-						<span class="detail-label">Name:</span>
-						<span class="detail-value">${customer?.name || booking.customerName || 'Not provided'}</span>
-					</div>
-					<div class="detail-row">
-						<span class="detail-label">Email:</span>
-						<span class="detail-value">${customer?.email || booking.customerEmail || 'Not provided'}</span>
-					</div>
-					${booking.customerPhone ? `
-					<div class="detail-row">
-						<span class="detail-label">Phone:</span>
-						<span class="detail-value"><a href="tel:${booking.customerPhone}" style="color: ${colors.primary}; text-decoration: none;">${booking.customerPhone}</a></span>
-					</div>
-					` : ''}
-					${booking.specialRequests ? `
-					<div class="detail-row">
-						<span class="detail-label">Special Requests:</span>
-						<span class="detail-value">${booking.specialRequests}</span>
-					</div>
-					` : ''}
-				</div>
-			</div>
-
-			<div class="next-steps">
-				<h3 class="next-steps-title">Next Steps</h3>
-				<ol class="steps-list">
-					<li>Review all trip details carefully</li>
-					<li>Log into your driver portal to accept or decline this assignment</li>
-					<li>Contact the customer if you have any questions</li>
-					<li>Arrive at the pickup location punctually</li>
-					<li>Provide exceptional luxury service throughout the journey</li>
-				</ol>
-			</div>
-
-			<div class="cta-container">
-				<a href="${websiteUrl}/driver" class="cta-button">Driver Portal</a>
-				<a href="${websiteUrl}/contact-us" class="cta-button">Contact Support</a>
-			</div>
-
-			<div class="contact-info">
-				<p><strong>Need immediate assistance?</strong></p>
-				<p>Call us at <a href="tel:+61-XXX-XXX-XXX">+61 XXX XXX XXX</a></p>
-				<p>Or email us at <a href="mailto:support@downunderchauffeurs.com">support@downunderchauffeurs.com</a></p>
-			</div>
-		</div>
-
-		<div class="footer">
-			<h3 class="footer-brand">${BUSINESS_INFO.business.name}</h3>
-			<p class="footer-tagline">Premium Luxury Transportation Services</p>
-
-			<div class="footer-links">
-				<a href="${websiteUrl}">Visit Website</a>
-				<span style="color: #94a3b8;">|</span>
-				<a href="${websiteUrl}/services">Our Services</a>
-				<span style="color: #94a3b8;">|</span>
-				<a href="${websiteUrl}/contact-us">Contact Us</a>
-			</div>
-
-			<p class="footer-disclaimer">
-				This is an automated notification from ${BUSINESS_INFO.business.name}.<br>
-				For support or questions, please contact our customer service team.
-			</p>
-		</div>
-	</div>
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
+					<tr>
+						<td style="padding:8px 8px 8px 0;">
+							<a href="${websiteUrl}/driver" style="display:inline-block;padding:14px 28px;background:#22818e;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">Driver Portal</a>
+						</td>
+						<td style="padding:8px 0 8px 8px;">
+							<a href="${websiteUrl}/contact-us" style="display:inline-block;padding:14px 28px;background:#f1f5f9;color:#22818e!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;border:1px solid #e2e8f0;">Contact Support</a>
+						</td>
+					</tr>
+				</table>
+				<p style="margin:0;font-size:14px;color:#64748b;">Need help? Call <a href="${BUSINESS_INFO.phone.link}" style="color:#22818e;text-decoration:none;font-weight:600;">${BUSINESS_INFO.phone.display}</a></p>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+				<p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#475569;">${BUSINESS_INFO.business.name}</p>
+				<p style="margin:0;font-size:12px;color:#94a3b8;">Automated notification · <a href="${websiteUrl}/contact-us" style="color:#22818e;text-decoration:none;">Contact Support</a></p>
+			</td>
+		</tr>
+	</table>
 </body>
-</html>
-	`;
+</html>`;
 
 	return { subject, html };
 }
@@ -714,24 +293,14 @@ function generateTripStatusEmailTemplate(
 	status: string,
 	bookingDetails: BookingDetailsForEmail
 ): { subject: string; html: string } {
-	const { booking, driverUser, car, package: pkg } = bookingDetails;
+	const { booking, driverUser, car, package: pkg, extras } = bookingDetails;
 
-	// Format pickup date and time - use scheduledPickupTime field
-	// Display time in UTC (as stored) without timezone conversion
+	// Format pickup date and time in booking timezone
 	const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-	const pickupDate = new Date(pickupDateTime).toLocaleDateString("en-AU", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-		timeZone: "UTC",
-	});
-	const pickupTime = new Date(pickupDateTime).toLocaleTimeString("en-AU", {
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: true,
-		timeZone: "UTC",
-	});
+	const tz = booking.timezone || "Australia/Sydney";
+	const zonedDate = toZonedTime(new Date(pickupDateTime), tz);
+	const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+	const pickupTime = format(zonedDate, "h:mm a");
 
 	// Status-specific content
 	let statusTitle = "";
@@ -817,553 +386,171 @@ function generateTripStatusEmailTemplate(
 		border: '#d4cabe' // oklch(0.85 0.02 85)
 	};
 
+	// Table-based layout for email client compatibility (Gmail, Outlook, etc.)
 	const html = `
-		<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="utf-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>${subject}</title>
-			<link rel="preconnect" href="https://fonts.googleapis.com">
-			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-			<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-			<style>
-				* {
-					box-sizing: border-box;
-				}
-				body {
-					font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-					font-size: 16px;
-					line-height: 1.7;
-					color: ${colors.foreground};
-					margin: 0;
-					padding: 20px;
-					background: linear-gradient(135deg, ${colors.beige} 0%, ${colors.softBeige} 100%);
-					min-height: 100vh;
-				}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6;color:#1e293b;background:#f8fafc;">
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+		<!-- Header: Brand teal -->
+		<tr>
+			<td style="padding:28px 32px;background:#22818e;text-align:center;">
+				<h1 style="margin:0 0 4px 0;font-size:26px;font-weight:600;color:#fff;letter-spacing:-0.5px;">${BUSINESS_INFO.business.name}</h1>
+				<p style="margin:0;font-size:14px;color:rgba(255,255,255,0.9);">
+					${statusTitle} ${statusIcon}
+				</p>
+			</td>
+		</tr>
+		<!-- Content -->
+		<tr>
+			<td style="padding:32px;">
+				<p style="margin:0 0 24px 0;font-size:17px;color:#334155;line-height:1.6;">${statusMessage}</p>
+				<p style="margin:0 0 28px 0;font-size:14px;color:#64748b;">Booking reference: <strong style="color:#22818e;">${bookingReference}</strong></p>
 
-				.email-wrapper {
-					max-width: 650px;
-					margin: 0 auto;
-					background: ${colors.background};
-					border-radius: 16px;
-					overflow: hidden;
-					box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
-				}
-
-				.header {
-					background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-					color: white;
-					padding: 50px 40px 40px;
-					text-align: center;
-					position: relative;
-				}
-
-				.header::after {
-					content: '';
-					position: absolute;
-					bottom: 0;
-					left: 0;
-					right: 0;
-					height: 3px;
-					background: linear-gradient(90deg, ${colors.primary} 0%, ${colors.primaryLight} 100%);
-				}
-
-				.logo {
-					max-width: 200px;
-					height: auto;
-					margin-bottom: 30px;
-					filter: brightness(0) invert(1);
-				}
-
-				.header-title {
-					font-family: 'Playfair Display', Georgia, serif;
-					font-size: 36px;
-					font-weight: 600;
-					margin: 0 0 8px 0;
-					letter-spacing: -0.5px;
-					line-height: 1.2;
-				}
-
-				.header-subtitle {
-					font-family: 'Inter', sans-serif;
-					font-size: 16px;
-					font-weight: 300;
-					margin: 0;
-					opacity: 0.85;
-					letter-spacing: 0.5px;
-				}
-
-				.content {
-					padding: 50px 40px;
-					background: ${colors.background};
-				}
-
-				.status-section {
-					text-align: center;
-					margin-bottom: 40px;
-					padding: 40px 30px;
-					background: linear-gradient(135deg, ${colors.softBeige} 0%, ${colors.card} 100%);
-					border-radius: 12px;
-					border: 1px solid ${colors.border};
-				}
-
-				.status-title {
-					font-family: 'Playfair Display', Georgia, serif;
-					font-size: 32px;
-					font-weight: 600;
-					color: ${colors.primary};
-					margin: 0 0 16px 0;
-					letter-spacing: -0.5px;
-				}
-
-				.status-message {
-					font-size: 18px;
-					color: ${colors.foreground};
-					margin: 0 0 24px 0;
-					line-height: 1.6;
-				}
-
-				.booking-reference {
-					display: inline-block;
-					background: white;
-					border: 2px solid ${colors.primary};
-					color: ${colors.primary};
-					padding: 12px 24px;
-					border-radius: 50px;
-					font-weight: 600;
-					letter-spacing: 0.5px;
-					font-size: 16px;
-				}
-
-				.info-card {
-					background: ${colors.card};
-					border: 1px solid ${colors.border};
-					border-radius: 12px;
-					padding: 32px;
-					margin: 32px 0;
-				}
-
-				.card-title {
-					font-family: 'Playfair Display', Georgia, serif;
-					font-size: 22px;
-					font-weight: 600;
-					color: ${colors.foreground};
-					margin: 0 0 24px 0;
-					padding-bottom: 12px;
-					border-bottom: 2px solid ${colors.border};
-				}
-
-				.detail-grid {
-					display: grid;
-					gap: 16px;
-				}
-
-				.detail-item {
-					display: flex;
-					padding: 16px 0;
-					border-bottom: 1px solid rgba(34, 129, 142, 0.15);
-					align-items: flex-start;
-				}
-
-				.detail-item:last-child {
-					border-bottom: none;
-				}
-
-				.detail-label {
-					font-weight: 800;
-					color: ${colors.primary};
-					font-size: 12px;
-					text-transform: uppercase;
-					letter-spacing: 1px;
-					min-width: 120px;
-					margin-right: 20px;
-					flex-shrink: 0;
-					background: rgba(34, 129, 142, 0.1);
-					padding: 4px 12px;
-					border-radius: 20px;
-					text-align: center;
-				}
-
-				.detail-value {
-					color: ${colors.foreground};
-					font-size: 16px;
-					font-weight: 500;
-					flex: 1;
-					line-height: 1.5;
-				}
-
-				.cta-section {
-					text-align: center;
-					margin: 50px 0 40px;
-					padding: 40px 20px;
-					background: linear-gradient(135deg, ${colors.beige} 0%, ${colors.softBeige} 100%);
-					border-radius: 12px;
-				}
-
-				.cta-title {
-					font-family: 'Playfair Display', Georgia, serif;
-					font-size: 24px;
-					font-weight: 600;
-					color: ${colors.foreground};
-					margin: 0 0 24px 0;
-				}
-
-				.cta-buttons {
-					display: flex;
-					gap: 20px;
-					justify-content: center;
-					flex-wrap: wrap;
-					margin-top: 16px;
-				}
-
-				.cta-button {
-					display: inline-block;
-					background: linear-gradient(135deg, ${colors.primary} 0%, #1a6e78 100%);
-					color: white;
-					text-decoration: none;
-					padding: 18px 36px;
-					border-radius: 12px;
-					font-weight: 600;
-					font-size: 16px;
-					letter-spacing: 0.3px;
-					transition: all 0.3s ease;
-					box-shadow:
-						0 8px 25px rgba(34, 129, 142, 0.3),
-						0 2px 6px rgba(34, 129, 142, 0.2);
-					min-width: 150px;
-					text-align: center;
-				}
-
-				.cta-button:hover {
-					transform: translateY(-2px);
-					box-shadow:
-						0 12px 35px rgba(34, 129, 142, 0.4),
-						0 4px 12px rgba(34, 129, 142, 0.3);
-				}
-
-				.footer {
-					background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-					padding: 40px;
-					text-align: center;
-					border-top: 1px solid ${colors.border};
-				}
-
-				.footer-brand {
-					font-family: 'Playfair Display', Georgia, serif;
-					font-size: 20px;
-					font-weight: 600;
-					color: ${colors.foreground};
-					margin: 0 0 8px 0;
-				}
-
-				.footer-tagline {
-					color: ${colors.mutedForeground};
-					font-size: 14px;
-					margin: 0 0 24px 0;
-				}
-
-				.footer-links {
-					display: flex;
-					gap: 16px;
-					justify-content: center;
-					flex-wrap: wrap;
-					margin: 0 0 24px 0;
-					align-items: center;
-				}
-
-				.footer-link {
-					color: ${colors.primary};
-					text-decoration: none;
-					font-weight: 600;
-					font-size: 14px;
-					transition: all 0.3s ease;
-					padding: 4px 8px;
-				}
-
-				.footer-link:hover {
-					text-decoration: underline;
-					color: #1a6e78;
-				}
-
-				.footer-separator {
-					color: #94a3b8;
-					font-weight: 300;
-					margin: 0 4px;
-				}
-
-				.footer-contact {
-					color: ${colors.mutedForeground};
-					font-size: 13px;
-					line-height: 1.5;
-					margin: 0;
-				}
-
-				.footer-contact a {
-					color: ${colors.primary};
-					text-decoration: none;
-				}
-
-				/* Dark mode support */
-				@media (prefers-color-scheme: dark) {
-					body {
-						background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-						color: #ffffff;
-					}
-
-					.email-wrapper {
-						background: #2a2a2a;
-						border: 1px solid #404040;
-					}
-
-					.content {
-						background: #2a2a2a;
-						color: #ffffff;
-					}
-
-					.status-section {
-						background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%);
-						border-color: #404040;
-						color: #ffffff;
-					}
-
-					.status-title {
-						color: #86d6e5;
-					}
-
-					.status-message {
-						color: #e5e5e5;
-					}
-
-					.booking-reference {
-						background: #1a1a1a;
-						color: #86d6e5;
-						border-color: #86d6e5;
-					}
-
-					.info-card {
-						background: #333333;
-						border-color: #404040;
-						color: #ffffff;
-					}
-
-					.card-title {
-						color: #ffffff;
-						border-color: #404040;
-					}
-
-					.detail-label {
-						color: #86d6e5;
-						background: rgba(134, 214, 229, 0.2);
-					}
-
-					.detail-value {
-						color: #e5e5e5;
-					}
-
-					.cta-section {
-						background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%);
-						color: #ffffff;
-					}
-
-					.cta-title {
-						color: #ffffff;
-					}
-
-					.footer {
-						background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-						border-color: #404040;
-						color: #b3b3b3;
-					}
-
-					.footer-brand {
-						color: #ffffff;
-					}
-
-					.footer-contact {
-						color: #b3b3b3;
-					}
-				}
-
-				@media (max-width: 600px) {
-					body { padding: 10px; }
-					.header, .content, .footer { padding: 30px 20px; }
-					.status-section, .info-card { padding: 24px 20px; }
-					.detail-item {
-						flex-direction: column;
-						gap: 8px;
-						padding: 12px 0;
-					}
-					.detail-label {
-						font-size: 11px;
-						min-width: auto;
-						margin-right: 0;
-						margin-bottom: 4px;
-						align-self: flex-start;
-					}
-					.cta-buttons { flex-direction: column; }
-					.footer-links {
-						flex-direction: column;
-						gap: 12px;
-					}
-					.footer-separator {
-						display: none;
-					}
-				}
-			</style>
-		</head>
-		<body>
-			<div class="email-wrapper">
-				<div class="header">
-					<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="${BUSINESS_INFO.business.name}" class="logo" />
-					<h1 class="header-title">${statusTitle}</h1>
-					<p class="header-subtitle">${BUSINESS_INFO.business.name}</p>
-				</div>
-
-				<div class="content">
-					<div class="status-section">
-						<h2 class="status-title">${statusTitle}</h2>
-						<p class="status-message">${statusMessage}</p>
-						<div class="booking-reference">Reference: ${bookingReference}</div>
-					</div>
-
-					<div class="info-card">
-						<h3 class="card-title">Trip Details</h3>
-						<div class="detail-grid">
-							<div class="detail-item">
-								<span class="detail-label">Service</span>
-								<span class="detail-value">${serviceType}</span>
-							</div>
-							<div class="detail-item">
-								<span class="detail-label">Pickup</span>
-								<span class="detail-value">${pickupDate} at ${pickupTime}</span>
-							</div>
-							<div class="detail-item">
-								<span class="detail-label">From</span>
-								<span class="detail-value">${booking.originAddress || booking.pickupAddress}</span>
-							</div>
+				<!-- Trip Details -->
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Trip Details</td></tr>
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #f1f5f9;">
+						<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Service</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${serviceType}</td></tr>
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Pickup</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${pickupDate} at ${pickupTime}</td></tr>
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">From</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.originAddress || booking.pickupAddress}</td></tr>
 							${booking.destinationAddress ? `
-							<div class="detail-item">
-								<span class="detail-label">To</span>
-								<span class="detail-value">${booking.destinationAddress}</span>
-							</div>
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">To</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.destinationAddress}</td></tr>
 							` : ''}
+						</table>
+					</td></tr>
+				</table>
+
+				<!-- Service Team -->
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Service Team</td></tr>
+					<tr><td style="padding:16px 20px;">
+						<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Driver</td></tr>
+							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${driverName}</td></tr>
+							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Vehicle</td></tr>
+							<tr><td style="padding:0;font-size:15px;color:#1e293b;">${vehicleInfo}</td></tr>
+						</table>
+					</td></tr>
+				</table>
+
+				${status === "completed" ? `
+				<!-- Fare Breakdown -->
+				${(() => {
+					const tollCharges = extras?.tollCharges ?? 0;
+					const parkingCharges = extras?.parkingCharges ?? 0;
+					const otherCharges = extras?.otherChargesAmount ?? 0;
+					const extraChargesTotal = booking.extraCharges ?? 0;
+					const waitingTimeCharge = Math.max(0, extraChargesTotal - tollCharges - parkingCharges - otherCharges);
+					const baseAmount = ((booking.baseFare ?? 0) + (booking.distanceFare ?? 0)) || (booking.quotedAmount ?? 0);
+					const finalAmount = booking.finalAmount ?? ((booking.quotedAmount ?? 0) + (booking.extraCharges ?? 0));
+					const hasBreakdown = tollCharges > 0 || parkingCharges > 0 || waitingTimeCharge > 0 || otherCharges > 0;
+					if (!hasBreakdown && extraChargesTotal <= 0) {
+						return `
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Fare Summary</td></tr>
+					<tr><td style="padding:16px 20px;">
+						<div style="display:flex;justify-content:space-between;font-size:15px;color:#1e293b;">
+							<span>Total charged:</span>
+							<span style="font-weight:600;">$${finalAmount.toFixed(2)}</span>
 						</div>
-					</div>
+					</td></tr>
+				</table>`;
+					}
+					return `
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Fare Breakdown</td></tr>
+					<tr><td style="padding:16px 20px;">
+						<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#334155;">
+							${baseAmount > 0 ? `<tr><td style="padding:6px 0;">Trip fare</td><td style="padding:6px 0;text-align:right;">$${baseAmount.toFixed(2)}</td></tr>` : ''}
+							${tollCharges > 0 ? `<tr><td style="padding:6px 0;">Tolls</td><td style="padding:6px 0;text-align:right;">$${tollCharges.toFixed(2)}</td></tr>` : ''}
+							${parkingCharges > 0 ? `<tr><td style="padding:6px 0;">Parking</td><td style="padding:6px 0;text-align:right;">$${parkingCharges.toFixed(2)}</td></tr>` : ''}
+							${waitingTimeCharge > 0 ? `<tr><td style="padding:6px 0;">Waiting time</td><td style="padding:6px 0;text-align:right;">$${waitingTimeCharge.toFixed(2)}</td></tr>` : ''}
+							${otherCharges > 0 ? `<tr><td style="padding:6px 0;">Other charges</td><td style="padding:6px 0;text-align:right;">$${otherCharges.toFixed(2)}</td></tr>` : ''}
+							<tr><td style="padding:12px 0 0 0;font-weight:600;color:#0f172a;">Total charged</td><td style="padding:12px 0 0 0;text-align:right;font-weight:600;color:#0f172a;">$${finalAmount.toFixed(2)}</td></tr>
+						</table>
+					</td></tr>
+				</table>`;
+				})()}
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #86efac;border-radius:8px;background:#f0fdf4;">
+					<tr><td style="padding:20px;text-align:center;font-size:16px;color:#166534;">Thank you for choosing ${BUSINESS_INFO.business.name}. We hope you enjoyed your luxury travel experience.</td></tr>
+				</table>
+				` : ''}
 
-					<div class="info-card">
-						<h3 class="card-title">Service Team</h3>
-						<div class="detail-grid">
-							<div class="detail-item">
-								<span class="detail-label">Driver</span>
-								<span class="detail-value">${driverName}</span>
-							</div>
-							<div class="detail-item">
-								<span class="detail-label">Vehicle</span>
-								<span class="detail-value">${vehicleInfo}</span>
-							</div>
-						</div>
-					</div>
-
-					${status === "completed" ? `
-					<div class="cta-section" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac;">
-						<h3 class="cta-title">Thank You for Choosing ${BUSINESS_INFO.business.name}</h3>
-						<p style="color: ${colors.mutedForeground}; margin: 0 0 24px 0; font-size: 16px;">We hope you enjoyed your luxury travel experience. Your feedback is valuable to us.</p>
-					</div>
-					` : ''}
-
-					<div class="cta-section">
-						<h3 class="cta-title">Manage Your Journey</h3>
-						<div class="cta-buttons">
-							<a href="${websiteUrl}/my-bookings" class="cta-button">View My Bookings</a>
-							<a href="${websiteUrl}/contact-us" class="cta-button">Contact Support</a>
-						</div>
-						<p style="color: ${colors.mutedForeground}; font-size: 14px; margin: 24px 0 0; line-height: 1.5;">
-							Need immediate assistance? Call us at <a href="tel:+61-XXX-XXX-XXX" style="color: ${colors.primary}; text-decoration: none; font-weight: 600;">+61 XXX XXX XXX</a>
-						</p>
-					</div>
-				</div>
-
-				<div class="footer">
-					<h4 class="footer-brand">${BUSINESS_INFO.business.name}</h4>
-					<p class="footer-tagline">Premium Luxury Transportation Services</p>
-					<div class="footer-links">
-						<a href="${websiteUrl}" class="footer-link">Our Website</a>
-						<span class="footer-separator">|</span>
-						<a href="${websiteUrl}/services" class="footer-link">Services</a>
-						<span class="footer-separator">|</span>
-						<a href="${websiteUrl}/contact-us" class="footer-link">Contact</a>
-					</div>
-					<p class="footer-contact">
-						This is an automated notification from ${BUSINESS_INFO.business.name}.<br>
-						For support or questions, please contact our customer service team.
-					</p>
-				</div>
-			</div>
-		</body>
-		</html>
-	`;
+				<!-- CTA Buttons -->
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
+					<tr>
+						<td style="padding:8px 8px 8px 0;">
+							<a href="${websiteUrl}/my-bookings" style="display:inline-block;padding:14px 28px;background:#22818e;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">View My Bookings</a>
+						</td>
+						<td style="padding:8px 0 8px 8px;">
+							<a href="${websiteUrl}/contact-us" style="display:inline-block;padding:14px 28px;background:#f1f5f9;color:#22818e!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;border:1px solid #e2e8f0;">Contact Support</a>
+						</td>
+					</tr>
+				</table>
+				<p style="margin:0;font-size:14px;color:#64748b;">Need help? Call <a href="${BUSINESS_INFO.phone.link}" style="color:#22818e;text-decoration:none;font-weight:600;">${BUSINESS_INFO.phone.display}</a></p>
+			</td>
+		</tr>
+		<!-- Footer -->
+		<tr>
+			<td style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+				<p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#475569;">${BUSINESS_INFO.business.name}</p>
+				<p style="margin:0 0 12px 0;font-size:12px;color:#94a3b8;">Premium Luxury Transportation Services</p>
+				<p style="margin:0;font-size:12px;color:#94a3b8;">Automated notification · <a href="${websiteUrl}/contact-us" style="color:#22818e;text-decoration:none;">Contact Support</a></p>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>`;
 
 	return { subject, html };
 }
 
 /**
  * Send driver assignment notification email
+ * Duplicate prevention: skips if already sent to this driver (allows resend on driver reassignment)
  */
 export async function sendDriverAssignmentNotification(data: DriverAssignmentEmailData): Promise<{ success: boolean; message: string }> {
 	try {
 		const { bookingId, driverId, env } = data;
 		console.log(`📧 EMAIL SERVICE: Starting driver assignment notification for booking ${bookingId}, driver ${driverId}`);
 
+		if (!env) {
+			console.error(`❌ DRIVER ASSIGNMENT: env is missing - check tRPC context passes env`);
+			return { success: false, message: "Environment not available" };
+		}
+
 		// Get booking details
 		console.log(`📧 EMAIL SERVICE: Fetching booking details for booking ${bookingId}`);
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
-		console.log(`📧 EMAIL SERVICE: Booking details fetched. Driver user email: ${bookingDetails.driverUser?.email}`);
+		const { booking, driverUser, car, package: pkg, stops, customer } = bookingDetails;
+		console.log(`📧 EMAIL SERVICE: Booking details fetched. Driver user email: ${driverUser?.email}`);
 
-		if (!bookingDetails.driverUser?.email) {
-			console.log(`❌ EMAIL SERVICE: Driver email not found for driver ${driverId}`);
-			throw new Error("Driver email not found");
+		if (!isValidEmail(driverUser?.email)) {
+			console.log(`❌ EMAIL SERVICE: No valid driver email for driver ${driverId}`);
+			return { success: false, message: "Driver email not found or invalid" };
 		}
 
-		// Format pickup date and time
-		const { booking, driverUser, car, package: pkg, stops, customer } = bookingDetails;
-		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
+		// Duplicate prevention - skip if already sent to this driver (allows resend when driver is reassigned)
+		if (booking.driverAssignmentEmailSentToDriverId === driverId) {
+			console.log(`⏭️ EMAIL SERVICE: Skipping - driver assignment email already sent to driver ${driverId}`);
+			return { success: true, message: "Driver assignment email already sent to this driver" };
+		}
 
-		// Format pickup date and time using timezone priority:
-		// 1. booking.timezone (specific booking override)
-		// 2. driverUser.timezone (driver's preferred timezone)
-		// 3. systemSettings.timezone (default: Australia/Sydney)
-		const systemTimezone = await getSystemTimezone();
-		const effectiveTimezone = booking.timezone || driverUser.timezone || systemTimezone;
-
-		const dateObj = new Date(pickupDateTime);
-		const zonedDate = toZonedTime(dateObj, effectiveTimezone);
-		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
-		const pickupTime = format(zonedDate, "h:mm a");
-
-		const serviceType = pkg?.title || "Custom Trip";
-		const vehicleInfo = car?.name || "Assigned Vehicle";
 		const driverName = driverUser.name || "Driver";
-		const bookingReference = booking.referenceNumber || "N/A";
-
-		// Generate React Email template for driver assignment
-		console.log(`📧 EMAIL SERVICE: Generating React email template for driver ${driverName}`);
-		const template = await renderDriverAssignmentEmail({
-			driverName,
-			customerName: customer?.name || "Customer",
-			bookingReference,
-			serviceType,
-			pickupDate,
-			pickupTime,
-			originAddress: booking.originAddress || booking.pickupAddress,
-			destinationAddress: booking.destinationAddress,
-			vehicleInfo,
-			websiteUrl: "https://downunderchauffeurs.com",
-			// Additional props
-			stops: stops?.map(stop => ({ address: stop.address })) || [],
-			passengerCount: booking.passengerCount || 1,
-			customerPhone: customer?.phone || "",
-		});
+		// Use plain HTML template (works in Cloudflare Workers - no React)
+		console.log(`📧 EMAIL SERVICE: Generating email template for driver ${driverName}`);
+		const template = generateDriverAssignmentEmailTemplate(driverName, bookingDetails);
 
 		// Send email
 		console.log(`📧 EMAIL SERVICE: Getting mail service and sending email to ${bookingDetails.driverUser.email}`);
@@ -1379,9 +566,20 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 			throw new Error("Failed to send driver assignment email");
 		}
 
+		// Mark as sent (duplicate prevention, track which driver) - run migration 0015 if this fails
+		try {
+			await db.update(bookings).set({
+				driverAssignmentEmailSentAt: new Date(),
+				driverAssignmentEmailSentToDriverId: driverId,
+				updatedAt: new Date(),
+			}).where(eq(bookings.id, bookingId));
+		} catch (dbErr) {
+			console.warn(`⚠️ DRIVER ASSIGNMENT: Could not update driverAssignmentEmailSentAt (run migration 0015):`, dbErr);
+		}
+
 		return {
 			success: true,
-			message: `Driver assignment notification sent to ${bookingDetails.driverUser.email}`,
+			message: `Driver assignment notification sent to ${driverUser.email}`,
 		};
 	} catch (error) {
 		console.error("Error sending driver assignment notification:", error);
@@ -1393,131 +591,45 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 }
 
 /**
- * Send trip status notification email to customer
+ * Send trip status / job completion summary email to customer (registered user or guest)
+ * For status=completed: duplicate prevention via completionSummaryEmailSentAt
  */
 export async function sendTripStatusNotification(data: TripStatusEmailData): Promise<{ success: boolean; message: string }> {
 	try {
 		const { bookingId, status, env } = data;
 		console.log(`📧 TRIP EMAIL DEBUG: sendTripStatusNotification called for booking ${bookingId}, status: ${status}`);
 
-		// Get booking details
+		if (!env) {
+			console.error(`❌ TRIP EMAIL: env is missing - check tRPC context passes env`);
+			return { success: false, message: "Environment not available" };
+		}
+
+		// Get booking details (includes guest support)
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
+		const { booking, customer } = bookingDetails;
 
-		if (!bookingDetails.customer?.email) {
-			throw new Error("Customer email not found");
+		const recipientEmail = customer?.email || booking.customerEmail;
+		if (!isValidEmail(recipientEmail)) {
+			console.log(`⏭️ TRIP EMAIL: Skipping - no valid customer email for booking ${bookingId}`);
+			return { success: false, message: "No valid customer email" };
 		}
 
-		// Format pickup date and time using timezone priority
-		const { booking, driverUser, car, package: pkg, stops, customer } = bookingDetails;
-		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-		const systemTimezone = await getSystemTimezone();
-		// Priority: booking.timezone > customer.timezone > systemSettings.timezone
-		const effectiveTimezone = booking.timezone || customer.timezone || systemTimezone;
-
-		console.log("📅 TIMEZONE DEBUG:", {
-			bookingId: booking.id,
-			rawTimestamp: pickupDateTime,
-			bookingTimezone: booking.timezone,
-			systemTimezone,
-			effectiveTimezone,
-			utcDate: new Date(pickupDateTime).toISOString(),
-		});
-
-		// Convert UTC to effective timezone
-		const dateObj = new Date(pickupDateTime);
-		const zonedDate = toZonedTime(dateObj, effectiveTimezone);
-
-		console.log("📅 TIMEZONE RESULT:", {
-			zonedDate: zonedDate.toISOString(),
-			formattedDate: format(zonedDate, "EEEE, MMMM d, yyyy"),
-			formattedTime: format(zonedDate, "h:mm a"),
-		});
-
-		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
-		const pickupTime = format(zonedDate, "h:mm a");
-
-		const serviceType = pkg?.title || "Custom Trip";
-		const vehicleInfo = car?.name || "Assigned Vehicle";
-		const driverName = driverUser?.name || "Your Driver";
-		const bookingReference = booking.referenceNumber || "N/A";
-
-		// Status-specific content (after booking reference is defined)
-		let statusTitle = "";
-		let statusMessage = "";
-
-		switch (status) {
-			case "in_progress":
-			case "passenger_on_board":
-				statusTitle = "Your Trip Has Started";
-				statusMessage = "Your driver has started your trip. You are now en route to your destination.";
-				break;
-			case "driver_en_route":
-				statusTitle = "Driver En Route to Pickup";
-				statusMessage = "Your driver is now on their way to your pickup location. Please be ready for pickup.";
-				break;
-			case "arrived_pickup":
-				statusTitle = "Driver Has Arrived";
-				statusMessage = "Your driver has arrived at your pickup location and is ready to begin your trip.";
-				break;
-			case "completed":
-				statusTitle = "Booking Completed";
-				statusMessage = `Your booking (#${bookingReference}) has been successfully completed. Thank you for choosing us—we look forward to serving you again on your next journey.`;
-				break;
-			default:
-				statusTitle = "Trip Status Update";
-				statusMessage = "Your booking status has been updated.";
+		// For completion summary: duplicate prevention
+		if (status === "completed") {
+			if (booking.completionSummaryEmailSentAt) {
+				console.log(`⏭️ TRIP EMAIL: Skipping - completion summary already sent for booking ${bookingId}`);
+				return { success: true, message: "Completion summary email already sent" };
+			}
 		}
 
-		// Generate React Email template with additional driver trips inspired data
-		// Debug logging to check email data
-		const emailData = {
-			customerName: bookingDetails.customer.name || "Customer",
-			statusTitle,
-			statusMessage,
-			bookingReference,
-			serviceType,
-			pickupDate,
-			pickupTime,
-			originAddress: booking.originAddress || booking.pickupAddress,
-			destinationAddress: booking.destinationAddress,
-			driverName,
-			driverPhone: bookingDetails.driver?.phoneNumber,
-			driverEmail: bookingDetails.driverUser?.email,
-			vehicleInfo,
-			websiteUrl: "https://downunderchauffeurs.com",
-			// Additional props to match driver trips design
-			status: status,
-			stops: stops?.map(stop => ({ address: stop.address })) || [],
-			passengerCount: booking.passengerCount || 1,
-			// Fare breakdown data (for completed trips)
-			baseFare: booking.baseFare,
-			distanceFare: booking.distanceFare,
-			extraCharges: booking.extraCharges,
-			finalAmount: booking.finalAmount,
-			actualDistance: booking.actualDistance,
-			estimatedDistance: booking.estimatedDistance,
-			// Detailed extras breakdown
-			extrasDetails: bookingDetails.extras ? {
-				additionalWaitTime: bookingDetails.extras.additionalWaitTime,
-				unscheduledStops: bookingDetails.extras.unscheduledStops,
-				parkingCharges: bookingDetails.extras.parkingCharges,
-				tollCharges: bookingDetails.extras.tollCharges,
-				tollLocation: bookingDetails.extras.tollLocation,
-				otherChargesDescription: bookingDetails.extras.otherChargesDescription,
-				otherChargesAmount: bookingDetails.extras.otherChargesAmount,
-				notes: bookingDetails.extras.notes,
-			} : undefined,
-		};
-
-		console.log(`📧 EMAIL TEMPLATE DEBUG: Email data for booking ${bookingId}:`, JSON.stringify(emailData, null, 2));
-
-		const template = await renderTripStatusEmail(emailData);
+		// Use plain HTML template (works in Cloudflare Workers - no React)
+		const template = generateTripStatusEmailTemplate(status, bookingDetails);
 
 		// Send email
-		console.log(`📧 TRIP EMAIL DEBUG: Getting mail service and sending email to ${bookingDetails.customer.email}`);
+		console.log(`📧 TRIP EMAIL DEBUG: Getting mail service and sending email to ${recipientEmail}`);
 		const mailService = getMailService(env);
 		const success = await mailService.sendEmail({
-			to: bookingDetails.customer.email,
+			to: recipientEmail,
 			subject: template.subject,
 			html: template.html,
 		});
@@ -1527,9 +639,21 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 			throw new Error("Failed to send trip status email");
 		}
 
+		// For completion summary: mark as sent (duplicate prevention)
+		if (status === "completed") {
+			try {
+				await db.update(bookings).set({
+					completionSummaryEmailSentAt: new Date(),
+					updatedAt: new Date(),
+				}).where(eq(bookings.id, bookingId));
+			} catch (dbErr) {
+				console.warn(`⚠️ TRIP EMAIL: Could not update completionSummaryEmailSentAt (run migration 0015):`, dbErr);
+			}
+		}
+
 		return {
 			success: true,
-			message: `Trip status notification sent to ${bookingDetails.customer.email}`,
+			message: `Trip status notification sent to ${recipientEmail}`,
 		};
 	} catch (error) {
 		console.error("Error sending trip status notification:", error);
@@ -1540,69 +664,42 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 	}
 }
 /**
- * Send booking confirmation email to customer
+ * Send booking confirmation email to customer (registered user or guest)
+ * Duplicate prevention: skips if confirmationEmailSentAt is already set
  */
 export async function sendBookingConfirmationEmail(bookingId: string, env: Env) {
 	try {
 		console.log(`📧 BOOKING CONFIRMATION: Starting email for booking ${bookingId}`);
 
-		// Get booking details
+		if (!env) {
+			console.error(`❌ BOOKING CONFIRMATION: env is missing - check tRPC context passes env`);
+			return { success: false, message: "Environment not available" };
+		}
+
+		// Get booking details (includes guest support via effectiveCustomer)
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
+		const { booking, customer } = bookingDetails;
 
-		if (!bookingDetails.customer || !bookingDetails.customer.email) {
-			throw new Error("Customer email not found");
+		const recipientEmail = customer?.email || booking.customerEmail;
+		if (!isValidEmail(recipientEmail)) {
+			console.log(`⏭️ BOOKING CONFIRMATION: Skipping - no valid customer email for booking ${bookingId}`);
+			return { success: false, message: "No valid customer email" };
 		}
 
-		const { booking, customer, car, package: pkg, stops } = bookingDetails;
-
-		// Format pickup date and time
-		// Display time in UTC (as stored) without timezone conversion
-		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
-		// Format pickup date and time using booking's timezone
-		const userTimezone = booking.timezone || "Australia/Sydney"; // Default to Sydney if not set
-		const dateObj = new Date(pickupDateTime);
-		const zonedDate = toZonedTime(dateObj, userTimezone);
-		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
-		const pickupTime = format(zonedDate, "h:mm a");
-
-		// Determine service type
-		let serviceType = "Custom Booking";
-		if (booking.bookingType === "package" && pkg) {
-			serviceType = `Package: ${pkg.name}`;
-		} else if (booking.bookingType === "car") {
-			serviceType = "Car Rental";
+		// Duplicate prevention
+		if (booking.confirmationEmailSentAt) {
+			console.log(`⏭️ BOOKING CONFIRMATION: Skipping - already sent at ${booking.confirmationEmailSentAt}`);
+			return { success: true, message: "Confirmation email already sent" };
 		}
 
-		// Get vehicle info
-		let vehicleInfo = "Luxury Vehicle";
-		if (car) {
-			vehicleInfo = car.name || "Luxury Vehicle";
-		}
-
-		// Generate booking reference
-		const bookingReference = booking.referenceNumber || "N/A";
-
-		// Generate email template
-		const template = await renderBookingConfirmationEmail({
-			customerName: customer.name || "Customer",
-			bookingReference,
-			serviceType,
-			pickupDate,
-			pickupTime,
-			originAddress: booking.originAddress || booking.pickupAddress,
-			destinationAddress: booking.destinationAddress,
-			vehicleInfo,
-			websiteUrl: "https://downunderchauffeurs.com",
-			stops: stops?.map(stop => ({ address: stop.address })) || [],
-			passengerCount: booking.passengerCount || 1,
-			quotedAmount: booking.quotedAmount,
-		});
+		// Use plain HTML template (works in Cloudflare Workers - no React)
+		const template = generateTripStatusEmailTemplate("confirmed", bookingDetails);
 
 		// Send email
-		console.log(`📧 BOOKING CONFIRMATION: Sending email to ${customer.email}`);
+		console.log(`📧 BOOKING CONFIRMATION: Sending email to ${recipientEmail}`);
 		const mailService = getMailService(env);
 		const success = await mailService.sendEmail({
-			to: customer.email,
+			to: recipientEmail,
 			subject: template.subject,
 			html: template.html,
 		});
@@ -1612,9 +709,19 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 			throw new Error("Failed to send booking confirmation email");
 		}
 
+		// Mark as sent (duplicate prevention) - run migration 0015 if this fails
+		try {
+			await db.update(bookings).set({
+				confirmationEmailSentAt: new Date(),
+				updatedAt: new Date(),
+			}).where(eq(bookings.id, bookingId));
+		} catch (dbErr) {
+			console.warn(`⚠️ BOOKING CONFIRMATION: Could not update confirmationEmailSentAt (run migration 0015):`, dbErr);
+		}
+
 		return {
 			success: true,
-			message: `Booking confirmation sent to ${customer.email}`,
+			message: `Booking confirmation sent to ${recipientEmail}`,
 		};
 	} catch (error) {
 		console.error("Error sending booking confirmation:", error);

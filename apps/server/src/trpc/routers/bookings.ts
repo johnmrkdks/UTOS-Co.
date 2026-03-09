@@ -2,7 +2,7 @@ import {
 	InsertBookingSchema,
 	UpdateBookingSchema,
 } from "@/schemas/shared/tables/booking";
-import { bookings } from "@/db/sqlite/schema";
+import { bookings, bookingExtras } from "@/db/sqlite/schema";
 import { eq } from "drizzle-orm";
 import { createBookingService, CreateBookingServiceSchema } from "@/services/bookings/create-booking";
 import { createPackageBookingService, CreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
@@ -20,7 +20,7 @@ import { validateBookingOperations } from "@/services/bookings/validate-booking-
 import { closeTripWithExtras, closeTripWithoutExtras } from "@/services/bookings/close-trip-with-extras";
 import { archiveBookingService, ArchiveBookingServiceSchema } from "@/services/bookings/archive-booking";
 import { bulkArchiveBookingsService, bulkDeleteBookingsService, BulkArchiveBookingsSchema, BulkDeleteBookingsSchema } from "@/services/bookings/bulk-booking-operations";
-import { sendBookingConfirmationEmail, sendAdminNewBookingEmail } from "@/services/notifications/booking-email-notification-service";
+import { sendBookingConfirmationEmail, sendAdminNewBookingEmail, sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
 import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -33,6 +33,7 @@ import { createBookingReviewService, CreateBookingReviewSchema } from "@/service
 import { hasBookingReviewService, HasBookingReviewSchema } from "@/services/reviews/has-booking-review";
 import { getBookingByShareToken } from "@/data/bookings/get-booking-by-share-token";
 import { updateBookingStatusByTokenService, UpdateBookingStatusByTokenSchema } from "@/services/bookings/update-booking-status-by-token";
+import { closeTripWithExtrasByShareToken, closeTripWithoutExtrasByShareToken } from "@/services/bookings/close-trip-by-share-token";
 import { generateBookingShareTokenService } from "@/services/bookings/generate-booking-share-token";
 
 // Helper function to get user role from database
@@ -240,7 +241,7 @@ export const bookingsRouter = router({
 		}),
 	update: protectedProcedure
 		.input(UpdateBookingServiceSchema)
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				console.log("🔍 DEBUG bookings.update - START");
 				console.log("📥 Input received:", JSON.stringify(input, null, 2));
@@ -304,6 +305,25 @@ export const bookingsRouter = router({
 				console.log("✅ Booking updated successfully:", updatedBooking?.id);
 				console.log("📋 Updated booking data:", JSON.stringify(updatedBooking, null, 2));
 
+				// When admin finalizes a booking awaiting_pricing_review (driver closed with waiting time),
+				// send the deferred completion email to the client
+				const hasAmountUpdate = input.data.finalAmount !== undefined || input.data.extraCharges !== undefined;
+				const statusSetToCompleted = input.data.status === "completed";
+				const wasAwaitingPricingReview = existingBooking.status === "awaiting_pricing_review";
+				if ((hasAmountUpdate || statusSetToCompleted) && wasAwaitingPricingReview && env) {
+					try {
+						// Ensure status is set to completed (updateBookingService may have already done this via input.data)
+						await db.update(bookings).set({
+							status: "completed",
+							updatedAt: new Date(),
+						}).where(eq(bookings.id, input.id));
+						await sendTripStatusNotification({ bookingId: input.id, status: "completed", env });
+						console.log("✅ Completion email sent after admin finalized charges");
+					} catch (emailErr) {
+						console.error("❌ Failed to send completion email:", emailErr);
+					}
+				}
+
 				return updatedBooking;
 			} catch (error) {
 				console.error("💥 ERROR in bookings.update:", error);
@@ -347,17 +367,11 @@ export const bookingsRouter = router({
 				const newBooking = await createPackageBookingService(db, processedInput);
 				console.log("✅ Service returned successfully:", newBooking?.id);
 
-				// Send booking confirmation and admin notification emails
+				// Send admin notification only - confirmation email sent when admin confirms
 				try {
-					console.log("📧 Sending booking confirmation and admin notification emails...");
-					await Promise.all([
-						sendBookingConfirmationEmail(newBooking.id, env),
-						sendAdminNewBookingEmail(newBooking.id, env),
-					]);
-					console.log("✅ Emails sent successfully");
+					await sendAdminNewBookingEmail(newBooking.id, env);
 				} catch (emailError) {
-					console.error("❌ Error sending emails:", emailError);
-					// Don't fail the booking creation if emails fail
+					console.error("❌ Error sending admin email:", emailError);
 				}
 
 				return newBooking;
@@ -389,17 +403,11 @@ export const bookingsRouter = router({
 				const newBooking = await createCustomBookingService(db, { ...input, userId });
 				console.log("✅ Custom booking created successfully:", newBooking.id);
 
-				// Send booking confirmation and admin notification emails
+				// Send admin notification only - confirmation email sent when admin confirms
 				try {
-					console.log("📧 Sending booking confirmation and admin notification emails...");
-					await Promise.all([
-						sendBookingConfirmationEmail(newBooking.id, env),
-						sendAdminNewBookingEmail(newBooking.id, env),
-					]);
-					console.log("✅ Emails sent successfully");
+					await sendAdminNewBookingEmail(newBooking.id, env);
 				} catch (emailError) {
-					console.error("❌ Error sending emails:", emailError);
-					// Don't fail the booking creation if emails fail
+					console.error("❌ Error sending admin email:", emailError);
 				}
 
 				return newBooking;
@@ -436,12 +444,9 @@ export const bookingsRouter = router({
 				});
 
 				try {
-					await Promise.all([
-						sendBookingConfirmationEmail(newBooking.id, env),
-						sendAdminNewBookingEmail(newBooking.id, env),
-					]);
+					await sendAdminNewBookingEmail(newBooking.id, env);
 				} catch (emailError) {
-					console.error("Error sending emails:", emailError);
+					console.error("Error sending admin email:", emailError);
 				}
 
 				return newBooking;
@@ -469,7 +474,7 @@ export const bookingsRouter = router({
 				}
 
 				console.log("🚀 Creating custom booking from quote for userId:", userId);
-				const inputWithUserId = { ...input, userId };
+				const inputWithUserId = { ...input, userId, isGuest: false };
 				console.log("📦 Final payload to service:", JSON.stringify(inputWithUserId, null, 2));
 
 				const newBooking = await createCustomBookingFromQuoteService(db, inputWithUserId);
@@ -477,12 +482,7 @@ export const bookingsRouter = router({
 
 				// Send booking confirmation and admin notification emails
 				try {
-					console.log("📧 Sending booking confirmation and admin notification emails...");
-					await Promise.all([
-						sendBookingConfirmationEmail(newBooking.id, env),
-						sendAdminNewBookingEmail(newBooking.id, env),
-					]);
-					console.log("✅ Emails sent successfully");
+					await sendAdminNewBookingEmail(newBooking.id, env);
 				} catch (emailError) {
 					console.error("❌ Error sending emails:", emailError);
 					// Don't fail the booking creation if emails fail
@@ -495,6 +495,29 @@ export const bookingsRouter = router({
 					stack: error instanceof Error ? error.stack : undefined,
 					input: JSON.stringify(input, null, 2)
 				});
+				handleTRPCError(error);
+			}
+		}),
+
+	// Create custom booking from quote as guest (no auth required)
+	createCustomBookingFromQuoteAsGuest: publicProcedure
+		.input(CreateCustomBookingFromQuoteSchema.omit({ userId: true }).extend({ isGuest: z.literal(true) }))
+		.mutation(async ({ ctx: { db, env }, input }) => {
+			try {
+				console.log("🔍 DEBUG createCustomBookingFromQuoteAsGuest - Guest booking:");
+
+				const inputWithGuest = { ...input, isGuest: true };
+				const newBooking = await createCustomBookingFromQuoteService(db, inputWithGuest);
+
+				try {
+					await sendAdminNewBookingEmail(newBooking.id, env);
+				} catch (emailError) {
+					console.error("❌ Error sending emails:", emailError);
+				}
+
+				return newBooking;
+			} catch (error) {
+				console.error("❌ TRPC Error in createCustomBookingFromQuoteAsGuest:", error);
 				handleTRPCError(error);
 			}
 		}),
@@ -658,6 +681,47 @@ export const bookingsRouter = router({
 			}
 		}),
 
+	/** Public: Close trip with extras via share token (for external drivers without account - no auth) */
+	closeTripWithExtrasByShareToken: publicProcedure
+		.input(z.object({
+			shareToken: z.string().min(1),
+			isNoShow: z.boolean().default(false),
+			extrasData: z.object({
+				additionalWaitTime: z.number().min(0).default(0),
+				unscheduledStops: z.number().min(0).default(0),
+				parkingCharges: z.number().min(0).default(0),
+				tollCharges: z.number().min(0).default(0),
+				location: z.string().default(""),
+				otherCharges: z.object({
+					description: z.string().default(""),
+					amount: z.number().min(0).default(0),
+				}),
+				extraType: z.enum(["general", "driver", "operator"]).default("general"),
+				notes: z.string().default(""),
+			}),
+		}))
+		.mutation(async ({ ctx: { db, env }, input }) => {
+			try {
+				return await closeTripWithExtrasByShareToken(db, input.shareToken, input.extrasData, env, input.isNoShow);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Public: Close trip without extras via share token (for external drivers without account - no auth) */
+	closeTripWithoutExtrasByShareToken: publicProcedure
+		.input(z.object({
+			shareToken: z.string().min(1),
+			isNoShow: z.boolean().default(false),
+		}))
+		.mutation(async ({ ctx: { db, env }, input }) => {
+			try {
+				return await closeTripWithoutExtrasByShareToken(db, input.shareToken, env, input.isNoShow);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
 	/** Admin/Driver: Generate share token for booking (for legacy bookings without one) */
 	generateShareToken: protectedProcedure
 		.input(z.object({ bookingId: z.string() }))
@@ -683,7 +747,7 @@ export const bookingsRouter = router({
 	// Get bookings by type
 	listByType: protectedProcedure
 		.input(ResourceListSchema.extend({
-			bookingType: z.enum(["package", "custom"]).optional(),
+			bookingType: z.enum(["package", "custom", "guest", "offload"]).optional(),
 		}))
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
@@ -952,7 +1016,14 @@ export const bookingsRouter = router({
 					throw new Error("Booking not found");
 				}
 
-				if (booking.userId !== userId) {
+				const userRole = await getUserRole(db, userId);
+				const isAdmin = userRole === "admin" || userRole === "super_admin";
+				// Guest bookings (userId is null) can only be validated by admins
+				if (booking.userId === null) {
+					if (!isAdmin) {
+						throw new Error("Guest bookings can only be managed by administrators");
+					}
+				} else if (booking.userId !== userId) {
 					console.error("❌ User mismatch. Booking userId:", booking.userId, "Session userId:", userId);
 					throw new Error("You can only check your own bookings");
 				}
@@ -997,8 +1068,9 @@ export const bookingsRouter = router({
 					throw new Error("User session is required");
 				}
 
+				const userRole = await getUserRole(db, userId);
 				const { bookingId, ...editData } = input;
-				return await editBooking(db, bookingId, userId, editData);
+				return await editBooking(db, bookingId, userId, editData, userRole);
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -1017,7 +1089,8 @@ export const bookingsRouter = router({
 					throw new Error("User session is required");
 				}
 
-				return await cancelBooking(db, input.bookingId, userId, input.cancellationReason);
+				const userRole = await getUserRole(db, userId);
+				return await cancelBooking(db, input.bookingId, userId, input.cancellationReason, userRole);
 			} catch (error) {
 				handleTRPCError(error);
 			}

@@ -3,7 +3,7 @@
  * Uses Web Crypto API - no Node.js crypto, stays within free tier CPU limits.
  * Format: "pbkdf2$saltHex:hashHex" (prefix distinguishes from scrypt hashes).
  */
-const PBKDF2_ITERATIONS = 100_000; // Max allowed by Cloudflare's crypto.subtle
+const PBKDF2_ITERATIONS = 100_000; // Must match existing hashes; exceeds Free tier 10ms CPU limit
 const SALT_LENGTH = 16;
 const KEY_LENGTH = 32;
 

@@ -21,6 +21,7 @@ export type UpdateBookingStatusByTokenParams = z.infer<typeof UpdateBookingStatu
 /**
  * Update booking status via share token (no auth - for driver job link).
  * Only allows driver-relevant status transitions.
+ * External drivers (share link) are NOT allowed to mark as completed - they must use close-trip-by-share-token.
  */
 export async function updateBookingStatusByTokenService(
 	db: DB,
@@ -31,6 +32,13 @@ export async function updateBookingStatusByTokenService(
 
 	if (!booking) {
 		throw ErrorFactory.notFound("Booking not found. The share link may be invalid or expired.");
+	}
+
+	// External drivers cannot mark as completed - they must add extras and submit via close-trip-by-share-token
+	if (data.status === BookingStatusEnum.Completed) {
+		throw ErrorFactory.badRequest(
+			"You cannot mark this job as completed. Please add any extras (tolls, parking, waiting time) and submit. Admin will finalize the amount."
+		);
 	}
 
 	// Map to the standard update format

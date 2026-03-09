@@ -39,6 +39,9 @@ export const instantQuoteRouter = router({
 		.input(CalculateInstantQuoteSchema)
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
+				if (!env?.GOOGLE_MAPS_API_KEY) {
+					throw new Error("Google Maps API key not configured. Please contact support.");
+				}
 				// For now, use the old calculation method until database schema is fixed
 				// This still provides security by generating a temporary secure ID
 				const quote = await calculateInstantQuoteService(db, input, env);
