@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Card,
@@ -9,10 +10,11 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import placeHolder from "@/assets/placeholder.svg";
-import { Check, Crown, Users, Car, Fuel, Settings, ArrowRight, Briefcase } from "lucide-react";
+import { Check, Crown, Users, Car, Fuel, Settings, ArrowRight, Briefcase, Images } from "lucide-react";
 import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
 import { Link } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { CarImageGalleryDialog } from "./car-image-gallery-dialog";
 
 export type BookingProps = {
 	id: string; // Add carId for pricing lookup
@@ -22,6 +24,7 @@ export type BookingProps = {
 	description: string;
 	features: string[];
 	image?: string;
+	images?: { url: string; altText?: string | null }[];
 	popular?: boolean;
 }
 
@@ -37,23 +40,42 @@ export function BookingCard({
 	description,
 	features,
 	image,
+	images,
 	popular,
 	className,
 	...props
 }: BookingCardProps) {
 	const { session } = useUserQuery();
+	const [galleryOpen, setGalleryOpen] = useState(false);
+	const hasImages = images && images.length > 0;
+	const hasMultipleImages = hasImages && images!.length > 1;
+
 	return (
+		<>
 		<Card className={cn(
 			"relative bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden rounded-xl p-0",
 			className
 		)} {...props}>
 			{/* Hero Image Section */}
-			<div className="relative aspect-[3/2] bg-gray-50 overflow-hidden rounded-t-xl">
+			<div className="relative aspect-[3/2] bg-gray-50 overflow-hidden rounded-t-xl group">
 				<img
 					src={image || placeHolder}
 					alt={`${brand} ${model}`}
 					className="w-full h-full object-cover rounded-t-xl"
 				/>
+
+				{/* Browse Images overlay - show when car has images */}
+				{hasImages && (
+					<Button
+						variant="secondary"
+						size="sm"
+						className="absolute bottom-2 right-2 z-20 opacity-90 hover:opacity-100 gap-1.5"
+						onClick={() => setGalleryOpen(true)}
+					>
+						<Images className="h-4 w-4" />
+						{hasMultipleImages ? `Browse ${images!.length} Images` : "View Image"}
+					</Button>
+				)}
 
 				{/* Category Badge */}
 				<div className="absolute top-0 left-0 z-20">
@@ -137,5 +159,13 @@ export function BookingCard({
 				</div>
 			</div>
 		</Card>
+
+		<CarImageGalleryDialog
+			open={galleryOpen}
+			onOpenChange={setGalleryOpen}
+			images={images || (image ? [{ url: image, altText: `${brand} ${model}` }] : [])}
+			carName={`${brand} ${model}`}
+		/>
+		</>
 	);
 }

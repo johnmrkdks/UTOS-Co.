@@ -184,10 +184,10 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 					return (
 						<Card
 							key={pkg.id}
-							className="group overflow-hidden hover:shadow-lg transition-all duration-200 border bg-background hover:border-primary/20"
+							className="group overflow-hidden hover:shadow-lg transition-all duration-200 border bg-background hover:border-primary/20 p-0 gap-0"
 						>
-							{/* Banner Image */}
-							<div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+							{/* Banner Image - extends to card edges */}
+							<div className="relative h-36 overflow-hidden rounded-t-xl bg-gradient-to-br from-primary/10 to-primary/5">
 								{pkg.bannerImageUrl ? (
 									<>
 										<img

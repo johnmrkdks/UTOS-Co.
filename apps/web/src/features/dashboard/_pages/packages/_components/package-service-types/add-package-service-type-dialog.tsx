@@ -61,7 +61,7 @@ export function AddPackageServiceTypeDialog() {
 
 	return (
 		<Dialog open={isModalOpen("add-package-service-type")} onOpenChange={closeModal}>
-			<DialogContent className="sm:max-w-[600px]">
+			<DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Add Service Type</DialogTitle>
 					<DialogDescription>

@@ -37,9 +37,9 @@ export function CreatePricingConfigDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={(open) => !open && closeModal()}>
-			<DialogContent className="sm:max-w-4xl h-[85vh] flex flex-col p-0">
+			<DialogContent className="sm:max-w-4xl h-[85vh] flex flex-col p-0" showCloseButton={false}>
 				{/* Sticky Header */}
-				<DialogHeader className="flex-shrink-0 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+				<DialogHeader className="flex-shrink-0 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b pt-6 px-6 pb-4">
 					<DialogTitle>
 						Create Pricing Configuration
 						{modalData?.carName && ` for ${modalData.carName}`}

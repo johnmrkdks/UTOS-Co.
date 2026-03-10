@@ -96,6 +96,7 @@ export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsC
 					key={data.id} 
 					data={data} 
 					view="compact"
+					className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
 				/>
 			))}
 		</div>

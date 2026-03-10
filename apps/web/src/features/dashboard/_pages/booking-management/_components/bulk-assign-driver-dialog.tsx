@@ -71,7 +71,7 @@ export function BulkAssignDriverDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[500px]">
+			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Assign Driver to {bookingIds.length} Booking(s)</DialogTitle>
 					<DialogDescription>

@@ -29,7 +29,7 @@ function CarDetailsPage() {
 	}
 
 	const handleBack = () => {
-		navigate({ to: "/dashboard/cars" })
+		navigate({ to: "/fleet" })
 	}
 
 	if (isLoading) {

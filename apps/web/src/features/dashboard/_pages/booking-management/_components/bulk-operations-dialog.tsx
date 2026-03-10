@@ -93,7 +93,7 @@ export function BulkOperationsDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-md">
+			<DialogContent className="max-w-md" showCloseButton={false}>
 				<DialogHeader>
 					<div className="flex items-center gap-3">
 						<config.icon className={`h-6 w-6 ${config.iconColor}`} />

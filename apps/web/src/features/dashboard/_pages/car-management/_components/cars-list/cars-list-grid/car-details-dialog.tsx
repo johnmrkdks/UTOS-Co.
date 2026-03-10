@@ -21,7 +21,7 @@ type CarDetailsDialogProps = {
 export function CarDetailsDialog({ car, open, onOpenChange }: CarDetailsDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="min-w-2xl w-full max-w-xl max-h-[90vh]">
+			<DialogContent className="sm:max-w-[600px] max-h-[90vh]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle className="text-2xl">{car.name}</DialogTitle>
 					<DialogDescription>

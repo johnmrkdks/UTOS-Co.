@@ -125,13 +125,15 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<DataTableColumnHeader column={column} title="Actions" />
 		),
 		cell: ({ row }) => (
-			<BookingTableRowActions
-				row={row}
-				onEditBooking={onEditBooking}
-				onCancelBooking={onCancelBooking}
-				onArchiveBooking={onArchiveBooking}
-				onDeleteBooking={onDeleteBooking}
-			/>
+			<div onClick={(e) => e.stopPropagation()}>
+				<BookingTableRowActions
+					row={row}
+					onEditBooking={onEditBooking}
+					onCancelBooking={onCancelBooking}
+					onArchiveBooking={onArchiveBooking}
+					onDeleteBooking={onDeleteBooking}
+				/>
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -195,25 +197,26 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<DataTableColumnHeader column={column} title="Customer" />
 		),
 		cell: ({ row }) => (
-			<div className="flex items-center space-x-2">
-				<User className="h-4 w-4 text-muted-foreground" />
-				<div>
-					<div className="flex items-center gap-1.5">
-						<span className="font-medium text-xs truncate">{row.getValue("customerName")}</span>
+			<div className="flex items-center space-x-2 min-w-0 overflow-hidden">
+				<User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+				<div className="min-w-0 overflow-hidden flex-1">
+					<div className="flex items-center gap-1.5 min-w-0">
+						<span className="font-medium text-xs truncate min-w-0">{row.getValue("customerName") as string}</span>
 						{row.original.isGuestBooking && (
-							<Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+							<Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal flex-shrink-0">
 								Guest
 							</Badge>
 						)}
 					</div>
-					<div className="text-xs text-muted-foreground flex items-center gap-1">
-						<Phone className="h-3 w-3" />
-						<span className="truncate">{row.original.customerPhone}</span>
+					<div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+						<Phone className="h-3 w-3 flex-shrink-0" />
+						<span className="truncate min-w-0">{row.original.customerPhone}</span>
 					</div>
 				</div>
 			</div>
 		),
-		size: 180,
+		size: 200,
+		meta: { className: "min-w-0 max-w-[200px] overflow-hidden" },
 	});
 
 	if (!compact) {
@@ -223,21 +226,22 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			accessorKey: "route",
 			header: "Route",
 			cell: ({ row }) => (
-				<div>
-					<div className="text-xs font-medium truncate">
+				<div className="min-w-0 overflow-hidden space-y-0.5">
+					<div className="text-xs font-medium truncate block" title={row.original.originAddress}>
 						From: {row.original.originAddress}
 					</div>
 					{row.original.stops && row.original.stops.length > 0 && (
-						<div className="text-xs text-blue-600 truncate">
+						<div className="text-xs text-blue-600 truncate block">
 							{row.original.stops.length} stop{row.original.stops.length > 1 ? 's' : ''}
 						</div>
 					)}
-					<div className="text-xs text-muted-foreground truncate">
+					<div className="text-xs text-muted-foreground truncate block" title={row.original.destinationAddress}>
 						To: {row.original.destinationAddress}
 					</div>
 				</div>
 			),
-			size: 200,
+			size: 260,
+			meta: { className: "min-w-0 max-w-[260px] overflow-hidden" },
 		});
 
 		// Stops column
@@ -311,14 +315,15 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			accessorKey: "car",
 			header: "Vehicle",
 			cell: ({ row }) => (
-				<div className="flex items-center space-x-2">
-					<Car className="h-4 w-4 text-muted-foreground" />
-					<div className="text-xs truncate">
+				<div className="flex items-center space-x-2 min-w-0 overflow-hidden">
+					<Car className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+					<div className="text-xs truncate min-w-0">
 						{row.original.car?.name || "Not assigned"}
 					</div>
 				</div>
 			),
-			size: 120,
+			size: 140,
+			meta: { className: "min-w-0" },
 		});
 
 		// Driver column

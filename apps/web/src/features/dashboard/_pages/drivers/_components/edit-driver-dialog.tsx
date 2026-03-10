@@ -64,7 +64,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Edit Driver</DialogTitle>
 					<DialogDescription>
@@ -116,7 +116,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 										/>
 									</FormControl>
 									<div className="text-xs text-muted-foreground">
-										Driver&apos;s share of each job price (default 50%)
+										Driver&apos;s share of each job. Excludes toll &amp; parking; includes waiting time (default 50%)
 									</div>
 									<FormMessage />
 								</FormItem>

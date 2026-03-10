@@ -81,8 +81,16 @@ function RouteComponent() {
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
-			<div className="flex items-center justify-between space-y-2">
-				<h2 className="text-3xl font-bold tracking-tight">Pricing Configuration</h2>
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+				<div className="flex items-center gap-3">
+					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center border border-amber-200/50">
+						<DollarSign className="h-5 w-5 text-amber-600" />
+					</div>
+					<div>
+						<h2 className="text-2xl font-bold tracking-tight">Pricing Configuration</h2>
+						<p className="text-sm text-muted-foreground">Manage pricing models and test quotes</p>
+					</div>
+				</div>
 				<Button 
 					className="flex items-center gap-2"
 					onClick={() => setShowCreateConfig(true)}
@@ -90,16 +98,16 @@ function RouteComponent() {
 					<Plus className="h-4 w-4" />
 					New Configuration
 				</Button>
-
-				{/* Unified pricing config dialog */}
-				<UnifiedPricingConfigDialog
-					open={showCreateConfig}
-					onOpenChange={setShowCreateConfig}
-					mode='create'
-					title="Create Pricing Configuration"
-					description="Set up a new pricing model for custom bookings. Configure base rates, multipliers, and additional charges."
-				/>
 			</div>
+
+			{/* Unified pricing config dialog */}
+			<UnifiedPricingConfigDialog
+				open={showCreateConfig}
+				onOpenChange={setShowCreateConfig}
+				mode='create'
+				title="Create Pricing Configuration"
+				description="Set up a new pricing model for custom bookings. Configure base rates, multipliers, and additional charges."
+			/>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{pricingStatsData.map((data) => (
@@ -107,6 +115,7 @@ function RouteComponent() {
 						key={data.id}
 						data={data}
 						view='compact'
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
 					/>
 				))}
 			</div>

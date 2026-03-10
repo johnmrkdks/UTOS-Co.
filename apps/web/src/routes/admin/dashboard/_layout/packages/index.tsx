@@ -38,8 +38,14 @@ function RouteComponent() {
 		<div className="flex-1">
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="">
 				<PaddingLayout className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b">
-					<div className="flex items-center justify-between space-y-2">
-						<h2 className="text-3xl font-bold tracking-tight">Package Management</h2>
+					<div className="flex items-center gap-3">
+						<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center border border-purple-200/50">
+							<Package className="h-5 w-5 text-purple-600" />
+						</div>
+						<div>
+							<h2 className="text-2xl font-bold tracking-tight">Package Management</h2>
+							<p className="text-sm text-muted-foreground">Manage packages and service types</p>
+						</div>
 					</div>
 					<TabsList className="grid grid-cols-2">
 						<TabsTrigger value="packages" className="flex items-center gap-2">

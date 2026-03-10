@@ -10,6 +10,7 @@ import {
 	useReactTable,
 	type ColumnDef,
 	type ColumnFiltersState,
+	type Row,
 	type SortingState,
 	type VisibilityState,
 	type PaginationState,
@@ -90,6 +91,7 @@ export interface DataTableProps<TData, TValue> {
 	// Callbacks
 	onSortingChange?: (sorting: SortingState) => void
 	onColumnFiltersChange?: (filters: ColumnFiltersState) => void
+	onRowClick?: (row: Row<TData>) => void
 
 	// Accessibility
 	"aria-label"?: string
@@ -163,6 +165,7 @@ export function DataTable<TData, TValue>({
 	// Callbacks
 	onSortingChange,
 	onColumnFiltersChange,
+	onRowClick,
 
 	// Accessibility
 	"aria-label": ariaLabel,
@@ -314,7 +317,11 @@ export function DataTable<TData, TValue>({
 									<TableRow
 										key={row.id}
 										data-state={enableRowSelection && row.getIsSelected() ? "selected" : undefined}
-										className={row.getIsSelected() ? "bg-muted/50" : ""}
+										className={cn(
+											row.getIsSelected() ? "bg-muted/50" : "",
+											onRowClick && "cursor-pointer hover:bg-muted/50 transition-colors"
+										)}
+										onClick={onRowClick ? () => onRowClick(row) : undefined}
 									>
 										{row.getVisibleCells().map((cell) => {
 											const pinningStyles = enableColumnPinning ? getPinningStyles(cell.column) : {}

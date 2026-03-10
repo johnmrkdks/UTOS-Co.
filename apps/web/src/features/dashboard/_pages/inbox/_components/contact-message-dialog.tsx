@@ -90,7 +90,7 @@ export function ContactMessageDialog({ message, open, onOpenChange }: ContactMes
 	return (
 		<>
 			<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-2xl">
+			<DialogContent className="max-w-2xl" showCloseButton={false}>
 				<DialogHeader>
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">

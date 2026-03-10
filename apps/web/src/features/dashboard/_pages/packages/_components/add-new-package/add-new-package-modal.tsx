@@ -16,7 +16,7 @@ export function AddNewPackageModal() {
 					Add New Package
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-w-xl">
+			<DialogContent className="max-w-xl" showCloseButton={false}>
 				<AddNewPackageForm />
 			</DialogContent>
 		</Dialog>

@@ -1,4 +1,4 @@
-import { User, Settings, LogOutIcon, Car, Calendar } from "lucide-react"
+import { User, Settings, LogOutIcon, Calendar } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
@@ -59,12 +59,6 @@ export function CustomerUserMenu({ onSignOut }: CustomerUserMenuProps = {}) {
 							<Link to="/my-bookings" className="flex items-center w-full">
 								<Calendar size={16} className="opacity-60 mr-2" aria-hidden="true" />
 								<span>My Bookings</span>
-							</Link>
-						</DropdownMenuItem>
-						<DropdownMenuItem asChild>
-							<Link to="/dashboard/cars" className="flex items-center w-full">
-								<Car size={16} className="opacity-60 mr-2" aria-hidden="true" />
-								<span>Browse Cars</span>
 							</Link>
 						</DropdownMenuItem>
 					</DropdownMenuGroup>

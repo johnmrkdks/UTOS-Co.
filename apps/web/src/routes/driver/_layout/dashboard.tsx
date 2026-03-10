@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useMemo } from 'react';
+import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -111,35 +113,21 @@ function DriverDashboardComponent() {
 		}
 	];
 
-	const recentBookings = [
-		{
-			id: 1,
-			customer: "Sarah Johnson",
-			pickup: "Sydney Airport",
-			destination: "Circular Quay",
-			time: "2:30 PM Today",
-			status: "completed",
-			amount: 85.50
-		},
-		{
-			id: 2,
-			customer: "Michael Chen",
-			pickup: "Central Station",
-			destination: "Bondi Beach",
-			time: "10:15 AM Today",
-			status: "completed",
-			amount: 65.00
-		},
-		{
-			id: 3,
-			customer: "Emma Wilson",
-			pickup: "Opera House",
-			destination: "Parramatta",
-			time: "Tomorrow 9:00 AM",
-			status: "scheduled",
-			amount: 95.00
-		}
-	];
+	// Use real bookings for recent activity (amounts are already driver share from API)
+	const recentBookings = useMemo(() => {
+		const sorted = [...bookings].sort((a, b) =>
+			new Date(b.scheduledPickupTime).getTime() - new Date(a.scheduledPickupTime).getTime()
+		);
+		return sorted.slice(0, 5).map((b) => ({
+			id: b.id,
+			customer: b.customerName || "Customer",
+			pickup: b.originAddress?.split(",")[0] || b.originAddress || "Pickup",
+			destination: b.destinationAddress?.split(",")[0] || b.destinationAddress || "Destination",
+			time: format(new Date(b.scheduledPickupTime), "MMM d, h:mm a"),
+			status: b.status === "completed" || b.status === "no_show" ? "completed" : "scheduled",
+			amount: b.driverShare ?? (b.finalAmount || b.quotedAmount || 0),
+		}));
+	}, [bookings]);
 
 	// Enhanced driver status tracking
 	const driverStatus = {

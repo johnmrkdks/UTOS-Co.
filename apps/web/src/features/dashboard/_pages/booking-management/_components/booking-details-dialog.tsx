@@ -172,23 +172,27 @@ export function BookingDetailsDialog() {
 
 	const currentStatus = statusOptions.find(s => s.value === booking.status);
 	const StatusIcon = currentStatus?.icon || Timer;
+	const packageName = booking.bookingType === "package" && (booking as { package?: { name: string } }).package?.name;
 
 	return (
 		<>
 			<Dialog open={isBookingDetailsDialogOpen} onOpenChange={closeBookingDetailsDialog}>
-			<DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden p-0">
+			<DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden p-0 flex flex-col" showCloseButton={false}>
 				{/* Simple Header */}
-				<div className="flex items-center justify-between p-4 border-b bg-soft-beige">
-					<div className="flex items-center gap-3 flex-1 min-w-0">
-						<h2 className="text-xl font-semibold">Booking Details</h2>
-						<Badge variant="outline" className="text-xs">
+				<div className="flex items-center justify-between gap-4 pt-6 px-6 pb-4 border-b bg-soft-beige flex-shrink-0 min-w-0">
+					<div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden flex-wrap">
+						<h2 className="text-xl font-semibold shrink-0">Booking Details</h2>
+						<Badge variant="outline" className="text-xs shrink-0">
 							{booking.bookingType === "package" ? "Package" : booking.bookingType === "guest" ? "Guest" : "Custom"}
 						</Badge>
-						<Badge variant={currentStatus?.color as any || "secondary"} className="text-xs">
+						{packageName && (
+							<span className="text-sm text-gray-600 font-medium truncate min-w-0">{packageName}</span>
+						)}
+						<Badge variant={currentStatus?.color as any || "secondary"} className="text-xs shrink-0">
 							{booking.status.replace("_", " ").toUpperCase()}
 						</Badge>
 					</div>
-					<div className="text-right flex-shrink-0 ml-4">
+					<div className="text-right flex-shrink-0">
 						<div className="text-lg font-bold text-primary">
 							${booking.quotedAmount.toFixed(2)}
 						</div>
@@ -197,33 +201,40 @@ export function BookingDetailsDialog() {
 				</div>
 
 				{/* Content in simple grid layout */}
-				<div className="p-6 overflow-y-auto max-h-[calc(95vh-140px)]">
-					<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+				<div className="p-6 overflow-y-auto overflow-x-hidden max-h-[calc(95vh-140px)] min-w-0">
+					<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 min-w-0">
 						
 						{/* Left: Customer & Route Info */}
-						<div className="lg:col-span-2 space-y-4">
+						<div className="lg:col-span-2 space-y-4 min-w-0 overflow-hidden">
 							{/* Customer */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<User className="h-5 w-5 text-primary" />
+									<User className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Customer</h3>
 								</div>
-								<div className="space-y-2">
-									<div className="font-bold text-lg">{booking.customerName}</div>
+								<div className="space-y-2 min-w-0 overflow-hidden">
+									{packageName && (
+										<div className="flex items-center gap-2 text-sm min-w-0">
+											<Package className="h-4 w-4 text-primary shrink-0" />
+											<span className="text-gray-600 shrink-0">Package:</span>
+											<span className="font-medium text-primary break-words">{packageName}</span>
+										</div>
+									)}
+									<div className="font-bold text-lg break-words">{booking.customerName}</div>
 									<div className="text-sm text-gray-600">{booking.passengerCount} passenger{booking.passengerCount > 1 ? 's' : ''}</div>
-									<div className="flex gap-4 text-sm">
-										<a href={`tel:${booking.customerPhone}`} className="text-primary hover:underline">{booking.customerPhone}</a>
+									<div className="flex flex-wrap gap-4 text-sm break-all">
+										<a href={`tel:${booking.customerPhone}`} className="text-primary hover:underline break-all">{booking.customerPhone}</a>
 										{booking.customerEmail && (
-											<a href={`mailto:${booking.customerEmail}`} className="text-primary hover:underline">{booking.customerEmail}</a>
+											<a href={`mailto:${booking.customerEmail}`} className="text-primary hover:underline break-all">{booking.customerEmail}</a>
 										)}
 									</div>
 								</div>
 							</div>
 
 							{/* Route */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<Navigation className="h-5 w-5 text-primary" />
+									<Navigation className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Route</h3>
 								</div>
 								<div className="space-y-4">
@@ -302,9 +313,9 @@ export function BookingDetailsDialog() {
 							</div>
 
 							{/* Schedule */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<Calendar className="h-5 w-5 text-primary" />
+									<Calendar className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Schedule</h3>
 								</div>
 								<div className="space-y-2">
@@ -330,20 +341,20 @@ export function BookingDetailsDialog() {
 							</div>
 
 							{/* Share Links */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<Share2 className="h-5 w-5 text-primary" />
+									<Share2 className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Share Links</h3>
 								</div>
 								{(booking as any).shareToken ? (
 									<div className="space-y-3">
-										<div>
+										<div className="min-w-0 overflow-hidden">
 											<p className="text-xs text-gray-500 mb-1">Client tracking (share with customer)</p>
-											<div className="flex gap-2">
+											<div className="flex gap-2 min-w-0">
 												<Input
 													readOnly
 													value={`${typeof window !== "undefined" ? window.location.origin : ""}/track/${(booking as any).shareToken}`}
-													className="text-sm font-mono"
+													className="text-sm font-mono min-w-0 flex-1 overflow-hidden"
 												/>
 												<Button
 													variant="outline"
@@ -357,13 +368,13 @@ export function BookingDetailsDialog() {
 												</Button>
 											</div>
 										</div>
-										<div>
+										<div className="min-w-0 overflow-hidden">
 											<p className="text-xs text-gray-500 mb-1">Driver job (share with driver)</p>
-											<div className="flex gap-2">
+											<div className="flex gap-2 min-w-0">
 												<Input
 													readOnly
 													value={`${typeof window !== "undefined" ? window.location.origin : ""}/driver-job/${(booking as any).shareToken}`}
-													className="text-sm font-mono"
+													className="text-sm font-mono min-w-0 flex-1 overflow-hidden"
 												/>
 												<Button
 													variant="outline"
@@ -397,18 +408,18 @@ export function BookingDetailsDialog() {
 							{(booking.car || booking.specialRequests || (booking as any).additionalNotes) && (
 								<div className="space-y-3">
 									{booking.car && (
-										<div className="bg-soft-beige p-4 rounded-lg border">
+										<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 											<div className="flex items-center gap-3 mb-2">
-												<Car className="h-5 w-5 text-primary" />
+												<Car className="h-5 w-5 text-primary shrink-0" />
 												<h3 className="font-semibold">Vehicle</h3>
 											</div>
-											<div className="font-medium">{booking.car.name}</div>
+											<div className="font-medium break-words">{booking.car.name}</div>
 										</div>
 									)}
 									{booking.specialRequests && (
-										<div className="bg-soft-beige p-4 rounded-lg border">
+										<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 											<div className="flex items-center gap-3 mb-2">
-												<MessageSquare className="h-5 w-5 text-blue-600" />
+												<MessageSquare className="h-5 w-5 text-blue-600 shrink-0" />
 												<h3 className="font-semibold">Special Requests</h3>
 											</div>
 											<div className="bg-blue-50 rounded-lg p-3">
@@ -419,9 +430,9 @@ export function BookingDetailsDialog() {
 										</div>
 									)}
 									{(booking as any).additionalNotes && (
-										<div className="bg-soft-beige p-4 rounded-lg border">
+										<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 											<div className="flex items-center gap-3 mb-2">
-												<MessageSquare className="h-5 w-5 text-orange-600" />
+												<MessageSquare className="h-5 w-5 text-orange-600 shrink-0" />
 												<h3 className="font-semibold">Additional Notes</h3>
 											</div>
 											<div className="bg-orange-50 rounded-lg p-3">
@@ -436,18 +447,18 @@ export function BookingDetailsDialog() {
 						</div>
 
 						{/* Right: Actions & Pricing */}
-						<div className="lg:col-span-2 space-y-4">
+						<div className="lg:col-span-2 space-y-4 min-w-0 overflow-hidden">
 							{/* Actions */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<Edit3 className="h-5 w-5 text-primary" />
+									<Edit3 className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Actions</h3>
 								</div>
 								<div className="space-y-3">
 									{/* Status Update */}
-									<div className="flex gap-3 items-center">
+									<div className="flex gap-3 items-center min-w-0">
 										<Select value={selectedStatus} onValueChange={setSelectedStatus}>
-											<SelectTrigger className="flex-1">
+											<SelectTrigger className="flex-1 min-w-0">
 												<SelectValue placeholder="Update status" />
 											</SelectTrigger>
 											<SelectContent>
@@ -467,7 +478,7 @@ export function BookingDetailsDialog() {
 										<Button
 											onClick={() => handleStatusUpdate(selectedStatus)}
 											disabled={!selectedStatus || updateStatusMutation.isPending}
-											className="bg-primary hover:bg-primary/90"
+											className="bg-primary hover:bg-primary/90 shrink-0"
 										>
 											{updateStatusMutation.isPending ? (
 												<Timer className="h-4 w-4 animate-spin" />
@@ -478,10 +489,10 @@ export function BookingDetailsDialog() {
 									</div>
 
 									{/* Car Assignment */}
-									<div className="flex gap-3 items-center">
-										<div className="flex-1">
+									<div className="flex gap-3 items-center min-w-0">
+										<div className="flex-1 min-w-0 overflow-hidden">
 											{booking.car ? (
-												<div className="text-sm">
+												<div className="text-sm truncate" title={booking.car.name}>
 													<span className="text-gray-500">Car: </span>
 													<span className="font-medium">{booking.car.name}</span>
 												</div>
@@ -492,7 +503,7 @@ export function BookingDetailsDialog() {
 										<Button
 											onClick={() => setIsAssignCarDialogOpen(true)}
 											variant="outline"
-											className="border-primary text-primary hover:bg-primary/5"
+											className="border-primary text-primary hover:bg-primary/5 shrink-0"
 										>
 											<Car className="h-4 w-4 mr-2" />
 											{booking.car ? "Change" : "Assign"} Car
@@ -500,10 +511,10 @@ export function BookingDetailsDialog() {
 									</div>
 
 									{/* Driver Assignment */}
-									<div className="flex gap-3 items-center">
-										<div className="flex-1">
+									<div className="flex gap-3 items-center min-w-0">
+										<div className="flex-1 min-w-0 overflow-hidden">
 											{booking.driverId ? (
-												<div className="text-sm">
+												<div className="text-sm truncate" title={booking.driverId}>
 													<span className="text-gray-500">Driver: </span>
 													<span className="font-medium">{booking.driverId}</span>
 												</div>
@@ -515,7 +526,7 @@ export function BookingDetailsDialog() {
 											<Button
 												onClick={() => setIsAssignDriverDialogOpen(true)}
 												variant="outline"
-												className="border-primary text-primary hover:bg-primary/5"
+												className="border-primary text-primary hover:bg-primary/5 shrink-0"
 											>
 												<UserPlus className="h-4 w-4 mr-2" />
 												{booking.driverId ? "Reassign" : "Assign"} Driver
@@ -524,7 +535,7 @@ export function BookingDetailsDialog() {
 											<Button
 												disabled
 												variant="outline"
-												className="opacity-50"
+												className="opacity-50 shrink-0"
 											>
 												<UserPlus className="h-4 w-4 mr-2 opacity-50" />
 												Assign Driver
@@ -536,9 +547,9 @@ export function BookingDetailsDialog() {
 							</div>
 
 							{/* Pricing */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<CreditCard className="h-5 w-5 text-primary" />
+									<CreditCard className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Pricing</h3>
 								</div>
 								<div className="space-y-2">
@@ -697,9 +708,9 @@ export function BookingDetailsDialog() {
 							</div>
 
 							{/* Timeline */}
-							<div className="bg-soft-beige p-4 rounded-lg border">
+							<div className="bg-soft-beige p-4 rounded-lg border overflow-hidden">
 								<div className="flex items-center gap-3 mb-3">
-									<Clock className="h-5 w-5 text-primary" />
+									<Clock className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Timeline</h3>
 								</div>
 								<div className="space-y-2 text-sm">

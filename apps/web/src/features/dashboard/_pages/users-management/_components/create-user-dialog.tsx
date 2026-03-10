@@ -112,7 +112,7 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 					</Button>
 				)}
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[500px]">
+			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Add User</DialogTitle>
 					<DialogDescription>

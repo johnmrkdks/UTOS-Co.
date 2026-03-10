@@ -425,7 +425,7 @@ export function DeleteDriverConfirmationDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
 				{renderProgressIndicator()}
 				{step === 1 && renderStep1()}
 				{step === 2 && renderStep2()}

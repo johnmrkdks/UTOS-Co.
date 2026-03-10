@@ -104,7 +104,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 					</Button>
 				)}
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[500px]">
+			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Create Driver Account</DialogTitle>
 					<DialogDescription>

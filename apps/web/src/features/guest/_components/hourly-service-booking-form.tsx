@@ -70,14 +70,14 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 		},
 	});
 
-	// Calculate total cost: Hours * rate = total
+	// Calculate total cost: Hours * rate = total (never negative)
 	const totalCost = useMemo(() => {
-		return hours * service.hourlyRate;
+		return Math.max(0, hours * service.hourlyRate);
 	}, [hours, service.hourlyRate]);
 
 	// Pre-populate with user data if authenticated
 	useEffect(() => {
-		if (sessionData?.user && profileData?.user) {
+		if (sessionData && profileData?.user) {
 			const currentValues = form.getValues();
 			form.reset({
 				...currentValues,
@@ -130,22 +130,11 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 	};
 
 	const onSubmit = async (data: ServiceBookingFormData) => {
-		// Check authentication before allowing booking
-		if (!sessionData?.user) {
-			toast.error("Please sign in to complete your booking.");
-			// Preserve current URL for redirect after sign-in
-			const currentPath = window.location.pathname + window.location.search;
-			navigate({
-				to: "/sign-in",
-				search: { redirect: currentPath }
-			});
-			return;
-		}
-
+		// Guest booking allowed - no sign-in required
 		try {
 			console.log("🔍 FRONTEND DEBUG - Form Data Received:", data);
 			console.log("🔍 FRONTEND DEBUG - Service:", service);
-			console.log("🔍 FRONTEND DEBUG - Session User:", sessionData.user);
+			console.log("🔍 FRONTEND DEBUG - Session:", sessionData);
 			console.log("🔍 FRONTEND DEBUG - Pickup Location:", pickupLocation);
 			console.log("🔍 FRONTEND DEBUG - Destination:", destination);
 			console.log("🔍 FRONTEND DEBUG - Stops:", stops);
@@ -209,7 +198,7 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 						<div>
 							<h1 className="text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
 							<p className="text-gray-600">Your hourly service booking has been submitted successfully</p>
-							{!sessionData?.user && (
+							{!sessionData && (
 								<p className="text-sm text-blue-600 mt-2">
 									💡 Tip: Create an account to easily manage your bookings
 								</p>
@@ -265,14 +254,20 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 							</div>
 
 							<Separator />
-							<div className="flex gap-3">
+							<div className="flex gap-3 flex-wrap">
 								<Button onClick={() => navigate({ to: "/services" })} variant="outline">
 									<ArrowLeft className="w-4 h-4 mr-2" />
 									Back to Services
 								</Button>
-								<Button onClick={() => navigate({ to: "/my-bookings/trips" })}>
-									View My Bookings
-								</Button>
+								{sessionData ? (
+									<Button onClick={() => navigate({ to: "/my-bookings/trips" })}>
+										View My Bookings
+									</Button>
+								) : (
+									<Button onClick={() => navigate({ to: "/sign-in" })} variant="outline">
+										Sign in to manage bookings
+									</Button>
+								)}
 							</div>
 						</CardContent>
 					</Card>
@@ -667,7 +662,7 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 										) : (
 											<>
 												<Package className="w-5 h-5 mr-2" />
-												Complete Booking - ${totalCost.toFixed(2)}
+												Complete Booking ${totalCost.toFixed(2)}
 											</>
 										)}
 									</Button>

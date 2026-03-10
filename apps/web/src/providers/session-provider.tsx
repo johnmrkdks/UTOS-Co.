@@ -1,7 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
-import type { Session } from "better-auth/types";
+import type { Session } from "@/types/auth";
 
 type SessionContextType = {
 	session: Session | null;

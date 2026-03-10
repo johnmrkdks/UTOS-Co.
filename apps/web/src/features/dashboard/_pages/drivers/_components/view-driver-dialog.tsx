@@ -21,7 +21,7 @@ type ViewDriverDialogProps = {
 export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<User className="h-5 w-5" />

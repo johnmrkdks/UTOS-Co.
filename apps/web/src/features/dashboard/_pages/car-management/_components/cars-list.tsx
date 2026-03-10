@@ -139,14 +139,14 @@ export function CarsList() {
 
 	const handleFiltersChange = (newFilters: Partial<typeof filters>) => {
 		navigate({
-			to: "/dashboard/cars",
+			to: "/admin/dashboard/cars",
 			search: (prev) => ({ ...prev, ...newFilters }),
 		})
 	}
 
 	const handleResetFilters = () => {
 		navigate({
-			to: "/dashboard/cars",
+			to: "/admin/dashboard/cars",
 			search: {
 				search: undefined,
 				brand: undefined,

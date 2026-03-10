@@ -203,7 +203,7 @@ export function CreatePackageBookingDialog() {
 
 	return (
 		<Dialog open={isCreatePackageBookingDialogOpen} onOpenChange={handleClose}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Create Package Booking (Admin)</DialogTitle>
 					<DialogDescription>
