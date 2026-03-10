@@ -76,7 +76,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px]">
+			<DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Assign Driver to Booking</DialogTitle>
 					<DialogDescription>

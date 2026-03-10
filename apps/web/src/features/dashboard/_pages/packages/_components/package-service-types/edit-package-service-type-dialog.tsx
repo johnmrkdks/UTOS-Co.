@@ -82,7 +82,7 @@ export function EditPackageServiceTypeDialog() {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={closeModal}>
-			<DialogContent className="sm:max-w-[600px]">
+			<DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Edit Service Type</DialogTitle>
 					<DialogDescription>

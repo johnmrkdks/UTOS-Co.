@@ -362,8 +362,8 @@ export function CustomerHistoryPage() {
 			{/* Booking Details Dialog */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
 				<DialogContent
+					showCloseButton={!isMobile}
 					className={cn(
-						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-md bg-gray-50"
 					)}
 				>

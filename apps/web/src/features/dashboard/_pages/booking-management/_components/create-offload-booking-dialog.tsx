@@ -155,6 +155,7 @@ export function CreateOffloadBookingDialog() {
 		<Dialog open={isCreateOffloadBookingDialogOpen} onOpenChange={handleClose}>
 			<DialogContent
 				className="!max-w-6xl max-h-[90vh] overflow-hidden flex flex-col p-0"
+				showCloseButton={false}
 				onPointerDownOutside={(e) => {
 					// Allow clicks on Google Places address dropdown (portaled to body)
 					const target = e.target as Node;
@@ -164,7 +165,7 @@ export function CreateOffloadBookingDialog() {
 					}
 				}}
 			>
-				<DialogHeader className="sticky top-0 z-10 bg-background border-b px-6 pt-6 pb-4">
+				<DialogHeader className="sticky top-0 z-10 bg-background border-b pt-6 px-6 pb-4">
 					<DialogTitle className="flex items-center gap-2">
 						<TruckIcon className="h-5 w-5 text-orange-600" />
 						Create Offload Booking

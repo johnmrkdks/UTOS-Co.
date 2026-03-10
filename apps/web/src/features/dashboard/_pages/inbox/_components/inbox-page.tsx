@@ -175,7 +175,12 @@ export function InboxPage() {
 			<div className="w-80 flex-shrink-0 border-r border-border/60 flex flex-col bg-muted/20">
 				<div className="p-4 border-b border-border/60 bg-background">
 					<div className="flex items-center justify-between mb-4">
-						<h1 className="text-lg font-medium text-foreground">Inbox</h1>
+						<div className="flex items-center gap-3">
+							<div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center border border-blue-200/50">
+								<Mail className="h-4 w-4 text-blue-600" />
+							</div>
+							<h1 className="text-lg font-medium text-foreground">Inbox</h1>
+						</div>
 						<Button variant="ghost" size="icon" onClick={handleRefresh} disabled={isLoading} className="h-8 w-8 rounded-md">
 							<RefreshCw className={cn("h-4 w-4 text-muted-foreground", isLoading && "animate-spin")} />
 						</Button>

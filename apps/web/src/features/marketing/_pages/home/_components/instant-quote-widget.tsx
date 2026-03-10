@@ -200,7 +200,7 @@ export function InstantQuoteWidget() {
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleOriginSelect}
-														placeholder="Origin - Enter pickup location in NSW..."
+														placeholder="Origin - Enter pickup location..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>
@@ -246,7 +246,7 @@ export function InstantQuoteWidget() {
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleDestinationSelect}
-														placeholder="Destination - Enter destination in NSW..."
+														placeholder="Destination - Enter destination..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>

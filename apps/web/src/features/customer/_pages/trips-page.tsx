@@ -765,8 +765,8 @@ export function CustomerTripsPage() {
 			{/* Booking Details Dialog/Fullscreen */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
 				<DialogContent
+					showCloseButton={!isMobile}
 					className={cn(
-						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-lg w-full bg-gray-50"
 					)}
 				>
@@ -982,8 +982,8 @@ export function CustomerTripsPage() {
 			{/* Driver Info Dialog/Fullscreen */}
 			<Dialog open={driverInfoOpen} onOpenChange={setDriverInfoOpen}>
 				<DialogContent
+					showCloseButton={!isMobile}
 					className={cn(
-						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-lg w-full bg-gray-50"
 					)}
 				>

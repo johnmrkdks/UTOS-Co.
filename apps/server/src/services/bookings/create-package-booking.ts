@@ -9,7 +9,7 @@ import { z } from "zod";
 export const CreatePackageBookingSchema = z.object({
 	packageId: z.string(),
 	carId: z.string().nullable(),
-	userId: z.string(),
+	userId: z.string().optional(), // Optional for guest bookings
 
 	// Route information
 	originAddress: z.string(),
@@ -92,13 +92,15 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 		// Note: Advance booking time validation removed per CEO requirements
 		// Clients should be able to book anytime
 
-		// Prepare booking data
-		console.log("📝 Preparing booking data...");
+		// Prepare booking data (guest bookings have null userId and isGuestBooking=true)
+		const isGuest = !data.userId;
+		console.log("📝 Preparing booking data...", isGuest ? "(guest booking)" : "");
 		const bookingData: InsertBooking = {
 			bookingType: BookingTypeEnum.Package,
 			packageId: data.packageId,
 			carId: data.carId,
-			userId: data.userId,
+			userId: data.userId ?? null,
+			isGuestBooking: isGuest,
 
 			originAddress: data.originAddress,
 			originLatitude: data.originLatitude,

@@ -226,7 +226,7 @@ export function EditBookingDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="!max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+			<DialogContent className="!max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0" showCloseButton={false}>
 				{/* Sticky Header */}
 				<div className="sticky top-0 bg-white z-10 border-b px-6 pt-6 pb-4">
 					<DialogHeader>

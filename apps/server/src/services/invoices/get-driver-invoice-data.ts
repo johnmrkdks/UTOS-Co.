@@ -1,8 +1,9 @@
 import type { DB } from "@/db";
-import { bookings, drivers, users, offloadBookingDetails } from "@/db/sqlite/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { bookings, drivers, users, offloadBookingDetails, bookingExtras } from "@/db/sqlite/schema";
+import { eq, and, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { computeDriverShare } from "@/utils/compute-driver-share";
 
 export const GetDriverInvoiceDataSchema = z.object({
 	driverId: z.string().min(1, "Driver is required"),
@@ -53,6 +54,7 @@ export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoic
 	const commissionRate = commissionRateOverride ?? driver.commissionRate ?? 50;
 
 	// Get completed bookings for driver in date range (use serviceCompletedAt or actualDropoffTime)
+	// Include extras for commission calculation (exclude toll/parking from driver share)
 	const completedBookings = await db
 		.select({
 			id: bookings.id,
@@ -81,6 +83,27 @@ export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoic
 		)
 		.orderBy(bookings.scheduledPickupTime);
 
+	// Fetch extras for each booking (for commission calculation - exclude toll/parking)
+	const bookingIds = completedBookings.map((b) => b.id);
+	const extrasRows = bookingIds.length
+		? await db
+				.select({
+					bookingId: bookingExtras.bookingId,
+					tollCharges: bookingExtras.tollCharges,
+					parkingCharges: bookingExtras.parkingCharges,
+				})
+				.from(bookingExtras)
+				.where(inArray(bookingExtras.bookingId, bookingIds))
+		: [];
+	const extrasByBooking = extrasRows.reduce((acc: Record<string, { tollCharges: number; parkingCharges: number }[]>, row) => {
+		if (!acc[row.bookingId]) acc[row.bookingId] = [];
+		acc[row.bookingId].push({
+			tollCharges: row.tollCharges ?? 0,
+			parkingCharges: row.parkingCharges ?? 0,
+		});
+		return acc;
+	}, {});
+
 	const jobs = completedBookings.map((b) => {
 		const amount = b.finalAmount ?? b.quotedAmount ?? 0;
 		const distance = b.actualDistance ?? b.estimatedDistance ?? 0;
@@ -93,7 +116,16 @@ export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoic
 		const originSuburb = extractSuburb(b.originAddress ?? "");
 		const destSuburb = extractSuburb(b.destinationAddress ?? "");
 
-		const driverShare = (amount * commissionRate) / 100;
+		// Commission excludes toll/parking, includes waiting time
+		const driverShare = computeDriverShare(
+			{
+				quotedAmount: b.quotedAmount ?? 0,
+				finalAmount: b.finalAmount,
+				extraCharges: b.extraCharges,
+				extras: extrasByBooking[b.id] ?? [],
+			},
+			commissionRate
+		);
 
 		return {
 			referenceNumber: b.referenceNumber || b.id,

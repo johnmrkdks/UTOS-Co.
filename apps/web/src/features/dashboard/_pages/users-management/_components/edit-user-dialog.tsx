@@ -99,7 +99,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[500px]">
+			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Edit User Credentials</DialogTitle>
 					<DialogDescription>

@@ -43,13 +43,16 @@ function HistoryPage() {
 
 		return bookingsData.data.map((booking: any) => ({
 			id: booking.id,
+			customerName: booking.customerName,
+			passengerCount: booking.passengerCount,
+			car: booking.car,
 			pickupAddress: booking.originAddress,
 			destinationAddress: booking.destinationAddress,
 			stops: booking.stops ? booking.stops.sort((a: any, b: any) => a.stopOrder - b.stopOrder) : [],
 			scheduledTime: new Date(booking.scheduledPickupTime),
 			completedTime: booking.serviceCompletedAt ? new Date(booking.serviceCompletedAt) : null,
 			passengers: booking.passengerCount || 1,
-			finalAmount: booking.finalAmount ?? (booking.quotedAmount || 0) + (booking.extraCharges || 0),
+			finalAmount: booking.driverShare ?? booking.finalAmount ?? (booking.quotedAmount || 0) + (booking.extraCharges || 0),
 			distance: (booking.actualDistance ?? booking.estimatedDistance) != null ? formatDistanceKm(booking.actualDistance ?? booking.estimatedDistance) : "N/A",
 			duration: (booking.estimatedDuration) ? `${Math.round(booking.estimatedDuration / 60)} min` : "N/A",
 			status: booking.status as "completed" | "cancelled" | "no_show",
@@ -87,16 +90,17 @@ function HistoryPage() {
 			originAddress: booking.pickupAddress,
 			destinationAddress: booking.destinationAddress,
 			stops: booking.stops || [],
-			customerName: booking.passengers ? `${booking.passengers} Passenger${booking.passengers > 1 ? 's' : ''}` : '1 Passenger',
-			customerPhone: null, // History doesn't have phone data
+			customerName: booking.customerName || (booking.passengers ? `${booking.passengers} Passenger${booking.passengers > 1 ? 's' : ''}` : '1 Passenger'),
+			customerPhone: null,
 			status: booking.status,
 			finalAmount: booking.finalAmount,
-			quotedAmount: originalBooking?.quotedAmount || booking.finalAmount, // Use original quoted amount
-			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
-			extras: (originalBooking as any)?.extras || [], // Get extras breakdown from original booking
-			specialRequests: originalBooking?.specialRequests || null, // Include special requests
-			additionalNotes: originalBooking?.additionalNotes || null, // Include additional notes
-			car: null // TODO: Add car information to history data
+			driverShare: originalBooking?.driverShare ?? booking.finalAmount,
+			quotedAmount: originalBooking?.quotedAmount || booking.finalAmount,
+			extraCharges: originalBooking?.extraCharges || 0,
+			extras: (originalBooking as any)?.extras || [],
+			specialRequests: originalBooking?.specialRequests || null,
+			additionalNotes: originalBooking?.additionalNotes || null,
+			car: originalBooking?.car || null,
 		};
 
 		setSelectedBookingForDetails(bookingData);
@@ -395,8 +399,8 @@ function HistoryPage() {
 			{/* Trip Details Dialog (same as trips.tsx) */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
 				<DialogContent
+					showCloseButton={!isMobile}
 					className={cn(
-						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
 					)}
 				>
@@ -568,22 +572,20 @@ function HistoryPage() {
 									</div>
 								)}
 
-								{/* Trip Fare Information */}
+								{/* Your Share - driver only sees their commission (excludes toll/parking, includes waiting) */}
 								<div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
 									<h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
 										<DollarSignIcon className="h-4 w-4 text-primary" />
-										Trip Fare
+										Your Share
 									</h3>
 									<div className="space-y-2">
-										{/* Base trip fare */}
 										<div className="flex justify-between items-center">
-											<span className="text-sm text-gray-600">Base Trip Fare:</span>
-											<span className="text-sm font-semibold">
-												${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
+											<span className="text-base font-bold text-gray-900">Earnings:</span>
+											<span className="text-lg font-bold text-gray-900">
+												${(selectedBookingForDetails.driverShare ?? selectedBookingForDetails.finalAmount ?? (selectedBookingForDetails.quotedAmount || 0) + (selectedBookingForDetails.extraCharges || 0)).toFixed(2)}
 											</span>
 										</div>
-
-										{/* Extras breakdown if any */}
+										{/* Extras breakdown - only shown when driver has access to full data (e.g. before masking) */}
 										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
 											<div className="space-y-2">
 												<div className="text-sm font-medium text-gray-700 mt-3 mb-2">Extra Charges:</div>
@@ -691,19 +693,6 @@ function HistoryPage() {
 											</div>
 										)}
 
-										{/* Divider if there are extras */}
-										{((selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0) ||
-										  (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0)) && (
-											<div className="border-t border-gray-200"></div>
-										)}
-
-										{/* Total - includes quoted + extraCharges (tolls, parking, waiting time, other) */}
-										<div className="flex justify-between items-center">
-											<span className="text-base font-bold text-gray-900">Total Charged:</span>
-											<span className="text-lg font-bold text-gray-900">
-												${(selectedBookingForDetails.finalAmount ?? (selectedBookingForDetails.quotedAmount || 0) + (selectedBookingForDetails.extraCharges || 0)).toFixed(2)}
-											</span>
-										</div>
 									</div>
 								</div>
 							</div>

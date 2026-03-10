@@ -29,14 +29,19 @@ function RouteComponent() {
 		<>
 			<div className="mx-auto">
 				<Tabs defaultValue="cars" className="relative gap-0">
-					<PaddingLayout className="sticky top-0 z-10 flex items-center justify-between bg-background border-b border-border">
-						<div>
-							<h1 className="text-2xl font-bold tracking-tight">
-								Car Management
-							</h1>
-							<p className="text-sm text-muted-foreground">
-								Manage inventory and configure features
-							</p>
+					<PaddingLayout className="sticky top-0 z-10 flex items-center justify-between bg-background/95 backdrop-blur-sm border-b border-border">
+						<div className="flex items-center gap-3">
+							<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center border border-green-200/50">
+								<CarIcon className="h-5 w-5 text-green-600" />
+							</div>
+							<div>
+								<h1 className="text-2xl font-bold tracking-tight">
+									Car Management
+								</h1>
+								<p className="text-sm text-muted-foreground">
+									Manage inventory and configure features
+								</p>
+							</div>
 						</div>
 
 						<TabsList className="grid grid-cols-2">
@@ -51,7 +56,7 @@ function RouteComponent() {
 						</TabsList>
 					</PaddingLayout>
 
-					<div className="bg-gray-50">
+					<div className="bg-gradient-to-b from-slate-50/60 to-background">
 						<TabsContent value="cars"> <CarsList /></TabsContent>
 						<TabsContent value="features"><CarFeatures /></TabsContent>
 					</div>

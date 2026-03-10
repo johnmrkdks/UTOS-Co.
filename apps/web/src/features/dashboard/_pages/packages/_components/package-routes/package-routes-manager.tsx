@@ -148,7 +148,7 @@ export function PackageRoutesManager({ packageId, packageName }: PackageRoutesMa
 									Add Stop
 								</Button>
 							</DialogTrigger>
-					<DialogContent className="sm:max-w-[500px]">
+					<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 						<DialogHeader>
 							<DialogTitle>Add Route Stop</DialogTitle>
 							<DialogDescription>

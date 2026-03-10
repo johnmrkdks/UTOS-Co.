@@ -334,7 +334,7 @@ export const bookingsRouter = router({
 		}),
 
 	// Package booking procedures (allow guest users)
-	createPackageBooking: guestProcedure
+	createPackageBooking: publicProcedure
 		.input(CreatePackageBookingSchema.omit({ userId: true }))
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
@@ -343,17 +343,13 @@ export const bookingsRouter = router({
 				console.log("👤 Session object:", JSON.stringify(session, null, 2));
 
 				// Better Auth anonymous plugin - check both user and session structures
-				const userId = session?.user?.id || session?.session?.userId;
-				console.log("🆔 Extracted userId:", userId);
-
-				if (!userId) {
-					console.error("❌ No userId found in session");
-					throw new Error("User session is required. Please sign in or create a guest account.");
-				}
+				// Guest bookings allowed: userId is optional
+				const userId = session?.user?.id || session?.session?.userId || undefined;
+				console.log("🆔 Extracted userId:", userId ?? "(guest booking)");
 
 				console.log("📅 Original scheduledPickupTime:", input.scheduledPickupTime, typeof input.scheduledPickupTime);
 
-				// Convert scheduledPickupTime string to Date object and add userId
+				// Convert scheduledPickupTime string to Date object; userId optional for guests
 				const processedInput = {
 					...input,
 					scheduledPickupTime: new Date(input.scheduledPickupTime),
@@ -960,14 +956,42 @@ export const bookingsRouter = router({
 				}
 
 				// Only show bookings assigned to this specific driver
-				const bookings = await getBookingsService(db, {
+				const result = await getBookingsService(db, {
 					...input,
 					filters: {
 						...input.filters,
 						driverId: driverProfile.id, // Only show bookings assigned to this driver
 					},
 				});
-				return bookings;
+
+				// Compute driver share for each booking (excludes toll/parking, includes waiting time)
+				const commissionRate = driverProfile.commissionRate ?? 50;
+				const { computeDriverShare } = await import("@/utils/compute-driver-share");
+
+				const dataWithDriverShare = (result.data || []).map((b: any) => {
+					const driverShare = computeDriverShare(
+						{
+							quotedAmount: b.quotedAmount ?? 0,
+							finalAmount: b.finalAmount,
+							extraCharges: b.extraCharges,
+							extras: b.extras,
+						},
+						commissionRate
+					);
+					const { extras: _extras, ...rest } = b;
+					return {
+						...rest,
+						driverShare,
+						// Mask full amounts - driver only sees their share
+						quotedAmount: driverShare,
+						finalAmount: driverShare,
+						extraCharges: 0,
+						// Strip extras breakdown (toll, parking) - driver should not see charge details
+						extras: undefined,
+					};
+				});
+
+				return { ...result, data: dataWithDriverShare };
 			} catch (error) {
 				handleTRPCError(error);
 			}

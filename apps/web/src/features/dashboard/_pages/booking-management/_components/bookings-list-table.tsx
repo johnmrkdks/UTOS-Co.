@@ -35,7 +35,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 	const [bulkAssignDriverOpen, setBulkAssignDriverOpen] = useState(false);
 
 	// Get modal provider functions
-	const { openEditBookingDialog } = useBookingManagementModalProvider();
+	const { openEditBookingDialog, openBookingDetailsDialog } = useBookingManagementModalProvider();
 	
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 1000, // Removed practical limit for now - will implement pagination later
@@ -269,6 +269,7 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 				searchPlaceholder="Search by customer name..."
 				isLoading={bookingsQuery.isLoading}
 				enableSorting={true}
+				onRowClick={(row) => openBookingDetailsDialog(row.original.id)}
 			/>
 
 			{/* Archive/Restore Dialog */}

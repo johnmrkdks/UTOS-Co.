@@ -170,8 +170,16 @@ function BookingManagementContent() {
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
-			<div className="flex items-center justify-between space-y-2">
-				<h2 className="text-3xl font-bold tracking-tight">Booking Management</h2>
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+				<div className="flex items-center gap-3">
+					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center border border-blue-200/50">
+						<Calendar className="h-5 w-5 text-blue-600" />
+					</div>
+					<div>
+						<h2 className="text-2xl font-bold tracking-tight">Booking Management</h2>
+						<p className="text-sm text-muted-foreground">Manage bookings, calendar, and assignments</p>
+					</div>
+				</div>
 				<div className="flex items-center space-x-2">
 					<Button
 						onClick={openCreateCustomBookingDialog}
@@ -198,6 +206,7 @@ function BookingManagementContent() {
 						key={data.id}
 						data={data}
 						view='compact'
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
 					/>
 				))}
 			</div>

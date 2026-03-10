@@ -1048,7 +1048,7 @@ function DriverTripsComponent() {
 			{/* Navigation Location Selection Modal */}
 			<Dialog open={showMapsModal} onOpenChange={setShowMapsModal}>
 				<DialogContent
-					showCloseButton={false}
+					showCloseButton={!isMobile}
 					className={cn(
 						isMobile
 							? "!max-w-none !w-screen !h-screen !m-0 !p-0 !top-0 !left-0 !translate-x-0 !translate-y-0 !rounded-none"
@@ -1246,8 +1246,8 @@ function DriverTripsComponent() {
 				}}
 			>
 				<DialogContent
+					showCloseButton={!isMobile}
 					className={cn(
-						"[&>button]:hidden", // Hide default close button
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50 max-h-[90vh]"
 					)}
 				>
@@ -1561,28 +1561,10 @@ function DriverTripsComponent() {
 							)}>
 								{/* Navigation or Fare Display based on trip status */}
 								{['completed', 'no_show'].includes(selectedBookingForDetails.status) ? (
-									/* Trip Fare Card for completed trips */
+									/* Your Share Card for completed trips */
 									<div className="w-full border-2 border-green-200 bg-green-50 rounded-lg p-3">
 										<div className="space-y-1">
-											{/* Base fare */}
-											<div className="flex items-center justify-between">
-												<span className="text-green-700 text-sm">Trip Fare:</span>
-												<span className="text-green-800 font-semibold">
-													${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
-												</span>
-											</div>
-
-											{/* Extras if any */}
-											{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
-												<div className="flex items-center justify-between">
-													<span className="text-green-700 text-sm">Extras:</span>
-													<span className="text-green-700 font-semibold">
-														+${(selectedBookingForDetails.extraCharges || 0).toFixed(2)}
-													</span>
-												</div>
-											) : null}
-
-											{/* Pending Extras (from current form) */}
+											{/* Pending Extras (from current form) - only when closing trip */}
 											{selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0 && (
 												<div className="flex items-center justify-between">
 													<span className="text-blue-700 text-sm">Pending Extras:</span>
@@ -1592,25 +1574,17 @@ function DriverTripsComponent() {
 												</div>
 											)}
 
-											{/* Divider if there are extras */}
-											{((selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ||
-											  (selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0)) ? (
-												<div className="border-t border-green-300"></div>
-											) : null}
-
-											{/* Total */}
+											{/* Your Share - driver only sees their commission share (excludes toll/parking, includes waiting) */}
 											<div className="flex items-center justify-between">
 												<div className="flex items-center gap-2">
 													<DollarSignIcon className="h-4 w-4 text-green-600" />
-													<span className="text-green-800 font-bold">Total:</span>
+													<span className="text-green-800 font-bold">Your Share:</span>
 												</div>
 												<span className="text-green-800 font-bold text-lg">
 													${(() => {
-														// If trip is completed, show finalAmount (includes extras)
 														if (['completed', 'cancelled'].includes(selectedBookingForDetails.status) || !selectedTripForClose) {
-															return (selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0).toFixed(2);
+															return (selectedBookingForDetails.driverShare ?? selectedBookingForDetails.finalAmount ?? selectedBookingForDetails.quotedAmount ?? 0).toFixed(2);
 														}
-														// If trip is being closed with extras, show original + extras preview
 														const baseAmount = selectedBookingForDetails.quotedAmount || 0;
 														const extrasAmount = selectedTripForClose?.id === selectedBookingForDetails.id ? calculateTotalExtrasCharges() : 0;
 														return (baseAmount + extrasAmount).toFixed(2);
@@ -1621,28 +1595,10 @@ function DriverTripsComponent() {
 									</div>
 								) : (
 									<div className="space-y-3">
-										{/* Trip Fare for dropped_off status */}
+										{/* Your Share for dropped_off status */}
 										{selectedBookingForDetails.status === 'dropped_off' && (
 											<div className="w-full border-2 border-green-200 bg-green-50 rounded-lg p-3">
 												<div className="space-y-1">
-													{/* Base fare */}
-													<div className="flex items-center justify-between">
-														<span className="text-green-700 text-sm">Trip Fare:</span>
-														<span className="text-green-800 font-semibold">
-															${(selectedBookingForDetails.quotedAmount || 0).toFixed(2)}
-														</span>
-													</div>
-
-													{/* Extras if any */}
-													{(selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ? (
-														<div className="flex items-center justify-between">
-															<span className="text-green-700 text-sm">Extras:</span>
-															<span className="text-green-700 font-semibold">
-																+${(selectedBookingForDetails.extraCharges || 0).toFixed(2)}
-															</span>
-														</div>
-													) : null}
-
 													{/* Pending Extras (from current form) */}
 													{selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0 && (
 														<div className="flex items-center justify-between">
@@ -1653,25 +1609,17 @@ function DriverTripsComponent() {
 														</div>
 													)}
 
-													{/* Divider if there are extras */}
-													{((selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) ||
-													  (selectedTripForClose?.id === selectedBookingForDetails.id && calculateTotalExtrasCharges() > 0)) ? (
-														<div className="border-t border-green-300"></div>
-													) : null}
-
-													{/* Total */}
+													{/* Your Share */}
 													<div className="flex items-center justify-between">
 														<div className="flex items-center gap-2">
 															<DollarSignIcon className="h-4 w-4 text-green-600" />
-															<span className="text-green-800 font-bold">Total:</span>
+															<span className="text-green-800 font-bold">Your Share:</span>
 														</div>
 														<span className="text-green-800 font-bold text-lg">
 															${(() => {
-																// If trip is completed, show finalAmount (includes extras)
 																if (['completed', 'cancelled'].includes(selectedBookingForDetails.status) || !selectedTripForClose) {
-																	return (selectedBookingForDetails.finalAmount || selectedBookingForDetails.quotedAmount || 0).toFixed(2);
+																	return (selectedBookingForDetails.driverShare ?? selectedBookingForDetails.finalAmount ?? selectedBookingForDetails.quotedAmount ?? 0).toFixed(2);
 																}
-																// If trip is being closed with extras, show original + extras preview
 																const baseAmount = selectedBookingForDetails.quotedAmount || 0;
 																const extrasAmount = selectedTripForClose?.id === selectedBookingForDetails.id ? calculateTotalExtrasCharges() : 0;
 																return (baseAmount + extrasAmount).toFixed(2);
