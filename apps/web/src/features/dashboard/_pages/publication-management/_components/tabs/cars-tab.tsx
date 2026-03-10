@@ -9,7 +9,7 @@ export function CarsTab() {
 			<div className="flex items-center justify-between">
 				<h2 className="text-lg font-semibold">Cars Publication Status</h2>
 				<Button asChild size="sm" variant="outline">
-					<Link to="/dashboard/cars" className="flex items-center gap-2">
+					<Link to="/admin/dashboard/cars" className="flex items-center gap-2">
 						<CarIcon className="h-4 w-4" />
 						Manage Cars
 						<ExternalLink className="h-3 w-3" />

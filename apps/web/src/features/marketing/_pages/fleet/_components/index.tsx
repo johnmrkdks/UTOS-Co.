@@ -53,23 +53,28 @@ export function Fleet({ className, ...props }: FleetProps) {
 		limit: 50 // Increased to show more cars
 	});
 
-	const bookingCards = carsData?.data?.map((car: any, index: number) => ({
-		id: car.id, // Add carId for pricing lookup
-		model: car.name,
-		brand: car.brand?.name || "Luxury",
-		category: car.category?.name || "Economy",
-		description: car.description,
-		features: [
-			`${car.seatingCapacity} seats`,
-			car.luggageCapacity ? `${car.luggageCapacity} bags` : null,
-			car.fuelType?.name || "Petrol",
-			car.transmissionType?.name || "Automatic",
-			"Air Conditioning",
-			"USB Charging Ports"
-		].filter(Boolean),
-		image: car.images?.find((img: any) => img.isMain)?.url || "placeholder.svg",
-		popular: index === 1 // Mark second car as popular
-	})) || [];
+	const bookingCards = carsData?.data?.map((car: any, index: number) => {
+		const sortedImages = [...(car.images || [])].sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+		const mainImage = sortedImages.find((img: any) => img.isMain) || sortedImages[0];
+		return {
+			id: car.id,
+			model: car.name,
+			brand: car.brand?.name || car.model?.brand?.name || "Luxury",
+			category: car.category?.name || "Economy",
+			description: car.description,
+			features: [
+				`${car.seatingCapacity} seats`,
+				car.luggageCapacity ? `${car.luggageCapacity} bags` : null,
+				car.fuelType?.name || "Petrol",
+				car.transmissionType?.name || "Automatic",
+				"Air Conditioning",
+				"USB Charging Ports"
+			].filter(Boolean),
+			image: mainImage?.url || "placeholder.svg",
+			images: sortedImages.map((img: any) => ({ url: img.url, altText: img.altText })),
+			popular: index === 1
+		};
+	}) || [];
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Vehicle Selection */}
@@ -130,7 +135,7 @@ export function Fleet({ className, ...props }: FleetProps) {
 							))
 						) : bookingCards.length > 0 ? (
 							bookingCards.map((card: any) => (
-								<BookingCard key={card.model} {...card} />
+								<BookingCard key={card.id} {...card} />
 							))
 						) : (
 							// Empty state

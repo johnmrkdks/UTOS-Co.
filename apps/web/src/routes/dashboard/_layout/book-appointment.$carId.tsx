@@ -123,7 +123,7 @@ function CarBookingPage() {
 	}
 
 	const goBackToCars = () => {
-		navigate({ to: "/dashboard/cars" })
+		navigate({ to: "/fleet" })
 	}
 
 	if (carLoading) {
