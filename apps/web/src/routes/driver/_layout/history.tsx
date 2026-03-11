@@ -399,7 +399,7 @@ function HistoryPage() {
 			{/* Trip Details Dialog (same as trips.tsx) */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
 				<DialogContent
-					showCloseButton={!isMobile}
+					showCloseButton={false}
 					className={cn(
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50" : "max-w-md bg-gray-50"
 					)}
@@ -408,9 +408,9 @@ function HistoryPage() {
 						<div className={cn(
 							isMobile ? "flex flex-col h-full" : "flex flex-col"
 						)}>
-							{/* Compact Header with gradient background */}
+							{/* Compact Header with gradient background - matches client account style */}
 							<div className={cn(
-								"bg-gradient-to-r from-primary to-primary/80 text-white p-4 flex-shrink-0",
+								"flex items-center justify-between bg-gradient-to-r from-primary to-primary/80 text-white p-4 flex-shrink-0",
 								isMobile ? "pt-6" : ""
 							)}>
 								<div className="flex items-center gap-3">
@@ -430,14 +430,13 @@ function HistoryPage() {
 									</div>
 								</div>
 
-								{/* Close button */}
 								<Button
 									variant="ghost"
-									size="sm"
-									className="absolute top-2 right-2 text-white hover:text-white hover:bg-white/20 bg-black/20 backdrop-blur-sm h-8 w-8 p-0 rounded-full shadow-lg"
+									size="lg"
+									className="h-12 w-12 p-0 text-white hover:bg-white/20 rounded-full flex-shrink-0 border-2 border-white/30 hover:border-white/50 transition-all duration-200"
 									onClick={() => setBookingDetailsOpen(false)}
 								>
-									<X className="h-5 w-5" />
+									<X className="h-6 w-6" />
 								</Button>
 							</div>
 
@@ -585,15 +584,26 @@ function HistoryPage() {
 												${(selectedBookingForDetails.driverShare ?? selectedBookingForDetails.finalAmount ?? (selectedBookingForDetails.quotedAmount || 0) + (selectedBookingForDetails.extraCharges || 0)).toFixed(2)}
 											</span>
 										</div>
-										{/* Extras breakdown - only shown when driver has access to full data (e.g. before masking) */}
-										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+										{/* Extras breakdown - only show when there are non-zero charges */}
+										{selectedBookingForDetails.extras &&
+										 selectedBookingForDetails.extras.length > 0 &&
+										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
 											<div className="space-y-2">
 												<div className="text-sm font-medium text-gray-700 mt-3 mb-2">Extra Charges:</div>
 												{(() => {
-													const extras = selectedBookingForDetails.extras;
-													const totalTolls = extras.reduce((s: number, e: any) => s + (e.tollCharges ?? 0), 0);
-													const totalParking = extras.reduce((s: number, e: any) => s + (e.parkingCharges ?? 0), 0);
-													const totalOther = extras.reduce((s: number, e: any) => s + (e.otherChargesAmount ?? 0), 0);
+													const allExtras = selectedBookingForDetails.extras;
+													const extras = allExtras.filter(
+														(e: any) =>
+															(e.additionalWaitTime ?? 0) > 0 ||
+															(e.unscheduledStops ?? 0) > 0 ||
+															(e.parkingCharges ?? 0) > 0 ||
+															(e.tollCharges ?? 0) > 0 ||
+															(e.otherChargesAmount ?? 0) > 0
+													);
+													if (extras.length === 0) return null;
+													const totalTolls = allExtras.reduce((s: number, e: any) => s + (e.tollCharges ?? 0), 0);
+													const totalParking = allExtras.reduce((s: number, e: any) => s + (e.parkingCharges ?? 0), 0);
+													const totalOther = allExtras.reduce((s: number, e: any) => s + (e.otherChargesAmount ?? 0), 0);
 													const extraTotal = selectedBookingForDetails.extraCharges ?? 0;
 													const waitingTimeCharge = Math.max(0, extraTotal - totalTolls - totalParking - totalOther);
 													return (
@@ -683,8 +693,10 @@ function HistoryPage() {
 											</div>
 										)}
 
-										{/* Show total extras amount if we have detailed breakdown */}
-										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+										{/* Show total extras amount if we have detailed breakdown and extraCharges > 0 */}
+										{selectedBookingForDetails.extras &&
+										 selectedBookingForDetails.extras.length > 0 &&
+										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
 											<div className="flex justify-between items-center bg-orange-50 px-3 py-2 rounded">
 												<span className="text-sm font-medium text-orange-700">Total Additional Charges:</span>
 												<span className="text-sm font-bold text-orange-700">

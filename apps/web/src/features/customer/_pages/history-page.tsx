@@ -362,7 +362,7 @@ export function CustomerHistoryPage() {
 			{/* Booking Details Dialog */}
 			<Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
 				<DialogContent
-					showCloseButton={!isMobile}
+					showCloseButton={false}
 					className={cn(
 						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-md bg-gray-50"
 					)}
@@ -465,15 +465,26 @@ export function CustomerHistoryPage() {
 											</span>
 										</div>
 
-										{/* Extras breakdown if any */}
-										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+										{/* Extras breakdown if any - only show when there are non-zero charges */}
+										{selectedBookingForDetails.extras &&
+										 selectedBookingForDetails.extras.length > 0 &&
+										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
 											<div className="space-y-2">
 												<div className="text-sm font-medium text-gray-700 mt-3 mb-2">Extra Charges:</div>
 												{(() => {
-													const extras = selectedBookingForDetails.extras;
-													const totalTolls = extras.reduce((s: number, e: any) => s + (e.tollCharges ?? 0), 0);
-													const totalParking = extras.reduce((s: number, e: any) => s + (e.parkingCharges ?? 0), 0);
-													const totalOther = extras.reduce((s: number, e: any) => s + (e.otherChargesAmount ?? 0), 0);
+													const allExtras = selectedBookingForDetails.extras;
+													const extras = allExtras.filter(
+														(e: any) =>
+															(e.additionalWaitTime ?? 0) > 0 ||
+															(e.unscheduledStops ?? 0) > 0 ||
+															(e.parkingCharges ?? 0) > 0 ||
+															(e.tollCharges ?? 0) > 0 ||
+															(e.otherChargesAmount ?? 0) > 0
+													);
+													if (extras.length === 0) return null;
+													const totalTolls = allExtras.reduce((s: number, e: any) => s + (e.tollCharges ?? 0), 0);
+													const totalParking = allExtras.reduce((s: number, e: any) => s + (e.parkingCharges ?? 0), 0);
+													const totalOther = allExtras.reduce((s: number, e: any) => s + (e.otherChargesAmount ?? 0), 0);
 													const extraTotal = selectedBookingForDetails.extraCharges ?? 0;
 													const waitingTimeCharge = Math.max(0, extraTotal - totalTolls - totalParking - totalOther);
 													return (
@@ -563,8 +574,10 @@ export function CustomerHistoryPage() {
 											</div>
 										)}
 
-										{/* Show total extras amount if we have detailed breakdown */}
-										{selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0 && (
+										{/* Show total extras amount if we have detailed breakdown and extraCharges > 0 */}
+										{selectedBookingForDetails.extras &&
+										 selectedBookingForDetails.extras.length > 0 &&
+										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
 											<div className="flex items-center justify-between bg-orange-50 px-3 py-2 rounded">
 												<span className="text-sm font-medium text-orange-700">Total Additional Charges:</span>
 												<span className="text-sm font-bold text-orange-700">
@@ -573,9 +586,8 @@ export function CustomerHistoryPage() {
 											</div>
 										)}
 
-										{/* Divider if there are extras */}
-										{((selectedBookingForDetails.extras && selectedBookingForDetails.extras.length > 0) ||
-										  (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0)) && (
+										{/* Divider if there are extra charges */}
+										{(selectedBookingForDetails.extraCharges ?? 0) > 0 && (
 											<div className="border-t border-gray-200"></div>
 										)}
 									</div>
