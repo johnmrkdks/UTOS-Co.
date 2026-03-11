@@ -164,6 +164,11 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
+// Health check - lightweight, no DB/auth; use to verify Worker is running (helps debug 503/CORS)
+app.get("/api/health", (c) => {
+	return c.json({ ok: true, timestamp: new Date().toISOString() });
+});
+
 // Top-level fetch: OPTIONS first, then app; wrap ALL in try/catch so CORS is always on errors
 export default {
 	async fetch(request: Request, env: unknown, ctx: ExecutionContext) {

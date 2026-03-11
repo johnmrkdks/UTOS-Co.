@@ -565,7 +565,7 @@ export function CustomerHistoryPage() {
 
 										{/* Simple extras total if no detailed breakdown available */}
 										{(!selectedBookingForDetails.extras || selectedBookingForDetails.extras.length === 0) &&
-										 (selectedBookingForDetails.extraCharges && selectedBookingForDetails.extraCharges > 0) && (
+										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
 											<div className="flex items-center justify-between">
 												<span className="text-sm text-gray-600">Additional Charges:</span>
 												<span className="text-sm font-semibold text-orange-600">
