@@ -59,6 +59,7 @@ export interface Booking {
 		createdAt: string;
 		updatedAt: string;
 	} | null;
+	paymentStatus?: string | null;
 	createdAt: string;
 	isGuestBooking?: boolean | null;
 	[key: string]: any;
@@ -185,6 +186,31 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		cell: ({ row }) => {
 			const status = row.getValue("status") as string;
 			return <StatusBadge status={status} size="md" />;
+		},
+		size: 140,
+	});
+
+	// Payment Status column
+	columns.push({
+		id: "paymentStatus",
+		accessorKey: "paymentStatus",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Payment" />
+		),
+		cell: ({ row }) => {
+			const status = (row.original.paymentStatus ?? "—") as string;
+			if (!status || status === "—") return <span className="text-xs text-muted-foreground">—</span>;
+			const config: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+				pending_payment: { label: "Pending", variant: "secondary" },
+				payment_authorized: { label: "Authorized", variant: "default" },
+				awaiting_capture: { label: "Awaiting Capture", variant: "outline" },
+				payment_captured: { label: "Captured", variant: "default" },
+				payment_failed: { label: "Failed", variant: "destructive" },
+				payment_cancelled: { label: "Cancelled", variant: "destructive" },
+				refunded: { label: "Refunded", variant: "secondary" },
+			};
+			const c = config[status] ?? { label: status.replace(/_/g, " "), variant: "outline" as const };
+			return <Badge variant={c.variant} className="text-xs">{c.label}</Badge>;
 		},
 		size: 140,
 	});

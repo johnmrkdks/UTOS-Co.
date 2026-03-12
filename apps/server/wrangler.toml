@@ -25,6 +25,10 @@ GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
 GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
 GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
+# Square Payments (local dev - add SQUARE_ACCESS_TOKEN to .dev.vars)
+SQUARE_APPLICATION_ID = "sandbox-sq0idb-NIoQ14HVzSUecRSlgTsM3w"
+SQUARE_LOCATION_ID = "L8P964X218027"
+SQUARE_ENVIRONMENT = "sandbox"
 
 # Cloudflare R2
 CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
@@ -120,6 +124,12 @@ GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
 GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
 GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
 GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+
+# Square Payments
+SQUARE_APPLICATION_ID = "sandbox-sq0idb-NIoQ14HVzSUecRSlgTsM3w"
+SQUARE_LOCATION_ID = "L8P964X218027"
+SQUARE_ENVIRONMENT = "sandbox"
+# Access token: wrangler secret put SQUARE_ACCESS_TOKEN --env staging
 
 # Resend - REQUIRED for emails in Cloudflare Workers (nodemailer/SMTP does not work)
 # Get API key at https://resend.com (free: 100/day). Add as secret: wrangler secret put RESEND_API_KEY --env staging

@@ -125,7 +125,7 @@ export function InstantQuoteResults({
 							) : (
 								<div className="bg-green-50 border border-green-200 rounded-md p-2 mt-2">
 									<p className="text-xs text-green-800">
-										✓ <strong>Great news!</strong> Your {(quote.estimatedDistance / 1000).toFixed(1)}km journey is within the base rate - no extra distance charges apply.
+										✓ <strong>Great news!</strong> Your {Number(quote.estimatedDistance).toFixed(1)}km journey is within the base rate - no extra distance charges apply.
 									</p>
 								</div>
 							)}

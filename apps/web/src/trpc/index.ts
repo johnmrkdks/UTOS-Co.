@@ -1,8 +1,12 @@
 import type { AppRouter } from "server/trpc/routers/_app";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { createTRPCClient, httpBatchLink, httpLink, splitLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
+
+const trpcUrl = `${import.meta.env.VITE_SERVER_URL}/trpc`;
+const trpcFetch = (url: RequestInfo | URL, options?: RequestInit) =>
+	fetch(url, { ...options, credentials: "include" });
 
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
@@ -34,14 +38,10 @@ export const queryClient = new QueryClient({
 
 export const trpcClient = createTRPCClient<AppRouter>({
 	links: [
-		httpBatchLink({
-			url: `${import.meta.env.VITE_SERVER_URL}/trpc`,
-			fetch(url, options) {
-				return fetch(url, {
-					...options,
-					credentials: "include",
-				});
-			},
+		splitLink({
+			condition: (op) => op.type === "mutation",
+			true: httpLink({ url: trpcUrl, fetch: trpcFetch }),
+			false: httpBatchLink({ url: trpcUrl, fetch: trpcFetch }),
 		}),
 	],
 });

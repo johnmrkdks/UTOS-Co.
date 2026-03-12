@@ -4,6 +4,10 @@ import type { R2Bucket } from "@cloudflare/workers-types";
 export type Env = {
 	DB: DB;
 	BUCKET: R2Bucket;
+	/** Square Payments - use sandbox for dev/staging */
+	SQUARE_ACCESS_TOKEN?: string;
+	SQUARE_LOCATION_ID?: string;
+	SQUARE_ENVIRONMENT?: "sandbox" | "production";
 	BETTER_AUTH_URL?: string;
 	GOOGLE_MAPS_API_KEY?: string;
 	// Email: Resend (works in Cloudflare Workers - preferred)

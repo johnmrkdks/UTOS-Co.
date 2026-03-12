@@ -17,6 +17,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { authClient } from "@/lib/auth-client";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { formatDistanceKm } from "@/utils/format";
 import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "@/trpc";
@@ -293,7 +294,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
 						<MapPin className="h-3 w-3" />
 						<span>
-							{((quote.estimatedDistance || 0) / 1000).toFixed(1)} km • {Math.round((quote.estimatedDuration || 0) / 60)} min journey
+							{formatDistanceKm(quote.estimatedDistance)} • {Math.round((quote.estimatedDuration || 0) / 60)} min journey
 						</span>
 					</div>
 
@@ -383,7 +384,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 									{(quote.breakdown.additionalDistance || 0) === 0 && (
 										<div className="bg-blue-50 p-2 rounded-md mt-2">
 											<p className="text-xs text-blue-800">
-												<strong>Within flat rate limit:</strong> No additional charges since your {((quote.estimatedDistance || 0) / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance || 10)}km tier.
+												<strong>Within flat rate limit:</strong> No additional charges since your {Number(quote.estimatedDistance || 0).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance || 10)}km tier.
 											</p>
 										</div>
 									)}

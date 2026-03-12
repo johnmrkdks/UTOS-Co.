@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import type { Env } from "@/types/env";
 import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import { maybeCapturePaymentOnCompletion } from "@/services/payments/maybe-capture-on-completion";
 
 export interface ExtrasFormData {
 	additionalWaitTime: number; // in minutes
@@ -105,9 +106,10 @@ export async function closeTripWithExtras(
 			extras: extrasRecord
 		};
 
-		// When Completed (no waiting time): send completion email immediately
-		// When AwaitingPricingReview: do NOT send - admin will trigger after finalizing amount
+		// When Completed (no waiting time): capture payment + send completion email
+		// When AwaitingPricingReview: do NOT capture - admin will finalize amount first
 		if (env && finalStatus === BookingStatusEnum.Completed) {
+			await maybeCapturePaymentOnCompletion(db, bookingId, newFinalAmount, env);
 			try {
 				await sendTripStatusNotification({ bookingId, status: "completed", env });
 				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId} (extras, no waiting time)`);
@@ -174,8 +176,10 @@ export async function closeTripWithoutExtras(
 			.returning()
 			.get();
 
-		// Send completion email notification
+		// Capture payment + send completion email
 		if (env && finalStatus === BookingStatusEnum.Completed) {
+			const finalAmount = Math.round((booking.finalAmount || booking.quotedAmount) * 100) / 100;
+			await maybeCapturePaymentOnCompletion(db, bookingId, finalAmount, env);
 			console.log(`📧 CLOSE TRIP DEBUG: Sending completion email for booking ${bookingId} (no extras)`);
 			try {
 				await sendTripStatusNotification({
@@ -186,7 +190,6 @@ export async function closeTripWithoutExtras(
 				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId} (no extras)`);
 			} catch (emailError) {
 				console.error(`❌ CLOSE TRIP EMAIL: Failed to send completion email for booking ${bookingId}:`, emailError);
-				// Don't fail the booking completion if email fails
 			}
 		}
 

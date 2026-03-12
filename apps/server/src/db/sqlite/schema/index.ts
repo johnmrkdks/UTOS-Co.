@@ -36,3 +36,4 @@ export * from "./sessions";
 export * from "./users";
 export * from "./verifications";
 export * from "./invoice-sent-logs";
+export * from "./payments";

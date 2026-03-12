@@ -235,7 +235,7 @@ export function QuoteToBookingDialog({
 								<div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
 									<div className="flex items-center gap-1">
 										<MapPin className="h-4 w-4" />
-										{(quote.estimatedDistance / 1000).toFixed(1)} km
+										{Number(quote.estimatedDistance).toFixed(1)} km
 									</div>
 									<div className="flex items-center gap-1">
 										<Clock className="h-4 w-4" />

@@ -191,6 +191,32 @@ export function BookingDetailsDialog() {
 						<Badge variant={currentStatus?.color as any || "secondary"} className="text-xs shrink-0">
 							{booking.status.replace("_", " ").toUpperCase()}
 						</Badge>
+						{(booking as { paymentStatus?: string }).paymentStatus && (
+							<Badge
+								variant={
+									(booking as { paymentStatus?: string }).paymentStatus === "payment_captured"
+										? "default"
+										: (booking as { paymentStatus?: string }).paymentStatus === "payment_authorized" ||
+											(booking as { paymentStatus?: string }).paymentStatus === "awaiting_capture"
+										? "secondary"
+										: (booking as { paymentStatus?: string }).paymentStatus === "payment_failed" ||
+											(booking as { paymentStatus?: string }).paymentStatus === "payment_cancelled"
+										? "destructive"
+										: "outline"
+								}
+								className="text-xs shrink-0"
+							>
+								{{
+									pending_payment: "Pending Payment",
+									payment_authorized: "Authorized",
+									awaiting_capture: "Awaiting Capture",
+									payment_captured: "Captured",
+									payment_failed: "Failed",
+									payment_cancelled: "Cancelled",
+									refunded: "Refunded",
+								}[(booking as { paymentStatus?: string }).paymentStatus ?? ""] ?? "Payment"}
+							</Badge>
+						)}
 					</div>
 					<div className="text-right flex-shrink-0">
 						<div className="text-lg font-bold text-primary">
@@ -551,6 +577,21 @@ export function BookingDetailsDialog() {
 								<div className="flex items-center gap-3 mb-3">
 									<CreditCard className="h-5 w-5 text-primary shrink-0" />
 									<h3 className="font-semibold">Pricing</h3>
+									{(() => {
+										const ps = (booking as { paymentStatus?: string }).paymentStatus;
+										if (!ps) return <span className="text-xs text-muted-foreground ml-auto">—</span>;
+										const labels: Record<string, string> = {
+											pending_payment: "Pending Payment",
+											payment_authorized: "Authorized",
+											awaiting_capture: "Awaiting Capture",
+											payment_captured: "Captured",
+											payment_failed: "Failed",
+											payment_cancelled: "Cancelled",
+											refunded: "Refunded",
+										};
+										const variant = ps === "payment_captured" ? "default" : ps === "payment_authorized" || ps === "awaiting_capture" ? "secondary" : ps === "payment_failed" || ps === "payment_cancelled" ? "destructive" : "outline";
+										return <Badge variant={variant as any} className="ml-auto">{labels[ps] ?? ps.replace(/_/g, " ")}</Badge>;
+									})()}
 								</div>
 								<div className="space-y-2">
 									{booking.bookingType === "package" ? (

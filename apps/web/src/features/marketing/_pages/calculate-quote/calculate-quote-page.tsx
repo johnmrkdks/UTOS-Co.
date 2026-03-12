@@ -91,17 +91,17 @@ export function CalculateQuotePage({ isCustomerArea = false }: CalculateQuotePag
 		setError(null);
 
 		try {
-			// Extract coordinates from geometry objects
-			const originLat = originGeometry?.location?.lat();
-			const originLng = originGeometry?.location?.lng();
-			const destinationLat = destinationGeometry?.location?.lat();
-			const destinationLng = destinationGeometry?.location?.lng();
+			// Extract coordinates from geometry objects (place = { placeId, description, geometry: { location } })
+			const originLat = originGeometry?.geometry?.location?.lat?.();
+			const originLng = originGeometry?.geometry?.location?.lng?.();
+			const destinationLat = destinationGeometry?.geometry?.location?.lat?.();
+			const destinationLng = destinationGeometry?.geometry?.location?.lng?.();
 
 			// Prepare stops data
 			const stopsData = data.stops?.map((stop, index) => ({
 				address: stop.address,
-				latitude: stopsGeometry[index]?.location?.lat(),
-				longitude: stopsGeometry[index]?.location?.lng(),
+				latitude: stopsGeometry[index]?.geometry?.location?.lat?.(),
+				longitude: stopsGeometry[index]?.geometry?.location?.lng?.(),
 			})) || [];
 
 			const result = await calculateQuoteMutation.mutateAsync({

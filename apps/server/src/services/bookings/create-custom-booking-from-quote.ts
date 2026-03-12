@@ -1,7 +1,7 @@
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import type { DB } from "@/db";
-import { BookingTypeEnum, BookingStatusEnum } from "@/db/sqlite/enums";
+import { BookingTypeEnum, BookingStatusEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 import type { InsertBooking } from "@/schemas/shared";
 import { selectAvailableCarService } from "@/services/cars/select-available-car";
 import { z } from "zod";
@@ -132,6 +132,7 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 		tollPreference: data.tollPreference || "toll",
 
 		status: BookingStatusEnum.Pending,
+		paymentStatus: BookingPaymentStatusEnum.PendingPayment,
 	};
 
 	// Create the booking

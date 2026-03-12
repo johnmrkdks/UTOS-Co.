@@ -3,7 +3,7 @@ import { users } from "@/db/sqlite/schema/users";
 import { cars } from "@/db/sqlite/schema/cars";
 import { packages } from "@/db/sqlite/schema/packages";
 import { relations, sql } from "drizzle-orm";
-import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
+import { BookingStatusEnum, BookingTypeEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 import { createId } from "@paralleldrive/cuid2";
 import { drivers } from "@/db/sqlite/schema/drivers";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
@@ -64,6 +64,7 @@ export const bookings = sqliteTable("bookings", {
 	tollPreference: text("toll_preference").default("toll"), // "toll" | "no_toll" - route preference
 
 	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
+	paymentStatus: text("payment_status").$type<BookingPaymentStatusEnum>(), // Square payment flow
 	isArchived: integer("is_archived", { mode: "boolean" }),
 	isGuestBooking: integer("is_guest_booking", { mode: "boolean" }).default(false),
 

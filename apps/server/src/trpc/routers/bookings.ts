@@ -195,14 +195,17 @@ export const bookingsRouter = router({
 
 				// Apply role-based filtering
 				if (userRole === 'admin' || userRole === 'super_admin') {
-					// Admins can see all bookings
-					const bookings = await getBookingsService(db, input);
+					// Admins see all bookings EXCEPT pending_payment (not shown until payment goes through)
+					const result = await getBookingsService(db, input);
+					const filteredData = (result?.data ?? []).filter(
+						(b: { paymentStatus?: string | null }) => b.paymentStatus !== "pending_payment"
+					);
 					console.log("- Bookings result:", {
-						count: bookings?.data?.length || 0,
-						hasData: !!bookings?.data,
-						firstBooking: bookings?.data?.[0] || null
+						count: filteredData?.length || 0,
+						hasData: !!filteredData?.length,
+						excludedPending: (result?.data?.length ?? 0) - filteredData.length
 					});
-					return bookings;
+					return { ...result, data: filteredData };
 				} else if (userRole === 'driver') {
 					// Drivers can only see their assigned bookings
 					const driverProfile = await db.query.drivers.findFirst({
@@ -306,21 +309,26 @@ export const bookingsRouter = router({
 				console.log("📋 Updated booking data:", JSON.stringify(updatedBooking, null, 2));
 
 				// When admin finalizes a booking awaiting_pricing_review (driver closed with waiting time),
-				// send the deferred completion email to the client
+				// capture payment + send the deferred completion email to the client
 				const hasAmountUpdate = input.data.finalAmount !== undefined || input.data.extraCharges !== undefined;
 				const statusSetToCompleted = input.data.status === "completed";
 				const wasAwaitingPricingReview = existingBooking.status === "awaiting_pricing_review";
 				if ((hasAmountUpdate || statusSetToCompleted) && wasAwaitingPricingReview && env) {
 					try {
-						// Ensure status is set to completed (updateBookingService may have already done this via input.data)
+						// Ensure status is set to completed
 						await db.update(bookings).set({
 							status: "completed",
 							updatedAt: new Date(),
 						}).where(eq(bookings.id, input.id));
+						// Capture payment with FINAL amount (includes tolls, parking, waiting time)
+						const { maybeCapturePaymentOnCompletion } = await import("@/services/payments/maybe-capture-on-completion");
+						const finalAmount = input.data.finalAmount ?? updatedBooking?.finalAmount ?? (existingBooking.quotedAmount ?? 0) + (existingBooking.extraCharges ?? 0);
+						console.log(`📷 Capturing payment for booking ${input.id} with final amount: $${finalAmount.toFixed(2)}`);
+						await maybeCapturePaymentOnCompletion(db, input.id, finalAmount, env, true);
 						await sendTripStatusNotification({ bookingId: input.id, status: "completed", env });
 						console.log("✅ Completion email sent after admin finalized charges");
 					} catch (emailErr) {
-						console.error("❌ Failed to send completion email:", emailErr);
+						console.error("❌ Failed to send completion email or capture payment:", emailErr);
 					}
 				}
 
@@ -761,9 +769,12 @@ export const bookingsRouter = router({
 
 				// Apply role-based filtering
 				if (userRole === 'admin' || userRole === 'super_admin') {
-					// Admins can see all bookings
-					const bookings = await getBookingsService(db, input);
-					return bookings;
+					// Admins see all bookings EXCEPT pending_payment (not shown until payment goes through)
+					const result = await getBookingsService(db, input);
+					const filteredData = (result?.data ?? []).filter(
+						(b: { paymentStatus?: string | null }) => b.paymentStatus !== "pending_payment"
+					);
+					return { ...result, data: filteredData };
 				} else if (userRole === 'driver') {
 					// Drivers can only see their assigned bookings
 					const driverProfile = await db.query.drivers.findFirst({

@@ -31,9 +31,11 @@ import { toast } from "sonner";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
-import { queryClient } from "@/trpc";
 import { useCreateCustomBookingFromQuoteMutation, useCreateCustomBookingFromQuoteAsGuestMutation } from "@/features/marketing/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { useGetSecureQuoteQuery } from "./_hooks/use-get-secure-quote-query";
+import { trpc } from "@/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { SquarePaymentForm } from "@/features/payments/_components/square-payment-form";
 import { useGetCarQuery } from "@/features/customer/_hooks/query/use-get-car-query";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
@@ -138,9 +140,15 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 	// Form state - pre-populate for authenticated users
 	const [formData, setFormData] = useState<Partial<QuoteBookingFormData>>({});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
+	const [step, setStep] = useState<"details" | "payment" | "confirmation">("details");
 	const [date, setDate] = useState<Date>();
 	const [bookingResult, setBookingResult] = useState<any>(null);
+
+	// Square config for payment step (only fetch when on payment step)
+	const { data: squareConfig, isLoading: squareConfigLoading, error: squareConfigError } = useQuery({
+		...trpc.payments.getSquareConfig.queryOptions(),
+		enabled: step === "payment" && !!bookingResult?.id,
+	});
 
 	// Pre-populate form data for authenticated users
 	useEffect(() => {
@@ -155,10 +163,11 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 	}, [sessionData, profileData]);
 
 	// Extract quote data - prioritize secure quote, fallback to URL params
+	// Note: instant quote API returns estimatedDistance in km (from calculateInstantQuoteService)
 	const quoteData = secureQuoteData ? {
 		origin: secureQuoteData.originAddress,
 		destination: secureQuoteData.destinationAddress,
-		distance: (secureQuoteData.estimatedDistance || 0) / 1000, // Convert meters to km
+		distance: secureQuoteData.estimatedDistance ?? 0, // Already in km from API
 		duration: Math.round((secureQuoteData.estimatedDuration || 0) / 60), // Convert seconds to minutes
 		totalFare: secureQuoteData.totalAmount || 0,
 		carId: secureQuoteData.carId, // Pre-selected car from quote
@@ -300,7 +309,7 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 				})) : [],
 				scheduledPickupTime: createLocalDateForBackend(formData.scheduledPickupDate!, formData.scheduledPickupTime!),
 				estimatedDuration: quoteData.duration * 60, // Convert minutes to seconds
-				estimatedDistance: quoteData.distance * 1000, // Convert km to meters
+				estimatedDistance: quoteData.distance, // Backend expects km
 				// Map new pricing structure to existing database fields
 				baseFare: firstKmFareAmount, // Store as dollar amount
 				distanceFare: additionalKmFareAmount, // Store as dollar amount
@@ -323,9 +332,9 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 				? await createGuestBookingMutation.mutateAsync(bookingPayload)
 				: await createBookingMutation.mutateAsync(bookingPayload);
 
-			console.log("✅ Quote booking successful:", result);
+			console.log("✅ Quote booking created (pending payment):", result);
 			setBookingResult(result);
-			setStep("confirmation");
+			setStep("payment");
 
 			// Scroll to top after confirmation
 			setTimeout(() => {
@@ -628,6 +637,87 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 				<Button asChild>
 					<Link to="/">Get New Quote</Link>
 				</Button>
+			</div>
+		);
+	}
+
+	// Payment step: show SquarePaymentForm after booking created
+	if (step === "payment" && bookingResult?.id) {
+		if (squareConfigError) {
+			return (
+				<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+					<Card className="max-w-md w-full">
+						<CardContent className="pt-6">
+							<AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+							<h3 className="text-lg font-medium text-center mb-2">Payment Setup Error</h3>
+							<p className="text-sm text-muted-foreground text-center mb-4">
+								{squareConfigError.message}
+							</p>
+							<Button variant="outline" className="w-full" onClick={() => setStep("details")}>
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Back to Booking
+							</Button>
+						</CardContent>
+					</Card>
+				</div>
+			);
+		}
+
+		if (squareConfigLoading || !squareConfig) {
+			return (
+				<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+					<Loader2 className="h-8 w-8 animate-spin text-primary" />
+					<span className="ml-2">Loading payment form...</span>
+				</div>
+			);
+		}
+
+		const amountCents = Math.round((quoteData.totalFare || 0) * 100);
+
+		return (
+			<div className="min-h-screen bg-gray-50">
+				<div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+					<div className="flex items-center gap-3 mb-6">
+						<Button variant="outline" size="icon" onClick={() => setStep("details")}>
+							<ArrowLeft className="h-4 w-4" />
+						</Button>
+						<div>
+							<h1 className="text-xl font-bold text-gray-900">Complete Payment</h1>
+							<p className="text-sm text-muted-foreground">Authorize your payment to confirm the booking</p>
+						</div>
+					</div>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>Payment Details</CardTitle>
+							<CardDescription>
+								Your card will be authorized for ${quoteData.totalFare?.toFixed(2) ?? "0.00"}. You will be charged after your trip is completed.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<SquarePaymentForm
+								applicationId={squareConfig.applicationId}
+								locationId={squareConfig.locationId}
+								amountCents={amountCents}
+								bookingId={bookingResult.id}
+								onAuthorized={() => {
+									setStep("confirmation");
+									toast.success("Payment authorized", {
+										description: "Your booking is now confirmed.",
+									});
+									setTimeout(() => {
+										if (scrollContainerRef.current) {
+											scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+										} else {
+											window.scrollTo({ top: 0, behavior: "smooth" });
+										}
+									}, 100);
+								}}
+								onError={(msg) => toast.error("Payment failed", { description: msg })}
+							/>
+						</CardContent>
+					</Card>
+				</div>
 			</div>
 		);
 	}
@@ -1324,9 +1414,8 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 												<div>
 													<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
 													<ul className="text-sm text-gray-600 space-y-1">
-														<li>• Pay after service completion</li>
-														<li>• Driver accepts cash or cashless payments</li>
-														<li>• Online payment options available soon</li>
+														<li>• Your card will be authorized now (payment held)</li>
+														<li>• You will be charged after your trip is completed</li>
 													</ul>
 												</div>
 											</div>
@@ -1344,12 +1433,12 @@ export function QuoteBookingPage({ isCustomerArea = false, pathQuoteId, isGuestF
 										{(createBookingMutation.isPending || createGuestBookingMutation.isPending) ? (
 											<>
 												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
-												Creating Your Booking...
+												Creating booking...
 											</>
 										) : sessionData?.user ? (
-											"Book Now"
+											"Continue to Payment"
 										) : isGuestFlow ? (
-											"Book"
+											"Continue to Payment"
 										) : (
 											"Sign In & Book"
 										)}

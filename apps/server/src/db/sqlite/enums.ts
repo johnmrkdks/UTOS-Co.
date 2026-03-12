@@ -42,6 +42,17 @@ export enum PaymentMethodEnum {
 	DebitCard = "debit_card",
 }
 
+/** Square payment flow status for bookings */
+export enum BookingPaymentStatusEnum {
+	PendingPayment = "pending_payment",
+	PaymentAuthorized = "payment_authorized",
+	AwaitingCapture = "awaiting_capture",
+	PaymentCaptured = "payment_captured",
+	PaymentFailed = "payment_failed",
+	PaymentCancelled = "payment_cancelled",
+	Refunded = "refunded",
+}
+
 export enum CarStatusEnum {
 	Available = "available",
 	Booked = "booked",

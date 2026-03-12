@@ -11,7 +11,7 @@ import { PackageSchema } from "./package";
 import { BookingExtraSchema } from "./booking-extra";
 import { BookingStopSchema } from "./booking-stop";
 import { OffloadBookingDetailsSchema } from "./offload-booking-details";
-import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
+import { BookingStatusEnum, BookingTypeEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 
 export const BookingSchema = createSelectSchema(bookings, {
 	createdAt: z.union([z.date(), z.string()]),
@@ -26,11 +26,12 @@ export const BookingSchema = createSelectSchema(bookings, {
 });
 export const InsertBookingSchema = createInsertSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum),
-	bookingType: z.nativeEnum(BookingTypeEnum)
-
+	bookingType: z.nativeEnum(BookingTypeEnum),
+	paymentStatus: z.nativeEnum(BookingPaymentStatusEnum).optional(),
 });
 export const UpdateBookingSchema = createUpdateSchema(bookings, {
 	status: z.nativeEnum(BookingStatusEnum).optional(),
+	paymentStatus: z.nativeEnum(BookingPaymentStatusEnum).optional(),
 	// Accept both Date objects and ISO string for scheduledPickupTime
 	scheduledPickupTime: z.union([z.date(), z.string().datetime()]).optional(),
 	// Accept both Date objects and ISO string for timestamp fields
