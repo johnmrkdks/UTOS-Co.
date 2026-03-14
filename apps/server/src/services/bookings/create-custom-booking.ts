@@ -1,7 +1,7 @@
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import type { DB } from "@/db";
-import { BookingTypeEnum, BookingStatusEnum } from "@/db/sqlite/enums";
+import { BookingTypeEnum, BookingStatusEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 import type { InsertBooking } from "@/schemas/shared";
 import { z } from "zod";
 
@@ -52,6 +52,8 @@ export type CreateCustomBookingParams = z.infer<typeof CreateCustomBookingSchema
 /** Admin creates booking for client - userId optional: when absent use admin's (walk-in/phone client) */
 export const AdminCreateCustomBookingSchema = CreateCustomBookingSchema.extend({
 	userId: z.string().optional(),
+	/** When true: set paymentStatus to pending_payment so client can pay via link; email sent separately */
+	sendPaymentToClient: z.boolean().optional(),
 });
 
 export type AdminCreateCustomBookingParams = z.infer<typeof AdminCreateCustomBookingSchema>;
@@ -94,6 +96,8 @@ export async function createCustomBookingService(db: DB, data: CreateCustomBooki
 		specialRequests: data.specialRequests,
 
 		status: BookingStatusEnum.Pending,
+		// Admin flow: when sendPaymentToClient, require payment before confirmation
+		...(data.sendPaymentToClient ? { paymentStatus: BookingPaymentStatusEnum.PendingPayment } : {}),
 	};
 
 	const newBooking = await createBooking(db, bookingData);

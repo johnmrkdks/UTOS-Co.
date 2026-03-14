@@ -10,6 +10,7 @@ enabled = true
 # Use local D1 (SQLite) when remote dev database is unavailable
 remote = false
 NODE_ENV = "development"
+SITE_URL = "http://localhost:3001"
 # Comma-separated origins for dev (web may run on 3001, 3003, etc.)
 CORS_ORIGIN = "http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
@@ -59,6 +60,7 @@ remote = false
 # Deployed dev environment - uses my-dev-db, domain-style URLs (dev.downunderchauffeurs.com)
 [env.dev.vars]
 NODE_ENV = "development"
+SITE_URL = "https://down-under-chauffeur-dev.luppy.workers.dev"
 CORS_ORIGIN = "https://down-under-chauffeur-dev.luppy.workers.dev,http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
 # Better Auth
@@ -110,6 +112,8 @@ remote = true
 [env.staging.vars]
 # Staging = development (account 8357cb0b, my-dev-db)
 NODE_ENV = "development"
+# Web app URL for payment links, emails, etc.
+SITE_URL = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
 # Comma-separated allowed origins for CORS (also hardcoded in index.ts ALLOWED_ORIGINS)
 CORS_ORIGIN = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev,https://downunderchauffeurs.com,https://down-under-chauffeur-dev.luppy.workers.dev,http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
@@ -160,6 +164,7 @@ preview_bucket_name = "down-under-chauffeur-bucket"
 
 [env.production.vars]
 NODE_ENV = "production"
+SITE_URL = "https://downunderchauffeurs.com"
 CORS_ORIGIN = "https://downunderchauffeurs.com"
 
 # Better Auth (Safari iOS: cross-subdomain cookies for email/password login)

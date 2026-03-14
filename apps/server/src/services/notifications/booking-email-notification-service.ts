@@ -351,7 +351,7 @@ function generateTripStatusEmailTemplate(
 			break;
 		case "no_show":
 			statusTitle = "No Show Recorded";
-			statusMessage = "Our driver was unable to locate you at the pickup location. Please contact us if there was an issue.";
+			statusMessage = "Our driver was unable to locate you at the pickup location. As your payment was already authorized, the total fare has been charged to your card. Please contact us if there was an issue.";
 			statusIcon = "⚠️";
 			break;
 		default:
@@ -444,7 +444,7 @@ function generateTripStatusEmailTemplate(
 					</td></tr>
 				</table>
 
-				${status === "completed" ? `
+				${(status === "completed" || status === "no_show") ? `
 				<!-- Fare Breakdown -->
 				${(() => {
 					const tollCharges = extras?.tollCharges ?? 0;
@@ -482,9 +482,15 @@ function generateTripStatusEmailTemplate(
 					</td></tr>
 				</table>`;
 				})()}
+				${status === "completed" ? `
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #86efac;border-radius:8px;background:#f0fdf4;">
 					<tr><td style="padding:20px;text-align:center;font-size:16px;color:#166534;">Thank you for choosing ${BUSINESS_INFO.business.name}. We hope you enjoyed your luxury travel experience.</td></tr>
 				</table>
+				` : status === "no_show" ? `
+				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #fef3c7;border-radius:8px;background:#fffbeb;">
+					<tr><td style="padding:20px;text-align:center;font-size:16px;color:#92400e;">If you believe this was recorded in error, please contact us to discuss.</td></tr>
+				</table>
+				` : ''}
 				` : ''}
 
 				<!-- CTA Buttons -->
@@ -608,7 +614,9 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
 		const { booking, customer } = bookingDetails;
 
-		const recipientEmail = customer?.email || booking.customerEmail;
+		// Use booking.customerEmail first - that's the client's email from the form (admin-created walk-in).
+		// customer is the user account (admin for walk-in), so we must not use it for client emails.
+		const recipientEmail = booking.customerEmail || customer?.email;
 		if (!isValidEmail(recipientEmail)) {
 			console.log(`⏭️ TRIP EMAIL: Skipping - no valid customer email for booking ${bookingId}`);
 			return { success: false, message: "No valid customer email" };
@@ -680,7 +688,9 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
 		const { booking, customer } = bookingDetails;
 
-		const recipientEmail = customer?.email || booking.customerEmail;
+		// Use booking.customerEmail first - that's the client's email from the form (admin-created walk-in).
+		// customer is the user account (admin for walk-in), so we must not use it for client emails.
+		const recipientEmail = booking.customerEmail || customer?.email;
 		if (!isValidEmail(recipientEmail)) {
 			console.log(`⏭️ BOOKING CONFIRMATION: Skipping - no valid customer email for booking ${bookingId}`);
 			return { success: false, message: "No valid customer email" };
@@ -725,6 +735,106 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		};
 	} catch (error) {
 		console.error("Error sending booking confirmation:", error);
+		return {
+			success: false,
+			message: error instanceof Error ? error.message : "Unknown error occurred",
+		};
+	}
+}
+
+/**
+ * Send payment link email to client for admin-created custom bookings.
+ * Client receives link to /pay/{shareToken} to complete payment (authorization).
+ */
+export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise<{ success: boolean; message: string }> {
+	try {
+		console.log(`📧 PAYMENT LINK: Starting email for booking ${bookingId}`);
+
+		if (!env) {
+			return { success: false, message: "Environment not available" };
+		}
+
+		const bookingDetails = await getBookingDetailsForEmail(bookingId);
+		const { booking, customer } = bookingDetails;
+
+		// Use booking.customerEmail first - that's the client's email from the form (admin-created walk-in).
+		// customer is the user account (admin for walk-in), so we must not use it for payment link.
+		const recipientEmail = booking.customerEmail || customer?.email;
+		if (!isValidEmail(recipientEmail)) {
+			return { success: false, message: "No valid customer email - add customer email to send payment link" };
+		}
+
+		if (booking.paymentStatus !== "pending_payment") {
+			return { success: false, message: "Booking is not awaiting payment" };
+		}
+
+		if (!booking.shareToken) {
+			return { success: false, message: "Booking has no share token" };
+		}
+
+		// Use SITE_URL from env (staging vs production), fallback to BUSINESS_INFO
+		const websiteUrl = (env as { SITE_URL?: string }).SITE_URL || BUSINESS_INFO.business.websiteUrl;
+		const paymentUrl = `${websiteUrl}/pay/${booking.shareToken}`;
+
+		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
+		const tz = booking.timezone || "Australia/Sydney";
+		const zonedDate = toZonedTime(new Date(pickupDateTime), tz);
+		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
+		const pickupTime = format(zonedDate, "h:mm a");
+		const amount = (booking.quotedAmount ?? 0).toFixed(2);
+		const bookingReference = booking.referenceNumber || "N/A";
+
+		const subject = `Complete Your Payment - Booking #${bookingReference}`;
+		const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${subject}</title></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6;color:#1e293b;background:#f8fafc;">
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+		<tr><td style="padding:28px 32px;background:#22818e;text-align:center;">
+			<h1 style="margin:0 0 4px 0;font-size:26px;font-weight:600;color:#fff;">${BUSINESS_INFO.business.name}</h1>
+			<p style="margin:0;font-size:14px;color:rgba(255,255,255,0.9);">Complete Your Booking Payment</p>
+		</td></tr>
+		<tr><td style="padding:32px;">
+			<p style="margin:0 0 16px 0;font-size:17px;color:#334155;">Hello ${booking.customerName || "there"},</p>
+			<p style="margin:0 0 24px 0;font-size:15px;color:#64748b;line-height:1.6;">Your chauffeur booking has been created. Please complete payment to confirm your reservation.</p>
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
+				<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Booking Details</td></tr>
+				<tr><td style="padding:16px 20px;">
+					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Reference</p>
+					<p style="margin:0 0 16px 0;font-size:16px;color:#22818e;font-weight:600;">${bookingReference}</p>
+					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Pickup</p>
+					<p style="margin:0 0 16px 0;font-size:15px;color:#1e293b;">${pickupDate} at ${pickupTime}</p>
+					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Amount</p>
+					<p style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#1e293b;">$${amount}</p>
+					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Payment</p>
+					<p style="margin:0;font-size:14px;color:#64748b;">Your card will be authorized now and charged after your trip is completed.</p>
+				</td></tr>
+			</table>
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
+				<tr><td>
+					<a href="${paymentUrl}" style="display:inline-block;padding:14px 28px;background:#22818e;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">Complete Payment</a>
+				</td></tr>
+			</table>
+			<p style="margin:0;font-size:14px;color:#64748b;">Or copy this link: <a href="${paymentUrl}" style="color:#22818e;word-break:break-all;">${paymentUrl}</a></p>
+		</td></tr>
+		<tr><td style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+			<p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#475569;">${BUSINESS_INFO.business.name}</p>
+			<p style="margin:0;font-size:12px;color:#94a3b8;">Need help? <a href="${websiteUrl}/contact-us" style="color:#22818e;text-decoration:none;">Contact Support</a></p>
+		</td></tr>
+	</table>
+</body>
+</html>`;
+
+		const mailService = getMailService(env);
+		const success = await mailService.sendEmail({ to: recipientEmail, subject, html });
+
+		if (!success) throw new Error("Failed to send payment link email");
+
+		console.log(`📧 PAYMENT LINK: Sent to ${recipientEmail}`);
+		return { success: true, message: `Payment link sent to ${recipientEmail}` };
+	} catch (error) {
+		console.error("Error sending payment link email:", error);
 		return {
 			success: false,
 			message: error instanceof Error ? error.message : "Unknown error occurred",

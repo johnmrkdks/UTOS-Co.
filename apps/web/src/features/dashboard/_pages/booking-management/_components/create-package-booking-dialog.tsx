@@ -27,15 +27,19 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { useCreatePackageBookingMutation } from "../_hooks/query/use-create-package-booking-mutation";
+import { useAdminCreatePackageBookingMutation } from "../_hooks/query/use-admin-create-package-booking-mutation";
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
 import { useGetCarsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-get-cars-query";
+import { useGetUsersQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-users-query";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CalendarIcon, MapPin, Plus, Trash2, Clock, Users } from "lucide-react";
+import { CalendarIcon, MapPin, Plus, Trash2, Clock, Users, UserPlus, CreditCard, Briefcase } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@workspace/ui/components/radio-group";
+import { Label } from "@workspace/ui/components/label";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import { format } from "date-fns";
 import { cn } from "@workspace/ui/lib/utils";
 import { Calendar } from "@workspace/ui/components/calendar";
@@ -46,13 +50,13 @@ import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/
 const createPackageBookingSchema = (isHourlyPackage = false) => z.object({
 	packageId: z.string().min(1, "Please select a package"),
 	carId: z.string().min(1, "Please select a car"),
-	userId: z.string().min(1, "User ID is required"),
+	userId: z.string().optional(), // Optional for walk-in clients
+	sendPaymentToClient: z.boolean().optional(),
 
-	// Location fields
-	originAddress: z.string().min(1, "Pickup address is required"),
-	destinationAddress: isHourlyPackage
-		? z.string().optional()
-		: z.string().min(1, "Destination address is required"),
+	// Location fields - for fixed packages, route can be TBD (like client view)
+	routeTbd: z.boolean().optional(),
+	originAddress: z.string().optional(),
+	destinationAddress: z.string().optional(),
 
 	// Hours field for hourly packages
 	serviceDurationHours: isHourlyPackage
@@ -73,8 +77,18 @@ const createPackageBookingSchema = (isHourlyPackage = false) => z.object({
 	customerName: z.string().min(1, "Customer name is required"),
 	customerPhone: z.string().min(1, "Customer phone is required"),
 	customerEmail: z.string().email().optional().or(z.literal("")),
-	passengerCount: z.number().int().min(1).max(8).default(1),
+	passengerCount: z.number().int().min(1).max(20).default(1),
+	luggageCount: z.number().int().min(0).max(10).default(0),
 	specialRequests: z.string().optional(),
+}).refine((data) => !data.sendPaymentToClient || (data.customerEmail && data.customerEmail.trim().length > 0), {
+	message: "Customer email is required when sending payment link",
+	path: ["customerEmail"],
+}).refine((data) => data.routeTbd || (data.originAddress && data.originAddress.trim().length > 0), {
+	message: "Pickup address is required when route is not TBD",
+	path: ["originAddress"],
+}).refine((data) => data.routeTbd || isHourlyPackage || (data.destinationAddress && data.destinationAddress.trim().length > 0), {
+	message: "Destination address is required for fixed packages when route is not TBD",
+	path: ["destinationAddress"],
 });
 
 type CreatePackageBookingForm = z.infer<ReturnType<typeof createPackageBookingSchema>>;
@@ -96,15 +110,27 @@ export function CreatePackageBookingDialog() {
 
 	// Determine if selected package is hourly
 	const isHourlyPackage = selectedPackage?.serviceType?.rateType === "hourly";
+	const [clientType, setClientType] = useState<"walk_in" | "existing">("walk_in");
+
+	const { data: usersData } = useGetUsersQuery({
+		roleFilter: "clients",
+		limit: 100,
+		enabled: clientType === "existing",
+	});
+	const clientUsers = usersData?.users ?? [];
 
 	const form = useForm<CreatePackageBookingForm>({
 		resolver: zodResolver(createPackageBookingSchema(isHourlyPackage)),
 		defaultValues: {
 			passengerCount: 1,
+			luggageCount: 0,
 			customerEmail: "",
 			specialRequests: "",
 			stops: [],
 			serviceDurationHours: isHourlyPackage ? 2 : undefined,
+			sendPaymentToClient: false,
+			userId: "",
+			routeTbd: false,
 		},
 	});
 
@@ -156,7 +182,7 @@ export function CreatePackageBookingDialog() {
 		limit: 100,
 	});
 
-	const createPackageBookingMutation = useCreatePackageBookingMutation(() => {
+	const createPackageBookingMutation = useAdminCreatePackageBookingMutation(() => {
 		// Reset all state on successful booking creation
 		form.reset();
 		setOriginAddress("");
@@ -170,15 +196,30 @@ export function CreatePackageBookingDialog() {
 	});
 
 	const onSubmit = (data: CreatePackageBookingForm) => {
-		// Prepare submission data based on package type
+		// Map form data to admin API format
 		const submissionData = {
-			...data,
-			// For hourly packages, include calculated total if available
-			...(isHourlyPackage && calculatedTotal > 0 && {
-				calculatedTotal: calculatedTotal // Store calculated total for reference
-			}),
-			// Ensure stops are properly formatted
-			stops: stops.filter(stop => stop.address.trim() !== ""),
+			packageId: data.packageId,
+			carId: data.carId,
+			userId: data.userId || undefined,
+			originAddress: data.routeTbd ? "Service location (TBD)" : (data.originAddress || "Service location (TBD)"),
+			destinationAddress: data.routeTbd ? "Service destination (TBD)" : (data.destinationAddress || (isHourlyPackage ? "Hourly service" : "Service destination (TBD)")),
+			scheduledPickupTime: data.scheduledPickupTime,
+			customerName: data.customerName,
+			customerPhone: data.customerPhone,
+			customerEmail: data.customerEmail || undefined,
+			passengerCount: data.passengerCount,
+			luggageCount: data.luggageCount ?? 0,
+			specialRequests: data.specialRequests,
+			sendPaymentToClient: data.sendPaymentToClient,
+			serviceDuration: isHourlyPackage ? (data.serviceDurationHours ?? 2) : undefined,
+			stops: stops
+				.filter(stop => stop.address.trim() !== "")
+				.map((stop, index) => ({
+					address: stop.address,
+					stopOrder: index + 1,
+					waitingTime: 0,
+					notes: "",
+				})),
 		};
 
 		createPackageBookingMutation.mutate(submissionData as any);
@@ -271,6 +312,81 @@ export function CreatePackageBookingDialog() {
 							/>
 						</div>
 
+						{/* Client type and send payment */}
+						<div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+							<div className="flex items-center gap-4">
+								<Label className="font-medium">Client</Label>
+								<RadioGroup
+									value={clientType}
+									onValueChange={(v: "walk_in" | "existing") => {
+										setClientType(v);
+										if (v === "walk_in") form.setValue("userId", "");
+									}}
+									className="flex gap-4"
+								>
+									<div className="flex items-center gap-2">
+										<RadioGroupItem value="walk_in" id="walk_in" />
+										<Label htmlFor="walk_in" className="font-normal flex items-center gap-1">
+											<UserPlus className="h-4 w-4" /> Walk-in / Phone
+										</Label>
+									</div>
+									<div className="flex items-center gap-2">
+										<RadioGroupItem value="existing" id="existing" />
+										<Label htmlFor="existing" className="font-normal">Existing client</Label>
+									</div>
+								</RadioGroup>
+							</div>
+							{clientType === "existing" && (
+								<FormField
+									control={form.control as any}
+									name="userId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Select client</FormLabel>
+											<Select onValueChange={field.onChange} value={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select a client" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{clientUsers.map((u: any) => (
+														<SelectItem key={u.id} value={u.id}>
+															{u.name} ({u.email})
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							)}
+							<FormField
+								control={form.control as any}
+								name="sendPaymentToClient"
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-start gap-3 space-y-0">
+										<FormControl>
+											<Checkbox
+												checked={field.value}
+												onCheckedChange={field.onChange}
+											/>
+										</FormControl>
+										<div className="space-y-3">
+											<FormLabel className="flex items-center gap-2 font-normal cursor-pointer">
+												<CreditCard className="h-4 w-4" />
+												Send payment link to client
+											</FormLabel>
+											<FormDescription>
+												Client will receive an email with a payment link. Booking is confirmed after payment is authorized.
+											</FormDescription>
+										</div>
+									</FormItem>
+								)}
+							/>
+						</div>
+
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
 								control={form.control as any}
@@ -345,6 +461,38 @@ export function CreatePackageBookingDialog() {
 							/>
 						)}
 
+						{/* Route TBD option - for fixed packages, same as client view */}
+						{!isHourlyPackage && (
+							<FormField
+								control={form.control as any}
+								name="routeTbd"
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-start gap-3 space-y-0 p-4 bg-muted/50 rounded-lg">
+										<FormControl>
+											<Checkbox
+												checked={field.value}
+												onCheckedChange={(checked) => {
+													field.onChange(checked);
+													if (checked) {
+														setOriginAddress("");
+														setDestinationAddress("");
+														form.setValue("originAddress", "");
+														form.setValue("destinationAddress", "");
+													}
+												}}
+											/>
+										</FormControl>
+										<div>
+											<FormLabel className="font-normal cursor-pointer">Route to be determined</FormLabel>
+											<FormDescription>
+												Use when pickup/destination are not yet known (same as client fixed-package booking)
+											</FormDescription>
+										</div>
+									</FormItem>
+								)}
+							/>
+						)}
+
 						{/* Location fields */}
 						<div className="space-y-4">
 							<FormField
@@ -352,7 +500,7 @@ export function CreatePackageBookingDialog() {
 								name="originAddress"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Pickup Address *</FormLabel>
+										<FormLabel>Pickup Address {form.watch("routeTbd") ? "(TBD)" : "*"}</FormLabel>
 										<FormControl>
 											<GooglePlacesInput
 												value={originAddress}
@@ -360,7 +508,8 @@ export function CreatePackageBookingDialog() {
 													setOriginAddress(value);
 													field.onChange(value);
 												}}
-												placeholder="Enter pickup location in NSW..."
+												placeholder={form.watch("routeTbd") ? "Route TBD - will use placeholder" : "Enter pickup location in NSW..."}
+												disabled={form.watch("routeTbd")}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -375,7 +524,7 @@ export function CreatePackageBookingDialog() {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											Destination Address {isHourlyPackage ? "(Optional)" : "*"}
+											Destination Address {form.watch("routeTbd") ? "(TBD)" : isHourlyPackage ? "(Optional)" : "*"}
 										</FormLabel>
 										<FormControl>
 											<GooglePlacesInput
@@ -384,7 +533,8 @@ export function CreatePackageBookingDialog() {
 													setDestinationAddress(value);
 													field.onChange(value);
 												}}
-												placeholder={isHourlyPackage ? "Optional final destination..." : "Enter destination location in NSW..."}
+												placeholder={form.watch("routeTbd") ? "Route TBD - will use placeholder" : isHourlyPackage ? "Optional final destination..." : "Enter destination location in NSW..."}
+												disabled={form.watch("routeTbd")}
 											/>
 										</FormControl>
 										{isHourlyPackage && (
@@ -397,8 +547,8 @@ export function CreatePackageBookingDialog() {
 								)}
 							/>
 
-							{/* Stops section - primarily for hourly packages */}
-							{isHourlyPackage && (
+							{/* Stops section - for hourly and fixed packages (optional) */}
+							{(
 								<div className="space-y-3">
 									<div className="flex items-center justify-between">
 										<FormLabel className="flex items-center gap-2">
@@ -475,30 +625,61 @@ export function CreatePackageBookingDialog() {
 							/>
 						</div>
 
-						{/* Number of Passengers */}
-						<FormField
-							control={form.control as any}
-							name="passengerCount"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className="flex items-center gap-2">
-										<Users className="h-4 w-4" />
-										Number of Passengers
-									</FormLabel>
-									<FormControl>
-										<Input
-											type="number"
-											min="1"
-											max="8"
-											placeholder="e.g. 2"
-											{...field}
-											onChange={(e) => field.onChange(Number(e.target.value))}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						{/* Number of Passengers & Luggage - same as client booking */}
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control as any}
+								name="passengerCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="flex items-center gap-2">
+											<Users className="h-4 w-4" />
+											Number of Passengers
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min="1"
+												max={selectedPackage?.maxPassengers ?? 20}
+												placeholder="e.g. 2"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<FormDescription>
+											Max {selectedPackage?.maxPassengers ?? 20} for this package
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control as any}
+								name="luggageCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="flex items-center gap-2">
+											<Briefcase className="h-4 w-4" />
+											Luggage Count
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min="0"
+												max="10"
+												placeholder="e.g. 0"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+											/>
+										</FormControl>
+										<FormDescription>
+											0–10 pieces
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
 						{/* Pricing Summary for Hourly Packages */}
 						{isHourlyPackage && selectedPackage && watchedHours && watchedHours >= 2 && (

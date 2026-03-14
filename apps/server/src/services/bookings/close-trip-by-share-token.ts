@@ -5,6 +5,8 @@ import type { DB } from "@/db";
 import type { Env } from "@/types/env";
 import { getBookingByShareToken } from "@/data/bookings/get-booking-by-share-token";
 import type { ExtrasFormData } from "./close-trip-with-extras";
+import { maybeCapturePaymentOnCompletion } from "@/services/payments/maybe-capture-on-completion";
+import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
 
 /**
  * Close trip with extras via share token (for external drivers without an account).
@@ -38,8 +40,9 @@ export async function closeTripWithExtrasByShareToken(
 	) / 100;
 
 	// External drivers: ALWAYS go to awaiting_pricing_review - never completed. Admin must finalize.
+	// No Show with extras: go to awaiting_pricing_review so admin can finalize amount, then capture + send no-show email
 	const finalStatus = isNoShow
-		? BookingStatusEnum.NoShow
+		? BookingStatusEnum.AwaitingPricingReview
 		: BookingStatusEnum.AwaitingPricingReview;
 
 	const updatedBooking = await db
@@ -99,7 +102,8 @@ export async function closeTripWithoutExtrasByShareToken(
 		throw new Error("Booking is already completed");
 	}
 
-	// External drivers: ALWAYS go to awaiting_pricing_review - never completed. Admin must finalize.
+	// External drivers: normally go to awaiting_pricing_review for admin to finalize.
+	// No Show (no extras): auto-capture total fare + send no-show email immediately
 	const finalStatus = isNoShow ? BookingStatusEnum.NoShow : BookingStatusEnum.AwaitingPricingReview;
 
 	const updatedBooking = await db
@@ -115,9 +119,21 @@ export async function closeTripWithoutExtrasByShareToken(
 		.returning()
 		.get();
 
+	// No Show (no extras): capture payment + send no-show email
+	if (env && isNoShow) {
+		const finalAmount = Math.round((booking.finalAmount || booking.quotedAmount) * 100) / 100;
+		await maybeCapturePaymentOnCompletion(db, booking.id, finalAmount, env);
+		try {
+			await sendTripStatusNotification({ bookingId: booking.id, status: "no_show", env });
+			console.log(`✅ NO SHOW: Payment captured and email sent for booking ${booking.id} ($${finalAmount.toFixed(2)})`);
+		} catch (emailError) {
+			console.error(`❌ NO SHOW: Failed to send no-show email for booking ${booking.id}:`, emailError);
+		}
+	}
+
 	return {
 		success: true,
 		data: { booking: updatedBooking },
-		message: "Trip submitted. Admin will finalize the amount.",
+		message: isNoShow ? "No show recorded. Payment has been charged and the client has been notified." : "Trip submitted. Admin will finalize the amount.",
 	};
 }

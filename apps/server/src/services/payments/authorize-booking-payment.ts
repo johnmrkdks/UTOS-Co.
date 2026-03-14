@@ -37,6 +37,15 @@ export async function authorizeBookingPayment(params: AuthorizePaymentParams) {
 	env = "sandbox",
 } = params;
 
+	// Validate booking exists and is awaiting payment
+	const existing = await db.select({ id: bookings.id, paymentStatus: bookings.paymentStatus }).from(bookings).where(eq(bookings.id, bookingId)).get();
+	if (!existing) {
+		throw new Error("Booking not found");
+	}
+	if (existing.paymentStatus && existing.paymentStatus !== "pending_payment") {
+		throw new Error("Booking is not awaiting payment");
+	}
+
 	const client = await getSquareClient(accessToken, env);
 
 	const result = await client.payments.create({

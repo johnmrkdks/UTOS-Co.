@@ -60,9 +60,10 @@ export async function closeTripWithExtras(
 
 		// When driver adds waiting time: defer completion email until admin finalizes amount
 		// When only tolls/parking (no waiting time): complete immediately and send email
+		// No Show with extras: go to awaiting_pricing_review so admin can finalize amount, then capture + send no-show email
 		const hasWaitingTime = extrasData.additionalWaitTime > 0;
 		const finalStatus = isNoShow
-			? BookingStatusEnum.NoShow
+			? BookingStatusEnum.AwaitingPricingReview
 			: hasWaitingTime
 				? BookingStatusEnum.AwaitingPricingReview
 				: BookingStatusEnum.Completed;
@@ -117,7 +118,7 @@ export async function closeTripWithExtras(
 				console.error(`❌ CLOSE TRIP EMAIL: Failed to send:`, emailError);
 			}
 		} else if (finalStatus === BookingStatusEnum.AwaitingPricingReview) {
-			console.log(`📧 CLOSE TRIP DEBUG: Booking ${bookingId} awaiting admin pricing review (driver added waiting time)`);
+			console.log(`📧 CLOSE TRIP DEBUG: Booking ${bookingId} awaiting admin pricing review${isNoShow ? " (no show with extras)" : " (driver added waiting time)"}`);
 		}
 
 		return {
@@ -176,7 +177,7 @@ export async function closeTripWithoutExtras(
 			.returning()
 			.get();
 
-		// Capture payment + send completion email
+		// Capture payment + send completion or no-show email
 		if (env && finalStatus === BookingStatusEnum.Completed) {
 			const finalAmount = Math.round((booking.finalAmount || booking.quotedAmount) * 100) / 100;
 			await maybeCapturePaymentOnCompletion(db, bookingId, finalAmount, env);
@@ -190,6 +191,20 @@ export async function closeTripWithoutExtras(
 				console.log(`✅ CLOSE TRIP EMAIL: Completion email sent for booking ${bookingId} (no extras)`);
 			} catch (emailError) {
 				console.error(`❌ CLOSE TRIP EMAIL: Failed to send completion email for booking ${bookingId}:`, emailError);
+			}
+		} else if (env && finalStatus === BookingStatusEnum.NoShow) {
+			// No Show (no extras): auto-capture total fare + send no-show email
+			const finalAmount = Math.round((booking.finalAmount || booking.quotedAmount) * 100) / 100;
+			await maybeCapturePaymentOnCompletion(db, bookingId, finalAmount, env);
+			try {
+				await sendTripStatusNotification({
+					bookingId,
+					status: "no_show",
+					env,
+				});
+				console.log(`✅ CLOSE TRIP EMAIL: No-show email sent for booking ${bookingId} (amount deducted: $${finalAmount.toFixed(2)})`);
+			} catch (emailError) {
+				console.error(`❌ CLOSE TRIP EMAIL: Failed to send no-show email for booking ${bookingId}:`, emailError);
 			}
 		}
 

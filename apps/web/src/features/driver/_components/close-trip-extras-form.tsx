@@ -6,7 +6,7 @@ import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { RadioGroup, RadioGroupItem } from "@workspace/ui/components/radio-group";
 import { Card, CardContent } from "@workspace/ui/components/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface CloseTripExtrasFormProps {
@@ -311,19 +311,28 @@ export function CloseTripExtrasForm({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-md mx-auto sm:max-h-[90vh] max-sm:w-full max-sm:h-full max-sm:m-0 max-sm:rounded-none max-sm:max-w-none flex flex-col p-0">
+			<DialogContent className="sm:max-w-md mx-auto sm:max-h-[90vh] max-sm:w-full max-sm:h-full max-sm:m-0 max-sm:rounded-none max-sm:max-w-none flex flex-col p-0" showCloseButton={false}>
 				{/* Header */}
 				<DialogHeader className="flex-shrink-0 p-4 border-b bg-white">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center justify-between gap-3">
 						<Button
 							variant="ghost"
 							size="sm"
 							onClick={onBack}
-							className="h-8 w-8 p-0"
+							className="h-10 w-10 p-0 shrink-0 -ml-2"
 						>
-							<ArrowLeft className="h-4 w-4" />
+							<ArrowLeft className="h-5 w-5" />
 						</Button>
-						<DialogTitle className="text-sm">Close trip with extras</DialogTitle>
+						<DialogTitle className="text-sm flex-1 text-center">Close trip with extras</DialogTitle>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => onOpenChange(false)}
+							className="h-10 w-10 p-0 shrink-0 -mr-2"
+							aria-label="Close"
+						>
+							<X className="h-5 w-5" />
+						</Button>
 					</div>
 				</DialogHeader>
 

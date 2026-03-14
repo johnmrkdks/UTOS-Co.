@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Calculator, Plus, X, MapPin, Navigation, Users, Package2, Clock, Car, Phone, UserPlus } from "lucide-react"
+import { Calculator, Plus, X, MapPin, Navigation, Users, Package2, Clock, Car, Phone, UserPlus, CreditCard } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
 import { Input } from "@workspace/ui/components/input"
@@ -13,6 +13,7 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Separator } from "@workspace/ui/components/separator"
 import { RadioGroup, RadioGroupItem } from "@workspace/ui/components/radio-group"
 import { Label } from "@workspace/ui/components/label"
+import { Checkbox } from "@workspace/ui/components/checkbox"
 import { DateTimePicker } from "@/components/date-time-picker"
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple"
 import { format } from "date-fns"
@@ -24,6 +25,7 @@ import { useGetUsersQuery } from "../../../drivers/_hooks/query/use-get-users-qu
 const createEnhancedCustomBookingSchema = z.object({
 	carId: z.string().min(1, "Please select a car"),
 	userId: z.string().optional(),
+	sendPaymentToClient: z.boolean().optional(),
 	originAddress: z.string().min(1, "Origin address is required"),
 	originLatitude: z.number().optional(),
 	originLongitude: z.number().optional(),
@@ -45,6 +47,9 @@ const createEnhancedCustomBookingSchema = z.object({
 	passengerCount: z.number().int().min(1).max(8).default(1),
 	luggageCount: z.number().int().min(0).max(10).default(0),
 	specialRequests: z.string().optional(),
+}).refine((data) => !data.sendPaymentToClient || (data.customerEmail && data.customerEmail.trim().length > 0), {
+	message: "Customer email is required when sending payment link",
+	path: ["customerEmail"],
 })
 
 export type EnhancedCustomBookingForm = z.infer<typeof createEnhancedCustomBookingSchema>
@@ -101,6 +106,7 @@ export function EnhancedCustomBookingForm({
 		mode: "onChange", // Optimize validation
 		defaultValues: {
 			userId: "",
+			sendPaymentToClient: false,
 			passengerCount: 1,
 			luggageCount: 0,
 			customerEmail: "",
@@ -482,7 +488,7 @@ export function EnhancedCustomBookingForm({
 							name="customerEmail"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Email Address (Optional)</FormLabel>
+									<FormLabel>Email Address {form.watch("sendPaymentToClient") ? "(Required for payment link)" : "(Optional)"}</FormLabel>
 									<FormControl>
 										<Input placeholder="john@example.com" type="email" {...field} />
 									</FormControl>
@@ -490,6 +496,31 @@ export function EnhancedCustomBookingForm({
 								</FormItem>
 							)}
 						/>
+						{isAdminContext && (
+							<FormField
+								control={form.control as any}
+								name="sendPaymentToClient"
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+										<FormControl>
+											<Checkbox
+												checked={field.value}
+												onCheckedChange={field.onChange}
+											/>
+										</FormControl>
+										<div className="space-y-1 leading-none">
+											<FormLabel className="flex items-center gap-2 cursor-pointer font-normal">
+												<CreditCard className="h-4 w-4" />
+												Send payment link to client via email
+											</FormLabel>
+											<p className="text-sm text-muted-foreground">
+												Client will receive an email with a secure link to complete payment. Booking will be confirmed after payment. Amount is held (authorized) and charged after trip completion.
+											</p>
+										</div>
+									</FormItem>
+								)}
+							/>
+						)}
 					</CardContent>
 				</Card>
 

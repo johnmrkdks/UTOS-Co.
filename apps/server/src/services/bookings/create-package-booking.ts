@@ -2,7 +2,7 @@ import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import { getPackage } from "@/data/packages/get-package";
 import type { DB } from "@/db";
-import { BookingTypeEnum, BookingStatusEnum } from "@/db/sqlite/enums";
+import { BookingTypeEnum, BookingStatusEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 import type { InsertBooking } from "@/schemas/shared";
 import { z } from "zod";
 
@@ -10,6 +10,8 @@ export const CreatePackageBookingSchema = z.object({
 	packageId: z.string(),
 	carId: z.string().nullable(),
 	userId: z.string().optional(), // Optional for guest bookings
+	/** When true: set paymentStatus to pending_payment so client pays before confirmation (services page flow) */
+	requirePayment: z.boolean().optional(),
 
 	// Route information
 	originAddress: z.string(),
@@ -45,6 +47,14 @@ export const CreatePackageBookingSchema = z.object({
 });
 
 export type CreatePackageBookingParams = z.infer<typeof CreatePackageBookingSchema>;
+
+/** Admin creates package booking for client - userId optional (walk-in uses admin's), sendPaymentToClient sends payment link */
+export const AdminCreatePackageBookingSchema = CreatePackageBookingSchema.extend({
+	userId: z.string().optional(),
+	sendPaymentToClient: z.boolean().optional(),
+}).omit({ requirePayment: true }); // Admin uses sendPaymentToClient, not requirePayment
+
+export type AdminCreatePackageBookingParams = z.infer<typeof AdminCreatePackageBookingSchema>;
 
 export async function createPackageBookingService(db: DB, data: CreatePackageBookingParams) {
 	try {
@@ -132,6 +142,10 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			specialRequests: data.specialRequests,
 
 			status: BookingStatusEnum.Pending,
+			// When requirePayment (services page) or sendPaymentToClient (admin): client must pay before confirmation
+			...((data.requirePayment || ("sendPaymentToClient" in data && data.sendPaymentToClient))
+				? { paymentStatus: BookingPaymentStatusEnum.PendingPayment }
+				: {}),
 		};
 
 		console.log("💾 Calling createBooking with:", JSON.stringify(bookingData, null, 2));

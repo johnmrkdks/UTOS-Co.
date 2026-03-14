@@ -118,10 +118,16 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			customerEmail: data.customerEmail,
 			passengerCount: data.passengerCount,
 			specialRequests: data.specialRequirements,
+			requirePayment: true, // Payment required before confirmation - same as guest/client flow
 		};
 
 		try {
 			const result = await createBookingMutation.mutateAsync(bookingData);
+			// Redirect to payment page - booking confirmed + email sent after payment authorized
+			if (result?.shareToken) {
+				navigate({ to: "/pay/$token", params: { token: result.shareToken } });
+				return;
+			}
 			setConfirmedBooking(result);
 			setStep("confirmation");
 
@@ -182,14 +188,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 					</div>
 				</div>
 
-				{/* Payment Notice */}
+				{/* Payment Notice - shown only if no redirect to payment (fallback) */}
 				<div className="bg-blue-50 rounded-xl border border-blue-200 p-4 sm:p-6">
 					<h3 className="text-lg font-semibold text-blue-900 mb-2">What's Next?</h3>
 					<ul className="text-blue-800 space-y-1 text-sm">
-						<li>• We'll review your booking and confirm within 2-4 hours</li>
-						<li>• You'll receive confirmation via email and SMS</li>
-						<li>• Payment is processed after service completion</li>
-						<li>• You can contact us anytime for questions or changes</li>
+						<li>• Complete payment to confirm your booking</li>
+						<li>• You'll receive confirmation via email after payment</li>
+						<li>• Final charge occurs after service completion</li>
+						<li>• Contact us anytime for questions or changes</li>
 					</ul>
 				</div>
 
@@ -447,14 +453,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center mt-0.5">
 													<span className="text-primary text-sm">ℹ️</span>
 												</div>
-												<div>
-													<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
-													<ul className="text-sm text-gray-600 space-y-1">
-														<li>• Pay securely after service completion</li>
-														<li>• Driver accepts cash or cashless payments</li>
-														<li>• Online payment options available soon</li>
-													</ul>
-												</div>
+										<div>
+											<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
+											<ul className="text-sm text-gray-600 space-y-1">
+												<li>• Authorize payment now to confirm your booking</li>
+												<li>• Card charged after service completion</li>
+												<li>• Secure payment via Square</li>
+											</ul>
+										</div>
 											</div>
 										</div>
 									</div>

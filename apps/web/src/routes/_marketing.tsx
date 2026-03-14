@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_marketing")({
 
 function RouteComponent() {
 	const location = useLocation();
-	const isStandalonePage = location.pathname.startsWith("/driver-job/") || location.pathname.startsWith("/track/");
+	const isStandalonePage = location.pathname.startsWith("/driver-job/") || location.pathname.startsWith("/track/") || location.pathname.startsWith("/pay/");
 
 	if (isStandalonePage) {
 		return <Outlet />;

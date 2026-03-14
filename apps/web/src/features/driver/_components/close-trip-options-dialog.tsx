@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
-import { ArrowLeft, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface CloseTripOptionsDialogProps {
@@ -28,19 +28,28 @@ export function CloseTripOptionsDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-md mx-auto p-0 gap-0 sm:rounded-lg max-sm:w-full max-sm:h-full max-sm:m-0 max-sm:rounded-none max-sm:max-w-none">
+			<DialogContent className="sm:max-w-md mx-auto p-0 gap-0 sm:rounded-lg max-sm:w-full max-sm:h-full max-sm:m-0 max-sm:rounded-none max-sm:max-w-none" showCloseButton={false}>
 				{/* Header */}
 				<DialogHeader className="px-4 py-3 border-b bg-background">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center justify-between gap-3">
 						<Button 
 							variant="ghost" 
 							size="sm" 
 							onClick={handleBack}
-							className="h-8 w-8 p-0"
+							className="h-10 w-10 p-0 shrink-0 -ml-2"
 						>
-							<ArrowLeft className="h-4 w-4" />
+							<ArrowLeft className="h-5 w-5" />
 						</Button>
-						<DialogTitle className="text-lg font-semibold">Close trip</DialogTitle>
+						<DialogTitle className="text-lg font-semibold flex-1 text-center">Close trip</DialogTitle>
+						<Button 
+							variant="ghost" 
+							size="sm" 
+							onClick={handleBack}
+							className="h-10 w-10 p-0 shrink-0 -mr-2"
+							aria-label="Close"
+						>
+							<X className="h-5 w-5" />
+						</Button>
 					</div>
 				</DialogHeader>
 

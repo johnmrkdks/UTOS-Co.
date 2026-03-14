@@ -4,6 +4,8 @@ import type { R2Bucket } from "@cloudflare/workers-types";
 export type Env = {
 	DB: DB;
 	BUCKET: R2Bucket;
+	/** Base URL for the web app (payment links, etc.) - staging vs production */
+	SITE_URL?: string;
 	/** Square Payments - use sandbox for dev/staging */
 	SQUARE_ACCESS_TOKEN?: string;
 	SQUARE_LOCATION_ID?: string;

@@ -9,6 +9,7 @@ import { BookingsListTable } from "@/features/dashboard/_pages/booking-managemen
 import { BookingFilters, type BookingFilters as BookingFiltersType } from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
 import { BookingCalendar } from "@/features/dashboard/_pages/booking-management/_components/booking-calendar";
 import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
+import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-package-booking-dialog";
 import { CreateOffloadBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-offload-booking-dialog";
 import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
 import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-driver-dialog";
@@ -37,6 +38,7 @@ function RouteComponent() {
 function BookingManagementContent() {
 	const {
 		openCreateCustomBookingDialog,
+		openCreatePackageBookingDialog,
 		openCreateOffloadBookingDialog,
 		isAssignDriverDialogOpen,
 		selectedBookingForDriver,
@@ -188,6 +190,14 @@ function BookingManagementContent() {
 					>
 						<Calendar className="h-4 w-4" />
 						Create Custom Booking
+					</Button>
+					<Button
+						onClick={openCreatePackageBookingDialog}
+						variant="outline"
+						className="flex items-center gap-2"
+					>
+						<Calendar className="h-4 w-4" />
+						Create Package Booking
 					</Button>
 					<Button
 						onClick={openCreateOffloadBookingDialog}
@@ -383,6 +393,7 @@ function BookingManagementContent() {
 			</Tabs>
 
 			<CreateCustomBookingDialog />
+			<CreatePackageBookingDialog />
 			<CreateOffloadBookingDialog />
 			<BookingDetailsDialog />
 			<AssignDriverDialog

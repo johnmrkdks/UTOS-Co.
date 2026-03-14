@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, X } from "lucide-react";
 import type { ExtrasFormData } from "./close-trip-extras-form";
 
 interface TripConfirmationDialogProps {
@@ -37,19 +37,28 @@ export function TripConfirmationDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-md mx-auto sm:max-h-[90vh] flex flex-col p-0 max-sm:w-full max-sm:h-full max-sm:m-0 max-sm:rounded-none max-sm:max-w-none">
+			<DialogContent className="sm:max-w-md mx-auto sm:max-h-[90vh] flex flex-col p-0 max-sm:w-full max-sm:h-full max-sm:m-0 max-sm:rounded-none max-sm:max-w-none" showCloseButton={false}>
 				{/* Header */}
 				<DialogHeader className="flex-shrink-0 p-4 border-b bg-white">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center justify-between gap-3">
 						<Button 
 							variant="ghost" 
 							size="sm" 
 							onClick={onGoBack}
-							className="h-8 w-8 p-0"
+							className="h-10 w-10 p-0 shrink-0 -ml-2"
 						>
-							<ArrowLeft className="h-4 w-4" />
+							<ArrowLeft className="h-5 w-5" />
 						</Button>
-						<DialogTitle className="text-sm">Confirm job closure</DialogTitle>
+						<DialogTitle className="text-sm flex-1 text-center">Confirm job closure</DialogTitle>
+						<Button 
+							variant="ghost" 
+							size="sm" 
+							onClick={() => onOpenChange(false)}
+							className="h-10 w-10 p-0 shrink-0 -mr-2"
+							aria-label="Close"
+						>
+							<X className="h-5 w-5" />
+						</Button>
 					</div>
 				</DialogHeader>
 

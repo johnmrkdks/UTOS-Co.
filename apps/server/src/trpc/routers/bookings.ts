@@ -5,7 +5,7 @@ import {
 import { bookings, bookingExtras } from "@/db/sqlite/schema";
 import { eq } from "drizzle-orm";
 import { createBookingService, CreateBookingServiceSchema } from "@/services/bookings/create-booking";
-import { createPackageBookingService, CreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
+import { createPackageBookingService, CreatePackageBookingSchema, AdminCreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
 import { createCustomBookingService, CreateCustomBookingSchema, AdminCreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
 import { createCustomBookingFromQuoteService, CreateCustomBookingFromQuoteSchema } from "@/services/bookings/create-custom-booking-from-quote";
 import { calculateInstantQuoteService, CalculateInstantQuoteSchema } from "@/services/bookings/calculate-instant-quote";
@@ -20,7 +20,7 @@ import { validateBookingOperations } from "@/services/bookings/validate-booking-
 import { closeTripWithExtras, closeTripWithoutExtras } from "@/services/bookings/close-trip-with-extras";
 import { archiveBookingService, ArchiveBookingServiceSchema } from "@/services/bookings/archive-booking";
 import { bulkArchiveBookingsService, bulkDeleteBookingsService, BulkArchiveBookingsSchema, BulkDeleteBookingsSchema } from "@/services/bookings/bulk-booking-operations";
-import { sendBookingConfirmationEmail, sendAdminNewBookingEmail, sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import { sendBookingConfirmationEmail, sendAdminNewBookingEmail, sendTripStatusNotification, sendPaymentLinkEmail } from "@/services/notifications/booking-email-notification-service";
 import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
@@ -308,25 +308,28 @@ export const bookingsRouter = router({
 				console.log("✅ Booking updated successfully:", updatedBooking?.id);
 				console.log("📋 Updated booking data:", JSON.stringify(updatedBooking, null, 2));
 
-				// When admin finalizes a booking awaiting_pricing_review (driver closed with waiting time),
-				// capture payment + send the deferred completion email to the client
+				// When admin finalizes a booking awaiting_pricing_review (driver closed with waiting time or no-show with extras),
+				// capture payment + send the deferred completion or no-show email to the client
 				const hasAmountUpdate = input.data.finalAmount !== undefined || input.data.extraCharges !== undefined;
 				const statusSetToCompleted = input.data.status === "completed";
 				const wasAwaitingPricingReview = existingBooking.status === "awaiting_pricing_review";
+				const isNoShowWithExtras = existingBooking.actualDropoffTime === null; // No-show: driver set actualDropoffTime to null
 				if ((hasAmountUpdate || statusSetToCompleted) && wasAwaitingPricingReview && env) {
 					try {
-						// Ensure status is set to completed
+						const finalStatus = isNoShowWithExtras ? "no_show" : "completed";
+						const emailStatus = isNoShowWithExtras ? "no_show" : "completed";
+						// Ensure status is set (completed for normal trips, no_show for no-show with extras)
 						await db.update(bookings).set({
-							status: "completed",
+							status: finalStatus,
 							updatedAt: new Date(),
 						}).where(eq(bookings.id, input.id));
 						// Capture payment with FINAL amount (includes tolls, parking, waiting time)
 						const { maybeCapturePaymentOnCompletion } = await import("@/services/payments/maybe-capture-on-completion");
 						const finalAmount = input.data.finalAmount ?? updatedBooking?.finalAmount ?? (existingBooking.quotedAmount ?? 0) + (existingBooking.extraCharges ?? 0);
-						console.log(`📷 Capturing payment for booking ${input.id} with final amount: $${finalAmount.toFixed(2)}`);
+						console.log(`📷 Capturing payment for booking ${input.id} with final amount: $${finalAmount.toFixed(2)}${isNoShowWithExtras ? " (no-show with extras)" : ""}`);
 						await maybeCapturePaymentOnCompletion(db, input.id, finalAmount, env, true);
-						await sendTripStatusNotification({ bookingId: input.id, status: "completed", env });
-						console.log("✅ Completion email sent after admin finalized charges");
+						await sendTripStatusNotification({ bookingId: input.id, status: emailStatus, env });
+						console.log(`✅ ${emailStatus === "no_show" ? "No-show" : "Completion"} email sent after admin finalized charges`);
 					} catch (emailErr) {
 						console.error("❌ Failed to send completion email or capture payment:", emailErr);
 					}
@@ -382,6 +385,58 @@ export const bookingsRouter = router({
 			} catch (error) {
 				console.error("💥 ERROR in createPackageBooking:", error);
 				console.error("📚 Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Admin: Create package booking for client (existing or walk-in) with optional sendPaymentToClient */
+	adminCreatePackageBooking: protectedProcedure
+		.input(AdminCreatePackageBookingSchema)
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
+			try {
+				const adminUserId = session?.user?.id || session?.session?.userId;
+				if (!adminUserId) {
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Authentication required",
+					});
+				}
+				await requireAdmin(db, adminUserId);
+
+				// Use client's userId if provided (existing client), else admin's (walk-in/phone)
+				const userId = input.userId ?? adminUserId;
+
+				const newBooking = await createPackageBookingService(db, {
+					...input,
+					userId,
+					sendPaymentToClient: input.sendPaymentToClient,
+				});
+
+				try {
+					await sendAdminNewBookingEmail(newBooking.id, env);
+				} catch (emailError) {
+					console.error("Error sending admin email:", emailError);
+				}
+
+				// When sendPaymentToClient: email payment link to client
+				let paymentLinkSent = false;
+				let paymentLinkMessage: string | undefined;
+				if (input.sendPaymentToClient) {
+					try {
+						const result = await sendPaymentLinkEmail(newBooking.id, env);
+						paymentLinkSent = result.success;
+						paymentLinkMessage = result.message;
+						if (!result.success) {
+							console.warn("Payment link email:", result.message);
+						}
+					} catch (emailError) {
+						console.error("Error sending payment link email:", emailError);
+						paymentLinkMessage = emailError instanceof Error ? emailError.message : "Failed to send payment link";
+					}
+				}
+
+				return { ...newBooking, paymentLinkSent, paymentLinkMessage };
+			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
@@ -453,7 +508,24 @@ export const bookingsRouter = router({
 					console.error("Error sending admin email:", emailError);
 				}
 
-				return newBooking;
+				// When sendPaymentToClient: email payment link to client
+				let paymentLinkSent = false;
+				let paymentLinkMessage: string | undefined;
+				if (input.sendPaymentToClient) {
+					try {
+						const result = await sendPaymentLinkEmail(newBooking.id, env);
+						paymentLinkSent = result.success;
+						paymentLinkMessage = result.message;
+						if (!result.success) {
+							console.warn("Payment link email:", result.message);
+						}
+					} catch (emailError) {
+						console.error("Error sending payment link email:", emailError);
+						paymentLinkMessage = emailError instanceof Error ? emailError.message : "Failed to send payment link";
+					}
+				}
+
+				return { ...newBooking, paymentLinkSent, paymentLinkMessage };
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -743,6 +815,21 @@ export const bookingsRouter = router({
 					throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
 				}
 				return await generateBookingShareTokenService(db, input.bookingId);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Admin: Resend payment link email to client for a booking with pending_payment */
+	sendPaymentLink: protectedProcedure
+		.input(z.object({ bookingId: z.string() }))
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
+			try {
+				const userId = session?.user?.id || session?.session?.userId;
+				if (!userId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required" });
+				await requireAdmin(db, userId);
+				const result = await sendPaymentLinkEmail(input.bookingId, env);
+				return result;
 			} catch (error) {
 				handleTRPCError(error);
 			}

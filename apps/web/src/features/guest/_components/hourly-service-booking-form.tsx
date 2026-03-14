@@ -157,6 +157,7 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 				passengerCount: data.passengerCount,
 				serviceDuration: data.serviceDuration,
 				specialRequests: data.specialRequirements || "",
+				requirePayment: true, // Payment required before confirmation - same as guest/client flow
 				stops: stops.length > 0 ? stops.map((stop, index) => ({
 					address: stop,
 					stopOrder: index + 1,
@@ -165,10 +166,12 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 				})) : undefined,
 			};
 
-			console.log("🔍 FRONTEND DEBUG - Final Booking Data:", JSON.stringify(bookingData, null, 2));
-			console.log("🔍 FRONTEND DEBUG - Scheduled Pickup Time Type:", typeof bookingData.scheduledPickupTime);
-
 			const result = await createBookingMutation.mutateAsync(bookingData);
+			// Redirect to payment page - booking confirmed + email sent after payment authorized
+			if (result?.shareToken) {
+				navigate({ to: "/pay/$token", params: { token: result.shareToken } });
+				return;
+			}
 			setConfirmedBooking(result);
 			setStep("confirmation");
 
@@ -368,9 +371,9 @@ export function HourlyServiceBookingForm({ service }: HourlyServiceBookingFormPr
 										<div>
 											<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
 											<ul className="text-sm text-gray-600 space-y-1">
-												<li>• Pay after service completion</li>
-												<li>• Driver accepts cash or cashless payments</li>
-												<li>• Online payment options available soon</li>
+												<li>• Authorize payment now to confirm your booking</li>
+												<li>• Card charged after service completion</li>
+												<li>• Secure payment via Square</li>
 											</ul>
 										</div>
 									</div>

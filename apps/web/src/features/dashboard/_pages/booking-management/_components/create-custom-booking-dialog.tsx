@@ -139,6 +139,7 @@ export function CreateCustomBookingDialog() {
 		const bookingData = {
 			carId: data.carId,
 			userId: data.userId || undefined, // Omit for walk-in; backend uses admin's userId
+			sendPaymentToClient: data.sendPaymentToClient ?? false,
 			originAddress: data.originAddress,
 			originLatitude: data.originLatitude,
 			originLongitude: data.originLongitude,
