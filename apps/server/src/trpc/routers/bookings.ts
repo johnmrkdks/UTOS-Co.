@@ -1204,7 +1204,7 @@ export const bookingsRouter = router({
 			bookingId: z.string(),
 			cancellationReason: z.string().optional(),
 		}))
-		.mutation(async ({ ctx: { db, session }, input }) => {
+		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
 				if (!userId) {
@@ -1212,7 +1212,7 @@ export const bookingsRouter = router({
 				}
 
 				const userRole = await getUserRole(db, userId);
-				return await cancelBooking(db, input.bookingId, userId, input.cancellationReason, userRole);
+				return await cancelBooking(db, input.bookingId, userId, input.cancellationReason, userRole, env);
 			} catch (error) {
 				handleTRPCError(error);
 			}

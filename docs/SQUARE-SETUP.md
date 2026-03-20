@@ -81,6 +81,10 @@ Sandbox Application IDs typically start with `sandbox-sq0idp-` (with a **p**). I
 **5. HTTPS**  
 The Web Payments SDK requires HTTPS. Localhost is allowed for sandbox; production domains must use HTTPS.
 
+**6. Apple Pay**  
+Apple Pay requires domain registration in the [Square Developer Console](https://developer.squareup.com/apps) → your app → **Apple Pay** → **Add Sandbox Domain**. Use your production domain (e.g. `downunderchauffeurs.com`). Apple Pay only works in Safari on iOS/macOS.
+
+
 ### 401 UNAUTHORIZED – "This request could not be authorized"
 
 Square rejected the request because the **access token** is invalid or mismatched.

@@ -166,7 +166,7 @@ Integrate Square payments with authorization + delayed capture for Down Under Ch
 **Remaining (for full production):**
 - ~~Wire `SquarePaymentForm` into booking flows (quote-booking, service-booking, etc.)~~ ✅ Quote booking flow done (Option A: create → payment → confirm)
 - Add `VITE_SQUARE_APPLICATION_ID` and Square config to web env; fetch via `payments.getSquareConfig`
-- Apple Pay / Google Pay in `SquarePaymentForm` (SDK supports; add `payments.applePay()` / `payments.googlePay()`)
+- ~~Apple Pay / Google Pay in `SquarePaymentForm`~~ ✅ Implemented
 - Saved cards UI (add/remove/set default)
 - Webhook handler for payment events
 - Admin UI: payment status per booking, manual capture button for `awaiting_pricing_review`

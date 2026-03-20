@@ -4,13 +4,16 @@ import { bookings } from "@/db/sqlite/schema";
 import { validateBookingOperations } from "./validate-booking-operations";
 import { TRPCError } from "@trpc/server";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import type { Env } from "@/types/env";
 
 export async function cancelBooking(
 	db: DB,
 	bookingId: string,
 	userId: string,
 	cancellationReason?: string,
-	userRole?: string
+	userRole?: string,
+	env?: Env
 ) {
 	// Get the booking with user verification
 	const [existingBooking] = await db
@@ -25,26 +28,27 @@ export async function cancelBooking(
 		});
 	}
 
-	// Guest bookings (userId is null) can only be cancelled by admins
+	// Admins can cancel any booking; non-admins must own the booking
 	const isAdmin = userRole === "admin" || userRole === "super_admin";
-	if (existingBooking.userId === null) {
-		if (!isAdmin) {
+	if (!isAdmin) {
+		if (existingBooking.userId === null) {
 			throw new TRPCError({
 				code: "FORBIDDEN",
 				message: "Guest bookings can only be cancelled by administrators. Please contact support.",
 			});
 		}
-	} else if (existingBooking.userId !== userId) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "You can only cancel your own bookings",
-		});
+		if (existingBooking.userId !== userId) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "You can only cancel your own bookings",
+			});
+		}
 	}
 
-	// Validate cancellation permissions
+	// Validate cancellation permissions (admins bypass validation)
 	const validation = await validateBookingOperations(db, existingBooking);
 
-	if (!validation.canCancel) {
+	if (!isAdmin && !validation.canCancel) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: validation.cancelReason || "Booking cannot be cancelled at this time",
@@ -65,6 +69,16 @@ export async function cancelBooking(
 		})
 		.where(eq(bookings.id, bookingId))
 		.returning();
+
+	// Send cancellation email to client
+	if (env && cancelledBooking) {
+		try {
+			await sendTripStatusNotification({ bookingId, status: "cancelled", env });
+			console.log(`✅ Cancellation email sent for booking ${bookingId}`);
+		} catch (emailErr) {
+			console.error(`❌ Failed to send cancellation email for booking ${bookingId}:`, emailErr);
+		}
+	}
 
 	return {
 		booking: cancelledBooking,

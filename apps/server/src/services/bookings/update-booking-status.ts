@@ -161,6 +161,17 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 					}
 					break;
 
+				case BookingStatusEnum.Cancelled:
+					// Send cancellation email to client
+					console.log(`📧 EMAIL DEBUG: Sending cancellation email to client for booking ${data.id}`);
+					await sendTripStatusNotification({
+						bookingId: data.id,
+						status: "cancelled",
+						env,
+					});
+					console.log(`✅ Cancellation email sent to client for booking ${data.id}`);
+					break;
+
 				case BookingStatusEnum.InProgress:
 				case BookingStatusEnum.PassengerOnBoard:
 				case BookingStatusEnum.DriverEnRoute:
@@ -168,11 +179,10 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 				case BookingStatusEnum.DroppedOff:
 				case BookingStatusEnum.AwaitingExtras:
 				case BookingStatusEnum.AwaitingPricingReview:
-				case BookingStatusEnum.Cancelled:
 				case BookingStatusEnum.NoShow:
 				case BookingStatusEnum.Failed:
 				case BookingStatusEnum.Pending:
-					// No client email on driver status updates - only on confirmed and completed
+					// No client email on driver status updates - only on confirmed, completed, cancelled
 					console.log(`⏭️ EMAIL DEBUG: Skipping client email for status: ${data.status}`);
 					break;
 

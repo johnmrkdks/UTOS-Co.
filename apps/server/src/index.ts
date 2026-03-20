@@ -32,12 +32,13 @@ function isOriginAllowed(origin: string | null): boolean {
 	return TRUSTED_DOMAIN_PATTERNS.some((p) => p.test(origin));
 }
 
-/** Build CORS headers - never throws */
-function buildCorsHeaders(origin: string | null): Headers {
+/** Build CORS headers - never throws. For error responses, fallback to known origins if Origin missing. */
+function buildCorsHeaders(origin: string | null, fallbackForErrors = false): Headers {
 	const headers = new Headers();
 	headers.set("Vary", "Origin");
-	if (origin && isOriginAllowed(origin)) {
-		headers.set("Access-Control-Allow-Origin", origin);
+	const originToUse = origin && isOriginAllowed(origin) ? origin : fallbackForErrors ? "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev" : null;
+	if (originToUse) {
+		headers.set("Access-Control-Allow-Origin", originToUse);
 		headers.set("Access-Control-Allow-Credentials", "true");
 		headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 		headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
@@ -60,14 +61,16 @@ function addCorsToResponse(response: Response, request: Request): Response {
 	}
 }
 
-/** JSON error response with CORS headers - use for all error paths */
+/** JSON error response with CORS headers - use for all error paths. Fallback origin for 5xx so browser shows real error. */
 function jsonErrorWithCors(
 	request: Request,
 	body: { error: string; code?: string },
 	status: number,
 ): Response {
 	const headers = new Headers({ "Content-Type": "application/json" });
-	buildCorsHeaders(request.headers.get("Origin")).forEach((v, k) => headers.set(k, v));
+	const origin = request.headers.get("Origin");
+	const useFallback = status >= 500 && !origin;
+	buildCorsHeaders(origin, useFallback).forEach((v, k) => headers.set(k, v));
 	return new Response(JSON.stringify(body), { status, headers });
 }
 
@@ -91,7 +94,7 @@ app.on(["POST", "GET", "OPTIONS"], "/api/auth/**", async (c) => {
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
 		const stack = err instanceof Error ? err.stack : "";
-		console.error("Auth handler error:", msg, stack);
+		console.error("Auth handler error:", msg, "origin:", origin, stack);
 		return jsonErrorWithCors(c.req.raw, { error: "Authentication failed", code: "AUTH_ERROR" }, 503);
 	}
 });

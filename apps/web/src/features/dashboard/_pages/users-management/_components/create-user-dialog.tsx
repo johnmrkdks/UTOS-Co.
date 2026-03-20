@@ -86,6 +86,7 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 	});
 
 	const useDefaultPassword = form.watch("useDefaultPassword");
+	const selectedRole = form.watch("role");
 
 	const onSubmit = async (data: CreateUserForm) => {
 		try {
@@ -129,21 +130,21 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 									<FormLabel>User Type</FormLabel>
 									<Select onValueChange={field.onChange} defaultValue={field.value}>
 										<FormControl>
-											<SelectTrigger>
+											<SelectTrigger className="w-full">
 												<SelectValue placeholder="Select user type" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
 											<SelectItem value="user">
 												<div className="flex items-center gap-2">
-													<UserIcon className="h-4 w-4" />
-													Client – Book services and manage their bookings
+													<UserIcon className="h-4 w-4 shrink-0" />
+													<span>Client</span>
 												</div>
 											</SelectItem>
 											<SelectItem value="admin">
 												<div className="flex items-center gap-2">
-													<ShieldIcon className="h-4 w-4" />
-													Admin – Manage bookings, drivers, invoices, inbox, packages
+													<ShieldIcon className="h-4 w-4 shrink-0" />
+													<span>Admin</span>
 												</div>
 											</SelectItem>
 										</SelectContent>
@@ -186,14 +187,14 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 							control={form.control as any}
 							name="useDefaultPassword"
 							render={({ field }) => (
-								<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+								<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 w-full">
 									<FormControl>
 										<Checkbox
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
 									</FormControl>
-									<div className="space-y-1 leading-none">
+									<div className="space-y-1 leading-none flex-1 min-w-0">
 										<FormLabel>Use default password</FormLabel>
 										<FormDescription>
 											User will use &quot;changeme&quot; and should change it after first login.
@@ -258,19 +259,21 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 							</>
 						)}
 
-						<div className="flex items-start gap-2 rounded-md bg-blue-50 p-3">
-							<InfoIcon className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-							<div className="text-sm text-blue-800">
-								<p className="font-medium">Admin permissions include:</p>
-								<ul className="mt-1 list-disc list-inside text-xs space-y-1">
-									<li>Booking management</li>
-									<li>Assigning jobs to drivers</li>
-									<li>Sending invoices</li>
-									<li>Inbox management</li>
-									<li>Adding packages</li>
-								</ul>
+						{selectedRole === "admin" && (
+							<div className="flex items-start gap-3 rounded-md bg-blue-50 p-4 border border-blue-100">
+								<InfoIcon className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+								<div className="text-sm text-blue-800 min-w-0">
+									<p className="font-medium">Admin permissions include:</p>
+									<ul className="mt-1.5 list-disc pl-4 space-y-0.5 text-xs">
+										<li>Booking management</li>
+										<li>Assigning jobs to drivers</li>
+										<li>Sending invoices</li>
+										<li>Inbox management</li>
+										<li>Adding packages</li>
+									</ul>
+								</div>
 							</div>
-						</div>
+						)}
 
 						<DialogFooter>
 							<Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -345,8 +345,10 @@ function generateTripStatusEmailTemplate(
 			statusIcon = "✅";
 			break;
 		case "cancelled":
-			statusTitle = "Booking Cancelled";
-			statusMessage = "Your booking has been cancelled. If you have any questions, please contact us.";
+			statusTitle = pkg ? "Package Booking Cancelled" : "Booking Cancelled";
+			statusMessage = pkg
+				? "Your package booking has been cancelled. If you have any questions or would like to rebook, please contact us."
+				: "Your booking has been cancelled. If you have any questions, please contact us.";
 			statusIcon = "❌";
 			break;
 		case "no_show":
