@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    name: Deploy Web to Cloudflare Pages
+    name: Deploy Web to Cloudflare Workers
     steps:
       - uses: actions/checkout@v4
       
@@ -23,7 +23,6 @@ jobs:
           node-version: 20
           cache: 'pnpm'
           
-      # Enhanced caching strategy
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
@@ -47,16 +46,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      # Build the web app (outputs to apps/web/dist)
-      - name: Build web
-        run: pnpm run build --filter=web
-        
-      # Deploy to Cloudflare Pages (workingDirectory ensures wrangler is found)
-      - name: Deploy
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/web
-          command: pages deploy dist --project-name=web
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      # Build and deploy web (uses wrangler deploy, not wrangler-action - avoids npx issues)
+      - name: Deploy web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm run deploy:production --filter=web
