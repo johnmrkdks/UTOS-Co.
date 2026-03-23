@@ -48,7 +48,7 @@ export const superAdminProcedure = t.procedure.use(({ ctx, next }) => {
 			cause: "No session",
 		});
 	}
-	const role = ctx.session.user?.role;
+	const role = (ctx.session.user as { role?: string })?.role;
 	if (role !== "super_admin") {
 		throw new TRPCError({
 			code: "FORBIDDEN",

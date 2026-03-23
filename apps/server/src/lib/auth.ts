@@ -6,6 +6,7 @@ import { admin } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import * as schema from "@/db/sqlite/schema";
+import { UserRoleEnum } from "@/db/sqlite/enums";
 import {
 	ac,
 	adminRole,
@@ -45,8 +46,6 @@ const plugins: BetterAuthOptions["plugins"] = [
 	}),
 ];
 
-const configs = {};
-
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "sqlite",
@@ -59,10 +58,10 @@ export const auth = betterAuth({
 			const newSession = ctx.context.newSession;
 			if (newSession?.user) {
 				const user = newSession.user;
-				if (!user.role) {
+				if (!(user as { role?: string }).role) {
 					await db
 						.update(schema.users)
-						.set({ role: "user" })
+						.set({ role: UserRoleEnum.User })
 						.where(eq(schema.users.id, user.id));
 				}
 			}
@@ -99,7 +98,6 @@ export const auth = betterAuth({
 	secret: env.BETTER_AUTH_SECRET,
 	baseURL: env.BETTER_AUTH_URL,
 	plugins,
-	configs,
 	advanced: {
 		// Safari ITP: share cookies across subdomains so email/password login works on Safari iOS
 		// Only when API is on workers.dev or production domain (not localhost)

@@ -188,7 +188,7 @@ export const invoicesRouter = router({
 				if (!userId) throw new Error("Unauthorized");
 				await requireAdmin(db, userId);
 
-				const opts = input ?? {};
+				const opts: { limit?: number; offset?: number; type?: "driver" | "company" } = input ?? {};
 				const limit = opts.limit ?? 50;
 				const offset = opts.offset ?? 0;
 				const whereCondition = opts.type ? eq(invoiceSentLogs.type, opts.type) : undefined;

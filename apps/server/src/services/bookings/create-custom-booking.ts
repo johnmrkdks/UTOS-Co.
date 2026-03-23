@@ -58,7 +58,7 @@ export const AdminCreateCustomBookingSchema = CreateCustomBookingSchema.extend({
 
 export type AdminCreateCustomBookingParams = z.infer<typeof AdminCreateCustomBookingSchema>;
 
-export async function createCustomBookingService(db: DB, data: CreateCustomBookingParams) {
+export async function createCustomBookingService(db: DB, data: CreateCustomBookingParams | AdminCreateCustomBookingParams) {
 	// Validate minimum booking time (e.g., 1 hour in advance)
 	const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
 	if (hoursUntilPickup < 1) {
@@ -97,7 +97,7 @@ export async function createCustomBookingService(db: DB, data: CreateCustomBooki
 
 		status: BookingStatusEnum.Pending,
 		// Admin flow: when sendPaymentToClient, require payment before confirmation
-		...(data.sendPaymentToClient ? { paymentStatus: BookingPaymentStatusEnum.PendingPayment } : {}),
+		...("sendPaymentToClient" in data && data.sendPaymentToClient ? { paymentStatus: BookingPaymentStatusEnum.PendingPayment } : {}),
 	};
 
 	const newBooking = await createBooking(db, bookingData);

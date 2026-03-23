@@ -34,6 +34,7 @@ export const CreateOffloadBookingServiceSchema = z.object({
 		latitude: z.number().nullable().optional(),
 		longitude: z.number().nullable().optional(),
 		notes: z.string().optional().or(z.literal("")),
+		waitingTime: z.number().int().optional().default(0),
 	})),
 });
 

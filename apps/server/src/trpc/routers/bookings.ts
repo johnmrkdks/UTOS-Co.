@@ -316,7 +316,7 @@ export const bookingsRouter = router({
 				const isNoShowWithExtras = existingBooking.actualDropoffTime === null; // No-show: driver set actualDropoffTime to null
 				if ((hasAmountUpdate || statusSetToCompleted) && wasAwaitingPricingReview && env) {
 					try {
-						const finalStatus = isNoShowWithExtras ? "no_show" : "completed";
+						const finalStatus = isNoShowWithExtras ? BookingStatusEnum.NoShow : BookingStatusEnum.Completed;
 						const emailStatus = isNoShowWithExtras ? "no_show" : "completed";
 						// Ensure status is set (completed for normal trips, no_show for no-show with extras)
 						await db.update(bookings).set({
@@ -600,14 +600,15 @@ export const bookingsRouter = router({
 
 	// Create offload booking (admin only)
 	createOffloadBooking: protectedProcedure
-		.use(async ({ next, rawInput }) => {
+		.use(async (opts) => {
+			const rawInput = "rawInput" in opts ? (opts as { rawInput: unknown }).rawInput : undefined;
 			console.log("\n" + "🟡".repeat(40));
 			console.log("🔍 PRE-VALIDATION - RAW INPUT RECEIVED:");
 			console.log(JSON.stringify(rawInput, null, 2));
 			console.log("🟡".repeat(40) + "\n");
 
 			try {
-				const result = await next();
+				const result = await opts.next();
 				return result;
 			} catch (error) {
 				console.error("\n" + "🔴".repeat(40));

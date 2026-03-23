@@ -56,7 +56,7 @@ export const AdminCreatePackageBookingSchema = CreatePackageBookingSchema.extend
 
 export type AdminCreatePackageBookingParams = z.infer<typeof AdminCreatePackageBookingSchema>;
 
-export async function createPackageBookingService(db: DB, data: CreatePackageBookingParams) {
+export async function createPackageBookingService(db: DB, data: CreatePackageBookingParams | AdminCreatePackageBookingParams) {
 	try {
 		console.log("🔍 DEBUG createPackageBookingService - START");
 		console.log("📦 Service data received:", JSON.stringify(data, null, 2));
@@ -143,7 +143,7 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 
 			status: BookingStatusEnum.Pending,
 			// When requirePayment (services page) or sendPaymentToClient (admin): client must pay before confirmation
-			...((data.requirePayment || ("sendPaymentToClient" in data && data.sendPaymentToClient))
+			...(("requirePayment" in data && data.requirePayment) || ("sendPaymentToClient" in data && data.sendPaymentToClient)
 				? { paymentStatus: BookingPaymentStatusEnum.PendingPayment }
 				: {}),
 		};
