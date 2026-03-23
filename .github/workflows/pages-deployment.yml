@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    name: Deploy Server to Cloudflare Workers
+    name: Deploy Web to Cloudflare Pages
     steps:
       - uses: actions/checkout@v4
       
@@ -47,15 +47,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      # Build the server before deployment
+      # Build the web app (outputs to apps/web/dist)
       - name: Build web
-        run: pnpm run build --filter=server
+        run: pnpm run build --filter=web
         
-      # Deploy to Cloudflare Pages
+      # Deploy to Cloudflare Pages (workingDirectory ensures wrangler is found)
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=web
+          workingDirectory: apps/web
+          command: pages deploy dist --project-name=web
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
