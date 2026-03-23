@@ -17,11 +17,11 @@ export function toProxyImageUrl(url: string | null | undefined, baseUrl: string)
 	return url;
 }
 
-export function transformCarImages<
-	T extends { images?: Array<{ url?: string | null }> | null; imageUrl?: string | null },
->(car: T, baseUrl: string): T {
-	if (!car?.images?.length) return car;
-	const transformedImages = car.images.map((img) => ({
+export function transformCarImages<T extends Record<string, unknown>>(car: T, baseUrl: string): T {
+	const carWithImages = car as unknown as { images?: Array<{ url?: string | null }> };
+	if (!car || !Array.isArray(carWithImages?.images) || carWithImages.images.length === 0) return car;
+	const images = carWithImages.images;
+	const transformedImages = images.map((img) => ({
 		...img,
 		url: toProxyImageUrl(img.url, baseUrl) ?? img.url,
 	}));
