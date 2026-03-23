@@ -18,7 +18,7 @@
 		"deploy": "pnpm run build && wrangler deploy",
 		"deploy:dev": "pnpm run build:dev && wrangler deploy --env dev",
 		"deploy:staging": "pnpm run build:staging && wrangler deploy",
-		"deploy:production": "pnpm run build:production && wrangler deploy"
+		"deploy:production": "pnpm run build:production && wrangler deploy --env production"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.9.0",
