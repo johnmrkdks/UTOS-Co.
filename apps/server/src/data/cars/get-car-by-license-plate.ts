@@ -1,6 +1,6 @@
-import { cars } from "@/db/sqlite/schema/cars";
 import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
+import { cars } from "@/db/sqlite/schema/cars";
 
 export async function getCarByLicensePlate(db: DB, licensePlate: string) {
 	const [car] = await db

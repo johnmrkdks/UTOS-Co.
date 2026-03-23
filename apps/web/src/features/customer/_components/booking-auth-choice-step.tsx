@@ -1,7 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { UserPlus, User } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { User, UserPlus } from "lucide-react";
 
 const QUOTE_STORAGE_KEY = "booking_quote_flow";
 
@@ -70,27 +76,28 @@ export function BookingAuthChoiceStep({
 			<CardContent className="space-y-4">
 				<Button
 					variant="outline"
-					className="w-full justify-start h-auto py-4"
+					className="h-auto w-full justify-start py-4"
 					onClick={onContinueAsGuest}
 				>
-					<User className="h-5 w-5 mr-3" />
+					<User className="mr-3 h-5 w-5" />
 					<div className="text-left">
 						<div className="font-medium">Continue as guest</div>
-						<div className="text-sm text-muted-foreground font-normal">
-							Book without creating an account. You can still track your booking.
+						<div className="font-normal text-muted-foreground text-sm">
+							Book without creating an account. You can still track your
+							booking.
 						</div>
 					</div>
 				</Button>
 
 				<Button
 					variant="outline"
-					className="w-full justify-start h-auto py-4"
+					className="h-auto w-full justify-start py-4"
 					onClick={handleCreateAccount}
 				>
-					<UserPlus className="h-5 w-5 mr-3" />
+					<UserPlus className="mr-3 h-5 w-5" />
 					<div className="text-left">
 						<div className="font-medium">Create an account</div>
-						<div className="text-sm text-muted-foreground font-normal">
+						<div className="font-normal text-muted-foreground text-sm">
 							Sign up to save your details and view booking history.
 						</div>
 					</div>

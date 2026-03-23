@@ -1,23 +1,54 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { Button } from "@workspace/ui/components/button";
-import { Download, TrendingUp, Users, Car, DollarSign, Loader2 } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import {
+	Car,
+	DollarSign,
+	Download,
+	Loader2,
+	TrendingUp,
+	Users,
+} from "lucide-react";
 import { useState } from "react";
-import { RevenueAnalytics } from "./_components/revenue-analytics";
+import {
+	type DateRangePreset,
+	formatDashboardAnalytics,
+	useGetDashboardAnalyticsEnhancedQuery,
+} from "@/features/dashboard/_hooks/query/use-get-dashboard-analytics-enhanced-query";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { BookingPerformance } from "./_components/booking-performance";
-import { DriverAnalytics } from "./_components/driver-analytics";
 import { CustomerSatisfaction } from "./_components/customer-satisfaction";
+import { DriverAnalytics } from "./_components/driver-analytics";
 import { PredictiveAnalytics } from "./_components/predictive-analytics";
 import { RealTimeMetrics } from "./_components/real-time-metrics";
-import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
-import { useGetDashboardAnalyticsEnhancedQuery, formatDashboardAnalytics, type DateRangePreset } from "@/features/dashboard/_hooks/query/use-get-dashboard-analytics-enhanced-query";
+import { RevenueAnalytics } from "./_components/revenue-analytics";
 
 export function AdvancedAnalyticsPage() {
 	const [dateRange, setDateRange] = useState<DateRangePreset>("30d");
 	const [isExporting, setIsExporting] = useState(false);
 
-	const { data: analyticsData, isLoading, error } = useGetDashboardAnalyticsEnhancedQuery(dateRange);
+	const {
+		data: analyticsData,
+		isLoading,
+		error,
+	} = useGetDashboardAnalyticsEnhancedQuery(dateRange);
 	const data = formatDashboardAnalytics(analyticsData);
 	const stats = data?.stats ?? null;
 
@@ -36,7 +67,11 @@ export function AdvancedAnalyticsPage() {
 					completionRate: stats.completionRate ?? 0,
 					activeDrivers: stats.activeDrivers ?? 0,
 					totalDrivers: stats.totalDrivers ?? 0,
-					driverUtilization: stats.totalDrivers ? Math.round(((stats.activeDrivers ?? 0) / stats.totalDrivers) * 100) : 0,
+					driverUtilization: stats.totalDrivers
+						? Math.round(
+								((stats.activeDrivers ?? 0) / stats.totalDrivers) * 100,
+							)
+						: 0,
 				},
 			};
 			const blob = new Blob([JSON.stringify(reportData, null, 2)], {
@@ -57,7 +92,7 @@ export function AdvancedAnalyticsPage() {
 
 	if (isLoading) {
 		return (
-			<PaddingLayout className="flex-1 flex items-center justify-center min-h-[300px]">
+			<PaddingLayout className="flex min-h-[300px] flex-1 items-center justify-center">
 				<div className="flex items-center gap-2 text-muted-foreground">
 					<Loader2 className="h-6 w-6 animate-spin" />
 					Loading analytics...
@@ -68,10 +103,10 @@ export function AdvancedAnalyticsPage() {
 
 	if (error) {
 		return (
-			<PaddingLayout className="flex-1 flex items-center justify-center min-h-[300px]">
+			<PaddingLayout className="flex min-h-[300px] flex-1 items-center justify-center">
 				<div className="text-center text-destructive">
 					<p>Failed to load analytics</p>
-					<p className="text-sm text-muted-foreground mt-1">{String(error)}</p>
+					<p className="mt-1 text-muted-foreground text-sm">{String(error)}</p>
 				</div>
 			</PaddingLayout>
 		);
@@ -87,8 +122,10 @@ export function AdvancedAnalyticsPage() {
 		<PaddingLayout className="flex-1 space-y-4">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-bold">Advanced Analytics</h1>
-					<p className="text-gray-600">Comprehensive insights and performance metrics</p>
+					<h1 className="font-bold text-2xl">Advanced Analytics</h1>
+					<p className="text-gray-600">
+						Comprehensive insights and performance metrics
+					</p>
 				</div>
 				<div className="flex items-center gap-3">
 					<Select value={dateRange} onValueChange={setDateRange}>
@@ -103,7 +140,7 @@ export function AdvancedAnalyticsPage() {
 						</SelectContent>
 					</Select>
 					<Button onClick={handleExport} disabled={isExporting || !stats}>
-						<Download className="h-4 w-4 mr-2" />
+						<Download className="mr-2 h-4 w-4" />
 						{isExporting ? "Generating..." : "Export Report"}
 					</Button>
 				</div>
@@ -113,14 +150,17 @@ export function AdvancedAnalyticsPage() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+						<CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
 						<DollarSign className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
-							${((stats?.totalRevenue ?? 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+						<div className="font-bold text-2xl">
+							$
+							{((stats?.totalRevenue ?? 0) / 100).toLocaleString(undefined, {
+								minimumFractionDigits: 2,
+							})}
 						</div>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-muted-foreground text-xs">
 							{revenueGrowth >= 0 ? "+" : ""}
 							{revenueGrowth}% from last month
 						</p>
@@ -128,12 +168,16 @@ export function AdvancedAnalyticsPage() {
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Total Bookings
+						</CardTitle>
 						<Car className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{stats?.totalBookings ?? 0}</div>
-						<p className="text-xs text-muted-foreground">
+						<div className="font-bold text-2xl">
+							{stats?.totalBookings ?? 0}
+						</div>
+						<p className="text-muted-foreground text-xs">
 							{bookingGrowth >= 0 ? "+" : ""}
 							{bookingGrowth}% from last month
 						</p>
@@ -141,24 +185,30 @@ export function AdvancedAnalyticsPage() {
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Completion Rate
+						</CardTitle>
 						<Users className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{stats?.completionRate ?? 0}%</div>
-						<p className="text-xs text-muted-foreground">
+						<div className="font-bold text-2xl">
+							{stats?.completionRate ?? 0}%
+						</div>
+						<p className="text-muted-foreground text-xs">
 							{stats?.completedBookings ?? 0} completed
 						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Driver Utilization</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Driver Utilization
+						</CardTitle>
 						<TrendingUp className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverUtilization}%</div>
-						<p className="text-xs text-muted-foreground">
+						<div className="font-bold text-2xl">{driverUtilization}%</div>
+						<p className="text-muted-foreground text-xs">
 							{stats?.activeDrivers ?? 0} of {stats?.totalDrivers ?? 0} active
 						</p>
 					</CardContent>
@@ -179,36 +229,48 @@ export function AdvancedAnalyticsPage() {
 						<TabsContent value="revenue" className="space-y-4">
 							<RevenueAnalytics
 								dateRange={dateRange}
-								analytics={analyticsData ? {
-									totalRevenue: analyticsData.totalRevenue,
-									monthlyRevenue: analyticsData.monthlyRevenue,
-									revenueGrowth: analyticsData.revenueGrowth,
-									revenueByType: analyticsData.revenueByType,
-								} : undefined}
+								analytics={
+									analyticsData
+										? {
+												totalRevenue: analyticsData.totalRevenue,
+												monthlyRevenue: analyticsData.monthlyRevenue,
+												revenueGrowth: analyticsData.revenueGrowth,
+												revenueByType: analyticsData.revenueByType,
+											}
+										: undefined
+								}
 							/>
 						</TabsContent>
 
 						<TabsContent value="bookings" className="space-y-4">
 							<BookingPerformance
 								dateRange={dateRange}
-								analytics={analyticsData ? {
-									totalBookings: analyticsData.totalBookings,
-									completedBookings: analyticsData.completedBookings,
-									cancelledBookings: analyticsData.cancelledBookings,
-									completionRate: analyticsData.completionRate,
-									cancellationRate: analyticsData.cancellationRate,
-								} : undefined}
+								analytics={
+									analyticsData
+										? {
+												totalBookings: analyticsData.totalBookings,
+												completedBookings: analyticsData.completedBookings,
+												cancelledBookings: analyticsData.cancelledBookings,
+												completionRate: analyticsData.completionRate,
+												cancellationRate: analyticsData.cancellationRate,
+											}
+										: undefined
+								}
 							/>
 						</TabsContent>
 
 						<TabsContent value="drivers" className="space-y-4">
 							<DriverAnalytics
 								dateRange={dateRange}
-								analytics={analyticsData ? {
-									totalDrivers: analyticsData.totalDrivers,
-									activeDrivers: analyticsData.activeDrivers,
-									pendingDrivers: analyticsData.pendingDrivers,
-								} : undefined}
+								analytics={
+									analyticsData
+										? {
+												totalDrivers: analyticsData.totalDrivers,
+												activeDrivers: analyticsData.activeDrivers,
+												pendingDrivers: analyticsData.pendingDrivers,
+											}
+										: undefined
+								}
 							/>
 						</TabsContent>
 
@@ -222,12 +284,16 @@ export function AdvancedAnalyticsPage() {
 						<TabsContent value="predictive" className="space-y-4">
 							<PredictiveAnalytics
 								dateRange={dateRange}
-								analytics={analyticsData ? {
-									bookingGrowth: analyticsData.bookingGrowth,
-									revenueGrowth: analyticsData.revenueGrowth,
-									totalBookings: analyticsData.totalBookings,
-									completedBookings: analyticsData.completedBookings,
-								} : undefined}
+								analytics={
+									analyticsData
+										? {
+												bookingGrowth: analyticsData.bookingGrowth,
+												revenueGrowth: analyticsData.revenueGrowth,
+												totalBookings: analyticsData.totalBookings,
+												completedBookings: analyticsData.completedBookings,
+											}
+										: undefined
+								}
 							/>
 						</TabsContent>
 					</Tabs>
@@ -235,13 +301,17 @@ export function AdvancedAnalyticsPage() {
 
 				<div>
 					<RealTimeMetrics
-						analytics={analyticsData ? {
-							activeBookings: analyticsData.activeBookings,
-							activeDrivers: analyticsData.activeDrivers,
-							totalDrivers: analyticsData.totalDrivers,
-							monthlyRevenue: analyticsData.monthlyRevenue,
-							recentBookings: analyticsData.recentBookings,
-						} : undefined}
+						analytics={
+							analyticsData
+								? {
+										activeBookings: analyticsData.activeBookings,
+										activeDrivers: analyticsData.activeDrivers,
+										totalDrivers: analyticsData.totalDrivers,
+										monthlyRevenue: analyticsData.monthlyRevenue,
+										recentBookings: analyticsData.recentBookings,
+									}
+								: undefined
+						}
 					/>
 				</div>
 			</div>

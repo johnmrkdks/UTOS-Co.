@@ -1,13 +1,22 @@
-import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
+import { Calendar as CalendarComponent } from "@workspace/ui/components/calendar";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { CalendarIcon, MapPin } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
-import { Calendar as CalendarComponent } from "@workspace/ui/components/calendar";
-import { format } from "date-fns";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@workspace/ui/components/popover";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { format } from "date-fns";
+import { CalendarIcon, MapPin } from "lucide-react";
+import { useState } from "react";
 import type { TestResult } from "../index";
 
 interface CustomBookingTesterProps {
@@ -16,7 +25,9 @@ interface CustomBookingTesterProps {
 
 export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 	const [originAddress, setOriginAddress] = useState("Sydney Airport, NSW");
-	const [destinationAddress, setDestinationAddress] = useState("Circular Quay, Sydney NSW");
+	const [destinationAddress, setDestinationAddress] = useState(
+		"Circular Quay, Sydney NSW",
+	);
 	const [customerName, setCustomerName] = useState("Test Customer");
 	const [customerEmail, setCustomerEmail] = useState("test@example.com");
 	const [customerPhone, setCustomerPhone] = useState("+61400000000");
@@ -40,23 +51,23 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 
 		try {
 			// Simulate instant quote calculation
-			await new Promise(resolve => setTimeout(resolve, 1500));
+			await new Promise((resolve) => setTimeout(resolve, 1500));
 
 			const mockQuote = {
-				baseFare: 45.00,
-				distanceFare: 28.50,
-				timeFare: 15.00,
-				totalAmount: 88.50,
+				baseFare: 45.0,
+				distanceFare: 28.5,
+				timeFare: 15.0,
+				totalAmount: 88.5,
 				estimatedDistance: 19.5,
 				estimatedDuration: 45,
 				breakdown: {
-					baseFare: 45.00,
+					baseFare: 45.0,
 					distance: "19.5 km × $1.46/km = $28.50",
 					time: "45 min × $0.33/min = $15.00",
-					subtotal: 88.50,
+					subtotal: 88.5,
 					gst: 8.85,
 					total: 97.35,
-				}
+				},
 			};
 
 			setQuote(mockQuote);
@@ -67,7 +78,6 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 				message: `Quote generated: $${mockQuote.breakdown.total} for ${mockQuote.estimatedDistance}km trip`,
 				data: mockQuote,
 			});
-
 		} catch (error) {
 			onResult({
 				type: "custom",
@@ -93,7 +103,7 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 
 		try {
 			// Simulate custom booking creation
-			await new Promise(resolve => setTimeout(resolve, 2000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			const testData = {
 				bookingType: "custom",
@@ -103,7 +113,7 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 				customerEmail,
 				customerPhone,
 				scheduledPickupTime: pickupDate?.toISOString(),
-				passengerCount: parseInt(passengerCount),
+				passengerCount: Number.parseInt(passengerCount),
 				specialRequests,
 				quote,
 			};
@@ -125,7 +135,6 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 			setPassengerCount("2");
 			setSpecialRequests("");
 			setQuote(null);
-
 		} catch (error) {
 			onResult({
 				type: "custom",
@@ -143,7 +152,7 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 				<div>
 					<Label htmlFor="originAddress">Origin Address *</Label>
 					<div className="relative">
-						<MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+						<MapPin className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
 						<Input
 							id="originAddress"
 							value={originAddress}
@@ -157,7 +166,7 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 				<div>
 					<Label htmlFor="destinationAddress">Destination Address *</Label>
 					<div className="relative">
-						<MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+						<MapPin className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
 						<Input
 							id="destinationAddress"
 							value={destinationAddress}
@@ -281,17 +290,19 @@ export function CustomBookingTester({ onResult }: CustomBookingTesterProps) {
 			)}
 
 			<div className="flex gap-2">
-				<Button 
-					onClick={handleQuoteTest} 
-					disabled={isLoading || !originAddress || !destinationAddress || !pickupDate}
+				<Button
+					onClick={handleQuoteTest}
+					disabled={
+						isLoading || !originAddress || !destinationAddress || !pickupDate
+					}
 					variant="outline"
 					className="flex-1"
 				>
 					{isLoading ? "Generating..." : "Test Quote Generation"}
 				</Button>
 
-				<Button 
-					onClick={handleBookingTest} 
+				<Button
+					onClick={handleBookingTest}
 					disabled={isLoading || !quote}
 					className="flex-1"
 				>

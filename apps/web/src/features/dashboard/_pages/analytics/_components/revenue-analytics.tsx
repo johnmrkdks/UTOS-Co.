@@ -1,7 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Progress } from "@workspace/ui/components/progress";
 import { Badge } from "@workspace/ui/components/badge";
-import { TrendingUp, TrendingDown, DollarSign, Package } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Progress } from "@workspace/ui/components/progress";
+import { DollarSign, Package, TrendingDown, TrendingUp } from "lucide-react";
 
 interface RevenueAnalyticsProps {
 	dateRange: string;
@@ -17,7 +22,10 @@ interface RevenueAnalyticsProps {
 	};
 }
 
-export function RevenueAnalytics({ dateRange, analytics }: RevenueAnalyticsProps) {
+export function RevenueAnalytics({
+	dateRange,
+	analytics,
+}: RevenueAnalyticsProps) {
 	const totalRev = (analytics?.totalRevenue ?? 0) / 100;
 	const prevRev = (analytics?.revenueGrowth?.lastMonth ?? 0) / 100;
 
@@ -39,15 +47,32 @@ export function RevenueAnalytics({ dateRange, analytics }: RevenueAnalyticsProps
 		totalRevenue: totalRev,
 		previousPeriodRevenue: prevRev,
 		revenueByType: {
-			custom: { amount: customRev, percentage: customPct, bookings: revenueByType.custom.count },
-			package: { amount: packageRev, percentage: packagePct, bookings: revenueByType.package.count },
-			offload: { amount: offloadRev, percentage: offloadPct, bookings: revenueByType.offload.count },
+			custom: {
+				amount: customRev,
+				percentage: customPct,
+				bookings: revenueByType.custom.count,
+			},
+			package: {
+				amount: packageRev,
+				percentage: packagePct,
+				bookings: revenueByType.package.count,
+			},
+			offload: {
+				amount: offloadRev,
+				percentage: offloadPct,
+				bookings: revenueByType.offload.count,
+			},
 		},
 	};
 
-	const growthPercentage = revenueData.previousPeriodRevenue > 0
-		? ((revenueData.totalRevenue - revenueData.previousPeriodRevenue) / revenueData.previousPeriodRevenue) * 100
-		: revenueData.totalRevenue > 0 ? 100 : 0;
+	const growthPercentage =
+		revenueData.previousPeriodRevenue > 0
+			? ((revenueData.totalRevenue - revenueData.previousPeriodRevenue) /
+					revenueData.previousPeriodRevenue) *
+				100
+			: revenueData.totalRevenue > 0
+				? 100
+				: 0;
 	const isPositiveGrowth = growthPercentage > 0;
 
 	return (
@@ -61,7 +86,7 @@ export function RevenueAnalytics({ dateRange, analytics }: RevenueAnalyticsProps
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-3xl font-bold mb-2">
+						<div className="mb-2 font-bold text-3xl">
 							${revenueData.totalRevenue.toLocaleString()}
 						</div>
 						<div className="flex items-center gap-2">
@@ -70,26 +95,37 @@ export function RevenueAnalytics({ dateRange, analytics }: RevenueAnalyticsProps
 							) : (
 								<TrendingDown className="h-4 w-4 text-red-500" />
 							)}
-							<span className={`text-sm font-medium ${isPositiveGrowth ? 'text-green-600' : 'text-red-600'}`}>
-								{isPositiveGrowth ? '+' : ''}{growthPercentage.toFixed(1)}% from previous period
+							<span
+								className={`font-medium text-sm ${isPositiveGrowth ? "text-green-600" : "text-red-600"}`}
+							>
+								{isPositiveGrowth ? "+" : ""}
+								{growthPercentage.toFixed(1)}% from previous period
 							</span>
 						</div>
 						<div className="mt-4 space-y-3">
 							<div>
-								<div className="flex justify-between text-sm mb-1">
+								<div className="mb-1 flex justify-between text-sm">
 									<span>Current Period</span>
 									<span>${revenueData.totalRevenue.toLocaleString()}</span>
 								</div>
 								<Progress value={100} className="h-2" />
 							</div>
 							<div>
-								<div className="flex justify-between text-sm mb-1">
+								<div className="mb-1 flex justify-between text-sm">
 									<span>Previous Period</span>
-									<span>${revenueData.previousPeriodRevenue.toLocaleString()}</span>
+									<span>
+										${revenueData.previousPeriodRevenue.toLocaleString()}
+									</span>
 								</div>
-								<Progress 
-									value={revenueData.totalRevenue > 0 ? (revenueData.previousPeriodRevenue / revenueData.totalRevenue) * 100 : 0} 
-									className="h-2 opacity-60" 
+								<Progress
+									value={
+										revenueData.totalRevenue > 0
+											? (revenueData.previousPeriodRevenue /
+													revenueData.totalRevenue) *
+												100
+											: 0
+									}
+									className="h-2 opacity-60"
 								/>
 							</div>
 						</div>
@@ -105,42 +141,78 @@ export function RevenueAnalytics({ dateRange, analytics }: RevenueAnalyticsProps
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<div className="flex justify-between items-center mb-2">
-								<span className="text-sm font-medium">Custom Bookings</span>
+							<div className="mb-2 flex items-center justify-between">
+								<span className="font-medium text-sm">Custom Bookings</span>
 								<div className="flex items-center gap-2">
-									<Badge variant="outline">{revenueData.revenueByType.custom.bookings} bookings</Badge>
-									<span className="text-sm font-bold">${revenueData.revenueByType.custom.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+									<Badge variant="outline">
+										{revenueData.revenueByType.custom.bookings} bookings
+									</Badge>
+									<span className="font-bold text-sm">
+										$
+										{revenueData.revenueByType.custom.amount.toLocaleString(
+											undefined,
+											{ minimumFractionDigits: 2 },
+										)}
+									</span>
 								</div>
 							</div>
-							<Progress value={revenueData.revenueByType.custom.percentage} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1">
-								{revenueData.revenueByType.custom.percentage.toFixed(1)}% of total revenue
+							<Progress
+								value={revenueData.revenueByType.custom.percentage}
+								className="h-2"
+							/>
+							<p className="mt-1 text-muted-foreground text-xs">
+								{revenueData.revenueByType.custom.percentage.toFixed(1)}% of
+								total revenue
 							</p>
 						</div>
 						<div>
-							<div className="flex justify-between items-center mb-2">
-								<span className="text-sm font-medium">Package Bookings</span>
+							<div className="mb-2 flex items-center justify-between">
+								<span className="font-medium text-sm">Package Bookings</span>
 								<div className="flex items-center gap-2">
-									<Badge variant="outline">{revenueData.revenueByType.package.bookings} bookings</Badge>
-									<span className="text-sm font-bold">${revenueData.revenueByType.package.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+									<Badge variant="outline">
+										{revenueData.revenueByType.package.bookings} bookings
+									</Badge>
+									<span className="font-bold text-sm">
+										$
+										{revenueData.revenueByType.package.amount.toLocaleString(
+											undefined,
+											{ minimumFractionDigits: 2 },
+										)}
+									</span>
 								</div>
 							</div>
-							<Progress value={revenueData.revenueByType.package.percentage} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1">
-								{revenueData.revenueByType.package.percentage.toFixed(1)}% of total revenue
+							<Progress
+								value={revenueData.revenueByType.package.percentage}
+								className="h-2"
+							/>
+							<p className="mt-1 text-muted-foreground text-xs">
+								{revenueData.revenueByType.package.percentage.toFixed(1)}% of
+								total revenue
 							</p>
 						</div>
 						<div>
-							<div className="flex justify-between items-center mb-2">
-								<span className="text-sm font-medium">Offload Bookings</span>
+							<div className="mb-2 flex items-center justify-between">
+								<span className="font-medium text-sm">Offload Bookings</span>
 								<div className="flex items-center gap-2">
-									<Badge variant="outline">{revenueData.revenueByType.offload.bookings} bookings</Badge>
-									<span className="text-sm font-bold">${revenueData.revenueByType.offload.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+									<Badge variant="outline">
+										{revenueData.revenueByType.offload.bookings} bookings
+									</Badge>
+									<span className="font-bold text-sm">
+										$
+										{revenueData.revenueByType.offload.amount.toLocaleString(
+											undefined,
+											{ minimumFractionDigits: 2 },
+										)}
+									</span>
 								</div>
 							</div>
-							<Progress value={revenueData.revenueByType.offload.percentage} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1">
-								{revenueData.revenueByType.offload.percentage.toFixed(1)}% of total revenue
+							<Progress
+								value={revenueData.revenueByType.offload.percentage}
+								className="h-2"
+							/>
+							<p className="mt-1 text-muted-foreground text-xs">
+								{revenueData.revenueByType.offload.percentage.toFixed(1)}% of
+								total revenue
 							</p>
 						</div>
 					</CardContent>
@@ -158,20 +230,36 @@ export function RevenueAnalytics({ dateRange, analytics }: RevenueAnalyticsProps
 					<CardContent>
 						<div className="grid grid-cols-3 gap-4 text-center">
 							<div>
-								<p className="text-2xl font-bold">${revenueData.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-								<p className="text-xs text-muted-foreground">Total Revenue</p>
+								<p className="font-bold text-2xl">
+									$
+									{revenueData.totalRevenue.toLocaleString(undefined, {
+										minimumFractionDigits: 2,
+									})}
+								</p>
+								<p className="text-muted-foreground text-xs">Total Revenue</p>
 							</div>
 							<div>
-								<p className="text-2xl font-bold">
-									{revenueData.revenueByType.custom.bookings + revenueData.revenueByType.package.bookings + revenueData.revenueByType.offload.bookings}
+								<p className="font-bold text-2xl">
+									{revenueData.revenueByType.custom.bookings +
+										revenueData.revenueByType.package.bookings +
+										revenueData.revenueByType.offload.bookings}
 								</p>
-								<p className="text-xs text-muted-foreground">Total Bookings</p>
+								<p className="text-muted-foreground text-xs">Total Bookings</p>
 							</div>
 							<div>
-								<p className="text-2xl font-bold">
-									${(totalRev / Math.max(1, revenueData.revenueByType.custom.bookings + revenueData.revenueByType.package.bookings + revenueData.revenueByType.offload.bookings)).toFixed(2)}
+								<p className="font-bold text-2xl">
+									$
+									{(
+										totalRev /
+										Math.max(
+											1,
+											revenueData.revenueByType.custom.bookings +
+												revenueData.revenueByType.package.bookings +
+												revenueData.revenueByType.offload.bookings,
+										)
+									).toFixed(2)}
 								</p>
-								<p className="text-xs text-muted-foreground">Avg per Booking</p>
+								<p className="text-muted-foreground text-xs">Avg per Booking</p>
 							</div>
 						</div>
 					</CardContent>

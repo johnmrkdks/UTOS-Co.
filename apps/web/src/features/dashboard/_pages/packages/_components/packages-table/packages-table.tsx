@@ -1,8 +1,8 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import { DataTable } from "@workspace/ui/components/data-table";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Trash2, Eye, Power, PowerOff, Route as RouteIcon, Calendar } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,16 +10,25 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { useGetPackagesQuery } from "../../_hooks/query/use-get-packages-query";
-import { useDeletePackageMutation } from "../../_hooks/query/use-delete-package-mutation";
-import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
+import {
+	Calendar,
+	Eye,
+	MoreHorizontal,
+	Pencil,
+	Power,
+	PowerOff,
+	Route as RouteIcon,
+	Trash2,
+} from "lucide-react";
 import { useState } from "react";
-import { EditPackageDialog } from "./edit-package-dialog";
-import { ViewPackageDialog } from "./view-package-dialog";
+import { useDeletePackageMutation } from "../../_hooks/query/use-delete-package-mutation";
+import { useGetPackagesQuery } from "../../_hooks/query/use-get-packages-query";
+import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
 import { DeletePackageDialog } from "../delete-package-dialog/delete-package-dialog";
 import { PackageRoutesDialog } from "../package-routes/package-routes-dialog";
 import { PackageSchedulingDialog } from "../package-scheduling/package-scheduling-dialog";
-import type { ColumnDef } from "@tanstack/react-table";
+import { EditPackageDialog } from "./edit-package-dialog";
+import { ViewPackageDialog } from "./view-package-dialog";
 
 interface Package {
 	id: string;
@@ -37,7 +46,9 @@ export function PackagesTable() {
 	const [viewingPackage, setViewingPackage] = useState<Package | null>(null);
 	const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
 	const [routesPackage, setRoutesPackage] = useState<Package | null>(null);
-	const [schedulingPackage, setSchedulingPackage] = useState<Package | null>(null);
+	const [schedulingPackage, setSchedulingPackage] = useState<Package | null>(
+		null,
+	);
 
 	const packagesQuery = useGetPackagesQuery({});
 	const deletePackageMutation = useDeletePackageMutation();
@@ -49,13 +60,12 @@ export function PackagesTable() {
 				id: pkg.id,
 				data: {
 					isAvailable: !pkg.isAvailable,
-				}
+				},
 			});
 		} catch (error) {
 			console.error("Failed to toggle package availability:", error);
 		}
 	};
-
 
 	const columns: ColumnDef<Package>[] = [
 		{
@@ -64,7 +74,7 @@ export function PackagesTable() {
 				<DataTableColumnHeader column={column} title="Name" />
 			),
 			cell: ({ row }) => (
-				<div className="font-medium min-w-[150px]">{row.getValue("name")}</div>
+				<div className="min-w-[150px] font-medium">{row.getValue("name")}</div>
 			),
 		},
 		{
@@ -73,7 +83,10 @@ export function PackagesTable() {
 				<DataTableColumnHeader column={column} title="Description" />
 			),
 			cell: ({ row }) => (
-				<div className="min-w-[200px] max-w-[300px] truncate" title={row.getValue("description")}>
+				<div
+					className="min-w-[200px] max-w-[300px] truncate"
+					title={row.getValue("description")}
+				>
 					{row.getValue("description")}
 				</div>
 			),
@@ -86,7 +99,11 @@ export function PackagesTable() {
 			),
 			cell: ({ row }) => {
 				const fixedPrice = row.getValue("fixedPrice") as number;
-				return <div className="min-w-[100px] text-right font-mono">${(fixedPrice ? fixedPrice / 100 : 0).toFixed(2)}</div>;
+				return (
+					<div className="min-w-[100px] text-right font-mono">
+						${(fixedPrice ? fixedPrice / 100 : 0).toFixed(2)}
+					</div>
+				);
 			},
 		},
 		{
@@ -115,7 +132,11 @@ export function PackagesTable() {
 			),
 			cell: ({ row }) => {
 				const createdAt = row.getValue("createdAt") as string;
-				return <div className="min-w-[100px] text-sm text-muted-foreground">{new Date(createdAt).toLocaleDateString()}</div>;
+				return (
+					<div className="min-w-[100px] text-muted-foreground text-sm">
+						{new Date(createdAt).toLocaleDateString()}
+					</div>
+				);
 			},
 		},
 		{
@@ -124,7 +145,7 @@ export function PackagesTable() {
 			size: 80,
 			cell: ({ row }) => {
 				const pkg = row.original;
-				
+
 				return (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
@@ -152,7 +173,7 @@ export function PackagesTable() {
 								Manage Schedule
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem 
+							<DropdownMenuItem
 								onClick={() => handleToggleAvailable(pkg)}
 								disabled={updatePackageMutation.isPending}
 							>
@@ -211,9 +232,11 @@ export function PackagesTable() {
 				enablePagination={true}
 				pageSize={10}
 				emptyState={
-					<div className="text-center py-8">
+					<div className="py-8 text-center">
 						<p className="text-muted-foreground">No packages found</p>
-						<p className="text-sm text-muted-foreground">Create your first package to get started</p>
+						<p className="text-muted-foreground text-sm">
+							Create your first package to get started
+						</p>
 					</div>
 				}
 			/>

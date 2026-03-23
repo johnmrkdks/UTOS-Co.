@@ -3,7 +3,7 @@ import type { EmailTemplate } from "../types";
 export function generateDriverEmailVerificationTemplate(
 	driverName: string,
 	verificationUrl: string,
-	adminContactEmail: string = "admin@downunderchauffeur.com"
+	adminContactEmail = "admin@downunderchauffeur.com",
 ): EmailTemplate {
 	return {
 		subject: "Verify Your Email - Down Under Chauffeur Driver Account",

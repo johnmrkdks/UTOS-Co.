@@ -1,9 +1,9 @@
-import { DataTable } from "@workspace/ui/components/data-table"
-import { carsTableColumns } from "./cars-table-columns"
+import { DataTable } from "@workspace/ui/components/data-table";
+import { carsTableColumns } from "./cars-table-columns";
 
 interface CarsTableListProps {
-	carsData: any
-	isLoading: boolean
+	carsData: any;
+	isLoading: boolean;
 }
 
 export function CarsTableList({ carsData, isLoading }: CarsTableListProps) {
@@ -18,16 +18,16 @@ export function CarsTableList({ carsData, isLoading }: CarsTableListProps) {
 			pageSizeOptions={[10, 25, 50, 100]}
 			onSortingChange={(sorting) => {
 				// Handle sorting changes if needed
-				console.log("Sorting changed:", sorting)
+				console.log("Sorting changed:", sorting);
 			}}
 			emptyState={
-				<div className="text-center py-8">
+				<div className="py-8 text-center">
 					<p className="text-lg text-muted-foreground">No cars found</p>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-sm">
 						Try adjusting your filters or add a new car
 					</p>
 				</div>
 			}
 		/>
-	)
+	);
 }

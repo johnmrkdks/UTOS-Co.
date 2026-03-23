@@ -1,5 +1,5 @@
-import logo from "@/assets/logo.webp";
 import { cn } from "@workspace/ui/lib/utils";
+import logo from "@/assets/logo.webp";
 
 type LogoProps = {
 	className?: string;
@@ -10,7 +10,7 @@ export function Logo({ className }: LogoProps) {
 		<img
 			src={logo}
 			alt="Down Under Chauffeur Logo"
-			className={cn("rounded-xl h-10 w-16 md:h-12 md:w-20", className)}
+			className={cn("h-10 w-16 rounded-xl md:h-12 md:w-20", className)}
 		/>
 	);
 }

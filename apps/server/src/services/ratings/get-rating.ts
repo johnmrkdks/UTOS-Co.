@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { getRatingById } from "@/data/ratings/get-rating-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const GetRatingServiceSchema = z.object({
 	id: z.string(),

@@ -4,7 +4,10 @@ import type { InsertBookingStop } from "@/types";
 
 export type CreateBookingStopData = InsertBookingStop;
 
-export async function createBookingStops(db: DB, stops: CreateBookingStopData[]) {
+export async function createBookingStops(
+	db: DB,
+	stops: CreateBookingStopData[],
+) {
 	if (stops.length === 0) {
 		return [];
 	}
@@ -13,7 +16,7 @@ export async function createBookingStops(db: DB, stops: CreateBookingStopData[])
 	const sortedStops = stops.sort((a, b) => a.stopOrder - b.stopOrder);
 
 	// Prepare insert data
-	const insertData: InsertBookingStop[] = sortedStops.map(stop => ({
+	const insertData: InsertBookingStop[] = sortedStops.map((stop) => ({
 		bookingId: stop.bookingId,
 		stopOrder: stop.stopOrder,
 		address: stop.address,
@@ -24,9 +27,10 @@ export async function createBookingStops(db: DB, stops: CreateBookingStopData[])
 	}));
 
 	// Insert all stops
-	const createdStops = await db.insert(bookingStops).values(insertData).returning();
+	const createdStops = await db
+		.insert(bookingStops)
+		.values(insertData)
+		.returning();
 
 	return createdStops;
 }
-
-

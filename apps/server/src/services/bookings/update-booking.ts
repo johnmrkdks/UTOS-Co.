@@ -1,3 +1,4 @@
+import z from "zod";
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { deleteBookingStops } from "@/data/booking-stops/delete-booking-stops";
 import { getBookingById } from "@/data/bookings/get-booking-by-id";
@@ -5,7 +6,6 @@ import { updateBooking } from "@/data/bookings/update-booking";
 import type { DB } from "@/db";
 import { UpdateBookingSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import z from "zod";
 
 const StopSchema = z.object({
 	address: z.string().min(1, "Address is required"),
@@ -22,9 +22,7 @@ export const UpdateBookingServiceSchema = z.object({
 	stops: z.array(StopSchema).optional(),
 });
 
-export type UpdateBookingParams = z.infer<
-	typeof UpdateBookingServiceSchema
->;
+export type UpdateBookingParams = z.infer<typeof UpdateBookingServiceSchema>;
 
 export async function updateBookingService(
 	db: DB,

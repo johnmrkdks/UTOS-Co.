@@ -6,7 +6,5 @@ interface GetPackageRoutesParams {
 }
 
 export function useGetPackageRoutesQuery(params: GetPackageRoutesParams) {
-	return useQuery(
-		trpc.packageRoutes.getByPackageId.queryOptions(params)
-	);
+	return useQuery(trpc.packageRoutes.getByPackageId.queryOptions(params));
 }

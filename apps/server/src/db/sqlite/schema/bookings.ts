@@ -1,27 +1,33 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { users } from "@/db/sqlite/schema/users";
-import { cars } from "@/db/sqlite/schema/cars";
-import { packages } from "@/db/sqlite/schema/packages";
-import { relations, sql } from "drizzle-orm";
-import { BookingStatusEnum, BookingTypeEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 import { createId } from "@paralleldrive/cuid2";
-import { drivers } from "@/db/sqlite/schema/drivers";
-import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
+import { relations, sql } from "drizzle-orm";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	type BookingPaymentStatusEnum,
+	BookingStatusEnum,
+	type BookingTypeEnum,
+} from "@/db/sqlite/enums";
 import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
+import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
 import { offloadBookingDetails } from "@/db/sqlite/schema/bookings/offload-booking-details";
+import { cars } from "@/db/sqlite/schema/cars";
+import { drivers } from "@/db/sqlite/schema/drivers";
+import { packages } from "@/db/sqlite/schema/packages";
+import { users } from "@/db/sqlite/schema/users";
 
 export const bookings = sqliteTable("bookings", {
-	id: text("id").primaryKey().$defaultFn(() => createId()),
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => createId()),
 	referenceNumber: text("reference_number"), // Generated in application code using system settings prefix
 	shareToken: text("share_token"), // Unique token for shareable tracking/update links (no auth)
 	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
 
-	carId: text("car_id")
-		.references(() => cars.id, { onDelete: "cascade" }),
-	userId: text("user_id")
-		.references(() => users.id, { onDelete: "cascade" }), // Null for guest bookings
+	carId: text("car_id").references(() => cars.id, { onDelete: "cascade" }),
+	userId: text("user_id").references(() => users.id, { onDelete: "cascade" }), // Null for guest bookings
 	driverId: text("driver_id").references(() => drivers.id),
-	packageId: text("package_id").references(() => packages.id, { onDelete: "cascade" }),
+	packageId: text("package_id").references(() => packages.id, {
+		onDelete: "cascade",
+	}),
 
 	driverAssignedAt: integer("driver_assigned_at", { mode: "timestamp" }),
 
@@ -35,7 +41,9 @@ export const bookings = sqliteTable("bookings", {
 	destinationLongitude: real("destination_longitude"),
 
 	// Timing
-	scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }).notNull(),
+	scheduledPickupTime: integer("scheduled_pickup_time", {
+		mode: "timestamp",
+	}).notNull(),
 	timezone: text("timezone"), // Booking-specific timezone (e.g., "Australia/Melbourne"), falls back to system default if null
 	estimatedDuration: integer("estimated_duration"), // in seconds
 	actualPickupTime: integer("actual_pickup_time", { mode: "timestamp" }),
@@ -63,10 +71,15 @@ export const bookings = sqliteTable("bookings", {
 	additionalNotes: text("additional_notes"), // Operational notes for drivers/admins
 	tollPreference: text("toll_preference").default("toll"), // "toll" | "no_toll" - route preference
 
-	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
+	status: text("status")
+		.notNull()
+		.$type<BookingStatusEnum>()
+		.default(BookingStatusEnum.Pending),
 	paymentStatus: text("payment_status").$type<BookingPaymentStatusEnum>(), // Square payment flow
 	isArchived: integer("is_archived", { mode: "boolean" }),
-	isGuestBooking: integer("is_guest_booking", { mode: "boolean" }).default(false),
+	isGuestBooking: integer("is_guest_booking", { mode: "boolean" }).default(
+		false,
+	),
 
 	// Booking timeline tracking
 	confirmedAt: integer("confirmed_at", { mode: "timestamp" }),
@@ -75,20 +88,38 @@ export const bookings = sqliteTable("bookings", {
 	serviceCompletedAt: integer("service_completed_at", { mode: "timestamp" }),
 
 	// Email sent tracking (duplicate prevention)
-	confirmationEmailSentAt: integer("confirmation_email_sent_at", { mode: "timestamp" }),
-	driverAssignmentEmailSentAt: integer("driver_assignment_email_sent_at", { mode: "timestamp" }),
-	driverAssignmentEmailSentToDriverId: text("driver_assignment_email_sent_to_driver_id"), // Track which driver we sent to (for reassignment)
-	completionSummaryEmailSentAt: integer("completion_summary_email_sent_at", { mode: "timestamp" }),
+	confirmationEmailSentAt: integer("confirmation_email_sent_at", {
+		mode: "timestamp",
+	}),
+	driverAssignmentEmailSentAt: integer("driver_assignment_email_sent_at", {
+		mode: "timestamp",
+	}),
+	driverAssignmentEmailSentToDriverId: text(
+		"driver_assignment_email_sent_to_driver_id",
+	), // Track which driver we sent to (for reassignment)
+	completionSummaryEmailSentAt: integer("completion_summary_email_sent_at", {
+		mode: "timestamp",
+	}),
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
 });
 
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	user: one(users, { fields: [bookings.userId], references: [users.id] }),
 	car: one(cars, { fields: [bookings.carId], references: [cars.id] }),
-	driver: one(drivers, { fields: [bookings.driverId], references: [drivers.id] }),
-	package: one(packages, { fields: [bookings.packageId], references: [packages.id] }),
+	driver: one(drivers, {
+		fields: [bookings.driverId],
+		references: [drivers.id],
+	}),
+	package: one(packages, {
+		fields: [bookings.packageId],
+		references: [packages.id],
+	}),
 	stops: many(bookingStops),
 	extras: many(bookingExtras),
 	offloadDetails: one(offloadBookingDetails, {
@@ -100,5 +131,8 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 // Relations are defined in cars.ts to avoid circular imports
 
 export const bookingStopsRelations = relations(bookingStops, ({ one }) => ({
-	booking: one(bookings, { fields: [bookingStops.bookingId], references: [bookings.id] }),
+	booking: one(bookings, {
+		fields: [bookingStops.bookingId],
+		references: [bookings.id],
+	}),
 }));

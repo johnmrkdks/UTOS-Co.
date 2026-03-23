@@ -1,7 +1,7 @@
-import * as React from "react"
-import type { Table } from "@tanstack/react-table"
-
-import { Button } from "./button"
+import type { Table } from "@tanstack/react-table";
+import { Settings2Icon } from "lucide-react";
+import * as React from "react";
+import { Button } from "./button";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -9,33 +9,35 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "./dropdown-menu"
-import { Settings2Icon } from "lucide-react"
+} from "./dropdown-menu";
 
 interface DataTableViewOptionsProps<TData> {
-	table: Table<TData>
-	disabled?: boolean
+	table: Table<TData>;
+	disabled?: boolean;
 }
 
-export function DataTableViewOptions<TData>({ 
-	table, 
-	disabled = false 
+export function DataTableViewOptions<TData>({
+	table,
+	disabled = false,
 }: DataTableViewOptionsProps<TData>) {
 	const visibleColumns = table
 		.getAllColumns()
-		.filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+		.filter(
+			(column) =>
+				typeof column.accessorFn !== "undefined" && column.getCanHide(),
+		);
 
 	if (visibleColumns.length === 0) {
-		return null
+		return null;
 	}
 
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button 
-					variant="outline" 
-					size="sm" 
-					className="ml-auto hidden h-8 lg:flex bg-transparent"
+				<Button
+					variant="outline"
+					size="sm"
+					className="ml-auto hidden h-8 bg-transparent lg:flex"
 					disabled={disabled}
 					aria-label="Toggle column visibility"
 				>
@@ -56,9 +58,9 @@ export function DataTableViewOptions<TData>({
 						>
 							{column.id}
 						</DropdownMenuCheckboxItem>
-					)
+					);
 				})}
 			</DropdownMenuContent>
 		</DropdownMenu>
-	)
+	);
 }

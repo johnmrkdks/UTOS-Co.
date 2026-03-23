@@ -1,22 +1,20 @@
+import { z } from "zod";
 import {
-	createPricingConfigService,
 	CreatePricingConfigServiceSchema,
+	createPricingConfigService,
 } from "@/services/pricing-config/create-pricing-config";
 import {
-	deletePricingConfigService,
 	DeletePricingConfigServiceSchema,
+	deletePricingConfigService,
 } from "@/services/pricing-config/delete-pricing-config";
+import { getPricingConfigsService } from "@/services/pricing-config/get-pricing-configs";
 import {
-	getPricingConfigsService,
-} from "@/services/pricing-config/get-pricing-configs";
-import {
-	updatePricingConfigService,
 	UpdatePricingConfigServiceSchema,
+	updatePricingConfigService,
 } from "@/services/pricing-config/update-pricing-config";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { z } from "zod";
 
 export const pricingConfigRouter = router({
 	create: protectedProcedure

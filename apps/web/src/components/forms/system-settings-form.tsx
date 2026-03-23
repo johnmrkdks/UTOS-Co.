@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Card,
 	CardContent,
@@ -9,7 +8,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -19,10 +17,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { Loader2, Settings, CheckCircle2, Info } from "lucide-react";
-import { trpc } from "@/trpc";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Info, Loader2, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import { trpc } from "@/trpc";
 
 // Common timezone options
 const TIMEZONE_OPTIONS = [
@@ -44,7 +44,10 @@ const systemSettingsSchema = z.object({
 		.string()
 		.min(1, "Prefix must be at least 1 character")
 		.max(10, "Prefix must be at most 10 characters")
-		.regex(/^[A-Z0-9]+$/, "Prefix must contain only uppercase letters and numbers"),
+		.regex(
+			/^[A-Z0-9]+$/,
+			"Prefix must contain only uppercase letters and numbers",
+		),
 });
 
 type SystemSettingsFormData = z.infer<typeof systemSettingsSchema>;
@@ -55,7 +58,7 @@ export function SystemSettingsForm() {
 
 	// Fetch current settings
 	const { data: settings, isLoading: isLoadingSettings } = useQuery(
-		trpc.systemSettings.getSettings.queryOptions()
+		trpc.systemSettings.getSettings.queryOptions(),
 	);
 
 	// Update mutation
@@ -74,7 +77,7 @@ export function SystemSettingsForm() {
 					description: error.message || "Failed to update system settings.",
 				});
 			},
-		})
+		}),
 	);
 
 	const {
@@ -133,7 +136,8 @@ export function SystemSettingsForm() {
 					System Settings
 				</CardTitle>
 				<CardDescription>
-					Configure global system settings including timezone and booking reference format
+					Configure global system settings including timezone and booking
+					reference format
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -142,11 +146,13 @@ export function SystemSettingsForm() {
 					<div className="space-y-2">
 						<Label htmlFor="timezone">
 							Default Timezone
-							<span className="text-red-500 ml-1">*</span>
+							<span className="ml-1 text-red-500">*</span>
 						</Label>
 						<Select
 							value={watch("timezone")}
-							onValueChange={(value) => setValue("timezone", value, { shouldDirty: true })}
+							onValueChange={(value) =>
+								setValue("timezone", value, { shouldDirty: true })
+							}
 						>
 							<SelectTrigger id="timezone" className="w-full">
 								<SelectValue placeholder="Select timezone" />
@@ -160,13 +166,13 @@ export function SystemSettingsForm() {
 							</SelectContent>
 						</Select>
 						{errors.timezone && (
-							<p className="text-sm text-red-600">{errors.timezone.message}</p>
+							<p className="text-red-600 text-sm">{errors.timezone.message}</p>
 						)}
-						<p className="text-xs text-gray-500 flex items-start gap-1.5">
-							<Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+						<p className="flex items-start gap-1.5 text-gray-500 text-xs">
+							<Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
 							<span>
-								Used as the default timezone for the system. Users can override this with their
-								own timezone preference.
+								Used as the default timezone for the system. Users can override
+								this with their own timezone preference.
 							</span>
 						</p>
 					</div>
@@ -175,7 +181,7 @@ export function SystemSettingsForm() {
 					<div className="space-y-2">
 						<Label htmlFor="bookingReferencePrefix">
 							Booking Reference Prefix
-							<span className="text-red-500 ml-1">*</span>
+							<span className="ml-1 text-red-500">*</span>
 						</Label>
 						<Input
 							id="bookingReferencePrefix"
@@ -186,25 +192,30 @@ export function SystemSettingsForm() {
 							className="uppercase"
 							onChange={(e) => {
 								const value = e.target.value.toUpperCase();
-								setValue("bookingReferencePrefix", value, { shouldDirty: true });
+								setValue("bookingReferencePrefix", value, {
+									shouldDirty: true,
+								});
 							}}
 						/>
 						{errors.bookingReferencePrefix && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{errors.bookingReferencePrefix.message}
 							</p>
 						)}
 						<div className="space-y-1.5">
-							<p className="text-xs text-gray-500 flex items-start gap-1.5">
-								<Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+							<p className="flex items-start gap-1.5 text-gray-500 text-xs">
+								<Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
 								<span>
-									This prefix will be used for all new booking reference numbers. Only
-									uppercase letters (A-Z) and numbers (0-9) are allowed.
+									This prefix will be used for all new booking reference
+									numbers. Only uppercase letters (A-Z) and numbers (0-9) are
+									allowed.
 								</span>
 							</p>
-							<div className="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-200">
-								<span className="text-xs font-medium text-gray-600">Example:</span>
-								<code className="text-sm font-mono font-semibold text-primary">
+							<div className="flex items-center gap-2 rounded border border-gray-200 bg-gray-50 p-2">
+								<span className="font-medium text-gray-600 text-xs">
+									Example:
+								</span>
+								<code className="font-mono font-semibold text-primary text-sm">
 									{exampleReference}
 								</code>
 							</div>
@@ -212,7 +223,7 @@ export function SystemSettingsForm() {
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex items-center justify-end gap-3 pt-4 border-t">
+					<div className="flex items-center justify-end gap-3 border-t pt-4">
 						<Button
 							type="submit"
 							disabled={!isDirty || updateSettingsMutation.isPending}
@@ -220,12 +231,12 @@ export function SystemSettingsForm() {
 						>
 							{updateSettingsMutation.isPending ? (
 								<>
-									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Saving...
 								</>
 							) : (
 								<>
-									<CheckCircle2 className="h-4 w-4 mr-2" />
+									<CheckCircle2 className="mr-2 h-4 w-4" />
 									Save Settings
 								</>
 							)}
@@ -234,11 +245,11 @@ export function SystemSettingsForm() {
 
 					{/* Success/Warning Notice */}
 					{isDirty && (
-						<div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-							<p className="text-xs text-amber-800">
-								<strong>Note:</strong> Changing the booking reference prefix will only affect{" "}
-								<strong>new bookings</strong>. Existing bookings will keep their current
-								reference numbers.
+						<div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+							<p className="text-amber-800 text-xs">
+								<strong>Note:</strong> Changing the booking reference prefix
+								will only affect <strong>new bookings</strong>. Existing
+								bookings will keep their current reference numbers.
 							</p>
 						</div>
 					)}

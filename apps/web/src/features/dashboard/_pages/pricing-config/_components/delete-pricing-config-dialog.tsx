@@ -1,3 +1,4 @@
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogContent,
@@ -6,7 +7,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
 import { AlertTriangle } from "lucide-react";
 import { useDeletePricingConfigMutation } from "../_hooks/query/use-delete-pricing-config-mutation";
 
@@ -29,12 +29,16 @@ type DeletePricingConfigDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function DeletePricingConfigDialog({ config, open, onOpenChange }: DeletePricingConfigDialogProps) {
+export function DeletePricingConfigDialog({
+	config,
+	open,
+	onOpenChange,
+}: DeletePricingConfigDialogProps) {
 	const deleteConfigMutation = useDeletePricingConfigMutation();
 
 	const handleDelete = async () => {
 		if (!config) return;
-		
+
 		try {
 			await deleteConfigMutation.mutateAsync({ id: config.id });
 			onOpenChange(false);
@@ -61,47 +65,59 @@ export function DeletePricingConfigDialog({ config, open, onOpenChange }: Delete
 						</div>
 					</div>
 				</DialogHeader>
-				
+
 				<div className="py-4">
-					<p className="text-sm text-muted-foreground">
-						Are you sure you want to delete <strong>"{config.name}"</strong>? 
+					<p className="text-muted-foreground text-sm">
+						Are you sure you want to delete <strong>"{config.name}"</strong>?
 					</p>
-					
+
 					{config.car && (
-						<div className="mt-3 p-3 bg-muted/50 rounded-md">
-							<p className="text-sm font-medium">Associated Car:</p>
-							<p className="text-sm text-muted-foreground">
-								{config.car.name} {config.car.licensePlate && `(${config.car.licensePlate})`}
+						<div className="mt-3 rounded-md bg-muted/50 p-3">
+							<p className="font-medium text-sm">Associated Car:</p>
+							<p className="text-muted-foreground text-sm">
+								{config.car.name}{" "}
+								{config.car.licensePlate && `(${config.car.licensePlate})`}
 							</p>
 						</div>
 					)}
-					
-					<div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
-						<p className="text-sm text-amber-800 font-medium mb-1">⚠️ Impact of deletion:</p>
-						<ul className="text-sm text-amber-700 space-y-1">
-							<li>• Future bookings won't be able to use this pricing structure</li>
-							<li>• The associated car may become unpublishable if this is its only pricing config</li>
-							<li>• Existing bookings with this pricing will not be affected</li>
+
+					<div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+						<p className="mb-1 font-medium text-amber-800 text-sm">
+							⚠️ Impact of deletion:
+						</p>
+						<ul className="space-y-1 text-amber-700 text-sm">
+							<li>
+								• Future bookings won't be able to use this pricing structure
+							</li>
+							<li>
+								• The associated car may become unpublishable if this is its
+								only pricing config
+							</li>
+							<li>
+								• Existing bookings with this pricing will not be affected
+							</li>
 						</ul>
 					</div>
 				</div>
 
 				<DialogFooter>
-					<Button 
-						type="button" 
-						variant="outline" 
+					<Button
+						type="button"
+						variant="outline"
 						onClick={() => onOpenChange(false)}
 						disabled={deleteConfigMutation.isPending}
 					>
 						Cancel
 					</Button>
-					<Button 
-						type="button" 
+					<Button
+						type="button"
 						variant="destructive"
 						onClick={handleDelete}
 						disabled={deleteConfigMutation.isPending}
 					>
-						{deleteConfigMutation.isPending ? "Deleting..." : "Delete Configuration"}
+						{deleteConfigMutation.isPending
+							? "Deleting..."
+							: "Delete Configuration"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

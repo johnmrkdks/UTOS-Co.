@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { AddFeatureDialog } from "./features/add-feature-dialog";
 import { FeatureTableList } from "./features/feature-table-list";
 
@@ -9,7 +15,9 @@ export function Features() {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Car Features</CardTitle>
-						<CardDescription>Manage car features in your inventory</CardDescription>
+						<CardDescription>
+							Manage car features in your inventory
+						</CardDescription>
 					</div>
 					<AddFeatureDialog />
 				</div>
@@ -18,6 +26,5 @@ export function Features() {
 				<FeatureTableList />
 			</CardContent>
 		</Card>
-	)
+	);
 }
-

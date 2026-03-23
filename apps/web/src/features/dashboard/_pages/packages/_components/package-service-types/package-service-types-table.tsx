@@ -1,3 +1,11 @@
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import {
 	Table,
 	TableBody,
@@ -6,18 +14,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@workspace/ui/components/table";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 import { useModal } from "@/hooks/use-modal";
-import { EditPackageServiceTypeDialog } from "./edit-package-service-type-dialog";
 import { DeletePackageServiceTypeDialog } from "./delete-package-service-type-dialog";
+import { EditPackageServiceTypeDialog } from "./edit-package-service-type-dialog";
 
 interface PackageServiceType {
 	id: string;
@@ -34,7 +34,10 @@ interface PackageServiceTypesTableProps {
 	isLoading: boolean;
 }
 
-export function PackageServiceTypesTable({ data, isLoading }: PackageServiceTypesTableProps) {
+export function PackageServiceTypesTable({
+	data,
+	isLoading,
+}: PackageServiceTypesTableProps) {
 	const { openModal } = useModal();
 
 	if (isLoading) {
@@ -67,17 +70,27 @@ export function PackageServiceTypesTable({ data, isLoading }: PackageServiceType
 						.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 						.map((serviceType) => (
 							<TableRow key={serviceType.id}>
-								<TableCell className="font-medium">{serviceType.name}</TableCell>
-								<TableCell className="text-sm text-muted-foreground">
+								<TableCell className="font-medium">
+									{serviceType.name}
+								</TableCell>
+								<TableCell className="text-muted-foreground text-sm">
 									{serviceType.description || "No description"}
 								</TableCell>
 								<TableCell>
-									<Badge variant={serviceType.rateType === "fixed" ? "outline" : "secondary"}>
-										{serviceType.rateType === "fixed" ? "Fixed Rate" : "Hourly Rate"}
+									<Badge
+										variant={
+											serviceType.rateType === "fixed" ? "outline" : "secondary"
+										}
+									>
+										{serviceType.rateType === "fixed"
+											? "Fixed Rate"
+											: "Hourly Rate"}
 									</Badge>
 								</TableCell>
 								<TableCell>
-									<Badge variant={serviceType.isActive ? "default" : "secondary"}>
+									<Badge
+										variant={serviceType.isActive ? "default" : "secondary"}
+									>
 										{serviceType.isActive ? "Active" : "Inactive"}
 									</Badge>
 								</TableCell>

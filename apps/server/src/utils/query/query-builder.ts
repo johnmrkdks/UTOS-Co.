@@ -1,4 +1,4 @@
-import { type AnyColumn, type SQL } from "drizzle-orm";
+import type { AnyColumn, SQL } from "drizzle-orm";
 
 export interface FilterBuilder<T = any> {
 	build(filters: Record<string, string>): SQL<unknown>[];

@@ -1,8 +1,8 @@
+import { z } from "zod";
 import { deleteCar } from "@/data/cars/delete-car";
 import { getCarById } from "@/data/cars/get-car-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const DeleteCarServiceSchema = z.object({
 	id: z.string(),

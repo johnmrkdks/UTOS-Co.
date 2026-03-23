@@ -1,10 +1,10 @@
-import { drivers } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { drivers } from "@/db/sqlite/schema";
 
 export const DriverSchema = createSelectSchema(drivers, {
 	createdAt: z.union([z.date(), z.string()]),

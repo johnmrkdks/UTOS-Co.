@@ -9,8 +9,8 @@
  * Run with: pnpm tsx scripts/migrate-distance-to-decimal.ts
  */
 
-import { drizzle } from "drizzle-orm/d1";
 import { sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
 
 // Get database binding from environment
 const db = drizzle((globalThis as any).DB);
@@ -20,7 +20,9 @@ async function migrateDistanceToDecimal() {
 
 	try {
 		// Step 1: Create new table with REAL distance fields
-		console.log("📋 Step 1: Creating new bookings table with REAL distance fields...");
+		console.log(
+			"📋 Step 1: Creating new bookings table with REAL distance fields...",
+		);
 		await db.run(sql`
 			CREATE TABLE bookings_new (
 				id TEXT PRIMARY KEY NOT NULL,
@@ -74,12 +76,16 @@ async function migrateDistanceToDecimal() {
 		console.log("✅ New table created\n");
 
 		// Step 2: Count existing bookings
-		const countResult = await db.run(sql`SELECT COUNT(*) as count FROM bookings`);
+		const countResult = await db.run(
+			sql`SELECT COUNT(*) as count FROM bookings`,
+		);
 		const bookingCount = (countResult.results[0] as any)?.count || 0;
 		console.log(`📊 Found ${bookingCount} bookings to migrate\n`);
 
 		// Step 3: Copy data with distance conversion
-		console.log("📦 Step 2: Copying data and converting distances (meters → kilometers)...");
+		console.log(
+			"📦 Step 2: Copying data and converting distances (meters → kilometers)...",
+		);
 		await db.run(sql`
 			INSERT INTO bookings_new
 			SELECT
@@ -147,7 +153,9 @@ async function migrateDistanceToDecimal() {
 		if (sampleResult.results.length > 0) {
 			console.log("Sample converted data:");
 			sampleResult.results.forEach((row: any) => {
-				console.log(`  - ID: ${row.id.slice(0, 8)}... | Estimated: ${row.estimated_distance} km | Actual: ${row.actual_distance || 'N/A'} km`);
+				console.log(
+					`  - ID: ${row.id.slice(0, 8)}... | Estimated: ${row.estimated_distance} km | Actual: ${row.actual_distance || "N/A"} km`,
+				);
 			});
 			console.log("✅ Data verified\n");
 		}
@@ -163,19 +171,22 @@ async function migrateDistanceToDecimal() {
 		console.log("✅ Table renamed\n");
 
 		// Step 7: Final verification
-		const finalCount = await db.run(sql`SELECT COUNT(*) as count FROM bookings`);
+		const finalCount = await db.run(
+			sql`SELECT COUNT(*) as count FROM bookings`,
+		);
 		const finalBookingCount = (finalCount.results[0] as any)?.count || 0;
 
 		console.log("🎉 Migration completed successfully!\n");
 		console.log("📊 Summary:");
 		console.log(`  - Bookings migrated: ${bookingCount}`);
 		console.log(`  - Final count: ${finalBookingCount}`);
-		console.log(`  - Distance format: INTEGER (meters) → REAL (kilometers)`);
-		console.log(`  - Example: 15500 → 15.5 km\n`);
-
+		console.log("  - Distance format: INTEGER (meters) → REAL (kilometers)");
+		console.log("  - Example: 15500 → 15.5 km\n");
 	} catch (error) {
 		console.error("❌ Migration failed:", error);
-		console.error("\n⚠️  Database may be in inconsistent state. Please restore from backup.\n");
+		console.error(
+			"\n⚠️  Database may be in inconsistent state. Please restore from backup.\n",
+		);
 		throw error;
 	}
 }

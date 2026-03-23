@@ -1,7 +1,7 @@
+import { desc, eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { drivers, users } from "@/db/schema";
 import type { ResourceList } from "@/utils/query/resource-list";
-import { eq, desc } from "drizzle-orm";
 
 export async function getDriversService(db: DB, params: ResourceList) {
 	const { limit = 10, offset = 0 } = params;
@@ -33,9 +33,7 @@ export async function getDriversService(db: DB, params: ResourceList) {
 		.limit(limit)
 		.offset(offset);
 
-	const totalQuery = await db
-		.select({ count: drivers.id })
-		.from(drivers);
+	const totalQuery = await db.select({ count: drivers.id }).from(drivers);
 
 	return {
 		items: driversData,

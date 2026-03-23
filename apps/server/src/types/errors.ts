@@ -1,13 +1,13 @@
 export enum ErrorCode {
-	MISSING_ENTRY = 'MISSING_ENTRY',
-	VALIDATION_ERROR = 'VALIDATION_ERROR',
-	NOT_FOUND = 'NOT_FOUND',
-	UNAUTHORIZED = 'UNAUTHORIZED',
-	FORBIDDEN = 'FORBIDDEN',
-	CONFLICT = 'CONFLICT',
-	INTERNAL_ERROR = 'INTERNAL_ERROR',
-	BAD_REQUEST = 'BAD_REQUEST',
-	DUPLICATE_ENTRY = 'DUPLICATE_ENTRY'
+	MISSING_ENTRY = "MISSING_ENTRY",
+	VALIDATION_ERROR = "VALIDATION_ERROR",
+	NOT_FOUND = "NOT_FOUND",
+	UNAUTHORIZED = "UNAUTHORIZED",
+	FORBIDDEN = "FORBIDDEN",
+	CONFLICT = "CONFLICT",
+	INTERNAL_ERROR = "INTERNAL_ERROR",
+	BAD_REQUEST = "BAD_REQUEST",
+	DUPLICATE_ENTRY = "DUPLICATE_ENTRY",
 }
 
 export interface ErrorDetail {
@@ -25,9 +25,9 @@ export class AppError extends Error {
 	constructor(
 		message: string,
 		code: ErrorCode,
-		statusCode: number = 500,
+		statusCode = 500,
 		details?: ErrorDetail[],
-		isOperational: boolean = true
+		isOperational = true,
 	) {
 		super(message);
 		this.code = code;

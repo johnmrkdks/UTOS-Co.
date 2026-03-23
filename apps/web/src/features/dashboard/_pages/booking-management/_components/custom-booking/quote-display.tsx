@@ -1,13 +1,19 @@
-import { Calculator, MapPin } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { Badge } from "@workspace/ui/components/badge"
-import { Skeleton } from "@workspace/ui/components/skeleton"
-import type { QuoteResult } from "../../_types/booking"
-import { formatDistanceKm } from "@/utils/format"
+import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Calculator, MapPin } from "lucide-react";
+import { formatDistanceKm } from "@/utils/format";
+import type { QuoteResult } from "../../_types/booking";
 
 interface QuoteDisplayProps {
-	quote: QuoteResult | null
-	isCalculating: boolean
+	quote: QuoteResult | null;
+	isCalculating: boolean;
 }
 
 export function QuoteDisplay({ quote, isCalculating }: QuoteDisplayProps) {
@@ -18,7 +24,9 @@ export function QuoteDisplay({ quote, isCalculating }: QuoteDisplayProps) {
 					<Calculator className="h-5 w-5" />
 					Instant Quote
 				</CardTitle>
-				<CardDescription>Calculate pricing based on route and time</CardDescription>
+				<CardDescription>
+					Calculate pricing based on route and time
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{isCalculating ? (
@@ -30,10 +38,11 @@ export function QuoteDisplay({ quote, isCalculating }: QuoteDisplayProps) {
 					</div>
 				) : quote ? (
 					<div className="space-y-4">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+						<div className="flex items-center gap-2 text-muted-foreground text-sm">
 							<MapPin className="h-4 w-4" />
 							<span>
-								{formatDistanceKm(quote.estimatedDistance)} • {Math.round(quote.estimatedDuration / 60)} min
+								{formatDistanceKm(quote.estimatedDistance)} •{" "}
+								{Math.round(quote.estimatedDuration / 60)} min
 							</span>
 						</div>
 
@@ -59,32 +68,41 @@ export function QuoteDisplay({ quote, isCalculating }: QuoteDisplayProps) {
 							<hr className="my-2" />
 							<div className="flex justify-between font-semibold text-lg">
 								<span>Total</span>
-								<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
+								<span className="text-primary">
+									${quote.totalAmount.toFixed(2)}
+								</span>
 							</div>
 						</div>
 
-						{quote.breakdown.surgePricing && quote.breakdown.surgePricing > 1 && (
-							<Badge variant="destructive" className="w-full justify-center">
-								{((quote.breakdown.surgePricing - 1) * 100).toFixed(0)}% surge pricing
-							</Badge>
-						)}
+						{quote.breakdown.surgePricing &&
+							quote.breakdown.surgePricing > 1 && (
+								<Badge variant="destructive" className="w-full justify-center">
+									{((quote.breakdown.surgePricing - 1) * 100).toFixed(0)}% surge
+									pricing
+								</Badge>
+							)}
 
-						<div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
-							<div className="font-medium mb-1">Rate breakdown:</div>
+						<div className="space-y-1 border-t pt-2 text-muted-foreground text-xs">
+							<div className="mb-1 font-medium">Rate breakdown:</div>
 							<div>Base: ${(quote.breakdown.baseRate / 100).toFixed(2)}</div>
 							<div>Per km: ${(quote.breakdown.perKmRate / 100).toFixed(2)}</div>
-							<div>Per min: ${(quote.breakdown.perMinuteRate / 100).toFixed(2)}</div>
-							<div>Min fare: ${(quote.breakdown.minimumFare / 100).toFixed(2)}</div>
+							<div>
+								Per min: ${(quote.breakdown.perMinuteRate / 100).toFixed(2)}
+							</div>
+							<div>
+								Min fare: ${(quote.breakdown.minimumFare / 100).toFixed(2)}
+							</div>
 						</div>
 					</div>
 				) : (
-					<div className="text-center text-muted-foreground py-8">
-						<Calculator className="h-8 w-8 mx-auto mb-2 opacity-50" />
-						<p className="text-sm">Enter route details and click "Calculate Quote" to see pricing</p>
+					<div className="py-8 text-center text-muted-foreground">
+						<Calculator className="mx-auto mb-2 h-8 w-8 opacity-50" />
+						<p className="text-sm">
+							Enter route details and click "Calculate Quote" to see pricing
+						</p>
 					</div>
 				)}
 			</CardContent>
 		</Card>
-	)
+	);
 }
-

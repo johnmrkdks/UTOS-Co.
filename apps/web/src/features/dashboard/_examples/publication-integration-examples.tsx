@@ -1,24 +1,29 @@
 /**
  * Publication System Integration Examples
- * 
+ *
  * This file demonstrates how to integrate the publication system components
  * into existing car and package management interfaces.
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { 
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { useState } from "react";
+import {
+	type BulkPublicationItem,
+	BulkPublicationManager,
+	type PublicationFilterState,
+	PublicationFilters,
+	PublicationStatsCard,
 	PublicationStatusBadge,
 	PublicationToggleButton,
-	PublicationStatsCard,
-	BulkPublicationManager,
-	PublicationFilters,
 	PublicationValidationPanel,
 	useTogglePublishCarMutation,
 	useTogglePublishPackageMutation,
-	type BulkPublicationItem,
-	type PublicationFilterState,
 } from "../_components/publication";
 
 // Example 1: Car Table Row with Publication Controls
@@ -84,7 +89,7 @@ export function PackageManagementWithPublication() {
 			hasValidationErrors: false,
 		},
 		{
-			id: "2", 
+			id: "2",
 			name: "City Tour Deluxe",
 			isPublished: false,
 			isAvailable: true,
@@ -104,7 +109,7 @@ export function PackageManagementWithPublication() {
 	return (
 		<div className="space-y-6">
 			{/* Publication Stats Overview */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 				<PublicationStatsCard
 					total={25}
 					published={18}
@@ -138,7 +143,10 @@ export function PackageManagementWithPublication() {
 				<CardContent>
 					<div className="space-y-4">
 						{packages.map((pkg) => (
-							<div key={pkg.id} className="flex items-center justify-between p-4 border rounded-lg">
+							<div
+								key={pkg.id}
+								className="flex items-center justify-between rounded-lg border p-4"
+							>
 								<div className="flex items-center gap-3">
 									<span className="font-medium">{pkg.name}</span>
 									<PublicationStatusBadge
@@ -152,7 +160,7 @@ export function PackageManagementWithPublication() {
 									isPublished={pkg.isPublished}
 									isAvailable={pkg.isAvailable}
 									type="package"
-									onTogglePublish={(isPublished) => 
+									onTogglePublish={(isPublished) =>
 										togglePublishMutation.mutate({ id: pkg.id, isPublished })
 									}
 									isLoading={togglePublishMutation.isPending}
@@ -179,7 +187,7 @@ export function CarEditFormWithValidation({ car }: { car: any }) {
 	};
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 			{/* Main Form (2/3 width) */}
 			<div className="lg:col-span-2">
 				<Card>
@@ -197,10 +205,7 @@ export function CarEditFormWithValidation({ car }: { car: any }) {
 
 			{/* Validation Panel (1/3 width) */}
 			<div className="lg:col-span-1">
-				<PublicationValidationPanel
-					data={car}
-					type="car"
-				/>
+				<PublicationValidationPanel data={car} type="car" />
 			</div>
 		</div>
 	);
@@ -210,7 +215,7 @@ export function CarEditFormWithValidation({ car }: { car: any }) {
 export function DashboardOverviewWithPublication() {
 	return (
 		<div className="space-y-6">
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{/* Publication Stats */}
 				<PublicationStatsCard
 					total={156}
@@ -219,7 +224,7 @@ export function DashboardOverviewWithPublication() {
 					publishedWithIssues={8}
 					type="cars"
 				/>
-				
+
 				<PublicationStatsCard
 					total={43}
 					published={38}
@@ -231,19 +236,21 @@ export function DashboardOverviewWithPublication() {
 				{/* Other dashboard metrics */}
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Total Bookings
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">1,234</div>
+						<div className="font-bold text-2xl">1,234</div>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Revenue</CardTitle>
+						<CardTitle className="font-medium text-sm">Revenue</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">$45,231</div>
+						<div className="font-bold text-2xl">$45,231</div>
 					</CardContent>
 				</Card>
 			</div>

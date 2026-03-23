@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const createCustomBookingSchema = z.object({
 	carId: z.string().min(1, "Please select a car"),
@@ -17,24 +17,23 @@ export const createCustomBookingSchema = z.object({
 	customerEmail: z.string().email().optional().or(z.literal("")),
 	passengerCount: z.number().int().min(1).max(8).default(1),
 	specialRequests: z.string().optional(),
-})
+});
 
-export type CreateCustomBookingForm = z.infer<typeof createCustomBookingSchema>
+export type CreateCustomBookingForm = z.infer<typeof createCustomBookingSchema>;
 
 export interface QuoteResult {
-	baseFare: number
-	distanceFare: number
-	timeFare: number
-	extraCharges: number
-	totalAmount: number
-	estimatedDistance: number
-	estimatedDuration: number
+	baseFare: number;
+	distanceFare: number;
+	timeFare: number;
+	extraCharges: number;
+	totalAmount: number;
+	estimatedDistance: number;
+	estimatedDuration: number;
 	breakdown: {
-		baseRate: number
-		perKmRate: number
-		perMinuteRate: number
-		minimumFare: number
-		surgePricing?: number
-	}
+		baseRate: number;
+		perKmRate: number;
+		perMinuteRate: number;
+		minimumFare: number;
+		surgePricing?: number;
+	};
 }
-

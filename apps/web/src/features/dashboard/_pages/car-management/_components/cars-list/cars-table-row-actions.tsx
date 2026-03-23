@@ -1,33 +1,40 @@
-import { Button } from "@workspace/ui/components/button"
+import type { Row } from "@tanstack/react-table";
+import { Button } from "@workspace/ui/components/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu"
-import type { Row } from "@tanstack/react-table"
-import { EditIcon, EyeIcon, MoreHorizontalIcon, TrashIcon, ToggleLeftIcon, ToggleRightIcon } from "lucide-react"
-import type { Car } from "server/types"
-import { useModal } from "@/hooks/use-modal"
-import { useUpdateCarMutation } from "../../_hooks/query/car/use-update-car-mutation"
+} from "@workspace/ui/components/dropdown-menu";
+import {
+	EditIcon,
+	EyeIcon,
+	MoreHorizontalIcon,
+	ToggleLeftIcon,
+	ToggleRightIcon,
+	TrashIcon,
+} from "lucide-react";
+import type { Car } from "server/types";
+import { useModal } from "@/hooks/use-modal";
+import { useUpdateCarMutation } from "../../_hooks/query/car/use-update-car-mutation";
 
 interface CarsTableRowActionsProps {
-	row: Row<Car>
+	row: Row<Car>;
 }
 
 export function CarsTableRowActions({ row }: CarsTableRowActionsProps) {
-	const car = row.original
-	const { openModal } = useModal()
-	const updateCarMutation = useUpdateCarMutation()
+	const car = row.original;
+	const { openModal } = useModal();
+	const updateCarMutation = useUpdateCarMutation();
 
 	const handleView = () => {
-		openModal("view-car", car)
-	}
+		openModal("view-car", car);
+	};
 
 	const handleEdit = () => {
-		openModal("edit-car", car)
-	}
+		openModal("edit-car", car);
+	};
 
 	const handleToggleAvailability = async () => {
 		try {
@@ -36,15 +43,15 @@ export function CarsTableRowActions({ row }: CarsTableRowActionsProps) {
 				data: {
 					isAvailable: !car.isAvailable,
 				},
-			})
+			});
 		} catch (error) {
-			console.error("Failed to toggle availability:", error)
+			console.error("Failed to toggle availability:", error);
 		}
-	}
+	};
 
 	const handleDelete = () => {
-		openModal("delete-car", car)
-	}
+		openModal("delete-car", car);
+	};
 
 	return (
 		<DropdownMenu>
@@ -90,5 +97,5 @@ export function CarsTableRowActions({ row }: CarsTableRowActionsProps) {
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
-	)
+	);
 }

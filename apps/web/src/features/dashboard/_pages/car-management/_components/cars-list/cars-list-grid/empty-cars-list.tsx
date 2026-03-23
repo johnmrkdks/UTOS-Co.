@@ -1,23 +1,24 @@
-import { CarIcon, SearchIcon } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
 import { useRouter } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import { CarIcon, SearchIcon } from "lucide-react";
 
 export function EmptyCarsList() {
 	const router = useRouter();
 
 	return (
-		<div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+		<div className="flex flex-col items-center justify-center px-4 py-16 text-center">
 			<div className="relative mb-6">
-				<div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
-					<CarIcon className="w-10 h-10 text-muted-foreground" />
+				<div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+					<CarIcon className="h-10 w-10 text-muted-foreground" />
 				</div>
-				<div className="absolute -top-1 -right-1 w-8 h-8 bg-background border-2 border-muted rounded-full flex items-center justify-center">
-					<SearchIcon className="w-4 h-4 text-muted-foreground" />
+				<div className="-top-1 -right-1 absolute flex h-8 w-8 items-center justify-center rounded-full border-2 border-muted bg-background">
+					<SearchIcon className="h-4 w-4 text-muted-foreground" />
 				</div>
 			</div>
-			<h3 className="text-lg font-semibold mb-2">No cars found</h3>
-			<p className="text-muted-foreground mb-6 max-w-sm">
-				We couldn't find any cars matching your criteria. Try adjusting your filters or search terms.
+			<h3 className="mb-2 font-semibold text-lg">No cars found</h3>
+			<p className="mb-6 max-w-sm text-muted-foreground">
+				We couldn't find any cars matching your criteria. Try adjusting your
+				filters or search terms.
 			</p>
 			<div className="flex gap-2">
 				<Button variant="outline" onClick={() => router.invalidate()}>
@@ -25,6 +26,5 @@ export function EmptyCarsList() {
 				</Button>
 			</div>
 		</div>
-	)
+	);
 }
-

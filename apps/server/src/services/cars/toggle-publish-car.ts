@@ -1,14 +1,16 @@
+import { eq, isNull, or } from "drizzle-orm";
+import { z } from "zod";
 import type { DB } from "@/db";
 import { cars, pricingConfig } from "@/db/schema";
-import { eq, or, isNull } from "drizzle-orm";
-import { z } from "zod";
 
 export const TogglePublishCarServiceSchema = z.object({
 	id: z.string(),
 	isPublished: z.boolean(),
 });
 
-export type TogglePublishCarService = z.infer<typeof TogglePublishCarServiceSchema>;
+export type TogglePublishCarService = z.infer<
+	typeof TogglePublishCarServiceSchema
+>;
 
 export async function togglePublishCarService(
 	db: DB,
@@ -23,13 +25,15 @@ export async function togglePublishCarService(
 			.limit(1);
 
 		if (existingPricingConfig.length === 0) {
-			throw new Error("Cannot publish car: Pricing configuration is required before publishing a vehicle. Please create a pricing configuration for this car first.");
+			throw new Error(
+				"Cannot publish car: Pricing configuration is required before publishing a vehicle. Please create a pricing configuration for this car first.",
+			);
 		}
 	}
 
 	const [updatedCar] = await db
 		.update(cars)
-		.set({ 
+		.set({
 			isPublished,
 			updatedAt: new Date(),
 		})

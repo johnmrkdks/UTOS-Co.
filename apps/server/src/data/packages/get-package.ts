@@ -1,7 +1,7 @@
-import type { DB } from "@/db";
-import { packages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { packages } from "@/db/schema";
 
 export const GetPackageSchema = z.object({
 	id: z.string(),

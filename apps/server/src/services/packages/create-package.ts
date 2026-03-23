@@ -1,24 +1,34 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createPackage } from "@/data/packages/create-package";
 import { getPackageByName } from "@/data/packages/get-package-by-name";
 import type { DB } from "@/db";
-import { type Package, type InsertPackage, InsertPackageSchema } from "@/schemas/shared";
+import {
+	type InsertPackage,
+	InsertPackageSchema,
+	type Package,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
-export const CreatePackageServiceSchema = InsertPackageSchema
+export const CreatePackageServiceSchema = InsertPackageSchema;
 
 export type CreatePackageParams = z.infer<typeof CreatePackageServiceSchema>;
 
 export async function createPackageService(db: DB, data: CreatePackageParams) {
-	console.log("🚀 createPackageService - Input data:", JSON.stringify(data, null, 2));
+	console.log(
+		"🚀 createPackageService - Input data:",
+		JSON.stringify(data, null, 2),
+	);
 
 	const packageName = await getPackageByName(db, data.name);
-	console.log("📦 Existing package with name check:", packageName ? "EXISTS" : "NOT_FOUND");
+	console.log(
+		"📦 Existing package with name check:",
+		packageName ? "EXISTS" : "NOT_FOUND",
+	);
 
 	if (packageName) {
 		console.log("❌ Package name already exists:", data.name);
-		throw ErrorFactory.duplicateEntry('Package', "name");
+		throw ErrorFactory.duplicateEntry("Package", "name");
 	}
 
 	const values = {
@@ -31,7 +41,10 @@ export async function createPackageService(db: DB, data: CreatePackageParams) {
 
 	try {
 		const newPackage = await createPackage(db, values);
-		console.log("✅ Package created successfully:", JSON.stringify(newPackage, null, 2));
+		console.log(
+			"✅ Package created successfully:",
+			JSON.stringify(newPackage, null, 2),
+		);
 		return newPackage;
 	} catch (error) {
 		console.error("❌ Database insertion failed:", error);

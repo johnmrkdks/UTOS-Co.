@@ -1,8 +1,8 @@
-import type { DB } from "@/db";
-import { bookings, offloadBookingDetails } from "@/db/sqlite/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { bookings, offloadBookingDetails } from "@/db/sqlite/schema";
 
 export const GetCompanyInvoiceDataSchema = z.object({
 	companyName: z.string().min(1, "Company is required"),
@@ -10,18 +10,25 @@ export const GetCompanyInvoiceDataSchema = z.object({
 	endDate: z.coerce.date(),
 });
 
-export type GetCompanyInvoiceDataInput = z.infer<typeof GetCompanyInvoiceDataSchema>;
+export type GetCompanyInvoiceDataInput = z.infer<
+	typeof GetCompanyInvoiceDataSchema
+>;
 
 /** Extract suburb from Australian-style address */
 function extractSuburb(address: string): string {
 	if (!address?.trim()) return address || "";
-	const match = address.match(/,\s*([^,]+?)\s+(?:NSW|VIC|QLD|WA|SA|TAS|NT|ACT)\s+\d{4}/i);
+	const match = address.match(
+		/,\s*([^,]+?)\s+(?:NSW|VIC|QLD|WA|SA|TAS|NT|ACT)\s+\d{4}/i,
+	);
 	if (match) return match[1].trim();
 	const parts = address.split(",").map((p) => p.trim());
 	return parts.length >= 2 ? parts[parts.length - 2] : address;
 }
 
-export async function getCompanyInvoiceDataService(db: DB, input: GetCompanyInvoiceDataInput) {
+export async function getCompanyInvoiceDataService(
+	db: DB,
+	input: GetCompanyInvoiceDataInput,
+) {
 	const { companyName, startDate, endDate } = input;
 
 	const startTs = Math.floor(startDate.getTime() / 1000);
@@ -43,14 +50,17 @@ export async function getCompanyInvoiceDataService(db: DB, input: GetCompanyInvo
 			vehicleType: offloadBookingDetails.vehicleType,
 		})
 		.from(bookings)
-		.innerJoin(offloadBookingDetails, eq(bookings.id, offloadBookingDetails.bookingId))
+		.innerJoin(
+			offloadBookingDetails,
+			eq(bookings.id, offloadBookingDetails.bookingId),
+		)
 		.where(
 			and(
 				eq(offloadBookingDetails.offloaderName, companyName),
 				eq(bookings.status, BookingStatusEnum.Completed),
 				sql`COALESCE(${bookings.serviceCompletedAt}, ${bookings.actualDropoffTime}, ${bookings.scheduledPickupTime}) >= ${startTs}`,
-				sql`COALESCE(${bookings.serviceCompletedAt}, ${bookings.actualDropoffTime}, ${bookings.scheduledPickupTime}) <= ${endTs}`
-			)
+				sql`COALESCE(${bookings.serviceCompletedAt}, ${bookings.actualDropoffTime}, ${bookings.scheduledPickupTime}) <= ${endTs}`,
+			),
 		)
 		.orderBy(bookings.scheduledPickupTime);
 

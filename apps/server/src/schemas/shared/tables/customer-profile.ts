@@ -1,10 +1,10 @@
-import { customerProfiles } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { customerProfiles } from "@/db/schema";
 
 export const CustomerProfileSchema = createSelectSchema(customerProfiles, {
 	dateOfBirth: z.union([z.date(), z.string()]).nullable(),
@@ -12,17 +12,23 @@ export const CustomerProfileSchema = createSelectSchema(customerProfiles, {
 	updatedAt: z.union([z.date(), z.string()]),
 });
 
-export const InsertCustomerProfileSchema = createInsertSchema(customerProfiles, {
-	dateOfBirth: z.union([z.date(), z.string()]).optional(),
-});
+export const InsertCustomerProfileSchema = createInsertSchema(
+	customerProfiles,
+	{
+		dateOfBirth: z.union([z.date(), z.string()]).optional(),
+	},
+);
 
-export const UpdateCustomerProfileSchema = createUpdateSchema(customerProfiles, {
-	dateOfBirth: z.union([z.date(), z.string()]).optional(),
-}).omit({ 
-	id: true, 
-	userId: true, 
+export const UpdateCustomerProfileSchema = createUpdateSchema(
+	customerProfiles,
+	{
+		dateOfBirth: z.union([z.date(), z.string()]).optional(),
+	},
+).omit({
+	id: true,
+	userId: true,
 	createdAt: true,
-	updatedAt: true 
+	updatedAt: true,
 });
 
 export type CustomerProfile = z.infer<typeof CustomerProfileSchema>;

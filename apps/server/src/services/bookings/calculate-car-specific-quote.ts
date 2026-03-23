@@ -1,8 +1,11 @@
-import type { DB } from "@/db";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { getDistanceMatrix, calculateHaversineDistance } from "@/lib/google-maps";
-import { eq, and, isNull } from "drizzle-orm";
-import { pricingConfig, cars } from "@/db/schema";
+import type { DB } from "@/db";
+import { cars, pricingConfig } from "@/db/schema";
+import {
+	calculateHaversineDistance,
+	getDistanceMatrix,
+} from "@/lib/google-maps";
 
 export const CalculateCarSpecificQuoteSchema = z.object({
 	carId: z.string().min(1, "Car ID is required"),
@@ -13,15 +16,21 @@ export const CalculateCarSpecificQuoteSchema = z.object({
 	destinationLatitude: z.number().optional(),
 	destinationLongitude: z.number().optional(),
 	scheduledPickupTime: z.coerce.date().optional().default(new Date()),
-	stops: z.array(z.object({
-		address: z.string(),
-		latitude: z.number().optional(),
-		longitude: z.number().optional(),
-		waitingTime: z.number().int().default(0), // in minutes
-	})).optional(),
+	stops: z
+		.array(
+			z.object({
+				address: z.string(),
+				latitude: z.number().optional(),
+				longitude: z.number().optional(),
+				waitingTime: z.number().int().default(0), // in minutes
+			}),
+		)
+		.optional(),
 });
 
-export type CalculateCarSpecificQuoteParams = z.infer<typeof CalculateCarSpecificQuoteSchema>;
+export type CalculateCarSpecificQuoteParams = z.infer<
+	typeof CalculateCarSpecificQuoteSchema
+>;
 
 export interface CarSpecificQuote {
 	firstKmFare: number;
@@ -46,9 +55,9 @@ export interface CarSpecificQuote {
 }
 
 export async function calculateCarSpecificQuoteService(
-	db: DB, 
+	db: DB,
 	data: CalculateCarSpecificQuoteParams,
-	env?: { GOOGLE_MAPS_API_KEY?: string }
+	env?: { GOOGLE_MAPS_API_KEY?: string },
 ): Promise<CarSpecificQuote> {
 	// Get the specific car details
 	const carResult = await db
@@ -62,8 +71,8 @@ export async function calculateCarSpecificQuoteService(
 				eq(cars.id, data.carId),
 				eq(cars.isPublished, true),
 				eq(cars.isActive, true),
-				eq(cars.isAvailable, true)
-			)
+				eq(cars.isAvailable, true),
+			),
 		)
 		.limit(1);
 
@@ -82,7 +91,9 @@ export async function calculateCarSpecificQuoteService(
 
 	// If no car-specific pricing exists, fallback to global pricing configuration
 	if (carPricingResult.length === 0) {
-		console.log(`No car-specific pricing found for car ${data.carId}, using global pricing configuration`);
+		console.log(
+			`No car-specific pricing found for car ${data.carId}, using global pricing configuration`,
+		);
 		carPricingResult = await db
 			.select()
 			.from(pricingConfig)
@@ -92,15 +103,16 @@ export async function calculateCarSpecificQuoteService(
 
 	// If still no pricing config found, try any pricing config as last resort
 	if (carPricingResult.length === 0) {
-		console.log(`No global pricing found, using any pricing configuration as fallback`);
-		carPricingResult = await db
-			.select()
-			.from(pricingConfig)
-			.limit(1);
+		console.log(
+			"No global pricing found, using any pricing configuration as fallback",
+		);
+		carPricingResult = await db.select().from(pricingConfig).limit(1);
 	}
 
 	if (carPricingResult.length === 0) {
-		throw new Error("No pricing configuration found. Please contact support or set up pricing configuration.");
+		throw new Error(
+			"No pricing configuration found. Please contact support or set up pricing configuration.",
+		);
 	}
 
 	const carPricing = carPricingResult[0];
@@ -113,41 +125,47 @@ export async function calculateCarSpecificQuoteService(
 		// Calculate distance and duration (same logic as instant quote)
 		const origins = [data.originAddress];
 		const destinations = [data.destinationAddress];
-		
+
 		// Add stops if provided
 		if (data.stops && data.stops.length > 0) {
 			let currentOrigin = data.originAddress;
-			
+
 			for (const stop of data.stops) {
-				const response = await getDistanceMatrix({
-					origins: [currentOrigin],
-					destinations: [stop.address],
-					mode: "driving",
-					units: "metric",
-					avoidHighways: false,
-					avoidTolls: false,
-				}, env);
-				
+				const response = await getDistanceMatrix(
+					{
+						origins: [currentOrigin],
+						destinations: [stop.address],
+						mode: "driving",
+						units: "metric",
+						avoidHighways: false,
+						avoidTolls: false,
+					},
+					env,
+				);
+
 				if (response.rows[0]?.elements[0]?.status === "OK") {
 					const element = response.rows[0].elements[0];
 					totalDistance += element.distance?.value || 0;
 					totalDuration += element.duration?.value || 0;
 					totalWaitingTime += stop.waitingTime;
 				}
-				
+
 				currentOrigin = stop.address;
 			}
-			
+
 			// Final segment
-			const finalResponse = await getDistanceMatrix({
-				origins: [currentOrigin],
-				destinations: [data.destinationAddress],
-				mode: "driving",
-				units: "metric",
-				avoidHighways: false,
-				avoidTolls: false,
-			}, env);
-			
+			const finalResponse = await getDistanceMatrix(
+				{
+					origins: [currentOrigin],
+					destinations: [data.destinationAddress],
+					mode: "driving",
+					units: "metric",
+					avoidHighways: false,
+					avoidTolls: false,
+				},
+				env,
+			);
+
 			if (finalResponse.rows[0]?.elements[0]?.status === "OK") {
 				const element = finalResponse.rows[0].elements[0];
 				totalDistance += element.distance?.value || 0;
@@ -155,14 +173,17 @@ export async function calculateCarSpecificQuoteService(
 			}
 		} else {
 			// Simple origin to destination
-			const response = await getDistanceMatrix({
-				origins,
-				destinations,
-				mode: "driving",
-				units: "metric",
-				avoidHighways: false,
-				avoidTolls: false,
-			}, env);
+			const response = await getDistanceMatrix(
+				{
+					origins,
+					destinations,
+					mode: "driving",
+					units: "metric",
+					avoidHighways: false,
+					avoidTolls: false,
+				},
+				env,
+			);
 
 			if (response.rows[0]?.elements[0]?.status === "OK") {
 				const element = response.rows[0].elements[0];
@@ -172,18 +193,21 @@ export async function calculateCarSpecificQuoteService(
 		}
 	} catch (error) {
 		console.warn("Google Maps API failed, using fallback calculation:", error);
-		
+
 		// Fallback calculation
-		if (data.originLatitude && data.originLongitude && 
-			data.destinationLatitude && data.destinationLongitude) {
-			
+		if (
+			data.originLatitude &&
+			data.originLongitude &&
+			data.destinationLatitude &&
+			data.destinationLongitude
+		) {
 			const fallback = calculateHaversineDistance(
 				data.originLatitude,
 				data.originLongitude,
 				data.destinationLatitude,
-				data.destinationLongitude
+				data.destinationLongitude,
 			);
-			
+
 			totalDistance = fallback.distanceKm * 1000;
 			totalDuration = fallback.durationSeconds;
 		} else {
@@ -201,13 +225,13 @@ export async function calculateCarSpecificQuoteService(
 
 	// Calculate fare components using simplified two-tier pricing (same as quote tester)
 	const distanceKm = totalDistance / 1000; // convert meters to km
-	
+
 	// Calculate using simplified two-tier pricing model (same logic as quote tester)
 	let firstKmFare = 0;
 	let additionalKmFare = 0;
 	let firstKmDistance = 0;
 	let additionalDistance = 0;
-	
+
 	if (distanceKm <= pricing.firstKmLimit) {
 		// Distance is within first tier - pay flat rate
 		firstKmFare = pricing.firstKmRate;
@@ -220,25 +244,27 @@ export async function calculateCarSpecificQuoteService(
 		additionalKmFare = additionalDistance * pricing.additionalKmRate;
 		firstKmDistance = pricing.firstKmLimit;
 	}
-	
+
 	// Ensure proper decimal formatting
-	firstKmFare = parseFloat(firstKmFare.toFixed(2));
-	additionalKmFare = parseFloat(additionalKmFare.toFixed(2));
-	
-	const totalAmount = parseFloat((firstKmFare + additionalKmFare).toFixed(2));
-	
+	firstKmFare = Number.parseFloat(firstKmFare.toFixed(2));
+	additionalKmFare = Number.parseFloat(additionalKmFare.toFixed(2));
+
+	const totalAmount = Number.parseFloat(
+		(firstKmFare + additionalKmFare).toFixed(2),
+	);
+
 	return {
 		firstKmFare,
 		additionalKmFare,
 		totalAmount,
-		estimatedDistance: parseFloat((totalDistance / 1000).toFixed(3)), // Convert meters to kilometers with 3 decimal precision
+		estimatedDistance: Number.parseFloat((totalDistance / 1000).toFixed(3)), // Convert meters to kilometers with 3 decimal precision
 		estimatedDuration: Math.round(totalDuration),
 		breakdown: {
 			firstKmRate: pricing.firstKmRate,
 			additionalKmRate: pricing.additionalKmRate,
-			totalDistance: parseFloat(distanceKm.toFixed(2)),
-			firstKmDistance: parseFloat(firstKmDistance.toFixed(2)),
-			additionalDistance: parseFloat(additionalDistance.toFixed(2)),
+			totalDistance: Number.parseFloat(distanceKm.toFixed(2)),
+			firstKmDistance: Number.parseFloat(firstKmDistance.toFixed(2)),
+			additionalDistance: Number.parseFloat(additionalDistance.toFixed(2)),
 		},
 		car: {
 			id: car.id,
@@ -247,4 +273,3 @@ export async function calculateCarSpecificQuoteService(
 		},
 	};
 }
-

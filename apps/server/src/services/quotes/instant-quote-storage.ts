@@ -1,7 +1,7 @@
+import { createId } from "@paralleldrive/cuid2";
+import { and, eq, gt, lt, sql } from "drizzle-orm";
 import type { DB } from "@/db";
 import { instantQuotes } from "@/db/schema";
-import { eq, and, gt, lt, sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 export interface SecureQuoteData {
 	// Route information
@@ -17,19 +17,19 @@ export interface SecureQuoteData {
 		longitude?: number;
 		waitingTime?: number;
 	}>;
-	
+
 	// Selected car
 	carId?: string;
-	
+
 	// Flexible quote calculations
 	firstKmFare: number;
 	additionalKmFare: number;
 	totalAmount: number;
-	
+
 	// Trip metrics
 	estimatedDistance: number; // in meters
 	estimatedDuration: number; // in seconds
-	
+
 	// Flexible pricing breakdown for transparency
 	breakdown: {
 		firstKmRate: number;
@@ -38,7 +38,7 @@ export interface SecureQuoteData {
 		firstKmDistance: number; // distance charged at first km rate
 		additionalDistance: number; // distance charged at per km rate
 	};
-	
+
 	// Quote metadata
 	scheduledPickupTime?: Date;
 }
@@ -65,11 +65,11 @@ export interface StoredQuoteData extends SecureQuoteData {
 export async function storeSecureQuote(
 	db: DB,
 	quoteData: SecureQuoteData,
-	clientInfo?: { ip?: string; userAgent?: string }
+	clientInfo?: { ip?: string; userAgent?: string },
 ): Promise<string> {
 	const quoteId = createId();
 	const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
-	
+
 	await db.insert(instantQuotes).values({
 		id: quoteId,
 		originAddress: quoteData.originAddress,
@@ -91,7 +91,7 @@ export async function storeSecureQuote(
 		clientIp: clientInfo?.ip,
 		userAgent: clientInfo?.userAgent,
 	});
-	
+
 	return quoteId;
 }
 
@@ -101,7 +101,7 @@ export async function storeSecureQuote(
  */
 export async function retrieveSecureQuote(
 	db: DB,
-	quoteId: string
+	quoteId: string,
 ): Promise<StoredQuoteData | null> {
 	const result = await db
 		.select({
@@ -129,21 +129,21 @@ export async function retrieveSecureQuote(
 		.where(
 			and(
 				eq(instantQuotes.id, quoteId),
-				gt(instantQuotes.expiresAt, new Date()) // Only return non-expired quotes
-			)
+				gt(instantQuotes.expiresAt, new Date()), // Only return non-expired quotes
+			),
 		)
 		.limit(1);
-	
+
 	if (!result.length) {
 		return null;
 	}
-	
+
 	const quote = result[0];
-	
+
 	// Parse JSON fields
 	const stops = quote.stops ? JSON.parse(quote.stops as string) : undefined;
 	const breakdown = JSON.parse(quote.breakdown as string);
-	
+
 	return {
 		id: quote.id,
 		originAddress: quote.originAddress,
@@ -171,7 +171,7 @@ export async function retrieveSecureQuote(
  */
 export async function retrieveSecureQuoteWithCar(
 	db: DB,
-	quoteId: string
+	quoteId: string,
 ): Promise<StoredQuoteData | null> {
 	const result = await db
 		.select({
@@ -200,21 +200,21 @@ export async function retrieveSecureQuoteWithCar(
 		.where(
 			and(
 				eq(instantQuotes.id, quoteId),
-				gt(instantQuotes.expiresAt, new Date()) // Only return non-expired quotes
-			)
+				gt(instantQuotes.expiresAt, new Date()), // Only return non-expired quotes
+			),
 		)
 		.limit(1);
-	
+
 	if (!result.length) {
 		return null;
 	}
-	
+
 	const quote = result[0];
-	
+
 	// Parse JSON fields
 	const stops = quote.stops ? JSON.parse(quote.stops as string) : undefined;
 	const breakdown = JSON.parse(quote.breakdown as string);
-	
+
 	return {
 		id: quote.id,
 		originAddress: quote.originAddress,
@@ -244,10 +244,8 @@ export async function retrieveSecureQuoteWithCar(
 export async function cleanupExpiredQuotes(db: DB): Promise<number> {
 	const result = await db
 		.delete(instantQuotes)
-		.where(
-			lt(instantQuotes.expiresAt, new Date())
-		);
-	
+		.where(lt(instantQuotes.expiresAt, new Date()));
+
 	// D1Result doesn't have a changes/rowsAffected property, so we return a generic success count
 	return 1; // Indicates operation completed successfully
 }

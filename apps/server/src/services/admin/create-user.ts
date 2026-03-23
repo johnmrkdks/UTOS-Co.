@@ -1,19 +1,26 @@
+import { createId } from "@paralleldrive/cuid2";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
-import { users, accounts } from "@/db/sqlite/schema";
+import { accounts, users } from "@/db/sqlite/schema";
 import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
-import { eq } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 /** Roles that Super Admin can create via User Management */
-export const CreateUserRoleEnum = z.enum([UserRoleEnum.User, UserRoleEnum.Admin]);
+export const CreateUserRoleEnum = z.enum([
+	UserRoleEnum.User,
+	UserRoleEnum.Admin,
+]);
 export type CreateUserRole = z.infer<typeof CreateUserRoleEnum>;
 
 export const CreateUserServiceSchema = z.object({
 	email: z.string().email("Invalid email format"),
 	name: z.string().min(2, "Name must be at least 2 characters"),
-	password: z.string().min(8, "Password must be at least 8 characters").optional().default("changeme"),
+	password: z
+		.string()
+		.min(8, "Password must be at least 8 characters")
+		.optional()
+		.default("changeme"),
 	role: CreateUserRoleEnum,
 });
 

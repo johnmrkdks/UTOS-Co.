@@ -1,18 +1,24 @@
-import { useState } from "react";
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Checkbox } from "@workspace/ui/components/checkbox";
 import { Badge } from "@workspace/ui/components/badge";
-import { 
-	Dialog, 
-	DialogContent, 
-	DialogDescription, 
-	DialogFooter, 
-	DialogHeader, 
-	DialogTitle, 
-	DialogTrigger 
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Checkbox } from "@workspace/ui/components/checkbox";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
 } from "@workspace/ui/components/dialog";
-import { Eye, EyeOff, Check, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Check, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export interface BulkPublicationItem {
@@ -41,21 +47,21 @@ export function BulkPublicationManager({
 }: BulkPublicationManagerProps) {
 	const [selectedItems, setSelectedItems] = useState<string[]>([]);
 	const [showDialog, setShowDialog] = useState(false);
-	const [pendingAction, setPendingAction] = useState<"publish" | "unpublish" | null>(null);
+	const [pendingAction, setPendingAction] = useState<
+		"publish" | "unpublish" | null
+	>(null);
 
-	const publishedItems = items.filter(item => item.isPublished);
-	const unpublishedItems = items.filter(item => !item.isPublished);
-	const itemsWithIssues = items.filter(item => item.hasValidationErrors);
+	const publishedItems = items.filter((item) => item.isPublished);
+	const unpublishedItems = items.filter((item) => !item.isPublished);
+	const itemsWithIssues = items.filter((item) => item.hasValidationErrors);
 
 	const handleSelectAll = (checked: boolean) => {
-		setSelectedItems(checked ? items.map(item => item.id) : []);
+		setSelectedItems(checked ? items.map((item) => item.id) : []);
 	};
 
 	const handleSelectItem = (itemId: string, checked: boolean) => {
-		setSelectedItems(prev => 
-			checked 
-				? [...prev, itemId]
-				: prev.filter(id => id !== itemId)
+		setSelectedItems((prev) =>
+			checked ? [...prev, itemId] : prev.filter((id) => id !== itemId),
 		);
 	};
 
@@ -82,8 +88,12 @@ export function BulkPublicationManager({
 		}
 	};
 
-	const selectedItemsDetails = items.filter(item => selectedItems.includes(item.id));
-	const selectedWithIssues = selectedItemsDetails.filter(item => item.hasValidationErrors);
+	const selectedItemsDetails = items.filter((item) =>
+		selectedItems.includes(item.id),
+	);
+	const selectedWithIssues = selectedItemsDetails.filter(
+		(item) => item.hasValidationErrors,
+	);
 
 	return (
 		<Card>
@@ -93,9 +103,13 @@ export function BulkPublicationManager({
 					<div className="flex gap-2">
 						<Badge variant="outline">{items.length} Total</Badge>
 						<Badge variant="default">{publishedItems.length} Published</Badge>
-						<Badge variant="secondary">{unpublishedItems.length} Unpublished</Badge>
+						<Badge variant="secondary">
+							{unpublishedItems.length} Unpublished
+						</Badge>
 						{itemsWithIssues.length > 0 && (
-							<Badge variant="destructive">{itemsWithIssues.length} With Issues</Badge>
+							<Badge variant="destructive">
+								{itemsWithIssues.length} With Issues
+							</Badge>
 						)}
 					</div>
 				</CardTitle>
@@ -116,7 +130,7 @@ export function BulkPublicationManager({
 							Select All ({selectedItems.length}/{items.length})
 						</label>
 					</div>
-					
+
 					<div className="flex gap-2">
 						<Button
 							size="sm"
@@ -124,7 +138,7 @@ export function BulkPublicationManager({
 							onClick={() => handleBulkAction("publish")}
 							disabled={selectedItems.length === 0 || isLoading}
 						>
-							<Eye className="h-4 w-4 mr-2" />
+							<Eye className="mr-2 h-4 w-4" />
 							Publish Selected
 						</Button>
 						<Button
@@ -133,45 +147,45 @@ export function BulkPublicationManager({
 							onClick={() => handleBulkAction("unpublish")}
 							disabled={selectedItems.length === 0 || isLoading}
 						>
-							<EyeOff className="h-4 w-4 mr-2" />
+							<EyeOff className="mr-2 h-4 w-4" />
 							Unpublish Selected
 						</Button>
 					</div>
 				</div>
 
 				{/* Items List */}
-				<div className="max-h-64 overflow-y-auto border rounded-lg">
+				<div className="max-h-64 overflow-y-auto rounded-lg border">
 					<div className="space-y-0 divide-y">
 						{items.map((item) => (
 							<div key={item.id} className="flex items-center space-x-3 p-3">
 								<Checkbox
 									checked={selectedItems.includes(item.id)}
-									onCheckedChange={(checked) => 
+									onCheckedChange={(checked) =>
 										handleSelectItem(item.id, checked as boolean)
 									}
 								/>
-								<div className="flex-1 min-w-0">
+								<div className="min-w-0 flex-1">
 									<div className="flex items-center justify-between">
-										<p className="text-sm font-medium truncate">{item.name}</p>
+										<p className="truncate font-medium text-sm">{item.name}</p>
 										<div className="flex items-center gap-2">
 											{item.hasValidationErrors && (
 												<AlertTriangle className="h-4 w-4 text-amber-500" />
 											)}
 											{item.isPublished ? (
 												<Badge variant="default" className="text-xs">
-													<Eye className="h-3 w-3 mr-1" />
+													<Eye className="mr-1 h-3 w-3" />
 													Published
 												</Badge>
 											) : (
 												<Badge variant="secondary" className="text-xs">
-													<EyeOff className="h-3 w-3 mr-1" />
+													<EyeOff className="mr-1 h-3 w-3" />
 													Unpublished
 												</Badge>
 											)}
 										</div>
 									</div>
 									{item.hasValidationErrors && (
-										<p className="text-xs text-amber-600 mt-1">
+										<p className="mt-1 text-amber-600 text-xs">
 											{item.validationErrors?.join(", ")}
 										</p>
 									)}
@@ -186,22 +200,30 @@ export function BulkPublicationManager({
 					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>
-								{pendingAction === "publish" ? "Publish" : "Unpublish"} {selectedItems.length} {type}?
+								{pendingAction === "publish" ? "Publish" : "Unpublish"}{" "}
+								{selectedItems.length} {type}?
 							</DialogTitle>
 							<DialogDescription>
-								This will {pendingAction === "publish" ? "make visible to customers" : "hide from customers"} the selected {type}.
+								This will{" "}
+								{pendingAction === "publish"
+									? "make visible to customers"
+									: "hide from customers"}{" "}
+								the selected {type}.
 							</DialogDescription>
 						</DialogHeader>
 
 						{selectedWithIssues.length > 0 && pendingAction === "publish" && (
-							<div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
-								<div className="flex items-center gap-2 text-amber-700 font-medium text-sm">
+							<div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+								<div className="flex items-center gap-2 font-medium text-amber-700 text-sm">
 									<AlertTriangle className="h-4 w-4" />
-									Warning: {selectedWithIssues.length} items have validation issues
+									Warning: {selectedWithIssues.length} items have validation
+									issues
 								</div>
-								<ul className="mt-2 text-sm text-amber-600 space-y-1">
+								<ul className="mt-2 space-y-1 text-amber-600 text-sm">
 									{selectedWithIssues.slice(0, 3).map((item) => (
-										<li key={item.id}>• {item.name}: {item.validationErrors?.join(", ")}</li>
+										<li key={item.id}>
+											• {item.name}: {item.validationErrors?.join(", ")}
+										</li>
 									))}
 									{selectedWithIssues.length > 3 && (
 										<li>• And {selectedWithIssues.length - 3} more...</li>
@@ -216,11 +238,12 @@ export function BulkPublicationManager({
 							</Button>
 							<Button onClick={confirmBulkAction} disabled={isLoading}>
 								{pendingAction === "publish" ? (
-									<Eye className="h-4 w-4 mr-2" />
+									<Eye className="mr-2 h-4 w-4" />
 								) : (
-									<EyeOff className="h-4 w-4 mr-2" />
+									<EyeOff className="mr-2 h-4 w-4" />
 								)}
-								{pendingAction === "publish" ? "Publish" : "Unpublish"} {selectedItems.length} {type}
+								{pendingAction === "publish" ? "Publish" : "Unpublish"}{" "}
+								{selectedItems.length} {type}
 							</Button>
 						</DialogFooter>
 					</DialogContent>

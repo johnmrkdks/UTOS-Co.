@@ -19,7 +19,7 @@ export type BookingForDriverShare = {
 
 export function computeDriverShare(
 	booking: BookingForDriverShare,
-	commissionRate: number
+	commissionRate: number,
 ): number {
 	const totalAmount = booking.finalAmount ?? booking.quotedAmount ?? 0;
 
@@ -34,8 +34,12 @@ export function computeDriverShare(
 	}
 
 	// Commission base = total amount minus toll and parking (excluded from driver share)
-	const commissionBase = Math.max(0, totalAmount - tollCharges - parkingCharges);
-	const driverShare = Math.round((commissionBase * commissionRate) / 100 * 100) / 100;
+	const commissionBase = Math.max(
+		0,
+		totalAmount - tollCharges - parkingCharges,
+	);
+	const driverShare =
+		Math.round(((commissionBase * commissionRate) / 100) * 100) / 100;
 
 	return driverShare;
 }

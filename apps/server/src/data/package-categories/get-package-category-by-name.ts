@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { packageCategories } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getPackageCategoryByName(db: DB, name: string) {
 	const category = await db

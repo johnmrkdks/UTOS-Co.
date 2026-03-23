@@ -1,6 +1,6 @@
 import { DataTable } from "@workspace/ui/components/data-table";
+import { useGetCarModelsWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-get-car-models-with-enriched-data-query";
 import { modelTableColumns } from "./model-table-columns";
-import { useGetCarModelsWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-get-car-models-with-enriched-data-query"
 
 export function ModelTableList() {
 	const { data, isLoading } = useGetCarModelsWithEnrichedDataQuery({});
@@ -13,5 +13,5 @@ export function ModelTableList() {
 			loadingRowCount={5}
 			pageSize={5}
 		/>
-	)
+	);
 }

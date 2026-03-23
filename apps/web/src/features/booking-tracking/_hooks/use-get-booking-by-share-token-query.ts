@@ -1,9 +1,13 @@
-import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/trpc";
 
-export const useGetBookingByShareTokenQuery = (shareToken: string | undefined) => {
+export const useGetBookingByShareTokenQuery = (
+	shareToken: string | undefined,
+) => {
 	return useQuery({
-		...trpc.bookings.getByShareToken.queryOptions({ shareToken: shareToken ?? "" }),
+		...trpc.bookings.getByShareToken.queryOptions({
+			shareToken: shareToken ?? "",
+		}),
 		enabled: !!shareToken && shareToken.length > 0,
 	});
 };

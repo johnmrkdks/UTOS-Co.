@@ -1,9 +1,12 @@
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { publicProcedure, router } from "@/trpc/init";
 import { getMailService } from "@workspace/mail";
-import { sendDriverAssignmentNotification, sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
+import { z } from "zod";
 import { BUSINESS_INFO } from "@/constants/business-info";
+import {
+	sendDriverAssignmentNotification,
+	sendTripStatusNotification,
+} from "@/services/notifications/booking-email-notification-service";
+import { publicProcedure, router } from "@/trpc/init";
 
 const sendEmailSchema = z.object({
 	to: z.string().email(),
@@ -108,7 +111,7 @@ export const mailRouter = router({
 				const success = await mailService.sendAccountVerification(
 					input.to,
 					input.verificationToken,
-					input.baseUrl
+					input.baseUrl,
 				);
 
 				if (!success) {
@@ -118,7 +121,10 @@ export const mailRouter = router({
 					});
 				}
 
-				return { success: true, message: "Verification email sent successfully" };
+				return {
+					success: true,
+					message: "Verification email sent successfully",
+				};
 			} catch (error) {
 				console.error("Error in sendAccountVerification:", error);
 				throw new TRPCError({
@@ -136,7 +142,7 @@ export const mailRouter = router({
 				const success = await mailService.sendPasswordReset(
 					input.to,
 					input.resetToken,
-					input.baseUrl
+					input.baseUrl,
 				);
 
 				if (!success) {
@@ -146,7 +152,10 @@ export const mailRouter = router({
 					});
 				}
 
-				return { success: true, message: "Password reset email sent successfully" };
+				return {
+					success: true,
+					message: "Password reset email sent successfully",
+				};
 			} catch (error) {
 				console.error("Error in sendPasswordReset:", error);
 				throw new TRPCError({
@@ -164,7 +173,7 @@ export const mailRouter = router({
 				const success = await mailService.sendDriverOnboarding(
 					input.to,
 					input.driverName,
-					input.loginUrl
+					input.loginUrl,
 				);
 
 				if (!success) {
@@ -174,7 +183,10 @@ export const mailRouter = router({
 					});
 				}
 
-				return { success: true, message: "Driver onboarding email sent successfully" };
+				return {
+					success: true,
+					message: "Driver onboarding email sent successfully",
+				};
 			} catch (error) {
 				console.error("Error in sendDriverOnboarding:", error);
 				throw new TRPCError({
@@ -193,7 +205,7 @@ export const mailRouter = router({
 					input.to,
 					input.customerName,
 					input.bookingId,
-					input.invoiceData
+					input.invoiceData,
 				);
 
 				if (!success) {
@@ -221,7 +233,7 @@ export const mailRouter = router({
 				const success = await mailService.sendBookingConfirmation(
 					input.to,
 					input.customerName,
-					input.bookingDetails
+					input.bookingDetails,
 				);
 
 				if (!success) {
@@ -231,7 +243,10 @@ export const mailRouter = router({
 					});
 				}
 
-				return { success: true, message: "Booking confirmation email sent successfully" };
+				return {
+					success: true,
+					message: "Booking confirmation email sent successfully",
+				};
 			} catch (error) {
 				console.error("Error in sendBookingConfirmation:", error);
 				throw new TRPCError({
@@ -243,9 +258,11 @@ export const mailRouter = router({
 
 	// Test endpoint for admin testing
 	testEmailConnection: publicProcedure
-		.input(z.object({
-			testEmail: z.string().email(),
-		}))
+		.input(
+			z.object({
+				testEmail: z.string().email(),
+			}),
+		)
 		.mutation(async ({ input, ctx }) => {
 			let mailService: any = null;
 			try {
@@ -256,15 +273,23 @@ export const mailRouter = router({
 					// Validate configuration first
 					const config = ctx.env;
 					const requiredEnvVars = [
-						'GOOGLE_CLIENT_ID', 'GMAIL_CLIENT_ID',
-						'GOOGLE_CLIENT_SECRET', 'GMAIL_CLIENT_SECRET',
-						'GOOGLE_EMAIL_REFRESH_TOKEN', 'GMAIL_REFRESH_TOKEN',
-						'GOOGLE_EMAIL_USER', 'GMAIL_USER'
+						"GOOGLE_CLIENT_ID",
+						"GMAIL_CLIENT_ID",
+						"GOOGLE_CLIENT_SECRET",
+						"GMAIL_CLIENT_SECRET",
+						"GOOGLE_EMAIL_REFRESH_TOKEN",
+						"GMAIL_REFRESH_TOKEN",
+						"GOOGLE_EMAIL_USER",
+						"GMAIL_USER",
 					];
 
-					const hasRequiredConfig = requiredEnvVars.some(varName => (config as any)[varName]);
+					const hasRequiredConfig = requiredEnvVars.some(
+						(varName) => (config as any)[varName],
+					);
 					if (!hasRequiredConfig) {
-						throw new Error("Missing required email configuration environment variables");
+						throw new Error(
+							"Missing required email configuration environment variables",
+						);
 					}
 
 					const success = await mailService.sendEmail({
@@ -291,7 +316,10 @@ export const mailRouter = router({
 
 				// Race with timeout
 				const timeoutPromise = new Promise<boolean>((_, reject) => {
-					setTimeout(() => reject(new Error('Email test timeout after 60 seconds')), 60000);
+					setTimeout(
+						() => reject(new Error("Email test timeout after 60 seconds")),
+						60000,
+					);
 				});
 
 				const success = await Promise.race([testEmailPromise, timeoutPromise]);
@@ -307,13 +335,13 @@ export const mailRouter = router({
 					success: true,
 					message: "Test email sent successfully",
 					timestamp: new Date().toISOString(),
-					recipient: input.testEmail
+					recipient: input.testEmail,
 				};
 			} catch (error) {
 				console.error("Error in testEmailConnection:", error);
 
 				// Cleanup on error
-				if (mailService && typeof mailService.cleanup === 'function') {
+				if (mailService && typeof mailService.cleanup === "function") {
 					try {
 						await mailService.cleanup();
 					} catch (cleanupError) {
@@ -324,13 +352,19 @@ export const mailRouter = router({
 				// Provide more specific error messages
 				let errorMessage = "Failed to send test email";
 				if (error instanceof Error) {
-					if (error.message.includes('timeout')) {
-						errorMessage = "Email test timed out - possible network connectivity issue";
-					} else if (error.message.includes('IPv4') || error.message.includes('resolve')) {
-						errorMessage = "Network connectivity issue - unable to resolve email server";
-					} else if (error.message.includes('authentication')) {
-						errorMessage = "Email authentication failed - check OAuth2 credentials";
-					} else if (error.message.includes('Missing required')) {
+					if (error.message.includes("timeout")) {
+						errorMessage =
+							"Email test timed out - possible network connectivity issue";
+					} else if (
+						error.message.includes("IPv4") ||
+						error.message.includes("resolve")
+					) {
+						errorMessage =
+							"Network connectivity issue - unable to resolve email server";
+					} else if (error.message.includes("authentication")) {
+						errorMessage =
+							"Email authentication failed - check OAuth2 credentials";
+					} else if (error.message.includes("Missing required")) {
 						errorMessage = error.message;
 					} else {
 						errorMessage = `Email service error: ${error.message}`;
@@ -367,7 +401,10 @@ export const mailRouter = router({
 				console.error("Error in sendDriverAssignmentNotification:", error);
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: error instanceof Error ? error.message : "Failed to send driver assignment notification",
+					message:
+						error instanceof Error
+							? error.message
+							: "Failed to send driver assignment notification",
 				});
 			}
 		}),
@@ -395,7 +432,10 @@ export const mailRouter = router({
 				console.error("Error in sendTripStatusNotification:", error);
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: error instanceof Error ? error.message : "Failed to send trip status notification",
+					message:
+						error instanceof Error
+							? error.message
+							: "Failed to send trip status notification",
 				});
 			}
 		}),

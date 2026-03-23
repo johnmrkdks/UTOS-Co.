@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { eq, or, sql } from "drizzle-orm";
+import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
 import * as schema from "@/db/sqlite/schema";
@@ -31,7 +31,9 @@ export async function deleteUserService(db: DB, input: DeleteUserServiceInput) {
 			.from(schema.users)
 			.where(eq(schema.users.role, UserRoleEnum.SuperAdmin));
 		if ((superAdminCount[0]?.count ?? 0) <= 1) {
-			throw new Error("Cannot delete the last Super Admin. Promote another user first.");
+			throw new Error(
+				"Cannot delete the last Super Admin. Promote another user first.",
+			);
 		}
 	}
 
@@ -56,12 +58,14 @@ export async function deleteUserService(db: DB, input: DeleteUserServiceInput) {
 			.where(
 				or(
 					eq(schema.drivers.approvedBy, userId),
-					eq(schema.drivers.verifiedBy, userId)
-				)
+					eq(schema.drivers.verifiedBy, userId),
+				),
 			);
 
 		// Delete driver record
-		await db.delete(schema.drivers).where(eq(schema.drivers.id, driverRecord.id));
+		await db
+			.delete(schema.drivers)
+			.where(eq(schema.drivers.id, driverRecord.id));
 	}
 
 	// Delete invoice sent logs (references user by sentByUserId)
@@ -76,7 +80,9 @@ export async function deleteUserService(db: DB, input: DeleteUserServiceInput) {
 	await db.delete(schema.accounts).where(eq(schema.accounts.userId, userId));
 
 	// Delete customer profiles
-	await db.delete(schema.customerProfiles).where(eq(schema.customerProfiles.userId, userId));
+	await db
+		.delete(schema.customerProfiles)
+		.where(eq(schema.customerProfiles.userId, userId));
 
 	// Delete ratings
 	await db.delete(schema.ratings).where(eq(schema.ratings.userId, userId));

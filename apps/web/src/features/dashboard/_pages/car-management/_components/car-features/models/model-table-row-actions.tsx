@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarModel } from "server/types"
-import { EditModelDialog } from "./edit-model-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarModel } from "server/types";
 import { DeleteModelDialog } from "./delete-model-dialog";
+import { EditModelDialog } from "./edit-model-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function ModelTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function ModelTableRowActions<TData>({
 			<EditModelDialog model={model} />
 			<DeleteModelDialog model={model} />
 		</div>
-	)
+	);
 }

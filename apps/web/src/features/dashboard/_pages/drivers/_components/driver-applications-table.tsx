@@ -1,13 +1,30 @@
-import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@workspace/ui/components/button";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@workspace/ui/components/avatar";
 import { Badge } from "@workspace/ui/components/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
+import { Button } from "@workspace/ui/components/button";
 import { DataTable } from "@workspace/ui/components/data-table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
-import { DriverApplicationReview } from "./driver-application-review";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@workspace/ui/components/dialog";
+import {
+	CheckCircle,
+	Clock,
+	Eye,
+	FileText,
+	Mail,
+	MailCheck,
+	XCircle,
+} from "lucide-react";
+import { useState } from "react";
 import { useGetDriversByStatusQuery } from "../_hooks/query/use-get-drivers-by-status-query";
-import { Eye, Clock, CheckCircle, XCircle, FileText, Mail, MailCheck } from "lucide-react";
+import { DriverApplicationReview } from "./driver-application-review";
 
 interface DriverApplicationData {
 	id: string;
@@ -43,14 +60,27 @@ interface DriverApplicationData {
 }
 
 interface DriverApplicationsTableProps {
-	status?: "email_verification_pending" | "email_verified" | "pending" | "documents_uploaded" | "approved" | "rejected";
+	status?:
+		| "email_verification_pending"
+		| "email_verified"
+		| "pending"
+		| "documents_uploaded"
+		| "approved"
+		| "rejected";
 }
 
-export function DriverApplicationsTable({ status = "documents_uploaded" }: DriverApplicationsTableProps) {
-	const [selectedApplication, setSelectedApplication] = useState<DriverApplicationData | null>(null);
+export function DriverApplicationsTable({
+	status = "documents_uploaded",
+}: DriverApplicationsTableProps) {
+	const [selectedApplication, setSelectedApplication] =
+		useState<DriverApplicationData | null>(null);
 	const [currentAdminId] = useState("admin_mock_123"); // In real app, get from auth context
 
-	const { data: applications = [], isLoading, refetch } = useGetDriversByStatusQuery(status);
+	const {
+		data: applications = [],
+		isLoading,
+		refetch,
+	} = useGetDriversByStatusQuery(status);
 
 	const formatDate = (date: Date | string) => {
 		return new Date(date).toLocaleDateString();
@@ -58,15 +88,36 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 
 	const getStatusBadge = (status: string) => {
 		const config = {
-			email_verification_pending: { variant: "secondary" as const, icon: Mail, label: "Email Pending" },
-			email_verified: { variant: "default" as const, icon: MailCheck, label: "Email Verified" },
+			email_verification_pending: {
+				variant: "secondary" as const,
+				icon: Mail,
+				label: "Email Pending",
+			},
+			email_verified: {
+				variant: "default" as const,
+				icon: MailCheck,
+				label: "Email Verified",
+			},
 			pending: { variant: "secondary" as const, icon: Clock, label: "Pending" },
-			documents_uploaded: { variant: "default" as const, icon: FileText, label: "Under Review" },
-			approved: { variant: "default" as const, icon: CheckCircle, label: "Approved" },
-			rejected: { variant: "destructive" as const, icon: XCircle, label: "Rejected" },
+			documents_uploaded: {
+				variant: "default" as const,
+				icon: FileText,
+				label: "Under Review",
+			},
+			approved: {
+				variant: "default" as const,
+				icon: CheckCircle,
+				label: "Approved",
+			},
+			rejected: {
+				variant: "destructive" as const,
+				icon: XCircle,
+				label: "Rejected",
+			},
 		};
 
-		const statusConfig = config[status as keyof typeof config] || config.pending;
+		const statusConfig =
+			config[status as keyof typeof config] || config.pending;
 		const Icon = statusConfig.icon;
 
 		return (
@@ -98,17 +149,25 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 						<Avatar className="h-10 w-10">
 							<AvatarImage src={application.profilePhotoUrl || undefined} />
 							<AvatarFallback>
-								{application.userName?.charAt(0) || 'D'}
+								{application.userName?.charAt(0) || "D"}
 							</AvatarFallback>
 						</Avatar>
 						<div>
-							<div className="font-medium">{application.userName || 'Unknown'}</div>
-							<div className="text-sm text-muted-foreground flex items-center gap-1">
+							<div className="font-medium">
+								{application.userName || "Unknown"}
+							</div>
+							<div className="flex items-center gap-1 text-muted-foreground text-sm">
 								{application.userEmail}
 								{application.userEmailVerified ? (
-									<MailCheck className="h-3 w-3 text-green-500" title="Email verified" />
+									<MailCheck
+										className="h-3 w-3 text-green-500"
+										title="Email verified"
+									/>
 								) : (
-									<Mail className="h-3 w-3 text-yellow-500" title="Email not verified" />
+									<Mail
+										className="h-3 w-3 text-yellow-500"
+										title="Email not verified"
+									/>
 								)}
 							</div>
 						</div>
@@ -159,7 +218,7 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 						size="sm"
 						onClick={() => setSelectedApplication(application)}
 					>
-						<Eye className="h-4 w-4 mr-1" />
+						<Eye className="mr-1 h-4 w-4" />
 						Review
 					</Button>
 				);
@@ -173,7 +232,9 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 	};
 
 	if (isLoading) {
-		return <div className="flex justify-center p-8">Loading applications...</div>;
+		return (
+			<div className="flex justify-center p-8">Loading applications...</div>
+		);
 	}
 
 	return (
@@ -187,7 +248,10 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 
 			{/* Review Dialog */}
 			<Dialog open={!!selectedApplication} onOpenChange={handleCloseReview}>
-				<DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+				<DialogContent
+					className="max-h-[90vh] max-w-6xl overflow-y-auto"
+					showCloseButton={false}
+				>
 					<DialogHeader>
 						<DialogTitle>Driver Application Review</DialogTitle>
 					</DialogHeader>

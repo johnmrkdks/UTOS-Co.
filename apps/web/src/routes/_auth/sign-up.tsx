@@ -1,11 +1,11 @@
-import { Logo } from "@/components/logo";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import placeholder from "@/assets/placeholder.svg";
-import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
-import SignUpForm from "@/features/auth/_components/sign-up-form";
-import { redirectIfAuthenticated } from "@/utils/auth";
-import { Car, Shield, Star, Clock, Users } from "lucide-react";
+import { Car, Clock, Shield, Star, Users } from "lucide-react";
 import { z } from "zod";
+import placeholder from "@/assets/placeholder.svg";
+import { Logo } from "@/components/logo";
+import SignUpForm from "@/features/auth/_components/sign-up-form";
+import { SydneyImageCover } from "@/features/auth/_components/sydney-image-cover";
+import { redirectIfAuthenticated } from "@/utils/auth";
 
 const signUpSearchSchema = z.object({
 	redirect: z.string().optional(),
@@ -26,85 +26,117 @@ function RouteComponent() {
 	return (
 		<div className="grid min-h-svh lg:grid-cols-2">
 			{/* Left Panel - Sign Up Form */}
-			<div className="bg-beige flex flex-col gap-8 p-6 md:p-10">
+			<div className="flex flex-col gap-8 bg-beige p-6 md:p-10">
 				{/* Header */}
-				<div className="flex justify-between items-center">
-					<Link to="/" className="flex items-center gap-3 font-medium group">
+				<div className="flex items-center justify-between">
+					<Link to="/" className="group flex items-center gap-3 font-medium">
 						<Logo />
 						<div className="hidden md:block">
-							<h2 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+							<h2 className="font-bold text-foreground text-lg transition-colors group-hover:text-primary">
 								Down Under Chauffeur
 							</h2>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-muted-foreground text-xs">
 								Sydney's Premier Luxury Service
 							</p>
 						</div>
 					</Link>
-					<div className="text-center text-xs md:text-sm text-muted-foreground">
+					<div className="text-center text-muted-foreground text-xs md:text-sm">
 						Already have an account?{" "}
-						<Link to="/sign-in" className="text-primary font-semibold hover:text-primary/80 transition-colors">
+						<Link
+							to="/sign-in"
+							className="font-semibold text-primary transition-colors hover:text-primary/80"
+						>
 							Sign in
 						</Link>
 					</div>
 				</div>
 
 				{/* Welcome Section */}
-				<div className="text-center space-y-4">
-					<div className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-xs md:text-sm font-medium">
-						<Users className="w-4 h-4 mr-2" />
+				<div className="space-y-4 text-center">
+					<div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-2 font-medium text-primary text-xs md:text-sm">
+						<Users className="mr-2 h-4 w-4" />
 						Join Our Premium Service
 					</div>
-					<h1 className="text-2xl md:text-3xl font-bold text-foreground">
+					<h1 className="font-bold text-2xl text-foreground md:text-3xl">
 						Create your account
 					</h1>
-					<p className="text-sm md:text-base text-muted-foreground">
-						Join thousands of satisfied clients who trust us for luxury transportation
+					<p className="text-muted-foreground text-sm md:text-base">
+						Join thousands of satisfied clients who trust us for luxury
+						transportation
 					</p>
 				</div>
 
 				{/* Form Section */}
 				<div className="flex flex-1 items-start justify-center">
 					<div className="w-full max-w-md">
-						<SignUpForm className="bg-card p-6 md:p-8 rounded-lg border border-border" />
+						<SignUpForm className="rounded-lg border border-border bg-card p-6 md:p-8" />
 					</div>
 				</div>
 
 				{/* Footer */}
-				<div className="text-center text-xs text-muted-foreground border-t border-border/30 pt-4">
-					<p>© 2024 Down Under Chauffeur. Premium luxury transportation in Sydney.</p>
-					<div className="flex justify-center gap-4 mt-2">
-						<Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-						<Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms</Link>
-						<Link to="/contact-us" className="hover:text-primary transition-colors">Support</Link>
+				<div className="border-border/30 border-t pt-4 text-center text-muted-foreground text-xs">
+					<p>
+						© 2024 Down Under Chauffeur. Premium luxury transportation in
+						Sydney.
+					</p>
+					<div className="mt-2 flex justify-center gap-4">
+						<Link
+							to="/privacy"
+							className="transition-colors hover:text-primary"
+						>
+							Privacy
+						</Link>
+						<Link
+							to="/terms-and-conditions"
+							className="transition-colors hover:text-primary"
+						>
+							Terms
+						</Link>
+						<Link
+							to="/contact-us"
+							className="transition-colors hover:text-primary"
+						>
+							Support
+						</Link>
 					</div>
 				</div>
 			</div>
 
 			{/* Right Panel - Image */}
-			<div className="bg-gradient-to-br from-foreground to-primary/20 relative hidden lg:block">
+			<div className="relative hidden bg-gradient-to-br from-foreground to-primary/20 lg:block">
 				<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-				<div className="absolute top-8 left-8 text-beige z-10">
-					<h3 className="text-2xl font-bold mb-2">Down Under Chauffeur</h3>
-					<p className="text-beige/80 text-sm">Sydney's Premier Luxury Transportation</p>
+				<div className="absolute top-8 left-8 z-10 text-beige">
+					<h3 className="mb-2 font-bold text-2xl">Down Under Chauffeur</h3>
+					<p className="text-beige/80 text-sm">
+						Sydney's Premier Luxury Transportation
+					</p>
 				</div>
 				<SydneyImageCover className="absolute inset-0 h-full w-full object-cover opacity-60" />
 
 				{/* Statistics */}
-				<div className="absolute bottom-8 left-8 right-8 text-beige z-10">
-					<div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-						<h4 className="text-lg font-bold mb-4">Join Our Premium Community</h4>
+				<div className="absolute right-8 bottom-8 left-8 z-10 text-beige">
+					<div className="rounded-xl border border-white/10 bg-black/20 p-6 backdrop-blur-sm">
+						<h4 className="mb-4 font-bold text-lg">
+							Join Our Premium Community
+						</h4>
 						<div className="grid grid-cols-3 gap-4 text-center">
 							<div>
-								<div className="text-2xl font-bold text-primary-secondary">1000+</div>
-								<div className="text-xs text-beige/70">Happy Clients</div>
+								<div className="font-bold text-2xl text-primary-secondary">
+									1000+
+								</div>
+								<div className="text-beige/70 text-xs">Happy Clients</div>
 							</div>
 							<div>
-								<div className="text-2xl font-bold text-primary-secondary">5.0</div>
-								<div className="text-xs text-beige/70">Star Rating</div>
+								<div className="font-bold text-2xl text-primary-secondary">
+									5.0
+								</div>
+								<div className="text-beige/70 text-xs">Star Rating</div>
 							</div>
 							<div>
-								<div className="text-2xl font-bold text-primary-secondary">15+</div>
-								<div className="text-xs text-beige/70">Luxury Vehicles</div>
+								<div className="font-bold text-2xl text-primary-secondary">
+									15+
+								</div>
+								<div className="text-beige/70 text-xs">Luxury Vehicles</div>
 							</div>
 						</div>
 					</div>

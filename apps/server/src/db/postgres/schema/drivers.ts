@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, text, timestamp, numeric } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	numeric,
+	pgTable,
+	text,
+	timestamp,
+} from "drizzle-orm/pg-core";
 import { cars } from "./cars";
 import { users } from "./users";
 
@@ -21,7 +27,7 @@ export const drivers = pgTable("drivers", {
 	emergencyContactPhone: text("emergency_contact_phone"),
 	address: text("address"),
 	dateOfBirth: timestamp("date_of_birth", { mode: "date" }),
-	
+
 	// Onboarding status
 	onboardingStatus: text("onboarding_status").notNull().default("pending"), // pending, documents_uploaded, approved, rejected
 	onboardingNotes: text("onboarding_notes"),

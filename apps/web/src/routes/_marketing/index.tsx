@@ -1,6 +1,6 @@
-import { Home } from "@/features/marketing/_pages/home/_components";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
+import { Home } from "@/features/marketing/_pages/home/_components";
 import { authClient } from "@/lib/auth-client";
 import { getDashboardPath } from "@/utils/auth";
 

@@ -1,8 +1,8 @@
-import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client/http";
+import dotenv from "dotenv";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "../../src/db/sqlite/schema";
 import seed from "./seed";
-import dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();

@@ -1,10 +1,10 @@
+import { createId } from "@paralleldrive/cuid2";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
-import { users, accounts } from "@/db/sqlite/schema";
+import { accounts, users } from "@/db/sqlite/schema";
 import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
-import { eq } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 export const CreateDriverUserServiceSchema = z.object({
 	email: z.string().email("Invalid email format"),
@@ -12,7 +12,9 @@ export const CreateDriverUserServiceSchema = z.object({
 	password: z.string().default("changeme"),
 });
 
-export type CreateDriverUserServiceInput = z.infer<typeof CreateDriverUserServiceSchema>;
+export type CreateDriverUserServiceInput = z.infer<
+	typeof CreateDriverUserServiceSchema
+>;
 
 export const createDriverUserService = async (
 	db: DB,

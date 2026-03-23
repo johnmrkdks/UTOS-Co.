@@ -1,13 +1,15 @@
+import { z } from "zod";
 import { getCarBodyTypeById } from "@/data/cars-body-types/get-car-body-type-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const GetCarBodyTypeServiceSchema = z.object({
 	id: z.string(),
 });
 
-export type GetCarBodyTypeByIdParams = z.infer<typeof GetCarBodyTypeServiceSchema>;
+export type GetCarBodyTypeByIdParams = z.infer<
+	typeof GetCarBodyTypeServiceSchema
+>;
 
 export async function getCarBodyTypeService(
 	db: DB,

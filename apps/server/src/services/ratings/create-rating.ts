@@ -1,7 +1,11 @@
+import type { z } from "zod";
 import { createRating } from "@/data/ratings/create-rating";
 import type { DB } from "@/db";
-import { type Rating, type InsertRating, InsertRatingSchema } from "@/schemas/shared";
-import { z } from "zod";
+import {
+	type InsertRating,
+	InsertRatingSchema,
+	type Rating,
+} from "@/schemas/shared";
 
 export const CreateRatingServiceSchema = InsertRatingSchema;
 

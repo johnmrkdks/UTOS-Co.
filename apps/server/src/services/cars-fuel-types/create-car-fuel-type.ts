@@ -1,14 +1,19 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarFuelType } from "@/data/cars-fuel-types/create-car-fuel-type";
 import { getCarFuelTypeByName } from "@/data/cars-fuel-types/get-car-fuel-type-by-name";
 import type { DB } from "@/db";
-import { InsertCarFuelTypeSchema, type InsertCarFuelType } from "@/schemas/shared";
+import {
+	type InsertCarFuelType,
+	InsertCarFuelTypeSchema,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const CreateCarFuelTypeServiceSchema = InsertCarFuelTypeSchema;
 
-export type CreateCarFuelTypeParams = z.infer<typeof CreateCarFuelTypeServiceSchema>;
+export type CreateCarFuelTypeParams = z.infer<
+	typeof CreateCarFuelTypeServiceSchema
+>;
 
 export async function createCarFuelTypeService(
 	db: DB,

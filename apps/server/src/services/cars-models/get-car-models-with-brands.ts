@@ -3,7 +3,10 @@ import { getCarModelsWithBrand } from "@/data/cars-models/get-car-models-with-br
 import type { DB } from "@/db";
 import type { ResourceList } from "@/utils/query/resource-list";
 
-export async function getCarModelsWithBrandService(db: DB, params: ResourceList) {
+export async function getCarModelsWithBrandService(
+	db: DB,
+	params: ResourceList,
+) {
 	const carModelsWithBrand = await getCarModelsWithBrand(db, params);
 	return carModelsWithBrand;
 }

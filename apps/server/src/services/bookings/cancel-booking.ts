@@ -1,11 +1,11 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
-import { bookings } from "@/db/sqlite/schema";
-import { validateBookingOperations } from "./validate-booking-operations";
-import { TRPCError } from "@trpc/server";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { bookings } from "@/db/sqlite/schema";
 import { sendTripStatusNotification } from "@/services/notifications/booking-email-notification-service";
 import type { Env } from "@/types/env";
+import { validateBookingOperations } from "./validate-booking-operations";
 
 export async function cancelBooking(
 	db: DB,
@@ -13,7 +13,7 @@ export async function cancelBooking(
 	userId: string,
 	cancellationReason?: string,
 	userRole?: string,
-	env?: Env
+	env?: Env,
 ) {
 	// Get the booking with user verification
 	const [existingBooking] = await db
@@ -34,7 +34,8 @@ export async function cancelBooking(
 		if (existingBooking.userId === null) {
 			throw new TRPCError({
 				code: "FORBIDDEN",
-				message: "Guest bookings can only be cancelled by administrators. Please contact support.",
+				message:
+					"Guest bookings can only be cancelled by administrators. Please contact support.",
 			});
 		}
 		if (existingBooking.userId !== userId) {
@@ -51,7 +52,8 @@ export async function cancelBooking(
 	if (!isAdmin && !validation.canCancel) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: validation.cancelReason || "Booking cannot be cancelled at this time",
+			message:
+				validation.cancelReason || "Booking cannot be cancelled at this time",
 		});
 	}
 
@@ -60,10 +62,10 @@ export async function cancelBooking(
 		.update(bookings)
 		.set({
 			status: BookingStatusEnum.Cancelled,
-			specialRequests: cancellationReason 
-				? (existingBooking.specialRequests 
-					? `${existingBooking.specialRequests}\n\nCancellation reason: ${cancellationReason}` 
-					: `Cancellation reason: ${cancellationReason}`)
+			specialRequests: cancellationReason
+				? existingBooking.specialRequests
+					? `${existingBooking.specialRequests}\n\nCancellation reason: ${cancellationReason}`
+					: `Cancellation reason: ${cancellationReason}`
 				: existingBooking.specialRequests,
 			updatedAt: new Date(),
 		})
@@ -76,7 +78,10 @@ export async function cancelBooking(
 			await sendTripStatusNotification({ bookingId, status: "cancelled", env });
 			console.log(`✅ Cancellation email sent for booking ${bookingId}`);
 		} catch (emailErr) {
-			console.error(`❌ Failed to send cancellation email for booking ${bookingId}:`, emailErr);
+			console.error(
+				`❌ Failed to send cancellation email for booking ${bookingId}:`,
+				emailErr,
+			);
 		}
 	}
 

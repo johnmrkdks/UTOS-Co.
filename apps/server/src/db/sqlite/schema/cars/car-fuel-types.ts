@@ -1,10 +1,12 @@
-import { relations, sql } from "drizzle-orm";
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-import { cars } from "@/db/sqlite/schema/cars";
 import { createId } from "@paralleldrive/cuid2";
+import { relations, sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { cars } from "@/db/sqlite/schema/cars";
 
 export const carFuelTypes = sqliteTable("car_fuel_types", {
-	id: text("id").primaryKey().$defaultFn(() => createId()),
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => createId()),
 	name: text("name").notNull().unique(),
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()

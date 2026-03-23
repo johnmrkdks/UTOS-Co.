@@ -2,10 +2,11 @@
  * Saved payment methods for registered users (Square Cards on File).
  * Never store raw card data - only Square IDs and last4/brand for display.
  */
+
+import { createId } from "@paralleldrive/cuid2";
+import { relations, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { users } from "@/db/sqlite/schema/users";
-import { relations, sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 export const paymentMethods = sqliteTable("payment_methods", {
 	id: text("id")
@@ -25,8 +26,12 @@ export const paymentMethods = sqliteTable("payment_methods", {
 
 	isDefault: integer("is_default", { mode: "boolean" }).default(false),
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
 });
 
 export const paymentMethodsRelations = relations(paymentMethods, ({ one }) => ({

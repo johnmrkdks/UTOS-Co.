@@ -1,11 +1,7 @@
-import { Loader } from "@/components/loader";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { authClient } from "@/lib/auth-client";
-import { useForm } from "react-hook-form";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Form,
 	FormControl,
@@ -14,13 +10,17 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
 import { InputPassword } from "@workspace/ui/components/input-password";
-import { SignInWithOAuth } from "./sign-in-with-oauth";
-import { signInSchema } from "@/features/auth/_schemas/sign-in-schema";
-import { useSignInMutation } from "@/features/auth/_hooks/query/use-sign-in-mutation";
 import { cn } from "@workspace/ui/lib/utils";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { Loader } from "@/components/loader";
+import { useSignInMutation } from "@/features/auth/_hooks/query/use-sign-in-mutation";
+import { signInSchema } from "@/features/auth/_schemas/sign-in-schema";
+import { authClient } from "@/lib/auth-client";
 import { handlePostLoginRedirect } from "@/utils/auth";
-import { useQueryClient } from "@tanstack/react-query";
+import { SignInWithOAuth } from "./sign-in-with-oauth";
 
 type SignInFromProps = {
 	className?: string;
@@ -64,10 +64,13 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 	};
 
 	return (
-		<div className={cn("flex flex-col gap-4 mx-auto w-full max-w-md", className)} {...props}>
-			<h1 className="text-center text-2xl md:text-3xl font-bold">Sign In</h1>
+		<div
+			className={cn("mx-auto flex w-full max-w-md flex-col gap-4", className)}
+			{...props}
+		>
+			<h1 className="text-center font-bold text-2xl md:text-3xl">Sign In</h1>
 
-			<Form {...form as any}>
+			<Form {...(form as any)}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<div>
 						<FormField
@@ -95,7 +98,10 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 								<FormItem>
 									<FormLabel>Password</FormLabel>
 									<FormControl>
-										<InputPassword {...field} className="bg-background text-xs md:text-sm" />
+										<InputPassword
+											{...field}
+											className="bg-background text-xs md:text-sm"
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -115,7 +121,7 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 			</Form>
 
 			<div className="flex flex-col gap-2 text-center">
-				<h2 className="text-center text-xs text-muted-foreground font-medium">
+				<h2 className="text-center font-medium text-muted-foreground text-xs">
 					Or sign in with
 				</h2>
 				<SignInWithOAuth />

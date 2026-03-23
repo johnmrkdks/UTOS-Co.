@@ -1,12 +1,30 @@
 import { z } from "zod";
-import { protectedProcedure, superAdminProcedure, router } from "@/trpc/init";
+import {
+	CreateDriverUserServiceSchema,
+	createDriverUserService,
+} from "@/services/admin/create-driver-user";
+import {
+	CreateUserServiceSchema,
+	createUserService,
+} from "@/services/admin/create-user";
+import {
+	DeleteUserServiceSchema,
+	deleteUserService,
+} from "@/services/admin/delete-user";
+import {
+	GetAdminUsersServiceSchema,
+	getAdminUsersService,
+} from "@/services/admin/get-admin-users";
+import {
+	GetUserByIdServiceSchema,
+	getUserByIdService,
+} from "@/services/admin/get-user-by-id";
+import {
+	UpdateUserCredentialsServiceSchema,
+	updateUserCredentialsService,
+} from "@/services/admin/update-user-credentials";
+import { protectedProcedure, router, superAdminProcedure } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { createDriverUserService, CreateDriverUserServiceSchema } from "@/services/admin/create-driver-user";
-import { createUserService, CreateUserServiceSchema } from "@/services/admin/create-user";
-import { getAdminUsersService, GetAdminUsersServiceSchema } from "@/services/admin/get-admin-users";
-import { getUserByIdService, GetUserByIdServiceSchema } from "@/services/admin/get-user-by-id";
-import { updateUserCredentialsService, UpdateUserCredentialsServiceSchema } from "@/services/admin/update-user-credentials";
-import { deleteUserService, DeleteUserServiceSchema } from "@/services/admin/delete-user";
 
 export const adminRouter = router({
 	/** Super Admin only: Get user by ID */
@@ -66,9 +84,18 @@ export const adminRouter = router({
 			} catch (error) {
 				console.error("=== tRPC ERROR: createDriverUser mutation failed ===");
 				console.error("tRPC Error type:", typeof error);
-				console.error("tRPC Error name:", error instanceof Error ? error.name : "Unknown");
-				console.error("tRPC Error message:", error instanceof Error ? error.message : error);
-				console.error("tRPC Error stack:", error instanceof Error ? error.stack : "No stack trace");
+				console.error(
+					"tRPC Error name:",
+					error instanceof Error ? error.name : "Unknown",
+				);
+				console.error(
+					"tRPC Error message:",
+					error instanceof Error ? error.message : error,
+				);
+				console.error(
+					"tRPC Error stack:",
+					error instanceof Error ? error.stack : "No stack trace",
+				);
 				console.error("=== tRPC END ERROR ===");
 				handleTRPCError(error);
 			}

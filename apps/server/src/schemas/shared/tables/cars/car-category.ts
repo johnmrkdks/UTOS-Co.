@@ -1,9 +1,9 @@
-import { z } from "zod";
 import {
-	createSelectSchema,
 	createInsertSchema,
+	createSelectSchema,
 	createUpdateSchema,
-} from "drizzle-zod"
+} from "drizzle-zod";
+import { z } from "zod";
 import { carCategories } from "@/db/schema";
 
 // Base schemas
@@ -28,4 +28,5 @@ export type UpdateCarCategory = z.infer<typeof UpdateCarCategorySchema>;
 
 // Extended types
 export type CarCategoryWithEnrichedData = z.infer<
-	typeof CarCategoryWithEnrichedDataSchema>
+	typeof CarCategoryWithEnrichedDataSchema
+>;

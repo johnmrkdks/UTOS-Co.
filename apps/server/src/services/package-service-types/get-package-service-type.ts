@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { packageServiceTypes } from "@/db/sqlite/schema";
-import type { DB } from "@/db";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+import type { DB } from "@/db";
+import { packageServiceTypes } from "@/db/sqlite/schema";
 
 export const GetPackageServiceTypeServiceSchema = z.object({
 	id: z.string().min(1, "ID is required"),

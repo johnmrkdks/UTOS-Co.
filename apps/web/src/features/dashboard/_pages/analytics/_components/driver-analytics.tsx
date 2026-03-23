@@ -1,7 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Progress } from "@workspace/ui/components/progress";
 import { Badge } from "@workspace/ui/components/badge";
-import { Star, Users, Clock, DollarSign, Award, TrendingUp } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Progress } from "@workspace/ui/components/progress";
+import {
+	Award,
+	Clock,
+	DollarSign,
+	Star,
+	TrendingUp,
+	Users,
+} from "lucide-react";
 
 interface DriverAnalyticsProps {
 	dateRange: string;
@@ -12,38 +24,44 @@ interface DriverAnalyticsProps {
 	};
 }
 
-export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) {
+export function DriverAnalytics({
+	dateRange,
+	analytics,
+}: DriverAnalyticsProps) {
 	const driverData = {
 		totalDrivers: analytics?.totalDrivers ?? 18,
 		activeDrivers: analytics?.activeDrivers ?? 15,
-		utilizationRate: (analytics?.totalDrivers && analytics.totalDrivers > 0)
-			? Math.round(((analytics.activeDrivers ?? 0) / analytics.totalDrivers) * 100)
-			: 83.3,
+		utilizationRate:
+			analytics?.totalDrivers && analytics.totalDrivers > 0
+				? Math.round(
+						((analytics.activeDrivers ?? 0) / analytics.totalDrivers) * 100,
+					)
+				: 83.3,
 		averageRating: 4.6,
 		topPerformers: [
-			{ 
-				id: "DRV001", 
-				name: "Michael Johnson", 
-				rating: 4.9, 
-				trips: 45, 
-				revenue: 3200, 
-				efficiency: 96 
+			{
+				id: "DRV001",
+				name: "Michael Johnson",
+				rating: 4.9,
+				trips: 45,
+				revenue: 3200,
+				efficiency: 96,
 			},
-			{ 
-				id: "DRV002", 
-				name: "Sarah Wilson", 
-				rating: 4.8, 
-				trips: 42, 
-				revenue: 2950, 
-				efficiency: 94 
+			{
+				id: "DRV002",
+				name: "Sarah Wilson",
+				rating: 4.8,
+				trips: 42,
+				revenue: 2950,
+				efficiency: 94,
 			},
-			{ 
-				id: "DRV003", 
-				name: "James Brown", 
-				rating: 4.7, 
-				trips: 38, 
-				revenue: 2750, 
-				efficiency: 91 
+			{
+				id: "DRV003",
+				name: "James Brown",
+				rating: 4.7,
+				trips: 38,
+				revenue: 2750,
+				efficiency: 91,
 			},
 		],
 		performanceMetrics: {
@@ -65,65 +83,70 @@ export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) 
 			<div className="grid gap-4 md:grid-cols-4">
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Users className="h-4 w-4 text-blue-600" />
 							Active Drivers
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverData.activeDrivers}</div>
-						<div className="text-xs text-muted-foreground">
+						<div className="font-bold text-2xl">{driverData.activeDrivers}</div>
+						<div className="text-muted-foreground text-xs">
 							of {driverData.totalDrivers} total
 						</div>
-						<Progress 
-							value={(driverData.activeDrivers / driverData.totalDrivers) * 100} 
-							className="h-1 mt-2" 
+						<Progress
+							value={(driverData.activeDrivers / driverData.totalDrivers) * 100}
+							className="mt-2 h-1"
 						/>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<TrendingUp className="h-4 w-4 text-green-600" />
 							Utilization Rate
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverData.utilizationRate}%</div>
-						<div className="text-xs text-muted-foreground">
+						<div className="font-bold text-2xl">
+							{driverData.utilizationRate}%
+						</div>
+						<div className="text-muted-foreground text-xs">
 							Driver efficiency
 						</div>
-						<Progress value={driverData.utilizationRate} className="h-1 mt-2" />
+						<Progress value={driverData.utilizationRate} className="mt-2 h-1" />
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Star className="h-4 w-4 text-yellow-600" />
 							Average Rating
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverData.averageRating}</div>
-						<div className="text-xs text-muted-foreground">
-							Customer rating
-						</div>
-						<Progress value={driverData.averageRating * 20} className="h-1 mt-2" />
+						<div className="font-bold text-2xl">{driverData.averageRating}</div>
+						<div className="text-muted-foreground text-xs">Customer rating</div>
+						<Progress
+							value={driverData.averageRating * 20}
+							className="mt-2 h-1"
+						/>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Clock className="h-4 w-4 text-purple-600" />
 							Response Time
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{driverData.performanceMetrics.averageResponseTime} min</div>
-						<div className="text-xs text-muted-foreground">
+						<div className="font-bold text-2xl">
+							{driverData.performanceMetrics.averageResponseTime} min
+						</div>
+						<div className="text-muted-foreground text-xs">
 							Average pickup time
 						</div>
 					</CardContent>
@@ -141,22 +164,27 @@ export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) 
 					<CardContent>
 						<div className="space-y-4">
 							{driverData.topPerformers.map((driver, index) => (
-								<div key={driver.id} className="p-3 rounded-lg border bg-card">
-									<div className="flex justify-between items-start mb-2">
+								<div key={driver.id} className="rounded-lg border bg-card p-3">
+									<div className="mb-2 flex items-start justify-between">
 										<div>
-											<p className="text-sm font-medium">{driver.name}</p>
-											<p className="text-xs text-muted-foreground">ID: {driver.id}</p>
+											<p className="font-medium text-sm">{driver.name}</p>
+											<p className="text-muted-foreground text-xs">
+												ID: {driver.id}
+											</p>
 										</div>
-										<Badge variant="outline" className="bg-gold-50 text-gold-700">
+										<Badge
+											variant="outline"
+											className="bg-gold-50 text-gold-700"
+										>
 											#{index + 1}
 										</Badge>
 									</div>
-									
+
 									<div className="grid grid-cols-3 gap-2 text-xs">
 										<div>
 											<span className="font-medium">Rating:</span>
 											<div className="flex items-center gap-1">
-												<Star className="h-3 w-3 text-yellow-500 fill-current" />
+												<Star className="h-3 w-3 fill-current text-yellow-500" />
 												<span>{driver.rating}</span>
 											</div>
 										</div>
@@ -169,9 +197,9 @@ export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) 
 											<div>${driver.revenue}</div>
 										</div>
 									</div>
-									
+
 									<div className="mt-2">
-										<div className="flex justify-between text-xs mb-1">
+										<div className="mb-1 flex justify-between text-xs">
 											<span>Efficiency</span>
 											<span>{driver.efficiency}%</span>
 										</div>
@@ -192,40 +220,51 @@ export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) 
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<div className="flex justify-between items-center mb-2">
-								<span className="text-sm font-medium">On-Time Performance</span>
-								<span className="text-sm font-bold text-green-600">
+							<div className="mb-2 flex items-center justify-between">
+								<span className="font-medium text-sm">On-Time Performance</span>
+								<span className="font-bold text-green-600 text-sm">
 									{driverData.performanceMetrics.onTimePerformance}%
 								</span>
 							</div>
-							<Progress value={driverData.performanceMetrics.onTimePerformance} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1">
+							<Progress
+								value={driverData.performanceMetrics.onTimePerformance}
+								className="h-2"
+							/>
+							<p className="mt-1 text-muted-foreground text-xs">
 								Drivers arriving within 5 minutes of scheduled time
 							</p>
 						</div>
 
 						<div>
-							<div className="flex justify-between items-center mb-2">
-								<span className="text-sm font-medium">Customer Satisfaction</span>
-								<span className="text-sm font-bold text-blue-600">
+							<div className="mb-2 flex items-center justify-between">
+								<span className="font-medium text-sm">
+									Customer Satisfaction
+								</span>
+								<span className="font-bold text-blue-600 text-sm">
 									{driverData.performanceMetrics.customerSatisfaction}/5.0
 								</span>
 							</div>
-							<Progress value={driverData.performanceMetrics.customerSatisfaction * 20} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1">
+							<Progress
+								value={driverData.performanceMetrics.customerSatisfaction * 20}
+								className="h-2"
+							/>
+							<p className="mt-1 text-muted-foreground text-xs">
 								Average rating across all completed trips
 							</p>
 						</div>
 
 						<div>
-							<div className="flex justify-between items-center mb-2">
-								<span className="text-sm font-medium">Cancellation Rate</span>
-								<span className="text-sm font-bold text-orange-600">
+							<div className="mb-2 flex items-center justify-between">
+								<span className="font-medium text-sm">Cancellation Rate</span>
+								<span className="font-bold text-orange-600 text-sm">
 									{driverData.performanceMetrics.cancellationRate}%
 								</span>
 							</div>
-							<Progress value={driverData.performanceMetrics.cancellationRate} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1">
+							<Progress
+								value={driverData.performanceMetrics.cancellationRate}
+								className="h-2"
+							/>
+							<p className="mt-1 text-muted-foreground text-xs">
 								Driver-initiated cancellations
 							</p>
 						</div>
@@ -244,7 +283,7 @@ export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) 
 					<div className="grid gap-4 md:grid-cols-2">
 						<div className="space-y-4">
 							<div>
-								<p className="text-sm font-medium mb-2">Peak Working Hours</p>
+								<p className="mb-2 font-medium text-sm">Peak Working Hours</p>
 								<div className="flex gap-1">
 									{driverData.workingPatterns.peakHours.map((hour, index) => (
 										<Badge key={index} variant="secondary">
@@ -255,38 +294,52 @@ export function DriverAnalytics({ dateRange, analytics }: DriverAnalyticsProps) 
 							</div>
 
 							<div>
-								<div className="flex justify-between items-center mb-1">
-									<span className="text-sm font-medium">Average Hours per Day</span>
-									<span className="text-sm font-bold">
+								<div className="mb-1 flex items-center justify-between">
+									<span className="font-medium text-sm">
+										Average Hours per Day
+									</span>
+									<span className="font-bold text-sm">
 										{driverData.workingPatterns.averageHoursPerDay}h
 									</span>
 								</div>
-								<Progress 
-									value={(driverData.workingPatterns.averageHoursPerDay / 12) * 100} 
-									className="h-2" 
+								<Progress
+									value={
+										(driverData.workingPatterns.averageHoursPerDay / 12) * 100
+									}
+									className="h-2"
 								/>
 							</div>
 						</div>
 
 						<div className="space-y-4">
 							<div>
-								<div className="flex justify-between items-center mb-1">
-									<span className="text-sm font-medium">Weekday Utilization</span>
-									<span className="text-sm font-bold text-green-600">
+								<div className="mb-1 flex items-center justify-between">
+									<span className="font-medium text-sm">
+										Weekday Utilization
+									</span>
+									<span className="font-bold text-green-600 text-sm">
 										{driverData.workingPatterns.weekdayUtilization}%
 									</span>
 								</div>
-								<Progress value={driverData.workingPatterns.weekdayUtilization} className="h-2" />
+								<Progress
+									value={driverData.workingPatterns.weekdayUtilization}
+									className="h-2"
+								/>
 							</div>
 
 							<div>
-								<div className="flex justify-between items-center mb-1">
-									<span className="text-sm font-medium">Weekend Utilization</span>
-									<span className="text-sm font-bold text-blue-600">
+								<div className="mb-1 flex items-center justify-between">
+									<span className="font-medium text-sm">
+										Weekend Utilization
+									</span>
+									<span className="font-bold text-blue-600 text-sm">
 										{driverData.workingPatterns.weekendUtilization}%
 									</span>
 								</div>
-								<Progress value={driverData.workingPatterns.weekendUtilization} className="h-2" />
+								<Progress
+									value={driverData.workingPatterns.weekendUtilization}
+									className="h-2"
+								/>
 							</div>
 						</div>
 					</div>

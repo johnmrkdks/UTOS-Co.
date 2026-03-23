@@ -1,24 +1,31 @@
-import * as React from "react"
-import type { Column } from "@tanstack/react-table"
-import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon, EyeOffIcon, PinIcon, Pin } from "lucide-react"
+import type { Column } from "@tanstack/react-table";
+import {
+	ArrowDownIcon,
+	ArrowUpIcon,
+	ChevronsUpDownIcon,
+	EyeOffIcon,
+	Pin,
+	PinIcon,
+} from "lucide-react";
+import type * as React from "react";
 
-import { cn } from "../lib/utils"
-import { Button } from "./button"
+import { cn } from "../lib/utils";
+import { Button } from "./button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "./dropdown-menu"
+} from "./dropdown-menu";
 
 interface DataTableColumnHeaderProps<TData, TValue>
 	extends React.HTMLAttributes<HTMLDivElement> {
-	column: Column<TData, TValue>
-	title: string
-	sortable?: boolean
-	hideable?: boolean
-	pinnable?: boolean
+	column: Column<TData, TValue>;
+	title: string;
+	sortable?: boolean;
+	hideable?: boolean;
+	pinnable?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
@@ -30,23 +37,26 @@ export function DataTableColumnHeader<TData, TValue>({
 	pinnable = true,
 	...props
 }: DataTableColumnHeaderProps<TData, TValue>) {
-	const canSort = sortable && column.getCanSort()
-	const canHide = hideable && column.getCanHide()
-	const canPin = pinnable && column.getCanPin()
-	const isPinned = column.getIsPinned()
+	const canSort = sortable && column.getCanSort();
+	const canHide = hideable && column.getCanHide();
+	const canPin = pinnable && column.getCanPin();
+	const isPinned = column.getIsPinned();
 
 	if (!canSort && !canHide && !canPin) {
 		return (
-			<div className={cn("text-muted-foreground font-medium", className)} {...props}>
+			<div
+				className={cn("font-medium text-muted-foreground", className)}
+				{...props}
+			>
 				{title}
 			</div>
-		)
+		);
 	}
 
 	if (!canSort && (canHide || canPin)) {
 		return (
 			<div className={cn("flex items-center gap-2", className)} {...props}>
-				<span className="text-muted-foreground font-medium">{title}</span>
+				<span className="font-medium text-muted-foreground">{title}</span>
 				{isPinned && (
 					<Pin className="h-3 w-3 text-blue-500" aria-label="Pinned column" />
 				)}
@@ -93,7 +103,7 @@ export function DataTableColumnHeader<TData, TValue>({
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
-		)
+		);
 	}
 
 	return (
@@ -103,12 +113,15 @@ export function DataTableColumnHeader<TData, TValue>({
 					<Button
 						variant="ghost"
 						size="sm"
-						className="data-[state=open]:bg-accent -ml-3 h-8 hover:bg-muted"
+						className="-ml-3 h-8 hover:bg-muted data-[state=open]:bg-accent"
 						aria-label={`Sort by ${title}`}
 					>
-						<span className="text-muted-foreground font-medium">{title}</span>
+						<span className="font-medium text-muted-foreground">{title}</span>
 						{isPinned && (
-							<Pin className="ml-1 h-3 w-3 text-blue-500" aria-label="Pinned column" />
+							<Pin
+								className="ml-1 h-3 w-3 text-blue-500"
+								aria-label="Pinned column"
+							/>
 						)}
 						{column.getIsSorted() === "desc" ? (
 							<ArrowDownIcon className="ml-2 h-4 w-4" />
@@ -164,5 +177,5 @@ export function DataTableColumnHeader<TData, TValue>({
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</div>
-	)
+	);
 }

@@ -1,3 +1,14 @@
+import type { Row } from "@tanstack/react-table";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@workspace/ui/components/alert-dialog";
 import { Button } from "@workspace/ui/components/button";
 import {
 	DropdownMenu,
@@ -7,15 +18,27 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import type { Row } from "@tanstack/react-table";
-import { Eye, MoreHorizontal, Car, UserCheck, Edit, Activity, UserX, X, Archive, ArchiveRestore, Trash2, CheckCircle, Ban } from "lucide-react";
-import type { Booking } from "./booking-table-columns";
-import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
-import { canCancelBooking } from "@/lib/booking-status-config";
-import { useUnassignDriverMutation } from "../_hooks/query/use-unassign-driver-mutation";
-import { useUnassignCarMutation } from "../_hooks/query/use-unassign-car-mutation";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@workspace/ui/components/alert-dialog";
+import {
+	Activity,
+	Archive,
+	ArchiveRestore,
+	Ban,
+	Car,
+	CheckCircle,
+	Edit,
+	Eye,
+	MoreHorizontal,
+	Trash2,
+	UserCheck,
+	UserX,
+	X,
+} from "lucide-react";
 import { useState } from "react";
+import { canCancelBooking } from "@/lib/booking-status-config";
+import { useUnassignCarMutation } from "../_hooks/query/use-unassign-car-mutation";
+import { useUnassignDriverMutation } from "../_hooks/query/use-unassign-driver-mutation";
+import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import type { Booking } from "./booking-table-columns";
 
 interface BookingTableRowActionsProps {
 	row: Row<Booking>;
@@ -25,20 +48,27 @@ interface BookingTableRowActionsProps {
 	onDeleteBooking?: (booking: Booking) => void;
 }
 
-export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, onArchiveBooking, onDeleteBooking }: BookingTableRowActionsProps) {
+export function BookingTableRowActions({
+	row,
+	onEditBooking,
+	onCancelBooking,
+	onArchiveBooking,
+	onDeleteBooking,
+}: BookingTableRowActionsProps) {
 	const {
 		openBookingDetailsDialog,
 		openAssignDriverDialog,
 		openAssignCarDialog,
 		openEditBookingDialog,
-		openChangeStatusDialog
+		openChangeStatusDialog,
 	} = useBookingManagementModalProvider();
 	const unassignDriverMutation = useUnassignDriverMutation();
 	const unassignCarMutation = useUnassignCarMutation();
 	const booking = row.original;
 
 	// Confirmation dialog states
-	const [unassignDriverDialogOpen, setUnassignDriverDialogOpen] = useState(false);
+	const [unassignDriverDialogOpen, setUnassignDriverDialogOpen] =
+		useState(false);
 	const [unassignCarDialogOpen, setUnassignCarDialogOpen] = useState(false);
 
 	const handleAssignDriver = (booking: Booking) => {
@@ -128,15 +158,27 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 					{booking.status !== "cancelled" && booking.status !== "completed" && (
 						<>
 							{/* Driver assignment - only allow if booking is confirmed AND has a car assigned */}
-							{['confirmed', 'driver_assigned', 'driver_en_route', 'arrived_pickup', 'passenger_on_board', 'in_progress'].includes(booking.status) ? (
+							{[
+								"confirmed",
+								"driver_assigned",
+								"driver_en_route",
+								"arrived_pickup",
+								"passenger_on_board",
+								"in_progress",
+							].includes(booking.status) ? (
 								// For confirmed status, require car to be assigned first
-								booking.status === 'confirmed' && !booking.car ? (
-									<DropdownMenuItem disabled className="flex-col items-start py-2">
-										<div className="flex items-center w-full">
+								booking.status === "confirmed" && !booking.car ? (
+									<DropdownMenuItem
+										disabled
+										className="flex-col items-start py-2"
+									>
+										<div className="flex w-full items-center">
 											<UserCheck className="mr-2 h-4 w-4 opacity-50" />
 											<span className="opacity-50">Assign driver</span>
 										</div>
-										<span className="text-xs text-muted-foreground ml-6">(Assign car first)</span>
+										<span className="ml-6 text-muted-foreground text-xs">
+											(Assign car first)
+										</span>
 									</DropdownMenuItem>
 								) : (
 									<DropdownMenuItem onClick={() => handleAssignDriver(booking)}>
@@ -145,25 +187,31 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 									</DropdownMenuItem>
 								)
 							) : (
-								<DropdownMenuItem disabled className="flex-col items-start py-2">
-									<div className="flex items-center w-full">
+								<DropdownMenuItem
+									disabled
+									className="flex-col items-start py-2"
+								>
+									<div className="flex w-full items-center">
 										<UserCheck className="mr-2 h-4 w-4 opacity-50" />
 										<span className="opacity-50">Assign driver</span>
 									</div>
-									<span className="text-xs text-muted-foreground ml-6">(Confirm first)</span>
+									<span className="ml-6 text-muted-foreground text-xs">
+										(Confirm first)
+									</span>
 								</DropdownMenuItem>
 							)}
 
 							{/* Unassign driver - only show if driver is assigned and status allows */}
-							{booking.driver && ['confirmed', 'driver_assigned'].includes(booking.status) && (
-								<DropdownMenuItem
-									onClick={() => handleUnassignDriver(booking)}
-									className="text-orange-600 hover:text-orange-700"
-								>
-									<UserX className="mr-2 h-4 w-4" />
-									Unassign driver
-								</DropdownMenuItem>
-							)}
+							{booking.driver &&
+								["confirmed", "driver_assigned"].includes(booking.status) && (
+									<DropdownMenuItem
+										onClick={() => handleUnassignDriver(booking)}
+										className="text-orange-600 hover:text-orange-700"
+									>
+										<UserX className="mr-2 h-4 w-4" />
+										Unassign driver
+									</DropdownMenuItem>
+								)}
 
 							{/* Car assignment - especially useful for package bookings */}
 							{(booking.bookingType === "package" || !booking.car) && (
@@ -201,7 +249,11 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 					{/* Archive/Restore Actions */}
 					<DropdownMenuItem
 						onClick={() => handleArchiveBooking(booking)}
-						className={booking.isArchived ? "text-blue-600 hover:text-blue-700" : "text-orange-600 hover:text-orange-700"}
+						className={
+							booking.isArchived
+								? "text-blue-600 hover:text-blue-700"
+								: "text-orange-600 hover:text-orange-700"
+						}
 					>
 						{booking.isArchived ? (
 							<>
@@ -224,17 +276,21 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 						<Trash2 className="mr-2 h-4 w-4" />
 						Delete permanently
 					</DropdownMenuItem>
-
 				</DropdownMenuContent>
 			</DropdownMenu>
 
 			{/* Unassign Driver Confirmation Dialog */}
-			<AlertDialog open={unassignDriverDialogOpen} onOpenChange={setUnassignDriverDialogOpen}>
+			<AlertDialog
+				open={unassignDriverDialogOpen}
+				onOpenChange={setUnassignDriverDialogOpen}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Unassign Driver</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to unassign the driver from this booking? The booking status will be changed back to "Confirmed" and will need a new driver assignment.
+							Are you sure you want to unassign the driver from this booking?
+							The booking status will be changed back to "Confirmed" and will
+							need a new driver assignment.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
@@ -250,12 +306,17 @@ export function BookingTableRowActions({ row, onEditBooking, onCancelBooking, on
 			</AlertDialog>
 
 			{/* Unassign Car Confirmation Dialog */}
-			<AlertDialog open={unassignCarDialogOpen} onOpenChange={setUnassignCarDialogOpen}>
+			<AlertDialog
+				open={unassignCarDialogOpen}
+				onOpenChange={setUnassignCarDialogOpen}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Unassign Car</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to unassign the car from this booking? This will remove the vehicle assignment and the booking will need a new car to be assigned.
+							Are you sure you want to unassign the car from this booking? This
+							will remove the vehicle assignment and the booking will need a new
+							car to be assigned.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

@@ -1,12 +1,22 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { PackageBookingTester } from "./_components/package-booking-tester";
-import { CustomBookingTester } from "./_components/custom-booking-tester";
-import { EndToEndTester } from "./_components/end-to-end-tester";
-import { EmailTester } from "./_components/email-tester";
-import { TestResults } from "./_components/test-results";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import { useState } from "react";
 import { PaddingLayout } from "../../_layouts/padding-layout";
+import { CustomBookingTester } from "./_components/custom-booking-tester";
+import { EmailTester } from "./_components/email-tester";
+import { EndToEndTester } from "./_components/end-to-end-tester";
+import { PackageBookingTester } from "./_components/package-booking-tester";
+import { TestResults } from "./_components/test-results";
 
 export interface TestResult {
 	id: string;
@@ -26,14 +36,16 @@ export function AdminTestingPage() {
 			id: crypto.randomUUID(),
 			timestamp: new Date(),
 		};
-		setTestResults(prev => [newResult, ...prev.slice(0, 9)]); // Keep last 10 results
+		setTestResults((prev) => [newResult, ...prev.slice(0, 9)]); // Keep last 10 results
 	};
 
 	return (
-		<PaddingLayout className="space-y-6 mb-8">
+		<PaddingLayout className="mb-8 space-y-6">
 			<div>
-				<h1 className="text-2xl font-bold">Admin Testing Interface</h1>
-				<p className="text-gray-600">Test booking workflows, pricing, and system functionality</p>
+				<h1 className="font-bold text-2xl">Admin Testing Interface</h1>
+				<p className="text-gray-600">
+					Test booking workflows, pricing, and system functionality
+				</p>
 			</div>
 
 			<div className="grid gap-6 lg:grid-cols-3">

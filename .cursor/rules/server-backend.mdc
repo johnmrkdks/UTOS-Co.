@@ -1,0 +1,33 @@
+---
+description: Server/backend patterns - tRPC, Drizzle, error handling
+globs: apps/server/**/*.ts
+alwaysApply: false
+---
+
+# Server Backend Rules
+
+## tRPC Patterns
+- **Procedures:** Use `publicProcedure`, `protectedProcedure`, `guestProcedure`, or `superAdminProcedure` as appropriate
+- **Input validation:** Always use `.input(zodSchema)` - define schema in service, export for router
+- **Error handling:** Wrap service calls in try/catch, call `handleTRPCError(error)` - it maps to TRPCError and preserves user-facing messages
+- **Auth:** Extract `userId` via `session?.user?.id || session?.session?.userId` for guest support
+
+```typescript
+// ✅ GOOD - Router delegates to service, uses handleTRPCError
+mutation(async ({ ctx: { db }, input }) => {
+  try {
+    return await createBookingService(db, input);
+  } catch (error) {
+    handleTRPCError(error);
+  }
+})
+```
+
+## Drizzle & Database
+- **Schema:** Define in `db/sqlite/schema/`, use enums from `db/sqlite/enums`
+- **Queries:** Prefer `.get()` for single row, `.all()` for lists; use `eq`, `and`, `inArray` from drizzle-orm
+- **Transactions:** Group related inserts/updates when needed
+
+## Cloudflare (Workers, D1, R2)
+- **Env:** Access via `ctx.env` in tRPC; use `cloudflare:workers` for server-wide
+- **Secrets:** Never commit secrets; use wrangler secrets or env vars

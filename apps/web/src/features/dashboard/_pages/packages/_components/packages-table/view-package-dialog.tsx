@@ -1,4 +1,11 @@
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import {
 	Dialog,
 	DialogContent,
@@ -7,10 +14,17 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Badge } from "@workspace/ui/components/badge";
 import { Switch } from "@workspace/ui/components/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Package, DollarSign, Calendar, Clock, CheckCircle, AlertCircle, Globe, Shield } from "lucide-react";
+import {
+	AlertCircle,
+	Calendar,
+	CheckCircle,
+	Clock,
+	DollarSign,
+	Globe,
+	Package,
+	Shield,
+} from "lucide-react";
 import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
 
 type ViewPackageDialogProps = {
@@ -19,7 +33,11 @@ type ViewPackageDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPackageDialogProps) {
+export function ViewPackageDialog({
+	package: pkg,
+	open,
+	onOpenChange,
+}: ViewPackageDialogProps) {
 	const updatePackageMutation = useUpdatePackageMutation();
 
 	const handleToggleAvailable = async () => {
@@ -34,7 +52,7 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 					pricePerDay: (pkg.fixedPrice || pkg.pricePerDay || 0) / 100,
 					isAvailable: !pkg.isAvailable,
 					isPublished: pkg.isPublished || false,
-				}
+				},
 			});
 		} catch (error) {
 			console.error("Failed to toggle package availability:", error);
@@ -49,20 +67,21 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 		if (hasHourlyRate) {
 			return {
 				price: `$${pkg.hourlyRate.toFixed(2)}`,
-				unit: '/hour',
-				type: 'Hourly Rate'
+				unit: "/hour",
+				type: "Hourly Rate",
 			};
-		} else if (hasFixedPrice) {
+		}
+		if (hasFixedPrice) {
 			return {
 				price: `$${pkg.fixedPrice.toFixed(2)}`,
-				unit: '',
-				type: 'Fixed Price'
+				unit: "",
+				type: "Fixed Price",
 			};
 		}
 		return {
-			price: '$0.00',
-			unit: '',
-			type: 'No Price Set'
+			price: "$0.00",
+			unit: "",
+			type: "No Price Set",
 		};
 	};
 
@@ -70,31 +89,39 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+			<DialogContent
+				className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
+				showCloseButton={false}
+			>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Package className="h-5 w-5" />
 						{pkg?.name}
 					</DialogTitle>
-					<DialogDescription>Package details and configuration</DialogDescription>
+					<DialogDescription>
+						Package details and configuration
+					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-6">
-
 					{/* Key Information */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						{/* Pricing */}
 						<Card>
 							<CardContent className="p-4">
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="text-sm text-gray-600">{pricing.type}</p>
-										<p className="text-2xl font-bold text-primary">
+										<p className="text-gray-600 text-sm">{pricing.type}</p>
+										<p className="font-bold text-2xl text-primary">
 											{pricing.price}
-											{pricing.unit && <span className="text-sm text-gray-500">{pricing.unit}</span>}
+											{pricing.unit && (
+												<span className="text-gray-500 text-sm">
+													{pricing.unit}
+												</span>
+											)}
 										</p>
 									</div>
-									<div className="p-2 bg-primary/10 rounded-lg">
+									<div className="rounded-lg bg-primary/10 p-2">
 										<DollarSign className="h-5 w-5 text-primary" />
 									</div>
 								</div>
@@ -107,12 +134,12 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
-											<p className="text-sm text-gray-600">Duration</p>
-											<p className="text-2xl font-bold">
+											<p className="text-gray-600 text-sm">Duration</p>
+											<p className="font-bold text-2xl">
 												{Math.floor(pkg.duration / 60)}h {pkg.duration % 60}m
 											</p>
 										</div>
-										<div className="p-2 bg-blue-100 rounded-lg">
+										<div className="rounded-lg bg-blue-100 p-2">
 											<Clock className="h-5 w-5 text-blue-600" />
 										</div>
 									</div>
@@ -126,11 +153,15 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
-											<p className="text-sm text-gray-600">Service Type</p>
-											<p className="text-2xl font-bold">{pkg.serviceType.name}</p>
-											<p className="text-sm text-gray-500 capitalize">{pkg.serviceType.rateType} Rate</p>
+											<p className="text-gray-600 text-sm">Service Type</p>
+											<p className="font-bold text-2xl">
+												{pkg.serviceType.name}
+											</p>
+											<p className="text-gray-500 text-sm capitalize">
+												{pkg.serviceType.rateType} Rate
+											</p>
 										</div>
-										<div className="p-2 bg-green-100 rounded-lg">
+										<div className="rounded-lg bg-green-100 p-2">
 											<Shield className="h-5 w-5 text-green-600" />
 										</div>
 									</div>
@@ -146,7 +177,9 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 								<CardTitle className="text-lg">Description</CardTitle>
 							</CardHeader>
 							<CardContent>
-								<p className="text-gray-700 leading-relaxed">{pkg.description}</p>
+								<p className="text-gray-700 leading-relaxed">
+									{pkg.description}
+								</p>
 							</CardContent>
 						</Card>
 					)}
@@ -161,9 +194,9 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 								<img
 									src={pkg.bannerImageUrl}
 									alt={`${pkg.name} banner`}
-									className="w-full h-48 object-cover rounded-lg"
+									className="h-48 w-full rounded-lg object-cover"
 									onError={(e) => {
-										e.currentTarget.style.display = 'none';
+										e.currentTarget.style.display = "none";
 									}}
 								/>
 							</CardContent>
@@ -172,7 +205,9 @@ export function ViewPackageDialog({ package: pkg, open, onOpenChange }: ViewPack
 				</div>
 
 				<DialogFooter>
-					<Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+					<Button variant="outline" onClick={() => onOpenChange(false)}>
+						Close
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

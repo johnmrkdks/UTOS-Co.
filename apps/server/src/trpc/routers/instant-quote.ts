@@ -1,28 +1,33 @@
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { pricingConfig } from "@/db/sqlite/schema/price-config";
 import {
-	calculateInstantQuoteService,
-	calculateAndStoreSecureQuote,
-	CalculateInstantQuoteSchema,
-} from "@/services/bookings/calculate-instant-quote";
-import {
-	calculateCarSpecificQuoteService,
 	CalculateCarSpecificQuoteSchema,
+	calculateCarSpecificQuoteService,
 } from "@/services/bookings/calculate-car-specific-quote";
+import {
+	CalculateInstantQuoteSchema,
+	calculateAndStoreSecureQuote,
+	calculateInstantQuoteService,
+} from "@/services/bookings/calculate-instant-quote";
 import { retrieveSecureQuoteWithCar } from "@/services/quotes/instant-quote-storage";
 import { publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { eq } from "drizzle-orm";
-import { pricingConfig } from "@/db/sqlite/schema/price-config";
-import { z } from "zod";
 
 // Generate secure random token using crypto
 function generateSecureToken(): string {
 	const array = new Uint8Array(32);
 	crypto.getRandomValues(array);
-	return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+	return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+		"",
+	);
 }
 
 // Temporary in-memory quote storage until database schema is fixed
-const quoteStorage = new Map<string, { quote: any; routeData: any; expiresAt: number }>();
+const quoteStorage = new Map<
+	string,
+	{ quote: any; routeData: any; expiresAt: number }
+>();
 
 // Clean expired quotes when accessed (no global intervals in Cloudflare Workers)
 function cleanExpiredQuotes() {
@@ -40,15 +45,17 @@ export const instantQuoteRouter = router({
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
 				if (!env?.GOOGLE_MAPS_API_KEY) {
-					throw new Error("Google Maps API key not configured. Please contact support.");
+					throw new Error(
+						"Google Maps API key not configured. Please contact support.",
+					);
 				}
 				// For now, use the old calculation method until database schema is fixed
 				// This still provides security by generating a temporary secure ID
 				const quote = await calculateInstantQuoteService(db, input, env);
-				
+
 				// Generate a temporary secure quote ID (will be replaced with database storage)
 				const quoteId = generateSecureToken();
-				
+
 				// Store in memory temporarily (30 minutes expiry)
 				quoteStorage.set(quoteId, {
 					quote,
@@ -62,9 +69,9 @@ export const instantQuoteRouter = router({
 						stops: input.stops || [],
 						carId: input.carId,
 					},
-					expiresAt: Date.now() + (2 * 60 * 60 * 1000) // 2 hours
+					expiresAt: Date.now() + 2 * 60 * 60 * 1000, // 2 hours
 				});
-				
+
 				// Return quote with secure ID
 				return {
 					...quote,
@@ -74,43 +81,46 @@ export const instantQuoteRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	checkAvailability: publicProcedure
-		.query(async ({ ctx: { db } }) => {
-			try {
-				const existingPricingConfig = await db
-					.select()
-					.from(pricingConfig)
-					.limit(1);
+	checkAvailability: publicProcedure.query(async ({ ctx: { db } }) => {
+		try {
+			const existingPricingConfig = await db
+				.select()
+				.from(pricingConfig)
+				.limit(1);
 
-				return {
-					available: existingPricingConfig.length > 0,
-					hasActiveConfig: existingPricingConfig.length > 0
-				};
-			} catch (error) {
-				handleTRPCError(error);
-			}
-		}),
-	
+			return {
+				available: existingPricingConfig.length > 0,
+				hasActiveConfig: existingPricingConfig.length > 0,
+			};
+		} catch (error) {
+			handleTRPCError(error);
+		}
+	}),
+
 	getQuoteById: publicProcedure
-		.input(z.object({
-			quoteId: z.string().min(1, "Quote ID is required")
-		}))
+		.input(
+			z.object({
+				quoteId: z.string().min(1, "Quote ID is required"),
+			}),
+		)
 		.query(async ({ input }) => {
 			try {
 				// Clean expired quotes periodically
 				cleanExpiredQuotes();
-				
+
 				const quoteData = quoteStorage.get(input.quoteId);
-				
+
 				if (!quoteData) {
-					throw new Error("Quote not found or expired. Please generate a new quote.");
+					throw new Error(
+						"Quote not found or expired. Please generate a new quote.",
+					);
 				}
-				
+
 				if (quoteData.expiresAt < Date.now()) {
 					quoteStorage.delete(input.quoteId);
 					throw new Error("Quote has expired. Please generate a new quote.");
 				}
-				
+
 				// Return the stored quote data in the format expected by the frontend
 				return {
 					id: input.quoteId,
@@ -127,7 +137,8 @@ export const instantQuoteRouter = router({
 					additionalKmFare: quoteData.quote.additionalKmFare,
 					// Legacy pricing structure (for backward compatibility)
 					baseFare: quoteData.quote.baseFare || quoteData.quote.firstKmFare,
-					distanceFare: quoteData.quote.distanceFare || quoteData.quote.additionalKmFare,
+					distanceFare:
+						quoteData.quote.distanceFare || quoteData.quote.additionalKmFare,
 					timeFare: quoteData.quote.timeFare || 0,
 					extraCharges: quoteData.quote.extraCharges || 0,
 					totalAmount: quoteData.quote.totalAmount,
@@ -135,7 +146,9 @@ export const instantQuoteRouter = router({
 					estimatedDuration: quoteData.quote.estimatedDuration,
 					breakdown: quoteData.quote.breakdown,
 					expiresAt: new Date(quoteData.expiresAt),
-					createdAt: new Date(Date.now() - (30 * 60 * 1000) + (quoteData.expiresAt - Date.now())),
+					createdAt: new Date(
+						Date.now() - 30 * 60 * 1000 + (quoteData.expiresAt - Date.now()),
+					),
 				};
 			} catch (error) {
 				handleTRPCError(error);

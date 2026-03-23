@@ -1,6 +1,6 @@
+import { z } from "zod";
 import { updateDriverData } from "@/data/drivers/update-driver";
 import type { DB } from "@/db";
-import { z } from "zod";
 
 export const ApproveDriverApplicationServiceSchema = z.object({
 	driverId: z.string().cuid2(),
@@ -9,7 +9,9 @@ export const ApproveDriverApplicationServiceSchema = z.object({
 	approvedBy: z.string().cuid2(),
 });
 
-export type ApproveDriverApplicationServiceInput = z.infer<typeof ApproveDriverApplicationServiceSchema>;
+export type ApproveDriverApplicationServiceInput = z.infer<
+	typeof ApproveDriverApplicationServiceSchema
+>;
 
 export const approveDriverApplicationService = async (
 	db: DB,
@@ -18,7 +20,9 @@ export const approveDriverApplicationService = async (
 	const updateData = {
 		id: data.driverId,
 		isApproved: data.approved,
-		onboardingStatus: data.approved ? "approved" as const : "rejected" as const,
+		onboardingStatus: data.approved
+			? ("approved" as const)
+			: ("rejected" as const),
 		onboardingNotes: data.notes,
 		approvedAt: data.approved ? new Date() : null,
 		approvedBy: data.approvedBy,

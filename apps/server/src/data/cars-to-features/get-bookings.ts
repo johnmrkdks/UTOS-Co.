@@ -2,8 +2,8 @@ import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
 import type { Booking } from "@/schemas/shared";
 import { RQBFilterBuilder } from "@/utils/query/filter-builders";
-import type { QueryBuilder } from "@/utils/query/query-builder";
 import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
+import type { QueryBuilder } from "@/utils/query/query-builder";
 import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getBookings(db: DB, options: ResourceList) {

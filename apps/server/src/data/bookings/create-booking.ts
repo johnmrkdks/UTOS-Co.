@@ -14,16 +14,20 @@ function generateShareToken(): string {
 
 export async function createBooking(db: DB, params: CreateBookingParams) {
 	// Generate reference number if not provided
-	const referenceNumber = params.referenceNumber || await generateBookingReference(db);
+	const referenceNumber =
+		params.referenceNumber || (await generateBookingReference(db));
 	const shareToken = params.shareToken ?? generateShareToken();
 
-	const [record] = await db.insert(bookings).values({
-		...params,
-		referenceNumber,
-		shareToken,
-		status: params.status,
-		bookingType: params.bookingType,
-	}).returning();
+	const [record] = await db
+		.insert(bookings)
+		.values({
+			...params,
+			referenceNumber,
+			shareToken,
+			status: params.status,
+			bookingType: params.bookingType,
+		})
+		.returning();
 
 	return record;
 }

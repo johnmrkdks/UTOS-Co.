@@ -1,26 +1,38 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Textarea } from "@workspace/ui/components/textarea";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@workspace/ui/components/dialog";
+import { Label } from "@workspace/ui/components/label";
 import { Separator } from "@workspace/ui/components/separator";
 import { Switch } from "@workspace/ui/components/switch";
-import { Label } from "@workspace/ui/components/label";
-import { 
-	CheckCircle2, 
-	XCircle, 
-	AlertTriangle, 
-	Eye, 
-	FileText, 
-	Shield, 
-	User,
+import { Textarea } from "@workspace/ui/components/textarea";
+import {
+	AlertTriangle,
 	Calendar,
+	CheckCircle2,
+	Eye,
+	FileText,
+	Mail,
 	Phone,
-	Mail
+	Shield,
+	User,
+	XCircle,
 } from "lucide-react";
-import { useVerifyDriverDocumentsMutation } from "../_hooks/query/use-verify-driver-documents-mutation";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useVerifyDriverDocumentsMutation } from "../_hooks/query/use-verify-driver-documents-mutation";
 
 interface DriverDocumentVerificationDialogProps {
 	driver: any;
@@ -43,14 +55,20 @@ export function DriverDocumentVerificationDialog({
 		profilePhotoVerified: false,
 		profilePhotoNotes: "",
 	});
-	
-	const [overallStatus, setOverallStatus] = useState<"approved" | "rejected" | "needs_revision">("needs_revision");
+
+	const [overallStatus, setOverallStatus] = useState<
+		"approved" | "rejected" | "needs_revision"
+	>("needs_revision");
 	const [adminNotes, setAdminNotes] = useState("");
 
 	const verifyDocumentsMutation = useVerifyDriverDocumentsMutation();
 
-	const handleDocumentCheck = (documentType: keyof typeof documentChecks, field: string, value: any) => {
-		setDocumentChecks(prev => ({
+	const handleDocumentCheck = (
+		documentType: keyof typeof documentChecks,
+		field: string,
+		value: any,
+	) => {
+		setDocumentChecks((prev) => ({
 			...prev,
 			[`${documentType}${field}`]: value,
 		}));
@@ -59,7 +77,7 @@ export function DriverDocumentVerificationDialog({
 	const handleSubmitVerification = async () => {
 		try {
 			// Validate that at least some verification has been done
-			const hasAnyVerification = 
+			const hasAnyVerification =
 				documentChecks.licenseVerified ||
 				documentChecks.insuranceVerified ||
 				documentChecks.backgroundCheckVerified ||
@@ -107,14 +125,19 @@ export function DriverDocumentVerificationDialog({
 	// Parse existing document verification if it exists
 	let existingVerification = {};
 	try {
-		existingVerification = driver.documentVerification ? JSON.parse(driver.documentVerification) : {};
+		existingVerification = driver.documentVerification
+			? JSON.parse(driver.documentVerification)
+			: {};
 	} catch (e) {
 		console.warn("Failed to parse existing document verification:", e);
 	}
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+			<DialogContent
+				className="max-h-[90vh] max-w-4xl overflow-y-auto"
+				showCloseButton={false}
+			>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Shield className="h-5 w-5" />
@@ -135,7 +158,7 @@ export function DriverDocumentVerificationDialog({
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div className="space-y-2">
 									<div className="flex items-center gap-2">
 										<User className="h-4 w-4 text-muted-foreground" />
@@ -163,15 +186,18 @@ export function DriverDocumentVerificationDialog({
 										<Calendar className="h-4 w-4 text-muted-foreground" />
 										<span className="font-medium">License Expiry:</span>
 										<span>
-											{driver.licenseExpiry 
-												? new Date(driver.licenseExpiry).toLocaleDateString() 
-												: "N/A"
-											}
+											{driver.licenseExpiry
+												? new Date(driver.licenseExpiry).toLocaleDateString()
+												: "N/A"}
 										</span>
 									</div>
 									<div className="flex items-center gap-2">
 										<span className="font-medium">Current Status:</span>
-										<Badge className={getStatusColor(driver.verificationStatus || "pending")}>
+										<Badge
+											className={getStatusColor(
+												driver.verificationStatus || "pending",
+											)}
+										>
 											{driver.verificationStatus || "Pending"}
 										</Badge>
 									</div>
@@ -201,12 +227,14 @@ export function DriverDocumentVerificationDialog({
 									</div>
 									<div className="flex items-center gap-2">
 										{driver.licenseDocumentUrl && (
-											<Button 
-												variant="outline" 
+											<Button
+												variant="outline"
 												size="sm"
-												onClick={() => window.open(driver.licenseDocumentUrl, '_blank')}
+												onClick={() =>
+													window.open(driver.licenseDocumentUrl, "_blank")
+												}
 											>
-												<Eye className="h-3 w-3 mr-1" />
+												<Eye className="mr-1 h-3 w-3" />
 												View
 											</Button>
 										)}
@@ -214,11 +242,14 @@ export function DriverDocumentVerificationDialog({
 											<Switch
 												id="license-verified"
 												checked={documentChecks.licenseVerified}
-												onCheckedChange={(checked) => 
+												onCheckedChange={(checked) =>
 													handleDocumentCheck("license", "Verified", checked)
 												}
 											/>
-											<Label htmlFor="license-verified" className="flex items-center gap-1">
+											<Label
+												htmlFor="license-verified"
+												className="flex items-center gap-1"
+											>
 												{getStatusIcon(documentChecks.licenseVerified)}
 												Verified
 											</Label>
@@ -228,7 +259,9 @@ export function DriverDocumentVerificationDialog({
 								<Textarea
 									placeholder="Notes about license verification (optional)"
 									value={documentChecks.licenseNotes}
-									onChange={(e) => handleDocumentCheck("license", "Notes", e.target.value)}
+									onChange={(e) =>
+										handleDocumentCheck("license", "Notes", e.target.value)
+									}
 									rows={2}
 								/>
 							</div>
@@ -244,12 +277,14 @@ export function DriverDocumentVerificationDialog({
 									</div>
 									<div className="flex items-center gap-2">
 										{driver.insuranceDocumentUrl && (
-											<Button 
-												variant="outline" 
+											<Button
+												variant="outline"
 												size="sm"
-												onClick={() => window.open(driver.insuranceDocumentUrl, '_blank')}
+												onClick={() =>
+													window.open(driver.insuranceDocumentUrl, "_blank")
+												}
 											>
-												<Eye className="h-3 w-3 mr-1" />
+												<Eye className="mr-1 h-3 w-3" />
 												View
 											</Button>
 										)}
@@ -257,11 +292,14 @@ export function DriverDocumentVerificationDialog({
 											<Switch
 												id="insurance-verified"
 												checked={documentChecks.insuranceVerified}
-												onCheckedChange={(checked) => 
+												onCheckedChange={(checked) =>
 													handleDocumentCheck("insurance", "Verified", checked)
 												}
 											/>
-											<Label htmlFor="insurance-verified" className="flex items-center gap-1">
+											<Label
+												htmlFor="insurance-verified"
+												className="flex items-center gap-1"
+											>
 												{getStatusIcon(documentChecks.insuranceVerified)}
 												Verified
 											</Label>
@@ -271,7 +309,9 @@ export function DriverDocumentVerificationDialog({
 								<Textarea
 									placeholder="Notes about insurance verification (optional)"
 									value={documentChecks.insuranceNotes}
-									onChange={(e) => handleDocumentCheck("insurance", "Notes", e.target.value)}
+									onChange={(e) =>
+										handleDocumentCheck("insurance", "Notes", e.target.value)
+									}
 									rows={2}
 								/>
 							</div>
@@ -287,12 +327,17 @@ export function DriverDocumentVerificationDialog({
 									</div>
 									<div className="flex items-center gap-2">
 										{driver.backgroundCheckDocumentUrl && (
-											<Button 
-												variant="outline" 
+											<Button
+												variant="outline"
 												size="sm"
-												onClick={() => window.open(driver.backgroundCheckDocumentUrl, '_blank')}
+												onClick={() =>
+													window.open(
+														driver.backgroundCheckDocumentUrl,
+														"_blank",
+													)
+												}
 											>
-												<Eye className="h-3 w-3 mr-1" />
+												<Eye className="mr-1 h-3 w-3" />
 												View
 											</Button>
 										)}
@@ -300,11 +345,18 @@ export function DriverDocumentVerificationDialog({
 											<Switch
 												id="background-verified"
 												checked={documentChecks.backgroundCheckVerified}
-												onCheckedChange={(checked) => 
-													handleDocumentCheck("backgroundCheck", "Verified", checked)
+												onCheckedChange={(checked) =>
+													handleDocumentCheck(
+														"backgroundCheck",
+														"Verified",
+														checked,
+													)
 												}
 											/>
-											<Label htmlFor="background-verified" className="flex items-center gap-1">
+											<Label
+												htmlFor="background-verified"
+												className="flex items-center gap-1"
+											>
 												{getStatusIcon(documentChecks.backgroundCheckVerified)}
 												Verified
 											</Label>
@@ -314,7 +366,13 @@ export function DriverDocumentVerificationDialog({
 								<Textarea
 									placeholder="Notes about background check verification (optional)"
 									value={documentChecks.backgroundCheckNotes}
-									onChange={(e) => handleDocumentCheck("backgroundCheck", "Notes", e.target.value)}
+									onChange={(e) =>
+										handleDocumentCheck(
+											"backgroundCheck",
+											"Notes",
+											e.target.value,
+										)
+									}
 									rows={2}
 								/>
 							</div>
@@ -330,12 +388,14 @@ export function DriverDocumentVerificationDialog({
 									</div>
 									<div className="flex items-center gap-2">
 										{driver.profilePhotoUrl && (
-											<Button 
-												variant="outline" 
+											<Button
+												variant="outline"
 												size="sm"
-												onClick={() => window.open(driver.profilePhotoUrl, '_blank')}
+												onClick={() =>
+													window.open(driver.profilePhotoUrl, "_blank")
+												}
 											>
-												<Eye className="h-3 w-3 mr-1" />
+												<Eye className="mr-1 h-3 w-3" />
 												View
 											</Button>
 										)}
@@ -343,11 +403,18 @@ export function DriverDocumentVerificationDialog({
 											<Switch
 												id="photo-verified"
 												checked={documentChecks.profilePhotoVerified}
-												onCheckedChange={(checked) => 
-													handleDocumentCheck("profilePhoto", "Verified", checked)
+												onCheckedChange={(checked) =>
+													handleDocumentCheck(
+														"profilePhoto",
+														"Verified",
+														checked,
+													)
 												}
 											/>
-											<Label htmlFor="photo-verified" className="flex items-center gap-1">
+											<Label
+												htmlFor="photo-verified"
+												className="flex items-center gap-1"
+											>
 												{getStatusIcon(documentChecks.profilePhotoVerified)}
 												Verified
 											</Label>
@@ -357,7 +424,9 @@ export function DriverDocumentVerificationDialog({
 								<Textarea
 									placeholder="Notes about profile photo verification (optional)"
 									value={documentChecks.profilePhotoNotes}
-									onChange={(e) => handleDocumentCheck("profilePhoto", "Notes", e.target.value)}
+									onChange={(e) =>
+										handleDocumentCheck("profilePhoto", "Notes", e.target.value)
+									}
 									rows={2}
 								/>
 							</div>
@@ -373,33 +442,39 @@ export function DriverDocumentVerificationDialog({
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								<Button
 									variant={overallStatus === "approved" ? "default" : "outline"}
 									onClick={() => setOverallStatus("approved")}
-									className="h-auto py-4 flex flex-col gap-2"
+									className="flex h-auto flex-col gap-2 py-4"
 								>
 									<CheckCircle2 className="h-5 w-5" />
 									<div className="text-center">
 										<div className="font-semibold">Approve</div>
-										<div className="text-xs opacity-75">Activate driver account</div>
+										<div className="text-xs opacity-75">
+											Activate driver account
+										</div>
 									</div>
 								</Button>
 								<Button
-									variant={overallStatus === "needs_revision" ? "default" : "outline"}
+									variant={
+										overallStatus === "needs_revision" ? "default" : "outline"
+									}
 									onClick={() => setOverallStatus("needs_revision")}
-									className="h-auto py-4 flex flex-col gap-2"
+									className="flex h-auto flex-col gap-2 py-4"
 								>
 									<AlertTriangle className="h-5 w-5" />
 									<div className="text-center">
 										<div className="font-semibold">Needs Revision</div>
-										<div className="text-xs opacity-75">Request document updates</div>
+										<div className="text-xs opacity-75">
+											Request document updates
+										</div>
 									</div>
 								</Button>
 								<Button
 									variant={overallStatus === "rejected" ? "default" : "outline"}
 									onClick={() => setOverallStatus("rejected")}
-									className="h-auto py-4 flex flex-col gap-2"
+									className="flex h-auto flex-col gap-2 py-4"
 								>
 									<XCircle className="h-5 w-5" />
 									<div className="text-center">
@@ -427,11 +502,13 @@ export function DriverDocumentVerificationDialog({
 						<Button variant="outline" onClick={onClose}>
 							Cancel
 						</Button>
-						<Button 
+						<Button
 							onClick={handleSubmitVerification}
 							disabled={verifyDocumentsMutation.isPending}
 						>
-							{verifyDocumentsMutation.isPending ? "Processing..." : "Submit Verification"}
+							{verifyDocumentsMutation.isPending
+								? "Processing..."
+								: "Submit Verification"}
 						</Button>
 					</div>
 				</div>

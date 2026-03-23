@@ -1,21 +1,29 @@
+import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, integer, text, index, real } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	integer,
+	real,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
+import { CarStatusEnum } from "@/db/sqlite/enums";
+import { carBodyTypes } from "@/db/sqlite/schema/cars/car-body-types";
+import { carCategories } from "@/db/sqlite/schema/cars/car-categories";
+import { carConditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
+import { carDriveTypes } from "@/db/sqlite/schema/cars/car-drive-types";
+import { carFuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
 import { carImages } from "@/db/sqlite/schema/cars/car-images";
 import { carModels } from "@/db/sqlite/schema/cars/car-models";
-import { carBodyTypes } from "@/db/sqlite/schema/cars/car-body-types";
-import { carFuelTypes } from "@/db/sqlite/schema/cars/car-fuel-types";
 import { carTransmissionTypes } from "@/db/sqlite/schema/cars/car-transmission-types";
-import { carDriveTypes } from "@/db/sqlite/schema/cars/car-drive-types";
-import { carConditionTypes } from "@/db/sqlite/schema/cars/car-condition-types";
-import { createId } from "@paralleldrive/cuid2";
-import { CarStatusEnum } from "@/db/sqlite/enums";
-import { carCategories } from "@/db/sqlite/schema/cars/car-categories";
 import { carsToFeatures } from "./cars-to-features";
 
 export const cars = sqliteTable(
 	"cars",
 	{
-		id: text("id").primaryKey().$defaultFn(() => createId()),
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
 		name: text("name").notNull(),
 		description: text("description").notNull(),
 
@@ -74,9 +82,7 @@ export const cars = sqliteTable(
 		nextServiceDue: integer("next_service_due", { mode: "timestamp" }),
 
 		// Operational status
-		isActive: integer("is_active", { mode: "boolean" })
-			.notNull()
-			.default(true), // Can be used for service
+		isActive: integer("is_active", { mode: "boolean" }).notNull().default(true), // Can be used for service
 		isAvailable: integer("is_available", { mode: "boolean" })
 			.notNull()
 			.default(true), // Currently available for booking
@@ -85,7 +91,8 @@ export const cars = sqliteTable(
 			.default(false), // Public visibility for customers
 
 		// Service status tracking
-		status: text("status").$type<CarStatusEnum>()
+		status: text("status")
+			.$type<CarStatusEnum>()
 			.notNull()
 			.default(CarStatusEnum.Available),
 
@@ -98,11 +105,21 @@ export const cars = sqliteTable(
 			.default(sql`(unixepoch())`),
 	},
 	(table) => ({
-		availabilityIdx: index("cars_availability_idx").on(table.isAvailable, table.isActive),
-		publishedAvailabilityIdx: index("cars_published_availability_idx").on(table.isPublished, table.isActive, table.isAvailable),
+		availabilityIdx: index("cars_availability_idx").on(
+			table.isAvailable,
+			table.isActive,
+		),
+		publishedAvailabilityIdx: index("cars_published_availability_idx").on(
+			table.isPublished,
+			table.isActive,
+			table.isAvailable,
+		),
 		categoryIdx: index("cars_category_idx").on(table.categoryId),
 		statusIdx: index("cars_status_idx").on(table.status),
-		locationIdx: index("cars_location_idx").on(table.currentLatitude, table.currentLongitude),
+		locationIdx: index("cars_location_idx").on(
+			table.currentLatitude,
+			table.currentLongitude,
+		),
 		licensePlateIdx: index("cars_license_plate_idx").on(table.licensePlate),
 	}),
 );

@@ -1,5 +1,5 @@
-import { ChevronRight, Home } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { ChevronRight, Home } from "lucide-react";
 import { Fragment } from "react";
 import { getBreadcrumbTrail } from "@/constants/routes";
 
@@ -15,20 +15,20 @@ export function Breadcrumbs() {
 	}
 
 	return (
-		<nav className="flex items-center space-x-1 text-sm text-muted-foreground">
-			<Home className="size-3.5 mr-2" strokeWidth={3} />
+		<nav className="flex items-center space-x-1 text-muted-foreground text-sm">
+			<Home className="mr-2 size-3.5" strokeWidth={3} />
 			{breadcrumbs.map((breadcrumb, index) => (
 				<Fragment key={breadcrumb.path || breadcrumb.label}>
 					{index > 0 && <ChevronRight className="h-4 w-4" />}
 					{breadcrumb.path ? (
 						<Link
 							to={breadcrumb.path}
-							className="hover:text-foreground transition-colors font-medium"
+							className="font-medium transition-colors hover:text-foreground"
 						>
 							{breadcrumb.label}
 						</Link>
 					) : (
-						<span className="text-foreground font-medium">
+						<span className="font-medium text-foreground">
 							{breadcrumb.label}
 						</span>
 					)}

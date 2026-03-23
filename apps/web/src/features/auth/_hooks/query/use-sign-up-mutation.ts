@@ -1,6 +1,6 @@
-import { authClient } from "@/lib/auth-client";
-import { useMutation } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 type SignUpParams = {
 	name: string;
@@ -11,13 +11,11 @@ type SignUpParams = {
 export const useSignUpMutation = () => {
 	return useMutation({
 		mutationFn: async (values: SignUpParams) => {
-			return await authClient.signUp.email(
-				{
-					name: values.name,
-					email: values.email,
-					password: values.password,
-				},
-			);
+			return await authClient.signUp.email({
+				name: values.name,
+				email: values.email,
+				password: values.password,
+			});
 		},
 		onSuccess: ({ data, error }) => {
 			if (data && data.user) {
@@ -31,5 +29,5 @@ export const useSignUpMutation = () => {
 		onError: (error) => {
 			toast.error(error.message);
 		},
-	})
-}
+	});
+};

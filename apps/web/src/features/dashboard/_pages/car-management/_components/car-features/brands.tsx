@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { AddBrandDialog } from "./brands/add-brand-dialog";
 import { BrandTableList } from "./brands/brand-table-list";
 
@@ -9,7 +15,9 @@ export function Brands() {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Car Brands</CardTitle>
-						<CardDescription>Manage car brands in your inventory</CardDescription>
+						<CardDescription>
+							Manage car brands in your inventory
+						</CardDescription>
 					</div>
 					<AddBrandDialog />
 				</div>
@@ -18,5 +26,5 @@ export function Brands() {
 				<BrandTableList />
 			</CardContent>
 		</Card>
-	)
-}	
+	);
+}

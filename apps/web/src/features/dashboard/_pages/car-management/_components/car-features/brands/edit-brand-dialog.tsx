@@ -1,4 +1,6 @@
-import { Button } from "@workspace/ui/components/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TRPCClientError } from "@trpc/client";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogClose,
@@ -8,43 +10,44 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@workspace/ui/components/dialog"
-import { Form } from "@workspace/ui/components/form"
-import { SquarePenIcon } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import type { CarBrand } from "server/types"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useUpdateCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-update-car-brand-mutation"
-import { useCheckCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-mutation"
-import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
-import { ValidatedTextInputField } from "@/components/form-fields"
-import { TRPCClientError } from "@trpc/client"
+} from "@workspace/ui/components/dialog";
+import { Form } from "@workspace/ui/components/form";
+import { SquarePenIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { CarBrand } from "server/types";
+import { z } from "zod";
+import { ValidatedTextInputField } from "@/components/form-fields";
+import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display";
+import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation";
+import { useCheckCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-mutation";
+import { useUpdateCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-update-car-brand-mutation";
 
 type EditBrandDialogProps = {
-	brand: CarBrand
-}
+	brand: CarBrand;
+};
 
 const FormSchema = z.object({
-	name: z.string().min(1, "Brand name is required").max(50, "Brand name must be less than 50 characters"),
-})
+	name: z
+		.string()
+		.min(1, "Brand name is required")
+		.max(50, "Brand name must be less than 50 characters"),
+});
 
-type FormValues = z.infer<typeof FormSchema>
+type FormValues = z.infer<typeof FormSchema>;
 
 export function EditBrandDialog({ brand }: EditBrandDialogProps) {
-	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const mutation = useUpdateCarBrandMutation()
-	const checkNameMutation = useCheckCarBrandMutation()
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const mutation = useUpdateCarBrandMutation();
+	const checkNameMutation = useCheckCarBrandMutation();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
 		disabled: mutation.isPending,
 		defaultValues: {
-			name: brand.name
+			name: brand.name,
 		},
-	})
+	});
 
 	// Reset form when value changes
 	useEffect(() => {
@@ -60,10 +63,10 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 				{
 					onSuccess: (isAvailable) => resolve(isAvailable!),
 					onError: (error) => reject(error),
-				}
-			)
-		})
-	}
+				},
+			);
+		});
+	};
 
 	const nameValidation = useEntityNameValidation({
 		form,
@@ -71,7 +74,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 		validateNameFn: validateName,
 		originalValue: brand.name,
 		errorMessage: `${form.watch("name")} already used.`,
-	})
+	});
 
 	const validationDisplay = EntityNameValidationDisplay({
 		isChecking: nameValidation.isChecking,
@@ -79,59 +82,69 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 		hasValue: !!form.watch("name")?.trim(),
 		hasError: !!form.formState.errors.name,
 		entityName: form.watch("name")?.trim(),
-	})
+	});
 
 	const handleReset = () => {
-		form.reset()
-		nameValidation.reset()
-	}
+		form.reset();
+		nameValidation.reset();
+	};
 
 	const handleSubmit = (data: FormValues) => {
-		mutation.mutate({
-			id: brand.id,
-			data: FormSchema.parse(data)
-		}, {
-			onSuccess: () => {
-				handleReset()
-				setIsDialogOpen(false)
+		mutation.mutate(
+			{
+				id: brand.id,
+				data: FormSchema.parse(data),
 			},
-		})
-	}
+			{
+				onSuccess: () => {
+					handleReset();
+					setIsDialogOpen(false);
+				},
+			},
+		);
+	};
 
 	const hasChanges = () => {
-		const currentValues = form.getValues()
-		return (
-			currentValues.name !== brand.name
-		)
-	}
-
+		const currentValues = form.getValues();
+		return currentValues.name !== brand.name;
+	};
 
 	const canSubmit = () => {
-		const values = form.getValues()
-		const hasErrors = Object.keys(form.formState.errors).length > 0
-		const isNameUnavailable = nameValidation.nameAvailability === false
-		const isCheckingName = nameValidation.isChecking
-		const hasRequiredFields = values.name?.trim()
+		const values = form.getValues();
+		const hasErrors = Object.keys(form.formState.errors).length > 0;
+		const isNameUnavailable = nameValidation.nameAvailability === false;
+		const isCheckingName = nameValidation.isChecking;
+		const hasRequiredFields = values.name?.trim();
 
-		return hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
-	}
+		return (
+			hasChanges() &&
+			hasRequiredFields &&
+			!hasErrors &&
+			!isNameUnavailable &&
+			!isCheckingName &&
+			!mutation.isPending
+		);
+	};
 
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 			<DialogTrigger asChild>
 				<Button variant="outline" size="icon">
-					<SquarePenIcon className="w-4 h-4" />
+					<SquarePenIcon className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
-				<DialogHeader >
+				<DialogHeader>
 					<DialogTitle>Edit Brand</DialogTitle>
 					<DialogDescription>
 						Enter the name of the car brand.
 					</DialogDescription>
 				</DialogHeader>
-				<Form {...form as any}>
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+				<Form {...(form as any)}>
+					<form
+						onSubmit={form.handleSubmit(handleSubmit)}
+						className="flex flex-col gap-4"
+					>
 						<ValidatedTextInputField
 							form={form}
 							name="name"
@@ -141,11 +154,7 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 						/>
 						<DialogFooter>
 							<DialogClose>
-								<Button
-									type="button"
-									variant="ghost"
-									onClick={handleReset}
-								>
+								<Button type="button" variant="ghost" onClick={handleReset}>
 									Cancel
 								</Button>
 							</DialogClose>
@@ -161,5 +170,5 @@ export function EditBrandDialog({ brand }: EditBrandDialogProps) {
 				</Form>
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }

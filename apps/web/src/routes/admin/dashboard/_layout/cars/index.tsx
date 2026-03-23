@@ -1,11 +1,16 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import { CarIcon, SettingsIcon } from "lucide-react";
+import { z } from "zod";
 import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { CarFeatures } from "@/features/dashboard/_pages/car-management/_components/car-features";
 import { CarsList } from "@/features/dashboard/_pages/car-management/_components/cars-list";
 import { CarManagementModalProviders } from "@/features/dashboard/_pages/car-management/_providers/car-management-modal-providers";
-import { createFileRoute } from "@tanstack/react-router";
-import { CarIcon, SettingsIcon } from "lucide-react";
-import { z } from "zod";
 
 // Search params schema for filters
 const carManagementSearchSchema = z.object({
@@ -17,7 +22,7 @@ const carManagementSearchSchema = z.object({
 	maxPrice: z.number().optional(),
 	page: z.number().optional(),
 	pageSize: z.number().optional(),
-})
+});
 
 export const Route = createFileRoute("/admin/dashboard/_layout/cars/")({
 	component: RouteComponent,
@@ -29,16 +34,16 @@ function RouteComponent() {
 		<>
 			<div className="mx-auto">
 				<Tabs defaultValue="cars" className="relative gap-0">
-					<PaddingLayout className="sticky top-0 z-10 flex items-center justify-between bg-background/95 backdrop-blur-sm border-b border-border">
+					<PaddingLayout className="sticky top-0 z-10 flex items-center justify-between border-border border-b bg-background/95 backdrop-blur-sm">
 						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center border border-green-200/50">
+							<div className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200/50 bg-gradient-to-br from-green-50 to-green-100">
 								<CarIcon className="h-5 w-5 text-green-600" />
 							</div>
 							<div>
-								<h1 className="text-2xl font-bold tracking-tight">
+								<h1 className="font-bold text-2xl tracking-tight">
 									Car Management
 								</h1>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									Manage inventory and configure features
 								</p>
 							</div>
@@ -46,23 +51,28 @@ function RouteComponent() {
 
 						<TabsList className="grid grid-cols-2">
 							<TabsTrigger value="cars" className="flex items-center gap-2">
-								<CarIcon className="w-4 h-4" />
+								<CarIcon className="h-4 w-4" />
 								Cars Inventory
 							</TabsTrigger>
 							<TabsTrigger value="features" className="flex items-center gap-2">
-								<SettingsIcon className="w-4 h-4" />
+								<SettingsIcon className="h-4 w-4" />
 								Car Features
 							</TabsTrigger>
 						</TabsList>
 					</PaddingLayout>
 
 					<div className="bg-gradient-to-b from-slate-50/60 to-background">
-						<TabsContent value="cars"> <CarsList /></TabsContent>
-						<TabsContent value="features"><CarFeatures /></TabsContent>
+						<TabsContent value="cars">
+							{" "}
+							<CarsList />
+						</TabsContent>
+						<TabsContent value="features">
+							<CarFeatures />
+						</TabsContent>
 					</div>
 				</Tabs>
 			</div>
 			<CarManagementModalProviders />
 		</>
-	)
+	);
 }

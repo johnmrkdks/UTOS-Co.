@@ -1,5 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 
 export function NotificationsTab() {
 	return (
@@ -12,10 +18,16 @@ export function NotificationsTab() {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-3">
-					<p className="text-sm text-gray-600">
-						Notification settings will be available once your driver profile is complete and approved.
+					<p className="text-gray-600 text-sm">
+						Notification settings will be available once your driver profile is
+						complete and approved.
 					</p>
-					<Button variant="outline" disabled size="sm" className="w-full sm:w-auto">
+					<Button
+						variant="outline"
+						disabled
+						size="sm"
+						className="w-full sm:w-auto"
+					>
 						Configure Notifications
 					</Button>
 				</div>

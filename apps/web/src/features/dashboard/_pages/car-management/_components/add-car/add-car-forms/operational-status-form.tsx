@@ -1,23 +1,34 @@
-import type { Control } from "react-hook-form"
-
-import { Checkbox } from "@workspace/ui/components/checkbox"
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
-import { Input } from "@workspace/ui/components/input"
-import type { AddCarFormValues } from "../add-car-form"
-import { CarStatusEnum } from "server/types"
+import { Checkbox } from "@workspace/ui/components/checkbox";
+import {
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import type { Control } from "react-hook-form";
+import { CarStatusEnum } from "server/types";
+import type { AddCarFormValues } from "../add-car-form";
 
 type OperationalStatusFormProps = {
-	control: Control<AddCarFormValues>
-}
+	control: Control<AddCarFormValues>;
+};
 
 export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 	return (
 		<div className="space-y-4">
-			<h3 className="text-lg font-medium">Operational Status</h3>
+			<h3 className="font-medium text-lg">Operational Status</h3>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<div className="space-y-4">
 					<h4 className="font-medium">System Status</h4>
 					<FormField
@@ -26,11 +37,16 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
 								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+									<Checkbox
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Active</FormLabel>
-									<FormDescription className="text-xs">Car is active in the system</FormDescription>
+									<FormDescription className="text-xs">
+										Car is active in the system
+									</FormDescription>
 								</div>
 							</FormItem>
 						)}
@@ -42,11 +58,16 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
 								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+									<Checkbox
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Available</FormLabel>
-									<FormDescription className="text-xs">Car is currently available for booking</FormDescription>
+									<FormDescription className="text-xs">
+										Car is currently available for booking
+									</FormDescription>
 								</div>
 							</FormItem>
 						)}
@@ -58,21 +79,34 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Current Status</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<Select
+									onValueChange={field.onChange}
+									defaultValue={field.value}
+								>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Select status" />
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										<SelectItem value={CarStatusEnum.Available}>Available</SelectItem>
+										<SelectItem value={CarStatusEnum.Available}>
+											Available
+										</SelectItem>
 										<SelectItem value={CarStatusEnum.Booked}>Booked</SelectItem>
-										<SelectItem value={CarStatusEnum.InService}>In Service</SelectItem>
-										<SelectItem value={CarStatusEnum.Maintenance}>Maintenance</SelectItem>
-										<SelectItem value={CarStatusEnum.OutOfService}>Out of Service</SelectItem>
+										<SelectItem value={CarStatusEnum.InService}>
+											In Service
+										</SelectItem>
+										<SelectItem value={CarStatusEnum.Maintenance}>
+											Maintenance
+										</SelectItem>
+										<SelectItem value={CarStatusEnum.OutOfService}>
+											Out of Service
+										</SelectItem>
 									</SelectContent>
 								</Select>
-								<FormDescription className="text-xs">Current operational status of the car</FormDescription>
+								<FormDescription className="text-xs">
+									Current operational status of the car
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -80,18 +114,23 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 				</div>
 				<div className="space-y-4">
 					<h4 className="font-medium">Service Availability</h4>
-					
+
 					<FormField
 						control={control}
 						name="availableForPackages"
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
 								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+									<Checkbox
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Available for Packages</FormLabel>
-									<FormDescription className="text-xs">Car can be used for package delivery services</FormDescription>
+									<FormDescription className="text-xs">
+										Car can be used for package delivery services
+									</FormDescription>
 								</div>
 							</FormItem>
 						)}
@@ -103,19 +142,22 @@ export function OperationalStatusForm({ control }: OperationalStatusFormProps) {
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
 								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+									<Checkbox
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Available for Custom Services</FormLabel>
-									<FormDescription className="text-xs">Car can be used for custom booking services</FormDescription>
+									<FormDescription className="text-xs">
+										Car can be used for custom booking services
+									</FormDescription>
 								</div>
 							</FormItem>
 						)}
 					/>
-
 				</div>
 			</div>
 		</div>
-	)
+	);
 }
-

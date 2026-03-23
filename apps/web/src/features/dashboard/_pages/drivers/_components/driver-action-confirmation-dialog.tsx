@@ -1,9 +1,5 @@
-import { useState } from "react";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
 import { Badge } from "@workspace/ui/components/badge";
-import { Textarea } from "@workspace/ui/components/textarea";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogContent,
@@ -12,15 +8,19 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import { Textarea } from "@workspace/ui/components/textarea";
 import {
+	AlertTriangle,
+	CheckCircle,
+	Shield,
+	User,
 	UserCheck,
 	UserX,
-	AlertTriangle,
-	User,
-	Shield,
-	CheckCircle,
 	X,
 } from "lucide-react";
+import { useState } from "react";
 
 type ActionType = "approve" | "reject" | "activate" | "deactivate";
 
@@ -65,7 +65,7 @@ export function DriverActionConfirmationDialog({
 			buttonClass: "bg-green-600 hover:bg-green-700",
 		},
 		reject: {
-			title: "Reject Driver Application", 
+			title: "Reject Driver Application",
 			icon: UserX,
 			color: "text-red-600",
 			bgColor: "bg-red-50 border-red-200",
@@ -143,16 +143,14 @@ export function DriverActionConfirmationDialog({
 						{config.title}
 					</DialogTitle>
 					<DialogDescription className="space-y-3">
-						<p className="text-base font-medium">
-							{config.description}
-						</p>
+						<p className="font-medium text-base">{config.description}</p>
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-4">
 					{/* Driver Info */}
-					<div className="border rounded-lg p-4 bg-gray-50">
-						<h4 className="font-medium mb-3 flex items-center gap-2">
+					<div className="rounded-lg border bg-gray-50 p-4">
+						<h4 className="mb-3 flex items-center gap-2 font-medium">
 							<User className="h-4 w-4" />
 							Driver Information
 						</h4>
@@ -172,7 +170,9 @@ export function DriverActionConfirmationDialog({
 							<div>
 								<Label className="text-gray-500">Current Status</Label>
 								<div className="flex gap-2">
-									<Badge variant={driver?.isApproved ? "default" : "destructive"}>
+									<Badge
+										variant={driver?.isApproved ? "default" : "destructive"}
+									>
 										{driver?.isApproved ? "Approved" : "Pending"}
 									</Badge>
 									<Badge variant={driver?.isActive ? "default" : "secondary"}>
@@ -185,8 +185,12 @@ export function DriverActionConfirmationDialog({
 
 					{/* Consequences */}
 					<div className={`rounded-lg p-4 ${config.bgColor}`}>
-						<p className={`font-medium mb-2 ${config.textColor}`}>This action will:</p>
-						<ul className={`text-sm space-y-1 list-disc list-inside ${config.textColor}`}>
+						<p className={`mb-2 font-medium ${config.textColor}`}>
+							This action will:
+						</p>
+						<ul
+							className={`list-inside list-disc space-y-1 text-sm ${config.textColor}`}
+						>
 							{config.consequences.map((consequence, index) => (
 								<li key={index}>{consequence}</li>
 							))}
@@ -196,7 +200,9 @@ export function DriverActionConfirmationDialog({
 					{/* Notes (for reject action) */}
 					{action === "reject" && (
 						<div className="space-y-2">
-							<Label htmlFor="rejection-notes">Rejection Reason (Optional)</Label>
+							<Label htmlFor="rejection-notes">
+								Rejection Reason (Optional)
+							</Label>
 							<Textarea
 								id="rejection-notes"
 								value={notes}
@@ -218,10 +224,14 @@ export function DriverActionConfirmationDialog({
 							value={confirmationText}
 							onChange={(e) => setConfirmationText(e.target.value)}
 							placeholder={`Type: ${config.confirmation}`}
-							className={isConfirmationValid ? "border-green-500 bg-green-50" : ""}
+							className={
+								isConfirmationValid ? "border-green-500 bg-green-50" : ""
+							}
 						/>
 						{confirmationText && (
-							<p className={`text-sm ${isConfirmationValid ? "text-green-600" : "text-red-600"}`}>
+							<p
+								className={`text-sm ${isConfirmationValid ? "text-green-600" : "text-red-600"}`}
+							>
 								{isConfirmationValid ? (
 									<span className="flex items-center gap-1">
 										<CheckCircle className="h-3 w-3" />
@@ -237,10 +247,10 @@ export function DriverActionConfirmationDialog({
 
 				<DialogFooter>
 					<Button variant="outline" onClick={handleClose}>
-						<X className="h-4 w-4 mr-2" />
+						<X className="mr-2 h-4 w-4" />
 						Cancel
 					</Button>
-					<Button 
+					<Button
 						onClick={handleConfirm}
 						disabled={!isConfirmationValid || isLoading}
 						className={config.buttonClass}
@@ -249,7 +259,7 @@ export function DriverActionConfirmationDialog({
 							"Processing..."
 						) : (
 							<>
-								<Icon className="h-4 w-4 mr-2" />
+								<Icon className="mr-2 h-4 w-4" />
 								{config.buttonText}
 							</>
 						)}

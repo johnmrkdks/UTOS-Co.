@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarConditionType } from "server/types"
-import { EditConditionTypeDialog } from "./edit-condition-type-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarConditionType } from "server/types";
 import { DeleteConditionTypeDialog } from "./delete-condition-type-dialog";
+import { EditConditionTypeDialog } from "./edit-condition-type-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function ConditionTypeTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function ConditionTypeTableRowActions<TData>({
 			<EditConditionTypeDialog conditionType={conditionType} />
 			<DeleteConditionTypeDialog conditionType={conditionType} />
 		</div>
-	)
+	);
 }

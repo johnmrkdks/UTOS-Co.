@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Step, type QuoteResult, type RouteData } from "../_types/instant-quote";
+import type { QuoteResult, RouteData, Step } from "../_types/instant-quote";
 
 export function useInstantQuoteFlow() {
 	const [currentStep, setCurrentStep] = useState<Step>("input");

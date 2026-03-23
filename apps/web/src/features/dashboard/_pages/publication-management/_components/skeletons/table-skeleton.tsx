@@ -1,5 +1,5 @@
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 
 interface TableSkeletonProps {
 	rows?: number;
@@ -11,22 +11,22 @@ export function TableSkeleton({ rows = 5, columns = 6 }: TableSkeletonProps) {
 		<div className="space-y-4">
 			{/* Filters Skeleton */}
 			<div className="flex items-center gap-4">
-				<Skeleton className="flex-1 h-10" />
-				<Skeleton className="w-[200px] h-10" />
+				<Skeleton className="h-10 flex-1" />
+				<Skeleton className="h-10 w-[200px]" />
 			</div>
 
 			{/* Stats Summary Skeleton */}
 			<div className="grid grid-cols-4 gap-4">
 				{Array.from({ length: 4 }).map((_, index) => (
-					<div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
-						<Skeleton className="h-8 w-12 mx-auto mb-2" />
-						<Skeleton className="h-4 w-16 mx-auto" />
+					<div key={index} className="rounded-lg bg-gray-50 p-3 text-center">
+						<Skeleton className="mx-auto mb-2 h-8 w-12" />
+						<Skeleton className="mx-auto h-4 w-16" />
 					</div>
 				))}
 			</div>
 
 			{/* Table Skeleton */}
-			<div className="border rounded-lg">
+			<div className="rounded-lg border">
 				{/* Header Skeleton */}
 				<div className="border-b p-4">
 					<div className="grid grid-cols-6 gap-4">

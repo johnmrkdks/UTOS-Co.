@@ -1,10 +1,10 @@
-import { users } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { users } from "@/db/schema";
 
 export const UserSchema = createSelectSchema(users, {
 	banExpires: z.union([z.date(), z.string()]),

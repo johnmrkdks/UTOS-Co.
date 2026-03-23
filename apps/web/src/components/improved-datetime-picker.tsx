@@ -1,19 +1,23 @@
-import { useState } from "react"
-import { format } from "date-fns"
-import { Button } from "@workspace/ui/components/button"
-import { Calendar } from "@workspace/ui/components/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover"
-import { cn } from "@workspace/ui/lib/utils"
-import { CalendarIcon } from "lucide-react"
-import { ImprovedTimePicker } from "./improved-time-picker"
+import { Button } from "@workspace/ui/components/button";
+import { Calendar } from "@workspace/ui/components/calendar";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@workspace/ui/components/popover";
+import { cn } from "@workspace/ui/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import { ImprovedTimePicker } from "./improved-time-picker";
 
 interface ImprovedDateTimePickerProps {
-	value?: Date
-	onChange: (date: Date | undefined) => void
-	placeholder?: string
-	disabled?: boolean
-	className?: string
-	minDate?: Date
+	value?: Date;
+	onChange: (date: Date | undefined) => void;
+	placeholder?: string;
+	disabled?: boolean;
+	className?: string;
+	minDate?: Date;
 }
 
 export function ImprovedDateTimePicker({
@@ -22,68 +26,68 @@ export function ImprovedDateTimePicker({
 	placeholder = "Select date and time",
 	disabled = false,
 	className,
-	minDate
+	minDate,
 }: ImprovedDateTimePickerProps) {
-	const [selectedDate, setSelectedDate] = useState<Date | undefined>(value)
+	const [selectedDate, setSelectedDate] = useState<Date | undefined>(value);
 	const [selectedTime, setSelectedTime] = useState<string>(
-		value ? format(value, "HH:mm") : ""
-	)
+		value ? format(value, "HH:mm") : "",
+	);
 
 	const handleDateSelect = (date: Date | undefined) => {
-		setSelectedDate(date)
+		setSelectedDate(date);
 		if (date && selectedTime) {
-			const [hours, minutes] = selectedTime.split(":").map(Number)
-			const newDateTime = new Date(date)
-			newDateTime.setHours(hours, minutes, 0, 0)
-			onChange(newDateTime)
+			const [hours, minutes] = selectedTime.split(":").map(Number);
+			const newDateTime = new Date(date);
+			newDateTime.setHours(hours, minutes, 0, 0);
+			onChange(newDateTime);
 		} else {
-			onChange(date)
+			onChange(date);
 		}
-	}
+	};
 
 	const handleTimeSelect = (time: string) => {
-		setSelectedTime(time)
+		setSelectedTime(time);
 		if (selectedDate && time) {
-			const [hours, minutes] = time.split(":").map(Number)
-			const newDateTime = new Date(selectedDate)
-			newDateTime.setHours(hours, minutes, 0, 0)
-			onChange(newDateTime)
+			const [hours, minutes] = time.split(":").map(Number);
+			const newDateTime = new Date(selectedDate);
+			newDateTime.setHours(hours, minutes, 0, 0);
+			onChange(newDateTime);
 		}
-	}
+	};
 
 	const getDisplayValue = () => {
-		if (!selectedDate) return placeholder
-		
-		const dateStr = format(selectedDate, "PPP")
+		if (!selectedDate) return placeholder;
+
+		const dateStr = format(selectedDate, "PPP");
 		if (selectedTime) {
 			// Convert time to 12-hour format for display
-			const [hours, minutes] = selectedTime.split(":").map(Number)
-			let displayHour = hours
-			const ampm = hours >= 12 ? 'PM' : 'AM'
-			
-			if (hours === 0) displayHour = 12
-			else if (hours > 12) displayHour = hours - 12
-			
-			const time12 = `${displayHour}:${minutes.toString().padStart(2, '0')} ${ampm}`
-			return `${dateStr} at ${time12}`
+			const [hours, minutes] = selectedTime.split(":").map(Number);
+			let displayHour = hours;
+			const ampm = hours >= 12 ? "PM" : "AM";
+
+			if (hours === 0) displayHour = 12;
+			else if (hours > 12) displayHour = hours - 12;
+
+			const time12 = `${displayHour}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+			return `${dateStr} at ${time12}`;
 		}
-		
-		return dateStr
-	}
+
+		return dateStr;
+	};
 
 	return (
 		<div className="space-y-3">
 			{/* Date Picker */}
 			<div>
-				<label className="block text-sm font-medium mb-1">Date</label>
+				<label className="mb-1 block font-medium text-sm">Date</label>
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
 							variant="outline"
 							className={cn(
-								"w-full justify-start text-left font-normal h-10 sm:h-12",
+								"h-10 w-full justify-start text-left font-normal sm:h-12",
 								!selectedDate && "text-muted-foreground",
-								className
+								className,
 							)}
 							disabled={disabled}
 						>
@@ -98,13 +102,13 @@ export function ImprovedDateTimePicker({
 							onSelect={handleDateSelect}
 							disabled={(date) => {
 								if (minDate) {
-									const today = new Date()
-									today.setHours(0, 0, 0, 0)
-									const compareDate = new Date(date)
-									compareDate.setHours(0, 0, 0, 0)
-									return compareDate < today
+									const today = new Date();
+									today.setHours(0, 0, 0, 0);
+									const compareDate = new Date(date);
+									compareDate.setHours(0, 0, 0, 0);
+									return compareDate < today;
 								}
-								return false
+								return false;
 							}}
 							initialFocus
 						/>
@@ -114,7 +118,7 @@ export function ImprovedDateTimePicker({
 
 			{/* Time Picker */}
 			<div>
-				<label className="block text-sm font-medium mb-1">Time</label>
+				<label className="mb-1 block font-medium text-sm">Time</label>
 				<ImprovedTimePicker
 					value={selectedTime}
 					onChange={handleTimeSelect}
@@ -126,11 +130,11 @@ export function ImprovedDateTimePicker({
 
 			{/* Selected DateTime Display */}
 			{selectedDate && selectedTime && (
-				<div className="p-3 bg-muted rounded-lg">
-					<p className="text-sm font-medium text-muted-foreground">Selected:</p>
+				<div className="rounded-lg bg-muted p-3">
+					<p className="font-medium text-muted-foreground text-sm">Selected:</p>
 					<p className="text-sm">{getDisplayValue()}</p>
 				</div>
 			)}
 		</div>
-	)
+	);
 }

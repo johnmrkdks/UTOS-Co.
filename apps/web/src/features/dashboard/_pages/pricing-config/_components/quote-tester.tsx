@@ -1,19 +1,52 @@
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Separator } from "@workspace/ui/components/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useState } from "react";
-import { useGetPricingConfigsQuery } from "../_hooks/query/use-get-pricing-configs-query";
-import { Calculator, MapPin, Clock, DollarSign, Route, Plus, X, ArrowRight } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { Separator } from "@workspace/ui/components/separator";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import {
+	ArrowRight,
+	Calculator,
+	Clock,
+	DollarSign,
+	MapPin,
+	Plus,
+	Route,
+	X,
+} from "lucide-react";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
 import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/home/_hooks/query/use-calculate-instant-quote-mutation";
+import { useGetPricingConfigsQuery } from "../_hooks/query/use-get-pricing-configs-query";
 
 const quoteTesterSchema = z.object({
 	pricingConfigId: z.string().min(1, "Please select a pricing configuration"),
@@ -24,9 +57,14 @@ const realAddressTesterSchema = z.object({
 	pricingConfigId: z.string().min(1, "Please select a pricing configuration"),
 	originAddress: z.string().min(1, "Origin address is required"),
 	destinationAddress: z.string().min(1, "Destination address is required"),
-	stops: z.array(z.object({
-		address: z.string().min(1, "Stop address is required"),
-	})).optional().default([]),
+	stops: z
+		.array(
+			z.object({
+				address: z.string().min(1, "Stop address is required"),
+			}),
+		)
+		.optional()
+		.default([]),
 });
 
 type QuoteTesterForm = z.infer<typeof quoteTesterSchema>;
@@ -38,10 +76,10 @@ export function QuoteTester() {
 	const [originGeometry, setOriginGeometry] = useState<any>(null);
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null);
 	const [stopsGeometry, setStopsGeometry] = useState<any[]>([]);
-	
+
 	const pricingConfigsQuery = useGetPricingConfigsQuery({});
 	const calculateQuoteMutation = useCalculateInstantQuoteMutation();
-	
+
 	const form = useForm<QuoteTesterForm>({
 		resolver: zodResolver(quoteTesterSchema),
 		defaultValues: {
@@ -60,39 +98,54 @@ export function QuoteTester() {
 		},
 	});
 
-	const { fields: stopFields, append: appendStop, remove: removeStop } = useFieldArray({
+	const {
+		fields: stopFields,
+		append: appendStop,
+		remove: removeStop,
+	} = useFieldArray({
 		control: addressForm.control,
 		name: "stops",
 	});
 
-	const handleOriginSelect = (place: { placeId: string; description: string; geometry?: any }) => {
-		setOriginGeometry(place.geometry)
-		addressForm.setValue("originAddress", place.description)
-	}
+	const handleOriginSelect = (place: {
+		placeId: string;
+		description: string;
+		geometry?: any;
+	}) => {
+		setOriginGeometry(place.geometry);
+		addressForm.setValue("originAddress", place.description);
+	};
 
-	const handleDestinationSelect = (place: { placeId: string; description: string; geometry?: any }) => {
-		setDestinationGeometry(place.geometry)
-		addressForm.setValue("destinationAddress", place.description)
-	}
+	const handleDestinationSelect = (place: {
+		placeId: string;
+		description: string;
+		geometry?: any;
+	}) => {
+		setDestinationGeometry(place.geometry);
+		addressForm.setValue("destinationAddress", place.description);
+	};
 
-	const handleStopSelect = (index: number, place: { placeId: string; description: string; geometry?: any }) => {
-		const newStopsGeometry = [...stopsGeometry]
-		newStopsGeometry[index] = place.geometry
-		setStopsGeometry(newStopsGeometry)
-		addressForm.setValue(`stops.${index}.address`, place.description)
-	}
+	const handleStopSelect = (
+		index: number,
+		place: { placeId: string; description: string; geometry?: any },
+	) => {
+		const newStopsGeometry = [...stopsGeometry];
+		newStopsGeometry[index] = place.geometry;
+		setStopsGeometry(newStopsGeometry);
+		addressForm.setValue(`stops.${index}.address`, place.description);
+	};
 
 	const addStop = () => {
-		appendStop({ address: "" })
-		setStopsGeometry([...stopsGeometry, null])
-	}
+		appendStop({ address: "" });
+		setStopsGeometry([...stopsGeometry, null]);
+	};
 
 	const removeStopAt = (index: number) => {
-		removeStop(index)
-		const newStopsGeometry = [...stopsGeometry]
-		newStopsGeometry.splice(index, 1)
-		setStopsGeometry(newStopsGeometry)
-	}
+		removeStop(index);
+		const newStopsGeometry = [...stopsGeometry];
+		newStopsGeometry.splice(index, 1);
+		setStopsGeometry(newStopsGeometry);
+	};
 
 	const onAddressSubmit = async (data: RealAddressTesterForm) => {
 		// Extract coordinates from geometry if available
@@ -102,11 +155,12 @@ export function QuoteTester() {
 		const destinationLng = destinationGeometry?.location?.lng?.();
 
 		// Extract stops coordinates
-		const stopsData = data.stops?.map((stop, index) => ({
-			address: stop.address,
-			latitude: stopsGeometry[index]?.location?.lat?.(),
-			longitude: stopsGeometry[index]?.location?.lng?.(),
-		})) || [];
+		const stopsData =
+			data.stops?.map((stop, index) => ({
+				address: stop.address,
+				latitude: stopsGeometry[index]?.location?.lat?.(),
+				longitude: stopsGeometry[index]?.location?.lng?.(),
+			})) || [];
 
 		try {
 			// Get real distance and duration from Google Maps
@@ -126,7 +180,7 @@ export function QuoteTester() {
 
 			// Now calculate the quote using the selected pricing config
 			const config = pricingConfigsQuery.data?.data?.find(
-				(c: any) => c.id === data.pricingConfigId
+				(c: any) => c.id === data.pricingConfigId,
 			);
 
 			if (!config) return;
@@ -134,9 +188,9 @@ export function QuoteTester() {
 			// Calculate using simplified two-tier pricing
 			let firstKmFare = 0;
 			let additionalKmFare = 0;
-			
+
 			const firstKmLimit = config.firstKmLimit || 10;
-			
+
 			if (distance <= firstKmLimit) {
 				// Distance is within first tier - pay flat rate
 				firstKmFare = config.firstKmRate || 0;
@@ -158,7 +212,7 @@ export function QuoteTester() {
 						origin: data.originAddress,
 						destination: data.destinationAddress,
 						stops: data.stops || [],
-					}
+					},
 				},
 				breakdown: {
 					firstKmFare: firstKmFare,
@@ -170,15 +224,14 @@ export function QuoteTester() {
 				parameters: data,
 				isRealTest: true,
 			});
-
 		} catch (error) {
 			console.error("Error calculating real address quote:", error);
 		}
-	}
+	};
 
 	const onSubmit = (data: QuoteTesterForm) => {
 		const config = pricingConfigsQuery.data?.data?.find(
-			(c: any) => c.id === data.pricingConfigId
+			(c: any) => c.id === data.pricingConfigId,
 		);
 
 		if (!config) return;
@@ -186,9 +239,9 @@ export function QuoteTester() {
 		// Calculate using simplified two-tier pricing
 		let firstKmFare = 0;
 		let additionalKmFare = 0;
-		
+
 		const firstKmLimit = config.firstKmLimit || 10;
-		
+
 		if (data.distance <= firstKmLimit) {
 			// Distance is within first tier - pay flat rate
 			firstKmFare = config.firstKmRate || 0;
@@ -222,7 +275,7 @@ export function QuoteTester() {
 			</TabsList>
 
 			<TabsContent value="manual">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 					{/* Manual Input Form */}
 					<Card>
 						<CardHeader>
@@ -235,26 +288,39 @@ export function QuoteTester() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<Form {...form as any}>
-								<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+							<Form {...(form as any)}>
+								<form
+									onSubmit={form.handleSubmit(onSubmit)}
+									className="space-y-4"
+								>
 									<FormField
 										control={form.control as any}
 										name="pricingConfigId"
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Pricing Configuration</FormLabel>
-												<Select onValueChange={field.onChange} defaultValue={field.value}>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+												>
 													<FormControl>
 														<SelectTrigger>
 															<SelectValue placeholder="Select configuration" />
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
-														{pricingConfigsQuery.data?.data?.map((config: any) => (
-															<SelectItem key={config.id} value={config.id}>
-																{config.name} {config.isActive && <Badge variant="secondary" className="ml-2">Active</Badge>}
-															</SelectItem>
-														))}
+														{pricingConfigsQuery.data?.data?.map(
+															(config: any) => (
+																<SelectItem key={config.id} value={config.id}>
+																	{config.name}{" "}
+																	{config.isActive && (
+																		<Badge variant="secondary" className="ml-2">
+																			Active
+																		</Badge>
+																	)}
+																</SelectItem>
+															),
+														)}
 													</SelectContent>
 												</Select>
 												<FormMessage />
@@ -269,13 +335,17 @@ export function QuoteTester() {
 											<FormItem>
 												<FormLabel>Distance (km)</FormLabel>
 												<FormControl>
-													<Input 
-														type="number" 
-														step="0.1" 
+													<Input
+														type="number"
+														step="0.1"
 														min="0.1"
 														placeholder="e.g., 15.5"
-														{...field} 
-														onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+														{...field}
+														onChange={(e) =>
+															field.onChange(
+																Number.parseFloat(e.target.value) || 0,
+															)
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -299,28 +369,53 @@ export function QuoteTester() {
 								Quote Results
 							</CardTitle>
 							<CardDescription>
-								{quote?.isRealTest ? "Real address test results" : "Manual test results"}
+								{quote?.isRealTest
+									? "Real address test results"
+									: "Manual test results"}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{quote ? (
 								<div className="space-y-4">
 									<div className="text-center">
-										<p className="text-sm text-muted-foreground">Total Fare</p>
-										<p className="text-3xl font-bold">${quote.breakdown.total.toFixed(2)}</p>
-										<p className="text-sm text-muted-foreground">Using {quote.config}</p>
+										<p className="text-muted-foreground text-sm">Total Fare</p>
+										<p className="font-bold text-3xl">
+											${quote.breakdown.total.toFixed(2)}
+										</p>
+										<p className="text-muted-foreground text-sm">
+											Using {quote.config}
+										</p>
 									</div>
 
 									{quote.realData && (
-										<div className="bg-blue-50 p-3 rounded-lg">
-											<h4 className="font-medium text-sm mb-2">Real Test Data</h4>
-											<div className="text-xs space-y-1">
-												<p><strong>Distance:</strong> {quote.realData.distance.toFixed(2)} km</p>
-												<p><strong>Duration:</strong> {quote.realData.duration.toFixed(0)} min</p>
-												<p><strong>From:</strong> {quote.realData.addresses.origin}</p>
-												<p><strong>To:</strong> {quote.realData.addresses.destination}</p>
+										<div className="rounded-lg bg-blue-50 p-3">
+											<h4 className="mb-2 font-medium text-sm">
+												Real Test Data
+											</h4>
+											<div className="space-y-1 text-xs">
+												<p>
+													<strong>Distance:</strong>{" "}
+													{quote.realData.distance.toFixed(2)} km
+												</p>
+												<p>
+													<strong>Duration:</strong>{" "}
+													{quote.realData.duration.toFixed(0)} min
+												</p>
+												<p>
+													<strong>From:</strong>{" "}
+													{quote.realData.addresses.origin}
+												</p>
+												<p>
+													<strong>To:</strong>{" "}
+													{quote.realData.addresses.destination}
+												</p>
 												{quote.realData.addresses.stops.length > 0 && (
-													<p><strong>Stops:</strong> {quote.realData.addresses.stops.map((s: any) => s.address).join(', ')}</p>
+													<p>
+														<strong>Stops:</strong>{" "}
+														{quote.realData.addresses.stops
+															.map((s: any) => s.address)
+															.join(", ")}
+													</p>
 												)}
 											</div>
 										</div>
@@ -334,23 +429,34 @@ export function QuoteTester() {
 												<DollarSign className="h-4 w-4 text-blue-600" />
 												First {quote.breakdown.firstKmLimit}km (Flat Rate)
 											</span>
-											<span className="font-semibold">${quote.breakdown.firstKmFare.toFixed(2)}</span>
+											<span className="font-semibold">
+												${quote.breakdown.firstKmFare.toFixed(2)}
+											</span>
 										</div>
 
 										{quote.breakdown.additionalDistance > 0 && (
 											<div className="flex justify-between">
 												<span className="flex items-center gap-2">
 													<MapPin className="h-4 w-4 text-green-600" />
-													Additional {quote.breakdown.additionalDistance.toFixed(2)}km
+													Additional{" "}
+													{quote.breakdown.additionalDistance.toFixed(2)}km
 												</span>
-												<span className="font-semibold">${quote.breakdown.additionalKmFare.toFixed(2)}</span>
+												<span className="font-semibold">
+													${quote.breakdown.additionalKmFare.toFixed(2)}
+												</span>
 											</div>
 										)}
 
 										{quote.breakdown.additionalDistance === 0 && (
-											<div className="bg-blue-50 p-3 rounded-lg">
-												<p className="text-sm text-blue-800">
-													<strong>Within flat rate limit:</strong> No additional charges apply since the distance ({quote.realData ? quote.realData.distance.toFixed(2) : quote.parameters.distance}km) is within the first {quote.breakdown.firstKmLimit}km tier.
+											<div className="rounded-lg bg-blue-50 p-3">
+												<p className="text-blue-800 text-sm">
+													<strong>Within flat rate limit:</strong> No additional
+													charges apply since the distance (
+													{quote.realData
+														? quote.realData.distance.toFixed(2)
+														: quote.parameters.distance}
+													km) is within the first {quote.breakdown.firstKmLimit}
+													km tier.
 												</p>
 											</div>
 										)}
@@ -364,9 +470,11 @@ export function QuoteTester() {
 									</div>
 								</div>
 							) : (
-								<div className="text-center py-8">
-									<Calculator className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-									<p className="text-muted-foreground">Enter parameters and calculate quote</p>
+								<div className="py-8 text-center">
+									<Calculator className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+									<p className="text-muted-foreground">
+										Enter parameters and calculate quote
+									</p>
 								</div>
 							)}
 						</CardContent>
@@ -375,7 +483,7 @@ export function QuoteTester() {
 			</TabsContent>
 
 			<TabsContent value="addresses">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 					{/* Real Address Input Form */}
 					<Card>
 						<CardHeader>
@@ -384,30 +492,44 @@ export function QuoteTester() {
 								Real Address Testing
 							</CardTitle>
 							<CardDescription>
-								Test with real addresses using Google Maps for accurate distance calculation
+								Test with real addresses using Google Maps for accurate distance
+								calculation
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<Form {...addressForm as any}>
-								<form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4">
+							<Form {...(addressForm as any)}>
+								<form
+									onSubmit={addressForm.handleSubmit(onAddressSubmit)}
+									className="space-y-4"
+								>
 									<FormField
 										control={addressForm.control}
 										name="pricingConfigId"
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Pricing Configuration</FormLabel>
-												<Select onValueChange={field.onChange} defaultValue={field.value}>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+												>
 													<FormControl>
 														<SelectTrigger>
 															<SelectValue placeholder="Select configuration" />
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
-														{pricingConfigsQuery.data?.data?.map((config: any) => (
-															<SelectItem key={config.id} value={config.id}>
-																{config.name} {config.isActive && <Badge variant="secondary" className="ml-2">Active</Badge>}
-															</SelectItem>
-														))}
+														{pricingConfigsQuery.data?.data?.map(
+															(config: any) => (
+																<SelectItem key={config.id} value={config.id}>
+																	{config.name}{" "}
+																	{config.isActive && (
+																		<Badge variant="secondary" className="ml-2">
+																			Active
+																		</Badge>
+																	)}
+																</SelectItem>
+															),
+														)}
 													</SelectContent>
 												</Select>
 												<FormMessage />
@@ -431,7 +553,7 @@ export function QuoteTester() {
 														onChange={field.onChange}
 														onPlaceSelect={handleOriginSelect}
 														placeholder="Enter pickup location in Australia..."
-														className="text-sm bg-background"
+														className="bg-background text-sm"
 													/>
 												</FormControl>
 												<FormMessage />
@@ -455,9 +577,11 @@ export function QuoteTester() {
 														<GooglePlacesInput
 															value={stopField.value || ""}
 															onChange={stopField.onChange}
-															onPlaceSelect={(place) => handleStopSelect(index, place)}
+															onPlaceSelect={(place) =>
+																handleStopSelect(index, place)
+															}
 															placeholder="Enter stop address in Australia..."
-															className="text-sm bg-background"
+															className="bg-background text-sm"
 															showRemoveButton={true}
 															onRemove={() => removeStopAt(index)}
 														/>
@@ -474,7 +598,7 @@ export function QuoteTester() {
 											type="button"
 											variant="outline"
 											onClick={addStop}
-											className="w-full flex items-center gap-2"
+											className="flex w-full items-center gap-2"
 										>
 											<Plus className="h-4 w-4" />
 											Add Stop
@@ -497,7 +621,7 @@ export function QuoteTester() {
 														onChange={field.onChange}
 														onPlaceSelect={handleDestinationSelect}
 														placeholder="Enter destination in Australia..."
-														className="text-sm bg-background"
+														className="bg-background text-sm"
 													/>
 												</FormControl>
 												<FormMessage />
@@ -505,9 +629,8 @@ export function QuoteTester() {
 										)}
 									/>
 
-
-									<Button 
-										type="submit" 
+									<Button
+										type="submit"
 										className="w-full"
 										disabled={calculateQuoteMutation.isPending}
 									>
@@ -536,28 +659,53 @@ export function QuoteTester() {
 								Quote Results
 							</CardTitle>
 							<CardDescription>
-								{quote?.isRealTest ? "Real address test results" : "Manual test results"}
+								{quote?.isRealTest
+									? "Real address test results"
+									: "Manual test results"}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{quote ? (
 								<div className="space-y-4">
 									<div className="text-center">
-										<p className="text-sm text-muted-foreground">Total Fare</p>
-										<p className="text-3xl font-bold">${quote.breakdown.total.toFixed(2)}</p>
-										<p className="text-sm text-muted-foreground">Using {quote.config}</p>
+										<p className="text-muted-foreground text-sm">Total Fare</p>
+										<p className="font-bold text-3xl">
+											${quote.breakdown.total.toFixed(2)}
+										</p>
+										<p className="text-muted-foreground text-sm">
+											Using {quote.config}
+										</p>
 									</div>
 
 									{quote.realData && (
-										<div className="bg-blue-50 p-3 rounded-lg">
-											<h4 className="font-medium text-sm mb-2">Real Test Data</h4>
-											<div className="text-xs space-y-1">
-												<p><strong>Distance:</strong> {quote.realData.distance.toFixed(2)} km</p>
-												<p><strong>Duration:</strong> {quote.realData.duration.toFixed(0)} min</p>
-												<p><strong>From:</strong> {quote.realData.addresses.origin}</p>
-												<p><strong>To:</strong> {quote.realData.addresses.destination}</p>
+										<div className="rounded-lg bg-blue-50 p-3">
+											<h4 className="mb-2 font-medium text-sm">
+												Real Test Data
+											</h4>
+											<div className="space-y-1 text-xs">
+												<p>
+													<strong>Distance:</strong>{" "}
+													{quote.realData.distance.toFixed(2)} km
+												</p>
+												<p>
+													<strong>Duration:</strong>{" "}
+													{quote.realData.duration.toFixed(0)} min
+												</p>
+												<p>
+													<strong>From:</strong>{" "}
+													{quote.realData.addresses.origin}
+												</p>
+												<p>
+													<strong>To:</strong>{" "}
+													{quote.realData.addresses.destination}
+												</p>
 												{quote.realData.addresses.stops.length > 0 && (
-													<p><strong>Stops:</strong> {quote.realData.addresses.stops.map((s: any) => s.address).join(', ')}</p>
+													<p>
+														<strong>Stops:</strong>{" "}
+														{quote.realData.addresses.stops
+															.map((s: any) => s.address)
+															.join(", ")}
+													</p>
 												)}
 											</div>
 										</div>
@@ -571,23 +719,34 @@ export function QuoteTester() {
 												<DollarSign className="h-4 w-4 text-blue-600" />
 												First {quote.breakdown.firstKmLimit}km (Flat Rate)
 											</span>
-											<span className="font-semibold">${quote.breakdown.firstKmFare.toFixed(2)}</span>
+											<span className="font-semibold">
+												${quote.breakdown.firstKmFare.toFixed(2)}
+											</span>
 										</div>
 
 										{quote.breakdown.additionalDistance > 0 && (
 											<div className="flex justify-between">
 												<span className="flex items-center gap-2">
 													<MapPin className="h-4 w-4 text-green-600" />
-													Additional {quote.breakdown.additionalDistance.toFixed(2)}km
+													Additional{" "}
+													{quote.breakdown.additionalDistance.toFixed(2)}km
 												</span>
-												<span className="font-semibold">${quote.breakdown.additionalKmFare.toFixed(2)}</span>
+												<span className="font-semibold">
+													${quote.breakdown.additionalKmFare.toFixed(2)}
+												</span>
 											</div>
 										)}
 
 										{quote.breakdown.additionalDistance === 0 && (
-											<div className="bg-blue-50 p-3 rounded-lg">
-												<p className="text-sm text-blue-800">
-													<strong>Within flat rate limit:</strong> No additional charges apply since the distance ({quote.realData ? quote.realData.distance.toFixed(2) : quote.parameters.distance}km) is within the first {quote.breakdown.firstKmLimit}km tier.
+											<div className="rounded-lg bg-blue-50 p-3">
+												<p className="text-blue-800 text-sm">
+													<strong>Within flat rate limit:</strong> No additional
+													charges apply since the distance (
+													{quote.realData
+														? quote.realData.distance.toFixed(2)
+														: quote.parameters.distance}
+													km) is within the first {quote.breakdown.firstKmLimit}
+													km tier.
 												</p>
 											</div>
 										)}
@@ -601,9 +760,11 @@ export function QuoteTester() {
 									</div>
 								</div>
 							) : (
-								<div className="text-center py-8">
-									<Route className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-									<p className="text-muted-foreground">Enter addresses and calculate real quote</p>
+								<div className="py-8 text-center">
+									<Route className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+									<p className="text-muted-foreground">
+										Enter addresses and calculate real quote
+									</p>
 								</div>
 							)}
 						</CardContent>

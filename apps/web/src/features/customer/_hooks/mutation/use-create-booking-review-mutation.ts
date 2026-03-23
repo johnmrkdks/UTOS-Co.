@@ -1,6 +1,6 @@
-import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { trpc } from "@/trpc";
 
 export const useCreateBookingReviewMutation = () => {
 	const queryClient = useQueryClient();
@@ -16,7 +16,9 @@ export const useCreateBookingReviewMutation = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [["analytics"]] });
 			queryClient.invalidateQueries({ queryKey: [["bookings"]] });
-			queryClient.invalidateQueries({ queryKey: [["analytics", "getReviewsForCar"]] });
+			queryClient.invalidateQueries({
+				queryKey: [["analytics", "getReviewsForCar"]],
+			});
 			toast.success("Thank you for your review!");
 		},
 		onError: (error) => {

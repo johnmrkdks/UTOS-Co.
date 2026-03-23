@@ -1,25 +1,48 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { useFileUpload } from "@/hooks/use-file-upload";
+import {
+	Calendar,
+	FileText,
+	MapPin,
+	Phone,
+	Shield,
+	Upload,
+	User,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { useCreatePresignedUrlMutation } from "@/hooks/query/file/use-create-presigned-url-mutation";
 import { useUploadMutation } from "@/hooks/query/file/use-upload-mutation";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { useCreateDriverApplicationMutation } from "../_hooks/query/use-create-driver-application-mutation";
-import { Upload, FileText, Shield, User, Phone, Calendar, MapPin } from "lucide-react";
-import { toast } from "sonner";
 
 const driverApplicationSchema = z.object({
 	licenseNumber: z.string().min(1, "License number is required"),
 	licenseExpiry: z.string().min(1, "License expiry date is required"),
 	phoneNumber: z.string().min(1, "Phone number is required"),
 	emergencyContactName: z.string().min(1, "Emergency contact name is required"),
-	emergencyContactPhone: z.string().min(1, "Emergency contact phone is required"),
+	emergencyContactPhone: z
+		.string()
+		.min(1, "Emergency contact phone is required"),
 	address: z.string().min(1, "Address is required"),
 	dateOfBirth: z.string().min(1, "Date of birth is required"),
 });
@@ -35,7 +58,14 @@ interface DocumentUploadProps {
 	isUploading?: boolean;
 }
 
-function DocumentUpload({ title, description, icon, onFileSelect, uploadUrl, isUploading }: DocumentUploadProps) {
+function DocumentUpload({
+	title,
+	description,
+	icon,
+	onFileSelect,
+	uploadUrl,
+	isUploading,
+}: DocumentUploadProps) {
 	const [fileState, fileActions] = useFileUpload({
 		maxFiles: 1,
 		accept: "image/*,.pdf",
@@ -48,19 +78,17 @@ function DocumentUpload({ title, description, icon, onFileSelect, uploadUrl, isU
 	});
 
 	return (
-		<Card className="border-dashed border-2">
+		<Card className="border-2 border-dashed">
 			<CardContent className="p-6">
 				<div className="flex items-center space-x-4">
-					<div className="flex-shrink-0">
-						{icon}
-					</div>
+					<div className="flex-shrink-0">{icon}</div>
 					<div className="flex-1">
 						<h3 className="font-medium">{title}</h3>
-						<p className="text-sm text-muted-foreground">{description}</p>
-						
+						<p className="text-muted-foreground text-sm">{description}</p>
+
 						{fileState.files.length === 0 ? (
 							<div
-								className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+								className="mt-4 cursor-pointer rounded-lg border-2 border-gray-300 border-dashed p-4 text-center transition-colors hover:border-gray-400"
 								onDragEnter={fileActions.handleDragEnter}
 								onDragLeave={fileActions.handleDragLeave}
 								onDragOver={fileActions.handleDragOver}
@@ -68,21 +96,32 @@ function DocumentUpload({ title, description, icon, onFileSelect, uploadUrl, isU
 								onClick={fileActions.openFileDialog}
 							>
 								<Upload className="mx-auto h-8 w-8 text-gray-400" />
-								<p className="mt-2 text-sm text-gray-600">Click to upload or drag and drop</p>
-								<p className="text-xs text-gray-500">PDF or images up to 10MB</p>
+								<p className="mt-2 text-gray-600 text-sm">
+									Click to upload or drag and drop
+								</p>
+								<p className="text-gray-500 text-xs">
+									PDF or images up to 10MB
+								</p>
 								<input {...fileActions.getInputProps()} className="hidden" />
 							</div>
 						) : (
 							<div className="mt-4 space-y-2">
 								{fileState.files.map((file) => (
-									<div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-										<span className="text-sm font-medium">{file.file.name}</span>
+									<div
+										key={file.id}
+										className="flex items-center justify-between rounded bg-gray-50 p-2"
+									>
+										<span className="font-medium text-sm">
+											{file.file.name}
+										</span>
 										<div className="flex items-center space-x-2">
 											{isUploading && (
-												<div className="text-xs text-blue-600">Uploading...</div>
+												<div className="text-blue-600 text-xs">
+													Uploading...
+												</div>
 											)}
 											{uploadUrl && (
-												<div className="text-xs text-green-600">✓ Uploaded</div>
+												<div className="text-green-600 text-xs">✓ Uploaded</div>
 											)}
 											<Button
 												size="sm"
@@ -96,11 +135,13 @@ function DocumentUpload({ title, description, icon, onFileSelect, uploadUrl, isU
 								))}
 							</div>
 						)}
-						
+
 						{fileState.errors.length > 0 && (
 							<div className="mt-2 space-y-1">
 								{fileState.errors.map((error, index) => (
-									<p key={index} className="text-sm text-red-600">{error}</p>
+									<p key={index} className="text-red-600 text-sm">
+										{error}
+									</p>
 								))}
 							</div>
 						)}
@@ -116,7 +157,10 @@ interface DriverOnboardingFormProps {
 	onSuccess?: () => void;
 }
 
-export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingFormProps) {
+export function DriverOnboardingForm({
+	userId,
+	onSuccess,
+}: DriverOnboardingFormProps) {
 	const [uploadedDocuments, setUploadedDocuments] = useState<{
 		license?: string;
 		insurance?: string;
@@ -141,7 +185,10 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 	const uploadMutation = useUploadMutation();
 	const createApplicationMutation = useCreateDriverApplicationMutation();
 
-	const handleFileUpload = async (file: File, documentType: keyof typeof uploadedDocuments) => {
+	const handleFileUpload = async (
+		file: File,
+		documentType: keyof typeof uploadedDocuments,
+	) => {
 		try {
 			// Get presigned URL
 			const presignedResponse = await createPresignedUrlMutation.mutateAsync({
@@ -158,7 +205,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 			});
 
 			// Store the document URL
-			setUploadedDocuments(prev => ({
+			setUploadedDocuments((prev) => ({
 				...prev,
 				[documentType]: presignedResponse.key,
 			}));
@@ -195,14 +242,15 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 		}
 	};
 
-	const isUploading = createPresignedUrlMutation.isPending || uploadMutation.isPending;
+	const isUploading =
+		createPresignedUrlMutation.isPending || uploadMutation.isPending;
 	const isSubmitting = createApplicationMutation.isPending;
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 			{/* Left Column - Form Inputs */}
 			<div className="space-y-6">
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						{/* Personal Information */}
 						<Card>
@@ -216,7 +264,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<FormField
 										control={form.control as any}
 										name="phoneNumber"
@@ -253,9 +301,9 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 										<FormItem>
 											<FormLabel>Address</FormLabel>
 											<FormControl>
-												<Textarea 
-													placeholder="Full residential address" 
-													{...field} 
+												<Textarea
+													placeholder="Full residential address"
+													{...field}
 												/>
 											</FormControl>
 											<FormMessage />
@@ -277,7 +325,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<FormField
 										control={form.control as any}
 										name="licenseNumber"
@@ -321,7 +369,7 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<FormField
 										control={form.control as any}
 										name="emergencyContactName"
@@ -416,10 +464,13 @@ export function DriverOnboardingForm({ userId, onSuccess }: DriverOnboardingForm
 							className="w-full"
 							size="lg"
 						>
-							{isSubmitting ? "Submitting Application..." : "Submit Application"}
+							{isSubmitting
+								? "Submitting Application..."
+								: "Submit Application"}
 						</Button>
-						<p className="text-sm text-muted-foreground mt-2 text-center">
-							Please ensure all information is accurate and all documents are uploaded before submitting.
+						<p className="mt-2 text-center text-muted-foreground text-sm">
+							Please ensure all information is accurate and all documents are
+							uploaded before submitting.
 						</p>
 					</CardContent>
 				</Card>

@@ -8,8 +8,8 @@ import {
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { AlertTriangle, Archive, ArchiveRestore, Loader2 } from "lucide-react";
-import { useArchiveBookingMutation } from "../_hooks/query/use-archive-booking-mutation";
 import type { Booking } from "../_components/booking-table-columns";
+import { useArchiveBookingMutation } from "../_hooks/query/use-archive-booking-mutation";
 
 interface ArchiveBookingDialogProps {
 	booking: Booking | null;
@@ -22,7 +22,7 @@ export function ArchiveBookingDialog({
 	booking,
 	open,
 	onOpenChange,
-	isArchiving = true
+	isArchiving = true,
 }: ArchiveBookingDialogProps) {
 	const archiveBookingMutation = useArchiveBookingMutation();
 
@@ -59,11 +59,13 @@ export function ArchiveBookingDialog({
 					<DialogDescription className="pt-2">
 						{isArchiving ? (
 							<>
-								Are you sure you want to archive this booking? The booking will be hidden from the main list but can be restored later.
+								Are you sure you want to archive this booking? The booking will
+								be hidden from the main list but can be restored later.
 							</>
 						) : (
 							<>
-								Are you sure you want to restore this booking? It will be visible in the main booking list again.
+								Are you sure you want to restore this booking? It will be
+								visible in the main booking list again.
 							</>
 						)}
 					</DialogDescription>
@@ -73,7 +75,9 @@ export function ArchiveBookingDialog({
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm">
 							<span className="font-medium">Booking Reference:</span>
-							<span className="font-mono">{(booking as any).referenceNumber || 'N/A'}</span>
+							<span className="font-mono">
+								{(booking as any).referenceNumber || "N/A"}
+							</span>
 						</div>
 						<div className="flex justify-between text-sm">
 							<span className="font-medium">Customer:</span>
@@ -91,11 +95,15 @@ export function ArchiveBookingDialog({
 				</div>
 
 				{isArchiving && (
-					<div className="flex items-start gap-3 rounded-lg bg-orange-50 p-3 border border-orange-200">
-						<AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-						<div className="text-sm text-orange-800">
+					<div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-3">
+						<AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange-600" />
+						<div className="text-orange-800 text-sm">
 							<p className="font-medium">Important:</p>
-							<p>Archived bookings are hidden from the main list but remain in the database. You can restore them at any time from the archived bookings view.</p>
+							<p>
+								Archived bookings are hidden from the main list but remain in
+								the database. You can restore them at any time from the archived
+								bookings view.
+							</p>
 						</div>
 					</div>
 				)}

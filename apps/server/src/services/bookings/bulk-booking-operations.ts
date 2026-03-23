@@ -1,7 +1,7 @@
+import { eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { bookings } from "@/db/sqlite/schema";
-import { eq, inArray } from "drizzle-orm";
 
 export const BulkArchiveBookingsSchema = z.object({
 	bookingIds: z.array(z.string()).min(1, "At least one booking ID is required"),
@@ -12,7 +12,9 @@ export const BulkDeleteBookingsSchema = z.object({
 	bookingIds: z.array(z.string()).min(1, "At least one booking ID is required"),
 });
 
-export type BulkArchiveBookingsInput = z.infer<typeof BulkArchiveBookingsSchema>;
+export type BulkArchiveBookingsInput = z.infer<
+	typeof BulkArchiveBookingsSchema
+>;
 export type BulkDeleteBookingsInput = z.infer<typeof BulkDeleteBookingsSchema>;
 
 export const bulkArchiveBookingsService = async (
@@ -30,7 +32,12 @@ export const bulkArchiveBookingsService = async (
 			.from(bookings)
 			.where(inArray(bookings.id, input.bookingIds));
 
-		console.log("DEBUG: Found bookings:", existingBookings.length, "out of", input.bookingIds.length);
+		console.log(
+			"DEBUG: Found bookings:",
+			existingBookings.length,
+			"out of",
+			input.bookingIds.length,
+		);
 
 		if (existingBookings.length === 0) {
 			throw new Error("No valid bookings found");
@@ -50,16 +57,21 @@ export const bulkArchiveBookingsService = async (
 		console.log("DEBUG: Bulk archive operation completed successfully");
 		console.log("DEBUG: Updated bookings count:", updatedBookings.length);
 
-		console.log("=== DEBUG: bulkArchiveBookingsService completed successfully ===");
+		console.log(
+			"=== DEBUG: bulkArchiveBookingsService completed successfully ===",
+		);
 		return {
 			success: true,
-			message: `${updatedBookings.length} booking${updatedBookings.length !== 1 ? 's' : ''} ${input.isArchived ? 'archived' : 'unarchived'} successfully.`,
+			message: `${updatedBookings.length} booking${updatedBookings.length !== 1 ? "s" : ""} ${input.isArchived ? "archived" : "unarchived"} successfully.`,
 			updatedCount: updatedBookings.length,
 			bookings: updatedBookings,
 		};
 	} catch (error) {
 		console.error("=== ERROR in bulkArchiveBookingsService ===");
-		console.error("Error message:", error instanceof Error ? error.message : error);
+		console.error(
+			"Error message:",
+			error instanceof Error ? error.message : error,
+		);
 		console.error("=== END ERROR LOG ===");
 		throw error;
 	}
@@ -80,7 +92,12 @@ export const bulkDeleteBookingsService = async (
 			.from(bookings)
 			.where(inArray(bookings.id, input.bookingIds));
 
-		console.log("DEBUG: Found bookings:", existingBookings.length, "out of", input.bookingIds.length);
+		console.log(
+			"DEBUG: Found bookings:",
+			existingBookings.length,
+			"out of",
+			input.bookingIds.length,
+		);
 
 		if (existingBookings.length === 0) {
 			throw new Error("No valid bookings found");
@@ -94,15 +111,20 @@ export const bulkDeleteBookingsService = async (
 
 		console.log("DEBUG: Bulk delete operation completed successfully");
 
-		console.log("=== DEBUG: bulkDeleteBookingsService completed successfully ===");
+		console.log(
+			"=== DEBUG: bulkDeleteBookingsService completed successfully ===",
+		);
 		return {
 			success: true,
-			message: `${existingBookings.length} booking${existingBookings.length !== 1 ? 's' : ''} deleted permanently.`,
+			message: `${existingBookings.length} booking${existingBookings.length !== 1 ? "s" : ""} deleted permanently.`,
 			deletedCount: existingBookings.length,
 		};
 	} catch (error) {
 		console.error("=== ERROR in bulkDeleteBookingsService ===");
-		console.error("Error message:", error instanceof Error ? error.message : error);
+		console.error(
+			"Error message:",
+			error instanceof Error ? error.message : error,
+		);
 		console.error("=== END ERROR LOG ===");
 		throw error;
 	}

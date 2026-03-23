@@ -6,27 +6,27 @@ export enum UserRoleEnum {
 }
 
 export enum BookingTypeEnum {
-	Package = "package",     // Fixed service packages
-	Custom = "custom",       // Custom route/instant quote
-	Guest = "guest",        // Guest booking (no account)
-	Offload = "offload"      // Manual bookings from other companies
+	Package = "package", // Fixed service packages
+	Custom = "custom", // Custom route/instant quote
+	Guest = "guest", // Guest booking (no account)
+	Offload = "offload", // Manual bookings from other companies
 }
 
 export enum BookingStatusEnum {
-	Pending = "pending",           // Just created
-	Confirmed = "confirmed",       // Payment confirmed
+	Pending = "pending", // Just created
+	Confirmed = "confirmed", // Payment confirmed
 	DriverAssigned = "driver_assigned", // Driver allocated
 	DriverEnRoute = "driver_en_route", // Driver started job - on the way to pickup
-	ArrivedPickup = "arrived_pickup",  // Driver arrived at pickup location
+	ArrivedPickup = "arrived_pickup", // Driver arrived at pickup location
 	PassengerOnBoard = "passenger_on_board", // Passenger picked up (POB)
-	InProgress = "in_progress",    // Service started (legacy - same as PassengerOnBoard)
-	DroppedOff = "dropped_off",    // Passenger dropped off at destination
+	InProgress = "in_progress", // Service started (legacy - same as PassengerOnBoard)
+	DroppedOff = "dropped_off", // Passenger dropped off at destination
 	AwaitingExtras = "awaiting_extras", // Waiting for extras (tolls, parking, etc.)
 	AwaitingPricingReview = "awaiting_pricing_review", // Driver closed with waiting time - admin must finalize amount
-	Completed = "completed",       // Service finished
-	Cancelled = "cancelled",       // Cancelled by customer/admin
-	NoShow = "no_show",           // Customer didn't show up
-	Failed = "failed"             // Service couldn't be completed
+	Completed = "completed", // Service finished
+	Cancelled = "cancelled", // Cancelled by customer/admin
+	NoShow = "no_show", // Customer didn't show up
+	Failed = "failed", // Service couldn't be completed
 }
 
 export enum RateableTypeEnum {
@@ -62,6 +62,6 @@ export enum CarStatusEnum {
 }
 
 export enum RateTypeEnum {
-	Fixed = "fixed",    // Fixed price packages (weddings, concerts, etc.)
-	Hourly = "hourly",  // Hourly rate packages (tours, etc.)
+	Fixed = "fixed", // Fixed price packages (weddings, concerts, etc.)
+	Hourly = "hourly", // Hourly rate packages (tours, etc.)
 }

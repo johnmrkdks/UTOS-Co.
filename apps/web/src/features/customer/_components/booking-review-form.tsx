@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Star, Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
+import { useState } from "react";
 import { useCreateBookingReviewMutation } from "../_hooks/mutation/use-create-booking-review-mutation";
 
 interface BookingReviewFormProps {
@@ -10,7 +10,10 @@ interface BookingReviewFormProps {
 	onSuccess?: () => void;
 }
 
-export function BookingReviewForm({ bookingId, onSuccess }: BookingReviewFormProps) {
+export function BookingReviewForm({
+	bookingId,
+	onSuccess,
+}: BookingReviewFormProps) {
 	const [serviceRating, setServiceRating] = useState(0);
 	const [driverRating, setDriverRating] = useState(0);
 	const [vehicleRating, setVehicleRating] = useState(0);
@@ -37,7 +40,7 @@ export function BookingReviewForm({ bookingId, onSuccess }: BookingReviewFormPro
 					setReview("");
 					onSuccess?.();
 				},
-			}
+			},
 		);
 	};
 
@@ -58,11 +61,13 @@ export function BookingReviewForm({ bookingId, onSuccess }: BookingReviewFormPro
 						key={star}
 						type="button"
 						onClick={() => onChange(star)}
-						className="p-1 hover:scale-110 transition-transform"
+						className="p-1 transition-transform hover:scale-110"
 					>
 						<Star
 							className={`h-6 w-6 ${
-								star <= value ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+								star <= value
+									? "fill-yellow-400 text-yellow-400"
+									: "text-muted-foreground"
 							}`}
 						/>
 					</button>
@@ -72,9 +77,12 @@ export function BookingReviewForm({ bookingId, onSuccess }: BookingReviewFormPro
 	);
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4 p-4 bg-muted/50 rounded-lg">
+		<form
+			onSubmit={handleSubmit}
+			className="space-y-4 rounded-lg bg-muted/50 p-4"
+		>
 			<h4 className="font-semibold">Leave a Review</h4>
-			<p className="text-sm text-muted-foreground">
+			<p className="text-muted-foreground text-sm">
 				Share your experience to help us improve our service.
 			</p>
 
@@ -117,7 +125,7 @@ export function BookingReviewForm({ bookingId, onSuccess }: BookingReviewFormPro
 			>
 				{mutation.isPending ? (
 					<>
-						<Loader2 className="h-4 w-4 animate-spin mr-2" />
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 						Submitting...
 					</>
 				) : (

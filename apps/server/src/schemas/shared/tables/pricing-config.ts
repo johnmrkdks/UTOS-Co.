@@ -1,10 +1,10 @@
-import { pricingConfig } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { pricingConfig } from "@/db/schema";
 
 export const PricingConfigSchema = createSelectSchema(pricingConfig, {
 	createdAt: z.union([z.date(), z.string()]),

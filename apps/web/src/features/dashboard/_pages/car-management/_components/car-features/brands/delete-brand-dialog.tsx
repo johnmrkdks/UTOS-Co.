@@ -1,4 +1,8 @@
-import { Button } from "@workspace/ui/components/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
 	Dialog,
 	DialogClose,
@@ -8,38 +12,45 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@workspace/ui/components/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Checkbox } from "@workspace/ui/components/checkbox"
-import { Alert, AlertDescription } from "@workspace/ui/components/alert"
-import { Badge } from "@workspace/ui/components/badge"
-import { Skeleton } from "@workspace/ui/components/skeleton"
-import { Trash2Icon, AlertTriangle, Car, Settings } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import type { CarBrand } from "server/types"
-import { useDeleteCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-delete-car-brand-mutation"
-import { useCheckCarBrandUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-usage-query"
+} from "@workspace/ui/components/dialog";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { AlertTriangle, Car, Settings, Trash2Icon } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import type { CarBrand } from "server/types";
+import { z } from "zod";
+import { useCheckCarBrandUsageQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-check-car-brand-usage-query";
+import { useDeleteCarBrandMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-delete-car-brand-mutation";
 
 type DeleteBrandDialogProps = {
-	brand: CarBrand
-	className?: string
-}
+	brand: CarBrand;
+	className?: string;
+};
 
 const FormSchema = z.object({
 	confirmation: z.boolean().refine((val) => val === true, {
 		message: "You must confirm to delete the brand",
 	}),
-})
+});
 
-type FormValues = z.infer<typeof FormSchema>
+type FormValues = z.infer<typeof FormSchema>;
 
-export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) {
-	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: checkUsage, isLoading: isCheckingUsage } = useCheckCarBrandUsageQuery({ id: brand.id })
-	const mutation = useDeleteCarBrandMutation()
+export function DeleteBrandDialog({
+	brand,
+	className,
+}: DeleteBrandDialogProps) {
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const { data: checkUsage, isLoading: isCheckingUsage } =
+		useCheckCarBrandUsageQuery({ id: brand.id });
+	const mutation = useDeleteCarBrandMutation();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -47,32 +58,32 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 		defaultValues: {
 			confirmation: false,
 		},
-	})
+	});
 
 	const handleReset = () => {
-		form.reset()
-	}
+		form.reset();
+	};
 
 	const handleSubmit = () => {
 		mutation.mutate(
 			{ id: brand.id },
 			{
 				onSuccess: () => {
-					handleReset()
-					setIsDialogOpen(false)
+					handleReset();
+					setIsDialogOpen(false);
 				},
 			},
-		)
-	}
+		);
+	};
 
-	const canDelete = checkUsage?.canDelete ?? true
-	const isInUse = checkUsage?.usage?.isInUse ?? false
+	const canDelete = checkUsage?.canDelete ?? true;
+	const isInUse = checkUsage?.usage?.isInUse ?? false;
 
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 			<DialogTrigger asChild>
 				<Button variant="destructive" size="icon" className={className}>
-					<Trash2Icon className="w-4 h-4" />
+					<Trash2Icon className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-6">
@@ -95,20 +106,24 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 					) : checkUsage ? (
 						<>
 							{/* Usage Stats */}
-							<div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+							<div className="flex items-center gap-4 rounded-lg bg-muted/50 p-4">
 								<div className="flex items-center gap-2">
-									<Car className="w-4 h-4 text-muted-foreground" />
-									<span className="text-sm font-medium">Cars:</span>
+									<Car className="h-4 w-4 text-muted-foreground" />
+									<span className="font-medium text-sm">Cars:</span>
 									<Badge variant="secondary">{checkUsage.usage.carCount}</Badge>
 								</div>
 								<div className="flex items-center gap-2">
-									<Settings className="w-4 h-4 text-muted-foreground" />
-									<span className="text-sm font-medium">Models:</span>
-									<Badge variant="secondary">{checkUsage.usage.carModelsCount}</Badge>
+									<Settings className="h-4 w-4 text-muted-foreground" />
+									<span className="font-medium text-sm">Models:</span>
+									<Badge variant="secondary">
+										{checkUsage.usage.carModelsCount}
+									</Badge>
 								</div>
 								<div className="flex items-center gap-2">
-									<span className="text-sm font-medium">Total:</span>
-									<Badge variant={isInUse ? "destructive" : "secondary"}>{checkUsage.usage.totalUsages}</Badge>
+									<span className="font-medium text-sm">Total:</span>
+									<Badge variant={isInUse ? "destructive" : "secondary"}>
+										{checkUsage.usage.totalUsages}
+									</Badge>
 								</div>
 							</div>
 
@@ -123,7 +138,10 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 							{/* Success Message */}
 							{!isInUse && (
 								<Alert>
-									<AlertDescription>This brand is not currently in use and can be safely deleted.</AlertDescription>
+									<AlertDescription>
+										This brand is not currently in use and can be safely
+										deleted.
+									</AlertDescription>
 								</Alert>
 							)}
 						</>
@@ -132,18 +150,25 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 
 				{/* Form - Only show if brand can be deleted */}
 				{canDelete && (
-					<Form {...form as any}>
-						<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-6">
+					<Form {...(form as any)}>
+						<form
+							onSubmit={form.handleSubmit(handleSubmit)}
+							className="flex flex-col gap-6"
+						>
 							<FormField
 								control={form.control as any}
 								name="confirmation"
 								render={({ field }) => (
 									<FormItem className="flex items-center gap-2">
 										<FormControl>
-											<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+											<Checkbox
+												checked={field.value}
+												onCheckedChange={field.onChange}
+											/>
 										</FormControl>
 										<FormLabel>
-											Are you sure you want to delete the brand <span className="font-bold">{brand.name}</span>?
+											Are you sure you want to delete the brand{" "}
+											<span className="font-bold">{brand.name}</span>?
 										</FormLabel>
 										<FormMessage />
 									</FormItem>
@@ -159,7 +184,7 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 							type="button"
 							variant="ghost"
 							onClick={() => {
-								handleReset()
+								handleReset();
 							}}
 						>
 							{canDelete ? "Cancel" : "Close"}
@@ -169,7 +194,11 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 						<Button
 							type="submit"
 							variant="destructive"
-							disabled={mutation.isPending || !form.watch("confirmation") || isCheckingUsage}
+							disabled={
+								mutation.isPending ||
+								!form.watch("confirmation") ||
+								isCheckingUsage
+							}
 							onClick={form.handleSubmit(handleSubmit)}
 						>
 							{mutation.isPending ? "Deleting..." : "Delete Brand"}
@@ -178,6 +207,5 @@ export function DeleteBrandDialog({ brand, className }: DeleteBrandDialogProps) 
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }
-

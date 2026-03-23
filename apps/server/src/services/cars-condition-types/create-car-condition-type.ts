@@ -1,14 +1,19 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarConditionType } from "@/data/cars-condition-types/create-car-condition-type";
 import { getCarConditionTypeByName } from "@/data/cars-condition-types/get-car-condition-type-by-name";
 import type { DB } from "@/db";
-import { InsertCarConditionTypeSchema, type InsertCarConditionType } from "@/schemas/shared";
+import {
+	type InsertCarConditionType,
+	InsertCarConditionTypeSchema,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
-export const CreateCarConditionTypeServiceSchema = InsertCarConditionTypeSchema
+export const CreateCarConditionTypeServiceSchema = InsertCarConditionTypeSchema;
 
-export type CreateCarConditionTypeParams = z.infer<typeof CreateCarConditionTypeServiceSchema>;
+export type CreateCarConditionTypeParams = z.infer<
+	typeof CreateCarConditionTypeServiceSchema
+>;
 
 export async function createCarConditionTypeService(
 	db: DB,

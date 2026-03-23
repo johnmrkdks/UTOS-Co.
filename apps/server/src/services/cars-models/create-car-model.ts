@@ -1,10 +1,10 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarModel } from "@/data/cars-models/create-car-model";
 import { getCarModelByName } from "@/data/cars-models/get-car-model-by-name";
 import type { DB } from "@/db";
-import { InsertCarModelSchema, type InsertCarModel } from "@/schemas/shared";
+import { type InsertCarModel, InsertCarModelSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const CreateCarModelServiceSchema = InsertCarModelSchema;
 
@@ -14,7 +14,6 @@ export async function createCarModelService(
 	db: DB,
 	data: CreateCarModelParams,
 ) {
-
 	if (!data.brandId) {
 		throw ErrorFactory.missingEntry("Car model", "brandId");
 	}

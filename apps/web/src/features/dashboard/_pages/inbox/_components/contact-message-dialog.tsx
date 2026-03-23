@@ -14,12 +14,19 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { format } from "date-fns";
-import { Mail, MailOpen, Archive, MoreHorizontal, ExternalLink, Trash2 } from "lucide-react";
-import type { ContactMessage } from "server/db/sqlite/schema";
-import { useUpdateContactMessageStatusMutation } from "../../../_hooks/query/use-update-contact-message-status-mutation";
-import { useDeleteContactMessageMutation } from "../../../_hooks/query/use-delete-contact-message-mutation";
-import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import {
+	Archive,
+	ExternalLink,
+	Mail,
+	MailOpen,
+	MoreHorizontal,
+	Trash2,
+} from "lucide-react";
 import { useState } from "react";
+import type { ContactMessage } from "server/db/sqlite/schema";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import { useDeleteContactMessageMutation } from "../../../_hooks/query/use-delete-contact-message-mutation";
+import { useUpdateContactMessageStatusMutation } from "../../../_hooks/query/use-update-contact-message-status-mutation";
 
 interface ContactMessageDialogProps {
 	message: ContactMessage | null;
@@ -27,7 +34,11 @@ interface ContactMessageDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-export function ContactMessageDialog({ message, open, onOpenChange }: ContactMessageDialogProps) {
+export function ContactMessageDialog({
+	message,
+	open,
+	onOpenChange,
+}: ContactMessageDialogProps) {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const updateStatusMutation = useUpdateContactMessageStatusMutation();
 	const deleteMessageMutation = useDeleteContactMessageMutation();
@@ -43,7 +54,7 @@ export function ContactMessageDialog({ message, open, onOpenChange }: ContactMes
 
 	const handleEmailClick = () => {
 		const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(message.email)}&su=${encodeURIComponent(`Re: Contact Form Message from ${message.name}`)}`;
-		window.open(gmailUrl, '_blank');
+		window.open(gmailUrl, "_blank");
 	};
 
 	const handleDeleteClick = () => {
@@ -51,14 +62,17 @@ export function ContactMessageDialog({ message, open, onOpenChange }: ContactMes
 	};
 
 	const handleConfirmDelete = () => {
-		deleteMessageMutation.mutate({
-			messageId: message.id,
-		}, {
-			onSuccess: () => {
-				setShowDeleteDialog(false);
-				onOpenChange(false); // Close dialog after successful deletion
+		deleteMessageMutation.mutate(
+			{
+				messageId: message.id,
 			},
-		});
+			{
+				onSuccess: () => {
+					setShowDeleteDialog(false);
+					onOpenChange(false); // Close dialog after successful deletion
+				},
+			},
+		);
 	};
 
 	const getStatusBadge = () => {
@@ -90,94 +104,108 @@ export function ContactMessageDialog({ message, open, onOpenChange }: ContactMes
 	return (
 		<>
 			<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-2xl" showCloseButton={false}>
-				<DialogHeader>
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-3">
-							<div>
-								<DialogTitle className="text-xl">{message.name}</DialogTitle>
-								<DialogDescription asChild>
-									<div className="flex items-center gap-2 mt-1">
-										<button
-											onClick={handleEmailClick}
-											className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+				<DialogContent className="max-w-2xl" showCloseButton={false}>
+					<DialogHeader>
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-3">
+								<div>
+									<DialogTitle className="text-xl">{message.name}</DialogTitle>
+									<DialogDescription asChild>
+										<div className="mt-1 flex items-center gap-2">
+											<button
+												onClick={handleEmailClick}
+												className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline"
+											>
+												{message.email}
+												<ExternalLink className="h-3 w-3" />
+											</button>
+											<span className="text-muted-foreground">•</span>
+											<span className="text-muted-foreground text-sm">
+												{format(new Date(message.createdAt), "PPpp")}
+											</span>
+										</div>
+									</DialogDescription>
+								</div>
+							</div>
+							<div className="flex items-center gap-2">
+								{getStatusBadge()}
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+											<MoreHorizontal className="h-4 w-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										{message.status !== "read" && (
+											<DropdownMenuItem
+												onClick={() => handleStatusChange("read")}
+											>
+												<MailOpen className="mr-2 h-4 w-4" />
+												Mark as Read
+											</DropdownMenuItem>
+										)}
+										{message.status !== "unread" && (
+											<DropdownMenuItem
+												onClick={() => handleStatusChange("unread")}
+											>
+												<Mail className="mr-2 h-4 w-4" />
+												Mark as Unread
+											</DropdownMenuItem>
+										)}
+										{message.status !== "archived" && (
+											<DropdownMenuItem
+												onClick={() => handleStatusChange("archived")}
+											>
+												<Archive className="mr-2 h-4 w-4" />
+												Archive
+											</DropdownMenuItem>
+										)}
+										<DropdownMenuItem
+											onClick={handleDeleteClick}
+											className="text-red-600 focus:text-red-600"
 										>
-											{message.email}
-											<ExternalLink className="h-3 w-3" />
-										</button>
-										<span className="text-muted-foreground">•</span>
-										<span className="text-sm text-muted-foreground">
-											{format(new Date(message.createdAt), "PPpp")}
-										</span>
-									</div>
-								</DialogDescription>
+											<Trash2 className="mr-2 h-4 w-4" />
+											Delete
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						</div>
-						<div className="flex items-center gap-2">
-							{getStatusBadge()}
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-										<MoreHorizontal className="h-4 w-4" />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end">
-									{message.status !== "read" && (
-										<DropdownMenuItem onClick={() => handleStatusChange("read")}>
-											<MailOpen className="mr-2 h-4 w-4" />
-											Mark as Read
-										</DropdownMenuItem>
-									)}
-									{message.status !== "unread" && (
-										<DropdownMenuItem onClick={() => handleStatusChange("unread")}>
-											<Mail className="mr-2 h-4 w-4" />
-											Mark as Unread
-										</DropdownMenuItem>
-									)}
-									{message.status !== "archived" && (
-										<DropdownMenuItem onClick={() => handleStatusChange("archived")}>
-											<Archive className="mr-2 h-4 w-4" />
-											Archive
-										</DropdownMenuItem>
-									)}
-									<DropdownMenuItem onClick={handleDeleteClick} className="text-red-600 focus:text-red-600">
-										<Trash2 className="mr-2 h-4 w-4" />
-										Delete
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
+					</DialogHeader>
+
+					<div className="mt-6">
+						<h4 className="mb-3 font-semibold">Message</h4>
+						<div className="rounded-lg bg-gray-50 p-4">
+							<p className="whitespace-pre-wrap text-sm leading-relaxed">
+								{message.message}
+							</p>
 						</div>
 					</div>
-				</DialogHeader>
 
-				<div className="mt-6">
-					<h4 className="font-semibold mb-3">Message</h4>
-					<div className="bg-gray-50 rounded-lg p-4">
-						<p className="whitespace-pre-wrap text-sm leading-relaxed">{message.message}</p>
+					<div className="mt-6 flex items-center justify-between border-t pt-4">
+						<div className="text-muted-foreground text-sm">
+							Received {format(new Date(message.createdAt), "PPpp")}
+						</div>
+						<Button
+							onClick={handleEmailClick}
+							className="flex items-center gap-2"
+						>
+							<Mail className="h-4 w-4" />
+							Reply via Gmail
+						</Button>
 					</div>
-				</div>
+				</DialogContent>
+			</Dialog>
 
-				<div className="flex justify-between items-center mt-6 pt-4 border-t">
-					<div className="text-sm text-muted-foreground">
-						Received {format(new Date(message.createdAt), "PPpp")}
-					</div>
-					<Button onClick={handleEmailClick} className="flex items-center gap-2">
-						<Mail className="h-4 w-4" />
-						Reply via Gmail
-					</Button>
-				</div>
-			</DialogContent>
-		</Dialog>
-
-		<DeleteConfirmationDialog
-			open={showDeleteDialog}
-			onOpenChange={setShowDeleteDialog}
-			onConfirm={handleConfirmDelete}
-			title="Delete Message"
-			itemName={`the message from ${message.name}`}
-			description={`Are you sure you want to delete this message from ${message.name}? This action cannot be undone and the message will be permanently removed.`}
-			isLoading={deleteMessageMutation.isPending}
-		/>
+			<DeleteConfirmationDialog
+				open={showDeleteDialog}
+				onOpenChange={setShowDeleteDialog}
+				onConfirm={handleConfirmDelete}
+				title="Delete Message"
+				itemName={`the message from ${message.name}`}
+				description={`Are you sure you want to delete this message from ${message.name}? This action cannot be undone and the message will be permanently removed.`}
+				isLoading={deleteMessageMutation.isPending}
+			/>
 		</>
 	);
 }

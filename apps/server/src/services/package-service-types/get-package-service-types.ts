@@ -1,7 +1,7 @@
-import { packageServiceTypes } from "@/db/sqlite/schema";
-import type { DB } from "@/db";
-import type { ResourceList } from "@/utils/query/resource-list";
 import { asc } from "drizzle-orm";
+import type { DB } from "@/db";
+import { packageServiceTypes } from "@/db/sqlite/schema";
+import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getPackageServiceTypesService(
 	db: DB,
@@ -10,7 +10,10 @@ export async function getPackageServiceTypesService(
 	const serviceTypes = await db
 		.select()
 		.from(packageServiceTypes)
-		.orderBy(asc(packageServiceTypes.displayOrder), asc(packageServiceTypes.name));
+		.orderBy(
+			asc(packageServiceTypes.displayOrder),
+			asc(packageServiceTypes.name),
+		);
 
 	return {
 		data: serviceTypes,

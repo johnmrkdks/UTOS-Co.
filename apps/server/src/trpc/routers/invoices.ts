@@ -1,16 +1,26 @@
+import { getMailService } from "@workspace/mail";
+import { count, desc, eq } from "drizzle-orm";
+import { z } from "zod";
+import { invoiceSentLogs } from "@/db/sqlite/schema/invoice-sent-logs";
+import { users } from "@/db/sqlite/schema/users";
+import {
+	GetCompanyInvoiceDataSchema,
+	getCompanyInvoiceDataService,
+} from "@/services/invoices/get-company-invoice-data";
+import {
+	GetDriverInvoiceDataSchema,
+	getDriverInvoiceDataService,
+} from "@/services/invoices/get-driver-invoice-data";
+import { listInvoiceCompaniesService } from "@/services/invoices/list-invoice-companies";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { getDriverInvoiceDataService, GetDriverInvoiceDataSchema } from "@/services/invoices/get-driver-invoice-data";
-import { getCompanyInvoiceDataService, GetCompanyInvoiceDataSchema } from "@/services/invoices/get-company-invoice-data";
-import { listInvoiceCompaniesService } from "@/services/invoices/list-invoice-companies";
-import { users } from "@/db/sqlite/schema/users";
-import { invoiceSentLogs } from "@/db/sqlite/schema/invoice-sent-logs";
-import { eq, desc, count } from "drizzle-orm";
-import { getMailService } from "@workspace/mail";
-import { z } from "zod";
 
 async function requireAdmin(db: any, userId: string) {
-	const [user] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+	const [user] = await db
+		.select({ role: users.role })
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
 	const role = user?.role;
 	if (role !== "admin" && role !== "super_admin") {
 		throw new Error("Admin access required");
@@ -68,7 +78,7 @@ export const invoicesRouter = router({
 				endDate: z.coerce.date(),
 				commissionRate: z.number().min(1).max(100),
 				pdfBase64: z.string(),
-			})
+			}),
 		)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
@@ -76,14 +86,15 @@ export const invoicesRouter = router({
 				if (!userId) throw new Error("Unauthorized");
 				await requireAdmin(db, userId);
 
-				const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_");
+				const sanitize = (s: string) =>
+					s.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_");
 				const filename = `${sanitize(input.driverName)}_${input.endDate.toISOString().slice(0, 10)}.pdf`;
 				const pdfBuffer = Buffer.from(input.pdfBase64, "base64");
 
 				const mailService = getMailService(env);
 				const success = await mailService.sendEmail({
 					to: input.driverEmail,
-					subject: `Your Commission Invoice - Down Under Chauffeurs`,
+					subject: "Your Commission Invoice - Down Under Chauffeurs",
 					html: `
 						<p>Hi ${input.driverName},</p>
 						<p>Please find your commission invoice attached for the period ${input.startDate.toISOString().slice(0, 10)} to ${input.endDate.toISOString().slice(0, 10)}.</p>
@@ -124,7 +135,7 @@ export const invoicesRouter = router({
 				startDate: z.coerce.date(),
 				endDate: z.coerce.date(),
 				pdfBase64: z.string(),
-			})
+			}),
 		)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
@@ -132,14 +143,15 @@ export const invoicesRouter = router({
 				if (!userId) throw new Error("Unauthorized");
 				await requireAdmin(db, userId);
 
-				const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_");
+				const sanitize = (s: string) =>
+					s.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_");
 				const filename = `${sanitize(input.companyName)}_${input.endDate.toISOString().slice(0, 10)}.pdf`;
 				const pdfBuffer = Buffer.from(input.pdfBase64, "base64");
 
 				const mailService = getMailService(env);
 				const success = await mailService.sendEmail({
 					to: input.companyEmail,
-					subject: `Tax Invoice - Down Under Chauffeurs`,
+					subject: "Tax Invoice - Down Under Chauffeurs",
 					html: `
 						<p>Dear ${input.companyName},</p>
 						<p>Please find your tax invoice attached for the period ${input.startDate.toISOString().slice(0, 10)} to ${input.endDate.toISOString().slice(0, 10)}.</p>
@@ -180,7 +192,7 @@ export const invoicesRouter = router({
 					offset: z.number().min(0).default(0),
 					type: z.enum(["driver", "company"]).optional(),
 				})
-				.optional()
+				.optional(),
 		)
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
@@ -188,10 +200,16 @@ export const invoicesRouter = router({
 				if (!userId) throw new Error("Unauthorized");
 				await requireAdmin(db, userId);
 
-				const opts: { limit?: number; offset?: number; type?: "driver" | "company" } = input ?? {};
+				const opts: {
+					limit?: number;
+					offset?: number;
+					type?: "driver" | "company";
+				} = input ?? {};
 				const limit = opts.limit ?? 50;
 				const offset = opts.offset ?? 0;
-				const whereCondition = opts.type ? eq(invoiceSentLogs.type, opts.type) : undefined;
+				const whereCondition = opts.type
+					? eq(invoiceSentLogs.type, opts.type)
+					: undefined;
 
 				const logs = await db
 					.select()

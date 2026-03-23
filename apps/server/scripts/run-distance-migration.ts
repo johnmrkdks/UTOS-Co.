@@ -7,18 +7,20 @@
  *   pnpm tsx scripts/run-distance-migration.ts
  */
 
-// @ts-nocheck - Migration script, better-sqlite3 is a dev-only dependency
-import { drizzle } from "drizzle-orm/d1";
+import fs from "node:fs";
+import path from "node:path";
 import Database from "better-sqlite3";
 import { sql } from "drizzle-orm";
-import path from "node:path";
-import fs from "node:fs";
+// @ts-nocheck - Migration script, better-sqlite3 is a dev-only dependency
+import { drizzle } from "drizzle-orm/d1";
 
 async function runMigration() {
 	console.log("🚀 Distance Migration Script\n");
 
 	// Read local database path from env
-	const dbPath = process.env.LOCAL_DB_PATH || ".wrangler/state/v3/d1/miniflare-D1DatabaseObject/db.sqlite";
+	const dbPath =
+		process.env.LOCAL_DB_PATH ||
+		".wrangler/state/v3/d1/miniflare-D1DatabaseObject/db.sqlite";
 	const fullPath = path.join(process.cwd(), dbPath);
 
 	console.log(`📁 Database: ${fullPath}\n`);
@@ -26,7 +28,9 @@ async function runMigration() {
 	if (!fs.existsSync(fullPath)) {
 		console.error("❌ Database file not found!");
 		console.error(`   Expected at: ${fullPath}`);
-		console.error("\n💡 Make sure to run 'pnpm dev:server' first to create the database.\n");
+		console.error(
+			"\n💡 Make sure to run 'pnpm dev:server' first to create the database.\n",
+		);
 		process.exit(1);
 	}
 
@@ -37,44 +41,67 @@ async function runMigration() {
 	console.log("🔍 Checking current schema...\n");
 
 	// Check current distance field types
-	const tableInfo = sqlite.prepare("PRAGMA table_info(bookings)").all() as any[];
-	const estimatedDistanceField = tableInfo.find((col: any) => col.name === "estimated_distance");
-	const actualDistanceField = tableInfo.find((col: any) => col.name === "actual_distance");
+	const tableInfo = sqlite
+		.prepare("PRAGMA table_info(bookings)")
+		.all() as any[];
+	const estimatedDistanceField = tableInfo.find(
+		(col: any) => col.name === "estimated_distance",
+	);
+	const actualDistanceField = tableInfo.find(
+		(col: any) => col.name === "actual_distance",
+	);
 
 	if (!estimatedDistanceField) {
-		console.error("❌ bookings table not found or missing estimated_distance column");
+		console.error(
+			"❌ bookings table not found or missing estimated_distance column",
+		);
 		process.exit(1);
 	}
 
-	console.log(`Current estimated_distance type: ${estimatedDistanceField.type}`);
+	console.log(
+		`Current estimated_distance type: ${estimatedDistanceField.type}`,
+	);
 	console.log(`Current actual_distance type: ${actualDistanceField.type}\n`);
 
-	if (estimatedDistanceField.type === "REAL" || estimatedDistanceField.type === "real") {
-		console.log("✅ Distance fields are already REAL type. Migration may have already been applied.\n");
-		console.log("Do you want to continue anyway? (This will recreate the table)");
+	if (
+		estimatedDistanceField.type === "REAL" ||
+		estimatedDistanceField.type === "real"
+	) {
+		console.log(
+			"✅ Distance fields are already REAL type. Migration may have already been applied.\n",
+		);
+		console.log(
+			"Do you want to continue anyway? (This will recreate the table)",
+		);
 		console.log("Press Ctrl+C to cancel, or wait 5 seconds to continue...\n");
 		await new Promise((resolve) => setTimeout(resolve, 5000));
 	}
 
 	try {
 		// Count existing bookings
-		const countResult = sqlite.prepare("SELECT COUNT(*) as count FROM bookings").get() as any;
+		const countResult = sqlite
+			.prepare("SELECT COUNT(*) as count FROM bookings")
+			.get() as any;
 		const bookingCount = countResult?.count || 0;
 
 		console.log(`📊 Found ${bookingCount} bookings to migrate\n`);
 
 		if (bookingCount > 0) {
 			// Show sample data before migration
-			const sampleBefore = sqlite.prepare(`
+			const sampleBefore = sqlite
+				.prepare(`
 				SELECT id, estimated_distance, actual_distance
 				FROM bookings
 				WHERE estimated_distance IS NOT NULL
 				LIMIT 3
-			`).all() as any[];
+			`)
+				.all() as any[];
 
 			console.log("📋 Sample data BEFORE migration:");
 			sampleBefore.forEach((row: any) => {
-				console.log(`  - ID: ${row.id.slice(0, 8)}... | Estimated: ${row.estimated_distance} | Actual: ${row.actual_distance || "N/A"}`);
+				console.log(
+					`  - ID: ${row.id.slice(0, 8)}... | Estimated: ${row.estimated_distance} | Actual: ${row.actual_distance || "N/A"}`,
+				);
 			});
 			console.log("");
 		}
@@ -193,16 +220,20 @@ async function runMigration() {
 
 		if (bookingCount > 0) {
 			// Show sample data after conversion
-			const sampleAfter = sqlite.prepare(`
+			const sampleAfter = sqlite
+				.prepare(`
 				SELECT id, estimated_distance, actual_distance
 				FROM bookings_new
 				WHERE estimated_distance IS NOT NULL
 				LIMIT 3
-			`).all() as any[];
+			`)
+				.all() as any[];
 
 			console.log("📋 Sample data AFTER migration:");
 			sampleAfter.forEach((row: any) => {
-				console.log(`  - ID: ${row.id.slice(0, 8)}... | Estimated: ${row.estimated_distance} km | Actual: ${row.actual_distance || "N/A"} km`);
+				console.log(
+					`  - ID: ${row.id.slice(0, 8)}... | Estimated: ${row.estimated_distance} km | Actual: ${row.actual_distance || "N/A"} km`,
+				);
 			});
 			console.log("");
 		}
@@ -216,27 +247,34 @@ async function runMigration() {
 		console.log("✅ Table renamed\n");
 
 		console.log("Step 5/5: Verifying migration...");
-		const finalCount = sqlite.prepare("SELECT COUNT(*) as count FROM bookings").get() as any;
-		const finalTableInfo = sqlite.prepare("PRAGMA table_info(bookings)").all() as any[];
-		const finalEstimatedField = finalTableInfo.find((col: any) => col.name === "estimated_distance");
+		const finalCount = sqlite
+			.prepare("SELECT COUNT(*) as count FROM bookings")
+			.get() as any;
+		const finalTableInfo = sqlite
+			.prepare("PRAGMA table_info(bookings)")
+			.all() as any[];
+		const finalEstimatedField = finalTableInfo.find(
+			(col: any) => col.name === "estimated_distance",
+		);
 
-		console.log(`✅ Verification complete\n`);
+		console.log("✅ Verification complete\n");
 
 		console.log("🎉 Migration completed successfully!\n");
 		console.log("📊 Summary:");
 		console.log(`  - Bookings migrated: ${bookingCount}`);
 		console.log(`  - Final count: ${finalCount.count}`);
 		console.log(`  - Distance field type: ${finalEstimatedField.type}`);
-		console.log(`  - Format: INTEGER (meters) → REAL (kilometers)`);
-		console.log(`  - Example: 15500 → 15.5 km\n`);
+		console.log("  - Format: INTEGER (meters) → REAL (kilometers)");
+		console.log("  - Example: 15500 → 15.5 km\n");
 
 		sqlite.close();
 		console.log("✨ Migration complete!\n");
-
 	} catch (error) {
 		console.error("\n❌ Migration failed:", error);
 		console.error("\n⚠️  Database may be in inconsistent state.");
-		console.error("💡 Restore from backup or delete .wrangler folder and restart.\n");
+		console.error(
+			"💡 Restore from backup or delete .wrangler folder and restart.\n",
+		);
 		sqlite.close();
 		process.exit(1);
 	}

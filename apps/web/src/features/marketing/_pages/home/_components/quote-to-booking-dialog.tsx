@@ -1,72 +1,111 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Calendar, Clock, MapPin, User, Phone, Mail, Users, MessageSquare, CreditCard, ArrowRight, X } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Input } from "@workspace/ui/components/input"
-import { Textarea } from "@workspace/ui/components/textarea"
-import { Badge } from "@workspace/ui/components/badge"
-import { Separator } from "@workspace/ui/components/separator"
-import { useCreateCustomBookingFromQuoteMutation } from "../_hooks/mutation/use-create-custom-booking-from-quote-mutation"
-import { authClient } from "@/lib/auth-client"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@workspace/ui/components/dialog";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { Separator } from "@workspace/ui/components/separator";
+import { Textarea } from "@workspace/ui/components/textarea";
+import {
+	ArrowRight,
+	Calendar,
+	Clock,
+	CreditCard,
+	Mail,
+	MapPin,
+	MessageSquare,
+	Phone,
+	User,
+	Users,
+	X,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { authClient } from "@/lib/auth-client";
+import { useCreateCustomBookingFromQuoteMutation } from "../_hooks/mutation/use-create-custom-booking-from-quote-mutation";
 
 const bookingDetailsSchema = z.object({
 	customerName: z.string().min(2, "Name must be at least 2 characters"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
-	customerEmail: z.string().email("Please enter a valid email address").optional().or(z.literal("")),
-	passengerCount: z.number().int().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
+	customerEmail: z
+		.string()
+		.email("Please enter a valid email address")
+		.optional()
+		.or(z.literal("")),
+	passengerCount: z
+		.number()
+		.int()
+		.min(1, "At least 1 passenger required")
+		.max(8, "Maximum 8 passengers allowed"),
 	scheduledPickupTime: z.date({
 		message: "Please select a pickup date and time",
 	}),
 	specialRequests: z.string().optional(),
-})
+});
 
-type BookingDetailsForm = z.infer<typeof bookingDetailsSchema>
+type BookingDetailsForm = z.infer<typeof bookingDetailsSchema>;
 
 interface QuoteResult {
-	baseFare: number
-	distanceFare: number
-	timeFare: number
-	extraCharges: number
-	totalAmount: number
-	estimatedDistance: number
-	estimatedDuration: number
+	baseFare: number;
+	distanceFare: number;
+	timeFare: number;
+	extraCharges: number;
+	totalAmount: number;
+	estimatedDistance: number;
+	estimatedDuration: number;
 	breakdown: {
-		baseRate: number
-		perKmRate: number
-		perMinuteRate: number
-		minimumFare: number
-		surgePricing?: number
-	}
+		baseRate: number;
+		perKmRate: number;
+		perMinuteRate: number;
+		minimumFare: number;
+		surgePricing?: number;
+	};
 }
 
 interface RouteData {
-	originAddress: string
-	destinationAddress: string
-	originLatitude?: number
-	originLongitude?: number
-	destinationLatitude?: number
-	destinationLongitude?: number
+	originAddress: string;
+	destinationAddress: string;
+	originLatitude?: number;
+	originLongitude?: number;
+	destinationLatitude?: number;
+	destinationLongitude?: number;
 	stops: Array<{
-		address: string
-		latitude?: number
-		longitude?: number
-	}>
+		address: string;
+		latitude?: number;
+		longitude?: number;
+	}>;
 }
 
 interface QuoteToBookingDialogProps {
-	open: boolean
-	onOpenChange: (open: boolean) => void
-	quote: QuoteResult
-	routeData: RouteData
-	onBookingConfirmed: (bookingId: string) => void
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	quote: QuoteResult;
+	routeData: RouteData;
+	onBookingConfirmed: (bookingId: string) => void;
 }
 
-type BookingStep = "details" | "confirmation" | "processing" | "success"
+type BookingStep = "details" | "confirmation" | "processing" | "success";
 
 export function QuoteToBookingDialog({
 	open,
@@ -75,10 +114,10 @@ export function QuoteToBookingDialog({
 	routeData,
 	onBookingConfirmed,
 }: QuoteToBookingDialogProps) {
-	const [currentStep, setCurrentStep] = useState<BookingStep>("details")
-	const [bookingId, setBookingId] = useState<string | null>(null)
-	const createBookingMutation = useCreateCustomBookingFromQuoteMutation()
-	const { data: session } = authClient.useSession()
+	const [currentStep, setCurrentStep] = useState<BookingStep>("details");
+	const [bookingId, setBookingId] = useState<string | null>(null);
+	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
+	const { data: session } = authClient.useSession();
 
 	const form = useForm<BookingDetailsForm>({
 		resolver: zodResolver(bookingDetailsSchema),
@@ -90,7 +129,7 @@ export function QuoteToBookingDialog({
 			scheduledPickupTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
 			specialRequests: "",
 		},
-	})
+	});
 
 	const handleSubmit = async (data: BookingDetailsForm) => {
 		if (!session?.user?.id) {
@@ -99,12 +138,12 @@ export function QuoteToBookingDialog({
 			return;
 		}
 
-		setCurrentStep("processing")
-		
+		setCurrentStep("processing");
+
 		try {
 			const result = await createBookingMutation.mutateAsync({
 				userId: session.user.id,
-				
+
 				// Route data from quote
 				originAddress: routeData.originAddress,
 				originLatitude: routeData.originLatitude,
@@ -112,84 +151,86 @@ export function QuoteToBookingDialog({
 				destinationAddress: routeData.destinationAddress,
 				destinationLatitude: routeData.destinationLatitude,
 				destinationLongitude: routeData.destinationLongitude,
-				
+
 				// Stops from quote
 				stops: routeData.stops,
-				
+
 				// Timing
 				scheduledPickupTime: data.scheduledPickupTime.toISOString(),
 				estimatedDuration: quote.estimatedDuration,
 				estimatedDistance: quote.estimatedDistance,
-				
+
 				// Pricing from quote
 				baseFare: quote.baseFare,
 				distanceFare: quote.distanceFare,
 				timeFare: quote.timeFare || 0,
 				extraCharges: quote.extraCharges,
 				quotedAmount: quote.totalAmount,
-				
+
 				// Customer details
 				customerName: data.customerName,
 				customerPhone: data.customerPhone,
 				customerEmail: data.customerEmail || undefined,
 				passengerCount: data.passengerCount,
 				specialRequests: data.specialRequests,
-			})
-			
-			setBookingId(result?.id || null)
-			setCurrentStep("success")
+			});
+
+			setBookingId(result?.id || null);
+			setCurrentStep("success");
 
 			setTimeout(() => {
-				if (result?.id) onBookingConfirmed(result.id)
-				onOpenChange(false)
-				resetForm()
-			}, 3000)
+				if (result?.id) onBookingConfirmed(result.id);
+				onOpenChange(false);
+				resetForm();
+			}, 3000);
 		} catch (error) {
-			console.error("Booking creation failed:", error)
-			setCurrentStep("details")
+			console.error("Booking creation failed:", error);
+			setCurrentStep("details");
 		}
-	}
+	};
 
 	const resetForm = () => {
-		setCurrentStep("details")
-		setBookingId(null)
-		form.reset()
-	}
+		setCurrentStep("details");
+		setBookingId(null);
+		form.reset();
+	};
 
 	const goToConfirmation = () => {
-		setCurrentStep("confirmation")
-	}
+		setCurrentStep("confirmation");
+	};
 
 	const goBackToDetails = () => {
-		setCurrentStep("details")
-	}
+		setCurrentStep("details");
+	};
 
 	// Format date for display
 	const formatDateTime = (date: Date) => {
 		return new Intl.DateTimeFormat("en-AU", {
 			weekday: "long",
 			year: "numeric",
-			month: "long", 
+			month: "long",
 			day: "numeric",
 			hour: "2-digit",
 			minute: "2-digit",
-		}).format(date)
-	}
+		}).format(date);
+	};
 
 	// Get minimum pickup time (1 hour from now)
-	const minPickupTime = new Date(Date.now() + 60 * 60 * 1000)
+	const minPickupTime = new Date(Date.now() + 60 * 60 * 1000);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
 				<DialogHeader className="space-y-1">
 					<DialogTitle className="flex items-center gap-2">
 						<CreditCard className="h-5 w-5 text-primary" />
 						Book This Journey
 					</DialogTitle>
 					<DialogDescription>
-						{currentStep === "details" && "Enter your details to confirm this booking"}
-						{currentStep === "confirmation" && "Review your booking details before confirming"}
+						{currentStep === "details" &&
+							"Enter your details to confirm this booking"}
+						{currentStep === "confirmation" &&
+							"Review your booking details before confirming"}
 						{currentStep === "processing" && "Creating your booking..."}
 						{currentStep === "success" && "Booking confirmed successfully!"}
 					</DialogDescription>
@@ -207,32 +248,38 @@ export function QuoteToBookingDialog({
 								{/* Route Display */}
 								<div className="space-y-2 text-sm">
 									<div className="flex items-start gap-2">
-										<div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
+										<div className="mt-1.5 h-3 w-3 flex-shrink-0 rounded-full bg-green-500" />
 										<div>
 											<div className="font-medium">From</div>
-											<div className="text-muted-foreground">{routeData.originAddress}</div>
+											<div className="text-muted-foreground">
+												{routeData.originAddress}
+											</div>
 										</div>
 									</div>
 									{routeData.stops.map((stop, index) => (
 										<div key={index} className="flex items-start gap-2">
-											<div className="w-3 h-3 rounded-full bg-orange-500 mt-1.5 flex-shrink-0" />
+											<div className="mt-1.5 h-3 w-3 flex-shrink-0 rounded-full bg-orange-500" />
 											<div>
 												<div className="font-medium">Stop {index + 1}</div>
-												<div className="text-muted-foreground">{stop.address}</div>
+												<div className="text-muted-foreground">
+													{stop.address}
+												</div>
 											</div>
 										</div>
 									))}
 									<div className="flex items-start gap-2">
-										<div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+										<div className="mt-1.5 h-3 w-3 flex-shrink-0 rounded-full bg-red-500" />
 										<div>
 											<div className="font-medium">To</div>
-											<div className="text-muted-foreground">{routeData.destinationAddress}</div>
+											<div className="text-muted-foreground">
+												{routeData.destinationAddress}
+											</div>
 										</div>
 									</div>
 								</div>
 
 								{/* Journey Info */}
-								<div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
+								<div className="flex items-center gap-4 border-t pt-2 text-muted-foreground text-sm">
 									<div className="flex items-center gap-1">
 										<MapPin className="h-4 w-4" />
 										{Number(quote.estimatedDistance).toFixed(1)} km
@@ -242,8 +289,8 @@ export function QuoteToBookingDialog({
 										{Math.round(quote.estimatedDuration / 60)} min
 									</div>
 									<div className="flex items-center gap-1">
-										<CreditCard className="h-4 w-4" />
-										${quote.totalAmount.toFixed(2)}
+										<CreditCard className="h-4 w-4" />$
+										{quote.totalAmount.toFixed(2)}
 									</div>
 								</div>
 							</CardContent>
@@ -258,10 +305,13 @@ export function QuoteToBookingDialog({
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Form {...form as any}>
-									<form onSubmit={form.handleSubmit(goToConfirmation)} className="space-y-4">
+								<Form {...(form as any)}>
+									<form
+										onSubmit={form.handleSubmit(goToConfirmation)}
+										className="space-y-4"
+									>
 										{/* Name and Phone */}
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 											<FormField
 												control={form.control as any}
 												name="customerName"
@@ -269,7 +319,10 @@ export function QuoteToBookingDialog({
 													<FormItem>
 														<FormLabel>Full Name *</FormLabel>
 														<FormControl>
-															<Input {...field} placeholder="Enter your full name" />
+															<Input
+																{...field}
+																placeholder="Enter your full name"
+															/>
 														</FormControl>
 														<FormMessage />
 													</FormItem>
@@ -291,7 +344,7 @@ export function QuoteToBookingDialog({
 										</div>
 
 										{/* Email and Passenger Count */}
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 											<FormField
 												control={form.control as any}
 												name="customerEmail"
@@ -299,7 +352,11 @@ export function QuoteToBookingDialog({
 													<FormItem>
 														<FormLabel>Email Address</FormLabel>
 														<FormControl>
-															<Input {...field} placeholder="your.email@example.com" type="email" />
+															<Input
+																{...field}
+																placeholder="your.email@example.com"
+																type="email"
+															/>
 														</FormControl>
 														<FormMessage />
 													</FormItem>
@@ -317,7 +374,11 @@ export function QuoteToBookingDialog({
 																type="number"
 																min="1"
 																max="8"
-																onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+																onChange={(e) =>
+																	field.onChange(
+																		Number.parseInt(e.target.value) || 1,
+																	)
+																}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -338,12 +399,23 @@ export function QuoteToBookingDialog({
 															{...field}
 															type="datetime-local"
 															min={minPickupTime.toISOString().slice(0, 16)}
-															value={field.value ? new Date(field.value.getTime() - field.value.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
-															onChange={(e) => field.onChange(new Date(e.target.value))}
+															value={
+																field.value
+																	? new Date(
+																			field.value.getTime() -
+																				field.value.getTimezoneOffset() * 60000,
+																		)
+																			.toISOString()
+																			.slice(0, 16)
+																	: ""
+															}
+															onChange={(e) =>
+																field.onChange(new Date(e.target.value))
+															}
 														/>
 													</FormControl>
 													<FormMessage />
-													<p className="text-xs text-muted-foreground">
+													<p className="text-muted-foreground text-xs">
 														Minimum 1 hour advance booking required
 													</p>
 												</FormItem>
@@ -375,7 +447,11 @@ export function QuoteToBookingDialog({
 												Review Booking
 												<ArrowRight className="ml-2 h-4 w-4" />
 											</Button>
-											<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+											<Button
+												type="button"
+												variant="outline"
+												onClick={() => onOpenChange(false)}
+											>
 												Cancel
 											</Button>
 										</div>
@@ -393,29 +469,38 @@ export function QuoteToBookingDialog({
 							<CardHeader>
 								<CardTitle className="text-lg">Confirm Your Booking</CardTitle>
 								<CardDescription>
-									Please review all details before confirming your luxury chauffeur service
+									Please review all details before confirming your luxury
+									chauffeur service
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								{/* Customer Details */}
 								<div className="space-y-3">
 									<h4 className="font-medium">Passenger Information</h4>
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+									<div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
 										<div>
 											<span className="text-muted-foreground">Name:</span>
-											<div className="font-medium">{form.getValues("customerName")}</div>
+											<div className="font-medium">
+												{form.getValues("customerName")}
+											</div>
 										</div>
 										<div>
 											<span className="text-muted-foreground">Phone:</span>
-											<div className="font-medium">{form.getValues("customerPhone")}</div>
+											<div className="font-medium">
+												{form.getValues("customerPhone")}
+											</div>
 										</div>
 										<div>
 											<span className="text-muted-foreground">Email:</span>
-											<div className="font-medium">{form.getValues("customerEmail") || "Not provided"}</div>
+											<div className="font-medium">
+												{form.getValues("customerEmail") || "Not provided"}
+											</div>
 										</div>
 										<div>
 											<span className="text-muted-foreground">Passengers:</span>
-											<div className="font-medium">{form.getValues("passengerCount")} person(s)</div>
+											<div className="font-medium">
+												{form.getValues("passengerCount")} person(s)
+											</div>
 										</div>
 									</div>
 								</div>
@@ -428,16 +513,24 @@ export function QuoteToBookingDialog({
 									<div className="space-y-2 text-sm">
 										<div>
 											<span className="text-muted-foreground">Pickup:</span>
-											<div className="font-medium">{formatDateTime(form.getValues("scheduledPickupTime"))}</div>
+											<div className="font-medium">
+												{formatDateTime(form.getValues("scheduledPickupTime"))}
+											</div>
 										</div>
 										<div>
 											<span className="text-muted-foreground">Duration:</span>
-											<div className="font-medium">~{Math.round(quote.estimatedDuration / 60)} minutes</div>
+											<div className="font-medium">
+												~{Math.round(quote.estimatedDuration / 60)} minutes
+											</div>
 										</div>
 										{form.getValues("specialRequests") && (
 											<div>
-												<span className="text-muted-foreground">Special Requests:</span>
-												<div className="font-medium">{form.getValues("specialRequests")}</div>
+												<span className="text-muted-foreground">
+													Special Requests:
+												</span>
+												<div className="font-medium">
+													{form.getValues("specialRequests")}
+												</div>
 											</div>
 										)}
 									</div>
@@ -466,25 +559,39 @@ export function QuoteToBookingDialog({
 										<Separator />
 										<div className="flex justify-between font-bold text-lg">
 											<span>Total Amount</span>
-											<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
+											<span className="text-primary">
+												${quote.totalAmount.toFixed(2)}
+											</span>
 										</div>
 									</div>
 								</div>
 
 								{/* Important Notes */}
-								<div className="bg-muted/50 p-3 rounded-lg space-y-2">
+								<div className="space-y-2 rounded-lg bg-muted/50 p-3">
 									<h5 className="font-medium text-sm">Important Information</h5>
-									<ul className="text-xs text-muted-foreground space-y-1">
+									<ul className="space-y-1 text-muted-foreground text-xs">
 										<li>• Payment will be processed upon confirmation</li>
-										<li>• A driver will be assigned and will contact you before pickup</li>
-										<li>• Cancellation policy: Free cancellation up to 2 hours before pickup</li>
-										<li>• This is an estimate - final amount may vary based on actual distance and time</li>
+										<li>
+											• A driver will be assigned and will contact you before
+											pickup
+										</li>
+										<li>
+											• Cancellation policy: Free cancellation up to 2 hours
+											before pickup
+										</li>
+										<li>
+											• This is an estimate - final amount may vary based on
+											actual distance and time
+										</li>
 									</ul>
 								</div>
 
 								{/* Action Buttons */}
 								<div className="flex flex-col gap-3 pt-4">
-									<Button onClick={() => handleSubmit(form.getValues())} className="w-full">
+									<Button
+										onClick={() => handleSubmit(form.getValues())}
+										className="w-full"
+									>
 										Confirm & Book Journey
 									</Button>
 									<Button variant="outline" onClick={goBackToDetails}>
@@ -498,42 +605,49 @@ export function QuoteToBookingDialog({
 
 				{/* Processing Step */}
 				{currentStep === "processing" && (
-					<div className="text-center py-8 space-y-4">
-						<div className="mx-auto w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+					<div className="space-y-4 py-8 text-center">
+						<div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 						<div className="space-y-2">
-							<h3 className="text-lg font-medium">Creating Your Booking...</h3>
-							<p className="text-muted-foreground">Please wait while we process your request</p>
+							<h3 className="font-medium text-lg">Creating Your Booking...</h3>
+							<p className="text-muted-foreground">
+								Please wait while we process your request
+							</p>
 						</div>
 					</div>
 				)}
 
 				{/* Success Step */}
 				{currentStep === "success" && (
-					<div className="text-center py-8 space-y-6">
-						<div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-							<div className="w-8 h-8 text-green-600">✓</div>
+					<div className="space-y-6 py-8 text-center">
+						<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+							<div className="h-8 w-8 text-green-600">✓</div>
 						</div>
 						<div className="space-y-2">
-							<h3 className="text-xl font-bold text-green-600">Booking Confirmed!</h3>
+							<h3 className="font-bold text-green-600 text-xl">
+								Booking Confirmed!
+							</h3>
 							<p className="text-muted-foreground">
 								Your luxury chauffeur service has been booked successfully.
 							</p>
 							{bookingId && (
-								<div className="bg-muted/50 p-3 rounded-lg">
+								<div className="rounded-lg bg-muted/50 p-3">
 									<p className="text-sm">
-										<span className="font-medium">Booking Reference:</span> {bookingId}
+										<span className="font-medium">Booking Reference:</span>{" "}
+										{bookingId}
 									</p>
 								</div>
 							)}
 						</div>
-						<div className="space-y-2 text-sm text-muted-foreground">
+						<div className="space-y-2 text-muted-foreground text-sm">
 							<p>• You will receive a confirmation email shortly</p>
-							<p>• A driver will be assigned and will contact you before pickup</p>
+							<p>
+								• A driver will be assigned and will contact you before pickup
+							</p>
 							<p>• You can view this booking in your dashboard</p>
 						</div>
 					</div>
 				)}
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }

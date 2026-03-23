@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
@@ -25,10 +26,9 @@ import {
 	SelectValue,
 } from "@workspace/ui/components/select";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState, useEffect } from "react";
 import { useUpdateUserCredentialsMutation } from "../_hooks/query/use-update-user-credentials-mutation";
 
 const editUserSchema = z.object({
@@ -36,7 +36,12 @@ const editUserSchema = z.object({
 	email: z.string().email("Invalid email format"),
 	phone: z.string().optional(),
 	role: z.enum(["user", "admin", "driver", "super_admin"]),
-	password: z.union([z.string().min(8, "Password must be at least 8 characters"), z.literal("")]).optional(),
+	password: z
+		.union([
+			z.string().min(8, "Password must be at least 8 characters"),
+			z.literal(""),
+		])
+		.optional(),
 });
 
 type EditUserForm = z.infer<typeof editUserSchema>;
@@ -53,7 +58,11 @@ interface EditUserDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps) {
+export function EditUserDialog({
+	user,
+	open,
+	onOpenChange,
+}: EditUserDialogProps) {
 	const [showPassword, setShowPassword] = useState(false);
 	const updateMutation = useUpdateUserCredentialsMutation();
 
@@ -106,7 +115,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 						Update name, email, phone, password, or role for this user.
 					</DialogDescription>
 				</DialogHeader>
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control as any}
@@ -130,7 +139,9 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 									<FormControl>
 										<Input type="email" placeholder="Email" {...field} />
 									</FormControl>
-									<FormDescription>Used for login and notifications.</FormDescription>
+									<FormDescription>
+										Used for login and notifications.
+									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -188,7 +199,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 												type="button"
 												variant="ghost"
 												size="sm"
-												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+												className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
 												onClick={() => setShowPassword(!showPassword)}
 											>
 												{showPassword ? (
@@ -208,7 +219,11 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 						/>
 
 						<DialogFooter>
-							<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => onOpenChange(false)}
+							>
 								Cancel
 							</Button>
 							<Button type="submit" disabled={updateMutation.isPending}>

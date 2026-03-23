@@ -1,10 +1,10 @@
-import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
 
 export const BookingExtraSchema = createSelectSchema(bookingExtras, {
 	createdAt: z.union([z.date(), z.string()]),

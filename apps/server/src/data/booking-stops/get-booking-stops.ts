@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { bookingStops } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getBookingStops(db: DB, bookingId: string) {
 	const stops = await db

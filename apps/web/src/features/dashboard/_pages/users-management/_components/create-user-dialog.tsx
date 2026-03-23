@@ -1,4 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -25,42 +27,49 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { Checkbox } from "@workspace/ui/components/checkbox";
-import { UserPlusIcon, EyeIcon, EyeOffIcon, InfoIcon, ShieldIcon, UserIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import {
+	EyeIcon,
+	EyeOffIcon,
+	InfoIcon,
+	ShieldIcon,
+	UserIcon,
+	UserPlusIcon,
+} from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { useCreateUserMutation } from "../_hooks/query/use-create-user-mutation";
 
-const createUserSchema = z.object({
-	email: z.string().email("Invalid email format"),
-	name: z.string().min(2, "Name must be at least 2 characters"),
-	role: z.enum(["user", "admin"]),
-	useDefaultPassword: z.boolean().default(true),
-	password: z.string().optional(),
-	confirmPassword: z.string().optional(),
-}).superRefine((data, ctx) => {
-	if (!data.useDefaultPassword) {
-		if (!data.password || data.password.length < 8) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.too_small,
-				minimum: 8,
-				type: "string",
-				inclusive: true,
-				message: "Password must be at least 8 characters",
-				path: ["password"],
-			});
+const createUserSchema = z
+	.object({
+		email: z.string().email("Invalid email format"),
+		name: z.string().min(2, "Name must be at least 2 characters"),
+		role: z.enum(["user", "admin"]),
+		useDefaultPassword: z.boolean().default(true),
+		password: z.string().optional(),
+		confirmPassword: z.string().optional(),
+	})
+	.superRefine((data, ctx) => {
+		if (!data.useDefaultPassword) {
+			if (!data.password || data.password.length < 8) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.too_small,
+					minimum: 8,
+					type: "string",
+					inclusive: true,
+					message: "Password must be at least 8 characters",
+					path: ["password"],
+				});
+			}
+			if (data.password !== data.confirmPassword) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "Passwords don't match",
+					path: ["confirmPassword"],
+				});
+			}
 		}
-		if (data.password !== data.confirmPassword) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "Passwords don't match",
-				path: ["confirmPassword"],
-			});
-		}
-	}
-});
+	});
 
 type CreateUserForm = z.infer<typeof createUserSchema>;
 
@@ -117,10 +126,11 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 				<DialogHeader>
 					<DialogTitle>Add User</DialogTitle>
 					<DialogDescription>
-						Create a new Client or Admin account. Admins can manage bookings, assign drivers, send invoices, manage inbox, and add packages.
+						Create a new Client or Admin account. Admins can manage bookings,
+						assign drivers, send invoices, manage inbox, and add packages.
 					</DialogDescription>
 				</DialogHeader>
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control as any}
@@ -128,7 +138,10 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>User Type</FormLabel>
-									<Select onValueChange={field.onChange} defaultValue={field.value}>
+									<Select
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+									>
 										<FormControl>
 											<SelectTrigger className="w-full">
 												<SelectValue placeholder="Select user type" />
@@ -187,17 +200,18 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 							control={form.control as any}
 							name="useDefaultPassword"
 							render={({ field }) => (
-								<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 w-full">
+								<FormItem className="flex w-full flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
 									<FormControl>
 										<Checkbox
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
 									</FormControl>
-									<div className="space-y-1 leading-none flex-1 min-w-0">
+									<div className="min-w-0 flex-1 space-y-1 leading-none">
 										<FormLabel>Use default password</FormLabel>
 										<FormDescription>
-											User will use &quot;changeme&quot; and should change it after first login.
+											User will use &quot;changeme&quot; and should change it
+											after first login.
 										</FormDescription>
 									</div>
 								</FormItem>
@@ -223,7 +237,7 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 														type="button"
 														variant="ghost"
 														size="sm"
-														className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+														className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
 														onClick={() => setShowPassword(!showPassword)}
 													>
 														{showPassword ? (
@@ -260,11 +274,11 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 						)}
 
 						{selectedRole === "admin" && (
-							<div className="flex items-start gap-3 rounded-md bg-blue-50 p-4 border border-blue-100">
-								<InfoIcon className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-								<div className="text-sm text-blue-800 min-w-0">
+							<div className="flex items-start gap-3 rounded-md border border-blue-100 bg-blue-50 p-4">
+								<InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+								<div className="min-w-0 text-blue-800 text-sm">
 									<p className="font-medium">Admin permissions include:</p>
-									<ul className="mt-1.5 list-disc pl-4 space-y-0.5 text-xs">
+									<ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-xs">
 										<li>Booking management</li>
 										<li>Assigning jobs to drivers</li>
 										<li>Sending invoices</li>
@@ -276,7 +290,11 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
 						)}
 
 						<DialogFooter>
-							<Button type="button" variant="outline" onClick={() => setOpen(false)}>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setOpen(false)}
+							>
 								Cancel
 							</Button>
 							<Button type="submit" disabled={createUserMutation.isPending}>

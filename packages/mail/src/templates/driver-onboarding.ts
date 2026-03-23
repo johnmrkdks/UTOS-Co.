@@ -4,9 +4,10 @@ export function generateDriverOnboardingTemplate(
 	driverName: string,
 	loginUrl: string,
 	googleLinkingUrl?: string,
-	adminContactEmail: string = "admin@downunderchauffeur.com"
+	adminContactEmail = "admin@downunderchauffeur.com",
 ): EmailTemplate {
-	const googleLinkingSection = googleLinkingUrl ? `
+	const googleLinkingSection = googleLinkingUrl
+		? `
 		<div style="background-color: #e8f5e8; border: 1px solid #c3e6c3; padding: 20px; border-radius: 5px; margin: 30px 0;">
 			<h3 style="color: #2d5a2d; margin: 0 0 15px 0; font-size: 18px;">🔗 Optional: Link Your Google Account</h3>
 			<p style="color: #2d5a2d; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
@@ -18,7 +19,8 @@ export function generateDriverOnboardingTemplate(
 				</a>
 			</div>
 		</div>
-	` : '';
+	`
+		: "";
 
 	return {
 		subject: "🚗 Complete Your Driver Onboarding - Down Under Chauffeur",

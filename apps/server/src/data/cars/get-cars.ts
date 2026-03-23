@@ -2,14 +2,11 @@ import type { DB } from "@/db";
 import { cars } from "@/db/schema";
 import type { Car } from "@/schemas/shared";
 import { RQBFilterBuilder } from "@/utils/query/filter-builders";
-import type { QueryBuilder } from "@/utils/query/query-builder";
 import { filterPaginationSort } from "@/utils/query/filter-pagination-sort";
+import type { QueryBuilder } from "@/utils/query/query-builder";
 import type { ResourceList } from "@/utils/query/resource-list";
 
-export async function getCars(
-	db: DB,
-	params: ResourceList,
-) {
+export async function getCars(db: DB, params: ResourceList) {
 	const query = db.query.cars.findMany({
 		with: {
 			bodyType: true,
@@ -19,11 +16,11 @@ export async function getCars(
 			fuelType: true,
 			model: {
 				with: {
-					brand: true
-				}
+					brand: true,
+				},
 			},
 			transmissionType: true,
-			images: true
+			images: true,
 		},
 	});
 

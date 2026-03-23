@@ -1,11 +1,11 @@
 import { Outlet } from "@tanstack/react-router";
-import { useUserQuery } from "@/hooks/query/use-user-query";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import {
-	CustomerHeader,
 	CustomerBottomNavigation,
-	useCustomerNavigation
+	CustomerHeader,
+	useCustomerNavigation,
 } from "../navigation";
 
 export function CustomerLayout() {
@@ -14,7 +14,7 @@ export function CustomerLayout() {
 	const scrollContainerRef = useScrollToTop();
 
 	return (
-		<div className="flex flex-col h-screen bg-background overflow-hidden">
+		<div className="flex h-screen flex-col overflow-hidden bg-background">
 			{/* Header */}
 			<div className="flex-shrink-0">
 				<CustomerHeader
@@ -41,7 +41,14 @@ export function CustomerLayout() {
 				isOpen={signOutWithConfirmation.isDialogOpen}
 				onClose={signOutWithConfirmation.closeSignOutDialog}
 				onConfirm={signOutWithConfirmation.confirmSignOut}
-				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userRole={
+					session?.user.role as
+						| "user"
+						| "driver"
+						| "admin"
+						| "super_admin"
+						| undefined
+				}
 				userName={session?.user.name}
 				isLoading={signOutWithConfirmation.isSigningOut}
 			/>

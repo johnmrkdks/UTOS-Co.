@@ -1,4 +1,8 @@
 import {
+	CheckCarConditionTypeUsageServiceSchema,
+	checkCarConditionTypeUsageService,
+} from "@/services/cars-condition-types/check-car-condition-type-usage";
+import {
 	CreateCarConditionTypeServiceSchema,
 	createCarConditionTypeService,
 } from "@/services/cars-condition-types/create-car-condition-type";
@@ -12,7 +16,10 @@ import {
 } from "@/services/cars-condition-types/get-car-condition-type";
 import { getCarConditionTypesService } from "@/services/cars-condition-types/get-car-condition-types";
 import { getCarConditionTypesWithEnrichedDataService } from "@/services/cars-condition-types/get-car-condition-types-with-enriched-data";
-import { isCarConditionTypeExistService, IsCarConditionTypeExistServiceSchema } from "@/services/cars-condition-types/is-car-condition-type-exist";
+import {
+	IsCarConditionTypeExistServiceSchema,
+	isCarConditionTypeExistService,
+} from "@/services/cars-condition-types/is-car-condition-type-exist";
 import {
 	UpdateCarConditionTypeServiceSchema,
 	updateCarConditionTypeService,
@@ -20,14 +27,14 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { checkCarConditionTypeUsageService, CheckCarConditionTypeUsageServiceSchema } from "@/services/cars-condition-types/check-car-condition-type-usage";
 
 export const carConditionTypesRouter = router({
 	checkUsage: protectedProcedure
 		.input(CheckCarConditionTypeUsageServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const checkCarConditionTypeUsage = await checkCarConditionTypeUsageService(db, input);
+				const checkCarConditionTypeUsage =
+					await checkCarConditionTypeUsageService(db, input);
 				return checkCarConditionTypeUsage;
 			} catch (error) {
 				handleTRPCError(error);
@@ -73,7 +80,10 @@ export const carConditionTypesRouter = router({
 		.input(IsCarConditionTypeExistServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const isCarConditionTypeExist = await isCarConditionTypeExistService(db, input);
+				const isCarConditionTypeExist = await isCarConditionTypeExistService(
+					db,
+					input,
+				);
 				return isCarConditionTypeExist;
 			} catch (error) {
 				handleTRPCError(error);
@@ -114,4 +124,3 @@ export const carConditionTypesRouter = router({
 			}
 		}),
 });
-

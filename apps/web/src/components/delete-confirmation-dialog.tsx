@@ -1,4 +1,3 @@
-import { Button } from "@workspace/ui/components/button";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -9,6 +8,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
+import { Button } from "@workspace/ui/components/button";
 import { Trash2 } from "lucide-react";
 
 interface DeleteConfirmationDialogProps {

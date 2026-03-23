@@ -1,4 +1,12 @@
-export type Step = "input" | "results" | "car-selection" | "auth-choice" | "booking-details" | "confirmation" | "processing" | "success";
+export type Step =
+	| "input"
+	| "results"
+	| "car-selection"
+	| "auth-choice"
+	| "booking-details"
+	| "confirmation"
+	| "processing"
+	| "success";
 
 export interface Stop {
 	id: string;

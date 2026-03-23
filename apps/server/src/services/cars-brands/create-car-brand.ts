@@ -1,12 +1,12 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarBrand } from "@/data/cars-brands/create-car-brand";
 import { getCarBrandByName } from "@/data/cars-brands/get-car-brand-by-name";
 import type { DB } from "@/db";
-import { InsertCarBrandSchema, type InsertCarBrand } from "@/schemas/shared";
+import { type InsertCarBrand, InsertCarBrandSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
-export const CreateCarBrandServiceSchema = InsertCarBrandSchema
+export const CreateCarBrandServiceSchema = InsertCarBrandSchema;
 
 export type CreateCarBrandParams = z.infer<typeof CreateCarBrandServiceSchema>;
 

@@ -1,3 +1,4 @@
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
@@ -7,7 +8,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Badge } from "@workspace/ui/components/badge";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
 
@@ -17,7 +17,11 @@ type ConfirmBookingDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function ConfirmBookingDialog({ booking, open, onOpenChange }: ConfirmBookingDialogProps) {
+export function ConfirmBookingDialog({
+	booking,
+	open,
+	onOpenChange,
+}: ConfirmBookingDialogProps) {
 	const updateStatusMutation = useUpdateBookingStatusMutation();
 
 	const handleConfirm = async () => {
@@ -26,7 +30,7 @@ export function ConfirmBookingDialog({ booking, open, onOpenChange }: ConfirmBoo
 		try {
 			await updateStatusMutation.mutateAsync({
 				id: booking.id,
-				status: "confirmed" as any
+				status: "confirmed" as any,
 			});
 			onOpenChange(false);
 		} catch (error) {
@@ -50,27 +54,39 @@ export function ConfirmBookingDialog({ booking, open, onOpenChange }: ConfirmBoo
 				{booking && (
 					<div className="space-y-4">
 						{/* Current Status */}
-						<div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-							<span className="text-sm font-medium">Current Status:</span>
+						<div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+							<span className="font-medium text-sm">Current Status:</span>
 							<Badge variant="secondary" className="text-xs">
 								{booking.status.replace("_", " ").toUpperCase()}
 							</Badge>
 						</div>
 
 						{/* New Status */}
-						<div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-							<span className="text-sm font-medium">New Status:</span>
-							<Badge variant="default" className="text-xs bg-green-600">
-								<CheckCircle className="h-3 w-3 mr-1" />
+						<div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3">
+							<span className="font-medium text-sm">New Status:</span>
+							<Badge variant="default" className="bg-green-600 text-xs">
+								<CheckCircle className="mr-1 h-3 w-3" />
 								CONFIRMED
 							</Badge>
 						</div>
 
 						{/* Booking Info */}
-						<div className="text-sm text-gray-600">
-							<p><strong>Customer:</strong> {booking.customerName || 'N/A'}</p>
-							<p><strong>Amount:</strong> ${booking.quotedAmount?.toFixed(2) || '0.00'}</p>
-							<p><strong>Type:</strong> {booking.bookingType === "package" ? "Package" : booking.bookingType === "guest" ? "Guest" : "Custom"}</p>
+						<div className="text-gray-600 text-sm">
+							<p>
+								<strong>Customer:</strong> {booking.customerName || "N/A"}
+							</p>
+							<p>
+								<strong>Amount:</strong> $
+								{booking.quotedAmount?.toFixed(2) || "0.00"}
+							</p>
+							<p>
+								<strong>Type:</strong>{" "}
+								{booking.bookingType === "package"
+									? "Package"
+									: booking.bookingType === "guest"
+										? "Guest"
+										: "Custom"}
+							</p>
 						</div>
 					</div>
 				)}

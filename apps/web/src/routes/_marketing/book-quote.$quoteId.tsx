@@ -1,6 +1,6 @@
 import { createFileRoute, useParams, useSearch } from "@tanstack/react-router";
-import { QuoteBookingPage } from "@/features/marketing/_pages/quote-booking/quote-booking-page";
 import { z } from "zod";
+import { QuoteBookingPage } from "@/features/marketing/_pages/quote-booking/quote-booking-page";
 
 const bookQuoteSearchSchema = z.object({
 	// Legacy URL parameters (for backward compatibility, will be removed later)
@@ -23,5 +23,11 @@ export const Route = createFileRoute("/_marketing/book-quote/$quoteId")({
 function BookQuotePageComponent() {
 	const { quoteId } = useParams({ from: "/_marketing/book-quote/$quoteId" });
 	const search = useSearch({ from: "/_marketing/book-quote/$quoteId" });
-	return <QuoteBookingPage isCustomerArea={false} pathQuoteId={quoteId} isGuestFlow={search.guest === "1"} />;
+	return (
+		<QuoteBookingPage
+			isCustomerArea={false}
+			pathQuoteId={quoteId}
+			isGuestFlow={search.guest === "1"}
+		/>
+	);
 }

@@ -1,25 +1,32 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs"
-import { Brands } from "./car-features/brands"
-import { Models } from "./car-features/models"
-import { FuelTypes } from "./car-features/fuel-types"
-import { TransmissionTypes } from "./car-features/transmission-types"
-import { DriveTypes } from "./car-features/drive-types"
-import { ConditionTypes } from "./car-features/conditions"
-import { Features } from "./car-features/features"
-import { BodyTypes } from "./car-features/body-types"
-import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout"
-import { Categories } from "./car-features/categories"
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
+import { BodyTypes } from "./car-features/body-types";
+import { Brands } from "./car-features/brands";
+import { Categories } from "./car-features/categories";
+import { ConditionTypes } from "./car-features/conditions";
+import { DriveTypes } from "./car-features/drive-types";
+import { Features } from "./car-features/features";
+import { FuelTypes } from "./car-features/fuel-types";
+import { Models } from "./car-features/models";
+import { TransmissionTypes } from "./car-features/transmission-types";
 
 export function CarFeatures() {
 	return (
 		<PaddingLayout>
 			<Tabs defaultValue="brands" className="flex flex-col gap-4">
-				<div className="border rounded-xl p-4 flex flex-col gap-4">
+				<div className="flex flex-col gap-4 rounded-xl border p-4">
 					<div>
-
-						<h2 className="text-lg font-bold tracking-tight">Car Features Management</h2>
-						<p className="text-sm text-muted-foreground">
-							Manage all car features and specifications that can be used when adding new cars.
+						<h2 className="font-bold text-lg tracking-tight">
+							Car Features Management
+						</h2>
+						<p className="text-muted-foreground text-sm">
+							Manage all car features and specifications that can be used when
+							adding new cars.
 						</p>
 					</div>
 
@@ -71,9 +78,7 @@ export function CarFeatures() {
 				<TabsContent value="features">
 					<Features />
 				</TabsContent>
-
 			</Tabs>
 		</PaddingLayout>
-	)
+	);
 }
-

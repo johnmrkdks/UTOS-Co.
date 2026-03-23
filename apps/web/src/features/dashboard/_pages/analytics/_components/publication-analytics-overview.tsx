@@ -1,29 +1,35 @@
-import { useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Progress } from "@workspace/ui/components/progress";
-import { 
-	BarChart, 
-	Bar, 
-	XAxis, 
-	YAxis, 
-	CartesianGrid, 
-	Tooltip, 
-	ResponsiveContainer,
-	PieChart,
-	Pie,
-	Cell 
-} from "recharts";
-import { 
-	Eye, 
-	EyeOff, 
-	AlertTriangle, 
-	TrendingUp, 
-	TrendingDown, 
-	Minus,
+import {
+	AlertTriangle,
 	Car,
-	Package 
+	Eye,
+	EyeOff,
+	Minus,
+	Package,
+	TrendingDown,
+	TrendingUp,
 } from "lucide-react";
+import { useMemo } from "react";
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Pie,
+	PieChart,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis,
+} from "recharts";
 
 export interface PublicationAnalyticsData {
 	cars: {
@@ -68,21 +74,24 @@ const COLORS = {
 	withIssues: "#f59e0b",
 };
 
-export function PublicationAnalyticsOverview({ 
-	data, 
-	isLoading = false 
+export function PublicationAnalyticsOverview({
+	data,
+	isLoading = false,
 }: PublicationAnalyticsOverviewProps) {
 	const analyticsData = useMemo(() => {
-		const carsPublishRate = data.cars.total > 0 
-			? Math.round((data.cars.published / data.cars.total) * 100) 
-			: 0;
-		const packagesPublishRate = data.packages.total > 0 
-			? Math.round((data.packages.published / data.packages.total) * 100) 
-			: 0;
+		const carsPublishRate =
+			data.cars.total > 0
+				? Math.round((data.cars.published / data.cars.total) * 100)
+				: 0;
+		const packagesPublishRate =
+			data.packages.total > 0
+				? Math.round((data.packages.published / data.packages.total) * 100)
+				: 0;
 
 		// Calculate trends
 		const carsTrend = data.cars.lastWeekPublished - data.cars.published;
-		const packagesTrend = data.packages.lastWeekPublished - data.packages.published;
+		const packagesTrend =
+			data.packages.lastWeekPublished - data.packages.published;
 
 		// Prepare chart data
 		const overviewData = [
@@ -103,10 +112,26 @@ export function PublicationAnalyticsOverview({
 		];
 
 		const pieData = [
-			{ name: "Published Cars", value: data.cars.published, color: COLORS.published },
-			{ name: "Published Packages", value: data.packages.published, color: "#3b82f6" },
-			{ name: "Unpublished Cars", value: data.cars.unpublished, color: COLORS.unpublished },
-			{ name: "Unpublished Packages", value: data.packages.unpublished, color: "#94a3b8" },
+			{
+				name: "Published Cars",
+				value: data.cars.published,
+				color: COLORS.published,
+			},
+			{
+				name: "Published Packages",
+				value: data.packages.published,
+				color: "#3b82f6",
+			},
+			{
+				name: "Unpublished Cars",
+				value: data.cars.unpublished,
+				color: COLORS.unpublished,
+			},
+			{
+				name: "Unpublished Packages",
+				value: data.packages.unpublished,
+				color: "#94a3b8",
+			},
 		];
 
 		return {
@@ -138,22 +163,27 @@ export function PublicationAnalyticsOverview({
 	return (
 		<div className="space-y-6">
 			{/* Key Metrics */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Cars Published</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Cars Published
+						</CardTitle>
 						<Car className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-green-600">
+						<div className="font-bold text-2xl text-green-600">
 							{data.cars.published}
 						</div>
-						<div className="flex items-center gap-2 text-xs text-muted-foreground">
+						<div className="flex items-center gap-2 text-muted-foreground text-xs">
 							{getTrendIcon(analyticsData.carsTrend)}
 							{getTrendLabel(analyticsData.carsTrend)}
 						</div>
-						<Progress value={analyticsData.carsPublishRate} className="mt-2 h-2" />
-						<p className="text-xs text-muted-foreground mt-1">
+						<Progress
+							value={analyticsData.carsPublishRate}
+							className="mt-2 h-2"
+						/>
+						<p className="mt-1 text-muted-foreground text-xs">
 							{analyticsData.carsPublishRate}% of total cars
 						</p>
 					</CardContent>
@@ -161,19 +191,24 @@ export function PublicationAnalyticsOverview({
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Packages Published</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Packages Published
+						</CardTitle>
 						<Package className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-blue-600">
+						<div className="font-bold text-2xl text-blue-600">
 							{data.packages.published}
 						</div>
-						<div className="flex items-center gap-2 text-xs text-muted-foreground">
+						<div className="flex items-center gap-2 text-muted-foreground text-xs">
 							{getTrendIcon(analyticsData.packagesTrend)}
 							{getTrendLabel(analyticsData.packagesTrend)}
 						</div>
-						<Progress value={analyticsData.packagesPublishRate} className="mt-2 h-2" />
-						<p className="text-xs text-muted-foreground mt-1">
+						<Progress
+							value={analyticsData.packagesPublishRate}
+							className="mt-2 h-2"
+						/>
+						<p className="mt-1 text-muted-foreground text-xs">
 							{analyticsData.packagesPublishRate}% of total packages
 						</p>
 					</CardContent>
@@ -181,14 +216,17 @@ export function PublicationAnalyticsOverview({
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Items with Issues</CardTitle>
+						<CardTitle className="font-medium text-sm">
+							Items with Issues
+						</CardTitle>
 						<AlertTriangle className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-amber-600">
-							{data.cars.publishedWithIssues + data.packages.publishedWithIssues}
+						<div className="font-bold text-2xl text-amber-600">
+							{data.cars.publishedWithIssues +
+								data.packages.publishedWithIssues}
 						</div>
-						<div className="flex items-center gap-1 mt-2">
+						<div className="mt-2 flex items-center gap-1">
 							<Badge variant="destructive" className="text-xs">
 								{data.cars.publishedWithIssues} Cars
 							</Badge>
@@ -201,15 +239,19 @@ export function PublicationAnalyticsOverview({
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Overall Rate</CardTitle>
+						<CardTitle className="font-medium text-sm">Overall Rate</CardTitle>
 						<Eye className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
-							{Math.round(((data.cars.published + data.packages.published) / 
-							             (data.cars.total + data.packages.total)) * 100)}%
+						<div className="font-bold text-2xl">
+							{Math.round(
+								((data.cars.published + data.packages.published) /
+									(data.cars.total + data.packages.total)) *
+									100,
+							)}
+							%
 						</div>
-						<p className="text-xs text-muted-foreground mt-2">
+						<p className="mt-2 text-muted-foreground text-xs">
 							{data.cars.published + data.packages.published} of{" "}
 							{data.cars.total + data.packages.total} items published
 						</p>
@@ -218,7 +260,7 @@ export function PublicationAnalyticsOverview({
 			</div>
 
 			{/* Charts */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 				{/* Publication Status Chart */}
 				<Card>
 					<CardHeader>
@@ -234,9 +276,21 @@ export function PublicationAnalyticsOverview({
 								<XAxis dataKey="name" />
 								<YAxis />
 								<Tooltip />
-								<Bar dataKey="published" fill={COLORS.published} name="Published" />
-								<Bar dataKey="withIssues" fill={COLORS.withIssues} name="With Issues" />
-								<Bar dataKey="unpublished" fill={COLORS.unpublished} name="Unpublished" />
+								<Bar
+									dataKey="published"
+									fill={COLORS.published}
+									name="Published"
+								/>
+								<Bar
+									dataKey="withIssues"
+									fill={COLORS.withIssues}
+									name="With Issues"
+								/>
+								<Bar
+									dataKey="unpublished"
+									fill={COLORS.unpublished}
+									name="Unpublished"
+								/>
 							</BarChart>
 						</ResponsiveContainer>
 					</CardContent>
@@ -258,7 +312,9 @@ export function PublicationAnalyticsOverview({
 									cx="50%"
 									cy="50%"
 									labelLine={false}
-									label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+									label={({ name, percent }) =>
+										`${name} ${(percent * 100).toFixed(0)}%`
+									}
 									outerRadius={80}
 									fill="#8884d8"
 									dataKey="value"
@@ -275,19 +331,22 @@ export function PublicationAnalyticsOverview({
 			</div>
 
 			{/* Category Breakdown */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 				<Card>
 					<CardHeader>
 						<CardTitle>Cars by Category</CardTitle>
-						<CardDescription>Publication status by car category</CardDescription>
+						<CardDescription>
+							Publication status by car category
+						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-3">
 							{data.cars.categories.map((category) => {
-								const publishRate = category.total > 0 
-									? Math.round((category.published / category.total) * 100)
-									: 0;
-								
+								const publishRate =
+									category.total > 0
+										? Math.round((category.published / category.total) * 100)
+										: 0;
+
 								return (
 									<div key={category.name} className="space-y-2">
 										<div className="flex justify-between text-sm">
@@ -307,15 +366,18 @@ export function PublicationAnalyticsOverview({
 				<Card>
 					<CardHeader>
 						<CardTitle>Packages by Category</CardTitle>
-						<CardDescription>Publication status by package category</CardDescription>
+						<CardDescription>
+							Publication status by package category
+						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-3">
 							{data.packages.categories.map((category) => {
-								const publishRate = category.total > 0 
-									? Math.round((category.published / category.total) * 100)
-									: 0;
-								
+								const publishRate =
+									category.total > 0
+										? Math.round((category.published / category.total) * 100)
+										: 0;
+
 								return (
 									<div key={category.name} className="space-y-2">
 										<div className="flex justify-between text-sm">

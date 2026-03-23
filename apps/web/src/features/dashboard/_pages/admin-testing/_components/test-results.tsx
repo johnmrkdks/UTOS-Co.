@@ -1,8 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
-import { CheckCircle, XCircle, Clock, TestTube2 } from "lucide-react";
 import { format } from "date-fns";
+import { CheckCircle, Clock, TestTube2, XCircle } from "lucide-react";
 import type { TestResult } from "../index";
 
 interface TestResultsProps {
@@ -49,8 +54,8 @@ export function TestResults({ results }: TestResultsProps) {
 		}
 	};
 
-	const successCount = results.filter(r => r.status === "success").length;
-	const errorCount = results.filter(r => r.status === "error").length;
+	const successCount = results.filter((r) => r.status === "success").length;
+	const errorCount = results.filter((r) => r.status === "error").length;
 
 	return (
 		<Card>
@@ -63,15 +68,13 @@ export function TestResults({ results }: TestResultsProps) {
 					<Badge variant="default" className="bg-green-100 text-green-800">
 						{successCount} Passed
 					</Badge>
-					<Badge variant="destructive">
-						{errorCount} Failed
-					</Badge>
+					<Badge variant="destructive">{errorCount} Failed</Badge>
 				</div>
 			</CardHeader>
 			<CardContent>
 				{results.length === 0 ? (
-					<div className="text-center text-muted-foreground py-8">
-						<TestTube2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+					<div className="py-8 text-center text-muted-foreground">
+						<TestTube2 className="mx-auto mb-3 h-12 w-12 opacity-50" />
 						<p>No test results yet.</p>
 						<p className="text-sm">Run tests to see results here.</p>
 					</div>
@@ -79,15 +82,15 @@ export function TestResults({ results }: TestResultsProps) {
 					<ScrollArea className="h-[400px] pr-4">
 						<div className="space-y-3">
 							{results.map((result) => (
-								<div 
+								<div
 									key={result.id}
-									className="flex flex-col gap-2 p-3 rounded-lg border bg-card"
+									className="flex flex-col gap-2 rounded-lg border bg-card p-3"
 								>
 									<div className="flex items-start justify-between">
 										<div className="flex items-center gap-2">
 											{getStatusIcon(result.status)}
-											<Badge 
-												variant="outline" 
+											<Badge
+												variant="outline"
 												className={`text-xs ${getTypeColor(result.type)}`}
 											>
 												{result.type}
@@ -97,10 +100,10 @@ export function TestResults({ results }: TestResultsProps) {
 											{result.status}
 										</Badge>
 									</div>
-									
+
 									<div className="text-sm">
-										<p className="font-medium mb-1">{result.message}</p>
-										<p className="text-xs text-muted-foreground">
+										<p className="mb-1 font-medium">{result.message}</p>
+										<p className="text-muted-foreground text-xs">
 											{format(result.timestamp, "MMM d, h:mm:ss a")}
 										</p>
 									</div>
@@ -110,7 +113,7 @@ export function TestResults({ results }: TestResultsProps) {
 											<summary className="cursor-pointer text-muted-foreground hover:text-foreground">
 												View Details
 											</summary>
-											<pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">
+											<pre className="mt-2 overflow-x-auto rounded bg-muted p-2 text-xs">
 												{JSON.stringify(result.data, null, 2)}
 											</pre>
 										</details>

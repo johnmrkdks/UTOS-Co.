@@ -1,11 +1,12 @@
-import { useMemo, useState, useCallback } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addHours } from "date-fns";
+import { addHours, format, getDay, parse, startOfWeek } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { useCallback, useMemo, useState } from "react";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
-import type { BookingFilters } from "./booking-filters";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import type { BookingFilters } from "./booking-filters";
+
 // Status to calendar event background color (hex)
 const STATUS_CALENDAR_COLORS: Record<string, string> = {
 	pending: "#fef3c7",
@@ -70,8 +71,15 @@ export function BookingCalendar({ filters }: BookingCalendarProps) {
 		return bookingsQuery.data.data
 			.filter((booking) => {
 				if (!filters) return true;
-				if (filters.bookingType && booking.bookingType !== filters.bookingType) return false;
-				if (filters.customerName && !booking.customerName.toLowerCase().includes(filters.customerName.toLowerCase())) return false;
+				if (filters.bookingType && booking.bookingType !== filters.bookingType)
+					return false;
+				if (
+					filters.customerName &&
+					!booking.customerName
+						.toLowerCase()
+						.includes(filters.customerName.toLowerCase())
+				)
+					return false;
 				if (filters.dateFrom) {
 					const fromDate = new Date(filters.dateFrom);
 					if (new Date(booking.scheduledPickupTime) < fromDate) return false;
@@ -81,8 +89,10 @@ export function BookingCalendar({ filters }: BookingCalendarProps) {
 					toDate.setHours(23, 59, 59, 999);
 					if (new Date(booking.scheduledPickupTime) > toDate) return false;
 				}
-				if (filters.minAmount && booking.quotedAmount < filters.minAmount) return false;
-				if (filters.maxAmount && booking.quotedAmount > filters.maxAmount) return false;
+				if (filters.minAmount && booking.quotedAmount < filters.minAmount)
+					return false;
+				if (filters.maxAmount && booking.quotedAmount > filters.maxAmount)
+					return false;
 				return true;
 			})
 			.map((booking) => {
@@ -101,7 +111,8 @@ export function BookingCalendar({ filters }: BookingCalendarProps) {
 						quotedAmount: booking.quotedAmount,
 						originAddress: booking.originAddress,
 						destinationAddress: booking.destinationAddress,
-						referenceNumber: (booking as { referenceNumber?: string }).referenceNumber,
+						referenceNumber: (booking as { referenceNumber?: string })
+							.referenceNumber,
 					},
 				};
 			});
@@ -111,7 +122,7 @@ export function BookingCalendar({ filters }: BookingCalendarProps) {
 		(event: CalendarEvent) => {
 			openBookingDetailsDialog(event.resource.bookingId);
 		},
-		[openBookingDetailsDialog]
+		[openBookingDetailsDialog],
 	);
 
 	const handleView = useCallback((newView: View | string) => {
@@ -124,7 +135,9 @@ export function BookingCalendar({ filters }: BookingCalendarProps) {
 
 	const eventStyleGetter = (event: CalendarEvent) => {
 		const color = STATUS_CALENDAR_COLORS[event.resource.status] ?? "#e2e8f0";
-		const isCompleted = ["completed", "cancelled", "no_show"].includes(event.resource.status);
+		const isCompleted = ["completed", "cancelled", "no_show"].includes(
+			event.resource.status,
+		);
 		return {
 			style: {
 				backgroundColor: color,
@@ -136,12 +149,16 @@ export function BookingCalendar({ filters }: BookingCalendarProps) {
 	};
 
 	if (bookingsQuery.isLoading) {
-		return <div className="text-center py-12 text-muted-foreground">Loading calendar...</div>;
+		return (
+			<div className="py-12 text-center text-muted-foreground">
+				Loading calendar...
+			</div>
+		);
 	}
 
 	if (bookingsQuery.error) {
 		return (
-			<div className="text-center py-12 text-destructive">
+			<div className="py-12 text-center text-destructive">
 				Error loading bookings: {bookingsQuery.error.message}
 			</div>
 		);

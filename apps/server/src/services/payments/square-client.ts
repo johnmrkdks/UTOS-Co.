@@ -8,7 +8,10 @@ export async function getSquareClient(
 	env: "sandbox" | "production" = "sandbox",
 ) {
 	const { SquareClient, SquareEnvironment } = await import("square");
-	const baseUrl = env === "sandbox" ? SquareEnvironment.Sandbox : SquareEnvironment.Production;
+	const baseUrl =
+		env === "sandbox"
+			? SquareEnvironment.Sandbox
+			: SquareEnvironment.Production;
 	return new SquareClient({
 		token: accessToken,
 		environment: baseUrl,

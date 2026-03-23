@@ -17,10 +17,14 @@ export const getAccountInfo = (session: any): AccountInfo => {
 	const accounts = user.accounts || [];
 
 	// Check for Google OAuth account
-	const hasGoogleAccount = accounts.some((account: any) => account.providerId === 'google');
+	const hasGoogleAccount = accounts.some(
+		(account: any) => account.providerId === "google",
+	);
 
 	// Check for credential (password) account
-	const hasPasswordAccount = accounts.some((account: any) => account.providerId === 'credential');
+	const hasPasswordAccount = accounts.some(
+		(account: any) => account.providerId === "credential",
+	);
 
 	return {
 		hasGoogleAccount,

@@ -1,10 +1,10 @@
-import { accounts } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { accounts } from "@/db/sqlite/schema";
 
 export const AccountSchema = createSelectSchema(accounts, {
 	createdAt: z.union([z.date(), z.string()]),

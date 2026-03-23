@@ -1,5 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
-import { Home, Calendar, History, BarChart3, ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart3, Calendar, History, Home } from "lucide-react";
 import type { CustomerNavigationItem } from "./types";
 
 export function useCustomerBookingsNavigation(): CustomerNavigationItem[] {
@@ -11,28 +11,28 @@ export function useCustomerBookingsNavigation(): CustomerNavigationItem[] {
 			href: "/",
 			icon: ArrowLeft,
 			active: false,
-			primary: false
+			primary: false,
 		},
 		{
 			name: "Dashboard",
 			href: "/my-bookings/dashboard",
 			icon: BarChart3,
 			active: location.pathname === "/my-bookings/dashboard",
-			primary: true
+			primary: true,
 		},
 		{
 			name: "Trips",
 			href: "/my-bookings/trips",
 			icon: Calendar,
 			active: location.pathname === "/my-bookings/trips",
-			primary: true
+			primary: true,
 		},
 		{
 			name: "History",
 			href: "/my-bookings/history",
 			icon: History,
 			active: location.pathname === "/my-bookings/history",
-			primary: true
-		}
+			primary: true,
+		},
 	];
 }

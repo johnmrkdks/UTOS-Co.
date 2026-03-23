@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export interface UpdatePasswordInput {
 	currentPassword: string;
@@ -25,7 +25,8 @@ export const useUpdatePasswordMutation = () => {
 		},
 		onSuccess: () => {
 			toast.success("Password updated successfully", {
-				description: "Your password has been changed. Other sessions have been revoked for security.",
+				description:
+					"Your password has been changed. Other sessions have been revoked for security.",
 			});
 		},
 		onError: (error: Error) => {

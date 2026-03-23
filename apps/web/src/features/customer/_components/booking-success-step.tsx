@@ -1,14 +1,30 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { CheckCircle, Calendar, Car, MapPin, ArrowRight, History } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	ArrowRight,
+	Calendar,
+	Car,
+	CheckCircle,
+	History,
+	MapPin,
+} from "lucide-react";
 
 interface BookingSuccessStepProps {
 	bookingId?: string;
 	onStartNewQuote: () => void;
 }
 
-export function BookingSuccessStep({ bookingId, onStartNewQuote }: BookingSuccessStepProps) {
+export function BookingSuccessStep({
+	bookingId,
+	onStartNewQuote,
+}: BookingSuccessStepProps) {
 	const router = useRouter();
 
 	const goToBookings = () => {
@@ -18,8 +34,8 @@ export function BookingSuccessStep({ bookingId, onStartNewQuote }: BookingSucces
 	return (
 		<Card>
 			<CardHeader className="text-center">
-				<div className="flex justify-center mb-4">
-					<div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
+				<div className="mb-4 flex justify-center">
+					<div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
 						<CheckCircle className="h-8 w-8 text-white" />
 					</div>
 				</div>
@@ -30,27 +46,30 @@ export function BookingSuccessStep({ bookingId, onStartNewQuote }: BookingSucces
 			</CardHeader>
 			<CardContent className="space-y-6">
 				{bookingId && (
-					<div className="bg-muted/50 p-4 rounded-lg text-center">
-						<div className="text-sm text-muted-foreground">Booking Reference</div>
-						<div className="font-mono font-medium text-lg">{bookingId}</div>
-						<div className="text-xs text-muted-foreground mt-1">
+					<div className="rounded-lg bg-muted/50 p-4 text-center">
+						<div className="text-muted-foreground text-sm">
+							Booking Reference
+						</div>
+						<div className="font-medium font-mono text-lg">{bookingId}</div>
+						<div className="mt-1 text-muted-foreground text-xs">
 							Please save this reference number for your records
 						</div>
 					</div>
 				)}
 
 				<div className="space-y-3 text-sm">
-					<div className="flex items-center gap-3 p-3 border rounded-lg">
+					<div className="flex items-center gap-3 rounded-lg border p-3">
 						<Calendar className="h-5 w-5 text-primary" />
 						<div>
 							<div className="font-medium">What's Next?</div>
 							<div className="text-muted-foreground">
-								We'll send you booking confirmation and driver details via SMS/Email
+								We'll send you booking confirmation and driver details via
+								SMS/Email
 							</div>
 						</div>
 					</div>
 
-					<div className="flex items-center gap-3 p-3 border rounded-lg">
+					<div className="flex items-center gap-3 rounded-lg border p-3">
 						<Car className="h-5 w-5 text-primary" />
 						<div>
 							<div className="font-medium">Driver Assignment</div>
@@ -60,7 +79,7 @@ export function BookingSuccessStep({ bookingId, onStartNewQuote }: BookingSucces
 						</div>
 					</div>
 
-					<div className="flex items-center gap-3 p-3 border rounded-lg">
+					<div className="flex items-center gap-3 rounded-lg border p-3">
 						<MapPin className="h-5 w-5 text-primary" />
 						<div>
 							<div className="font-medium">Real-time Tracking</div>
@@ -73,18 +92,23 @@ export function BookingSuccessStep({ bookingId, onStartNewQuote }: BookingSucces
 
 				<div className="space-y-2">
 					<Button onClick={goToBookings} className="w-full">
-						<History className="h-4 w-4 mr-2" />
+						<History className="mr-2 h-4 w-4" />
 						View My Bookings
-						<ArrowRight className="h-4 w-4 ml-2" />
+						<ArrowRight className="ml-2 h-4 w-4" />
 					</Button>
 
-					<Button variant="outline" onClick={onStartNewQuote} className="w-full">
+					<Button
+						variant="outline"
+						onClick={onStartNewQuote}
+						className="w-full"
+					>
 						Book Another Journey
 					</Button>
 				</div>
 
-				<div className="text-center text-xs text-muted-foreground">
-					Need help? Contact our customer support at support@downunderchauffeur.com
+				<div className="text-center text-muted-foreground text-xs">
+					Need help? Contact our customer support at
+					support@downunderchauffeur.com
 				</div>
 			</CardContent>
 		</Card>

@@ -1,23 +1,29 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Separator } from "@workspace/ui/components/separator";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
-	CheckCircle,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Separator } from "@workspace/ui/components/separator";
+import {
 	ArrowLeft,
-	User,
-	Phone,
-	Mail,
-	Users,
+	Calculator,
 	Calendar,
 	Car,
+	CheckCircle,
+	Mail,
 	MapPin,
-	Calculator,
 	MessageSquare,
-	Route
+	Phone,
+	Route,
+	User,
+	Users,
 } from "lucide-react";
-import { type BookingDetailsFormData } from "../_schemas/instant-quote";
-import { type QuoteResult, type RouteData } from "../_types/instant-quote";
+import type { BookingDetailsFormData } from "../_schemas/instant-quote";
+import type { QuoteResult, RouteData } from "../_types/instant-quote";
 
 interface BookingConfirmationStepProps {
 	bookingDetails: BookingDetailsFormData;
@@ -36,7 +42,7 @@ export function BookingConfirmationStep({
 	selectedCar,
 	onConfirm,
 	onBack,
-	isProcessing = false
+	isProcessing = false,
 }: BookingConfirmationStepProps) {
 	return (
 		<Card>
@@ -52,42 +58,49 @@ export function BookingConfirmationStep({
 			<CardContent className="space-y-6">
 				{/* Journey Summary */}
 				<div>
-					<h3 className="font-medium flex items-center gap-2 mb-3">
+					<h3 className="mb-3 flex items-center gap-2 font-medium">
 						<Route className="h-4 w-4" />
 						Journey Details
 					</h3>
 					<div className="space-y-2 text-sm">
 						<div className="flex items-start gap-3">
-							<div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
+							<div className="mt-1.5 h-3 w-3 flex-shrink-0 rounded-full bg-green-500" />
 							<div>
 								<div className="font-medium">From</div>
-								<div className="text-muted-foreground">{routeData.originAddress}</div>
+								<div className="text-muted-foreground">
+									{routeData.originAddress}
+								</div>
 							</div>
 						</div>
-						
+
 						{routeData.stops?.map((stop, index) => (
-							<div key={stop.id} className="flex items-start gap-3 ml-1">
-								<div className="w-1 h-8 bg-gray-300 ml-1" />
+							<div key={stop.id} className="ml-1 flex items-start gap-3">
+								<div className="ml-1 h-8 w-1 bg-gray-300" />
 								<div className="-mt-2">
-									<div className="w-2 h-2 rounded-full bg-blue-500 mb-1" />
+									<div className="mb-1 h-2 w-2 rounded-full bg-blue-500" />
 									<div className="text-xs">Stop {index + 1}</div>
-									<div className="text-xs text-muted-foreground">{stop.address}</div>
+									<div className="text-muted-foreground text-xs">
+										{stop.address}
+									</div>
 								</div>
 							</div>
 						))}
-						
+
 						<div className="flex items-start gap-3">
-							<div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+							<div className="mt-1.5 h-3 w-3 flex-shrink-0 rounded-full bg-red-500" />
 							<div>
 								<div className="font-medium">To</div>
-								<div className="text-muted-foreground">{routeData.destinationAddress}</div>
+								<div className="text-muted-foreground">
+									{routeData.destinationAddress}
+								</div>
 							</div>
 						</div>
 					</div>
-					<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg mt-3">
+					<div className="mt-3 flex items-center gap-2 rounded-lg bg-muted/50 p-2 text-muted-foreground text-xs">
 						<MapPin className="h-3 w-3" />
 						<span>
-							{Number(quote.estimatedDistance ?? 0).toFixed(1)} km • {Math.round(quote.estimatedDuration / 60)} min journey
+							{Number(quote.estimatedDistance ?? 0).toFixed(1)} km •{" "}
+							{Math.round(quote.estimatedDuration / 60)} min journey
 						</span>
 					</div>
 				</div>
@@ -97,23 +110,23 @@ export function BookingConfirmationStep({
 				{/* Vehicle Details */}
 				{selectedCar && (
 					<div>
-						<h3 className="font-medium flex items-center gap-2 mb-3">
+						<h3 className="mb-3 flex items-center gap-2 font-medium">
 							<Car className="h-4 w-4" />
 							Selected Vehicle
 						</h3>
-						<div className="flex items-center gap-4 p-3 border rounded-lg">
+						<div className="flex items-center gap-4 rounded-lg border p-3">
 							{selectedCar.imageUrl && (
 								<img
 									src={selectedCar.imageUrl}
 									alt={`${selectedCar.brandName} ${selectedCar.modelName}`}
-									className="w-16 h-12 object-cover rounded"
+									className="h-12 w-16 rounded object-cover"
 								/>
 							)}
 							<div>
 								<div className="font-medium">
 									{selectedCar.brandName} {selectedCar.modelName}
 								</div>
-								<div className="flex items-center gap-3 text-sm text-muted-foreground">
+								<div className="flex items-center gap-3 text-muted-foreground text-sm">
 									<span>{selectedCar.passengerCapacity} seats</span>
 									<span>{selectedCar.categoryName}</span>
 								</div>
@@ -126,7 +139,7 @@ export function BookingConfirmationStep({
 
 				{/* Customer Information */}
 				<div>
-					<h3 className="font-medium flex items-center gap-2 mb-3">
+					<h3 className="mb-3 flex items-center gap-2 font-medium">
 						<User className="h-4 w-4" />
 						Booking Information
 					</h3>
@@ -147,7 +160,10 @@ export function BookingConfirmationStep({
 						)}
 						<div className="flex items-center gap-3">
 							<Users className="h-4 w-4 text-muted-foreground" />
-							<span>{bookingDetails.passengerCount} passenger{bookingDetails.passengerCount > 1 ? 's' : ''}</span>
+							<span>
+								{bookingDetails.passengerCount} passenger
+								{bookingDetails.passengerCount > 1 ? "s" : ""}
+							</span>
 						</div>
 						<div className="flex items-center gap-3">
 							<Calendar className="h-4 w-4 text-muted-foreground" />
@@ -155,7 +171,7 @@ export function BookingConfirmationStep({
 						</div>
 						{bookingDetails.specialRequests && (
 							<div className="flex items-start gap-3">
-								<MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
+								<MessageSquare className="mt-0.5 h-4 w-4 text-muted-foreground" />
 								<span>{bookingDetails.specialRequests}</span>
 							</div>
 						)}
@@ -166,7 +182,7 @@ export function BookingConfirmationStep({
 
 				{/* Fare Summary */}
 				<div>
-					<h3 className="font-medium flex items-center gap-2 mb-3">
+					<h3 className="mb-3 flex items-center gap-2 font-medium">
 						<Calculator className="h-4 w-4" />
 						Fare Summary
 					</h3>
@@ -182,7 +198,9 @@ export function BookingConfirmationStep({
 						<Separator />
 						<div className="flex justify-between font-bold">
 							<span>Total Amount</span>
-							<span className="text-primary">${quote.totalAmount.toFixed(2)}</span>
+							<span className="text-primary">
+								${quote.totalAmount.toFixed(2)}
+							</span>
 						</div>
 					</div>
 				</div>
@@ -190,7 +208,7 @@ export function BookingConfirmationStep({
 				{/* Navigation Buttons */}
 				<div className="flex justify-between pt-4">
 					<Button variant="outline" onClick={onBack}>
-						<ArrowLeft className="h-4 w-4 mr-2" />
+						<ArrowLeft className="mr-2 h-4 w-4" />
 						Back
 					</Button>
 					<Button onClick={onConfirm} disabled={isProcessing}>
@@ -198,8 +216,9 @@ export function BookingConfirmationStep({
 					</Button>
 				</div>
 
-				<p className="text-xs text-muted-foreground text-center">
-					By confirming, you agree to our terms of service and cancellation policy.
+				<p className="text-center text-muted-foreground text-xs">
+					By confirming, you agree to our terms of service and cancellation
+					policy.
 				</p>
 			</CardContent>
 		</Card>

@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { BellIcon } from "lucide-react";
-
 import { Button } from "@workspace/ui/components/button";
 import {
 	Popover,
@@ -8,6 +5,8 @@ import {
 	PopoverTrigger,
 } from "@workspace/ui/components/popover";
 import { Separator } from "@workspace/ui/components/separator";
+import { BellIcon } from "lucide-react";
+import { useState } from "react";
 
 const initialNotifications = [
 	{
@@ -105,25 +104,25 @@ export function DashboardNotificationMenu() {
 				<Button
 					size="icon"
 					variant="ghost"
-					className="text-muted-foreground relative size-8 rounded-full shadow-none"
+					className="relative size-8 rounded-full text-muted-foreground shadow-none"
 					aria-label="Open notifications"
 				>
 					<BellIcon size={16} aria-hidden="true" />
 					{unreadCount > 0 && (
 						<div
 							aria-hidden="true"
-							className="bg-primary absolute top-0.5 right-0.5 size-1 rounded-full"
+							className="absolute top-0.5 right-0.5 size-1 rounded-full bg-primary"
 						/>
 					)}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent align="end" className="w-80 px-0 py-1">
 				<div className="flex items-baseline justify-between gap-4 px-3 py-2">
-					<div className="text-sm font-semibold">Notifications</div>
+					<div className="font-semibold text-sm">Notifications</div>
 					{unreadCount > 0 && (
 						<button
 							type="button"
-							className="text-xs font-medium hover:underline"
+							className="font-medium text-xs hover:underline"
 							onClick={handleMarkAllAsRead}
 						>
 							Mark all as read
@@ -134,20 +133,20 @@ export function DashboardNotificationMenu() {
 				{notifications.map((notification) => (
 					<div
 						key={notification.id}
-						className="hover:bg-accent rounded-md px-3 py-2 text-sm transition-colors"
+						className="rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
 					>
 						<div className="relative flex items-start pe-3">
 							<div className="flex-1 space-y-1">
 								<button
 									type="button"
-									className="text-foreground/80 text-left after:absolute after:inset-0"
+									className="text-left text-foreground/80 after:absolute after:inset-0"
 									onClick={() => handleNotificationClick(notification.id)}
 								>
-									<span className="text-foreground font-medium hover:underline">
+									<span className="font-medium text-foreground hover:underline">
 										{notification.user}
 									</span>{" "}
 									{notification.action}{" "}
-									<span className="text-foreground font-medium hover:underline">
+									<span className="font-medium text-foreground hover:underline">
 										{notification.target}
 									</span>
 									.

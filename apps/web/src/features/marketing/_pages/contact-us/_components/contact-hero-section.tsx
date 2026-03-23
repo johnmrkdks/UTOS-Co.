@@ -1,36 +1,35 @@
-import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
 import { Phone } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
 
 export function ContactHeroSection() {
 	return (
-		<div className="relative py-24 bg-[url('/src/assets/images/sydney.webp')] bg-center bg-cover bg-no-repeat">
+		<div className="relative bg-[url('/src/assets/images/sydney.webp')] bg-center bg-cover bg-no-repeat py-24">
 			<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
-			<div className="relative z-10 container mx-auto px-6 text-center">
-				<div className="max-w-4xl mx-auto">
-					<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-xs md:text-sm font-medium mb-6">
-						<Phone className="w-4 h-4 mr-2" />
+			<div className="container relative z-10 mx-auto px-6 text-center">
+				<div className="mx-auto max-w-4xl">
+					<div className="mb-6 inline-flex items-center rounded-full bg-beige px-4 py-2 font-medium text-foreground text-xs md:text-sm">
+						<Phone className="mr-2 h-4 w-4" />
 						Get in Touch
 					</div>
 
-					<h1 className="text-4xl lg:text-6xl font-bold text-background mb-6">
+					<h1 className="mb-6 font-bold text-4xl text-background lg:text-6xl">
 						Contact Our
-						<span className="block text-primary-secondary">
-							Luxury Team
-						</span>
+						<span className="block text-primary-secondary">Luxury Team</span>
 					</h1>
 
-					<p className="text-lg md:text-xl text-background/80 leading-relaxed max-w-3xl mx-auto mb-8">
-						Ready to experience premium transportation? Our dedicated team is here to assist
-						you daily from 00:00 – 23:45 with personalized service and expert guidance.
+					<p className="mx-auto mb-8 max-w-3xl text-background/80 text-lg leading-relaxed md:text-xl">
+						Ready to experience premium transportation? Our dedicated team is
+						here to assist you daily from 00:00 – 23:45 with personalized
+						service and expert guidance.
 					</p>
 
-					<div className="flex flex-col sm:flex-row gap-4 justify-center">
+					<div className="flex flex-col justify-center gap-4 sm:flex-row">
 						<a href={BUSINESS_INFO.phone.link}>
 							<Button
 								size="lg"
-								className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+								className="rounded-xl bg-primary px-8 py-6 font-semibold text-lg text-primary-foreground shadow-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-xl"
 							>
 								Call Now
 							</Button>
@@ -39,7 +38,7 @@ export function ContactHeroSection() {
 							<Button
 								variant="outline"
 								size="lg"
-								className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl"
+								className="rounded-xl border-background/20 px-8 py-6 font-semibold text-lg text-primary hover:bg-background/10"
 							>
 								Book Online
 							</Button>

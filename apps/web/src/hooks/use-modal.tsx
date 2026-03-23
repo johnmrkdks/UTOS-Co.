@@ -1,5 +1,5 @@
-import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
 
 export interface ModalState {
 	isOpen: boolean;
@@ -44,12 +44,14 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 	};
 
 	return (
-		<ModalContext.Provider value={{
-			modalState,
-			openModal,
-			closeModal,
-			isModalOpen,
-		}}>
+		<ModalContext.Provider
+			value={{
+				modalState,
+				openModal,
+				closeModal,
+				isModalOpen,
+			}}
+		>
 			{children}
 		</ModalContext.Provider>
 	);

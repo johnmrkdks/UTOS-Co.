@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
@@ -7,15 +8,27 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { Loader2, User } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { useGetAvailableDriversQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-available-drivers-query";
 import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
-import { Loader2, User } from "lucide-react";
 
 const assignDriverSchema = z.object({
 	driverId: z.string().min(1, "Please select a driver"),
@@ -73,9 +86,12 @@ export function BulkAssignDriverDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader>
-					<DialogTitle>Assign Driver to {bookingIds.length} Booking(s)</DialogTitle>
+					<DialogTitle>
+						Assign Driver to {bookingIds.length} Booking(s)
+					</DialogTitle>
 					<DialogDescription>
-						Select a driver to assign to all selected bookings. The same driver will be assigned to each booking.
+						Select a driver to assign to all selected bookings. The same driver
+						will be assigned to each booking.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -129,8 +145,13 @@ export function BulkAssignDriverDialog({
 							>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={isSubmitting || !form.watch("driverId")}>
-								{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+							<Button
+								type="submit"
+								disabled={isSubmitting || !form.watch("driverId")}
+							>
+								{isSubmitting && (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								)}
 								Assign to {bookingIds.length} Booking(s)
 							</Button>
 						</DialogFooter>

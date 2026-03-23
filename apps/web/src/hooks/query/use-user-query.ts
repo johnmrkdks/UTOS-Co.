@@ -1,6 +1,6 @@
-import { authClient } from "@/lib/auth-client";
 import { useNavigate } from "@tanstack/react-router";
 import { useSignOutWithConfirmation } from "@/hooks/use-sign-out-with-confirmation";
+import { authClient } from "@/lib/auth-client";
 import { useSession } from "@/providers/session-provider";
 
 export const useUserQuery = () => {
@@ -28,6 +28,6 @@ export const useUserQuery = () => {
 		isPending,
 		isFetching,
 		handleLogout,
-		signOutWithConfirmation
+		signOutWithConfirmation,
 	};
-}
+};

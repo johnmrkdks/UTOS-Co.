@@ -1,20 +1,18 @@
-import { authClient } from "@/lib/auth-client";
-import { useMutation } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export const useSignInWitGoogleOAuthMutation = () => {
 	return useMutation({
 		mutationFn: async (redirectPath?: string) => {
-			const callbackURL = redirectPath 
+			const callbackURL = redirectPath
 				? `${import.meta.env.VITE_CLIENT_URL}?redirect=${encodeURIComponent(redirectPath)}`
 				: import.meta.env.VITE_CLIENT_URL;
-				
-			return await authClient.signIn.social(
-				{
-					provider: "google",
-					callbackURL,
-				}
-			);
+
+			return await authClient.signIn.social({
+				provider: "google",
+				callbackURL,
+			});
 		},
 		onSuccess: ({ data, error }) => {
 			if (data && !data.redirect) {
@@ -28,5 +26,5 @@ export const useSignInWitGoogleOAuthMutation = () => {
 		onError: (error) => {
 			toast.error(error.message);
 		},
-	})
-}
+	});
+};

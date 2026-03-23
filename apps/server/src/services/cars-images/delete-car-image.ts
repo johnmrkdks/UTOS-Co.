@@ -1,8 +1,8 @@
+import { z } from "zod";
 import { deleteCarImage } from "@/data/cars-images/delete-car-image";
 import { getCarImageById } from "@/data/cars-images/get-car-image-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const DeleteCarImageServiceSchema = z.object({
 	id: z.string(),

@@ -45,7 +45,10 @@ export async function uploadFileService({
 			break;
 	}
 
-	const buffer = body instanceof ArrayBuffer ? new Uint8Array(body) : new Uint8Array(await (body as Blob).arrayBuffer());
+	const buffer =
+		body instanceof ArrayBuffer
+			? new Uint8Array(body)
+			: new Uint8Array(await (body as Blob).arrayBuffer());
 
 	// Use R2 binding directly (avoids AWS SDK's DOMParser which doesn't exist in Workers)
 	await env.BUCKET.put(key, buffer, {
@@ -54,7 +57,9 @@ export async function uploadFileService({
 
 	// Use proxy URL so images work even if R2 public access is disabled
 	const baseUrl = env.BETTER_AUTH_URL?.replace(/\/$/, "") || "";
-	const imageUrl = baseUrl ? `${baseUrl}/api/images/${key}` : `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+	const imageUrl = baseUrl
+		? `${baseUrl}/api/images/${key}`
+		: `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
 
 	return {
 		imageUrl,

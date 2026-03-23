@@ -1,22 +1,30 @@
-import { useState } from "react";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent } from "@workspace/ui/components/card";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@workspace/ui/components/collapsible";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { 
-	Select, 
-	SelectContent, 
-	SelectItem, 
-	SelectTrigger, 
-	SelectValue 
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@workspace/ui/components/select";
-import { Badge } from "@workspace/ui/components/badge";
-import { 
-	Collapsible, 
-	CollapsibleContent, 
-	CollapsibleTrigger 
-} from "@workspace/ui/components/collapsible";
-import { Card, CardContent } from "@workspace/ui/components/card";
-import { Search, Filter, X, ChevronDown, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import {
+	AlertTriangle,
+	ChevronDown,
+	Eye,
+	EyeOff,
+	Filter,
+	Search,
+	X,
+} from "lucide-react";
+import { useState } from "react";
 
 export interface PublicationFiltersProps {
 	onFiltersChange: (filters: PublicationFilterState) => void;
@@ -27,7 +35,11 @@ export interface PublicationFiltersProps {
 
 export interface PublicationFilterState {
 	search: string;
-	publicationStatus: "all" | "published" | "unpublished" | "published-with-issues";
+	publicationStatus:
+		| "all"
+		| "published"
+		| "unpublished"
+		| "published-with-issues";
 	availability: "all" | "available" | "unavailable";
 	dateRange: "all" | "last-7-days" | "last-30-days" | "last-90-days";
 }
@@ -63,9 +75,10 @@ export function PublicationFilters({
 		onFiltersChange(clearedFilters);
 	};
 
-	const hasActiveFilters = filters.search || 
-		filters.publicationStatus !== "all" || 
-		filters.availability !== "all" || 
+	const hasActiveFilters =
+		filters.search ||
+		filters.publicationStatus !== "all" ||
+		filters.availability !== "all" ||
 		filters.dateRange !== "all";
 
 	const getActiveFilterCount = () => {
@@ -84,7 +97,7 @@ export function PublicationFilters({
 					{/* Search and Quick Actions */}
 					<div className="flex gap-4">
 						<div className="relative flex-1">
-							<Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+							<Search className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
 							<Input
 								placeholder={`Search ${type}...`}
 								value={filters.search}
@@ -92,7 +105,7 @@ export function PublicationFilters({
 								className="pl-9"
 							/>
 						</div>
-						
+
 						<Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
 							<CollapsibleTrigger asChild>
 								<Button variant="outline" className="flex items-center gap-2">
@@ -106,14 +119,16 @@ export function PublicationFilters({
 									<ChevronDown className="h-4 w-4" />
 								</Button>
 							</CollapsibleTrigger>
-							
-							<CollapsibleContent className="absolute z-10 mt-2 w-80 right-0 bg-background border rounded-lg shadow-lg p-4 space-y-4">
+
+							<CollapsibleContent className="absolute right-0 z-10 mt-2 w-80 space-y-4 rounded-lg border bg-background p-4 shadow-lg">
 								{/* Publication Status */}
 								<div className="space-y-2">
 									<Label>Publication Status</Label>
-									<Select 
+									<Select
 										value={filters.publicationStatus}
-										onValueChange={(value: any) => updateFilters({ publicationStatus: value })}
+										onValueChange={(value: any) =>
+											updateFilters({ publicationStatus: value })
+										}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -145,9 +160,11 @@ export function PublicationFilters({
 								{/* Availability */}
 								<div className="space-y-2">
 									<Label>Availability</Label>
-									<Select 
+									<Select
 										value={filters.availability}
-										onValueChange={(value: any) => updateFilters({ availability: value })}
+										onValueChange={(value: any) =>
+											updateFilters({ availability: value })
+										}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -163,9 +180,11 @@ export function PublicationFilters({
 								{/* Date Range */}
 								<div className="space-y-2">
 									<Label>Updated</Label>
-									<Select 
+									<Select
 										value={filters.dateRange}
-										onValueChange={(value: any) => updateFilters({ dateRange: value })}
+										onValueChange={(value: any) =>
+											updateFilters({ dateRange: value })
+										}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -181,13 +200,13 @@ export function PublicationFilters({
 
 								{/* Clear Filters */}
 								{hasActiveFilters && (
-									<Button 
-										variant="outline" 
-										size="sm" 
+									<Button
+										variant="outline"
+										size="sm"
 										onClick={clearFilters}
 										className="w-full"
 									>
-										<X className="h-4 w-4 mr-2" />
+										<X className="mr-2 h-4 w-4" />
 										Clear Filters
 									</Button>
 								)}
@@ -196,11 +215,12 @@ export function PublicationFilters({
 					</div>
 
 					{/* Results Summary */}
-					<div className="flex items-center justify-between text-sm text-muted-foreground">
+					<div className="flex items-center justify-between text-muted-foreground text-sm">
 						<div>
-							Showing {filteredCount.toLocaleString()} of {totalCount.toLocaleString()} {type}
+							Showing {filteredCount.toLocaleString()} of{" "}
+							{totalCount.toLocaleString()} {type}
 						</div>
-						
+
 						{/* Active Filters Display */}
 						{hasActiveFilters && (
 							<div className="flex items-center gap-2">
@@ -225,9 +245,9 @@ export function PublicationFilters({
 										{filters.dateRange.replace("-", " ")}
 									</Badge>
 								)}
-								<Button 
-									variant="ghost" 
-									size="sm" 
+								<Button
+									variant="ghost"
+									size="sm"
 									onClick={clearFilters}
 									className="h-6 w-6 p-0"
 								>

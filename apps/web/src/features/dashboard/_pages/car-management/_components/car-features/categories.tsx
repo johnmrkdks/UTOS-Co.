@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { AddCategoryDialog } from "./categories/add-category-dialog";
 import { CategoryTableList } from "./categories/drive-type-table-list";
 
@@ -9,7 +15,9 @@ export function Categories() {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Car Categories</CardTitle>
-						<CardDescription>Manage car categories in your inventory</CardDescription>
+						<CardDescription>
+							Manage car categories in your inventory
+						</CardDescription>
 					</div>
 					<AddCategoryDialog />
 				</div>
@@ -18,5 +26,5 @@ export function Categories() {
 				<CategoryTableList />
 			</CardContent>
 		</Card>
-	)
-}	
+	);
+}

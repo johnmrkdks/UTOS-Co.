@@ -1,29 +1,32 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { Progress } from "@workspace/ui/components/progress";
-import { useUserQuery } from '@/hooks/query/use-user-query';
-import { useCurrentDriverQuery } from '@/hooks/query/use-current-driver-query';
-import { PersonalInfoTab } from '@/features/driver/_components/profile-tabs/personal-info-tab';
-import { DocumentsTab } from '@/features/driver/_components/profile-tabs/documents-tab';
-import { StatisticsTab } from '@/features/driver/_components/profile-tabs/statistics-tab';
-import { SettingsTab } from '@/features/driver/_components/profile-tabs/settings-tab';
-import {
-	CheckCircleIcon,
-	ArrowLeftIcon
-} from "lucide-react";
+import { ArrowLeftIcon, CheckCircleIcon } from "lucide-react";
+import { DocumentsTab } from "@/features/driver/_components/profile-tabs/documents-tab";
+import { PersonalInfoTab } from "@/features/driver/_components/profile-tabs/personal-info-tab";
+import { SettingsTab } from "@/features/driver/_components/profile-tabs/settings-tab";
+import { StatisticsTab } from "@/features/driver/_components/profile-tabs/statistics-tab";
+import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 
-export const Route = createFileRoute('/driver/_layout/profile')({
+export const Route = createFileRoute("/driver/_layout/profile")({
 	component: DriverProfileComponent,
 });
-
 
 function DriverProfileComponent() {
 	const navigate = useNavigate();
 	const { session } = useUserQuery();
-	const { data: driverData, isLoading: isDriverLoading } = useCurrentDriverQuery();
+	const { data: driverData, isLoading: isDriverLoading } =
+		useCurrentDriverQuery();
 
 	const user = session?.user;
 
@@ -59,37 +62,61 @@ function DriverProfileComponent() {
 		statistics: {
 			totalTrips: 87,
 			averageRating: 4.8,
-			totalEarnings: 2850.50,
+			totalEarnings: 2850.5,
 			memberSince: "2024-01-15",
-		}
+		},
 	};
 
-
 	const handleBack = () => {
-		navigate({ to: '/driver' });
+		navigate({ to: "/driver" });
 	};
 
 	const applicationSteps = [
-		{ key: 'submitted', label: 'Application Submitted', completed: driverProfile.applicationStatus.submitted },
-		{ key: 'underReview', label: 'Under Review', completed: driverProfile.applicationStatus.underReview },
-		{ key: 'approved', label: 'Approved', completed: driverProfile.applicationStatus.approved },
-		{ key: 'active', label: 'Active Driver', completed: driverProfile.applicationStatus.active },
+		{
+			key: "submitted",
+			label: "Application Submitted",
+			completed: driverProfile.applicationStatus.submitted,
+		},
+		{
+			key: "underReview",
+			label: "Under Review",
+			completed: driverProfile.applicationStatus.underReview,
+		},
+		{
+			key: "approved",
+			label: "Approved",
+			completed: driverProfile.applicationStatus.approved,
+		},
+		{
+			key: "active",
+			label: "Active Driver",
+			completed: driverProfile.applicationStatus.active,
+		},
 	];
 
-	const completedSteps = applicationSteps.filter(step => step.completed).length;
+	const completedSteps = applicationSteps.filter(
+		(step) => step.completed,
+	).length;
 	const progressPercentage = (completedSteps / applicationSteps.length) * 100;
 
 	return (
-		<div className="max-w-4xl mx-auto space-y-4">
+		<div className="mx-auto max-w-4xl space-y-4">
 			{/* Header */}
 			<div className="flex items-center justify-between">
-				<Button variant="outline" size="sm" onClick={handleBack} className="hidden md:flex">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={handleBack}
+					className="hidden md:flex"
+				>
 					<ArrowLeftIcon className="h-4 w-4" />
 					Back to Dashboard
 				</Button>
-				<div className="text-right md:text-right text-left flex-1 md:flex-none">
-					<h1 className="text-xl font-bold">Driver Profile</h1>
-					<p className="text-gray-600 text-sm">Manage your driver information</p>
+				<div className="flex-1 text-left text-right md:flex-none md:text-right">
+					<h1 className="font-bold text-xl">Driver Profile</h1>
+					<p className="text-gray-600 text-sm">
+						Manage your driver information
+					</p>
 				</div>
 			</div>
 
@@ -134,8 +161,8 @@ function DriverProfileComponent() {
 			{/* Personal Information */}
 			{isDriverLoading ? (
 				<div className="flex items-center justify-center py-12">
-					<div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mb-4"></div>
-					<p className="text-gray-500 text-center">Loading driver profile...</p>
+					<div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+					<p className="text-center text-gray-500">Loading driver profile...</p>
 				</div>
 			) : (
 				<PersonalInfoTab

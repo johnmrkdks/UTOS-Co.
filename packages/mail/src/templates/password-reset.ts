@@ -2,7 +2,7 @@ import type { EmailTemplate } from "../types";
 
 export function generatePasswordResetTemplate(
 	resetToken: string,
-	baseUrl: string
+	baseUrl: string,
 ): EmailTemplate {
 	const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 

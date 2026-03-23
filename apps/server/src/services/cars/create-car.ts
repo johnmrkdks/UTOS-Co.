@@ -1,29 +1,32 @@
-import { createCar } from "@/data/cars/create-car";
-import { getCarByName } from "@/data/cars/get-car-by-name";
-import { getCarByLicensePlate } from "@/data/cars/get-car-by-license-plate";
-import { createCarImage } from "@/data/cars-images/create-car-image";
-import type { DB } from "@/db";
-import { InsertCarSchema, type InsertCar } from "@/schemas/shared";
-import { ErrorFactory } from "@/utils/error-factory";
 import formatter from "lodash";
-import { z } from "zod";
+import type { z } from "zod";
+import { createCar } from "@/data/cars/create-car";
+import { getCarByLicensePlate } from "@/data/cars/get-car-by-license-plate";
+import { getCarByName } from "@/data/cars/get-car-by-name";
+import { createCarImage } from "@/data/cars-images/create-car-image";
 import { createCarsToFeature } from "@/data/cars-to-features/create-cars-to-feature";
+import type { DB } from "@/db";
+import { type InsertCar, InsertCarSchema } from "@/schemas/shared";
+import { ErrorFactory } from "@/utils/error-factory";
 
-export const CreateCarServiceSchema = InsertCarSchema
+export const CreateCarServiceSchema = InsertCarSchema;
 
-export type CreateCarParams = z.infer<typeof CreateCarServiceSchema>
+export type CreateCarParams = z.infer<typeof CreateCarServiceSchema>;
 
 export async function createCarService(db: DB, data: CreateCarParams) {
 	const car = await getCarByName(db, data.name);
 
 	if (car) {
-		throw ErrorFactory.duplicateEntry('Car', "name");
+		throw ErrorFactory.duplicateEntry("Car", "name");
 	}
 
-	const existingCarByLicensePlate = await getCarByLicensePlate(db, data.licensePlate);
+	const existingCarByLicensePlate = await getCarByLicensePlate(
+		db,
+		data.licensePlate,
+	);
 
 	if (existingCarByLicensePlate) {
-		throw ErrorFactory.duplicateEntry('Car', "license plate");
+		throw ErrorFactory.duplicateEntry("Car", "license plate");
 	}
 
 	const values = {

@@ -1,5 +1,5 @@
-import sydney from "@/assets/images/sydney.webp";
 import { cn } from "@workspace/ui/lib/utils";
+import sydney from "@/assets/images/sydney.webp";
 
 export function SydneyImageCover({
 	className,

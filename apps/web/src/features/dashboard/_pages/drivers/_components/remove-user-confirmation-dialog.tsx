@@ -1,3 +1,4 @@
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogContent,
@@ -6,7 +7,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
 import { AlertTriangle } from "lucide-react";
 
 interface RemoveUserConfirmationDialogProps {
@@ -36,7 +36,8 @@ export function RemoveUserConfirmationDialog({
 					</DialogTitle>
 					<DialogDescription className="text-left">
 						This will permanently remove the user account for{" "}
-						<strong>{driver.user?.name || "this driver"}</strong> and all associated data.
+						<strong>{driver.user?.name || "this driver"}</strong> and all
+						associated data.
 						<br />
 						<br />
 						<strong>This action will:</strong>
@@ -50,12 +51,12 @@ export function RemoveUserConfirmationDialog({
 							<li>• Cannot be undone</li>
 						</ul>
 						<br />
-						<span className="text-green-600 font-medium">
+						<span className="font-medium text-green-600">
 							✓ Recommended: Comprehensive deletion with foreign key handling
 						</span>
 					</DialogDescription>
 				</DialogHeader>
-				<DialogFooter className="flex-col sm:flex-row gap-2">
+				<DialogFooter className="flex-col gap-2 sm:flex-row">
 					<Button
 						variant="outline"
 						onClick={() => onOpenChange(false)}

@@ -11,20 +11,20 @@ export async function getPricingConfigsService(db: DB, options: ResourceList) {
 					with: {
 						model: {
 							with: {
-								brand: true
-							}
-						}
-					}
-				}
+								brand: true,
+							},
+						},
+					},
+				},
 			},
 		});
-		
+
 		// Apply basic pagination
 		const limit = options.limit || 10;
 		const offset = options.offset || 0;
-		
+
 		const paginatedConfigs = configs.slice(offset, offset + limit);
-		
+
 		return {
 			data: paginatedConfigs,
 			pagination: {
@@ -33,10 +33,12 @@ export async function getPricingConfigsService(db: DB, options: ResourceList) {
 				currentPage: Math.floor(offset / limit) + 1,
 				limit,
 				offset,
-			}
+			},
 		};
 	} catch (error) {
 		console.error("Error in getPricingConfigsService:", error);
-		throw new Error(`Failed to fetch pricing configurations: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		throw new Error(
+			`Failed to fetch pricing configurations: ${error instanceof Error ? error.message : "Unknown error"}`,
+		);
 	}
 }

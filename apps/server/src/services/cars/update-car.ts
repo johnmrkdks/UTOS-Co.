@@ -1,10 +1,10 @@
+import formatter from "lodash";
+import { z } from "zod";
 import { getCarById } from "@/data/cars/get-car-by-id";
 import { updateCar } from "@/data/cars/update-car";
 import type { DB } from "@/db";
-import { UpdateCarSchema, type UpdateCar } from "@/schemas/shared";
+import { type UpdateCar, UpdateCarSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const UpdateCarServiceSchema = z.object({
 	id: z.string(),

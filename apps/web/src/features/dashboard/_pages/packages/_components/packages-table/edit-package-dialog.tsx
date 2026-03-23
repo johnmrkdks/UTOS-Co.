@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
@@ -7,22 +8,37 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Textarea } from "@workspace/ui/components/textarea";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
 import { Switch } from "@workspace/ui/components/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useState, useMemo, useEffect } from "react";
-import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
-import { useGetPackageServiceTypesQuery } from "../../_hooks/query/use-get-package-service-types-query";
+import { Textarea } from "@workspace/ui/components/textarea";
 import { Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useGetPackageServiceTypesQuery } from "../../_hooks/query/use-get-package-service-types-query";
+import { useUpdatePackageMutation } from "../../_hooks/query/use-update-package-mutation";
 
 const editPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
-	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
+	description: z
+		.string()
+		.min(10, "Description must be at least 10 characters")
+		.max(1000, "Description too long"),
 	serviceTypeId: z.string().min(1, "Service type is required"),
 	fixedPrice: z.number().min(0, "Price must be positive").optional(),
 	hourlyRate: z.number().min(0, "Hourly rate must be positive").optional(),
@@ -38,7 +54,11 @@ type EditPackageDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPackageDialogProps) {
+export function EditPackageDialog({
+	package: pkg,
+	open,
+	onOpenChange,
+}: EditPackageDialogProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const updatePackageMutation = useUpdatePackageMutation();
 	const { data: serviceTypesData } = useGetPackageServiceTypesQuery();
@@ -74,7 +94,7 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 	const selectedServiceTypeId = form.watch("serviceTypeId");
 	const selectedServiceType = useMemo(
 		() => serviceTypes.find((t) => t.id === selectedServiceTypeId),
-		[serviceTypes, selectedServiceTypeId]
+		[serviceTypes, selectedServiceTypeId],
 	);
 	const isHourlyRate = selectedServiceType?.rateType === "hourly";
 
@@ -121,10 +141,10 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 					</DialogDescription>
 				</DialogHeader>
 
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						{/* Two-column layout */}
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+						<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 							{/* Left Column - Main Form Inputs */}
 							<div className="space-y-4">
 								<FormField
@@ -166,20 +186,31 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 										<FormItem>
 											<FormLabel>Rate Type</FormLabel>
 											<FormControl>
-												<Select onValueChange={field.onChange} value={field.value}>
+												<Select
+													onValueChange={field.onChange}
+													value={field.value}
+												>
 													<SelectTrigger>
 														<SelectValue placeholder="Select rate type" />
 													</SelectTrigger>
 													<SelectContent>
 														{serviceTypes
 															.filter((t) => t.isActive)
-															.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+															.sort(
+																(a, b) =>
+																	(a.displayOrder || 0) - (b.displayOrder || 0),
+															)
 															.map((serviceType) => (
-																<SelectItem key={serviceType.id} value={serviceType.id}>
+																<SelectItem
+																	key={serviceType.id}
+																	value={serviceType.id}
+																>
 																	<div className="flex items-center gap-2">
 																		<span>{serviceType.name}</span>
-																		<span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-																			{serviceType.rateType === "hourly" ? "Hourly" : "Fixed"}
+																		<span className="rounded bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+																			{serviceType.rateType === "hourly"
+																				? "Hourly"
+																				: "Fixed"}
 																		</span>
 																	</div>
 																</SelectItem>
@@ -187,16 +218,17 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 													</SelectContent>
 												</Select>
 											</FormControl>
-											<div className="text-xs text-muted-foreground">
-												Change service type to switch between hourly and fixed rate pricing
+											<div className="text-muted-foreground text-xs">
+												Change service type to switch between hourly and fixed
+												rate pricing
 											</div>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
 
-								{selectedServiceType && (
-									isHourlyRate ? (
+								{selectedServiceType &&
+									(isHourlyRate ? (
 										<FormField
 											control={form.control as any}
 											name="hourlyRate"
@@ -212,7 +244,11 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 															value={field.value ?? ""}
 															onChange={(e) => {
 																const v = e.target.value;
-																field.onChange(v === "" ? undefined : parseFloat(v) || undefined);
+																field.onChange(
+																	v === ""
+																		? undefined
+																		: Number.parseFloat(v) || undefined,
+																);
 															}}
 														/>
 													</FormControl>
@@ -236,7 +272,11 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 															value={field.value ?? ""}
 															onChange={(e) => {
 																const v = e.target.value;
-																field.onChange(v === "" ? undefined : parseFloat(v) || undefined);
+																field.onChange(
+																	v === ""
+																		? undefined
+																		: Number.parseFloat(v) || undefined,
+																);
 															}}
 														/>
 													</FormControl>
@@ -244,14 +284,13 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 												</FormItem>
 											)}
 										/>
-									)
-								)}
+									))}
 							</div>
 
 							{/* Right Column - Settings */}
 							<div className="space-y-4">
 								<div>
-									<h4 className="text-sm font-medium mb-3">Package Settings</h4>
+									<h4 className="mb-3 font-medium text-sm">Package Settings</h4>
 									<div className="space-y-3">
 										<FormField
 											control={form.control as any}
@@ -259,8 +298,10 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 											render={({ field }) => (
 												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 													<div className="space-y-0.5">
-														<FormLabel className="text-sm font-medium">Available for Booking</FormLabel>
-														<div className="text-xs text-muted-foreground">
+														<FormLabel className="font-medium text-sm">
+															Available for Booking
+														</FormLabel>
+														<div className="text-muted-foreground text-xs">
 															Enable internal booking functionality
 														</div>
 													</div>
@@ -280,8 +321,10 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 											render={({ field }) => (
 												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 													<div className="space-y-0.5">
-														<FormLabel className="text-sm font-medium">Publish to Customers</FormLabel>
-														<div className="text-xs text-muted-foreground">
+														<FormLabel className="font-medium text-sm">
+															Publish to Customers
+														</FormLabel>
+														<div className="text-muted-foreground text-xs">
 															Make this package visible to public customers
 														</div>
 													</div>
@@ -309,7 +352,9 @@ export function EditPackageDialog({ package: pkg, open, onOpenChange }: EditPack
 								Cancel
 							</Button>
 							<Button type="submit" disabled={isSubmitting}>
-								{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+								{isSubmitting && (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								)}
 								Save Changes
 							</Button>
 						</DialogFooter>

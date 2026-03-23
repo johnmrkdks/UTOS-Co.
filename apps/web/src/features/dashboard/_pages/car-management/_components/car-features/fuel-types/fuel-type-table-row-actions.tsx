@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarFuelType } from "server/types"
-import { EditFuelTypeDialog } from "./edit-fuel-type-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarFuelType } from "server/types";
 import { DeleteFuelTypeDialog } from "./delete-fuel-type-dialog";
+import { EditFuelTypeDialog } from "./edit-fuel-type-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function FuelTypeTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function FuelTypeTableRowActions<TData>({
 			<EditFuelTypeDialog fuelType={fuelType} />
 			<DeleteFuelTypeDialog fuelType={fuelType} />
 		</div>
-	)
+	);
 }

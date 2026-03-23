@@ -1,17 +1,22 @@
+import formatter from "lodash";
+import { z } from "zod";
 import { getCarCategoryById } from "@/data/cars-categories/get-car-catogory-by-id";
 import { updateCarCategory } from "@/data/cars-categories/update-car-category";
 import type { DB } from "@/db";
-import { UpdateCarCategorySchema, type UpdateCarCategory } from "@/schemas/shared";
+import {
+	type UpdateCarCategory,
+	UpdateCarCategorySchema,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const UpdateCarCategoryServiceSchema = z.object({
 	id: z.string(),
 	data: UpdateCarCategorySchema,
 });
 
-export type UpdateCarCategoryParams = z.infer<typeof UpdateCarCategoryServiceSchema>;
+export type UpdateCarCategoryParams = z.infer<
+	typeof UpdateCarCategoryServiceSchema
+>;
 
 export async function updateCarCategoryService(
 	db: DB,

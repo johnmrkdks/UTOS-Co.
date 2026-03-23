@@ -1,4 +1,3 @@
-import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -10,20 +9,30 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { trpc } from "@/trpc";
-import { Loader2Icon, FileDownIcon, MailIcon } from "lucide-react";
 import { format } from "date-fns";
-import { elementToPdfBlob, sanitizeFilename } from "./pdf-utils";
-import { InvoiceDocument } from "./invoice-document";
+import { FileDownIcon, Loader2Icon, MailIcon } from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/trpc";
+import { InvoiceDocument } from "./invoice-document";
+import { elementToPdfBlob, sanitizeFilename } from "./pdf-utils";
 
 const PRESETS = [
 	{ label: "This week", getRange: () => getWeekRange(new Date()) },
-	{ label: "Last week", getRange: () => getWeekRange(subtractWeeks(new Date(), 1)) },
+	{
+		label: "Last week",
+		getRange: () => getWeekRange(subtractWeeks(new Date(), 1)),
+	},
 	{ label: "This fortnight", getRange: () => getFortnightRange(new Date()) },
-	{ label: "Last fortnight", getRange: () => getFortnightRange(subtractWeeks(new Date(), 2)) },
+	{
+		label: "Last fortnight",
+		getRange: () => getFortnightRange(subtractWeeks(new Date(), 2)),
+	},
 	{ label: "This month", getRange: () => getMonthRange(new Date()) },
-	{ label: "Last month", getRange: () => getMonthRange(subtractMonths(new Date(), 1)) },
+	{
+		label: "Last month",
+		getRange: () => getMonthRange(subtractMonths(new Date(), 1)),
+	},
 ] as const;
 
 function getWeekRange(date: Date) {
@@ -52,7 +61,15 @@ function getFortnightRange(date: Date) {
 
 function getMonthRange(date: Date) {
 	const start = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
-	const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+	const end = new Date(
+		date.getFullYear(),
+		date.getMonth() + 1,
+		0,
+		23,
+		59,
+		59,
+		999,
+	);
 	return { startDate: start, endDate: end };
 }
 
@@ -108,11 +125,13 @@ export function CompanyInvoiceForm() {
 	const sendToCompanyMutation = useMutation(
 		trpc.invoices.sendCompanyInvoice.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: trpc.invoices.listSentLogs.queryKey() });
+				queryClient.invalidateQueries({
+					queryKey: trpc.invoices.listSentLogs.queryKey(),
+				});
 				toast.success("Invoice sent to company");
 			},
 			onError: (err) => toast.error(err.message || "Failed to send invoice"),
-		})
+		}),
 	);
 
 	const handleDownloadPdf = async () => {
@@ -224,7 +243,9 @@ export function CompanyInvoiceForm() {
 			</div>
 			<Button
 				onClick={handleGenerate}
-				disabled={!companyName || !startDate || !endDate || invoiceQuery.isFetching}
+				disabled={
+					!companyName || !startDate || !endDate || invoiceQuery.isFetching
+				}
 				className="print:hidden"
 			>
 				{invoiceQuery.isFetching ? (
@@ -236,7 +257,7 @@ export function CompanyInvoiceForm() {
 			{invoice && (
 				<div className="space-y-4">
 					<div className="flex flex-wrap items-center gap-2 print:hidden">
-						<h3 className="text-lg font-semibold">Invoice Preview</h3>
+						<h3 className="font-semibold text-lg">Invoice Preview</h3>
 						<Button variant="outline" size="sm" onClick={handleDownloadPdf}>
 							<FileDownIcon className="mr-2 h-4 w-4" />
 							Download PDF
@@ -253,7 +274,9 @@ export function CompanyInvoiceForm() {
 								variant="outline"
 								size="sm"
 								onClick={handleSendToCompany}
-								disabled={sendToCompanyMutation.isPending || !companyEmail.trim()}
+								disabled={
+									sendToCompanyMutation.isPending || !companyEmail.trim()
+								}
 							>
 								{sendToCompanyMutation.isPending ? (
 									<Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
@@ -266,7 +289,7 @@ export function CompanyInvoiceForm() {
 					</div>
 					<div
 						ref={invoiceRef}
-						className="rounded-lg border bg-white p-8 print:border-0 print:shadow-none print:p-0"
+						className="rounded-lg border bg-white p-8 print:border-0 print:p-0 print:shadow-none"
 					>
 						<InvoiceDocument type="company" data={invoice} />
 					</div>

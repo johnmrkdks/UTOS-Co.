@@ -1,5 +1,12 @@
 import { useLocation } from "@tanstack/react-router";
-import { LayoutDashboardIcon, CarIcon, ClockIcon, MapPinIcon, UserIcon, SettingsIcon } from "lucide-react";
+import {
+	CarIcon,
+	ClockIcon,
+	LayoutDashboardIcon,
+	MapPinIcon,
+	SettingsIcon,
+	UserIcon,
+} from "lucide-react";
 import type { DriverNavigationItem } from "./types";
 
 export function useDriverNavigation(): DriverNavigationItem[] {
@@ -11,42 +18,42 @@ export function useDriverNavigation(): DriverNavigationItem[] {
 			href: "/driver/available",
 			icon: MapPinIcon,
 			active: location.pathname === "/driver/available",
-			primary: true
+			primary: true,
 		},
 		{
 			name: "My Trips",
 			href: "/driver/trips",
 			icon: CarIcon,
 			active: location.pathname === "/driver/trips",
-			primary: true
+			primary: true,
 		},
 		{
 			name: "History",
 			href: "/driver/history",
 			icon: ClockIcon,
 			active: location.pathname === "/driver/history",
-			primary: true
+			primary: true,
 		},
 		{
 			name: "Dashboard",
 			href: "/driver/dashboard",
 			icon: LayoutDashboardIcon,
 			active: location.pathname === "/driver/dashboard",
-			primary: true
+			primary: true,
 		},
 		{
 			name: "Profile",
 			href: "/driver/profile",
 			icon: UserIcon,
 			active: location.pathname === "/driver/profile",
-			primary: false
+			primary: false,
 		},
 		{
 			name: "Settings",
 			href: "/driver/settings",
 			icon: SettingsIcon,
 			active: location.pathname === "/driver/settings",
-			primary: false
+			primary: false,
 		},
 	];
 }

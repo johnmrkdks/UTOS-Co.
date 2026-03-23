@@ -1,10 +1,14 @@
-import { useParams, useSearch } from "@tanstack/react-router";
+import { Link, useParams, useSearch } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { ArrowLeft, Car, Fuel, Gauge, Star, Users } from "lucide-react";
 import { useGetPublishedCarByIdQuery } from "@/features/customer/_hooks/query/use-get-published-car-by-id-query";
 import { CarBookingForm } from "../_components/car-booking-form";
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { ArrowLeft, Car, Users, Fuel, Gauge, Star } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 
 export function CarBookingPage() {
 	const { carId } = useParams({ from: "/_marketing/book-car/$carId" });
@@ -16,8 +20,8 @@ export function CarBookingPage() {
 		return (
 			<div className="container mx-auto px-4 py-8">
 				<div className="animate-pulse">
-					<div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-					<div className="h-64 bg-gray-200 rounded mb-6"></div>
+					<div className="mb-4 h-8 w-1/3 rounded bg-gray-200" />
+					<div className="mb-6 h-64 rounded bg-gray-200" />
 				</div>
 			</div>
 		);
@@ -27,8 +31,10 @@ export function CarBookingPage() {
 		return (
 			<div className="container mx-auto px-4 py-8">
 				<div className="text-center">
-					<h2 className="text-2xl font-bold mb-4">Car Not Found</h2>
-					<p className="text-gray-600 mb-6">The requested car could not be found.</p>
+					<h2 className="mb-4 font-bold text-2xl">Car Not Found</h2>
+					<p className="mb-6 text-gray-600">
+						The requested car could not be found.
+					</p>
 					<Link to="/">
 						<Button>Return Home</Button>
 					</Link>
@@ -40,12 +46,15 @@ export function CarBookingPage() {
 	return (
 		<div className="container mx-auto px-4 py-8">
 			{/* Back Button */}
-			<Link to="/services" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+			<Link
+				to="/services"
+				className="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800"
+			>
 				<ArrowLeft className="mr-2 h-4 w-4" />
 				Back to Cars
 			</Link>
 
-			<div className="grid md:grid-cols-2 gap-8">
+			<div className="grid gap-8 md:grid-cols-2">
 				{/* Car Details */}
 				<Card>
 					<CardHeader>
@@ -54,17 +63,17 @@ export function CarBookingPage() {
 								<CardTitle className="text-2xl">
 									{car.brand?.name} {car.model?.name}
 								</CardTitle>
-								<p className="text-sm text-gray-600 mt-1">{car.year}</p>
+								<p className="mt-1 text-gray-600 text-sm">{car.year}</p>
 							</div>
 							<div className="text-right">
-								<p className="text-2xl font-bold text-green-600">
+								<p className="font-bold text-2xl text-green-600">
 									${car.pricePerDay}
 								</p>
-								<p className="text-sm text-gray-500">per day</p>
+								<p className="text-gray-500 text-sm">per day</p>
 							</div>
 						</div>
 					</CardHeader>
-					
+
 					<CardContent className="space-y-4">
 						{car.description && (
 							<p className="text-gray-700">{car.description}</p>
@@ -75,7 +84,7 @@ export function CarBookingPage() {
 								<Car className="mr-2 h-4 w-4" />
 								<span className="text-sm">{car.category?.name}</span>
 							</div>
-							
+
 							<div className="flex items-center text-gray-600">
 								<Users className="mr-2 h-4 w-4" />
 								<span className="text-sm">{car.seats} seats</span>
@@ -94,10 +103,13 @@ export function CarBookingPage() {
 
 						{car.features && car.features.length > 0 && (
 							<div>
-								<h4 className="font-semibold mb-2">Features</h4>
+								<h4 className="mb-2 font-semibold">Features</h4>
 								<ul className="space-y-1">
 									{car.features.map((feature) => (
-										<li key={feature.id} className="flex items-center text-sm text-gray-600">
+										<li
+											key={feature.id}
+											className="flex items-center text-gray-600 text-sm"
+										>
 											<Star className="mr-2 h-3 w-3 text-yellow-500" />
 											{feature.name}
 										</li>
@@ -108,10 +120,10 @@ export function CarBookingPage() {
 
 						{car.imageUrls && car.imageUrls.length > 0 && (
 							<div>
-								<img 
-									src={car.imageUrls[0]} 
+								<img
+									src={car.imageUrls[0]}
 									alt={`${car.brand?.name} ${car.model?.name}`}
-									className="w-full h-48 object-cover rounded-lg"
+									className="h-48 w-full rounded-lg object-cover"
 								/>
 							</div>
 						)}
@@ -122,9 +134,7 @@ export function CarBookingPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Book This Car</CardTitle>
-						<p className="text-sm text-gray-600">
-							Complete your car booking
-						</p>
+						<p className="text-gray-600 text-sm">Complete your car booking</p>
 					</CardHeader>
 					<CardContent>
 						<CarBookingForm car={car} />

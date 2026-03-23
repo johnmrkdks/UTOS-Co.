@@ -2,24 +2,43 @@ import {
 	InsertCarTransmissionTypeSchema,
 	UpdateCarTransmissionTypeSchema,
 } from "@/schemas/shared/tables/cars/car-transmission-type";
-import { createCarTransmissionTypeService, CreateCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/create-car-transmission-type";
-import { deleteCarTransmissionTypeService, DeleteCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/delete-car-transmission-type";
-import { getCarTransmissionTypeService, GetCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/get-car-transmission-type";
+import {
+	CheckCarTransmissionTypeUsageServiceSchema,
+	checkCarTransmissionTypeUsageService,
+} from "@/services/cars-transmission-types/check-car-transmission-type-usage";
+import {
+	CreateCarTransmissionTypeServiceSchema,
+	createCarTransmissionTypeService,
+} from "@/services/cars-transmission-types/create-car-transmission-type";
+import {
+	DeleteCarTransmissionTypeServiceSchema,
+	deleteCarTransmissionTypeService,
+} from "@/services/cars-transmission-types/delete-car-transmission-type";
+import {
+	GetCarTransmissionTypeServiceSchema,
+	getCarTransmissionTypeService,
+} from "@/services/cars-transmission-types/get-car-transmission-type";
 import { getCarTransmissionTypesService } from "@/services/cars-transmission-types/get-car-transmission-types";
 import { getCarTransmissionTypesWithEnrichedDataService } from "@/services/cars-transmission-types/get-car-transmission-types-with-enriched-data";
-import { isCarTransmissionTypeExistService, IsCarTransmissionTypeExistServiceSchema } from "@/services/cars-transmission-types/is-car-transmission-type-exist";
-import { updateCarTransmissionTypeService, UpdateCarTransmissionTypeServiceSchema } from "@/services/cars-transmission-types/update-car-transmission-type";
+import {
+	IsCarTransmissionTypeExistServiceSchema,
+	isCarTransmissionTypeExistService,
+} from "@/services/cars-transmission-types/is-car-transmission-type-exist";
+import {
+	UpdateCarTransmissionTypeServiceSchema,
+	updateCarTransmissionTypeService,
+} from "@/services/cars-transmission-types/update-car-transmission-type";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { checkCarTransmissionTypeUsageService, CheckCarTransmissionTypeUsageServiceSchema } from "@/services/cars-transmission-types/check-car-transmission-type-usage";
 
 export const carTransmissionTypesRouter = router({
 	checkUsage: protectedProcedure
 		.input(CheckCarTransmissionTypeUsageServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const checkCarTransmissionTypeUsage = await checkCarTransmissionTypeUsageService(db, input);
+				const checkCarTransmissionTypeUsage =
+					await checkCarTransmissionTypeUsageService(db, input);
 				return checkCarTransmissionTypeUsage;
 			} catch (error) {
 				handleTRPCError(error);
@@ -66,10 +85,8 @@ export const carTransmissionTypesRouter = router({
 		.input(IsCarTransmissionTypeExistServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const isCarTransmissionTypeExist = await isCarTransmissionTypeExistService(
-					db,
-					input,
-				);
+				const isCarTransmissionTypeExist =
+					await isCarTransmissionTypeExistService(db, input);
 				return isCarTransmissionTypeExist;
 			} catch (error) {
 				handleTRPCError(error);
@@ -111,4 +128,3 @@ export const carTransmissionTypesRouter = router({
 			}
 		}),
 });
-

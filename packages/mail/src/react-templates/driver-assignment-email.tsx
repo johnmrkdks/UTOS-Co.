@@ -1,17 +1,17 @@
 import {
-	Html,
-	Head,
-	Preview,
 	Body,
-	Container,
-	Section,
-	Row,
-	Column,
-	Heading,
-	Text,
 	Button,
+	Column,
+	Container,
+	Head,
+	Heading,
 	Hr,
+	Html,
 	Img,
+	Preview,
+	Row,
+	Section,
+	Text,
 } from "@react-email/components";
 
 interface DriverAssignmentEmailProps {
@@ -48,7 +48,9 @@ export function DriverAssignmentEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>New Booking Assignment - {bookingReference} - Down Under Chauffeurs</Preview>
+			<Preview>
+				New Booking Assignment - {bookingReference} - Down Under Chauffeurs
+			</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
@@ -63,14 +65,20 @@ export function DriverAssignmentEmail({
 									style={logoStyle}
 								/>
 							</Column> */}
-							<Column style={{ verticalAlign: 'middle', flexGrow: 1 }}>
+							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
 								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
-								<Text style={brandTagline}>Premium Luxury Transportation Services</Text>
-							</Column>
-							<Column style={{ width: '120px', verticalAlign: 'middle', textAlign: 'right' }}>
-								<Text style={assignmentBadge}>
-									NEW ASSIGNMENT
+								<Text style={brandTagline}>
+									Premium Luxury Transportation Services
 								</Text>
+							</Column>
+							<Column
+								style={{
+									width: "120px",
+									verticalAlign: "middle",
+									textAlign: "right",
+								}}
+							>
+								<Text style={assignmentBadge}>NEW ASSIGNMENT</Text>
 							</Column>
 						</Row>
 					</Section>
@@ -78,7 +86,9 @@ export function DriverAssignmentEmail({
 					{/* Content Header */}
 					<Section style={contentHeader}>
 						<Heading style={headerTitle}>New Booking Assignment</Heading>
-						<Text style={headerSubtitle}>You have been assigned to a new trip</Text>
+						<Text style={headerSubtitle}>
+							You have been assigned to a new trip
+						</Text>
 					</Section>
 
 					{/* Main Trip Card - Driver Assignment Styled */}
@@ -86,11 +96,11 @@ export function DriverAssignmentEmail({
 						{/* Trip Header - Time and Reference */}
 						<Section style={tripHeader}>
 							<Row>
-								<Column style={{ width: '60%' }}>
+								<Column style={{ width: "60%" }}>
 									<Text style={tripTime}>{pickupTime}</Text>
 									<Text style={tripDate}>{pickupDate}</Text>
 								</Column>
-								<Column style={{ width: '40%', textAlign: 'right' }}>
+								<Column style={{ width: "40%", textAlign: "right" }}>
 									<Text style={tripReference}>#{bookingReference}</Text>
 								</Column>
 							</Row>
@@ -99,7 +109,8 @@ export function DriverAssignmentEmail({
 						{/* Assignment Message */}
 						<Section style={assignmentMessageSection}>
 							<Text style={assignmentText}>
-								Hello {driverName}, you have been assigned to this booking. Please review the details below and prepare for pickup.
+								Hello {driverName}, you have been assigned to this booking.
+								Please review the details below and prepare for pickup.
 							</Text>
 						</Section>
 
@@ -109,8 +120,8 @@ export function DriverAssignmentEmail({
 
 							{/* Pickup Location */}
 							<Row style={routeRow}>
-								<Column style={{ width: '20px', paddingRight: '12px' }}>
-									<div style={{ ...routeIcon, backgroundColor: '#22c55e' }}></div>
+								<Column style={{ width: "20px", paddingRight: "12px" }}>
+									<div style={{ ...routeIcon, backgroundColor: "#22c55e" }} />
 								</Column>
 								<Column>
 									<Text style={routeLabel}>Pick up</Text>
@@ -119,25 +130,29 @@ export function DriverAssignmentEmail({
 							</Row>
 
 							{/* Stops (if any) */}
-							{stops && stops.length > 0 && stops.map((stop, index) => (
-								<Row key={index} style={routeRow}>
-									<Column style={{ width: '20px', paddingRight: '12px' }}>
-										<div style={{ ...routeConnector }}></div>
-										<div style={{ ...routeIcon, backgroundColor: '#3b82f6' }}></div>
-									</Column>
-									<Column>
-										<Text style={routeLabel}>Stop {index + 1}</Text>
-										<Text style={routeAddress}>{stop.address}</Text>
-									</Column>
-								</Row>
-							))}
+							{stops &&
+								stops.length > 0 &&
+								stops.map((stop, index) => (
+									<Row key={index} style={routeRow}>
+										<Column style={{ width: "20px", paddingRight: "12px" }}>
+											<div style={{ ...routeConnector }} />
+											<div
+												style={{ ...routeIcon, backgroundColor: "#3b82f6" }}
+											/>
+										</Column>
+										<Column>
+											<Text style={routeLabel}>Stop {index + 1}</Text>
+											<Text style={routeAddress}>{stop.address}</Text>
+										</Column>
+									</Row>
+								))}
 
 							{/* Destination */}
 							{destinationAddress && (
 								<Row style={routeRow}>
-									<Column style={{ width: '20px', paddingRight: '12px' }}>
-										<div style={{ ...routeConnector }}></div>
-										<div style={{ ...routeIcon, backgroundColor: '#ef4444' }}></div>
+									<Column style={{ width: "20px", paddingRight: "12px" }}>
+										<div style={{ ...routeConnector }} />
+										<div style={{ ...routeIcon, backgroundColor: "#ef4444" }} />
 									</Column>
 									<Column>
 										<Text style={routeLabel}>Drop off</Text>
@@ -150,22 +165,22 @@ export function DriverAssignmentEmail({
 						{/* Trip Details - Compact info like driver trips */}
 						<Section style={tripDetails}>
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Customer</Text>
 									<Text style={detailValue}>{customerName}</Text>
 								</Column>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Passengers</Text>
 									<Text style={detailValue}>{passengerCount} pax</Text>
 								</Column>
 							</Row>
 							<Hr style={detailSeparator} />
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Vehicle</Text>
 									<Text style={detailValue}>{vehicleInfo}</Text>
 								</Column>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Service</Text>
 									<Text style={detailValue}>{serviceType}</Text>
 								</Column>
@@ -177,7 +192,9 @@ export function DriverAssignmentEmail({
 										<Column>
 											<Text style={detailLabel}>Customer Phone</Text>
 											<Text style={detailValue}>
-												<a href={`tel:${customerPhone}`} style={phoneLink}>{customerPhone}</a>
+												<a href={`tel:${customerPhone}`} style={phoneLink}>
+													{customerPhone}
+												</a>
 											</Text>
 										</Column>
 									</Row>
@@ -189,14 +206,19 @@ export function DriverAssignmentEmail({
 						<Section style={actionSection}>
 							<Row>
 								<Column style={{ textAlign: "center" }}>
-									<Button style={primaryButton} href={`${websiteUrl}/driver/trips`}>
+									<Button
+										style={primaryButton}
+										href={`${websiteUrl}/driver/trips`}
+									>
 										View Driver Dashboard
 									</Button>
 								</Column>
 							</Row>
 							<Text style={actionText}>
 								Questions about this booking? Contact support at{" "}
-								<a href={`${websiteUrl}/contact-us`} style={contactLink}>downunderchauffeurs.com</a>
+								<a href={`${websiteUrl}/contact-us`} style={contactLink}>
+									downunderchauffeurs.com
+								</a>
 							</Text>
 						</Section>
 					</Section>
@@ -204,16 +226,25 @@ export function DriverAssignmentEmail({
 					{/* Footer */}
 					<Section style={footer}>
 						<Heading style={footerBrand}>Down Under Chauffeurs</Heading>
-						<Text style={footerTagline}>Premium Luxury Transportation Services</Text>
+						<Text style={footerTagline}>
+							Premium Luxury Transportation Services
+						</Text>
 						<Text style={footerLinks}>
-							<a href={websiteUrl} style={footerLink}>Our Website</a>
+							<a href={websiteUrl} style={footerLink}>
+								Our Website
+							</a>
 							{" | "}
-							<a href={`${websiteUrl}/services`} style={footerLink}>Services</a>
+							<a href={`${websiteUrl}/services`} style={footerLink}>
+								Services
+							</a>
 							{" | "}
-							<a href={`${websiteUrl}/contact-us`} style={footerLink}>Contact</a>
+							<a href={`${websiteUrl}/contact-us`} style={footerLink}>
+								Contact
+							</a>
 						</Text>
 						<Text style={footerDisclaimer}>
-							This is an automated driver assignment from Down Under Chauffeurs.<br />
+							This is an automated driver assignment from Down Under Chauffeurs.
+							<br />
 							For support or questions, please contact our operations team.
 						</Text>
 					</Section>
@@ -225,7 +256,8 @@ export function DriverAssignmentEmail({
 
 // Driver Assignment Inspired Styles
 const main = {
-	fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+	fontFamily:
+		"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 	margin: "0",
 	padding: "20px",
 	background: "#f9fafb", // Gray-50 like driver interface
@@ -239,7 +271,8 @@ const container = {
 	background: "#ffffff",
 	borderRadius: "12px",
 	overflow: "hidden",
-	boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+	boxShadow:
+		"0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
 	border: "1px solid #e5e7eb",
 };
 

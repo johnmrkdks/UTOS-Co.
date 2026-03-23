@@ -1,11 +1,11 @@
-import { RateableTypeEnum } from "@/db/sqlite/enums";
-import { ratings } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { RateableTypeEnum } from "@/db/sqlite/enums";
+import { ratings } from "@/db/sqlite/schema";
 import { UserSchema } from "./user";
 
 export const RatingSchema = createSelectSchema(ratings, {

@@ -1,7 +1,7 @@
-import { asc, desc, and } from "drizzle-orm";
+import { and, asc, desc } from "drizzle-orm";
 import { paginationMetadata } from "./pagination-metadata";
-import type { QueryListResult, ResourceList } from "./resource-list";
 import type { QueryBuilder } from "./query-builder";
+import type { QueryListResult, ResourceList } from "./resource-list";
 
 export async function filterPaginationSort<T extends Record<string, any>>(
 	queryBuilder: QueryBuilder<T>,
@@ -12,10 +12,9 @@ export async function filterPaginationSort<T extends Record<string, any>>(
 	if (isRQB) {
 		// Handle Relational Query Builder (RQB) queries
 		return handleRQBQuery(queryBuilder, options);
-	} else {
-		// Handle SQL-like queries (default)
-		return handleSQLQuery(queryBuilder, options);
 	}
+	// Handle SQL-like queries (default)
+	return handleSQLQuery(queryBuilder, options);
 }
 
 async function handleSQLQuery<T extends Record<string, any>>(
@@ -102,7 +101,8 @@ async function handleRQBQuery<T extends Record<string, any>>(
 	// Apply sorting
 	if (sortBy && queryBuilder.sortColumns && queryBuilder.sortColumns[sortBy]) {
 		const sortColumn = queryBuilder.sortColumns[sortBy];
-		queryOptions.orderBy = sortOrder === "desc" ? desc(sortColumn) : asc(sortColumn);
+		queryOptions.orderBy =
+			sortOrder === "desc" ? desc(sortColumn) : asc(sortColumn);
 	}
 
 	// Get total count (execute query without pagination first)

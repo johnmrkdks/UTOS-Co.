@@ -1,6 +1,6 @@
 import { count, eq } from "drizzle-orm";
-import { cars } from "@/db/schema";
 import type { DB } from "@/db";
+import { cars } from "@/db/schema";
 
 export const getCarsCountByBodyTypeId = async (db: DB, bodyTypeId: string) => {
 	const [result] = await db
@@ -8,7 +8,7 @@ export const getCarsCountByBodyTypeId = async (db: DB, bodyTypeId: string) => {
 			value: count(),
 		})
 		.from(cars)
-		.where(eq(cars.bodyTypeId, bodyTypeId))
+		.where(eq(cars.bodyTypeId, bodyTypeId));
 
 	return result.value;
 };

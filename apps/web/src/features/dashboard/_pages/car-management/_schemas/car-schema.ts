@@ -1,27 +1,33 @@
-import { z } from "zod/v3"
-import { CarStatusEnum } from "server/types"
+import { CarStatusEnum } from "server/types";
+import { z } from "zod/v3";
 
 // Zod schema for car features
 export const CarFeatureSchema = z.object({
 	name: z.string().min(1, "Feature name is required"),
-})
+});
 
 // Zod schema for car images
 export const CarImageSchema = z.object({
-	url: z.string()
+	url: z
+		.string()
 		.min(1, "Image URL or path is required")
-		.refine((value) => {
-			// Allow full URLs or file paths/keys
-			const isValidUrl = z.string().url().safeParse(value).success;
-			const isValidPath = /^[a-zA-Z0-9._/-]+\.(jpg|jpeg|png|gif|webp)$/i.test(value);
-			return isValidUrl || isValidPath;
-		}, {
-			message: "Please provide a valid URL or image file path"
-		}),
+		.refine(
+			(value) => {
+				// Allow full URLs or file paths/keys
+				const isValidUrl = z.string().url().safeParse(value).success;
+				const isValidPath = /^[a-zA-Z0-9._/-]+\.(jpg|jpeg|png|gif|webp)$/i.test(
+					value,
+				);
+				return isValidUrl || isValidPath;
+			},
+			{
+				message: "Please provide a valid URL or image file path",
+			},
+		),
 	altText: z.string().optional(),
 	order: z.coerce.number().min(1).int(),
 	isMain: z.boolean(),
-})
+});
 
 // Updated main car form schema
 export const CarFormSchema = z.object({
@@ -42,8 +48,13 @@ export const CarFormSchema = z.object({
 	color: z.string().min(1, "Color is required"),
 	doors: z.coerce.number().min(2).max(8, "Doors must be between 2 and 8"),
 	// Passenger capacity
-	seatingCapacity: z.coerce.number().min(1, "Seating capacity must be at least 1"),
-	luggageCapacity: z.coerce.number().min(1, "Luggage capacity must be at least 1").optional(),
+	seatingCapacity: z.coerce
+		.number()
+		.min(1, "Seating capacity must be at least 1"),
+	luggageCapacity: z.coerce
+		.number()
+		.min(1, "Luggage capacity must be at least 1")
+		.optional(),
 	// Service availability
 	availableForPackages: z.boolean(),
 	availableForCustom: z.boolean(),
@@ -58,25 +69,26 @@ export const CarFormSchema = z.object({
 	status: z.nativeEnum(CarStatusEnum),
 	// Arrays for related data
 	features: z.array(z.string()).optional(),
-	images: z.array(CarImageSchema)
+	images: z
+		.array(CarImageSchema)
 		.min(1, "At least one image is required")
 		.superRefine((images, ctx) => {
 			if (!images || images.length === 0) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: "At least one image is required to add a car",
-					path: []
+					path: [],
 				});
 				return;
 			}
 
 			// Check for valid URLs
 			images.forEach((img, index) => {
-				if (!img.url || img.url.trim() === '') {
+				if (!img.url || img.url.trim() === "") {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,
 						message: `Image ${index + 1}: URL is required and cannot be empty`,
-						path: [index, 'url']
+						path: [index, "url"],
 					});
 				}
 
@@ -85,36 +97,40 @@ export const CarFormSchema = z.object({
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,
 						message: `Image ${index + 1}: Invalid order number`,
-						path: [index, 'order']
+						path: [index, "order"],
 					});
 				}
 			});
 
 			// Check main image logic
-			const mainImages = images.filter(img => img.isMain);
+			const mainImages = images.filter((img) => img.isMain);
 			if (mainImages.length === 0) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: "At least one image must be marked as the main image",
-					path: []
+					path: [],
 				});
 			} else if (mainImages.length > 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Only one image can be marked as main. Please uncheck the others.",
-					path: []
+					message:
+						"Only one image can be marked as main. Please uncheck the others.",
+					path: [],
 				});
 			}
 
 			// Check for duplicate orders
-			const orders = images.map(img => img.order);
-			const duplicateOrders = orders.filter((order, index) => orders.indexOf(order) !== index);
+			const orders = images.map((img) => img.order);
+			const duplicateOrders = orders.filter(
+				(order, index) => orders.indexOf(order) !== index,
+			);
 			if (duplicateOrders.length > 0) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Images have duplicate order numbers. This usually happens during upload - try removing and re-uploading the images.",
-					path: []
+					message:
+						"Images have duplicate order numbers. This usually happens during upload - try removing and re-uploading the images.",
+					path: [],
 				});
 			}
 		}),
-})
+});

@@ -4,7 +4,10 @@ import type { InsertCarsToFeature } from "@/schemas/shared";
 
 type CreateCarsToFeatureParams = InsertCarsToFeature;
 
-export async function createCarsToFeature(db: DB, params: CreateCarsToFeatureParams) {
+export async function createCarsToFeature(
+	db: DB,
+	params: CreateCarsToFeatureParams,
+) {
 	const [record] = await db.insert(carsToFeatures).values(params).returning();
 
 	return record;

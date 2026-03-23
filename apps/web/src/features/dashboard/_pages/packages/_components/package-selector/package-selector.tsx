@@ -1,24 +1,36 @@
-import React, { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { 
-	Package, 
-	Search, 
-	Filter, 
-	Eye, 
-	Settings, 
-	DollarSign,
-	Calendar,
-	MapPin,
-	CheckCircle,
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import {
 	AlertCircle,
+	Calendar,
+	CheckCircle,
+	DollarSign,
+	Eye,
+	Filter,
 	Grid3X3,
-	List
+	List,
+	MapPin,
+	Package,
+	Search,
+	Settings,
 } from "lucide-react";
+import React, { useState } from "react";
 
 interface PackageOption {
 	id: string;
@@ -41,29 +53,33 @@ interface PackageSelectorProps {
 	viewMode?: "grid" | "list" | "dropdown";
 }
 
-export function PackageSelector({ 
-	packages, 
-	selectedPackageId, 
-	onSelectPackage, 
+export function PackageSelector({
+	packages,
+	selectedPackageId,
+	onSelectPackage,
 	isLoading = false,
 	showDetails = true,
-	viewMode = "grid"
+	viewMode = "grid",
 }: PackageSelectorProps) {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [statusFilter, setStatusFilter] = useState<"all" | "available" | "unavailable">("all");
+	const [statusFilter, setStatusFilter] = useState<
+		"all" | "available" | "unavailable"
+	>("all");
 	const [currentViewMode, setCurrentViewMode] = useState(viewMode);
-	
-	const selectedPackage = packages.find(pkg => pkg.id === selectedPackageId);
-	
+
+	const selectedPackage = packages.find((pkg) => pkg.id === selectedPackageId);
+
 	// Filter packages based on search and status
-	const filteredPackages = packages.filter(pkg => {
-		const matchesSearch = pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+	const filteredPackages = packages.filter((pkg) => {
+		const matchesSearch =
+			pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			pkg.description?.toLowerCase().includes(searchTerm.toLowerCase());
-		
-		const matchesStatus = statusFilter === "all" || 
+
+		const matchesStatus =
+			statusFilter === "all" ||
 			(statusFilter === "available" && pkg.isAvailable === true) ||
 			(statusFilter === "unavailable" && pkg.isAvailable !== true);
-			
+
 		return matchesSearch && matchesStatus;
 	});
 
@@ -87,7 +103,7 @@ export function PackageSelector({
 							<Grid3X3 className="h-4 w-4" />
 						</Button>
 						<Button
-							variant="outline" 
+							variant="outline"
 							size="sm"
 							onClick={() => setCurrentViewMode("list")}
 						>
@@ -95,30 +111,32 @@ export function PackageSelector({
 						</Button>
 					</div>
 				</div>
-				
-				<Select 
-					value={selectedPackageId} 
+
+				<Select
+					value={selectedPackageId}
 					onValueChange={onSelectPackage}
 					disabled={isLoading || packages.length === 0}
 				>
 					<SelectTrigger id="package-selector" className="w-full">
-						<SelectValue 
+						<SelectValue
 							placeholder={
-								packages.length === 0 
-									? "No packages available" 
+								packages.length === 0
+									? "No packages available"
 									: "Choose a package to configure"
-							} 
+							}
 						/>
 					</SelectTrigger>
 					<SelectContent>
 						{packages.map((pkg) => (
 							<SelectItem key={pkg.id} value={pkg.id}>
-								<div className="flex items-center gap-3 w-full">
+								<div className="flex w-full items-center gap-3">
 									<Package className="h-4 w-4" />
-									<div className="flex-1 min-w-0">
-										<div className="font-medium truncate">{pkg.name}</div>
-										<div className="text-xs text-muted-foreground">
-											{formatPrice(pkg.pricePerDay, pkg.fixedPrice)} • {pkg.isAvailable === true ? "Available" : "Unavailable"} • {pkg.isPublished === true ? "Published" : "Draft"}
+									<div className="min-w-0 flex-1">
+										<div className="truncate font-medium">{pkg.name}</div>
+										<div className="text-muted-foreground text-xs">
+											{formatPrice(pkg.pricePerDay, pkg.fixedPrice)} •{" "}
+											{pkg.isAvailable === true ? "Available" : "Unavailable"} •{" "}
+											{pkg.isPublished === true ? "Published" : "Draft"}
 										</div>
 									</div>
 								</div>
@@ -126,11 +144,18 @@ export function PackageSelector({
 						))}
 					</SelectContent>
 				</Select>
-				
+
 				{selectedPackage && showDetails && (
-					<div className="p-3 bg-muted/50 rounded-lg text-sm">
-						<div className="font-medium">Configuring: {selectedPackage.name}</div>
-						<div className="text-muted-foreground">{formatPrice(selectedPackage.pricePerDay, selectedPackage.fixedPrice)}</div>
+					<div className="rounded-lg bg-muted/50 p-3 text-sm">
+						<div className="font-medium">
+							Configuring: {selectedPackage.name}
+						</div>
+						<div className="text-muted-foreground">
+							{formatPrice(
+								selectedPackage.pricePerDay,
+								selectedPackage.fixedPrice,
+							)}
+						</div>
 					</div>
 				)}
 			</div>
@@ -140,10 +165,12 @@ export function PackageSelector({
 	return (
 		<div className="space-y-4">
 			{/* Header with Search and Filters */}
-			<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+			<div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 				<div>
-					<Label className="text-base font-medium">Select Package to Configure</Label>
-					<p className="text-sm text-muted-foreground">
+					<Label className="font-medium text-base">
+						Select Package to Configure
+					</Label>
+					<p className="text-muted-foreground text-sm">
 						Choose a package to manage routes and scheduling
 					</p>
 				</div>
@@ -173,9 +200,9 @@ export function PackageSelector({
 			</div>
 
 			{/* Search and Filter */}
-			<div className="flex flex-col sm:flex-row gap-3">
+			<div className="flex flex-col gap-3 sm:flex-row">
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
 					<Input
 						placeholder="Search packages by name or description..."
 						value={searchTerm}
@@ -183,7 +210,10 @@ export function PackageSelector({
 						className="pl-9"
 					/>
 				</div>
-				<Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+				<Select
+					value={statusFilter}
+					onValueChange={(value: any) => setStatusFilter(value)}
+				>
 					<SelectTrigger className="w-full sm:w-[180px]">
 						<SelectValue />
 					</SelectTrigger>
@@ -197,34 +227,35 @@ export function PackageSelector({
 
 			{/* Package Display */}
 			{isLoading ? (
-				<div className="text-center py-8">
+				<div className="py-8 text-center">
 					<div className="animate-pulse">Loading packages...</div>
 				</div>
 			) : filteredPackages.length === 0 ? (
 				<Card>
 					<CardContent className="py-8 text-center">
-						<Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-						<h3 className="text-lg font-semibold mb-2">No packages found</h3>
+						<Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+						<h3 className="mb-2 font-semibold text-lg">No packages found</h3>
 						<p className="text-muted-foreground">
-							{packages.length === 0 
+							{packages.length === 0
 								? "Create your first package to get started"
-								: "Try adjusting your search or filter criteria"
-							}
+								: "Try adjusting your search or filter criteria"}
 						</p>
 					</CardContent>
 				</Card>
 			) : (
-				<div className={
-					currentViewMode === "grid" 
-						? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-						: "space-y-3"
-				}>
+				<div
+					className={
+						currentViewMode === "grid"
+							? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+							: "space-y-3"
+					}
+				>
 					{filteredPackages.map((pkg) => (
-						<Card 
+						<Card
 							key={pkg.id}
 							className={`cursor-pointer transition-all hover:shadow-md ${
-								selectedPackageId === pkg.id 
-									? "ring-2 ring-primary border-primary" 
+								selectedPackageId === pkg.id
+									? "border-primary ring-2 ring-primary"
 									: "hover:border-muted-foreground/50"
 							}`}
 							onClick={() => onSelectPackage(pkg.id)}
@@ -232,11 +263,13 @@ export function PackageSelector({
 							<CardHeader className={currentViewMode === "list" ? "pb-3" : ""}>
 								<div className="flex items-start justify-between">
 									<div className="flex items-center gap-3">
-										<div className={`p-2 rounded-lg ${
-											pkg.isAvailable === true 
-												? "bg-green-100 text-green-700" 
-												: "bg-gray-100 text-gray-700"
-										}`}>
+										<div
+											className={`rounded-lg p-2 ${
+												pkg.isAvailable === true
+													? "bg-green-100 text-green-700"
+													: "bg-gray-100 text-gray-700"
+											}`}
+										>
 											<Package className="h-5 w-5" />
 										</div>
 										<div>
@@ -244,7 +277,7 @@ export function PackageSelector({
 												{pkg.name}
 											</CardTitle>
 											{currentViewMode === "grid" && pkg.description && (
-												<CardDescription className="line-clamp-2 mt-1">
+												<CardDescription className="mt-1 line-clamp-2">
 													{pkg.description}
 												</CardDescription>
 											)}
@@ -255,16 +288,18 @@ export function PackageSelector({
 									)}
 								</div>
 							</CardHeader>
-							
+
 							<CardContent className={currentViewMode === "list" ? "pt-0" : ""}>
 								{currentViewMode === "list" && pkg.description && (
-									<p className="text-sm text-muted-foreground mb-3 line-clamp-1">
+									<p className="mb-3 line-clamp-1 text-muted-foreground text-sm">
 										{pkg.description}
 									</p>
 								)}
-								
-								<div className="flex flex-wrap gap-2 mb-3">
-									<Badge variant={pkg.isAvailable === true ? "default" : "secondary"}>
+
+								<div className="mb-3 flex flex-wrap gap-2">
+									<Badge
+										variant={pkg.isAvailable === true ? "default" : "secondary"}
+									>
 										{pkg.isAvailable === true ? (
 											<CheckCircle className="mr-1 h-3 w-3" />
 										) : (
@@ -272,7 +307,9 @@ export function PackageSelector({
 										)}
 										{pkg.isAvailable === true ? "Available" : "Unavailable"}
 									</Badge>
-									<Badge variant={pkg.isPublished === true ? "outline" : "secondary"}>
+									<Badge
+										variant={pkg.isPublished === true ? "outline" : "secondary"}
+									>
 										{pkg.isPublished === true ? "Published" : "Draft"}
 									</Badge>
 								</div>
@@ -285,14 +322,16 @@ export function PackageSelector({
 									{pkg.createdAt && (
 										<div className="flex items-center gap-2 text-muted-foreground">
 											<Calendar className="h-4 w-4" />
-											<span>Created {new Date(pkg.createdAt).toLocaleDateString()}</span>
+											<span>
+												Created {new Date(pkg.createdAt).toLocaleDateString()}
+											</span>
 										</div>
 									)}
 								</div>
 
 								{selectedPackageId === pkg.id && showDetails && (
-									<div className="mt-3 pt-3 border-t">
-										<div className="flex items-center gap-2 text-sm font-medium text-primary">
+									<div className="mt-3 border-t pt-3">
+										<div className="flex items-center gap-2 font-medium text-primary text-sm">
 											<Settings className="h-4 w-4" />
 											Currently configuring this package
 										</div>
@@ -308,7 +347,7 @@ export function PackageSelector({
 			{selectedPackage && showDetails && currentViewMode !== "dropdown" && (
 				<Card className="border-primary/50 bg-primary/5">
 					<CardHeader className="pb-3">
-						<CardTitle className="text-base flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 text-base">
 							<Settings className="h-4 w-4" />
 							Currently Configuring
 						</CardTitle>
@@ -317,15 +356,32 @@ export function PackageSelector({
 						<div className="flex items-center justify-between">
 							<div>
 								<div className="font-medium">{selectedPackage.name}</div>
-								<div className="text-sm text-muted-foreground">
-									{formatPrice(selectedPackage.pricePerDay, selectedPackage.fixedPrice)}
+								<div className="text-muted-foreground text-sm">
+									{formatPrice(
+										selectedPackage.pricePerDay,
+										selectedPackage.fixedPrice,
+									)}
 								</div>
 							</div>
 							<div className="flex gap-2">
-								<Badge variant={selectedPackage.isAvailable === true ? "default" : "secondary"}>
-									{selectedPackage.isAvailable === true ? "Available" : "Unavailable"}
+								<Badge
+									variant={
+										selectedPackage.isAvailable === true
+											? "default"
+											: "secondary"
+									}
+								>
+									{selectedPackage.isAvailable === true
+										? "Available"
+										: "Unavailable"}
 								</Badge>
-								<Badge variant={selectedPackage.isPublished === true ? "outline" : "secondary"}>
+								<Badge
+									variant={
+										selectedPackage.isPublished === true
+											? "outline"
+											: "secondary"
+									}
+								>
 									{selectedPackage.isPublished === true ? "Published" : "Draft"}
 								</Badge>
 							</div>

@@ -1,14 +1,28 @@
-import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "@/trpc/init";
-import { createContactMessage, listContactMessages, updateContactMessageStatus, deleteContactMessage } from "@/services/contact-messages";
-import { createContactMessageSchema, listContactMessagesSchema, updateContactMessageStatusSchema, deleteContactMessageSchema } from "@/schemas/contact-message-schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { users } from "@/db/sqlite/schema/users";
+import {
+	createContactMessageSchema,
+	deleteContactMessageSchema,
+	listContactMessagesSchema,
+	updateContactMessageStatusSchema,
+} from "@/schemas/contact-message-schema";
+import {
+	createContactMessage,
+	deleteContactMessage,
+	listContactMessages,
+	updateContactMessageStatus,
+} from "@/services/contact-messages";
+import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 
 // Helper function to get user role from database
 const getUserRole = async (db: any, userId: string) => {
-	const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+	const user = await db
+		.select({ role: users.role })
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
 	return user[0]?.role;
 };
 
@@ -36,7 +50,7 @@ export const contactMessagesRouter = router({
 			const userRole = await getUserRole(ctx.db, userId);
 
 			// Only admins can view contact messages
-			if (!userRole || !['admin', 'super_admin'].includes(userRole)) {
+			if (!userRole || !["admin", "super_admin"].includes(userRole)) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "Admin access required to view contact messages",
@@ -63,14 +77,18 @@ export const contactMessagesRouter = router({
 			const userRole = await getUserRole(ctx.db, userId);
 
 			// Only admins can update message status
-			if (!userRole || !['admin', 'super_admin'].includes(userRole)) {
+			if (!userRole || !["admin", "super_admin"].includes(userRole)) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "Admin access required to update message status",
 				});
 			}
 
-			return await updateContactMessageStatus(ctx.db, input.messageId, input.status);
+			return await updateContactMessageStatus(
+				ctx.db,
+				input.messageId,
+				input.status,
+			);
 		}),
 
 	delete: protectedProcedure
@@ -90,7 +108,7 @@ export const contactMessagesRouter = router({
 			const userRole = await getUserRole(ctx.db, userId);
 
 			// Only admins can delete messages
-			if (!userRole || !['admin', 'super_admin'].includes(userRole)) {
+			if (!userRole || !["admin", "super_admin"].includes(userRole)) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "Admin access required to delete messages",

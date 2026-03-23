@@ -1,13 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { DriverNavigation } from "../driver-navigation";
+import { Button } from "@workspace/ui/components/button";
 import {
-	LogOutIcon,
-	UserIcon,
-	ShieldCheckIcon
-} from "lucide-react";
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { LogOutIcon, ShieldCheckIcon, UserIcon } from "lucide-react";
+import { DriverNavigation } from "../driver-navigation";
 
 interface DriverMobileMenuContentProps {
 	session: any;
@@ -26,7 +27,7 @@ export function DriverMobileMenuContent({
 	driverStatus,
 	needsOnboarding,
 	onClose,
-	onSignOut
+	onSignOut,
 }: DriverMobileMenuContentProps) {
 	const navigate = useNavigate();
 
@@ -35,30 +36,32 @@ export function DriverMobileMenuContent({
 			{/* Scrollable Content */}
 			<div className="flex-1 overflow-y-auto">
 				{/* User Info Section */}
-				<div className="p-4 border-b">
+				<div className="border-b p-4">
 					<div className="flex items-center space-x-3">
-						<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+						<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
 							<UserIcon className="h-6 w-6 text-primary" />
 						</div>
 						<div className="flex-1">
-							<p className="text-sm font-medium text-gray-900">{session?.user.name}</p>
-							<p className="text-xs text-gray-500">{session?.user.email}</p>
-							<p className="text-xs text-blue-600 font-medium">Driver</p>
+							<p className="font-medium text-gray-900 text-sm">
+								{session?.user.name}
+							</p>
+							<p className="text-gray-500 text-xs">{session?.user.email}</p>
+							<p className="font-medium text-blue-600 text-xs">Driver</p>
 						</div>
 					</div>
 				</div>
 
 				{/* Navigation */}
 				<div className="p-4">
-					<DriverNavigation 
-						onNavigate={onClose} 
+					<DriverNavigation
+						onNavigate={onClose}
 						driverStatus={driverStatus}
 						needsOnboarding={needsOnboarding}
 					/>
 				</div>
 
 				{/* Account Status */}
-				<div className="p-4 border-t">
+				<div className="border-t p-4">
 					<Card>
 						<CardHeader className="pb-4">
 							<CardTitle className="text-lg">Account Status</CardTitle>
@@ -70,11 +73,17 @@ export function DriverMobileMenuContent({
 									<span className="text-sm">Profile</span>
 								</div>
 								{needsOnboarding ? (
-									<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+									<Badge
+										variant="outline"
+										className="border-blue-300 bg-blue-100 text-blue-700"
+									>
 										Incomplete
 									</Badge>
 								) : (
-									<Badge variant="default" className="bg-green-100 text-green-700">
+									<Badge
+										variant="default"
+										className="bg-green-100 text-green-700"
+									>
 										Complete
 									</Badge>
 								)}
@@ -86,23 +95,29 @@ export function DriverMobileMenuContent({
 									<span className="text-sm">Driver Status</span>
 								</div>
 								{driverStatus.isApproved ? (
-									<Badge variant="default" className="bg-green-100 text-green-700">
+									<Badge
+										variant="default"
+										className="bg-green-100 text-green-700"
+									>
 										Approved
 									</Badge>
 								) : (
-									<Badge variant="secondary" className="bg-gray-100 text-gray-700">
+									<Badge
+										variant="secondary"
+										className="bg-gray-100 text-gray-700"
+									>
 										Pending
 									</Badge>
 								)}
 							</div>
 
 							{needsOnboarding && (
-								<div className="pt-2 border-t">
+								<div className="border-t pt-2">
 									<Button
 										size="sm"
 										className="w-full"
 										onClick={() => {
-											navigate({ to: '/driver/onboarding' });
+											navigate({ to: "/driver/onboarding" });
 											onClose();
 										}}
 									>
@@ -116,10 +131,10 @@ export function DriverMobileMenuContent({
 			</div>
 
 			{/* Fixed Footer with Logout Button */}
-			<div className="p-4 border-t flex-shrink-0 bg-white">
+			<div className="flex-shrink-0 border-t bg-white p-4">
 				<Button
 					variant="outline"
-					className="w-full flex items-center justify-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+					className="flex w-full items-center justify-center gap-2 border-red-200 text-red-600 hover:bg-red-50"
 					onClick={() => {
 						onClose();
 						onSignOut();

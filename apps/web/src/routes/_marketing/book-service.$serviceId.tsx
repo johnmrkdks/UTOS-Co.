@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ServiceBookingPage } from "@/features/guest/_pages/service-booking-page";
 import { z } from "zod";
+import { ServiceBookingPage } from "@/features/guest/_pages/service-booking-page";
 
 const bookServiceSearchSchema = z.object({
 	quote: z.string().optional(),

@@ -1,10 +1,14 @@
+import { z } from "zod";
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import { getPackage } from "@/data/packages/get-package";
 import type { DB } from "@/db";
-import { BookingTypeEnum, BookingStatusEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
+import {
+	BookingPaymentStatusEnum,
+	BookingStatusEnum,
+	BookingTypeEnum,
+} from "@/db/sqlite/enums";
 import type { InsertBooking } from "@/schemas/shared";
-import { z } from "zod";
 
 export const CreatePackageBookingSchema = z.object({
 	packageId: z.string(),
@@ -36,36 +40,57 @@ export const CreatePackageBookingSchema = z.object({
 	serviceDuration: z.number().int().min(1).optional(),
 
 	// Optional stops for package bookings
-	stops: z.array(z.object({
-		address: z.string(),
-		latitude: z.number().optional(),
-		longitude: z.number().optional(),
-		stopOrder: z.number().int(),
-		waitingTime: z.number().int().default(0),
-		notes: z.string().optional(),
-	})).optional(),
+	stops: z
+		.array(
+			z.object({
+				address: z.string(),
+				latitude: z.number().optional(),
+				longitude: z.number().optional(),
+				stopOrder: z.number().int(),
+				waitingTime: z.number().int().default(0),
+				notes: z.string().optional(),
+			}),
+		)
+		.optional(),
 });
 
-export type CreatePackageBookingParams = z.infer<typeof CreatePackageBookingSchema>;
+export type CreatePackageBookingParams = z.infer<
+	typeof CreatePackageBookingSchema
+>;
 
 /** Admin creates package booking for client - userId optional (walk-in uses admin's), sendPaymentToClient sends payment link */
-export const AdminCreatePackageBookingSchema = CreatePackageBookingSchema.extend({
-	userId: z.string().optional(),
-	sendPaymentToClient: z.boolean().optional(),
-}).omit({ requirePayment: true }); // Admin uses sendPaymentToClient, not requirePayment
+export const AdminCreatePackageBookingSchema =
+	CreatePackageBookingSchema.extend({
+		userId: z.string().optional(),
+		sendPaymentToClient: z.boolean().optional(),
+	}).omit({ requirePayment: true }); // Admin uses sendPaymentToClient, not requirePayment
 
-export type AdminCreatePackageBookingParams = z.infer<typeof AdminCreatePackageBookingSchema>;
+export type AdminCreatePackageBookingParams = z.infer<
+	typeof AdminCreatePackageBookingSchema
+>;
 
-export async function createPackageBookingService(db: DB, data: CreatePackageBookingParams | AdminCreatePackageBookingParams) {
+export async function createPackageBookingService(
+	db: DB,
+	data: CreatePackageBookingParams | AdminCreatePackageBookingParams,
+) {
 	try {
 		console.log("🔍 DEBUG createPackageBookingService - START");
 		console.log("📦 Service data received:", JSON.stringify(data, null, 2));
-		console.log("📅 scheduledPickupTime type:", typeof data.scheduledPickupTime, "value:", data.scheduledPickupTime);
+		console.log(
+			"📅 scheduledPickupTime type:",
+			typeof data.scheduledPickupTime,
+			"value:",
+			data.scheduledPickupTime,
+		);
 
 		// Validate package exists and is available
 		console.log("🔍 Looking up package:", data.packageId);
 		const packageInfo = await getPackage(db, { id: data.packageId });
-		console.log("📦 Package found:", packageInfo ? "Yes" : "No", packageInfo?.name);
+		console.log(
+			"📦 Package found:",
+			packageInfo ? "Yes" : "No",
+			packageInfo?.name,
+		);
 
 		if (!packageInfo) {
 			throw new Error("Package not found");
@@ -77,7 +102,7 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 
 		// Validate passenger count doesn't exceed system limit (20 passengers max)
 		if (data.passengerCount > 20) {
-			throw new Error(`Maximum 20 passengers allowed per booking`);
+			throw new Error("Maximum 20 passengers allowed per booking");
 		}
 
 		// Fetch service type information for validation
@@ -86,8 +111,12 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 
 		if (packageInfo.serviceTypeId) {
 			try {
-				const { getPackageServiceTypeService } = await import("@/services/package-service-types/get-package-service-type");
-				serviceType = await getPackageServiceTypeService(db, { id: packageInfo.serviceTypeId });
+				const { getPackageServiceTypeService } = await import(
+					"@/services/package-service-types/get-package-service-type"
+				);
+				serviceType = await getPackageServiceTypeService(db, {
+					id: packageInfo.serviceTypeId,
+				});
 				isHourlyService = serviceType?.rateType === "hourly";
 			} catch (error) {
 				console.warn("Could not fetch service type:", error);
@@ -104,7 +133,10 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 
 		// Prepare booking data (guest bookings have null userId and isGuestBooking=true)
 		const isGuest = !data.userId;
-		console.log("📝 Preparing booking data...", isGuest ? "(guest booking)" : "");
+		console.log(
+			"📝 Preparing booking data...",
+			isGuest ? "(guest booking)" : "",
+		);
 		const bookingData: InsertBooking = {
 			bookingType: BookingTypeEnum.Package,
 			packageId: data.packageId,
@@ -122,17 +154,20 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 			scheduledPickupTime: data.scheduledPickupTime,
 
 			// Store service duration in estimated duration for hourly services
-			estimatedDuration: isHourlyService && data.serviceDuration
-				? data.serviceDuration * 60 // Convert hours to minutes
-				: packageInfo.duration,
+			estimatedDuration:
+				isHourlyService && data.serviceDuration
+					? data.serviceDuration * 60 // Convert hours to minutes
+					: packageInfo.duration,
 
 			// Calculate pricing based on service type
-			quotedAmount: isHourlyService && packageInfo.hourlyRate && data.serviceDuration
-				? packageInfo.hourlyRate * data.serviceDuration
-				: packageInfo.fixedPrice || 0,
-			finalAmount: isHourlyService && packageInfo.hourlyRate && data.serviceDuration
-				? packageInfo.hourlyRate * data.serviceDuration
-				: packageInfo.fixedPrice || 0,
+			quotedAmount:
+				isHourlyService && packageInfo.hourlyRate && data.serviceDuration
+					? packageInfo.hourlyRate * data.serviceDuration
+					: packageInfo.fixedPrice || 0,
+			finalAmount:
+				isHourlyService && packageInfo.hourlyRate && data.serviceDuration
+					? packageInfo.hourlyRate * data.serviceDuration
+					: packageInfo.fixedPrice || 0,
 
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,
@@ -143,12 +178,16 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 
 			status: BookingStatusEnum.Pending,
 			// When requirePayment (services page) or sendPaymentToClient (admin): client must pay before confirmation
-			...(("requirePayment" in data && data.requirePayment) || ("sendPaymentToClient" in data && data.sendPaymentToClient)
+			...(("requirePayment" in data && data.requirePayment) ||
+			("sendPaymentToClient" in data && data.sendPaymentToClient)
 				? { paymentStatus: BookingPaymentStatusEnum.PendingPayment }
 				: {}),
 		};
 
-		console.log("💾 Calling createBooking with:", JSON.stringify(bookingData, null, 2));
+		console.log(
+			"💾 Calling createBooking with:",
+			JSON.stringify(bookingData, null, 2),
+		);
 		const newBooking = await createBooking(db, bookingData);
 		console.log("✅ Booking created successfully with ID:", newBooking.id);
 
@@ -172,7 +211,10 @@ export async function createPackageBookingService(db: DB, data: CreatePackageBoo
 		return newBooking;
 	} catch (error) {
 		console.error("💥 ERROR in createPackageBookingService:", error);
-		console.error("📚 Service error stack:", error instanceof Error ? error.stack : 'No stack trace');
+		console.error(
+			"📚 Service error stack:",
+			error instanceof Error ? error.stack : "No stack trace",
+		);
 		throw error;
 	}
 }

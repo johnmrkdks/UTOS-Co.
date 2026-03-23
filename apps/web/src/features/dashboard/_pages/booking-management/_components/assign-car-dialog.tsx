@@ -15,9 +15,9 @@ import {
 } from "@workspace/ui/components/select";
 import { Car, Loader } from "lucide-react";
 import { useState } from "react";
-import { useGetAvailableCarsQuery } from "../_hooks/query/use-get-available-cars-query";
 import { useGetCarsQuery } from "../../car-management/_hooks/query/car/use-get-cars-query";
 import { useAssignCarMutation } from "../_hooks/query/use-assign-car-mutation";
+import { useGetAvailableCarsQuery } from "../_hooks/query/use-get-available-cars-query";
 
 interface AssignCarDialogProps {
 	booking: any;
@@ -31,49 +31,58 @@ export function AssignCarDialog({
 	onOpenChange,
 }: AssignCarDialogProps) {
 	const [selectedCarId, setSelectedCarId] = useState<string>("");
-	
+
 	// Try available cars endpoint first, fallback to regular cars endpoint
 	// Only execute queries when the dialog is actually open
-	const availableCarsQuery = useGetAvailableCarsQuery({ 
+	const availableCarsQuery = useGetAvailableCarsQuery({
 		limit: 100,
 		scheduledPickupTime: booking?.scheduledPickupTime,
-		estimatedDuration: booking?.estimatedDuration ? booking.estimatedDuration / 3600 : 2,
-		enabled: open  // Only run when dialog is open
+		estimatedDuration: booking?.estimatedDuration
+			? booking.estimatedDuration / 3600
+			: 2,
+		enabled: open, // Only run when dialog is open
 	});
-	
+
 	// Fallback to regular cars query if available cars query fails
 	const regularCarsQuery = useGetCarsQuery({
 		limit: 100,
 		sortBy: "name",
 		sortOrder: "asc",
-		enabled: open && availableCarsQuery.isError  // Only run when dialog is open and available cars query fails
+		enabled: open && availableCarsQuery.isError, // Only run when dialog is open and available cars query fails
 	});
-	
+
 	const assignCarMutation = useAssignCarMutation();
 
 	const handleAssignCar = () => {
 		if (!selectedCarId || !booking?.id) return;
 
-		(assignCarMutation as any).mutate({
-			id: booking.id,
-			data: {
-				carId: selectedCarId,
+		(assignCarMutation as any).mutate(
+			{
+				id: booking.id,
+				data: {
+					carId: selectedCarId,
+				},
 			},
-		}, {
-			onSuccess: () => {
-				onOpenChange(false);
-				setSelectedCarId("");
-			}
-		});
+			{
+				onSuccess: () => {
+					onOpenChange(false);
+					setSelectedCarId("");
+				},
+			},
+		);
 	};
 
 	// Use available cars if query succeeds, otherwise fallback to regular cars with filtering
-	const availableCars = availableCarsQuery.data?.data ||
-		(regularCarsQuery.data as any)?.items?.filter((car: any) =>
-			car.isActive && car.isAvailable && car.isPublished
-		) || [];
+	const availableCars =
+		availableCarsQuery.data?.data ||
+		(regularCarsQuery.data as any)?.items?.filter(
+			(car: any) => car.isActive && car.isAvailable && car.isPublished,
+		) ||
+		[];
 
-	const isLoading = availableCarsQuery.isLoading || (availableCarsQuery.isError && regularCarsQuery.isLoading);
+	const isLoading =
+		availableCarsQuery.isLoading ||
+		(availableCarsQuery.isError && regularCarsQuery.isLoading);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,7 +105,7 @@ export function AssignCarDialog({
 					) : (
 						<>
 							<div className="space-y-2">
-								<label className="text-sm font-medium">Available Cars</label>
+								<label className="font-medium text-sm">Available Cars</label>
 								<Select value={selectedCarId} onValueChange={setSelectedCarId}>
 									<SelectTrigger>
 										<SelectValue placeholder="Select a car" />
@@ -107,14 +116,20 @@ export function AssignCarDialog({
 												<div className="flex items-center gap-2">
 													<Car className="h-4 w-4" />
 													<span>{car.name}</span>
-													{car.brand && <span className="text-gray-500">({car.brand.name})</span>}
+													{car.brand && (
+														<span className="text-gray-500">
+															({car.brand.name})
+														</span>
+													)}
 												</div>
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
 								{availableCars.length === 0 && (
-									<p className="text-sm text-gray-500">No available cars found</p>
+									<p className="text-gray-500 text-sm">
+										No available cars found
+									</p>
 								)}
 							</div>
 
@@ -133,7 +148,7 @@ export function AssignCarDialog({
 								>
 									{assignCarMutation.isPending ? (
 										<>
-											<Loader className="h-4 w-4 mr-2 animate-spin" />
+											<Loader className="mr-2 h-4 w-4 animate-spin" />
 											Assigning...
 										</>
 									) : (

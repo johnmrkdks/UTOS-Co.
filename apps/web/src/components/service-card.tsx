@@ -1,8 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
-import { Clock, Users, MapPin, Calendar } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Calendar, Clock, MapPin, Users } from "lucide-react";
 
 interface Service {
 	id: string;
@@ -21,7 +26,7 @@ interface Service {
 	// Service type details
 	packageServiceType?: {
 		name: string;
-		rateType: 'fixed' | 'hourly';
+		rateType: "fixed" | "hourly";
 	};
 }
 
@@ -39,40 +44,40 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 	const getPriceDisplay = () => {
 		const rateType = service.packageServiceType?.rateType;
 
-		if (rateType === 'hourly' && service.hourlyRate) {
+		if (rateType === "hourly" && service.hourlyRate) {
 			return {
 				price: `$${service.hourlyRate.toFixed(0)}/hr`,
-				label: 'Hourly Rate',
-				badgeText: `${formatPrice(service.hourlyRate)}/hr`
+				label: "Hourly Rate",
+				badgeText: `${formatPrice(service.hourlyRate)}/hr`,
 			};
-		} else if (rateType === 'fixed' && service.fixedPrice) {
+		}
+		if (rateType === "fixed" && service.fixedPrice) {
 			return {
 				price: formatPrice(service.fixedPrice),
-				label: 'Fixed Price',
-				badgeText: formatPrice(service.fixedPrice)
+				label: "Fixed Price",
+				badgeText: formatPrice(service.fixedPrice),
 			};
-		} else {
-			// Fallback logic
-			if (service.hourlyRate && service.hourlyRate > 0) {
-				return {
-					price: `$${service.hourlyRate.toFixed(0)}/hr`,
-					label: 'Hourly Rate',
-					badgeText: `${formatPrice(service.hourlyRate)}/hr`
-				};
-			} else if (service.fixedPrice && service.fixedPrice > 0) {
-				return {
-					price: formatPrice(service.fixedPrice),
-					label: 'Fixed Price',
-					badgeText: formatPrice(service.fixedPrice)
-				};
-			} else {
-				return {
-					price: 'Contact for Price',
-					label: 'Custom Quote',
-					badgeText: 'Quote'
-				};
-			}
 		}
+		// Fallback logic
+		if (service.hourlyRate && service.hourlyRate > 0) {
+			return {
+				price: `$${service.hourlyRate.toFixed(0)}/hr`,
+				label: "Hourly Rate",
+				badgeText: `${formatPrice(service.hourlyRate)}/hr`,
+			};
+		}
+		if (service.fixedPrice && service.fixedPrice > 0) {
+			return {
+				price: formatPrice(service.fixedPrice),
+				label: "Fixed Price",
+				badgeText: formatPrice(service.fixedPrice),
+			};
+		}
+		return {
+			price: "Contact for Price",
+			label: "Custom Quote",
+			badgeText: "Quote",
+		};
 	};
 
 	const formatDuration = (minutes?: number) => {
@@ -86,43 +91,50 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 
 	const getServiceTypeDisplay = (serviceType: string) => {
 		switch (serviceType) {
-			case "transfer": return "Transfer";
-			case "tour": return "Private Tour";
-			case "airport": return "Airport Transfer";
-			case "business": return "Business Travel";
-			default: return serviceType.charAt(0).toUpperCase() + serviceType.slice(1);
+			case "transfer":
+				return "Transfer";
+			case "tour":
+				return "Private Tour";
+			case "airport":
+				return "Airport Transfer";
+			case "business":
+				return "Business Travel";
+			default:
+				return serviceType.charAt(0).toUpperCase() + serviceType.slice(1);
 		}
 	};
 
 	return (
-		<Card className={`overflow-hidden hover:shadow-xl transition-all duration-300 group ${className}`}>
+		<Card
+			className={`group overflow-hidden transition-all duration-300 hover:shadow-xl ${className}`}
+		>
 			{/* Service Image Banner */}
-			<div className="h-48 relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+			<div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
 				{service.bannerImageUrl ? (
 					<>
-						<img 
-							src={service.bannerImageUrl} 
+						<img
+							src={service.bannerImageUrl}
 							alt={service.name}
-							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+							className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
 						/>
 						<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 					</>
 				) : (
-					<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10">
+					<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10">
 						<Calendar className="h-16 w-16 text-primary/40" />
 					</div>
 				)}
-				
+
 				{/* Service Type Badge */}
 				<div className="absolute top-4 left-4">
-					<Badge className="bg-primary/90 text-primary-foreground border-0 shadow-lg">
+					<Badge className="border-0 bg-primary/90 text-primary-foreground shadow-lg">
 						{getServiceTypeDisplay(service.serviceType)}
 					</Badge>
 				</div>
 
 				{/* Price Badge */}
 				<div className="absolute top-4 right-4">
-					<Badge className="bg-green-600 text-white border-0 shadow-lg font-bold text-sm">
+					<Badge className="border-0 bg-green-600 font-bold text-sm text-white shadow-lg">
 						{getPriceDisplay().badgeText}
 					</Badge>
 				</div>
@@ -130,7 +142,10 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 				{/* Deposit Required Badge */}
 				{service.depositRequired && (
 					<div className="absolute bottom-4 left-4">
-						<Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+						<Badge
+							variant="secondary"
+							className="border-white/30 bg-white/20 text-white backdrop-blur-sm"
+						>
 							Deposit Required
 						</Badge>
 					</div>
@@ -139,22 +154,22 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 
 			{/* Card Content */}
 			<CardHeader className="pb-4">
-				<div className="flex justify-between items-start gap-3">
+				<div className="flex items-start justify-between gap-3">
 					<div className="flex-1">
-						<CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+						<CardTitle className="font-bold text-xl transition-colors group-hover:text-primary">
 							{service.name}
 						</CardTitle>
 						{service.description && (
-							<p className="text-sm text-muted-foreground leading-relaxed mt-1">
+							<p className="mt-1 text-muted-foreground text-sm leading-relaxed">
 								{service.description}
 							</p>
 						)}
 					</div>
-					<div className="text-right flex-shrink-0">
-						<div className="text-2xl font-bold text-primary">
+					<div className="flex-shrink-0 text-right">
+						<div className="font-bold text-2xl text-primary">
 							{getPriceDisplay().price}
 						</div>
-						<div className="text-xs text-muted-foreground">
+						<div className="text-muted-foreground text-xs">
 							{getPriceDisplay().label}
 						</div>
 					</div>
@@ -164,7 +179,7 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 			<CardContent className="space-y-4">
 				{/* Service Details */}
 				<div className="grid grid-cols-2 gap-3">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
+					<div className="flex items-center gap-2 text-muted-foreground text-sm">
 						<Clock className="h-4 w-4 text-primary" />
 						<span>{formatDuration(service.duration)}</span>
 					</div>
@@ -172,8 +187,14 @@ export function ServiceCard({ service, className = "" }: ServiceCardProps) {
 
 				{/* Book Button */}
 				<div className="pt-2">
-					<Button asChild className="w-full group-hover:shadow-md transition-shadow">
-						<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
+					<Button
+						asChild
+						className="w-full transition-shadow group-hover:shadow-md"
+					>
+						<Link
+							to="/book-service/$serviceId"
+							params={{ serviceId: service.id }}
+						>
 							Book This Service
 						</Link>
 					</Button>

@@ -1,56 +1,83 @@
-import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
-import { sql, relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
+import { relations, sql } from "drizzle-orm";
+import {
+	index,
+	integer,
+	real,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 import { packageCategories } from "./packages/package-categories";
 import { packageServiceTypes } from "./packages/package-service-types";
 
-export const packages = sqliteTable("packages", {
-	id: text("id").primaryKey().$defaultFn(() => createId()),
-	name: text("name").notNull(), // "Airport Transfer", "City Tour", etc.
-	description: text("description").notNull(),
+export const packages = sqliteTable(
+	"packages",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		name: text("name").notNull(), // "Airport Transfer", "City Tour", etc.
+		description: text("description").notNull(),
 
-	categoryId: text("category_id").references(() => packageCategories.id),
-	serviceTypeId: text("service_type_id").references(() => packageServiceTypes.id).notNull(),
+		categoryId: text("category_id").references(() => packageCategories.id),
+		serviceTypeId: text("service_type_id")
+			.references(() => packageServiceTypes.id)
+			.notNull(),
 
-	// Package image
-	bannerImageUrl: text("banner_image_url"), // URL for package banner image
+		// Package image
+		bannerImageUrl: text("banner_image_url"), // URL for package banner image
 
-	// Service specifications
-	duration: integer("duration"), // in minutes (null for transfers)
-	maxDistance: integer("max_distance"), // in km (null if unlimited)
+		// Service specifications
+		duration: integer("duration"), // in minutes (null for transfers)
+		maxDistance: integer("max_distance"), // in km (null if unlimited)
 
-	// Pricing (based on service type rate type)
-	fixedPrice: real("fixed_price"), // in dollars (for fixed rate packages)
-	hourlyRate: real("hourly_rate"), // in dollars per hour (for hourly rate packages)
-	extraKmPrice: real("extra_km_price"), // if distance exceeds maxDistance
-	extraHourPrice: real("extra_hour_price"), // if duration exceeds planned
-	depositRequired: real("deposit_required"), // in dollars
+		// Pricing (based on service type rate type)
+		fixedPrice: real("fixed_price"), // in dollars (for fixed rate packages)
+		hourlyRate: real("hourly_rate"), // in dollars per hour (for hourly rate packages)
+		extraKmPrice: real("extra_km_price"), // if distance exceeds maxDistance
+		extraHourPrice: real("extra_hour_price"), // if duration exceeds planned
+		depositRequired: real("deposit_required"), // in dollars
 
-	// Service constraints
-	maxPassengers: integer("max_passengers").default(20),
-	advanceBookingHours: integer("advance_booking_hours").default(24), // minimum notice
-	cancellationHours: integer("cancellation_hours").default(24), // cancellation policy
+		// Service constraints
+		maxPassengers: integer("max_passengers").default(20),
+		advanceBookingHours: integer("advance_booking_hours").default(24), // minimum notice
+		cancellationHours: integer("cancellation_hours").default(24), // cancellation policy
 
-	// Included services
-	includesDriver: integer("includes_driver", { mode: "boolean" }).default(true),
-	includesFuel: integer("includes_fuel", { mode: "boolean" }).default(true),
-	includesTolls: integer("includes_tolls", { mode: "boolean" }).default(false),
-	includesWaiting: integer("includes_waiting", { mode: "boolean" }).default(false),
-	waitingTimeMinutes: integer("waiting_time_minutes").default(0),
+		// Included services
+		includesDriver: integer("includes_driver", { mode: "boolean" }).default(
+			true,
+		),
+		includesFuel: integer("includes_fuel", { mode: "boolean" }).default(true),
+		includesTolls: integer("includes_tolls", { mode: "boolean" }).default(
+			false,
+		),
+		includesWaiting: integer("includes_waiting", { mode: "boolean" }).default(
+			false,
+		),
+		waitingTimeMinutes: integer("waiting_time_minutes").default(0),
 
-	// Availability
-	isAvailable: integer("is_available", { mode: "boolean" }).default(true),
-	isPublished: integer("is_published", { mode: "boolean" }).default(false), // Public visibility for customers
-	availableDays: text("available_days"), // JSON: ["monday", "tuesday", ...] or null for all days
-	availableTimeStart: text("available_time_start"), // "09:00" or null for anytime
-	availableTimeEnd: text("available_time_end"), // "17:00" or null for anytime
+		// Availability
+		isAvailable: integer("is_available", { mode: "boolean" }).default(true),
+		isPublished: integer("is_published", { mode: "boolean" }).default(false), // Public visibility for customers
+		availableDays: text("available_days"), // JSON: ["monday", "tuesday", ...] or null for all days
+		availableTimeStart: text("available_time_start"), // "09:00" or null for anytime
+		availableTimeEnd: text("available_time_end"), // "17:00" or null for anytime
 
-	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-}, (table) => ({
-	nameIdx: index("packages_name_idx").on(table.name),
-	publishedAvailabilityIdx: index("packages_published_availability_idx").on(table.isPublished, table.isAvailable),
-}));
+		createdAt: integer("created_at", { mode: "timestamp" }).default(
+			sql`(unixepoch())`,
+		),
+		updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+			sql`(unixepoch())`,
+		),
+	},
+	(table) => ({
+		nameIdx: index("packages_name_idx").on(table.name),
+		publishedAvailabilityIdx: index("packages_published_availability_idx").on(
+			table.isPublished,
+			table.isAvailable,
+		),
+	}),
+);
 
 export const packagesRelations = relations(packages, ({ one }) => ({
 	packageServiceType: one(packageServiceTypes, {

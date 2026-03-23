@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { cars } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function checkCarFuelTypeUsage(db: DB, id: string) {
 	const carsUsingFuelType = await db.query.cars.findMany({

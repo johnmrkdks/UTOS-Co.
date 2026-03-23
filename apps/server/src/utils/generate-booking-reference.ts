@@ -1,6 +1,6 @@
-import type { DB } from "@/db";
-import { systemSettings, bookings } from "@/db/sqlite/schema";
 import { eq } from "drizzle-orm";
+import type { DB } from "@/db";
+import { bookings, systemSettings } from "@/db/sqlite/schema";
 
 // Cache for booking reference prefix to avoid repeated DB queries
 let cachedPrefix: string | null = null;
@@ -35,7 +35,10 @@ export function clearBookingReferencePrefixCache() {
  * @param maxAttempts - Maximum retry attempts (default: 10)
  * @returns Promise<string> - Generated unique reference number (e.g., "DUC-234567")
  */
-export async function generateBookingReference(db: DB, maxAttempts = 10): Promise<string> {
+export async function generateBookingReference(
+	db: DB,
+	maxAttempts = 10,
+): Promise<string> {
 	const prefix = await getBookingReferencePrefix(db);
 
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -56,7 +59,9 @@ export async function generateBookingReference(db: DB, maxAttempts = 10): Promis
 		}
 
 		// If conflict, retry (loop continues)
-		console.log(`Reference ${referenceNumber} already exists, retrying... (attempt ${attempt + 1}/${maxAttempts})`);
+		console.log(
+			`Reference ${referenceNumber} already exists, retrying... (attempt ${attempt + 1}/${maxAttempts})`,
+		);
 	}
 
 	// Fallback: use timestamp to ensure uniqueness if all retries failed

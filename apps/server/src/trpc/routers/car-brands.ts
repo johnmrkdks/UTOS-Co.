@@ -1,4 +1,8 @@
 import {
+	CheckCarBrandUsageServiceSchema,
+	checkCarBrandUsageService,
+} from "@/services/cars-brands/check-car-brand-usage";
+import {
 	CreateCarBrandServiceSchema,
 	createCarBrandService,
 } from "@/services/cars-brands/create-car-brand";
@@ -7,13 +11,16 @@ import {
 	deleteCarBrandService,
 } from "@/services/cars-brands/delete-car-brand";
 import {
-	IsCarBrandExistServiceSchema,
-	isCarBrandExistService,
-} from "@/services/cars-brands/is-car-brand-exist";
-import { GetCarBrandServiceSchema, getCarBrandService } from "@/services/cars-brands/get-car-brand";
+	GetCarBrandServiceSchema,
+	getCarBrandService,
+} from "@/services/cars-brands/get-car-brand";
 import { getCarBrandsService } from "@/services/cars-brands/get-car-brands";
 import { getCarBrandsWithEnrichedDataService } from "@/services/cars-brands/get-car-brands-with-enriched-data";
 import { getCarBrandsWithModelsService } from "@/services/cars-brands/get-car-brands-with-models";
+import {
+	IsCarBrandExistServiceSchema,
+	isCarBrandExistService,
+} from "@/services/cars-brands/is-car-brand-exist";
 import {
 	UpdateCarBrandServiceSchema,
 	updateCarBrandService,
@@ -21,7 +28,6 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { checkCarBrandUsageService, CheckCarBrandUsageServiceSchema } from "@/services/cars-brands/check-car-brand-usage";
 
 export const carBrandsRouter = router({
 	checkCarBrandUsage: protectedProcedure
@@ -64,16 +70,18 @@ export const carBrandsRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	get: protectedProcedure.input(GetCarBrandServiceSchema).query(async ({ ctx: { db }, input }) => {
-		try {
+	get: protectedProcedure
+		.input(GetCarBrandServiceSchema)
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const carBrand = await getCarBrandService(db, input);
+				return carBrand;
+			} catch (error) {
+				handleTRPCError(error);
+			}
 			const carBrand = await getCarBrandService(db, input);
 			return carBrand;
-		} catch (error) {
-			handleTRPCError(error);
-		}
-		const carBrand = await getCarBrandService(db, input);
-		return carBrand;
-	}),
+		}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
@@ -88,7 +96,10 @@ export const carBrandsRouter = router({
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const carBrandsWithModels = await getCarBrandsWithModelsService(db, input);
+				const carBrandsWithModels = await getCarBrandsWithModelsService(
+					db,
+					input,
+				);
 				return carBrandsWithModels;
 			} catch (error) {
 				handleTRPCError(error);
@@ -116,4 +127,3 @@ export const carBrandsRouter = router({
 			}
 		}),
 });
-

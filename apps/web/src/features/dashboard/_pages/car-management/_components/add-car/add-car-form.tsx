@@ -1,42 +1,46 @@
-import { Button } from "@workspace/ui/components/button"
-import { Form } from "@workspace/ui/components/form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type FieldErrors } from "react-hook-form"
-import { z } from "zod/v3"
-import { CarFormSchema } from "@/features/dashboard/_pages/car-management/_schemas/car-schema"
-import { BasicInfoForm } from "./add-car-forms/basic-info-form"
-import { Separator } from "@workspace/ui/components/separator"
-import { SpecificationsForm } from "./add-car-forms/specifications-form"
-import { DetailsForm } from "./add-car-forms/details-form"
-import { CarStatusEnum } from "server/types"
-import { MaintenanceForm } from "./add-car-forms/maintenance-form"
-import { OperationalStatusForm } from "./add-car-forms/operational-status-form"
-import { ImagesForm } from "./add-car-forms/images-form"
-import { FeaturesForm } from "./add-car-forms/features-form"
-import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout"
-import { useCallback, useMemo } from "react"
-import { useNavigate } from "@tanstack/react-router"
-import { SaveIcon, FileTextIcon, AlertCircleIcon, ImageIcon, InfoIcon } from "lucide-react"
-import { useAddCarDraftStore } from "@/features/dashboard/_pages/car-management/_hooks/add-car-draft-store"
-import { toast } from "sonner"
-import { useCreateCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-create-car-mutation"
-import { useCarDraftForm } from "@/features/dashboard/_pages/car-management/_hooks/use-car-draft-form"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import { Form } from "@workspace/ui/components/form";
+import { Separator } from "@workspace/ui/components/separator";
+import {
+	AlertCircleIcon,
+	FileTextIcon,
+	ImageIcon,
+	InfoIcon,
+	SaveIcon,
+} from "lucide-react";
+import { useCallback, useMemo } from "react";
+import { type FieldErrors, useForm } from "react-hook-form";
+import { CarStatusEnum } from "server/types";
+import { toast } from "sonner";
+import type { z } from "zod/v3";
+import { PublicationValidationPanel } from "@/features/dashboard/_components/publication";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import {
 	DiscardDialog,
 	DraftDialog,
-} from "@/features/dashboard/_pages/car-management/_components/draft/draft-dialogs"
-import {
-	StatusBadge,
-} from "@/features/dashboard/_pages/car-management/_components/draft/draft-indicators"
-import { PublicationValidationPanel } from "@/features/dashboard/_components/publication"
+} from "@/features/dashboard/_pages/car-management/_components/draft/draft-dialogs";
+import { StatusBadge } from "@/features/dashboard/_pages/car-management/_components/draft/draft-indicators";
+import { useAddCarDraftStore } from "@/features/dashboard/_pages/car-management/_hooks/add-car-draft-store";
+import { useCreateCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-create-car-mutation";
+import { useCarDraftForm } from "@/features/dashboard/_pages/car-management/_hooks/use-car-draft-form";
+import { CarFormSchema } from "@/features/dashboard/_pages/car-management/_schemas/car-schema";
+import { BasicInfoForm } from "./add-car-forms/basic-info-form";
+import { DetailsForm } from "./add-car-forms/details-form";
+import { FeaturesForm } from "./add-car-forms/features-form";
+import { ImagesForm } from "./add-car-forms/images-form";
+import { MaintenanceForm } from "./add-car-forms/maintenance-form";
+import { OperationalStatusForm } from "./add-car-forms/operational-status-form";
+import { SpecificationsForm } from "./add-car-forms/specifications-form";
 
-export type AddCarFormValues = z.infer<typeof CarFormSchema>
+export type AddCarFormValues = z.infer<typeof CarFormSchema>;
 
 interface AddCarFormProps {
-	onSubmit?: (data: AddCarFormValues) => Promise<void> | void
-	initialData?: Partial<AddCarFormValues>
-	isLoading?: boolean
-	className?: string
+	onSubmit?: (data: AddCarFormValues) => Promise<void> | void;
+	initialData?: Partial<AddCarFormValues>;
+	isLoading?: boolean;
+	className?: string;
 }
 
 // Default form values - moved outside component to prevent recreation
@@ -63,38 +67,45 @@ const DEFAULT_VALUES: Partial<AddCarFormValues> = {
 	driveTypeId: "",
 	conditionTypeId: "",
 	categoryId: "",
-}
+};
 
 interface ValidationErrorsProps {
-	errors: FieldErrors<AddCarFormValues>
-	errorCount: number
+	errors: FieldErrors<AddCarFormValues>;
+	errorCount: number;
 }
 
-export const ValidationErrors = ({ errors, errorCount }: ValidationErrorsProps) => {
-	if (errorCount === 0 || !errors) return null
+export const ValidationErrors = ({
+	errors,
+	errorCount,
+}: ValidationErrorsProps) => {
+	if (errorCount === 0 || !errors) return null;
 
 	// Group errors by type for better user experience
-	const imageErrors = errors?.images
-	const formErrors = Object.entries(errors || {}).filter(([key]) => key !== 'images')
+	const imageErrors = errors?.images;
+	const formErrors = Object.entries(errors || {}).filter(
+		([key]) => key !== "images",
+	);
 
 	return (
 		<div className="mb-4 space-y-3">
 			{/* General form errors */}
 			{formErrors.length > 0 && (
-				<div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+				<div className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
 					<div className="flex items-start gap-2">
-						<AlertCircleIcon className="size-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
+						<AlertCircleIcon className="mt-0.5 size-4 shrink-0 text-red-600 dark:text-red-400" />
 						<div className="space-y-2">
-							<p className="text-sm text-red-800 dark:text-red-200 font-medium">
+							<p className="font-medium text-red-800 text-sm dark:text-red-200">
 								Please fix the following fields:
 							</p>
-							<ul className="text-xs text-red-700 dark:text-red-300 space-y-1 ml-2">
+							<ul className="ml-2 space-y-1 text-red-700 text-xs dark:text-red-300">
 								{formErrors.map(([field, error]) => (
 									<li key={field} className="flex items-start gap-1">
-										<span className="w-1 h-1 bg-red-500 rounded-full mt-2 shrink-0"></span>
+										<span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-red-500" />
 										<span>
-											<strong className="capitalize">{field.replace(/([A-Z])/g, ' $1').trim()}:</strong>{' '}
-											{error?.message || 'This field has an error'}
+											<strong className="capitalize">
+												{field.replace(/([A-Z])/g, " $1").trim()}:
+											</strong>{" "}
+											{error?.message || "This field has an error"}
 										</span>
 									</li>
 								))}
@@ -106,27 +117,29 @@ export const ValidationErrors = ({ errors, errorCount }: ValidationErrorsProps) 
 
 			{/* Image-specific errors */}
 			{imageErrors && (
-				<div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md">
+				<div className="rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-900/20">
 					<div className="flex items-start gap-2">
-						<ImageIcon className="size-4 shrink-0 text-orange-600 dark:text-orange-400 mt-0.5" />
+						<ImageIcon className="mt-0.5 size-4 shrink-0 text-orange-600 dark:text-orange-400" />
 						<div className="space-y-2">
-							<p className="text-sm text-orange-800 dark:text-orange-200 font-medium">
+							<p className="font-medium text-orange-800 text-sm dark:text-orange-200">
 								Image Upload Issues:
 							</p>
-							<div className="text-xs text-orange-700 dark:text-orange-300 space-y-2">
+							<div className="space-y-2 text-orange-700 text-xs dark:text-orange-300">
 								{imageErrors.message && (
-									<div className="p-2 bg-orange-100 dark:bg-orange-800/30 rounded border border-orange-200 dark:border-orange-700">
+									<div className="rounded border border-orange-200 bg-orange-100 p-2 dark:border-orange-700 dark:bg-orange-800/30">
 										{imageErrors.message}
 									</div>
 								)}
 
-								<div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-									<InfoIcon className="size-3 shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
+								<div className="flex items-start gap-2 rounded border border-blue-200 bg-blue-50 p-2 dark:border-blue-800 dark:bg-blue-900/20">
+									<InfoIcon className="mt-0.5 size-3 shrink-0 text-blue-600 dark:text-blue-400" />
 									<div className="text-blue-700 dark:text-blue-300">
 										<strong>Quick fixes:</strong>
-										<ul className="mt-1 space-y-1 ml-2">
+										<ul className="mt-1 ml-2 space-y-1">
 											<li>• Make sure at least one image is uploaded</li>
-											<li>• Check that exactly one image is marked as "Main"</li>
+											<li>
+												• Check that exactly one image is marked as "Main"
+											</li>
 											<li>• Try removing all images and re-uploading them</li>
 											<li>• Make sure all images have valid URLs</li>
 										</ul>
@@ -138,14 +151,19 @@ export const ValidationErrors = ({ errors, errorCount }: ValidationErrorsProps) 
 				</div>
 			)}
 		</div>
-	)
-}
+	);
+};
 
-export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = false, className }: AddCarFormProps) {
-	const navigate = useNavigate()
+export function AddCarForm({
+	onSubmit: onSubmitProp,
+	initialData,
+	isLoading = false,
+	className,
+}: AddCarFormProps) {
+	const navigate = useNavigate();
 
-	const mutation = useCreateCarMutation()
-	const draftStore = useAddCarDraftStore()
+	const mutation = useCreateCarMutation();
+	const draftStore = useAddCarDraftStore();
 
 	// Memoize form default values
 	const formDefaultValues = useMemo(
@@ -154,41 +172,52 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 			...initialData,
 		}),
 		[initialData],
-	)
+	);
 
 	const form = useForm<AddCarFormValues>({
 		resolver: zodResolver(CarFormSchema),
 		defaultValues: formDefaultValues,
 		mode: "onChange",
-	})
+	});
 
 	// Watch form data for validation
-	const currentFormData = form.watch()
+	const currentFormData = form.watch();
 
 	const {
 		formState: { isDirty, isValid, errors },
-	} = form
+	} = form;
 
 	// Transform form data for validation (add defaults for new car)
-	const carValidationData = useMemo(() => ({
-		id: initialData?.id || "new",
-		name: currentFormData.name || "",
-		description: currentFormData.description || "",
-		licensePlate: currentFormData.licensePlate || "",
-		images: currentFormData.images || [],
-		insuranceExpiry: currentFormData.insuranceExpiry ? new Date(currentFormData.insuranceExpiry) : undefined,
-		registrationExpiry: currentFormData.registrationExpiry ? new Date(currentFormData.registrationExpiry) : undefined,
-		lastServiceDate: currentFormData.lastServiceDate ? new Date(currentFormData.lastServiceDate) : undefined,
-		isActive: currentFormData.isActive ?? true,
-		isAvailable: currentFormData.isAvailable ?? true,
-		status: currentFormData.status || "available",
-		seatingCapacity: currentFormData.seatingCapacity || 4,
-		category: currentFormData.categoryId ? { name: "Category" } : undefined,
-		model: currentFormData.modelId ? { name: "Model", brand: { name: "Brand" } } : undefined,
-	}), [currentFormData, initialData])
+	const carValidationData = useMemo(
+		() => ({
+			id: initialData?.id || "new",
+			name: currentFormData.name || "",
+			description: currentFormData.description || "",
+			licensePlate: currentFormData.licensePlate || "",
+			images: currentFormData.images || [],
+			insuranceExpiry: currentFormData.insuranceExpiry
+				? new Date(currentFormData.insuranceExpiry)
+				: undefined,
+			registrationExpiry: currentFormData.registrationExpiry
+				? new Date(currentFormData.registrationExpiry)
+				: undefined,
+			lastServiceDate: currentFormData.lastServiceDate
+				? new Date(currentFormData.lastServiceDate)
+				: undefined,
+			isActive: currentFormData.isActive ?? true,
+			isAvailable: currentFormData.isAvailable ?? true,
+			status: currentFormData.status || "available",
+			seatingCapacity: currentFormData.seatingCapacity || 4,
+			category: currentFormData.categoryId ? { name: "Category" } : undefined,
+			model: currentFormData.modelId
+				? { name: "Model", brand: { name: "Brand" } }
+				: undefined,
+		}),
+		[currentFormData, initialData],
+	);
 
-	const errorCount = errors ? Object.keys(errors).length : 0
-	const hasErrors = errorCount > 0
+	const errorCount = errors ? Object.keys(errors).length : 0;
+	const hasErrors = errorCount > 0;
 
 	const {
 		showDiscardAlert,
@@ -205,38 +234,39 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 		draftStore,
 		initialData,
 		onDiscardSuccess: () => navigate({ to: "/admin/dashboard/cars" }),
-	})
+	});
 
 	const handleSubmit = useCallback(
 		async (data: AddCarFormValues) => {
+			const parsedData = CarFormSchema.parse(data);
 
-			const parsedData = CarFormSchema.parse(data)
-
-			console.log("parsedData", parsedData)
+			console.log("parsedData", parsedData);
 
 			mutation.mutate(parsedData, {
 				onSuccess: () => {
-					toast.success("Car has been added successfully!")
-					draftStore.clearDraft()
-					form.reset()
-					navigate({ to: "/admin/dashboard/cars" })
+					toast.success("Car has been added successfully!");
+					draftStore.clearDraft();
+					form.reset();
+					navigate({ to: "/admin/dashboard/cars" });
 				},
 				onError: (error) => {
-					console.error("Form submission error:", error)
-					toast.error("Failed to add car. Please try again.")
+					console.error("Form submission error:", error);
+					toast.error("Failed to add car. Please try again.");
 				},
-			})
-
+			});
 		},
 		[onSubmitProp, form, navigate, draftStore, mutation],
-	)
+	);
 
-	const isPending = mutation.isPending || form.formState.isSubmitting
+	const isPending = mutation.isPending || form.formState.isSubmitting;
 
 	return (
 		<>
-			<Form {...form as any}>
-				<form onSubmit={form.handleSubmit(handleSubmit)} className={`flex flex-col h-full ${className || ""}`}>
+			<Form {...(form as any)}>
+				<form
+					onSubmit={form.handleSubmit(handleSubmit)}
+					className={`flex h-full flex-col ${className || ""}`}
+				>
 					<div className="flex-1">
 						<PaddingLayout className="pt-0 pb-4">
 							<ValidationErrors errors={errors} errorCount={errorCount} />
@@ -268,7 +298,7 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 					</div>
 
 					{/* Footer Actions - Sticky within form container */}
-					<div className="sticky bottom-0 w-full bg-background/95 backdrop-blur-sm border-t shadow-lg z-10">
+					<div className="sticky bottom-0 z-10 w-full border-t bg-background/95 shadow-lg backdrop-blur-sm">
 						<PaddingLayout className="flex items-center justify-between gap-2 py-3">
 							<div className="flex items-center gap-2">
 								<Button
@@ -278,29 +308,32 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 									loading={isPending}
 								>
 									{isPending ? (
-										<>
-											Adding...
-										</>
+										<>Adding...</>
 									) : (
 										<>
-											<SaveIcon className="w-4 h-4" />
+											<SaveIcon className="h-4 w-4" />
 											Add New Car
 										</>
 									)}
 								</Button>
 
-								<Button 
-									type="button" 
-									variant="secondary" 
-									onClick={handleSaveDraft} 
+								<Button
+									type="button"
+									variant="secondary"
+									onClick={handleSaveDraft}
 									disabled={isPending || !isDirty}
 									className="min-w-[100px]"
 								>
-									<FileTextIcon className="w-4 h-4" />
+									<FileTextIcon className="h-4 w-4" />
 									Save Draft
 								</Button>
 
-								<Button type="button" variant="outline" onClick={handleDiscard} disabled={isPending}>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={handleDiscard}
+									disabled={isPending}
+								>
 									Cancel
 								</Button>
 
@@ -312,14 +345,18 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 										onClick={() => setShowDraftDialog(true)}
 										className="text-muted-foreground"
 									>
-										<FileTextIcon className="w-4 h-4" />
+										<FileTextIcon className="h-4 w-4" />
 										Load Draft
 									</Button>
 								)}
 							</div>
 
-							<div className="flex items-center gap-4 text-sm text-muted-foreground">
-								<StatusBadge isDirty={isDirty} hasErrors={hasErrors} errorCount={errorCount} />
+							<div className="flex items-center gap-4 text-muted-foreground text-sm">
+								<StatusBadge
+									isDirty={isDirty}
+									hasErrors={hasErrors}
+									errorCount={errorCount}
+								/>
 							</div>
 						</PaddingLayout>
 					</div>
@@ -343,5 +380,5 @@ export function AddCarForm({ onSubmit: onSubmitProp, initialData, isLoading = fa
 				isSubmitting={mutation.isPending}
 			/>
 		</>
-	)
+	);
 }

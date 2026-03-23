@@ -1,13 +1,15 @@
-import type { DB } from "@/db";
-import { pricingConfig, cars } from "@/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { cars, pricingConfig } from "@/db/schema";
 
 export const GetCarPricingEstimateSchema = z.object({
 	carId: z.string(),
 });
 
-export type GetCarPricingEstimateParams = z.infer<typeof GetCarPricingEstimateSchema>;
+export type GetCarPricingEstimateParams = z.infer<
+	typeof GetCarPricingEstimateSchema
+>;
 
 export interface CarPricingEstimate {
 	firstKmRate: number;
@@ -18,8 +20,8 @@ export interface CarPricingEstimate {
 }
 
 export async function getCarPricingEstimateService(
-	db: DB, 
-	data: GetCarPricingEstimateParams
+	db: DB,
+	data: GetCarPricingEstimateParams,
 ): Promise<CarPricingEstimate | null> {
 	try {
 		// Get pricing configuration for this specific car
@@ -46,7 +48,11 @@ export async function getCarPricingEstimateService(
 				firstKmRate: globalConfig.firstKmRate,
 				firstKmLimit: globalConfig.firstKmLimit || 10,
 				additionalKmRate: globalConfig.pricePerKm,
-				estimatedDailyRate: calculateEstimatedDailyRate(globalConfig.firstKmRate, globalConfig.firstKmLimit || 10, globalConfig.pricePerKm),
+				estimatedDailyRate: calculateEstimatedDailyRate(
+					globalConfig.firstKmRate,
+					globalConfig.firstKmLimit || 10,
+					globalConfig.pricePerKm,
+				),
 				hasActivePricing: true,
 			};
 		}
@@ -56,7 +62,11 @@ export async function getCarPricingEstimateService(
 			firstKmRate: config.firstKmRate,
 			firstKmLimit: config.firstKmLimit || 10,
 			additionalKmRate: config.pricePerKm,
-			estimatedDailyRate: calculateEstimatedDailyRate(config.firstKmRate, config.firstKmLimit || 10, config.pricePerKm),
+			estimatedDailyRate: calculateEstimatedDailyRate(
+				config.firstKmRate,
+				config.firstKmLimit || 10,
+				config.pricePerKm,
+			),
 			hasActivePricing: true,
 		};
 	} catch (error) {
@@ -66,13 +76,17 @@ export async function getCarPricingEstimateService(
 }
 
 // Daily rate estimation using simplified two-tier pricing model
-function calculateEstimatedDailyRate(firstKmRate: number, firstKmLimit: number, additionalKmRate: number): number {
+function calculateEstimatedDailyRate(
+	firstKmRate: number,
+	firstKmLimit: number,
+	additionalKmRate: number,
+): number {
 	const averageDailyKm = 100; // Assumption for daily usage
-	
+
 	// Calculate using simplified two-tier pricing model
 	let firstKmFare = 0;
 	let additionalKmFare = 0;
-	
+
 	if (averageDailyKm <= firstKmLimit) {
 		// Distance is within first tier - pay flat rate
 		firstKmFare = firstKmRate;
@@ -82,6 +96,6 @@ function calculateEstimatedDailyRate(firstKmRate: number, firstKmLimit: number, 
 		const additionalDistance = averageDailyKm - firstKmLimit;
 		additionalKmFare = additionalDistance * additionalKmRate;
 	}
-	
-	return parseFloat((firstKmFare + additionalKmFare).toFixed(2));
+
+	return Number.parseFloat((firstKmFare + additionalKmFare).toFixed(2));
 }

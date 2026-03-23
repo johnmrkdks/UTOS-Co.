@@ -1,10 +1,10 @@
-import { Button } from "@workspace/ui/components/button";
-import { companyIcons } from "@/features/auth/_utils/icons";
 import { useNavigate } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
-import { Loader } from "@/components/loader";
+import { Button } from "@workspace/ui/components/button";
 import { useState } from "react";
+import { Loader } from "@/components/loader";
 import { useSignInWitGoogleOAuthMutation } from "@/features/auth/_hooks/query/use-sign-in-with-google-oauth-mutation";
+import { companyIcons } from "@/features/auth/_utils/icons";
+import { authClient } from "@/lib/auth-client";
 import { OAuthButton } from "./oauth-button";
 
 export function SignUpWithOAuth() {

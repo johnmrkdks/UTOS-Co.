@@ -1,15 +1,16 @@
 /**
  * Payments router - Square authorization, capture, saved cards.
  */
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "@/trpc/init";
+
 import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
+import { bookings } from "@/db/sqlite/schema/bookings";
+import { paymentMethods } from "@/db/sqlite/schema/payments";
+import { sendBookingConfirmationEmail } from "@/services/notifications/booking-email-notification-service";
 import { authorizeBookingPayment } from "@/services/payments/authorize-booking-payment";
 import { captureBookingPayment } from "@/services/payments/capture-booking-payment";
-import { sendBookingConfirmationEmail } from "@/services/notifications/booking-email-notification-service";
-import { paymentMethods } from "@/db/sqlite/schema/payments";
-import { bookings } from "@/db/sqlite/schema/bookings";
-import { eq, and } from "drizzle-orm";
+import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 
 /** Generate idempotency key for payment operations. Square requires max 45 chars. */
 function idempotencyKey(prefix: string, bookingId: string): string {
@@ -20,12 +21,14 @@ function idempotencyKey(prefix: string, bookingId: string): string {
 export const paymentsRouter = router({
 	/** Get Square config for Web Payments SDK (applicationId + locationId - safe to expose to frontend) */
 	getSquareConfig: publicProcedure.query(({ ctx }) => {
-		const appId = (ctx.env as unknown as { SQUARE_APPLICATION_ID?: string }).SQUARE_APPLICATION_ID;
+		const appId = (ctx.env as unknown as { SQUARE_APPLICATION_ID?: string })
+			.SQUARE_APPLICATION_ID;
 		const locationId = ctx.env.SQUARE_LOCATION_ID;
 		if (!appId || !locationId) {
 			throw new TRPCError({
 				code: "INTERNAL_SERVER_ERROR",
-				message: "Square is not configured. Set SQUARE_APPLICATION_ID and SQUARE_LOCATION_ID.",
+				message:
+					"Square is not configured. Set SQUARE_APPLICATION_ID and SQUARE_LOCATION_ID.",
 			});
 		}
 		return { applicationId: appId, locationId };
@@ -43,7 +46,7 @@ export const paymentsRouter = router({
 				sourceId: z.string(), // Token from Web Payments SDK
 				amountCents: z.number().int().positive(),
 				paymentMethodId: z.string().optional().nullable(),
-			})
+			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const accessToken = ctx.env.SQUARE_ACCESS_TOKEN;
@@ -51,7 +54,8 @@ export const paymentsRouter = router({
 			if (!accessToken || !locationId) {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: "Square is not configured. Set SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID.",
+					message:
+						"Square is not configured. Set SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID.",
 				});
 			}
 
@@ -66,7 +70,9 @@ export const paymentsRouter = router({
 					paymentMethodId: input.paymentMethodId ?? null,
 					accessToken,
 					locationId,
-					env: (ctx.env.SQUARE_ENVIRONMENT as "sandbox" | "production") || "sandbox",
+					env:
+						(ctx.env.SQUARE_ENVIRONMENT as "sandbox" | "production") ||
+						"sandbox",
 				});
 			} catch (err) {
 				// Extract message from Error or Square SDK response
@@ -74,7 +80,9 @@ export const paymentsRouter = router({
 				if (err instanceof Error) {
 					msg = err.message;
 				} else if (err && typeof err === "object" && "errors" in err) {
-					const e = (err as { errors?: Array<{ detail?: string; code?: string }> }).errors?.[0];
+					const e = (
+						err as { errors?: Array<{ detail?: string; code?: string }> }
+					).errors?.[0];
 					msg = e?.detail ?? e?.code ?? msg;
 				}
 				throw new TRPCError({
@@ -87,7 +95,10 @@ export const paymentsRouter = router({
 			try {
 				await sendBookingConfirmationEmail(input.bookingId, ctx.env);
 			} catch (emailErr) {
-				console.error("❌ Failed to send booking confirmation email:", emailErr);
+				console.error(
+					"❌ Failed to send booking confirmation email:",
+					emailErr,
+				);
 			}
 
 			return { success: true };
@@ -103,7 +114,7 @@ export const paymentsRouter = router({
 				bookingId: z.string(),
 				finalAmountDollars: z.number().positive(),
 				idempotencyKey: z.string().optional(),
-			})
+			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const accessToken = ctx.env.SQUARE_ACCESS_TOKEN;
@@ -124,7 +135,8 @@ export const paymentsRouter = router({
 				});
 			}
 
-			const key = input.idempotencyKey ?? idempotencyKey("cap", input.bookingId);
+			const key =
+				input.idempotencyKey ?? idempotencyKey("cap", input.bookingId);
 			await captureBookingPayment({
 				db: ctx.db,
 				bookingId: input.bookingId,
@@ -132,7 +144,8 @@ export const paymentsRouter = router({
 				idempotencyKey: key,
 				accessToken,
 				locationId,
-				env: (ctx.env.SQUARE_ENVIRONMENT as "sandbox" | "production") || "sandbox",
+				env:
+					(ctx.env.SQUARE_ENVIRONMENT as "sandbox" | "production") || "sandbox",
 			});
 
 			return { success: true };
@@ -157,7 +170,11 @@ export const paymentsRouter = router({
 		.input(z.object({ paymentMethodId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			const userId = ctx.session?.user?.id;
-			if (!userId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+			if (!userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Not authenticated",
+				});
 
 			// Clear existing default
 			await ctx.db
@@ -169,7 +186,12 @@ export const paymentsRouter = router({
 			await ctx.db
 				.update(paymentMethods)
 				.set({ isDefault: true, updatedAt: new Date() })
-				.where(and(eq(paymentMethods.id, input.paymentMethodId), eq(paymentMethods.userId, userId)));
+				.where(
+					and(
+						eq(paymentMethods.id, input.paymentMethodId),
+						eq(paymentMethods.userId, userId),
+					),
+				);
 
 			return { success: true };
 		}),

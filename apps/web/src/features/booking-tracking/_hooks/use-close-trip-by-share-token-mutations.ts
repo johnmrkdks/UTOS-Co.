@@ -1,8 +1,10 @@
-import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { trpc } from "@/trpc";
 
-export const useCloseTripWithExtrasByShareTokenMutation = (shareToken: string) => {
+export const useCloseTripWithExtrasByShareTokenMutation = (
+	shareToken: string,
+) => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -16,11 +18,13 @@ export const useCloseTripWithExtrasByShareTokenMutation = (shareToken: string) =
 			onError: (error) => {
 				toast.error("Failed to submit", { description: error.message });
 			},
-		})
+		}),
 	);
 };
 
-export const useCloseTripWithoutExtrasByShareTokenMutation = (shareToken: string) => {
+export const useCloseTripWithoutExtrasByShareTokenMutation = (
+	shareToken: string,
+) => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -34,6 +38,6 @@ export const useCloseTripWithoutExtrasByShareTokenMutation = (shareToken: string
 			onError: (error) => {
 				toast.error("Failed to submit", { description: error.message });
 			},
-		})
+		}),
 	);
 };

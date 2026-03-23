@@ -1,10 +1,10 @@
+import formatter from "lodash";
+import { z } from "zod";
 import { getPackageById } from "@/data/packages/get-package-by-id";
 import { updatePackage } from "@/data/packages/update-package";
 import type { DB } from "@/db";
-import { UpdatePackageSchema, type UpdatePackage } from "@/schemas/shared";
+import { type UpdatePackage, UpdatePackageSchema } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const UpdatePackageServiceSchema = z.object({
 	id: z.string(),
@@ -13,7 +13,10 @@ export const UpdatePackageServiceSchema = z.object({
 
 export type UpdatePackageParams = z.infer<typeof UpdatePackageServiceSchema>;
 
-export async function updatePackageService(db: DB, { id, data }: UpdatePackageParams) {
+export async function updatePackageService(
+	db: DB,
+	{ id, data }: UpdatePackageParams,
+) {
 	const _package = await getPackageById(db, id);
 
 	if (!_package) {

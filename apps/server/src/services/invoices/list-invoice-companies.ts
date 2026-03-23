@@ -1,7 +1,7 @@
-import type { DB } from "@/db";
-import { offloadBookingDetails, bookings } from "@/db/sqlite/schema";
 import { eq, sql } from "drizzle-orm";
+import type { DB } from "@/db";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { bookings, offloadBookingDetails } from "@/db/sqlite/schema";
 
 /** Get distinct company names (offloaders) that have completed bookings */
 export async function listInvoiceCompaniesService(db: DB) {

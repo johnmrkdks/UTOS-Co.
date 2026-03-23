@@ -1,12 +1,14 @@
-import { db } from "@/db";
-import { betterAuth, type BetterAuthOptions } from "better-auth";
-import { createAuthMiddleware } from "better-auth/api";
+import { env } from "cloudflare:workers";
+import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { createAuthMiddleware } from "better-auth/api";
+import { verifyPassword as verifyBetterAuthPassword } from "better-auth/crypto";
 import { admin } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
-import { env } from "cloudflare:workers";
-import * as schema from "@/db/sqlite/schema";
+import { db } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
+import * as schema from "@/db/sqlite/schema";
+import { hashPasswordPbkdf2, verifyPasswordPbkdf2 } from "./pbkdf2-password";
 import {
 	ac,
 	adminRole,
@@ -14,9 +16,7 @@ import {
 	superAdminRole,
 	userRole,
 } from "./permissions";
-import { hashPasswordPbkdf2, verifyPasswordPbkdf2 } from "./pbkdf2-password";
 import { customVerify } from "./scrypt";
-import { verifyPassword as verifyBetterAuthPassword } from "better-auth/crypto";
 
 /** Supports PBKDF2 (Workers-friendly), better-auth scrypt, and legacy customHash for backward compatibility */
 async function verifyPasswordCompat({
@@ -68,7 +68,10 @@ export const auth = betterAuth({
 		}),
 	},
 	trustedOrigins: [
-		...(env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean),
+		...(env.CORS_ORIGIN || "")
+			.split(",")
+			.map((o) => o.trim())
+			.filter(Boolean),
 		env.BETTER_AUTH_URL || "",
 		"https://*.downunderchauffeurs.workers.dev",
 	].filter(Boolean),
@@ -101,15 +104,18 @@ export const auth = betterAuth({
 	advanced: {
 		// Safari ITP: share cookies across subdomains so email/password login works on Safari iOS
 		// Only when API is on workers.dev or production domain (not localhost)
-		...(env.BETTER_AUTH_URL && !env.BETTER_AUTH_URL.includes("localhost") && {
-			crossSubDomainCookies: {
-				enabled: true,
-				domain:
-					env.COOKIE_DOMAIN ||
-					(env.BETTER_AUTH_URL.includes("workers.dev") ? "downunderchauffeurs.workers.dev" : "downunderchauffeurs.com"),
-			},
-			useSecureCookies: true,
-		}),
+		...(env.BETTER_AUTH_URL &&
+			!env.BETTER_AUTH_URL.includes("localhost") && {
+				crossSubDomainCookies: {
+					enabled: true,
+					domain:
+						env.COOKIE_DOMAIN ||
+						(env.BETTER_AUTH_URL.includes("workers.dev")
+							? "downunderchauffeurs.workers.dev"
+							: "downunderchauffeurs.com"),
+				},
+				useSecureCookies: true,
+			}),
 		// In development, relax CSRF for cross-origin
 		...(env.NODE_ENV === "development" && { disableCSRFCheck: true }),
 	},

@@ -1,8 +1,8 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { bookings } from "@/db/sqlite/schema";
 import { validateBookingOperations } from "./validate-booking-operations";
-import { TRPCError } from "@trpc/server";
 
 interface EditBookingData {
 	originAddress?: string;
@@ -26,7 +26,7 @@ export async function editBooking(
 	bookingId: string,
 	userId: string,
 	editData: EditBookingData,
-	userRole?: string
+	userRole?: string,
 ) {
 	// Get the booking with user verification
 	const [existingBooking] = await db

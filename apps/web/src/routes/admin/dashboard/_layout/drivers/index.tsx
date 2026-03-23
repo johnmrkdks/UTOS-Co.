@@ -1,18 +1,39 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
-import { DriversTable } from "@/features/dashboard/_pages/drivers/_components/drivers-table";
-import { DriverApprovalTable } from "@/features/dashboard/_pages/drivers/_components/driver-approval-table";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import {
+	InfoIcon,
+	PlusIcon,
+	UserCheckIcon,
+	UserPlusIcon,
+	UsersIcon,
+	UserXIcon,
+} from "lucide-react";
+import {
+	AnalyticsCard,
+	type AnalyticsCardData,
+} from "@/components/analytics-card";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { CreateDriverUserDialog } from "@/features/dashboard/_pages/drivers/_components/create-driver-user-dialog";
-import { DriverUsersTable } from "@/features/dashboard/_pages/drivers/_components/driver-users-table";
+import { DriverApprovalTable } from "@/features/dashboard/_pages/drivers/_components/driver-approval-table";
 import { DriverProcessGuide } from "@/features/dashboard/_pages/drivers/_components/driver-process-guide";
-import { UsersIcon, UserCheckIcon, UserXIcon, PlusIcon, UserPlusIcon, InfoIcon } from "lucide-react";
+import { DriverUsersTable } from "@/features/dashboard/_pages/drivers/_components/driver-users-table";
+import { DriversTable } from "@/features/dashboard/_pages/drivers/_components/drivers-table";
 import { useGetDriversQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-drivers-query";
-import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
-export const Route = createFileRoute('/admin/dashboard/_layout/drivers/')({
+export const Route = createFileRoute("/admin/dashboard/_layout/drivers/")({
 	component: RouteComponent,
 });
 
@@ -21,75 +42,87 @@ function RouteComponent() {
 	const navigate = useNavigate();
 
 	const totalDrivers = driversQuery.data?.totalItems || 0;
-	const activeDrivers = driversQuery.data?.items?.filter((driver: any) => driver.isActive && driver.isApproved).length || 0;
-	const pendingDrivers = driversQuery.data?.items?.filter((driver: any) => !driver.isApproved).length || 0;
-	const inactiveDrivers = driversQuery.data?.items?.filter((driver: any) => driver.isApproved && !driver.isActive).length || 0;
+	const activeDrivers =
+		driversQuery.data?.items?.filter(
+			(driver: any) => driver.isActive && driver.isApproved,
+		).length || 0;
+	const pendingDrivers =
+		driversQuery.data?.items?.filter((driver: any) => !driver.isApproved)
+			.length || 0;
+	const inactiveDrivers =
+		driversQuery.data?.items?.filter(
+			(driver: any) => driver.isApproved && !driver.isActive,
+		).length || 0;
 
 	const handleAddDriver = () => {
-		navigate({ to: '/admin/dashboard/drivers/onboarding' });
-	}
+		navigate({ to: "/admin/dashboard/drivers/onboarding" });
+	};
 
 	const driverStatsData: AnalyticsCardData[] = [
 		{
-			id: 'total',
-			title: 'Total Drivers',
+			id: "total",
+			title: "Total Drivers",
 			value: totalDrivers,
 			icon: UsersIcon,
-			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-			iconBg: 'bg-blue-500',
-			changeText: 'Registered drivers',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
+			iconBg: "bg-blue-500",
+			changeText: "Registered drivers",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'active',
-			title: 'Active Drivers',
+			id: "active",
+			title: "Active Drivers",
 			value: activeDrivers,
 			icon: UserCheckIcon,
-			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
-			iconBg: 'bg-green-500',
-			changeText: 'Approved and active',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
+			iconBg: "bg-green-500",
+			changeText: "Approved and active",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'pending',
-			title: 'Pending Approval',
+			id: "pending",
+			title: "Pending Approval",
 			value: pendingDrivers,
 			icon: UserXIcon,
-			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
-			iconBg: 'bg-orange-500',
-			changeText: 'Awaiting approval',
-			changeType: 'warning',
+			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
+			iconBg: "bg-orange-500",
+			changeText: "Awaiting approval",
+			changeType: "warning",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'inactive',
-			title: 'Inactive Drivers',
+			id: "inactive",
+			title: "Inactive Drivers",
 			value: inactiveDrivers,
 			icon: UsersIcon,
-			bgGradient: 'bg-gradient-to-br from-slate-50 to-slate-100',
-			iconBg: 'bg-slate-500',
-			changeText: 'Approved but inactive',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-slate-50 to-slate-100",
+			iconBg: "bg-slate-500",
+			changeText: "Approved but inactive",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
-		}
+			showBackgroundIcon: true,
+		},
 	];
 
 	return (
-		<PaddingLayout className="flex-1 space-y-4 mb-8">
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+		<PaddingLayout className="mb-8 flex-1 space-y-4">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center border border-orange-200/50">
+					<div className="flex h-10 w-10 items-center justify-center rounded-xl border border-orange-200/50 bg-gradient-to-br from-orange-50 to-orange-100">
 						<UsersIcon className="h-5 w-5 text-orange-600" />
 					</div>
 					<div>
-						<h2 className="text-2xl font-bold tracking-tight">Driver Management</h2>
-						<p className="text-sm text-muted-foreground">Manage drivers and approvals</p>
+						<h2 className="font-bold text-2xl tracking-tight">
+							Driver Management
+						</h2>
+						<p className="text-muted-foreground text-sm">
+							Manage drivers and approvals
+						</p>
 					</div>
 				</div>
 				<div className="flex gap-2">
@@ -108,7 +141,7 @@ function RouteComponent() {
 						key={data.id}
 						data={data}
 						view="compact"
-						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+						className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
 					/>
 				))}
 			</div>
@@ -128,7 +161,7 @@ function RouteComponent() {
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
-					<Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+					<Card className="border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 						<CardHeader>
 							<CardTitle>All Drivers</CardTitle>
 							<CardDescription>
@@ -145,9 +178,8 @@ function RouteComponent() {
 					<DriverUsersTable />
 				</TabsContent>
 
-
 				<TabsContent value="pending" className="space-y-4">
-					<Card className="border-orange-200/50 shadow-sm hover:shadow-md transition-shadow">
+					<Card className="border-orange-200/50 shadow-sm transition-shadow hover:shadow-md">
 						<CardHeader>
 							<CardTitle>Pending Approval</CardTitle>
 							<CardDescription>
@@ -161,11 +193,12 @@ function RouteComponent() {
 				</TabsContent>
 
 				<TabsContent value="active" className="space-y-4">
-					<Card className="border-green-200/50 shadow-sm hover:shadow-md transition-shadow">
+					<Card className="border-green-200/50 shadow-sm transition-shadow hover:shadow-md">
 						<CardHeader>
 							<CardTitle>Active Drivers</CardTitle>
 							<CardDescription>
-								Approved drivers who are currently active and can accept bookings.
+								Approved drivers who are currently active and can accept
+								bookings.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -175,11 +208,12 @@ function RouteComponent() {
 				</TabsContent>
 
 				<TabsContent value="inactive" className="space-y-4">
-					<Card className="border-slate-200/50 shadow-sm hover:shadow-md transition-shadow">
+					<Card className="border-slate-200/50 shadow-sm transition-shadow hover:shadow-md">
 						<CardHeader>
 							<CardTitle>Inactive Drivers</CardTitle>
 							<CardDescription>
-								Approved drivers who are currently inactive and cannot accept bookings.
+								Approved drivers who are currently inactive and cannot accept
+								bookings.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -194,5 +228,5 @@ function RouteComponent() {
 				</TabsContent> */}
 			</Tabs>
 		</PaddingLayout>
-	)
+	);
 }

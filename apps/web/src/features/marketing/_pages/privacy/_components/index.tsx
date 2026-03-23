@@ -1,11 +1,7 @@
-import { cn } from "@workspace/ui/lib/utils";
-import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import {
-	Shield,
-	FileText,
-	Construction
-} from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
+import { Construction, FileText, Shield } from "lucide-react";
 
 type PrivacyPolicyProps = {
 	className?: string;
@@ -15,52 +11,51 @@ export function PrivacyPolicy({ className, ...props }: PrivacyPolicyProps) {
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Hero Section */}
-			<div className="relative py-24 bg-gradient-to-br from-foreground via-foreground/90 to-primary/20">
+			<div className="relative bg-gradient-to-br from-foreground via-foreground/90 to-primary/20 py-24">
 				<div className="absolute inset-0 bg-foreground/70" />
-				<div className="relative z-10 container mx-auto px-6 text-center">
-					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-sm font-medium mb-6">
-							<Shield className="w-4 h-4 mr-2" />
+				<div className="container relative z-10 mx-auto px-6 text-center">
+					<div className="mx-auto max-w-4xl">
+						<div className="mb-6 inline-flex items-center rounded-full bg-beige px-4 py-2 font-medium text-foreground text-sm">
+							<Shield className="mr-2 h-4 w-4" />
 							Privacy & Data Protection
 						</div>
 
-						<h1 className="text-5xl lg:text-6xl font-bold text-beige mb-6">
+						<h1 className="mb-6 font-bold text-5xl text-beige lg:text-6xl">
 							Privacy
-							<span className="block text-primary">
-								Policy
-							</span>
+							<span className="block text-primary">Policy</span>
 						</h1>
 
-						<p className="text-xl text-beige/80 leading-relaxed max-w-3xl mx-auto">
-							Your privacy is important to us. This page will contain our comprehensive privacy policy.
+						<p className="mx-auto max-w-3xl text-beige/80 text-xl leading-relaxed">
+							Your privacy is important to us. This page will contain our
+							comprehensive privacy policy.
 						</p>
 					</div>
 				</div>
 			</div>
 
 			{/* Content Section */}
-			<div className="py-24 bg-beige">
+			<div className="bg-beige py-24">
 				<div className="container mx-auto px-6">
-					<div className="max-w-4xl mx-auto">
-						
+					<div className="mx-auto max-w-4xl">
 						{/* Coming Soon Notice */}
-						<div className="bg-card p-12 rounded-2xl shadow-lg border border-border text-center">
-							<div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-								<Construction className="w-10 h-10 text-primary" />
+						<div className="rounded-2xl border border-border bg-card p-12 text-center shadow-lg">
+							<div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+								<Construction className="h-10 w-10 text-primary" />
 							</div>
-							
-							<h2 className="text-3xl font-bold text-card-foreground mb-4">
+
+							<h2 className="mb-4 font-bold text-3xl text-card-foreground">
 								Privacy Policy - To Be Added
 							</h2>
-							
-							<p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-								We are currently working on our comprehensive privacy policy. This will include detailed information about:
+
+							<p className="mb-8 text-lg text-muted-foreground leading-relaxed">
+								We are currently working on our comprehensive privacy policy.
+								This will include detailed information about:
 							</p>
 
-							<div className="grid md:grid-cols-2 gap-6 mb-8">
+							<div className="mb-8 grid gap-6 md:grid-cols-2">
 								<div className="text-left">
-									<h3 className="font-semibold text-card-foreground mb-3 flex items-center">
-										<FileText className="w-5 h-5 text-primary mr-2" />
+									<h3 className="mb-3 flex items-center font-semibold text-card-foreground">
+										<FileText className="mr-2 h-5 w-5 text-primary" />
 										What We'll Cover
 									</h3>
 									<ul className="space-y-2 text-muted-foreground">
@@ -70,10 +65,10 @@ export function PrivacyPolicy({ className, ...props }: PrivacyPolicyProps) {
 										<li>• Your privacy rights</li>
 									</ul>
 								</div>
-								
+
 								<div className="text-left">
-									<h3 className="font-semibold text-card-foreground mb-3 flex items-center">
-										<Shield className="w-5 h-5 text-primary mr-2" />
+									<h3 className="mb-3 flex items-center font-semibold text-card-foreground">
+										<Shield className="mr-2 h-5 w-5 text-primary" />
 										Your Protection
 									</h3>
 									<ul className="space-y-2 text-muted-foreground">
@@ -85,15 +80,16 @@ export function PrivacyPolicy({ className, ...props }: PrivacyPolicyProps) {
 								</div>
 							</div>
 
-							<div className="bg-soft-beige p-6 rounded-xl border border-border">
-								<p className="text-muted-foreground mb-4">
-									In the meantime, if you have any questions about how we handle your data, please don't hesitate to contact us.
+							<div className="rounded-xl border border-border bg-soft-beige p-6">
+								<p className="mb-4 text-muted-foreground">
+									In the meantime, if you have any questions about how we handle
+									your data, please don't hesitate to contact us.
 								</p>
-								
+
 								<Link to="/contact-us">
 									<Button
 										size="lg"
-										className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-xl"
+										className="rounded-xl bg-primary px-6 py-3 text-primary-foreground hover:bg-primary/90"
 									>
 										Contact Us
 									</Button>
@@ -102,7 +98,7 @@ export function PrivacyPolicy({ className, ...props }: PrivacyPolicyProps) {
 						</div>
 
 						{/* Legal Footer */}
-						<div className="mt-12 text-center text-sm text-muted-foreground">
+						<div className="mt-12 text-center text-muted-foreground text-sm">
 							<p>© 2024 Down Under Chauffeurs. All rights reserved.</p>
 						</div>
 					</div>

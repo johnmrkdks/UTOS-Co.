@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarCategory } from "server/types"
-import { EditCategoryDialog } from "./edit-category-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarCategory } from "server/types";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
+import { EditCategoryDialog } from "./edit-category-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function CategoryTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function CategoryTableRowActions<TData>({
 			<EditCategoryDialog category={category} />
 			<DeleteCategoryDialog category={category} />
 		</div>
-	)
+	);
 }

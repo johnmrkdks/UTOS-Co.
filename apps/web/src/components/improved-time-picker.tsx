@@ -1,15 +1,15 @@
-import { Clock } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
-import { cn } from "@workspace/ui/lib/utils"
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+import { cn } from "@workspace/ui/lib/utils";
+import { Clock } from "lucide-react";
 
 interface ImprovedTimePickerProps {
-	value?: string
-	onChange: (time: string) => void
-	placeholder?: string
-	disabled?: boolean
-	className?: string
-	isMobile?: boolean
+	value?: string;
+	onChange: (time: string) => void;
+	placeholder?: string;
+	disabled?: boolean;
+	className?: string;
+	isMobile?: boolean;
 }
 
 export function ImprovedTimePicker({
@@ -18,21 +18,21 @@ export function ImprovedTimePicker({
 	placeholder = "Select time",
 	disabled = false,
 	className,
-	isMobile = false
+	isMobile = false,
 }: ImprovedTimePickerProps) {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		onChange(e.target.value)
-	}
+		onChange(e.target.value);
+	};
 
 	// Convert 24-hour to 12-hour for display
 	const getDisplayValue = (timeValue?: string) => {
-		if (!timeValue) return placeholder
-		const [hourStr, minute] = timeValue.split(':')
-		const hour = parseInt(hourStr)
-		const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-		const ampm = hour >= 12 ? 'PM' : 'AM'
-		return `${displayHour}:${minute} ${ampm}`
-	}
+		if (!timeValue) return placeholder;
+		const [hourStr, minute] = timeValue.split(":");
+		const hour = Number.parseInt(hourStr);
+		const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+		const ampm = hour >= 12 ? "PM" : "AM";
+		return `${displayHour}:${minute} ${ampm}`;
+	};
 
 	if (isMobile) {
 		return (
@@ -42,14 +42,14 @@ export function ImprovedTimePicker({
 					value={value || ""}
 					onChange={handleChange}
 					disabled={disabled}
-					className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+					className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
 				/>
 				<Button
 					variant="outline"
 					className={cn(
-						"w-full h-12 justify-start text-left text-base pointer-events-none",
+						"pointer-events-none h-12 w-full justify-start text-left text-base",
 						!value && "text-muted-foreground",
-						className
+						className,
 					)}
 					disabled={disabled}
 				>
@@ -57,7 +57,7 @@ export function ImprovedTimePicker({
 					{getDisplayValue(value)}
 				</Button>
 			</div>
-		)
+		);
 	}
 
 	return (
@@ -68,5 +68,5 @@ export function ImprovedTimePicker({
 			disabled={disabled}
 			className={cn("bg-background", className)}
 		/>
-	)
+	);
 }

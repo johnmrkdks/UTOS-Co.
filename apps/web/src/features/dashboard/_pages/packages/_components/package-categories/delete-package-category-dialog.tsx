@@ -2,9 +2,9 @@ import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogDescription,
 } from "@workspace/ui/components/dialog";
 import { useModal } from "@/hooks/use-modal";
 import { useDeletePackageCategoryMutation } from "../../_hooks/query/use-delete-package-category-mutation";
@@ -21,17 +21,20 @@ export function DeletePackageCategoryDialog() {
 	};
 
 	return (
-		<Dialog open={isModalOpen("delete-package-category")} onOpenChange={closeModal}>
+		<Dialog
+			open={isModalOpen("delete-package-category")}
+			onOpenChange={closeModal}
+		>
 			<DialogContent className="max-w-md" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Delete Package Category</DialogTitle>
 					<DialogDescription>
-						Are you sure you want to delete "{modalData?.name}"? This action cannot be
-						undone.
+						Are you sure you want to delete "{modalData?.name}"? This action
+						cannot be undone.
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="flex gap-2 justify-end">
+				<div className="flex justify-end gap-2">
 					<Button variant="outline" onClick={closeModal}>
 						Cancel
 					</Button>

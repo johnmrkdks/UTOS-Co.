@@ -1,13 +1,26 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
-import { Bell, X, Info, AlertTriangle, AlertCircle, CheckCircle } from "lucide-react";
-import { useWebSocketContext } from "@/contexts/websocket-context";
 import { format } from "date-fns";
+import {
+	AlertCircle,
+	AlertTriangle,
+	Bell,
+	CheckCircle,
+	Info,
+	X,
+} from "lucide-react";
+import { useWebSocketContext } from "@/contexts/websocket-context";
 
 export function RealTimeNotifications() {
-	const { notifications, clearNotification, isConnected } = useWebSocketContext();
+	const { notifications, clearNotification, isConnected } =
+		useWebSocketContext();
 
 	const getIcon = (type: string) => {
 		switch (type) {
@@ -54,15 +67,15 @@ export function RealTimeNotifications() {
 			</CardHeader>
 			<CardContent>
 				{!isConnected && (
-					<div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg mb-4">
+					<div className="mb-4 flex items-center gap-2 rounded-lg bg-orange-50 p-3 text-orange-600 text-sm">
 						<AlertTriangle className="h-4 w-4" />
 						Notifications may be delayed - connection lost
 					</div>
 				)}
 
 				{notifications.length === 0 ? (
-					<div className="text-center text-muted-foreground py-8">
-						<Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+					<div className="py-8 text-center text-muted-foreground">
+						<Bell className="mx-auto mb-3 h-12 w-12 opacity-50" />
 						<p>No recent notifications</p>
 						<p className="text-sm">System alerts will appear here</p>
 					</div>
@@ -70,39 +83,41 @@ export function RealTimeNotifications() {
 					<ScrollArea className="h-[300px] pr-4">
 						<div className="space-y-3">
 							{notifications.map((notification) => (
-								<div 
+								<div
 									key={notification.id}
-									className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+									className="flex items-start gap-3 rounded-lg border bg-card p-3"
 								>
-									<div className="flex-shrink-0 mt-0.5">
+									<div className="mt-0.5 flex-shrink-0">
 										{getIcon(notification.type)}
 									</div>
-									
-									<div className="flex-1 min-w-0">
+
+									<div className="min-w-0 flex-1">
 										<div className="flex items-start justify-between gap-2">
 											<div className="flex-1">
-												<div className="flex items-center gap-2 mb-1">
-													<p className="text-sm font-medium">{notification.title}</p>
-													<Badge 
-														variant="outline" 
+												<div className="mb-1 flex items-center gap-2">
+													<p className="font-medium text-sm">
+														{notification.title}
+													</p>
+													<Badge
+														variant="outline"
 														className={`text-xs ${getTypeColor(notification.type)}`}
 													>
 														{notification.type}
 													</Badge>
 												</div>
-												<p className="text-sm text-muted-foreground mb-2">
+												<p className="mb-2 text-muted-foreground text-sm">
 													{notification.message}
 												</p>
-												<p className="text-xs text-muted-foreground">
+												<p className="text-muted-foreground text-xs">
 													Just now
 												</p>
 											</div>
-											
+
 											<Button
 												variant="ghost"
 												size="sm"
 												onClick={() => clearNotification(notification.id)}
-												className="flex-shrink-0 h-6 w-6 p-0"
+												className="h-6 w-6 flex-shrink-0 p-0"
 											>
 												<X className="h-3 w-3" />
 											</Button>
@@ -115,12 +130,12 @@ export function RealTimeNotifications() {
 				)}
 
 				{notifications.length > 0 && (
-					<div className="flex justify-center pt-4 border-t">
+					<div className="flex justify-center border-t pt-4">
 						<Button
 							variant="outline"
 							size="sm"
 							onClick={() => {
-								notifications.forEach(n => clearNotification(n.id));
+								notifications.forEach((n) => clearNotification(n.id));
 							}}
 						>
 							Clear All

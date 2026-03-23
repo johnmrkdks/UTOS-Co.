@@ -1,19 +1,35 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 // Removed Dialog imports - now using UnifiedPricingConfigDialog
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import { Calculator, DollarSign, Plus, Settings } from "lucide-react";
+import { useState } from "react";
+import {
+	AnalyticsCard,
+	type AnalyticsCardData,
+} from "@/components/analytics-card";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { PricingConfigForm } from "@/features/dashboard/_pages/pricing-config/_components/pricing-config-form";
-import { UnifiedPricingConfigDialog } from "@/features/dashboard/_pages/pricing-config/_components/unified-pricing-config-dialog";
 import { PricingConfigTable } from "@/features/dashboard/_pages/pricing-config/_components/pricing-config-table";
 import { QuoteTester } from "@/features/dashboard/_pages/pricing-config/_components/quote-tester";
-import { Settings, Plus, Calculator, DollarSign } from "lucide-react";
-import { useState } from "react";
+import { UnifiedPricingConfigDialog } from "@/features/dashboard/_pages/pricing-config/_components/unified-pricing-config-dialog";
 import { useGetPricingConfigsQuery } from "@/features/dashboard/_pages/pricing-config/_hooks/query/use-get-pricing-configs-query";
-import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 
-export const Route = createFileRoute('/admin/dashboard/_layout/pricing-config/')({
+export const Route = createFileRoute(
+	"/admin/dashboard/_layout/pricing-config/",
+)({
 	component: RouteComponent,
 });
 
@@ -24,74 +40,92 @@ function RouteComponent() {
 	const configs = (pricingConfigsQuery.data as any)?.data || [];
 	const totalConfigs = configs.length;
 	const activeConfigs = configs.filter((config: any) => config.isActive).length;
-	const avgBaseFare = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.baseFare || 0), 0) / configs.length / 100) : 0;
-	const avgPerKm = configs.length ? (configs.reduce((sum: number, config: any) => sum + (config.pricePerKm || 0), 0) / configs.length / 100) : 0;
+	const avgBaseFare = configs.length
+		? configs.reduce(
+				(sum: number, config: any) => sum + (config.baseFare || 0),
+				0,
+			) /
+			configs.length /
+			100
+		: 0;
+	const avgPerKm = configs.length
+		? configs.reduce(
+				(sum: number, config: any) => sum + (config.pricePerKm || 0),
+				0,
+			) /
+			configs.length /
+			100
+		: 0;
 
 	// Analytics card data for pricing config
 	const pricingStatsData: AnalyticsCardData[] = [
 		{
-			id: 'total-configs',
-			title: 'Total Configurations',
+			id: "total-configs",
+			title: "Total Configurations",
 			value: totalConfigs,
 			icon: Settings,
-			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-			iconBg: 'bg-blue-500',
-			changeText: 'Pricing models available',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
+			iconBg: "bg-blue-500",
+			changeText: "Pricing models available",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'active-configs',
-			title: 'Active Configs',
+			id: "active-configs",
+			title: "Active Configs",
 			value: activeConfigs,
 			icon: Settings,
-			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
-			iconBg: 'bg-green-500',
-			changeText: 'Currently in use',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
+			iconBg: "bg-green-500",
+			changeText: "Currently in use",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'avg-base-fare',
-			title: 'Average Base Fare',
+			id: "avg-base-fare",
+			title: "Average Base Fare",
 			value: `$${avgBaseFare.toFixed(0)}`,
 			icon: DollarSign,
-			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
-			iconBg: 'bg-purple-500',
-			changeText: 'Across all configurations',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-purple-50 to-purple-100",
+			iconBg: "bg-purple-500",
+			changeText: "Across all configurations",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'avg-per-km',
-			title: 'Average Per KM',
+			id: "avg-per-km",
+			title: "Average Per KM",
 			value: `$${avgPerKm.toFixed(2)}`,
 			icon: Calculator,
-			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
-			iconBg: 'bg-orange-500',
-			changeText: 'Per kilometer rate',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
+			iconBg: "bg-orange-500",
+			changeText: "Per kilometer rate",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
-		}
-	]
+			showBackgroundIcon: true,
+		},
+	];
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center border border-amber-200/50">
+					<div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-50 to-amber-100">
 						<DollarSign className="h-5 w-5 text-amber-600" />
 					</div>
 					<div>
-						<h2 className="text-2xl font-bold tracking-tight">Pricing Configuration</h2>
-						<p className="text-sm text-muted-foreground">Manage pricing models and test quotes</p>
+						<h2 className="font-bold text-2xl tracking-tight">
+							Pricing Configuration
+						</h2>
+						<p className="text-muted-foreground text-sm">
+							Manage pricing models and test quotes
+						</p>
 					</div>
 				</div>
-				<Button 
+				<Button
 					className="flex items-center gap-2"
 					onClick={() => setShowCreateConfig(true)}
 				>
@@ -104,7 +138,7 @@ function RouteComponent() {
 			<UnifiedPricingConfigDialog
 				open={showCreateConfig}
 				onOpenChange={setShowCreateConfig}
-				mode='create'
+				mode="create"
 				title="Create Pricing Configuration"
 				description="Set up a new pricing model for custom bookings. Configure base rates, multipliers, and additional charges."
 			/>
@@ -114,8 +148,8 @@ function RouteComponent() {
 					<AnalyticsCard
 						key={data.id}
 						data={data}
-						view='compact'
-						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+						view="compact"
+						className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
 					/>
 				))}
 			</div>
@@ -131,7 +165,8 @@ function RouteComponent() {
 						<CardHeader>
 							<CardTitle>Pricing Configurations</CardTitle>
 							<CardDescription>
-								Manage your pricing models for custom bookings. Configure rates, multipliers, and additional charges.
+								Manage your pricing models for custom bookings. Configure rates,
+								multipliers, and additional charges.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -148,7 +183,8 @@ function RouteComponent() {
 								Quote Tester
 							</CardTitle>
 							<CardDescription>
-								Test your pricing configurations with different scenarios to see calculated quotes.
+								Test your pricing configurations with different scenarios to see
+								calculated quotes.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -158,5 +194,5 @@ function RouteComponent() {
 				</TabsContent>
 			</Tabs>
 		</PaddingLayout>
-	)
+	);
 }

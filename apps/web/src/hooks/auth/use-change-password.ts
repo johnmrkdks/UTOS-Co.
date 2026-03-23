@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 interface ChangePasswordInput {
 	currentPassword: string;
@@ -23,7 +23,8 @@ export const useChangePasswordMutation = () => {
 		},
 		onError: (error: any) => {
 			toast.error("Failed to change password", {
-				description: error.message || "Please check your current password and try again.",
+				description:
+					error.message || "Please check your current password and try again.",
 			});
 		},
 	});

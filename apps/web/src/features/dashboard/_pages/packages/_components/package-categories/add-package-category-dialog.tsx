@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
@@ -8,10 +9,9 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { useModal } from "@/hooks/use-modal";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useModal } from "@/hooks/use-modal";
 import { useCreatePackageCategoryMutation } from "../../_hooks/query/use-create-package-category-mutation";
 
 const schema = z.object({
@@ -50,7 +50,10 @@ export function AddPackageCategoryDialog() {
 	};
 
 	return (
-		<Dialog open={isModalOpen("add-package-category")} onOpenChange={handleClose}>
+		<Dialog
+			open={isModalOpen("add-package-category")}
+			onOpenChange={handleClose}
+		>
 			<DialogContent className="max-w-md" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Add Package Category</DialogTitle>
@@ -65,7 +68,7 @@ export function AddPackageCategoryDialog() {
 							placeholder="e.g., Tours, Transfers, Events"
 						/>
 						{errors.name && (
-							<p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+							<p className="mt-1 text-red-500 text-sm">{errors.name.message}</p>
 						)}
 					</div>
 
@@ -89,7 +92,7 @@ export function AddPackageCategoryDialog() {
 						/>
 					</div>
 
-					<div className="flex gap-2 justify-end">
+					<div className="flex justify-end gap-2">
 						<Button type="button" variant="outline" onClick={handleClose}>
 							Cancel
 						</Button>

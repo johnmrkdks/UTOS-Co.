@@ -1,17 +1,23 @@
-import type { Control } from "react-hook-form"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Input } from "@workspace/ui/components/input"
-import type { AddCarFormValues } from "../add-car-form"
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import type { Control } from "react-hook-form";
+import type { AddCarFormValues } from "../add-car-form";
 
 type DetailsFormProps = {
-	control: Control<AddCarFormValues>
-}
+	control: Control<AddCarFormValues>;
+};
 
 export function DetailsForm({ control }: DetailsFormProps) {
 	return (
 		<div className="space-y-4">
-			<h3 className="text-lg font-medium">Car Details</h3>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<h3 className="font-medium text-lg">Car Details</h3>
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				<FormField
 					control={control}
 					name="licensePlate"
@@ -52,7 +58,9 @@ export function DetailsForm({ control }: DetailsFormProps) {
 									min="2"
 									max="8"
 									{...field}
-									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 4)}
+									onChange={(e) =>
+										field.onChange(Number.parseInt(e.target.value) || 4)
+									}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -71,7 +79,9 @@ export function DetailsForm({ control }: DetailsFormProps) {
 									min="1"
 									max="15"
 									{...field}
-									onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 4)}
+									onChange={(e) =>
+										field.onChange(Number.parseInt(e.target.value) || 4)
+									}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -90,7 +100,13 @@ export function DetailsForm({ control }: DetailsFormProps) {
 									type="number"
 									placeholder="Number of bags or volume"
 									{...field}
-									onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : undefined)}
+									onChange={(e) =>
+										field.onChange(
+											e.target.value
+												? Number.parseInt(e.target.value)
+												: undefined,
+										)
+									}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -99,6 +115,5 @@ export function DetailsForm({ control }: DetailsFormProps) {
 				/>
 			</div>
 		</div>
-	)
+	);
 }
-

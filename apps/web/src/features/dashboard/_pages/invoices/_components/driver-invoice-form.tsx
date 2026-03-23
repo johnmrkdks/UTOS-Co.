@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
@@ -9,20 +8,30 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { trpc } from "@/trpc";
-import { Loader2Icon, FileDownIcon, MailIcon } from "lucide-react";
-import { InvoiceDocument } from "./invoice-document";
 import { format } from "date-fns";
-import { elementToPdfBlob, sanitizeFilename } from "./pdf-utils";
+import { FileDownIcon, Loader2Icon, MailIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/trpc";
+import { InvoiceDocument } from "./invoice-document";
+import { elementToPdfBlob, sanitizeFilename } from "./pdf-utils";
 
 const PRESETS = [
 	{ label: "This week", getRange: () => getWeekRange(new Date()) },
-	{ label: "Last week", getRange: () => getWeekRange(subtractWeeks(new Date(), 1)) },
+	{
+		label: "Last week",
+		getRange: () => getWeekRange(subtractWeeks(new Date(), 1)),
+	},
 	{ label: "This fortnight", getRange: () => getFortnightRange(new Date()) },
-	{ label: "Last fortnight", getRange: () => getFortnightRange(subtractWeeks(new Date(), 2)) },
+	{
+		label: "Last fortnight",
+		getRange: () => getFortnightRange(subtractWeeks(new Date(), 2)),
+	},
 	{ label: "This month", getRange: () => getMonthRange(new Date()) },
-	{ label: "Last month", getRange: () => getMonthRange(subtractMonths(new Date(), 1)) },
+	{
+		label: "Last month",
+		getRange: () => getMonthRange(subtractMonths(new Date(), 1)),
+	},
 ] as const;
 
 function getWeekRange(date: Date) {
@@ -51,7 +60,15 @@ function getFortnightRange(date: Date) {
 
 function getMonthRange(date: Date) {
 	const start = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
-	const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+	const end = new Date(
+		date.getFullYear(),
+		date.getMonth() + 1,
+		0,
+		23,
+		59,
+		59,
+		999,
+	);
 	return { startDate: start, endDate: end };
 }
 
@@ -78,7 +95,7 @@ export function DriverInvoiceForm() {
 	const [preset, setPreset] = useState<string>("");
 
 	const driversQuery = useQuery(
-		trpc.drivers.list.queryOptions({ limit: 200, offset: 0 })
+		trpc.drivers.list.queryOptions({ limit: 200, offset: 0 }),
 	);
 	const invoiceQuery = useQuery({
 		...trpc.invoices.getDriverInvoice.queryOptions({
@@ -140,11 +157,13 @@ export function DriverInvoiceForm() {
 	const sendToDriverMutation = useMutation(
 		trpc.invoices.sendDriverInvoice.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: trpc.invoices.listSentLogs.queryKey() });
+				queryClient.invalidateQueries({
+					queryKey: trpc.invoices.listSentLogs.queryKey(),
+				});
 				toast.success("Invoice sent to driver");
 			},
 			onError: (err) => toast.error(err.message || "Failed to send invoice"),
-		})
+		}),
 	);
 
 	const handleSendToDriver = async () => {
@@ -248,7 +267,9 @@ export function DriverInvoiceForm() {
 			</div>
 			<Button
 				onClick={handleGenerate}
-				disabled={!driverId || !startDate || !endDate || invoiceQuery.isFetching}
+				disabled={
+					!driverId || !startDate || !endDate || invoiceQuery.isFetching
+				}
 				className="print:hidden"
 			>
 				{invoiceQuery.isFetching ? (
@@ -260,7 +281,7 @@ export function DriverInvoiceForm() {
 			{invoice && (
 				<div className="space-y-4">
 					<div className="flex items-center gap-2 print:hidden">
-						<h3 className="text-lg font-semibold">Invoice Preview</h3>
+						<h3 className="font-semibold text-lg">Invoice Preview</h3>
 						<Button variant="outline" size="sm" onClick={handleDownloadPdf}>
 							<FileDownIcon className="mr-2 h-4 w-4" />
 							Download PDF
@@ -281,7 +302,7 @@ export function DriverInvoiceForm() {
 					</div>
 					<div
 						ref={invoiceRef}
-						className="rounded-lg border bg-white p-8 print:border-0 print:shadow-none print:p-0"
+						className="rounded-lg border bg-white p-8 print:border-0 print:p-0 print:shadow-none"
 					>
 						<InvoiceDocument type="driver" data={invoice} />
 					</div>

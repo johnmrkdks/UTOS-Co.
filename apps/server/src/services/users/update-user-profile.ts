@@ -1,7 +1,7 @@
-import type { DB } from "@/db";
-import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { users } from "@/db/schema";
 
 export const UpdateUserProfileServiceSchema = z.object({
 	userId: z.string(),
@@ -9,9 +9,14 @@ export const UpdateUserProfileServiceSchema = z.object({
 	phone: z.string().optional(),
 });
 
-export type UpdateUserProfileParams = z.infer<typeof UpdateUserProfileServiceSchema>;
+export type UpdateUserProfileParams = z.infer<
+	typeof UpdateUserProfileServiceSchema
+>;
 
-export async function updateUserProfileService(db: DB, data: UpdateUserProfileParams) {
+export async function updateUserProfileService(
+	db: DB,
+	data: UpdateUserProfileParams,
+) {
 	console.log("=== DEBUG: Starting updateUserProfileService ===");
 	console.log("Input data:", JSON.stringify(data, null, 2));
 
@@ -70,9 +75,10 @@ export async function updateUserProfileService(db: DB, data: UpdateUserProfilePa
 			phone: (updatedUser as any).phone,
 		});
 
-		console.log("=== DEBUG: updateUserProfileService completed successfully ===");
+		console.log(
+			"=== DEBUG: updateUserProfileService completed successfully ===",
+		);
 		return updatedUser;
-
 	} catch (error) {
 		console.error("ERROR in updateUserProfileService:", error);
 		throw error;

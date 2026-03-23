@@ -8,7 +8,7 @@ export const getCarsCountByFeatureId = async (db: DB, featureId: string) => {
 			value: count(),
 		})
 		.from(carFeatures)
-		.where(eq(carFeatures.id, featureId))
+		.where(eq(carFeatures.id, featureId));
 
 	return result.value;
 };

@@ -1,26 +1,41 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
-import { format } from "date-fns";
-import { Loader2, CheckCircle, Calendar, Clock, Users, MapPin, Plus, X } from "lucide-react";
-import { toast } from "sonner";
-
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Textarea } from "@workspace/ui/components/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
 import { Separator } from "@workspace/ui/components/separator";
-import { DateTimePicker } from "@/components/date-time-picker";
+import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
-
-import { useUserQuery } from "@/hooks/query/use-user-query";
+import { format } from "date-fns";
+import {
+	Calendar,
+	CheckCircle,
+	Clock,
+	Loader2,
+	MapPin,
+	Plus,
+	Users,
+	X,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
-import { createLocalDateForBackend } from "@/utils/timezone";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
-import { createServiceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
+import {
+	createServiceBookingSchema,
+	type ServiceBookingFormData,
+} from "@/features/guest/_schemas/service-booking-schema";
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
+import { useUserQuery } from "@/hooks/query/use-user-query";
+import { createLocalDateForBackend } from "@/utils/timezone";
 
 interface ServiceBookingFormProps {
 	service: {
@@ -47,11 +62,13 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 	const navigate = useNavigate();
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
-	const { data: profileData, isLoading: profileLoading } = useCustomerProfileQuery();
+	const { data: profileData, isLoading: profileLoading } =
+		useCustomerProfileQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
 
 	// Determine if this is an hourly service
-	const isHourlyService = service.serviceType === 'hourly' || !!service.hourlyRate;
+	const isHourlyService =
+		service.serviceType === "hourly" || !!service.hourlyRate;
 
 	// Create schema based on service type - ensure minimum 20 passengers
 	const maxPassengers = Math.max(service.maxPassengers || 20, 20);
@@ -85,8 +102,10 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			form.reset({
 				...currentValues,
 				customerName: currentValues.customerName || profileData.user.name || "",
-				customerEmail: currentValues.customerEmail || profileData.user.email || "",
-				customerPhone: currentValues.customerPhone || profileData.user.phone || "",
+				customerEmail:
+					currentValues.customerEmail || profileData.user.email || "",
+				customerPhone:
+					currentValues.customerPhone || profileData.user.phone || "",
 			});
 		}
 	}, [sessionData, profileData, form]);
@@ -99,20 +118,23 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			const currentPath = window.location.pathname + window.location.search;
 			navigate({
 				to: "/sign-in",
-				search: { redirect: currentPath }
+				search: { redirect: currentPath },
 			});
 			return;
 		}
 
 		// Create booking data with proper user ID - use timezone-aware date handling
-		const dateString = data.bookingDate.toISOString().split('T')[0];
+		const dateString = data.bookingDate.toISOString().split("T")[0];
 
 		const bookingData = {
 			packageId: service.id,
 			carId: null, // Will be assigned by admin
 			originAddress: "Service location (TBD)", // Service packages don't have fixed locations
 			destinationAddress: "Service destination (TBD)",
-			scheduledPickupTime: createLocalDateForBackend(dateString, data.bookingTime),
+			scheduledPickupTime: createLocalDateForBackend(
+				dateString,
+				data.bookingTime,
+			),
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,
 			customerEmail: data.customerEmail,
@@ -133,26 +155,29 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 			// Scroll to top after booking confirmation
 			setTimeout(() => {
-				window.scrollTo({ top: 0, behavior: 'smooth' });
+				window.scrollTo({ top: 0, behavior: "smooth" });
 			}, 100);
 		} catch (error) {
 			console.error("Service booking failed:", error);
 		}
 	};
 
-
 	// Show confirmation screen after successful booking
 	if (step === "confirmation" && confirmedBooking) {
 		return (
-			<div className="w-full max-w-2xl mx-auto space-y-6 p-4 sm:p-6">
+			<div className="mx-auto w-full max-w-2xl space-y-6 p-4 sm:p-6">
 				{/* Header */}
-				<div className="text-center space-y-4">
-					<CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+				<div className="space-y-4 text-center">
+					<CheckCircle className="mx-auto h-16 w-16 text-green-500" />
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900">Service Booked!</h1>
-						<p className="text-gray-600">Your service booking has been submitted successfully</p>
+						<h1 className="font-bold text-3xl text-gray-900">
+							Service Booked!
+						</h1>
+						<p className="text-gray-600">
+							Your service booking has been submitted successfully
+						</p>
 						{!sessionData?.user && (
-							<p className="text-sm text-blue-600 mt-2">
+							<p className="mt-2 text-blue-600 text-sm">
 								💡 Tip: Create an account to easily manage your bookings
 							</p>
 						)}
@@ -160,8 +185,10 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 				</div>
 
 				{/* Service Details */}
-				<div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 shadow-sm">
-					<h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Details</h3>
+				<div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+					<h3 className="mb-4 font-semibold text-gray-900 text-lg">
+						Booking Details
+					</h3>
 					<div className="space-y-3">
 						<div className="flex justify-between">
 							<span className="text-gray-600">Service:</span>
@@ -169,29 +196,38 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Price:</span>
-							<span className="font-medium">${service.fixedPrice?.toFixed(2) || '0.00'}</span>
+							<span className="font-medium">
+								${service.fixedPrice?.toFixed(2) || "0.00"}
+							</span>
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Passengers:</span>
-							<span className="font-medium">{form.getValues("passengerCount")}</span>
+							<span className="font-medium">
+								{form.getValues("passengerCount")}
+							</span>
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Date & Time:</span>
 							<span className="font-medium">
-								{date ? format(date, "PPP") : "Date selected"} at {form.getValues("bookingTime")}
+								{date ? format(date, "PPP") : "Date selected"} at{" "}
+								{form.getValues("bookingTime")}
 							</span>
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Contact:</span>
-							<span className="font-medium">{form.getValues("customerName")}</span>
+							<span className="font-medium">
+								{form.getValues("customerName")}
+							</span>
 						</div>
 					</div>
 				</div>
 
 				{/* Payment Notice - shown only if no redirect to payment (fallback) */}
-				<div className="bg-blue-50 rounded-xl border border-blue-200 p-4 sm:p-6">
-					<h3 className="text-lg font-semibold text-blue-900 mb-2">What's Next?</h3>
-					<ul className="text-blue-800 space-y-1 text-sm">
+				<div className="rounded-xl border border-blue-200 bg-blue-50 p-4 sm:p-6">
+					<h3 className="mb-2 font-semibold text-blue-900 text-lg">
+						What's Next?
+					</h3>
+					<ul className="space-y-1 text-blue-800 text-sm">
 						<li>• Complete payment to confirm your booking</li>
 						<li>• You'll receive confirmation via email after payment</li>
 						<li>• Final charge occurs after service completion</li>
@@ -200,11 +236,8 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 				</div>
 
 				{/* Action Buttons */}
-				<div className="flex flex-col sm:flex-row gap-3">
-					<Button
-						onClick={() => navigate({ to: "/" })}
-						className="flex-1"
-					>
+				<div className="flex flex-col gap-3 sm:flex-row">
+					<Button onClick={() => navigate({ to: "/" })} className="flex-1">
 						Back to Home
 					</Button>
 					<Button
@@ -224,39 +257,45 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-6xl mx-auto px-4 py-8">
-				<div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+			<div className="mx-auto max-w-6xl px-4 py-8">
+				<div className="grid grid-cols-1 gap-8 xl:grid-cols-5">
 					{/* Service Information Panel - Left Side */}
 					<div className="xl:col-span-2">
 						<div className="sticky top-8">
-							<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+							<div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg">
 								{/* Service Image Banner */}
 								{service.bannerImageUrl ? (
-									<div className="h-64 relative overflow-hidden">
+									<div className="relative h-64 overflow-hidden">
 										<img
 											src={service.bannerImageUrl}
 											alt={service.name}
-											className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+											className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
 										/>
 										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-										<div className="absolute bottom-6 left-6 right-6">
+										<div className="absolute right-6 bottom-6 left-6">
 											<div className="text-white">
-												<h2 className="text-2xl font-bold mb-2">{service.name}</h2>
-												<p className="text-white/90 text-sm">
-													{service.description || "Premium chauffeur service with professional standards"}
+												<h2 className="mb-2 font-bold text-2xl">
+													{service.name}
+												</h2>
+												<p className="text-sm text-white/90">
+													{service.description ||
+														"Premium chauffeur service with professional standards"}
 												</p>
 											</div>
 										</div>
 									</div>
 								) : (
-									<div className="h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center">
+									<div className="flex h-64 items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5">
 										<div className="text-center">
-											<div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-												<Calendar className="w-10 h-10 text-primary/60" />
+											<div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
+												<Calendar className="h-10 w-10 text-primary/60" />
 											</div>
-											<h2 className="text-2xl font-bold text-gray-800 mb-2">{service.name}</h2>
-											<p className="text-gray-600 text-sm px-4">
-												{service.description || "Premium chauffeur service with professional standards"}
+											<h2 className="mb-2 font-bold text-2xl text-gray-800">
+												{service.name}
+											</h2>
+											<p className="px-4 text-gray-600 text-sm">
+												{service.description ||
+													"Premium chauffeur service with professional standards"}
 											</p>
 										</div>
 									</div>
@@ -265,15 +304,17 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 								<div className="p-8">
 									{/* Price Display - Only for fixed-type services */}
 									{!isHourlyService && service.fixedPrice && (
-										<div className="text-center mb-8">
-											<div className="inline-flex items-baseline gap-2 bg-primary/10 px-6 py-4 rounded-xl border border-primary/20">
-												<span className="text-4xl font-black text-primary">
-													${service.fixedPrice?.toFixed(2) || '0.00'}
+										<div className="mb-8 text-center">
+											<div className="inline-flex items-baseline gap-2 rounded-xl border border-primary/20 bg-primary/10 px-6 py-4">
+												<span className="font-black text-4xl text-primary">
+													${service.fixedPrice?.toFixed(2) || "0.00"}
 												</span>
-												<span className="text-primary/80 text-sm font-medium">per booking</span>
+												<span className="font-medium text-primary/80 text-sm">
+													per booking
+												</span>
 											</div>
 											<div className="mt-3">
-												<span className="inline-block bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full">
+												<span className="inline-block rounded-full bg-primary/15 px-3 py-1 font-semibold text-primary text-xs">
 													Fixed Price - No Hidden Fees
 												</span>
 											</div>
@@ -282,16 +323,17 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 									{/* Service Description */}
 									<div className="space-y-4">
-										<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-											<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center">
-												<CheckCircle className="w-3 h-3 text-primary" />
+										<h3 className="flex items-center gap-2 font-semibold text-gray-900 text-lg">
+											<div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15">
+												<CheckCircle className="h-3 w-3 text-primary" />
 											</div>
 											Service Details
 										</h3>
 
-										<div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
+										<div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
 											<p className="text-gray-700 leading-relaxed">
-												{service.description || "Premium chauffeur service with professional standards and exceptional comfort."}
+												{service.description ||
+													"Premium chauffeur service with professional standards and exceptional comfort."}
 											</p>
 										</div>
 									</div>
@@ -302,28 +344,41 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 
 					{/* Booking Form Panel - Right Side */}
 					<div className="xl:col-span-3">
-						<div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+						<div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg">
 							<div className="bg-primary p-8">
-								<h1 className="text-3xl font-bold text-white mb-2">Book This Service</h1>
-								<p className="text-primary-foreground/90">Complete your service booking in just a few steps</p>
+								<h1 className="mb-2 font-bold text-3xl text-white">
+									Book This Service
+								</h1>
+								<p className="text-primary-foreground/90">
+									Complete your service booking in just a few steps
+								</p>
 							</div>
 
-							<form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-8">
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className="space-y-8 p-8"
+							>
 								{/* Contact Information Section */}
 								<div className="space-y-6">
 									<div className="flex items-center gap-4">
-										<div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-											<span className="text-white text-lg font-bold">1</span>
+										<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
+											<span className="font-bold text-lg text-white">1</span>
 										</div>
 										<div>
-											<h3 className="text-xl font-bold text-gray-900">Contact Information</h3>
-											<p className="text-gray-500 text-sm">We'll use this to reach you about your booking</p>
+											<h3 className="font-bold text-gray-900 text-xl">
+												Contact Information
+											</h3>
+											<p className="text-gray-500 text-sm">
+												We'll use this to reach you about your booking
+											</p>
 										</div>
 									</div>
 
 									<div className="space-y-5 pl-14">
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Full Name *</label>
+											<label className="mb-3 block font-semibold text-gray-800 text-sm">
+												Full Name *
+											</label>
 											<Input
 												{...form.register("customerName")}
 												placeholder="Ivan Gemota"
@@ -332,9 +387,11 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 											/>
 										</div>
 
-										<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+										<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Email Address *</label>
+												<label className="mb-3 block font-semibold text-gray-800 text-sm">
+													Email Address *
+												</label>
 												<Input
 													type="email"
 													{...form.register("customerEmail")}
@@ -345,7 +402,9 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 											</div>
 
 											<div>
-												<label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number *</label>
+												<label className="mb-3 block font-semibold text-gray-800 text-sm">
+													Phone Number *
+												</label>
 												<Input
 													type="tel"
 													{...form.register("customerPhone")}
@@ -361,24 +420,32 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 								{/* Booking Details Section */}
 								<div className="space-y-6">
 									<div className="flex items-center gap-4">
-										<div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
-											<span className="text-white text-lg font-bold">2</span>
+										<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600">
+											<span className="font-bold text-lg text-white">2</span>
 										</div>
 										<div>
-											<h3 className="text-xl font-bold text-gray-900">Booking Details</h3>
-											<p className="text-gray-500 text-sm">Tell us about your service needs</p>
+											<h3 className="font-bold text-gray-900 text-xl">
+												Booking Details
+											</h3>
+											<p className="text-gray-500 text-sm">
+												Tell us about your service needs
+											</p>
 										</div>
 									</div>
 
 									<div className="space-y-5 pl-14">
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">Number of Passengers *</label>
+											<label className="mb-3 block font-semibold text-gray-800 text-sm">
+												Number of Passengers *
+											</label>
 											<Input
 												type="number"
 												min={1}
 												max={maxPassengers}
 												placeholder="e.g. 2"
-												{...form.register("passengerCount", { valueAsNumber: true })}
+												{...form.register("passengerCount", {
+													valueAsNumber: true,
+												})}
 												className="h-12 text-base"
 												error={form.formState.errors.passengerCount?.message}
 											/>
@@ -394,8 +461,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 													// Also update scheduledPickupTime for validation
 													const currentTime = form.getValues("bookingTime");
 													if (currentTime) {
-														const combinedDateTime = createLocalDateForBackend(selectedDate.toISOString().split('T')[0], currentTime);
-														form.setValue("scheduledPickupTime", new Date(combinedDateTime));
+														const combinedDateTime = createLocalDateForBackend(
+															selectedDate.toISOString().split("T")[0],
+															currentTime,
+														);
+														form.setValue(
+															"scheduledPickupTime",
+															new Date(combinedDateTime),
+														);
 													}
 												}
 											}}
@@ -404,8 +477,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												// Also update scheduledPickupTime for validation
 												const currentDate = form.getValues("bookingDate");
 												if (currentDate && time) {
-													const combinedDateTime = createLocalDateForBackend(currentDate.toISOString().split('T')[0], time);
-													form.setValue("scheduledPickupTime", new Date(combinedDateTime));
+													const combinedDateTime = createLocalDateForBackend(
+														currentDate.toISOString().split("T")[0],
+														time,
+													);
+													form.setValue(
+														"scheduledPickupTime",
+														new Date(combinedDateTime),
+													);
 												}
 											}}
 											dateError={form.formState.errors.bookingDate?.message}
@@ -415,8 +494,11 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 										/>
 
 										<div>
-											<label className="block text-sm font-semibold text-gray-800 mb-3">
-												Special Requirements <span className="text-gray-400 font-normal">(Optional)</span>
+											<label className="mb-3 block font-semibold text-gray-800 text-sm">
+												Special Requirements{" "}
+												<span className="font-normal text-gray-400">
+													(Optional)
+												</span>
 											</label>
 											<Textarea
 												{...form.register("specialRequirements")}
@@ -429,38 +511,48 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 								</div>
 
 								{/* Booking Summary */}
-								<div className="bg-primary/10 rounded-xl border border-primary/20 p-6">
-									<div className="flex items-center gap-3 mb-6">
-										<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-											<span className="text-white text-lg">💰</span>
+								<div className="rounded-xl border border-primary/20 bg-primary/10 p-6">
+									<div className="mb-6 flex items-center gap-3">
+										<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+											<span className="text-lg text-white">💰</span>
 										</div>
-										<h3 className="text-lg font-bold text-gray-900">Booking Summary</h3>
+										<h3 className="font-bold text-gray-900 text-lg">
+											Booking Summary
+										</h3>
 									</div>
 
 									<div className="space-y-4">
-										<div className="flex justify-between items-center p-4 bg-white rounded-lg">
+										<div className="flex items-center justify-between rounded-lg bg-white p-4">
 											<div>
-												<span className="font-semibold text-gray-800">Service Price</span>
-												<p className="text-sm text-gray-600">All-inclusive fixed rate</p>
+												<span className="font-semibold text-gray-800">
+													Service Price
+												</span>
+												<p className="text-gray-600 text-sm">
+													All-inclusive fixed rate
+												</p>
 											</div>
-											<span className="text-2xl font-bold text-primary">
-												${service.fixedPrice?.toFixed(2) || '0.00'}
+											<span className="font-bold text-2xl text-primary">
+												${service.fixedPrice?.toFixed(2) || "0.00"}
 											</span>
 										</div>
 
-										<div className="bg-white rounded-lg p-4 border border-primary/20">
+										<div className="rounded-lg border border-primary/20 bg-white p-4">
 											<div className="flex items-start gap-3">
-												<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center mt-0.5">
+												<div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary/15">
 													<span className="text-primary text-sm">ℹ️</span>
 												</div>
-										<div>
-											<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
-											<ul className="text-sm text-gray-600 space-y-1">
-												<li>• Authorize payment now to confirm your booking</li>
-												<li>• Card charged after service completion</li>
-												<li>• Secure payment via Square</li>
-											</ul>
-										</div>
+												<div>
+													<p className="mb-2 font-semibold text-gray-800 text-sm">
+														Payment Information
+													</p>
+													<ul className="space-y-1 text-gray-600 text-sm">
+														<li>
+															• Authorize payment now to confirm your booking
+														</li>
+														<li>• Card charged after service completion</li>
+														<li>• Secure payment via Square</li>
+													</ul>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -470,8 +562,12 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 								<div className="pt-4">
 									<Button
 										type="submit"
-										className="w-full h-14 text-lg font-bold"
-										disabled={createBookingMutation.isPending || sessionLoading || profileLoading}
+										className="h-14 w-full font-bold text-lg"
+										disabled={
+											createBookingMutation.isPending ||
+											sessionLoading ||
+											profileLoading
+										}
 									>
 										{createBookingMutation.isPending ? (
 											<>
@@ -490,11 +586,16 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 										)}
 									</Button>
 
-									<p className="text-sm text-gray-500 text-center mt-6 leading-relaxed">
+									<p className="mt-6 text-center text-gray-500 text-sm leading-relaxed">
 										By proceeding, you agree to our{" "}
-										<span className="text-primary underline cursor-pointer hover:text-primary/80">terms of service</span>{" "}
+										<span className="cursor-pointer text-primary underline hover:text-primary/80">
+											terms of service
+										</span>{" "}
 										and{" "}
-										<span className="text-primary underline cursor-pointer hover:text-primary/80">privacy policy</span>.
+										<span className="cursor-pointer text-primary underline hover:text-primary/80">
+											privacy policy
+										</span>
+										.
 									</p>
 								</div>
 							</form>

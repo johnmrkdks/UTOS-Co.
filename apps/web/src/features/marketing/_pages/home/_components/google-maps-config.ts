@@ -9,7 +9,8 @@
 export const GOOGLE_MAPS_CONFIG = {
 	// In a real app, this would come from environment variables
 	// For now, we're using a placeholder that will need to be replaced
-	apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY_HERE",
+	apiKey:
+		import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY_HERE",
 	libraries: ["places"] as const,
 	// Restrict autocomplete to Australia only
 	// Note: NSW filtering will be handled in application logic
@@ -18,6 +19,6 @@ export const GOOGLE_MAPS_CONFIG = {
 	},
 	// Supported place types for autocomplete
 	types: ["geocode"] as const,
-}
+};
 
-export const GOOGLE_MAPS_SCRIPT_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_CONFIG.apiKey}&libraries=${GOOGLE_MAPS_CONFIG.libraries.join(",")}`
+export const GOOGLE_MAPS_SCRIPT_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_CONFIG.apiKey}&libraries=${GOOGLE_MAPS_CONFIG.libraries.join(",")}`;
