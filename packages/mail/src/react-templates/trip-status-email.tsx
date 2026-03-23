@@ -1,17 +1,17 @@
 import {
-	Html,
-	Head,
-	Preview,
 	Body,
-	Container,
-	Section,
-	Row,
-	Column,
-	Heading,
-	Text,
 	Button,
+	Column,
+	Container,
+	Head,
+	Heading,
 	Hr,
+	Html,
 	Img,
+	Preview,
+	Row,
+	Section,
+	Text,
 } from "@react-email/components";
 
 interface TripStatusEmailProps {
@@ -82,22 +82,22 @@ export function TripStatusEmail({
 	// Status-based styling matching driver trips page
 	const getStatusStyle = () => {
 		switch (status) {
-			case 'driver_assigned':
-				return { borderLeftColor: '#3b82f6', badgeColor: '#3b82f6' }; // Blue
-			case 'driver_en_route':
-				return { borderLeftColor: '#eab308', badgeColor: '#eab308' }; // Yellow
-			case 'arrived_pickup':
-				return { borderLeftColor: '#f97316', badgeColor: '#f97316' }; // Orange
-			case 'passenger_on_board':
-			case 'in_progress':
-				return { borderLeftColor: '#22c55e', badgeColor: '#22c55e' }; // Green
-			case 'dropped_off':
-			case 'awaiting_extras':
-				return { borderLeftColor: '#a855f7', badgeColor: '#a855f7' }; // Purple
-			case 'completed':
-				return { borderLeftColor: '#6b7280', badgeColor: '#6b7280' }; // Gray
+			case "driver_assigned":
+				return { borderLeftColor: "#3b82f6", badgeColor: "#3b82f6" }; // Blue
+			case "driver_en_route":
+				return { borderLeftColor: "#eab308", badgeColor: "#eab308" }; // Yellow
+			case "arrived_pickup":
+				return { borderLeftColor: "#f97316", badgeColor: "#f97316" }; // Orange
+			case "passenger_on_board":
+			case "in_progress":
+				return { borderLeftColor: "#22c55e", badgeColor: "#22c55e" }; // Green
+			case "dropped_off":
+			case "awaiting_extras":
+				return { borderLeftColor: "#a855f7", badgeColor: "#a855f7" }; // Purple
+			case "completed":
+				return { borderLeftColor: "#6b7280", badgeColor: "#6b7280" }; // Gray
 			default:
-				return { borderLeftColor: '#22818e', badgeColor: '#22818e' }; // Teal (default)
+				return { borderLeftColor: "#22818e", badgeColor: "#22818e" }; // Teal (default)
 		}
 	};
 
@@ -106,7 +106,9 @@ export function TripStatusEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>{statusTitle} - Booking #{bookingReference} - {customerName}</Preview>
+			<Preview>
+				{statusTitle} - Booking #{bookingReference} - {customerName}
+			</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
@@ -121,9 +123,11 @@ export function TripStatusEmail({
 									style={logoStyle}
 								/>
 							</Column> */}
-							<Column style={{ verticalAlign: 'middle', flexGrow: 1 }}>
+							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
 								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
-								<Text style={brandTagline}>Premium Luxury Transportation Services</Text>
+								<Text style={brandTagline}>
+									Premium Luxury Transportation Services
+								</Text>
 							</Column>
 						</Row>
 					</Section>
@@ -133,22 +137,34 @@ export function TripStatusEmail({
 						<Heading style={headerTitle}>{statusTitle}</Heading>
 						<Text style={headerSubtitle}>{statusMessage}</Text>
 						{/* Content uniqueness marker */}
-						<span style={{ fontSize: '0px', color: 'transparent', lineHeight: '0px' }}>{bookingReference.slice(-4)}.{customerName.slice(0,2)}</span>
+						<span
+							style={{
+								fontSize: "0px",
+								color: "transparent",
+								lineHeight: "0px",
+							}}
+						>
+							{bookingReference.slice(-4)}.{customerName.slice(0, 2)}
+						</span>
 					</Section>
 
 					{/* Compact Trip Card */}
-					<Section style={{ ...tripCard, borderLeftColor: statusStyle.borderLeftColor }}>
+					<Section
+						style={{
+							...tripCard,
+							borderLeftColor: statusStyle.borderLeftColor,
+						}}
+					>
 						{/* Trip Header */}
 						<Row>
-							<Column style={{ width: '60%' }}>
+							<Column style={{ width: "60%" }}>
 								<Text style={tripTime}>{pickupTime}</Text>
 								<Text style={tripDate}>{pickupDate}</Text>
 							</Column>
-							<Column style={{ width: '40%', textAlign: 'right' }}>
+							<Column style={{ width: "40%", textAlign: "right" }}>
 								<Text style={tripReference}>#{bookingReference}</Text>
 							</Column>
 						</Row>
-
 
 						{/* Essential Trip Info */}
 						<Section style={tripDetails}>
@@ -168,14 +184,16 @@ export function TripStatusEmail({
 							)}
 							<Hr style={detailSeparator} />
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Driver</Text>
 									<Text style={detailValue}>{driverName}</Text>
 									{driverPhone && (
 										<>
 											<Text style={detailLabel}>Phone</Text>
 											<Text style={detailValue}>
-												<a href={`tel:${driverPhone}`} style={contactLink}>{driverPhone}</a>
+												<a href={`tel:${driverPhone}`} style={contactLink}>
+													{driverPhone}
+												</a>
 											</Text>
 										</>
 									)}
@@ -183,12 +201,14 @@ export function TripStatusEmail({
 										<>
 											<Text style={detailLabel}>Email</Text>
 											<Text style={detailValue}>
-												<a href={`mailto:${driverEmail}`} style={contactLink}>{driverEmail}</a>
+												<a href={`mailto:${driverEmail}`} style={contactLink}>
+													{driverEmail}
+												</a>
 											</Text>
 										</>
 									)}
 								</Column>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Vehicle</Text>
 									<Text style={detailValue}>{vehicleInfo}</Text>
 								</Column>
@@ -196,31 +216,41 @@ export function TripStatusEmail({
 						</Section>
 
 						{/* Fare Breakdown Section (only for completed trips) */}
-						{status === 'completed' && finalAmount && (
+						{status === "completed" && finalAmount && (
 							<Section style={fareBreakdownSection}>
-								<Heading style={fareBreakdownTitle}>Trip Summary & Fare Breakdown</Heading>
+								<Heading style={fareBreakdownTitle}>
+									Trip Summary & Fare Breakdown
+								</Heading>
 
 								{/* Trip Details */}
 								<Section style={tripSummary}>
 									<Row>
-										<Column style={{ width: '50%' }}>
+										<Column style={{ width: "50%" }}>
 											<Text style={summaryLabel}>Trip Distance</Text>
 											<Text style={summaryValue}>
-												{actualDistance ?
-													`${(actualDistance / 1000).toFixed(1)} km` :
-													estimatedDistance ? `${(estimatedDistance / 1000).toFixed(1)} km (estimated)` :
-													'N/A'
-												}
+												{actualDistance
+													? `${(actualDistance / 1000).toFixed(1)} km`
+													: estimatedDistance
+														? `${(estimatedDistance / 1000).toFixed(1)} km (estimated)`
+														: "N/A"}
 												{estimatedDistance && actualDistance && (
 													<Text style={estimatedText}>
-														{' '}(Est: {(estimatedDistance / 1000).toFixed(1)} km)
+														{" "}
+														(Est: {(estimatedDistance / 1000).toFixed(1)} km)
 													</Text>
 												)}
 											</Text>
 										</Column>
-										<Column style={{ width: '50%' }}>
+										<Column style={{ width: "50%" }}>
 											<Text style={summaryLabel}>Total Amount</Text>
-											<Text style={{...summaryValue, fontSize: '18px', fontWeight: '600', color: '#059669'}}>
+											<Text
+												style={{
+													...summaryValue,
+													fontSize: "18px",
+													fontWeight: "600",
+													color: "#059669",
+												}}
+											>
 												${finalAmount.toFixed(2)}
 											</Text>
 										</Column>
@@ -228,105 +258,181 @@ export function TripStatusEmail({
 								</Section>
 
 								{/* Fare Breakdown */}
-								{((typeof baseFare === 'number' && baseFare > 0) || (typeof distanceFare === 'number' && distanceFare > 0) || (typeof extraCharges === 'number' && extraCharges > 0)) && (
+								{((typeof baseFare === "number" && baseFare > 0) ||
+									(typeof distanceFare === "number" && distanceFare > 0) ||
+									(typeof extraCharges === "number" && extraCharges > 0)) && (
 									<Section style={fareDetails}>
 										<Text style={fareBreakdownSubtitle}>Fare Breakdown</Text>
 
-										{(typeof baseFare === 'number' && baseFare > 0) && (
+										{typeof baseFare === "number" && baseFare > 0 && (
 											<Row style={fareRow}>
-												<Column style={{ width: '70%' }}>
+												<Column style={{ width: "70%" }}>
 													<Text style={fareLabel}>Base Fare</Text>
 												</Column>
-												<Column style={{ width: '30%', textAlign: 'right' }}>
+												<Column style={{ width: "30%", textAlign: "right" }}>
 													<Text style={fareAmount}>${baseFare.toFixed(2)}</Text>
 												</Column>
 											</Row>
 										)}
 
-										{(typeof distanceFare === 'number' && distanceFare > 0) && (
+										{typeof distanceFare === "number" && distanceFare > 0 && (
 											<Row style={fareRow}>
-												<Column style={{ width: '70%' }}>
+												<Column style={{ width: "70%" }}>
 													<Text style={fareLabel}>Distance Fare</Text>
 												</Column>
-												<Column style={{ width: '30%', textAlign: 'right' }}>
-													<Text style={fareAmount}>${distanceFare.toFixed(2)}</Text>
+												<Column style={{ width: "30%", textAlign: "right" }}>
+													<Text style={fareAmount}>
+														${distanceFare.toFixed(2)}
+													</Text>
 												</Column>
 											</Row>
 										)}
 
-										{(typeof extraCharges === 'number' && extraCharges > 0) && (
+										{typeof extraCharges === "number" && extraCharges > 0 && (
 											<>
 												<Row style={fareRow}>
-													<Column style={{ width: '70%' }}>
+													<Column style={{ width: "70%" }}>
 														<Text style={fareLabel}>Additional Charges</Text>
 													</Column>
-													<Column style={{ width: '30%', textAlign: 'right' }}>
-														<Text style={fareAmount}>${extraCharges.toFixed(2)}</Text>
+													<Column style={{ width: "30%", textAlign: "right" }}>
+														<Text style={fareAmount}>
+															${extraCharges.toFixed(2)}
+														</Text>
 													</Column>
 												</Row>
 												{/* Detailed Extras Breakdown */}
 												{extrasDetails && (
-													<Section style={{ marginTop: '8px', marginBottom: '12px', paddingLeft: '12px' }}>
-														{(typeof extrasDetails.additionalWaitTime === 'number' && extrasDetails.additionalWaitTime > 0) && (
-															<Row style={{ marginBottom: '4px' }}>
-																<Column style={{ width: '80%' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		• Additional wait time ({extrasDetails.additionalWaitTime} min)
-																	</Text>
-																</Column>
-															</Row>
-														)}
-														{(typeof extrasDetails.unscheduledStops === 'number' && extrasDetails.unscheduledStops > 0) && (
-															<Row style={{ marginBottom: '4px' }}>
-																<Column style={{ width: '80%' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		• Unscheduled stops ({extrasDetails.unscheduledStops})
-																	</Text>
-																</Column>
-															</Row>
-														)}
-														{(typeof extrasDetails.parkingCharges === 'number' && extrasDetails.parkingCharges > 0) && (
-															<Row style={{ marginBottom: '4px' }}>
-																<Column style={{ width: '70%' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		• Parking charges
-																	</Text>
-																</Column>
-																<Column style={{ width: '30%', textAlign: 'right' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		${extrasDetails.parkingCharges.toFixed(2)}
-																	</Text>
-																</Column>
-															</Row>
-														)}
-														{(typeof extrasDetails.tollCharges === 'number' && extrasDetails.tollCharges > 0) && (
-															<Row style={{ marginBottom: '4px' }}>
-																<Column style={{ width: '70%' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		• Toll charges{extrasDetails.tollLocation ? ` (${extrasDetails.tollLocation})` : ''}
-																	</Text>
-																</Column>
-																<Column style={{ width: '30%', textAlign: 'right' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		${extrasDetails.tollCharges.toFixed(2)}
-																	</Text>
-																</Column>
-															</Row>
-														)}
-														{(typeof extrasDetails.otherChargesAmount === 'number' && extrasDetails.otherChargesAmount > 0) && (
-															<Row style={{ marginBottom: '4px' }}>
-																<Column style={{ width: '70%' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		• {extrasDetails.otherChargesDescription || 'Other charges'}
-																	</Text>
-																</Column>
-																<Column style={{ width: '30%', textAlign: 'right' }}>
-																	<Text style={{ fontSize: '12px', color: '#64748b' }}>
-																		${extrasDetails.otherChargesAmount.toFixed(2)}
-																	</Text>
-																</Column>
-															</Row>
-														)}
+													<Section
+														style={{
+															marginTop: "8px",
+															marginBottom: "12px",
+															paddingLeft: "12px",
+														}}
+													>
+														{typeof extrasDetails.additionalWaitTime ===
+															"number" &&
+															extrasDetails.additionalWaitTime > 0 && (
+																<Row style={{ marginBottom: "4px" }}>
+																	<Column style={{ width: "80%" }}>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			• Additional wait time (
+																			{extrasDetails.additionalWaitTime} min)
+																		</Text>
+																	</Column>
+																</Row>
+															)}
+														{typeof extrasDetails.unscheduledStops ===
+															"number" &&
+															extrasDetails.unscheduledStops > 0 && (
+																<Row style={{ marginBottom: "4px" }}>
+																	<Column style={{ width: "80%" }}>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			• Unscheduled stops (
+																			{extrasDetails.unscheduledStops})
+																		</Text>
+																	</Column>
+																</Row>
+															)}
+														{typeof extrasDetails.parkingCharges === "number" &&
+															extrasDetails.parkingCharges > 0 && (
+																<Row style={{ marginBottom: "4px" }}>
+																	<Column style={{ width: "70%" }}>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			• Parking charges
+																		</Text>
+																	</Column>
+																	<Column
+																		style={{ width: "30%", textAlign: "right" }}
+																	>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			${extrasDetails.parkingCharges.toFixed(2)}
+																		</Text>
+																	</Column>
+																</Row>
+															)}
+														{typeof extrasDetails.tollCharges === "number" &&
+															extrasDetails.tollCharges > 0 && (
+																<Row style={{ marginBottom: "4px" }}>
+																	<Column style={{ width: "70%" }}>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			• Toll charges
+																			{extrasDetails.tollLocation
+																				? ` (${extrasDetails.tollLocation})`
+																				: ""}
+																		</Text>
+																	</Column>
+																	<Column
+																		style={{ width: "30%", textAlign: "right" }}
+																	>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			${extrasDetails.tollCharges.toFixed(2)}
+																		</Text>
+																	</Column>
+																</Row>
+															)}
+														{typeof extrasDetails.otherChargesAmount ===
+															"number" &&
+															extrasDetails.otherChargesAmount > 0 && (
+																<Row style={{ marginBottom: "4px" }}>
+																	<Column style={{ width: "70%" }}>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			•{" "}
+																			{extrasDetails.otherChargesDescription ||
+																				"Other charges"}
+																		</Text>
+																	</Column>
+																	<Column
+																		style={{ width: "30%", textAlign: "right" }}
+																	>
+																		<Text
+																			style={{
+																				fontSize: "12px",
+																				color: "#64748b",
+																			}}
+																		>
+																			$
+																			{extrasDetails.otherChargesAmount.toFixed(
+																				2,
+																			)}
+																		</Text>
+																	</Column>
+																</Row>
+															)}
 													</Section>
 												)}
 											</>
@@ -334,20 +440,26 @@ export function TripStatusEmail({
 
 										<Hr style={fareTotal} />
 										<Row style={fareRow}>
-											<Column style={{ width: '70%' }}>
+											<Column style={{ width: "70%" }}>
 												<Text style={fareTotalLabel}>Total</Text>
 											</Column>
-											<Column style={{ width: '30%', textAlign: 'right' }}>
-												<Text style={fareTotalAmount}>${finalAmount.toFixed(2)}</Text>
+											<Column style={{ width: "30%", textAlign: "right" }}>
+												<Text style={fareTotalAmount}>
+													${finalAmount.toFixed(2)}
+												</Text>
 											</Column>
 										</Row>
 									</Section>
 								)}
 
 								<Text style={transparencyNote}>
-									This breakdown shows how your fare was calculated for complete transparency.
+									This breakdown shows how your fare was calculated for complete
+									transparency.
 									{/* Inline uniqueness */}
-									<span style={{ fontSize: '0px', color: 'transparent' }}> #{bookingReference}</span>
+									<span style={{ fontSize: "0px", color: "transparent" }}>
+										{" "}
+										#{bookingReference}
+									</span>
 								</Text>
 							</Section>
 						)}
@@ -359,7 +471,9 @@ export function TripStatusEmail({
 							</Button>
 							<Text style={contactText}>
 								Need help? Call{" "}
-								<a href="tel:+61422693233" style={contactLink}>+61 422 693 233</a>
+								<a href="tel:+61422693233" style={contactLink}>
+									+61 422 693 233
+								</a>
 							</Text>
 						</Section>
 					</Section>
@@ -368,11 +482,25 @@ export function TripStatusEmail({
 					<Section style={footer}>
 						<Text style={footerBrand}>Down Under Chauffeurs</Text>
 						<Text style={footerDisclaimer}>
-							Automated notification | <a href={`${websiteUrl}/contact-us`} style={footerLink}>Contact Support</a>
+							Automated notification |{" "}
+							<a href={`${websiteUrl}/contact-us`} style={footerLink}>
+								Contact Support
+							</a>
 						</Text>
 						{/* Anti-clipping measures */}
-						<Text style={{ fontSize: '1px', color: '#ffffff', lineHeight: '1px', opacity: 0, overflow: 'hidden', display: 'none' }}>
-							Unique: {bookingReference}-{customerName.replace(/\s/g, '')}-{new Date().getTime().toString().slice(-6)}-{Math.random().toString(36).substr(2, 5)}
+						<Text
+							style={{
+								fontSize: "1px",
+								color: "#ffffff",
+								lineHeight: "1px",
+								opacity: 0,
+								overflow: "hidden",
+								display: "none",
+							}}
+						>
+							Unique: {bookingReference}-{customerName.replace(/\s/g, "")}-
+							{new Date().getTime().toString().slice(-6)}-
+							{Math.random().toString(36).substr(2, 5)}
 						</Text>
 					</Section>
 				</Container>
@@ -383,7 +511,8 @@ export function TripStatusEmail({
 
 // Driver Trips Inspired Styles
 const main = {
-	fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+	fontFamily:
+		"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 	margin: "0",
 	padding: "10px",
 	background: "#f8fafc",

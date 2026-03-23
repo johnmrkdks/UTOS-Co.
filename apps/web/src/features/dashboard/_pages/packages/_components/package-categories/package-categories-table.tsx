@@ -1,3 +1,10 @@
+import { Button } from "@workspace/ui/components/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import {
 	Table,
 	TableBody,
@@ -6,17 +13,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@workspace/ui/components/table";
-import { Button } from "@workspace/ui/components/button";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 import { useModal } from "@/hooks/use-modal";
-import { EditPackageCategoryDialog } from "./edit-package-category-dialog";
 import { DeletePackageCategoryDialog } from "./delete-package-category-dialog";
+import { EditPackageCategoryDialog } from "./edit-package-category-dialog";
 
 interface PackageCategory {
 	id: string;
@@ -30,7 +30,10 @@ interface PackageCategoriesTableProps {
 	isLoading: boolean;
 }
 
-export function PackageCategoriesTable({ data, isLoading }: PackageCategoriesTableProps) {
+export function PackageCategoriesTable({
+	data,
+	isLoading,
+}: PackageCategoriesTableProps) {
 	const { openModal, setModalData } = useModal();
 
 	if (isLoading) {

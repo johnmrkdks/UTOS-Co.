@@ -3,11 +3,11 @@ import type { EmailTemplate, InvoiceData } from "../types";
 export function generateInvoiceTemplate(
 	customerName: string,
 	bookingId: string,
-	invoiceData: InvoiceData
+	invoiceData: InvoiceData,
 ): EmailTemplate {
-	const formattedAmount = new Intl.NumberFormat('en-AU', {
-		style: 'currency',
-		currency: invoiceData.currency || 'AUD'
+	const formattedAmount = new Intl.NumberFormat("en-AU", {
+		style: "currency",
+		currency: invoiceData.currency || "AUD",
 	}).format(invoiceData.amount / 100);
 
 	return {
@@ -38,21 +38,29 @@ export function generateInvoiceTemplate(
 								<span style="color: #666;">Service Type:</span>
 								<span style="color: #333; font-weight: bold;">${invoiceData.serviceType}</span>
 							</div>
-							${invoiceData.packageName ? `
+							${
+								invoiceData.packageName
+									? `
 							<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
 								<span style="color: #666;">Package:</span>
 								<span style="color: #333; font-weight: bold;">${invoiceData.packageName}</span>
 							</div>
-							` : ''}
-							${invoiceData.route ? `
+							`
+									: ""
+							}
+							${
+								invoiceData.route
+									? `
 							<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
 								<span style="color: #666;">Route:</span>
 								<span style="color: #333; font-weight: bold;">${invoiceData.route}</span>
 							</div>
-							` : ''}
+							`
+									: ""
+							}
 							<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
 								<span style="color: #666;">Date:</span>
-								<span style="color: #333; font-weight: bold;">${new Date(invoiceData.bookingDate).toLocaleDateString('en-AU')}</span>
+								<span style="color: #333; font-weight: bold;">${new Date(invoiceData.bookingDate).toLocaleDateString("en-AU")}</span>
 							</div>
 							<div style="border-top: 2px solid #333; margin-top: 20px; padding-top: 15px;">
 								<div style="display: flex; justify-content: space-between;">

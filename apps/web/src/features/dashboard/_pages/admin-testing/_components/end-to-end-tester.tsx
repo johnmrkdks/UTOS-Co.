@@ -1,9 +1,14 @@
-import { useState } from "react";
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Progress } from "@workspace/ui/components/progress";
-import { CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { useState } from "react";
 import type { TestResult } from "../index";
 
 interface EndToEndTesterProps {
@@ -23,7 +28,11 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 	const [testSteps, setTestSteps] = useState<TestStep[]>([
 		{ id: "pricing-config", name: "Pricing Configuration", status: "pending" },
 		{ id: "package-validation", name: "Package Validation", status: "pending" },
-		{ id: "driver-availability", name: "Driver Availability", status: "pending" },
+		{
+			id: "driver-availability",
+			name: "Driver Availability",
+			status: "pending",
+		},
 		{ id: "quote-generation", name: "Quote Generation", status: "pending" },
 		{ id: "booking-creation", name: "Booking Creation", status: "pending" },
 		{ id: "driver-assignment", name: "Driver Assignment", status: "pending" },
@@ -31,20 +40,26 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 		{ id: "completion", name: "Booking Completion", status: "pending" },
 	]);
 
-	const updateStepStatus = (stepId: string, status: TestStep["status"], message?: string) => {
-		setTestSteps(prev => prev.map(step => 
-			step.id === stepId 
-				? { ...step, status, message }
-				: step
-		));
+	const updateStepStatus = (
+		stepId: string,
+		status: TestStep["status"],
+		message?: string,
+	) => {
+		setTestSteps((prev) =>
+			prev.map((step) =>
+				step.id === stepId ? { ...step, status, message } : step,
+			),
+		);
 	};
 
 	const runEndToEndTest = async () => {
 		setIsRunning(true);
 		setProgress(0);
-		
+
 		// Reset all steps
-		setTestSteps(prev => prev.map(step => ({ ...step, status: "pending" as const })));
+		setTestSteps((prev) =>
+			prev.map((step) => ({ ...step, status: "pending" as const })),
+		);
 
 		const steps = [
 			{ id: "pricing-config", name: "Pricing Configuration", delay: 800 },
@@ -63,40 +78,41 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 		try {
 			for (let i = 0; i < steps.length; i++) {
 				const step = steps[i];
-				
+
 				// Mark step as running
 				updateStepStatus(step.id, "running");
-				
+
 				// Simulate step execution
-				await new Promise(resolve => setTimeout(resolve, step.delay));
-				
+				await new Promise((resolve) => setTimeout(resolve, step.delay));
+
 				// Simulate occasional failures for realistic testing
 				const shouldFail = Math.random() < 0.1; // 10% chance of failure
-				
-				if (shouldFail && i > 2) { // Don't fail the first few critical steps
+
+				if (shouldFail && i > 2) {
+					// Don't fail the first few critical steps
 					updateStepStatus(step.id, "error", "Simulated random failure");
-					
+
 					onResult({
 						type: "end-to-end",
 						status: "error",
 						message: `End-to-end test failed at step: ${step.name}`,
-						data: { 
+						data: {
 							completedSteps: i,
 							totalSteps,
-							failedStep: step.name
+							failedStep: step.name,
 						},
 					});
-					
+
 					setIsRunning(false);
 					return;
 				}
-				
+
 				updateStepStatus(step.id, "success", "Completed successfully");
 				successfulSteps++;
-				
+
 				// Update progress
 				setProgress(((i + 1) / totalSteps) * 100);
-				
+
 				// Report intermediate progress
 				onResult({
 					type: "end-to-end",
@@ -111,13 +127,12 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 				type: "end-to-end",
 				status: "success",
 				message: `🎉 End-to-end test completed successfully! All ${totalSteps} steps passed.`,
-				data: { 
+				data: {
 					completedSteps: successfulSteps,
 					totalSteps,
-					testId: `E2E-${Date.now()}`
+					testId: `E2E-${Date.now()}`,
 				},
 			});
-
 		} catch (error) {
 			onResult({
 				type: "end-to-end",
@@ -134,11 +149,13 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 			case "success":
 				return <CheckCircle className="h-4 w-4 text-green-500" />;
 			case "running":
-				return <Clock className="h-4 w-4 text-blue-500 animate-spin" />;
+				return <Clock className="h-4 w-4 animate-spin text-blue-500" />;
 			case "error":
 				return <AlertCircle className="h-4 w-4 text-red-500" />;
 			default:
-				return <div className="h-4 w-4 rounded-full border-2 border-gray-300" />;
+				return (
+					<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+				);
 		}
 	};
 
@@ -170,7 +187,7 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div>
-						<div className="flex items-center justify-between text-sm mb-2">
+						<div className="mb-2 flex items-center justify-between text-sm">
 							<span>Test Progress</span>
 							<span>{Math.round(progress)}%</span>
 						</div>
@@ -179,19 +196,19 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 
 					<div className="space-y-2">
 						{testSteps.map((step, index) => (
-							<div 
-								key={step.id} 
-								className="flex items-center justify-between p-3 rounded-lg border bg-card"
+							<div
+								key={step.id}
+								className="flex items-center justify-between rounded-lg border bg-card p-3"
 							>
 								<div className="flex items-center gap-3">
-									<span className="text-sm text-muted-foreground w-6">
+									<span className="w-6 text-muted-foreground text-sm">
 										{index + 1}.
 									</span>
 									{getStepIcon(step.status)}
 									<div>
-										<span className="text-sm font-medium">{step.name}</span>
+										<span className="font-medium text-sm">{step.name}</span>
 										{step.message && (
-											<div className="text-xs text-muted-foreground">
+											<div className="text-muted-foreground text-xs">
 												{step.message}
 											</div>
 										)}
@@ -206,8 +223,8 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 				</CardContent>
 			</Card>
 
-			<Button 
-				onClick={runEndToEndTest} 
+			<Button
+				onClick={runEndToEndTest}
 				disabled={isRunning}
 				className="w-full"
 				size="lg"
@@ -215,9 +232,9 @@ export function EndToEndTester({ onResult }: EndToEndTesterProps) {
 				{isRunning ? "Running End-to-End Test..." : "Start End-to-End Test"}
 			</Button>
 
-			<div className="text-sm text-muted-foreground">
+			<div className="text-muted-foreground text-sm">
 				<p>
-					This test simulates a complete booking workflow from quote generation 
+					This test simulates a complete booking workflow from quote generation
 					to completion, including driver assignment and status updates.
 				</p>
 			</div>

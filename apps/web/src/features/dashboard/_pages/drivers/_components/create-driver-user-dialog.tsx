@@ -1,4 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -18,42 +20,42 @@ import {
 	FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Checkbox } from "@workspace/ui/components/checkbox";
-import { UserPlusIcon, EyeIcon, EyeOffIcon, InfoIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { EyeIcon, EyeOffIcon, InfoIcon, UserPlusIcon } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { useCreateDriverUserMutation } from "../_hooks/query/use-create-driver-user-mutation";
 
-const createDriverUserSchema = z.object({
-	email: z.string().email("Invalid email format"),
-	name: z.string().min(2, "Name must be at least 2 characters"),
-	useDefaultPassword: z.boolean().default(true),
-	password: z.string().optional(),
-	confirmPassword: z.string().optional(),
-}).superRefine((data, ctx) => {
-	// Only validate password fields when not using default password
-	if (!data.useDefaultPassword) {
-		if (!data.password || data.password.length < 8) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.too_small,
-				minimum: 8,
-				type: "string",
-				inclusive: true,
-				message: "Password must be at least 8 characters",
-				path: ["password"],
-			});
+const createDriverUserSchema = z
+	.object({
+		email: z.string().email("Invalid email format"),
+		name: z.string().min(2, "Name must be at least 2 characters"),
+		useDefaultPassword: z.boolean().default(true),
+		password: z.string().optional(),
+		confirmPassword: z.string().optional(),
+	})
+	.superRefine((data, ctx) => {
+		// Only validate password fields when not using default password
+		if (!data.useDefaultPassword) {
+			if (!data.password || data.password.length < 8) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.too_small,
+					minimum: 8,
+					type: "string",
+					inclusive: true,
+					message: "Password must be at least 8 characters",
+					path: ["password"],
+				});
+			}
+			if (data.password !== data.confirmPassword) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "Passwords don't match",
+					path: ["confirmPassword"],
+				});
+			}
 		}
-		if (data.password !== data.confirmPassword) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "Passwords don't match",
-				path: ["confirmPassword"],
-			});
-		}
-	}
-});
+	});
 
 type CreateDriverUserForm = z.infer<typeof createDriverUserSchema>;
 
@@ -61,7 +63,9 @@ interface CreateDriverUserDialogProps {
 	children?: React.ReactNode;
 }
 
-export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps) {
+export function CreateDriverUserDialog({
+	children,
+}: CreateDriverUserDialogProps) {
 	const [open, setOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const createDriverUserMutation = useCreateDriverUserMutation();
@@ -108,10 +112,11 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 				<DialogHeader>
 					<DialogTitle>Create Driver Account</DialogTitle>
 					<DialogDescription>
-						Create a new user account with driver role. The driver will need to verify their email and complete onboarding before becoming active.
+						Create a new user account with driver role. The driver will need to
+						verify their email and complete onboarding before becoming active.
 					</DialogDescription>
 				</DialogHeader>
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control as any}
@@ -120,10 +125,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 								<FormItem>
 									<FormLabel>Full Name</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="Enter driver's full name"
-											{...field}
-										/>
+										<Input placeholder="Enter driver's full name" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -149,7 +151,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 								</FormItem>
 							)}
 						/>
-						
+
 						<FormField
 							control={form.control as any}
 							name="useDefaultPassword"
@@ -162,11 +164,10 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 										/>
 									</FormControl>
 									<div className="space-y-1 leading-none">
-										<FormLabel>
-											Use default password
-										</FormLabel>
+										<FormLabel>Use default password</FormLabel>
 										<FormDescription>
-											Driver will use "changeme" as the initial password and should change it after first login.
+											Driver will use "changeme" as the initial password and
+											should change it after first login.
 										</FormDescription>
 									</div>
 								</FormItem>
@@ -192,7 +193,7 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 														type="button"
 														variant="ghost"
 														size="sm"
-														className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+														className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
 														onClick={() => setShowPassword(!showPassword)}
 													>
 														{showPassword ? (
@@ -204,7 +205,8 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 												</div>
 											</FormControl>
 											<FormDescription>
-												Minimum 8 characters. Share this password securely with the driver.
+												Minimum 8 characters. Share this password securely with
+												the driver.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -231,10 +233,10 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 						)}
 
 						<div className="flex items-start gap-2 rounded-md bg-blue-50 p-3">
-							<InfoIcon className="h-4 w-4 text-blue-600 mt-0.5" />
-							<div className="text-sm text-blue-800">
+							<InfoIcon className="mt-0.5 h-4 w-4 text-blue-600" />
+							<div className="text-blue-800 text-sm">
 								<p className="font-medium">What happens next:</p>
-								<ul className="mt-1 list-disc list-inside text-xs space-y-1">
+								<ul className="mt-1 list-inside list-disc space-y-1 text-xs">
 									<li>Driver account will be created as unverified</li>
 									<li>Driver can login and verify their email</li>
 									<li>Driver completes onboarding process</li>
@@ -255,7 +257,9 @@ export function CreateDriverUserDialog({ children }: CreateDriverUserDialogProps
 								type="submit"
 								disabled={createDriverUserMutation.isPending}
 							>
-								{createDriverUserMutation.isPending ? "Creating..." : "Create Driver Account"}
+								{createDriverUserMutation.isPending
+									? "Creating..."
+									: "Create Driver Account"}
 							</Button>
 						</DialogFooter>
 					</form>

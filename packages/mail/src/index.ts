@@ -1,12 +1,12 @@
 export { MailService } from "./mail-service";
-export { WorkerMailService } from "./worker-mail-service";
-export * from "./types";
-export * from "./templates";
 export * from "./react-templates";
+export * from "./templates";
+export * from "./types";
+export { WorkerMailService } from "./worker-mail-service";
 
+import { MailService } from "./mail-service";
 // Factory function for creating mail service instances
 import type { MailConfig } from "./types";
-import { MailService } from "./mail-service";
 import { WorkerMailService } from "./worker-mail-service";
 
 // Use Maps to store instances per environment configuration
@@ -20,18 +20,22 @@ export function createMailService(config: MailConfig): MailService {
 export function getMailService(env: any): MailService | WorkerMailService {
 	// Prefer Resend in Workers - nodemailer/SMTP does not work in Cloudflare Workers
 	const resendKey = env.RESEND_API_KEY;
-		if (resendKey) {
+	if (resendKey) {
 		const cacheKey = `resend_${resendKey.slice(0, 12)}`;
 		if (!workerMailServiceInstances.has(cacheKey)) {
 			// Resend: use verified domain or onboarding@resend.dev for testing
-			const fromEmail = env.RESEND_FROM_EMAIL || env.GOOGLE_EMAIL_USER || env.GMAIL_USER || "onboarding@resend.dev";
+			const fromEmail =
+				env.RESEND_FROM_EMAIL ||
+				env.GOOGLE_EMAIL_USER ||
+				env.GMAIL_USER ||
+				"onboarding@resend.dev";
 			workerMailServiceInstances.set(
 				cacheKey,
 				new WorkerMailService({
 					resendApiKey: resendKey,
 					fromEmail,
 					fromName: env.RESEND_FROM_NAME || "Down Under Chauffeurs",
-				})
+				}),
 			);
 		}
 		return workerMailServiceInstances.get(cacheKey)!;
@@ -53,8 +57,13 @@ export function getMailService(env: any): MailService | WorkerMailService {
 
 // Add cleanup function for all instances
 export async function cleanupAllMailServices(): Promise<void> {
-	const cleanupPromises = Array.from(mailServiceInstances.values()).map(service =>
-		service.cleanup().catch(error => console.error('Error cleaning up mail service:', error))
+	const cleanupPromises = Array.from(mailServiceInstances.values()).map(
+		(service) =>
+			service
+				.cleanup()
+				.catch((error) =>
+					console.error("Error cleaning up mail service:", error),
+				),
 	);
 	await Promise.all(cleanupPromises);
 	mailServiceInstances.clear();

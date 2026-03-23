@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 interface UseSignOutWithConfirmationProps {
 	redirectTo?: string;
@@ -60,7 +60,8 @@ export const useSignOutWithConfirmation = ({
 					onError: (error) => {
 						onSignOutError?.(error);
 						toast.error("Failed to sign out", {
-							description: "There was an issue signing you out. Please try again.",
+							description:
+								"There was an issue signing you out. Please try again.",
 						});
 					},
 				},

@@ -1,11 +1,26 @@
 import { z } from "zod";
+import {
+	GetUserAccountsServiceSchema,
+	getUserAccountsService,
+} from "@/services/auth/get-user-accounts";
+import {
+	SetPasswordForUserServiceSchema,
+	setPasswordForUserService,
+} from "@/services/auth/set-password-for-user";
+import {
+	UpdateUserPhoneServiceSchema,
+	updateUserPhoneService,
+} from "@/services/auth/update-user-phone";
+import {
+	UpdateUserProfileServiceSchema,
+	updateUserProfileService,
+} from "@/services/auth/update-user-profile";
+import {
+	UpdateUserTimezoneServiceSchema,
+	updateUserTimezoneService,
+} from "@/services/auth/update-user-timezone";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
-import { setPasswordForUserService, SetPasswordForUserServiceSchema } from "@/services/auth/set-password-for-user";
-import { getUserAccountsService, GetUserAccountsServiceSchema } from "@/services/auth/get-user-accounts";
-import { updateUserPhoneService, UpdateUserPhoneServiceSchema } from "@/services/auth/update-user-phone";
-import { updateUserProfileService, UpdateUserProfileServiceSchema } from "@/services/auth/update-user-profile";
-import { updateUserTimezoneService, UpdateUserTimezoneServiceSchema } from "@/services/auth/update-user-timezone";
 
 export const authRouter = router({
 	// Set password for users who only have social accounts (like Google)
@@ -30,8 +45,8 @@ export const authRouter = router({
 		}),
 
 	// Get user accounts to determine what authentication methods they have
-	getUserAccounts: protectedProcedure
-		.query(async ({ ctx: { db, session } }) => {
+	getUserAccounts: protectedProcedure.query(
+		async ({ ctx: { db, session } }) => {
 			try {
 				if (!session?.user?.id) {
 					throw new Error("User not authenticated");
@@ -46,7 +61,8 @@ export const authRouter = router({
 				console.error("Error getting user accounts:", error);
 				handleTRPCError(error);
 			}
-		}),
+		},
+	),
 
 	// Update user phone number (not handled by Better Auth)
 	updateUserPhone: protectedProcedure

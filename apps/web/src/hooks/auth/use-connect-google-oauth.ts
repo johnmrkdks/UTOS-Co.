@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 interface ConnectGoogleOAuthInput {
 	callbackURL?: string;

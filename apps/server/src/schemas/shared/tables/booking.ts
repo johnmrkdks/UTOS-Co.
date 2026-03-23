@@ -1,17 +1,21 @@
-import { bookings } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
-import { CarSchema } from "./car";
-import { UserSchema } from "./user";
-import { PackageSchema } from "./package";
+import {
+	BookingPaymentStatusEnum,
+	BookingStatusEnum,
+	BookingTypeEnum,
+} from "@/db/sqlite/enums";
+import { bookings } from "@/db/sqlite/schema";
 import { BookingExtraSchema } from "./booking-extra";
 import { BookingStopSchema } from "./booking-stop";
+import { CarSchema } from "./car";
 import { OffloadBookingDetailsSchema } from "./offload-booking-details";
-import { BookingStatusEnum, BookingTypeEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
+import { PackageSchema } from "./package";
+import { UserSchema } from "./user";
 
 export const BookingSchema = createSelectSchema(bookings, {
 	createdAt: z.union([z.date(), z.string()]),

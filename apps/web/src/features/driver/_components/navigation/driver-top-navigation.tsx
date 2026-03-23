@@ -1,17 +1,21 @@
-import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
-import { Logo } from "@/components/logo";
+import { Button } from "@workspace/ui/components/button";
 import {
+	Sheet,
+	SheetContent,
+	SheetTrigger,
+} from "@workspace/ui/components/sheet";
+import {
+	ChevronsLeft,
+	ClipboardListIcon,
+	LogOutIcon,
 	MenuIcon,
 	XIcon,
-	LogOutIcon,
-	ClipboardListIcon,
-	ChevronsLeft
 } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
+import { Logo } from "@/components/logo";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { DriverUserMenu } from "./driver-user-menu";
-import { BrandLogo } from "@/components/brand-logo";
 
 interface DriverTopNavigationProps {
 	session: any;
@@ -28,12 +32,12 @@ export function DriverTopNavigation({
 	isMobileMenuOpen,
 	setIsMobileMenuOpen,
 	onSignOut,
-	mobileMenuContent
+	mobileMenuContent,
 }: DriverTopNavigationProps) {
 	return (
-		<div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex justify-between items-center h-16">
+		<div className="sticky top-0 z-10 border-gray-200 border-b bg-white">
+			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-2">
 						{/* Mobile Menu Button - Moved to Left */}
 						<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -42,23 +46,26 @@ export function DriverTopNavigation({
 									<MenuIcon className="h-5 w-5" />
 								</Button>
 							</SheetTrigger>
-							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full [&>button]:hidden">
+							<SheetContent
+								side="left"
+								className="flex h-full w-full flex-col p-0 sm:w-80 [&>button]:hidden"
+							>
 								{/* Fixed Header */}
-								<div className="p-4 border-b flex-shrink-0">
+								<div className="flex-shrink-0 border-b p-4">
 									<div className="flex items-center justify-between">
 										<div className="flex items-center">
 											<Logo />
 											<div className="ml-2">
-												<h2 className="text-lg font-semibold">Driver Portal</h2>
+												<h2 className="font-semibold text-lg">Driver Portal</h2>
 											</div>
 										</div>
 										<Button
 											variant="ghost"
 											size="sm"
 											onClick={() => setIsMobileMenuOpen(false)}
-											className="p-2 hover:bg-gray-100 rounded-lg"
+											className="rounded-lg p-2 hover:bg-gray-100"
 										>
-											<ChevronsLeft className="w-5 h-5 text-gray-600" />
+											<ChevronsLeft className="h-5 w-5 text-gray-600" />
 										</Button>
 									</div>
 								</div>
@@ -67,24 +74,27 @@ export function DriverTopNavigation({
 								{mobileMenuContent}
 							</SheetContent>
 						</Sheet>
-						
+
 						<BrandLogo />
 					</div>
 
 					{/* Right side - Status Indicators and User Info */}
 					<div className="flex items-center space-x-2 sm:space-x-4">
 						{/* Status Indicators - Hidden on mobile, shown on larger screens */}
-						<div className="hidden lg:flex items-center space-x-3">
+						<div className="hidden items-center space-x-3 lg:flex">
 							{needsOnboarding && (
-								<Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
-									<ClipboardListIcon className="h-3 w-3 mr-1" />
+								<Badge
+									variant="outline"
+									className="border-blue-300 bg-blue-100 text-blue-800"
+								>
+									<ClipboardListIcon className="mr-1 h-3 w-3" />
 									Complete Profile
 								</Badge>
 							)}
 						</div>
 
 						{/* Desktop User Menu */}
-						<div className="hidden lg:flex items-center space-x-3">
+						<div className="hidden items-center space-x-3 lg:flex">
 							<DriverUserMenu />
 						</div>
 					</div>

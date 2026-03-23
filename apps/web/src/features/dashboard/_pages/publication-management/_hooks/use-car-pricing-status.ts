@@ -1,5 +1,5 @@
-import { useGetPricingConfigsQuery } from "@/features/dashboard/_pages/pricing-config/_hooks/query/use-get-pricing-configs-query";
 import { useMemo } from "react";
+import { useGetPricingConfigsQuery } from "@/features/dashboard/_pages/pricing-config/_hooks/query/use-get-pricing-configs-query";
 
 export function useCarPricingStatus() {
 	const { data: pricingConfigsData, isLoading } = useGetPricingConfigsQuery({
@@ -7,14 +7,15 @@ export function useCarPricingStatus() {
 	});
 
 	const pricingConfigMap = useMemo(() => {
-		if (!pricingConfigsData?.data || isLoading) return new Map<string, boolean>();
-		
+		if (!pricingConfigsData?.data || isLoading)
+			return new Map<string, boolean>();
+
 		// Filter out configs without carId to prevent issues
-		const validConfigs = pricingConfigsData.data.filter((config: any) => config.carId);
-		
-		return new Map(
-			validConfigs.map((config: any) => [config.carId, true])
+		const validConfigs = pricingConfigsData.data.filter(
+			(config: any) => config.carId,
 		);
+
+		return new Map(validConfigs.map((config: any) => [config.carId, true]));
 	}, [pricingConfigsData, isLoading]);
 
 	const hasCarPricingConfig = (carId: string): boolean => {

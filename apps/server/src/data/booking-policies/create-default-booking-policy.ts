@@ -6,7 +6,8 @@ export async function createDefaultBookingPolicy(db: DB) {
 		.insert(bookingPolicies)
 		.values({
 			name: "Standard Booking Policy",
-			description: "Default policy allowing edits and cancellations 4 hours before pickup",
+			description:
+				"Default policy allowing edits and cancellations 4 hours before pickup",
 			editAllowedHours: 4,
 			editDisabledAfterDriverAssignment: true,
 			cancellationAllowedHours: 4,
@@ -16,6 +17,6 @@ export async function createDefaultBookingPolicy(db: DB) {
 			isDefault: true,
 		})
 		.returning();
-	
+
 	return defaultPolicy;
 }

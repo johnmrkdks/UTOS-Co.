@@ -1,10 +1,10 @@
-import { carBodyTypes } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { carBodyTypes } from "@/db/schema";
 
 // Base schemas
 export const CarBodyTypeSchema = createSelectSchema(carBodyTypes, {
@@ -17,7 +17,7 @@ export const UpdateCarBodyTypeSchema = createUpdateSchema(carBodyTypes);
 export const CarBodyTypeWithEnrichedDataSchema = CarBodyTypeSchema.extend({
 	metadata: z.object({
 		carsCount: z.number(),
-	})
+	}),
 });
 
 // Base types
@@ -26,5 +26,6 @@ export type InsertCarBodyType = z.infer<typeof InsertCarBodyTypeSchema>;
 export type UpdateCarBodyType = z.infer<typeof UpdateCarBodyTypeSchema>;
 
 // Extended types
-export type CarBodyTypeWithEnrichedData = z.infer<typeof CarBodyTypeWithEnrichedDataSchema>;
-
+export type CarBodyTypeWithEnrichedData = z.infer<
+	typeof CarBodyTypeWithEnrichedDataSchema
+>;

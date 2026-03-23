@@ -1,13 +1,21 @@
-import { relations, sql } from "drizzle-orm";
-import { sqliteTable, integer, text, real, index } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
+import { relations, sql } from "drizzle-orm";
+import {
+	index,
+	integer,
+	real,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 import { cars } from "./cars";
 
 export const instantQuotes = sqliteTable(
 	"instant_quotes",
 	{
-		id: text("id").primaryKey().$defaultFn(() => createId()),
-		
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+
 		// Route information
 		originAddress: text("origin_address").notNull(),
 		destinationAddress: text("destination_address").notNull(),
@@ -15,35 +23,37 @@ export const instantQuotes = sqliteTable(
 		originLongitude: real("origin_longitude"),
 		destinationLatitude: real("destination_latitude"),
 		destinationLongitude: real("destination_longitude"),
-		
+
 		// Stops data as JSON
 		stops: text("stops", { mode: "json" }),
-		
+
 		// Selected car information
 		carId: text("car_id").references(() => cars.id),
-		
+
 		// Flexible quote calculations
 		firstKmFare: real("first_km_fare").notNull(),
 		additionalKmFare: real("additional_km_fare").notNull(),
 		totalAmount: real("total_amount").notNull(),
-		
+
 		// Trip metrics
 		estimatedDistance: integer("estimated_distance").notNull(), // in meters
 		estimatedDuration: integer("estimated_duration").notNull(), // in seconds
-		
+
 		// Pricing breakdown as JSON for transparency
 		breakdown: text("breakdown", { mode: "json" }),
-		
+
 		// Quote metadata
-		scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }),
-		
+		scheduledPickupTime: integer("scheduled_pickup_time", {
+			mode: "timestamp",
+		}),
+
 		// Expiry and security
 		expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(), // Quotes expire after 30 minutes
-		
+
 		// Optional: track IP for security/analytics
 		clientIp: text("client_ip"),
 		userAgent: text("user_agent"),
-		
+
 		// Timestamps
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()

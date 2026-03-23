@@ -1,10 +1,10 @@
-import { carDriveTypes } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { carDriveTypes } from "@/db/schema";
 
 // Base schemas
 export const CarDriveTypeSchema = createSelectSchema(carDriveTypes, {

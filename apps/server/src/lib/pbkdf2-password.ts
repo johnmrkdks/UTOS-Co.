@@ -52,7 +52,7 @@ export async function verifyPasswordPbkdf2({
 	const storedHashHex = rest.slice(colon + 1);
 	const saltMatch = saltHex.match(/.{1,2}/g);
 	if (!saltMatch || saltMatch.length !== SALT_LENGTH) return false;
-	const salt = new Uint8Array(saltMatch.map((b) => parseInt(b, 16)));
+	const salt = new Uint8Array(saltMatch.map((b) => Number.parseInt(b, 16)));
 	const encoder = new TextEncoder();
 	const keyMaterial = await crypto.subtle.importKey(
 		"raw",

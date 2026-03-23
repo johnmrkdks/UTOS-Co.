@@ -1,11 +1,13 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
-import { SimplifiedDriverOnboardingForm } from "@/features/dashboard/_pages/drivers/_components/simplified-driver-onboarding-form";
 import { ArrowLeftIcon } from "lucide-react";
-import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
 import { useState } from "react";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
+import { SimplifiedDriverOnboardingForm } from "@/features/dashboard/_pages/drivers/_components/simplified-driver-onboarding-form";
 
-export const Route = createFileRoute('/admin/dashboard/_layout/drivers/onboarding')({
+export const Route = createFileRoute(
+	"/admin/dashboard/_layout/drivers/onboarding",
+)({
 	component: RouteComponent,
 });
 
@@ -14,12 +16,12 @@ function RouteComponent() {
 	const [mockUserId] = useState("user_mock_123"); // In real app, this would come from auth context
 
 	const handleSuccess = () => {
-		navigate({ to: '/admin/dashboard/drivers' });
-	}
+		navigate({ to: "/admin/dashboard/drivers" });
+	};
 
 	const handleBack = () => {
-		navigate({ to: '/admin/dashboard/drivers' });
-	}
+		navigate({ to: "/admin/dashboard/drivers" });
+	};
 
 	return (
 		<PaddingLayout className="flex-1 space-y-6">
@@ -30,7 +32,7 @@ function RouteComponent() {
 					Back to Driver Management
 				</Button>
 				<div className="text-right">
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-sm">
 						Need help? Contact support team
 					</p>
 				</div>
@@ -42,5 +44,5 @@ function RouteComponent() {
 				onSuccess={handleSuccess}
 			/>
 		</PaddingLayout>
-	)
+	);
 }

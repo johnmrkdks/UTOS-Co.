@@ -10,7 +10,7 @@ export const ALL_ROUTES: RouteConfig[] = [
 
 // Route lookup utility
 export const getRouteByPath = (path: string): RouteConfig | undefined => {
-	return ALL_ROUTES.find(route => route.path === path);
+	return ALL_ROUTES.find((route) => route.path === path);
 };
 
 // Get route label by path
@@ -29,11 +29,11 @@ export const formatPathToLabel = (path: string): string => {
 
 	// Handle special cases
 	const labelMap: Record<string, string> = {
-		"bookings": "Booking Management",
-		"cars": "Car Management",
+		bookings: "Booking Management",
+		cars: "Car Management",
 		"pricing-config": "Pricing Config",
 		"admin-testing": "Admin Testing",
-		"publications": "Publication Management",
+		publications: "Publication Management",
 		"todays-scheduled": "Today's Scheduled",
 		"about-us": "About Us",
 		"contact-us": "Contact Us",
@@ -46,12 +46,14 @@ export const formatPathToLabel = (path: string): string => {
 	// Default formatting: kebab-case to Title Case
 	return lastSegment
 		.split("-")
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 		.join(" ");
 };
 
 // Get breadcrumb trail for a given path
-export const getBreadcrumbTrail = (pathname: string): Array<{ label: string; path?: string }> => {
+export const getBreadcrumbTrail = (
+	pathname: string,
+): Array<{ label: string; path?: string }> => {
 	const pathSegments = pathname.split("/").filter(Boolean);
 	const breadcrumbs: Array<{ label: string; path?: string }> = [];
 
@@ -61,9 +63,8 @@ export const getBreadcrumbTrail = (pathname: string): Array<{ label: string; pat
 		breadcrumbs.push({ label: "Dashboard", path: "/dashboard" });
 
 		// Skip the first segment if it's "dashboard"
-		const relevantSegments = pathSegments[0] === "dashboard"
-			? pathSegments.slice(1)
-			: pathSegments;
+		const relevantSegments =
+			pathSegments[0] === "dashboard" ? pathSegments.slice(1) : pathSegments;
 
 		relevantSegments.forEach((segment, index) => {
 			const currentPath = `/dashboard/${relevantSegments.slice(0, index + 1).join("/")}`;
@@ -78,7 +79,7 @@ export const getBreadcrumbTrail = (pathname: string): Array<{ label: string; pat
 			const isLast = index === relevantSegments.length - 1;
 			breadcrumbs.push({
 				label,
-				path: isLast ? undefined : currentPath
+				path: isLast ? undefined : currentPath,
 			});
 		});
 	} else {
@@ -95,7 +96,7 @@ export const getBreadcrumbTrail = (pathname: string): Array<{ label: string; pat
 			const isLast = index === pathSegments.length - 1;
 			breadcrumbs.push({
 				label,
-				path: isLast ? undefined : currentPath
+				path: isLast ? undefined : currentPath,
 			});
 		});
 	}

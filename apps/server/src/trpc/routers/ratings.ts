@@ -1,16 +1,28 @@
+import { z } from "zod";
 import {
 	InsertRatingSchema,
 	UpdateRatingSchema,
 } from "@/schemas/shared/tables/rating";
-import { createRatingService, CreateRatingServiceSchema } from "@/services/ratings/create-rating";
-import { deleteRatingService, DeleteRatingServiceSchema } from "@/services/ratings/delete-rating";
-import { getRatingService, GetRatingServiceSchema } from "@/services/ratings/get-rating";
+import {
+	CreateRatingServiceSchema,
+	createRatingService,
+} from "@/services/ratings/create-rating";
+import {
+	DeleteRatingServiceSchema,
+	deleteRatingService,
+} from "@/services/ratings/delete-rating";
+import {
+	GetRatingServiceSchema,
+	getRatingService,
+} from "@/services/ratings/get-rating";
 import { getRatingsService } from "@/services/ratings/get-ratings";
-import { updateRatingService, UpdateRatingServiceSchema } from "@/services/ratings/update-rating";
+import {
+	UpdateRatingServiceSchema,
+	updateRatingService,
+} from "@/services/ratings/update-rating";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { z } from "zod";
 
 export const ratingsRouter = router({
 	create: protectedProcedure
@@ -64,4 +76,3 @@ export const ratingsRouter = router({
 			}
 		}),
 });
-

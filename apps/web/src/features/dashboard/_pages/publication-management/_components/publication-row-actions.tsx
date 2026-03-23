@@ -6,7 +6,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { MoreHorizontal, Edit, Eye, Settings } from "lucide-react";
+import { Edit, Eye, MoreHorizontal, Settings } from "lucide-react";
 
 interface PublicationRowActionsProps {
 	carId: string;
@@ -33,7 +33,6 @@ export function PublicationRowActions({
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
-
 				{/* Car Management Actions */}
 				{onViewDetails && (
 					<DropdownMenuItem onClick={onViewDetails}>

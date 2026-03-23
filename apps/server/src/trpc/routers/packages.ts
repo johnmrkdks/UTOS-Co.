@@ -1,27 +1,48 @@
+import { z } from "zod";
 import {
 	InsertPackageSchema,
 	UpdatePackageSchema,
 } from "@/schemas/shared/tables/package";
-import { createPackageService, CreatePackageServiceSchema } from "@/services/packages/create-package";
-import { deletePackageService, DeletePackageServiceSchema } from "@/services/packages/delete-package";
-import { getPackageService, GetPackageServiceSchema } from "@/services/packages/get-package";
+import {
+	CreatePackageServiceSchema,
+	createPackageService,
+} from "@/services/packages/create-package";
+import {
+	DeletePackageServiceSchema,
+	deletePackageService,
+} from "@/services/packages/delete-package";
+import {
+	GetPackageServiceSchema,
+	getPackageService,
+} from "@/services/packages/get-package";
 import { getPackagesService } from "@/services/packages/get-packages";
 import { getPublishedPackagesService } from "@/services/packages/get-published-packages";
-import { togglePublishPackageService, TogglePublishPackageServiceSchema } from "@/services/packages/toggle-publish-package";
-import { updatePackageService, UpdatePackageServiceSchema } from "@/services/packages/update-package";
+import {
+	TogglePublishPackageServiceSchema,
+	togglePublishPackageService,
+} from "@/services/packages/toggle-publish-package";
+import {
+	UpdatePackageServiceSchema,
+	updatePackageService,
+} from "@/services/packages/update-package";
 import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { z } from "zod";
 
 export const packagesRouter = router({
 	create: protectedProcedure
 		.input(CreatePackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
-			console.log("🔗 tRPC packages.create - Received input:", JSON.stringify(input, null, 2));
+			console.log(
+				"🔗 tRPC packages.create - Received input:",
+				JSON.stringify(input, null, 2),
+			);
 			try {
 				const newPackage = await createPackageService(db, input);
-				console.log("🎉 tRPC packages.create - Success:", JSON.stringify(newPackage, null, 2));
+				console.log(
+					"🎉 tRPC packages.create - Success:",
+					JSON.stringify(newPackage, null, 2),
+				);
 				return newPackage;
 			} catch (error) {
 				console.error("💥 tRPC packages.create - Error:", error);
@@ -62,16 +83,13 @@ export const packagesRouter = router({
 		.input(UpdatePackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
 			try {
-				const updatedPackage = await updatePackageService(
-					db,
-					input,
-				);
+				const updatedPackage = await updatePackageService(db, input);
 				return updatedPackage;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
-	
+
 	togglePublish: protectedProcedure
 		.input(TogglePublishPackageServiceSchema)
 		.mutation(async ({ ctx: { db }, input }) => {
@@ -82,7 +100,7 @@ export const packagesRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	
+
 	// Public endpoints for customer-facing functionality
 	listPublished: publicProcedure
 		.input(ResourceListSchema)
@@ -94,7 +112,7 @@ export const packagesRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	
+
 	getPublished: publicProcedure
 		.input(GetPackageServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
@@ -109,4 +127,3 @@ export const packagesRouter = router({
 			}
 		}),
 });
-

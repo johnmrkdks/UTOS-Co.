@@ -1,15 +1,17 @@
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
-import { users, accounts } from "@/db/sqlite/schema";
+import { accounts, users } from "@/db/sqlite/schema";
 import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
-import { eq, and } from "drizzle-orm";
 
 export const SetPasswordForUserServiceSchema = z.object({
 	userId: z.string().optional(), // Optional because it will be provided by session context
 	password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export type SetPasswordForUserServiceInput = z.infer<typeof SetPasswordForUserServiceSchema>;
+export type SetPasswordForUserServiceInput = z.infer<
+	typeof SetPasswordForUserServiceSchema
+>;
 
 export const setPasswordForUserService = async (
 	db: DB,
@@ -17,7 +19,10 @@ export const setPasswordForUserService = async (
 ) => {
 	try {
 		console.log("=== DEBUG: Starting setPasswordForUserService ===");
-		console.log("Input data:", JSON.stringify({ ...input, password: "[REDACTED]" }, null, 2));
+		console.log(
+			"Input data:",
+			JSON.stringify({ ...input, password: "[REDACTED]" }, null, 2),
+		);
 
 		// Check if user exists
 		console.log("DEBUG: Checking if user exists with ID:", input.userId);
@@ -34,7 +39,10 @@ export const setPasswordForUserService = async (
 		}
 
 		const user = existingUser[0];
-		console.log("DEBUG: Found user:", JSON.stringify({ ...user, id: user.id }, null, 2));
+		console.log(
+			"DEBUG: Found user:",
+			JSON.stringify({ ...user, id: user.id }, null, 2),
+		);
 
 		// Check if user already has a credential account (password)
 		console.log("DEBUG: Checking for existing credential account");
@@ -44,15 +52,20 @@ export const setPasswordForUserService = async (
 			.where(
 				and(
 					eq(accounts.userId, input.userId),
-					eq(accounts.providerId, "credential")
-				)
+					eq(accounts.providerId, "credential"),
+				),
 			)
 			.limit(1);
 
-		console.log("DEBUG: Existing credential account check result:", existingCredentialAccount.length);
+		console.log(
+			"DEBUG: Existing credential account check result:",
+			existingCredentialAccount.length,
+		);
 		if (existingCredentialAccount.length > 0) {
 			console.log("DEBUG: User already has password, throwing error");
-			throw new Error("User already has a password set. Use changePassword instead.");
+			throw new Error(
+				"User already has a password set. Use changePassword instead.",
+			);
 		}
 
 		// Hash the password with PBKDF2 (Workers-friendly, stays within free tier CPU limit)
@@ -76,32 +89,58 @@ export const setPasswordForUserService = async (
 			updatedAt: new Date(),
 		};
 
-		console.log("DEBUG: Account insert data:", JSON.stringify({
-			...credentialAccountData,
-			password: "[REDACTED]"
-		}, null, 2));
+		console.log(
+			"DEBUG: Account insert data:",
+			JSON.stringify(
+				{
+					...credentialAccountData,
+					password: "[REDACTED]",
+				},
+				null,
+				2,
+			),
+		);
 
 		const newAccount = await db
 			.insert(accounts)
 			.values(credentialAccountData)
 			.returning();
 
-		console.log("DEBUG: Credential account created successfully:", JSON.stringify({
-			...newAccount[0],
-			password: "[REDACTED]"
-		}, null, 2));
+		console.log(
+			"DEBUG: Credential account created successfully:",
+			JSON.stringify(
+				{
+					...newAccount[0],
+					password: "[REDACTED]",
+				},
+				null,
+				2,
+			),
+		);
 
-		console.log("=== DEBUG: setPasswordForUserService completed successfully ===");
+		console.log(
+			"=== DEBUG: setPasswordForUserService completed successfully ===",
+		);
 		return {
 			success: true,
-			message: "Password set successfully. You can now sign in with your email and password.",
+			message:
+				"Password set successfully. You can now sign in with your email and password.",
 		};
 	} catch (error) {
 		console.error("=== ERROR in setPasswordForUserService ===");
 		console.error("Error type:", typeof error);
-		console.error("Error name:", error instanceof Error ? error.name : "Unknown");
-		console.error("Error message:", error instanceof Error ? error.message : error);
-		console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+		console.error(
+			"Error name:",
+			error instanceof Error ? error.name : "Unknown",
+		);
+		console.error(
+			"Error message:",
+			error instanceof Error ? error.message : error,
+		);
+		console.error(
+			"Error stack:",
+			error instanceof Error ? error.stack : "No stack trace",
+		);
 		console.error("Full error object:", error);
 		console.error("=== END ERROR LOG ===");
 		throw error;

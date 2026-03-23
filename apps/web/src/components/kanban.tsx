@@ -1,20 +1,25 @@
-import React, { createContext, useContext, useState, type ReactNode } from "react";
 import {
 	DndContext,
-	DragOverlay,
-	useDraggable,
-	useDroppable,
 	type DragEndEvent,
 	type DragOverEvent,
+	DragOverlay,
 	type DragStartEvent,
+	useDraggable,
+	useDroppable,
 } from "@dnd-kit/core";
 import {
 	SortableContext,
-	verticalListSortingStrategy,
 	useSortable,
+	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@workspace/ui/lib/utils";
+import React, {
+	createContext,
+	type ReactNode,
+	useContext,
+	useState,
+} from "react";
 
 // Base types
 export type KanbanItemProps = {
@@ -40,7 +45,10 @@ const KanbanContext = createContext<KanbanContextType>({
 });
 
 // Kanban Provider Component
-interface KanbanProviderProps<T extends KanbanItemProps, C extends KanbanColumnProps> {
+interface KanbanProviderProps<
+	T extends KanbanItemProps,
+	C extends KanbanColumnProps,
+> {
 	children: (column: C) => ReactNode;
 	columns: C[];
 	data: T[];
@@ -48,7 +56,10 @@ interface KanbanProviderProps<T extends KanbanItemProps, C extends KanbanColumnP
 	className?: string;
 }
 
-export function KanbanProvider<T extends KanbanItemProps, C extends KanbanColumnProps>({
+export function KanbanProvider<
+	T extends KanbanItemProps,
+	C extends KanbanColumnProps,
+>({
 	children,
 	columns,
 	data,
@@ -81,7 +92,7 @@ export function KanbanProvider<T extends KanbanItemProps, C extends KanbanColumn
 		const overColumn = columns.find((col) => col.id === overId);
 		if (overColumn && activeItem.column !== overColumn.id) {
 			const newData = data.map((item) =>
-				item.id === activeId ? { ...item, column: overColumn.id } : item
+				item.id === activeId ? { ...item, column: overColumn.id } : item,
 			);
 			onDataChange(newData as T[]);
 		}
@@ -102,7 +113,7 @@ export function KanbanProvider<T extends KanbanItemProps, C extends KanbanColumn
 		const overColumn = columns.find((col) => col.id === overId);
 		if (overColumn && activeItem.column !== overColumn.id) {
 			const newData = data.map((item) =>
-				item.id === activeId ? { ...item, column: overColumn.id } : item
+				item.id === activeId ? { ...item, column: overColumn.id } : item,
 			);
 			onDataChange(newData as T[]);
 		}
@@ -113,8 +124,17 @@ export function KanbanProvider<T extends KanbanItemProps, C extends KanbanColumn
 
 	return (
 		<KanbanContext.Provider value={{ activeItem, activeColumn }}>
-			<DndContext onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-				<div className={cn("grid size-full auto-cols-fr grid-flow-col gap-4", className)}>
+			<DndContext
+				onDragStart={handleDragStart}
+				onDragOver={handleDragOver}
+				onDragEnd={handleDragEnd}
+			>
+				<div
+					className={cn(
+						"grid size-full auto-cols-fr grid-flow-col gap-4",
+						className,
+					)}
+				>
 					{columns.map((column) => children(column))}
 				</div>
 				<DragOverlay>
@@ -178,7 +198,14 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ id, name, children, className }: KanbanCardProps) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
 		id,
 	});
 
@@ -196,7 +223,7 @@ export function KanbanCard({ id, name, children, className }: KanbanCardProps) {
 			className={cn(
 				"cursor-move rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md",
 				isDragging && "opacity-50",
-				className
+				className,
 			)}
 		>
 			{children || <div className="font-medium">{name}</div>}

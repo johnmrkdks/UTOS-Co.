@@ -1,117 +1,126 @@
-import { cn } from "@workspace/ui/lib/utils";
-import { Button } from "@workspace/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import { BUSINESS_INFO } from "@/constants/business-info";
+import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import {
-	FileText,
+	AlertCircle,
+	Calendar,
 	Clock,
 	DollarSign,
-	AlertCircle,
+	FileText,
+	MapPin,
 	Phone,
-	Calendar,
-	MapPin
 } from "lucide-react";
+import { BUSINESS_INFO } from "@/constants/business-info";
 
 type TermsAndConditionsProps = {
 	className?: string;
 };
 
-export function TermsAndConditions({ className, ...props }: TermsAndConditionsProps) {
+export function TermsAndConditions({
+	className,
+	...props
+}: TermsAndConditionsProps) {
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Hero Section */}
-			<div className="relative py-24 bg-gradient-to-br from-foreground via-foreground/90 to-primary/20">
+			<div className="relative bg-gradient-to-br from-foreground via-foreground/90 to-primary/20 py-24">
 				<div className="absolute inset-0 bg-foreground/70" />
-				<div className="relative z-10 container mx-auto px-6 text-center">
-					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-sm font-medium mb-6">
-							<FileText className="w-4 h-4 mr-2" />
+				<div className="container relative z-10 mx-auto px-6 text-center">
+					<div className="mx-auto max-w-4xl">
+						<div className="mb-6 inline-flex items-center rounded-full bg-beige px-4 py-2 font-medium text-foreground text-sm">
+							<FileText className="mr-2 h-4 w-4" />
 							Legal Information
 						</div>
 
-						<h1 className="text-5xl lg:text-6xl font-bold text-beige mb-6">
+						<h1 className="mb-6 font-bold text-5xl text-beige lg:text-6xl">
 							Terms and
-							<span className="block text-primary">
-								Conditions
-							</span>
+							<span className="block text-primary">Conditions</span>
 						</h1>
 
-						<p className="text-xl text-beige/80 leading-relaxed max-w-3xl mx-auto">
-							Please read these terms and conditions carefully before using our services.
-							By booking with Down Under Chauffeurs, you agree to be bound by these terms.
+						<p className="mx-auto max-w-3xl text-beige/80 text-xl leading-relaxed">
+							Please read these terms and conditions carefully before using our
+							services. By booking with Down Under Chauffeurs, you agree to be
+							bound by these terms.
 						</p>
 					</div>
 				</div>
 			</div>
 
 			{/* Terms Content */}
-			<div className="py-24 bg-beige">
+			<div className="bg-beige py-24">
 				<div className="container mx-auto px-6">
-					<div className="max-w-4xl mx-auto">
-
+					<div className="mx-auto max-w-4xl">
 						{/* Booking Responsibilities */}
-						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border mb-8">
-							<div className="flex items-start mb-6">
-								<div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 mt-1">
-									<AlertCircle className="w-6 h-6 text-primary" />
+						<div className="mb-8 rounded-2xl border border-border bg-card p-8 shadow-lg">
+							<div className="mb-6 flex items-start">
+								<div className="mt-1 mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+									<AlertCircle className="h-6 w-6 text-primary" />
 								</div>
 								<div>
-									<h2 className="text-2xl font-bold text-card-foreground mb-4">
+									<h2 className="mb-4 font-bold text-2xl text-card-foreground">
 										Booking Responsibilities
 									</h2>
 									<p className="text-muted-foreground leading-relaxed">
-										Please note it is the customer's responsibility to verify that the booking details are accurate.
-										We recommend reviewing all information including pickup times, locations, and passenger details before confirming your reservation.
+										Please note it is the customer's responsibility to verify
+										that the booking details are accurate. We recommend
+										reviewing all information including pickup times, locations,
+										and passenger details before confirming your reservation.
 									</p>
 								</div>
 							</div>
 						</div>
 
 						{/* Cancellation Policy */}
-						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border mb-8">
-							<div className="flex items-start mb-6">
-								<div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 mt-1">
-									<Calendar className="w-6 h-6 text-primary" />
+						<div className="mb-8 rounded-2xl border border-border bg-card p-8 shadow-lg">
+							<div className="mb-6 flex items-start">
+								<div className="mt-1 mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+									<Calendar className="h-6 w-6 text-primary" />
 								</div>
 								<div className="w-full">
-									<h2 className="text-2xl font-bold text-card-foreground mb-6">
+									<h2 className="mb-6 font-bold text-2xl text-card-foreground">
 										Cancellation Policy
 									</h2>
 
 									<div className="space-y-6">
-										<div className="border border-border rounded-xl p-6 bg-soft-beige">
-											<div className="flex items-center mb-3">
-												<Clock className="w-5 h-5 text-primary mr-2" />
-												<h3 className="text-lg font-semibold text-card-foreground">
+										<div className="rounded-xl border border-border bg-soft-beige p-6">
+											<div className="mb-3 flex items-center">
+												<Clock className="mr-2 h-5 w-5 text-primary" />
+												<h3 className="font-semibold text-card-foreground text-lg">
 													Daytime Cancellations (8:00am - 8:00pm)
 												</h3>
 											</div>
 											<p className="text-muted-foreground">
-												Cancellations made less than <strong>1 hour prior to pickup</strong> will incur the full transfer fee.
+												Cancellations made less than{" "}
+												<strong>1 hour prior to pickup</strong> will incur the
+												full transfer fee.
 											</p>
 										</div>
 
-										<div className="border border-border rounded-xl p-6 bg-soft-beige">
-											<div className="flex items-center mb-3">
-												<Clock className="w-5 h-5 text-primary mr-2" />
-												<h3 className="text-lg font-semibold text-card-foreground">
+										<div className="rounded-xl border border-border bg-soft-beige p-6">
+											<div className="mb-3 flex items-center">
+												<Clock className="mr-2 h-5 w-5 text-primary" />
+												<h3 className="font-semibold text-card-foreground text-lg">
 													Evening/Night Cancellations (8:00pm - 8:00am)
 												</h3>
 											</div>
 											<p className="text-muted-foreground">
-												Cancellations made less than <strong>8 hours prior to pickup</strong> will incur the full transfer charge.
+												Cancellations made less than{" "}
+												<strong>8 hours prior to pickup</strong> will incur the
+												full transfer charge.
 											</p>
 										</div>
 
-										<div className="border border-border rounded-xl p-6 bg-soft-beige">
-											<div className="flex items-center mb-3">
-												<MapPin className="w-5 h-5 text-primary mr-2" />
-												<h3 className="text-lg font-semibold text-card-foreground">
+										<div className="rounded-xl border border-border bg-soft-beige p-6">
+											<div className="mb-3 flex items-center">
+												<MapPin className="mr-2 h-5 w-5 text-primary" />
+												<h3 className="font-semibold text-card-foreground text-lg">
 													As Directed/On Hold Bookings
 												</h3>
 											</div>
 											<p className="text-muted-foreground">
-												Cancellations made less than <strong>12 hours prior to scheduled time</strong> will incur a 50% charge.
+												Cancellations made less than{" "}
+												<strong>12 hours prior to scheduled time</strong> will
+												incur a 50% charge.
 											</p>
 										</div>
 									</div>
@@ -120,33 +129,50 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 						</div>
 
 						{/* Additional Charges */}
-						<div className="bg-card p-8 rounded-2xl shadow-lg border border-border mb-8">
-							<div className="flex items-start mb-6">
-								<div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 mt-1">
-									<DollarSign className="w-6 h-6 text-primary" />
+						<div className="mb-8 rounded-2xl border border-border bg-card p-8 shadow-lg">
+							<div className="mb-6 flex items-start">
+								<div className="mt-1 mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+									<DollarSign className="h-6 w-6 text-primary" />
 								</div>
 								<div className="w-full">
-									<h2 className="text-2xl font-bold text-card-foreground mb-6">
+									<h2 className="mb-6 font-bold text-2xl text-card-foreground">
 										Additional Charges
 									</h2>
 
-									<div className="grid md:grid-cols-3 gap-4">
-										<div className="border border-border rounded-xl p-4 bg-soft-beige text-center">
-											<MapPin className="w-8 h-8 text-primary mx-auto mb-3" />
-											<h3 className="font-semibold text-card-foreground mb-2">Extra Stops</h3>
-											<p className="text-sm text-muted-foreground">Additional charges apply for extra stops or detours during transit</p>
+									<div className="grid gap-4 md:grid-cols-3">
+										<div className="rounded-xl border border-border bg-soft-beige p-4 text-center">
+											<MapPin className="mx-auto mb-3 h-8 w-8 text-primary" />
+											<h3 className="mb-2 font-semibold text-card-foreground">
+												Extra Stops
+											</h3>
+											<p className="text-muted-foreground text-sm">
+												Additional charges apply for extra stops or detours
+												during transit
+											</p>
 										</div>
 
-										<div className="border border-border rounded-xl p-4 bg-soft-beige text-center">
-											<div className="text-2xl font-bold text-primary mb-2">$20</div>
-											<h3 className="font-semibold text-card-foreground mb-2">Baby/Booster Seat</h3>
-											<p className="text-sm text-muted-foreground">Per seat charge for child safety seats</p>
+										<div className="rounded-xl border border-border bg-soft-beige p-4 text-center">
+											<div className="mb-2 font-bold text-2xl text-primary">
+												$20
+											</div>
+											<h3 className="mb-2 font-semibold text-card-foreground">
+												Baby/Booster Seat
+											</h3>
+											<p className="text-muted-foreground text-sm">
+												Per seat charge for child safety seats
+											</p>
 										</div>
 
-										<div className="border border-border rounded-xl p-4 bg-soft-beige text-center">
-											<div className="text-2xl font-bold text-primary mb-2">$40</div>
-											<h3 className="font-semibold text-card-foreground mb-2">Luggage Trailer</h3>
-											<p className="text-sm text-muted-foreground">Additional charge for luggage trailer service</p>
+										<div className="rounded-xl border border-border bg-soft-beige p-4 text-center">
+											<div className="mb-2 font-bold text-2xl text-primary">
+												$40
+											</div>
+											<h3 className="mb-2 font-semibold text-card-foreground">
+												Luggage Trailer
+											</h3>
+											<p className="text-muted-foreground text-sm">
+												Additional charge for luggage trailer service
+											</p>
 										</div>
 									</div>
 								</div>
@@ -154,26 +180,29 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 						</div>
 
 						{/* Contact Information */}
-						<div className="bg-gradient-to-br from-primary/5 to-primary/10 p-8 rounded-2xl border border-primary/20">
+						<div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8">
 							<div className="text-center">
-								<h2 className="text-2xl font-bold text-foreground mb-4">
+								<h2 className="mb-4 font-bold text-2xl text-foreground">
 									Questions About Our Terms?
 								</h2>
-								<p className="text-muted-foreground mb-6">
-									If you have any questions about these terms and conditions, please don't hesitate to contact us.
+								<p className="mb-6 text-muted-foreground">
+									If you have any questions about these terms and conditions,
+									please don't hesitate to contact us.
 								</p>
 
-								<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+								<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
 									<div className="flex items-center text-muted-foreground">
-										<Phone className="w-5 h-5 mr-2 text-primary" />
-										<span className="font-medium">{BUSINESS_INFO.phone.display}</span>
+										<Phone className="mr-2 h-5 w-5 text-primary" />
+										<span className="font-medium">
+											{BUSINESS_INFO.phone.display}
+										</span>
 									</div>
 
 									<div className="flex gap-4">
 										<Link to="/contact-us">
 											<Button
 												size="lg"
-												className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-xl"
+												className="rounded-xl bg-primary px-6 py-3 text-primary-foreground hover:bg-primary/90"
 											>
 												Contact Us
 											</Button>
@@ -184,10 +213,17 @@ export function TermsAndConditions({ className, ...props }: TermsAndConditionsPr
 						</div>
 
 						{/* Legal Footer */}
-						<div className="mt-12 text-center text-sm text-muted-foreground">
-							<p>© {BUSINESS_INFO.business.foundedYear === 2020 ? `${BUSINESS_INFO.business.foundedYear}-${new Date().getFullYear()}` : new Date().getFullYear()} {BUSINESS_INFO.business.name}. All rights reserved.</p>
+						<div className="mt-12 text-center text-muted-foreground text-sm">
+							<p>
+								©{" "}
+								{BUSINESS_INFO.business.foundedYear === 2020
+									? `${BUSINESS_INFO.business.foundedYear}-${new Date().getFullYear()}`
+									: new Date().getFullYear()}{" "}
+								{BUSINESS_INFO.business.name}. All rights reserved.
+							</p>
 							<p className="mt-2">
-								These terms and conditions are effective as of the date of your booking and may be updated from time to time.
+								These terms and conditions are effective as of the date of your
+								booking and may be updated from time to time.
 							</p>
 						</div>
 					</div>

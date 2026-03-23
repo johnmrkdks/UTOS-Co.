@@ -1,5 +1,5 @@
-import { memo } from "react";
 import { Badge } from "@workspace/ui/components/badge";
+import { memo } from "react";
 import type { Car as CarType } from "server/types";
 
 interface ServiceAvailabilityProps {
@@ -9,15 +9,21 @@ interface ServiceAvailabilityProps {
 export const ServiceAvailability = memo<ServiceAvailabilityProps>(({ car }) => {
 	return (
 		<div>
-			<h3 className="font-semibold mb-3">Service Availability</h3>
-			<div className="flex gap-2 flex-wrap">
+			<h3 className="mb-3 font-semibold">Service Availability</h3>
+			<div className="flex flex-wrap gap-2">
 				{car.availableForPackages && (
-					<Badge variant="outline" className="text-green-700 border-green-200 bg-green-50">
+					<Badge
+						variant="outline"
+						className="border-green-200 bg-green-50 text-green-700"
+					>
 						✓ Available for Package Tours
 					</Badge>
 				)}
 				{car.availableForCustom && (
-					<Badge variant="outline" className="text-blue-700 border-blue-200 bg-blue-50">
+					<Badge
+						variant="outline"
+						className="border-blue-200 bg-blue-50 text-blue-700"
+					>
 						✓ Available for Custom Bookings
 					</Badge>
 				)}

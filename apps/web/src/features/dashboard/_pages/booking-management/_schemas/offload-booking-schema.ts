@@ -17,17 +17,19 @@ export const offloadBookingSchema = z.object({
 		.string()
 		.min(1, "Destination address is required")
 		.max(255, "Destination address must be less than 255 characters"),
-	stops: z.array(z.object({
-		stopOrder: z.number(),
-		address: z
-			.string()
-			.min(1, "Stop address is required")
-			.max(255, "Stop address must be less than 255 characters"),
-		latitude: z.number().nullable().optional(),
-		longitude: z.number().nullable().optional(),
-		waitingTime: z.number().int().min(0).optional(), // in minutes
-		notes: z.string().max(200).optional(),
-	})),
+	stops: z.array(
+		z.object({
+			stopOrder: z.number(),
+			address: z
+				.string()
+				.min(1, "Stop address is required")
+				.max(255, "Stop address must be less than 255 characters"),
+			latitude: z.number().nullable().optional(),
+			longitude: z.number().nullable().optional(),
+			waitingTime: z.number().int().min(0).optional(), // in minutes
+			notes: z.string().max(200).optional(),
+		}),
+	),
 	vehicleType: z
 		.string()
 		.min(1, "Vehicle type is required")
@@ -36,10 +38,9 @@ export const offloadBookingSchema = z.object({
 		.number()
 		.positive("Price must be a positive number")
 		.max(999999, "Price must be less than $999,999"),
-	scheduledPickupTime: z
-		.date({
-			message: "Pickup date and time is required",
-		}),
+	scheduledPickupTime: z.date({
+		message: "Pickup date and time is required",
+	}),
 	// Customer information
 	customerName: z
 		.string()
@@ -48,7 +49,7 @@ export const offloadBookingSchema = z.object({
 	customerPhone: z
 		.string()
 		.min(1, "Customer phone is required")
-		.regex(/^[\+\-\s\d\(\)]+$/, "Please enter a valid phone number"),
+		.regex(/^[+\-\s\d()]+$/, "Please enter a valid phone number"),
 	customerEmail: z
 		.string()
 		.email("Please enter a valid email address")

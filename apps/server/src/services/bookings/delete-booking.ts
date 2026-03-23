@@ -1,16 +1,14 @@
+import z from "zod";
 import { deleteBooking } from "@/data/bookings/delete-booking";
 import { getBookingById } from "@/data/bookings/get-booking-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import z from "zod";
 
 export const DeleteBookingServiceSchema = z.object({
 	id: z.string(),
 });
 
-export type DeleteBookingParams = z.infer<
-	typeof DeleteBookingServiceSchema
->;
+export type DeleteBookingParams = z.infer<typeof DeleteBookingServiceSchema>;
 
 export async function deleteBookingService(
 	db: DB,

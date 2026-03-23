@@ -1,11 +1,8 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
-export async function getBookingById(
-	db: DB,
-	id: string,
-) {
+export async function getBookingById(db: DB, id: string) {
 	const record = await db.query.bookings.findFirst({
 		where: eq(bookings.id, id),
 		with: {

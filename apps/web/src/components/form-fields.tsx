@@ -1,20 +1,32 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Input } from "@workspace/ui/components/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
-import type { UseFormReturn, FieldValues, Path } from "react-hook-form"
-import type { ReactNode } from "react"
-import { cn } from "@workspace/ui/lib/utils"
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { cn } from "@workspace/ui/lib/utils";
+import type { ReactNode } from "react";
+import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 interface TextInputFieldProps<T extends FieldValues> {
-	form: UseFormReturn<T>
-	name: Path<T>
-	label: string
-	placeholder?: string
-	type?: "text" | "number" | "email" | "password"
-	disabled?: boolean
-	className?: string
-	rightIcon?: ReactNode
-	validationMessage?: ReactNode
+	form: UseFormReturn<T>;
+	name: Path<T>;
+	label: string;
+	placeholder?: string;
+	type?: "text" | "number" | "email" | "password";
+	disabled?: boolean;
+	className?: string;
+	rightIcon?: ReactNode;
+	validationMessage?: ReactNode;
 }
 
 export function TextInputField<T extends FieldValues>({
@@ -45,7 +57,7 @@ export function TextInputField<T extends FieldValues>({
 								{...field}
 							/>
 							{rightIcon && (
-								<div className="absolute right-2 top-1/2 -translate-y-1/2">
+								<div className="-translate-y-1/2 absolute top-1/2 right-2">
 									{rightIcon}
 								</div>
 							)}
@@ -56,18 +68,18 @@ export function TextInputField<T extends FieldValues>({
 				</FormItem>
 			)}
 		/>
-	)
+	);
 }
 
 interface SelectFieldProps<T extends FieldValues> {
-	form: UseFormReturn<T>
-	name: Path<T>
-	label: string
-	placeholder?: string
-	disabled?: boolean
-	className?: string
-	options: Array<{ value: string; label: string }>
-	value?: string
+	form: UseFormReturn<T>;
+	name: Path<T>;
+	label: string;
+	placeholder?: string;
+	disabled?: boolean;
+	className?: string;
+	options: Array<{ value: string; label: string }>;
+	value?: string;
 }
 
 export function SelectField<T extends FieldValues>({
@@ -109,15 +121,15 @@ export function SelectField<T extends FieldValues>({
 				</FormItem>
 			)}
 		/>
-	)
+	);
 }
 
 interface ValidatedTextInputFieldProps<T extends FieldValues>
-	extends Omit<TextInputFieldProps<T>, 'rightIcon' | 'validationMessage'> {
+	extends Omit<TextInputFieldProps<T>, "rightIcon" | "validationMessage"> {
 	validationDisplay: {
-		icon: ReactNode
-		message: ReactNode
-	}
+		icon: ReactNode;
+		message: ReactNode;
+	};
 }
 
 export function ValidatedTextInputField<T extends FieldValues>({
@@ -130,5 +142,5 @@ export function ValidatedTextInputField<T extends FieldValues>({
 			rightIcon={validationDisplay.icon}
 			validationMessage={validationDisplay.message}
 		/>
-	)
+	);
 }

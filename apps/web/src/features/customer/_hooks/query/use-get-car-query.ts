@@ -1,9 +1,12 @@
-import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/trpc";
 
-export const useGetCarQuery = (params: { id: string }, options?: { enabled?: boolean }) => {
+export const useGetCarQuery = (
+	params: { id: string },
+	options?: { enabled?: boolean },
+) => {
 	return useQuery({
 		...trpc.cars.getPublished.queryOptions(params),
-		enabled: options?.enabled ?? true
+		enabled: options?.enabled ?? true,
 	});
 };

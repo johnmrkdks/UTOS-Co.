@@ -1,20 +1,20 @@
 {
-    "name": "Down Under Chauffeurs",
-    "short_name": "DUC",
-    "description": "Premium luxury transportation services in Australia",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#22818e",
-    "categories": ["travel", "transportation", "business"],
-    "lang": "en-AU",
-    "orientation": "portrait-primary",
-    "icons": [
-        {
-            "src": "/favicon.ico",
-            "sizes": "32x32",
-            "type": "image/x-icon",
-            "purpose": "any"
-        }
-    ]
+	"name": "Down Under Chauffeurs",
+	"short_name": "DUC",
+	"description": "Premium luxury transportation services in Australia",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#22818e",
+	"categories": ["travel", "transportation", "business"],
+	"lang": "en-AU",
+	"orientation": "portrait-primary",
+	"icons": [
+		{
+			"src": "/favicon.ico",
+			"sizes": "32x32",
+			"type": "image/x-icon",
+			"purpose": "any"
+		}
+	]
 }

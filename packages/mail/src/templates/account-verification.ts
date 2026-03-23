@@ -2,7 +2,7 @@ import type { EmailTemplate } from "../types";
 
 export function generateAccountVerificationTemplate(
 	verificationToken: string,
-	baseUrl: string
+	baseUrl: string,
 ): EmailTemplate {
 	const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
 

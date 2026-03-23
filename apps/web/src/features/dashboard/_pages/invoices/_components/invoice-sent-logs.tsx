@@ -1,7 +1,12 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Label } from "@workspace/ui/components/label";
 import {
 	Select,
 	SelectContent,
@@ -9,9 +14,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { Label } from "@workspace/ui/components/label";
 import { format } from "date-fns";
-import { TruckIcon, Building2Icon } from "lucide-react";
+import { Building2Icon, TruckIcon } from "lucide-react";
+import { useState } from "react";
+import { trpc } from "@/trpc";
 
 export function InvoiceSentLogs() {
 	const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -20,8 +26,9 @@ export function InvoiceSentLogs() {
 		trpc.invoices.listSentLogs.queryOptions({
 			limit: 50,
 			offset: 0,
-			type: typeFilter === "all" ? undefined : (typeFilter as "driver" | "company"),
-		})
+			type:
+				typeFilter === "all" ? undefined : (typeFilter as "driver" | "company"),
+		}),
 	);
 
 	const logs = logsQuery.data?.items ?? [];
@@ -35,7 +42,7 @@ export function InvoiceSentLogs() {
 					History of all invoices sent by email to drivers and companies.
 				</CardDescription>
 				<div className="flex items-center gap-2 pt-2">
-					<Label className="text-sm font-medium">Filter by type</Label>
+					<Label className="font-medium text-sm">Filter by type</Label>
 					<Select value={typeFilter} onValueChange={setTypeFilter}>
 						<SelectTrigger className="w-40">
 							<SelectValue />
@@ -55,18 +62,18 @@ export function InvoiceSentLogs() {
 					<p className="text-muted-foreground text-sm">No invoices sent yet.</p>
 				) : (
 					<div className="space-y-2">
-						<p className="text-muted-foreground text-sm mb-4">
+						<p className="mb-4 text-muted-foreground text-sm">
 							Showing {logs.length} of {total} sent invoices
 						</p>
 						<div className="rounded-md border">
 							<table className="w-full text-sm">
 								<thead>
 									<tr className="border-b bg-muted/50">
-										<th className="text-left p-3 font-medium">Type</th>
-										<th className="text-left p-3 font-medium">Recipient</th>
-										<th className="text-left p-3 font-medium">Email</th>
-										<th className="text-left p-3 font-medium">Period</th>
-										<th className="text-left p-3 font-medium">Sent at</th>
+										<th className="p-3 text-left font-medium">Type</th>
+										<th className="p-3 text-left font-medium">Recipient</th>
+										<th className="p-3 text-left font-medium">Email</th>
+										<th className="p-3 text-left font-medium">Period</th>
+										<th className="p-3 text-left font-medium">Sent at</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -83,9 +90,12 @@ export function InvoiceSentLogs() {
 												</span>
 											</td>
 											<td className="p-3 font-medium">{log.recipientName}</td>
-											<td className="p-3 text-muted-foreground">{log.recipientEmail}</td>
+											<td className="p-3 text-muted-foreground">
+												{log.recipientEmail}
+											</td>
 											<td className="p-3">
-												{format(log.periodStart, "dd MMM yyyy")} – {format(log.periodEnd, "dd MMM yyyy")}
+												{format(log.periodStart, "dd MMM yyyy")} –{" "}
+												{format(log.periodEnd, "dd MMM yyyy")}
 											</td>
 											<td className="p-3 text-muted-foreground">
 												{format(log.createdAt, "dd MMM yyyy, HH:mm")}

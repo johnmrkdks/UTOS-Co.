@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarFeature } from "server/types"
-import { EditFeatureDialog } from "./edit-feature-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarFeature } from "server/types";
 import { DeleteFeatureDialog } from "./delete-feature-dialog";
+import { EditFeatureDialog } from "./edit-feature-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function FeatureTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function FeatureTableRowActions<TData>({
 			<EditFeatureDialog feature={feature} />
 			<DeleteFeatureDialog feature={feature} />
 		</div>
-	)
+	);
 }

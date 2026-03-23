@@ -1,5 +1,4 @@
-import { useModal } from "@/hooks/use-modal";
-import { useUpdateCarMutation } from "../../_hooks/query/car/use-update-car-mutation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
@@ -12,16 +11,20 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import type { Car } from "server/types";
+import { z } from "zod";
+import { useModal } from "@/hooks/use-modal";
+import { useUpdateCarMutation } from "../../_hooks/query/car/use-update-car-mutation";
 
 const EditCarSchema = z.object({
 	name: z.string().min(1, "Car name is required"),
 	description: z.string().optional(),
-	year: z.number().min(1900).max(new Date().getFullYear() + 1),
+	year: z
+		.number()
+		.min(1900)
+		.max(new Date().getFullYear() + 1),
 	pricePerDay: z.number().min(0, "Price must be positive"),
 	mileage: z.number().min(0).optional(),
 	licensePlate: z.string().optional(),
@@ -35,9 +38,9 @@ type EditCarFormData = z.infer<typeof EditCarSchema>;
 export function EditCarModal() {
 	const { isModalOpen, closeModal, modalState } = useModal();
 	const updateCarMutation = useUpdateCarMutation();
-	
+
 	const car = modalState.data as Car;
-	
+
 	const {
 		register,
 		handleSubmit,
@@ -79,7 +82,7 @@ export function EditCarModal() {
 					conditionTypeId: car.conditionTypeId,
 				},
 			});
-			
+
 			reset();
 			closeModal();
 		} catch (error) {
@@ -94,14 +97,17 @@ export function EditCarModal() {
 
 	return (
 		<Dialog open={isModalOpen("edit-car")} onOpenChange={handleClose}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+			<DialogContent
+				className="max-h-[90vh] max-w-2xl overflow-y-auto"
+				showCloseButton={false}
+			>
 				<DialogHeader>
 					<DialogTitle>Edit Car</DialogTitle>
 					<DialogDescription>
 						Update the car information. Changes will be saved immediately.
 					</DialogDescription>
 				</DialogHeader>
-				
+
 				<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
@@ -112,10 +118,10 @@ export function EditCarModal() {
 								placeholder="Enter car name"
 							/>
 							{errors.name && (
-								<p className="text-sm text-red-600">{errors.name.message}</p>
+								<p className="text-red-600 text-sm">{errors.name.message}</p>
 							)}
 						</div>
-						
+
 						<div className="space-y-2">
 							<Label htmlFor="year">Year</Label>
 							<Input
@@ -125,7 +131,7 @@ export function EditCarModal() {
 								placeholder="2023"
 							/>
 							{errors.year && (
-								<p className="text-sm text-red-600">{errors.year.message}</p>
+								<p className="text-red-600 text-sm">{errors.year.message}</p>
 							)}
 						</div>
 					</div>
@@ -150,10 +156,12 @@ export function EditCarModal() {
 								placeholder="100"
 							/>
 							{errors.pricePerDay && (
-								<p className="text-sm text-red-600">{errors.pricePerDay.message}</p>
+								<p className="text-red-600 text-sm">
+									{errors.pricePerDay.message}
+								</p>
 							)}
 						</div>
-						
+
 						<div className="space-y-2">
 							<Label htmlFor="mileage">Mileage</Label>
 							<Input
@@ -174,14 +182,10 @@ export function EditCarModal() {
 								placeholder="ABC-123"
 							/>
 						</div>
-						
+
 						<div className="space-y-2">
 							<Label htmlFor="color">Color</Label>
-							<Input
-								id="color"
-								{...register("color")}
-								placeholder="Black"
-							/>
+							<Input id="color" {...register("color")} placeholder="Black" />
 						</div>
 					</div>
 
@@ -195,7 +199,7 @@ export function EditCarModal() {
 							/>
 							<Label htmlFor="isAvailable">Available for booking</Label>
 						</div>
-						
+
 						<div className="flex items-center space-x-2">
 							<input
 								id="isActive"

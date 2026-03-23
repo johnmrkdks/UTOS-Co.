@@ -1,10 +1,21 @@
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Badge } from "@workspace/ui/components/badge";
-import { CalendarIcon, X, FilterIcon } from "lucide-react";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { CalendarIcon, FilterIcon, X } from "lucide-react";
 import { useState } from "react";
 
 export interface BookingFilters {
@@ -25,8 +36,8 @@ interface BookingFiltersProps {
 	onClearFilters: () => void;
 	// Sort controls
 	sortBy?: string;
-	sortOrder?: 'asc' | 'desc';
-	onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
+	sortOrder?: "asc" | "desc";
+	onSortChange?: (sortBy: string, sortOrder: "asc" | "desc") => void;
 }
 
 const statusOptions = [
@@ -52,13 +63,16 @@ export function BookingFilters({
 	filters,
 	onFiltersChange,
 	onClearFilters,
-	sortBy = 'scheduledPickupTime',
-	sortOrder = 'asc',
-	onSortChange
+	sortBy = "scheduledPickupTime",
+	sortOrder = "asc",
+	onSortChange,
 }: BookingFiltersProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
-	const updateFilter = (key: keyof BookingFilters, value: string | number | undefined) => {
+	const updateFilter = (
+		key: keyof BookingFilters,
+		value: string | number | undefined,
+	) => {
 		onFiltersChange({
 			...filters,
 			[key]: value || undefined,
@@ -66,16 +80,16 @@ export function BookingFilters({
 	};
 
 	const getActiveFiltersCount = () => {
-		return Object.values(filters).filter(value => 
-			value !== undefined && value !== "" && value !== null
+		return Object.values(filters).filter(
+			(value) => value !== undefined && value !== "" && value !== null,
 		).length;
 	};
 
 	const activeFiltersCount = getActiveFiltersCount();
 
 	return (
-		<div className="bg-muted/30 rounded-lg border p-4">
-			<div className="flex items-center justify-between mb-4">
+		<div className="rounded-lg border bg-muted/30 p-4">
+			<div className="mb-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<FilterIcon className="h-4 w-4" />
 					<span className="font-medium">Filters</span>
@@ -93,7 +107,7 @@ export function BookingFilters({
 							onClick={onClearFilters}
 							className="h-7 px-2"
 						>
-							<X className="h-3 w-3 mr-1" />
+							<X className="mr-1 h-3 w-3" />
 							Clear
 						</Button>
 					)}
@@ -109,7 +123,7 @@ export function BookingFilters({
 			</div>
 
 			{/* Compact main filters - always visible */}
-			<div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+			<div className="grid grid-cols-2 gap-3 md:grid-cols-6">
 				{/* Sort By */}
 				<Select
 					value={sortBy}
@@ -119,7 +133,7 @@ export function BookingFilters({
 						<SelectValue placeholder="Sort by" />
 					</SelectTrigger>
 					<SelectContent>
-						{sortOptions.map(option => (
+						{sortOptions.map((option) => (
 							<SelectItem key={option.value} value={option.value}>
 								{option.label}
 							</SelectItem>
@@ -130,7 +144,9 @@ export function BookingFilters({
 				{/* Sort Order */}
 				<Select
 					value={sortOrder}
-					onValueChange={(value: 'asc' | 'desc') => onSortChange?.(sortBy, value)}
+					onValueChange={(value: "asc" | "desc") =>
+						onSortChange?.(sortBy, value)
+					}
 				>
 					<SelectTrigger className="h-8">
 						<SelectValue placeholder="Order" />
@@ -144,14 +160,16 @@ export function BookingFilters({
 				{/* Status Filter */}
 				<Select
 					value={filters.status || "all"}
-					onValueChange={(value) => updateFilter("status", value === "all" ? undefined : value)}
+					onValueChange={(value) =>
+						updateFilter("status", value === "all" ? undefined : value)
+					}
 				>
 					<SelectTrigger className="h-8">
 						<SelectValue placeholder="Status" />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="all">All Status</SelectItem>
-						{statusOptions.map(status => (
+						{statusOptions.map((status) => (
 							<SelectItem key={status.value} value={status.value}>
 								{status.label}
 							</SelectItem>
@@ -162,7 +180,14 @@ export function BookingFilters({
 				{/* Type Filter */}
 				<Select
 					value={filters.bookingType || "all"}
-					onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom" | "guest" | "offload")}
+					onValueChange={(value) =>
+						updateFilter(
+							"bookingType",
+							value === "all"
+								? undefined
+								: (value as "package" | "custom" | "guest" | "offload"),
+						)
+					}
 				>
 					<SelectTrigger className="h-8">
 						<SelectValue placeholder="Type" />
@@ -196,7 +221,7 @@ export function BookingFilters({
 
 			{/* Advanced filters - collapsible */}
 			{isExpanded && (
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 pt-3 border-t">
+				<div className="mt-3 grid grid-cols-2 gap-3 border-t pt-3 md:grid-cols-4">
 					<Input
 						type="date"
 						placeholder="Date to"
@@ -212,7 +237,12 @@ export function BookingFilters({
 						min="0"
 						step="0.01"
 						value={filters.minAmount || ""}
-						onChange={(e) => updateFilter("minAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
+						onChange={(e) =>
+							updateFilter(
+								"minAmount",
+								e.target.value ? Number.parseFloat(e.target.value) : undefined,
+							)
+						}
 					/>
 					<Input
 						type="number"
@@ -221,9 +251,14 @@ export function BookingFilters({
 						min="0"
 						step="0.01"
 						value={filters.maxAmount || ""}
-						onChange={(e) => updateFilter("maxAmount", e.target.value ? parseFloat(e.target.value) : undefined)}
+						onChange={(e) =>
+							updateFilter(
+								"maxAmount",
+								e.target.value ? Number.parseFloat(e.target.value) : undefined,
+							)
+						}
 					/>
-					<div className="flex items-center text-sm text-muted-foreground">
+					<div className="flex items-center text-muted-foreground text-sm">
 						More filters available
 					</div>
 				</div>

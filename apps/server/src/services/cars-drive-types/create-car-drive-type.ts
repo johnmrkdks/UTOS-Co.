@@ -1,14 +1,19 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarDriveType } from "@/data/cars-drive-types/create-car-drive-type";
 import { getCarDriveTypeByName } from "@/data/cars-drive-types/get-car-drive-type-by-name";
 import type { DB } from "@/db";
-import { InsertCarDriveTypeSchema, type InsertCarDriveType } from "@/schemas/shared";
+import {
+	type InsertCarDriveType,
+	InsertCarDriveTypeSchema,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const CreateCarDriveTypeServiceSchema = InsertCarDriveTypeSchema;
 
-export type CreateCarDriveTypeParams = z.infer<typeof CreateCarDriveTypeServiceSchema>;
+export type CreateCarDriveTypeParams = z.infer<
+	typeof CreateCarDriveTypeServiceSchema
+>;
 
 export async function createCarDriveTypeService(
 	db: DB,

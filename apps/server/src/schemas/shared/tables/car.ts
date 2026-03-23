@@ -1,21 +1,21 @@
-import { cars } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
-import { CarFeatureSchema } from "./cars/car-feature";
-import { CarImageSchema, InsertCarImageSchema } from "./cars/car-image";
-import { CarBrandSchema } from "./cars/car-brand";
-import { CarModelSchema, CarModelWithBrandSchema } from "./cars/car-model";
-import { CarFuelTypeSchema } from "./cars/car-fuel-type";
-import { CarTransmissionTypeSchema } from "./cars/car-transmission-type";
+import { cars } from "@/db/sqlite/schema";
+import { CarStatusEnum } from "@/types";
 import { CarBodyTypeSchema } from "./cars/car-body-type";
+import { CarBrandSchema } from "./cars/car-brand";
+import { CarCategorySchema } from "./cars/car-category";
 import { CarConditionTypeSchema } from "./cars/car-condition-type";
 import { CarDriveTypeSchema } from "./cars/car-drive-type";
-import { CarCategorySchema } from "./cars/car-category";
-import { CarStatusEnum } from "@/types";
+import { CarFeatureSchema } from "./cars/car-feature";
+import { CarFuelTypeSchema } from "./cars/car-fuel-type";
+import { CarImageSchema, InsertCarImageSchema } from "./cars/car-image";
+import { CarModelSchema, CarModelWithBrandSchema } from "./cars/car-model";
+import { CarTransmissionTypeSchema } from "./cars/car-transmission-type";
 
 export const CarSchema = createSelectSchema(cars, {
 	status: z.nativeEnum(CarStatusEnum),

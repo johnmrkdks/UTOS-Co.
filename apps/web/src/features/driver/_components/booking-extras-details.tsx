@@ -1,5 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
 
 interface BookingExtrasDetailsProps {
@@ -37,11 +42,15 @@ export function BookingExtrasDetails({ booking }: BookingExtrasDetailsProps) {
 		<Card className="mt-4">
 			<CardHeader className="pb-3">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-sm font-medium">Trip Extras Added</CardTitle>
+					<CardTitle className="font-medium text-sm">
+						Trip Extras Added
+					</CardTitle>
 					<Badge variant="secondary" className="text-xs">
-						{extras.extraType === 'general' ? 'General Extra' : 
-						 extras.extraType === 'driver' ? 'Driver Extra' : 
-						 'Operator Extra'}
+						{extras.extraType === "general"
+							? "General Extra"
+							: extras.extraType === "driver"
+								? "Driver Extra"
+								: "Operator Extra"}
 					</Badge>
 				</div>
 			</CardHeader>
@@ -57,7 +66,7 @@ export function BookingExtrasDetails({ booking }: BookingExtrasDetailsProps) {
 						<span>{formatCurrency(extraCharges)}</span>
 					</div>
 					<Separator />
-					<div className="flex justify-between text-sm font-medium">
+					<div className="flex justify-between font-medium text-sm">
 						<span>Final Amount:</span>
 						<span>{formatCurrency(finalAmount || quotedAmount)}</span>
 					</div>
@@ -65,31 +74,31 @@ export function BookingExtrasDetails({ booking }: BookingExtrasDetailsProps) {
 
 				{/* Extras Breakdown */}
 				<div className="space-y-2">
-					<h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+					<h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
 						Extras Details
 					</h4>
-					
+
 					{extras.additionalWaitTime > 0 && (
 						<div className="flex justify-between text-sm">
 							<span>Additional Wait Time:</span>
 							<span>{formatTime(extras.additionalWaitTime)}</span>
 						</div>
 					)}
-					
+
 					{extras.unscheduledStops > 0 && (
 						<div className="flex justify-between text-sm">
 							<span>Unscheduled Stops:</span>
 							<span>{extras.unscheduledStops}</span>
 						</div>
 					)}
-					
+
 					{extras.parkingCharges > 0 && (
 						<div className="flex justify-between text-sm">
 							<span>Parking Charges:</span>
 							<span>{formatCurrency(extras.parkingCharges)}</span>
 						</div>
 					)}
-					
+
 					{extras.tollCharges > 0 && (
 						<div className="space-y-1">
 							<div className="flex justify-between text-sm">
@@ -97,13 +106,13 @@ export function BookingExtrasDetails({ booking }: BookingExtrasDetailsProps) {
 								<span>{formatCurrency(extras.tollCharges)}</span>
 							</div>
 							{extras.tollLocation && (
-								<div className="text-xs text-muted-foreground pl-4">
+								<div className="pl-4 text-muted-foreground text-xs">
 									Location: {extras.tollLocation}
 								</div>
 							)}
 						</div>
 					)}
-					
+
 					{extras.otherChargesAmount > 0 && (
 						<div className="space-y-1">
 							<div className="flex justify-between text-sm">
@@ -111,17 +120,17 @@ export function BookingExtrasDetails({ booking }: BookingExtrasDetailsProps) {
 								<span>{formatCurrency(extras.otherChargesAmount)}</span>
 							</div>
 							{extras.otherChargesDescription && (
-								<div className="text-xs text-muted-foreground pl-4">
+								<div className="pl-4 text-muted-foreground text-xs">
 									{extras.otherChargesDescription}
 								</div>
 							)}
 						</div>
 					)}
-					
+
 					{extras.notes && (
 						<div className="space-y-1">
-							<span className="text-sm font-medium">Driver Notes:</span>
-							<div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
+							<span className="font-medium text-sm">Driver Notes:</span>
+							<div className="rounded-md bg-muted p-2 text-muted-foreground text-sm">
 								{extras.notes}
 							</div>
 						</div>

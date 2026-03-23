@@ -1,6 +1,6 @@
-import type { DB } from "@/db";
-import { cars, carFeatures } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import type { DB } from "@/db";
+import { carFeatures, cars } from "@/db/schema";
 
 export async function checkCarFeatureUsage(db: DB, id: string) {
 	const carsUsingFeature = await db.query.cars.findMany({
@@ -8,8 +8,8 @@ export async function checkCarFeatureUsage(db: DB, id: string) {
 			carsToFeatures: {
 				with: {
 					feature: true,
-				}
-			}
+				},
+			},
 		},
 	});
 

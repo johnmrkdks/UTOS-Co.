@@ -1,5 +1,5 @@
-import { trpc } from "@/trpc";
 import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/trpc";
 
 type UseGetAvailableDriversQueryOptions = {
 	timeSlot?: {
@@ -9,7 +9,9 @@ type UseGetAvailableDriversQueryOptions = {
 	enabled?: boolean;
 };
 
-export function useGetAvailableDriversQuery(options: UseGetAvailableDriversQueryOptions = {}) {
+export function useGetAvailableDriversQuery(
+	options: UseGetAvailableDriversQueryOptions = {},
+) {
 	const { timeSlot, enabled = true } = options;
 
 	return useQuery({

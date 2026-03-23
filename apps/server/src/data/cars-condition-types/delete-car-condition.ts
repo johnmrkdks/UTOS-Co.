@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { carConditionTypes } from "@/db/schema";
 import type { CarConditionType } from "@/schemas/shared";
-import { eq } from "drizzle-orm";
 
 export async function deleteCarConditionType(
 	db: DB,

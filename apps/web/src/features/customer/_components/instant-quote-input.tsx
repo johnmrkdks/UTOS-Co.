@@ -1,23 +1,42 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Alert, AlertDescription } from "@workspace/ui/components/alert";
-import { MapPin, Plus, Calculator, AlertCircle } from "lucide-react";
-import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { AlertCircle, Calculator, MapPin, Plus } from "lucide-react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
-import { instantQuoteSchema, type InstantQuoteFormData } from "../_schemas/instant-quote";
 import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/home/_hooks/query/use-calculate-instant-quote-mutation";
 import { useCheckInstantQuoteAvailabilityQuery } from "@/features/marketing/_pages/home/_hooks/query/use-check-instant-quote-availability-query";
-import { type QuoteResult, type RouteData } from "../_types/instant-quote";
+import {
+	type InstantQuoteFormData,
+	instantQuoteSchema,
+} from "../_schemas/instant-quote";
+import type { QuoteResult, RouteData } from "../_types/instant-quote";
 
 interface InstantQuoteInputProps {
 	initialData?: Partial<InstantQuoteFormData>;
 	onQuoteCalculated: (quote: QuoteResult, routeData: RouteData) => void;
 }
 
-export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuoteInputProps) {
+export function InstantQuoteInput({
+	initialData,
+	onQuoteCalculated,
+}: InstantQuoteInputProps) {
 	const form = useForm<InstantQuoteFormData>({
 		resolver: zodResolver(instantQuoteSchema) as any,
 		defaultValues: {
@@ -31,13 +50,17 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 			destinationLongitude: initialData?.destinationLongitude || 0,
 			stopsGeometry: initialData?.stopsGeometry || [],
 			passengerCount: initialData?.passengerCount || 1,
-			luggageCount: initialData?.luggageCount || 0
-		}
+			luggageCount: initialData?.luggageCount || 0,
+		},
 	});
 
-	const { fields: stops, append: addStop, remove: removeStop } = useFieldArray({
+	const {
+		fields: stops,
+		append: addStop,
+		remove: removeStop,
+	} = useFieldArray({
 		control: form.control,
-		name: "stops"
+		name: "stops",
 	});
 
 	const { data: availability } = useCheckInstantQuoteAvailabilityQuery();
@@ -53,7 +76,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 				originLongitude: data.originLongitude,
 				destinationLatitude: data.destinationLatitude,
 				destinationLongitude: data.destinationLongitude,
-				stops: data.stops || []
+				stops: data.stops || [],
 			});
 
 			const routeData: RouteData = {
@@ -66,7 +89,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 				stops: data.stops || [],
 				passengerCount: data.passengerCount || 1,
 				luggageCount: data.luggageCount || 0,
-				tollPreference: data.tollPreference || "toll"
+				tollPreference: data.tollPreference || "toll",
 			};
 
 			if (result) {
@@ -81,7 +104,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 		addStop({
 			id: `stop-${Date.now()}`,
 			address: "",
-			duration: 15
+			duration: 15,
 		});
 	};
 
@@ -90,7 +113,8 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 			<Alert>
 				<AlertCircle className="h-4 w-4" />
 				<AlertDescription>
-					Instant quote service is currently unavailable. Please try again later.
+					Instant quote service is currently unavailable. Please try again
+					later.
 				</AlertDescription>
 			</Alert>
 		);
@@ -108,7 +132,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						{/* Origin */}
 						<FormField
@@ -125,8 +149,14 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 											onPlaceSelect={(place) => {
 												field.onChange(place.description);
 												if (place.geometry?.location) {
-													form.setValue("originLatitude", place.geometry.location.lat());
-													form.setValue("originLongitude", place.geometry.location.lng());
+													form.setValue(
+														"originLatitude",
+														place.geometry.location.lat(),
+													);
+													form.setValue(
+														"originLongitude",
+														place.geometry.location.lng(),
+													);
 												}
 											}}
 										/>
@@ -151,8 +181,14 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 											onPlaceSelect={(place) => {
 												field.onChange(place.description);
 												if (place.geometry?.location) {
-													form.setValue("destinationLatitude", place.geometry.location.lat());
-													form.setValue("destinationLongitude", place.geometry.location.lng());
+													form.setValue(
+														"destinationLatitude",
+														place.geometry.location.lat(),
+													);
+													form.setValue(
+														"destinationLongitude",
+														place.geometry.location.lng(),
+													);
 												}
 											}}
 										/>
@@ -171,7 +207,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 									<FormLabel>Route preference</FormLabel>
 									<FormControl>
 										<div className="flex gap-4">
-											<label className="flex items-center gap-2 cursor-pointer">
+											<label className="flex cursor-pointer items-center gap-2">
 												<input
 													type="radio"
 													value="toll"
@@ -181,7 +217,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 												/>
 												<span>Use toll roads</span>
 											</label>
-											<label className="flex items-center gap-2 cursor-pointer">
+											<label className="flex cursor-pointer items-center gap-2">
 												<input
 													type="radio"
 													value="no_toll"
@@ -212,7 +248,9 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 												type="number"
 												min="1"
 												max="8"
-												onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+												onChange={(e) =>
+													field.onChange(Number.parseInt(e.target.value) || 1)
+												}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -232,7 +270,9 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 												type="number"
 												min="0"
 												max="10"
-												onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+												onChange={(e) =>
+													field.onChange(Number.parseInt(e.target.value) || 0)
+												}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -259,7 +299,8 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 													onPlaceSelect={(place) => {
 														field.onChange(place.description);
 														if (place.geometry?.location) {
-															const stopsGeometry = form.getValues("stopsGeometry") || [];
+															const stopsGeometry =
+																form.getValues("stopsGeometry") || [];
 															stopsGeometry[index] = place.geometry;
 															form.setValue("stopsGeometry", stopsGeometry);
 														}
@@ -288,7 +329,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 							onClick={addStopHandler}
 							className="w-full"
 						>
-							<Plus className="h-4 w-4 mr-2" />
+							<Plus className="mr-2 h-4 w-4" />
 							Add Stop
 						</Button>
 
@@ -298,8 +339,10 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 							className="w-full"
 							disabled={calculateQuoteMutation.isPending}
 						>
-							<MapPin className="h-4 w-4 mr-2" />
-							{calculateQuoteMutation.isPending ? "Calculating..." : "Get Quote"}
+							<MapPin className="mr-2 h-4 w-4" />
+							{calculateQuoteMutation.isPending
+								? "Calculating..."
+								: "Get Quote"}
 						</Button>
 					</form>
 				</Form>

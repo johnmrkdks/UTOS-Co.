@@ -1,25 +1,30 @@
-import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Badge } from "@workspace/ui/components/badge";
-import { Progress } from "@workspace/ui/components/progress";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
-import { 
-	CheckCircle, 
-	XCircle, 
-	AlertTriangle, 
-	Info,
-	TrendingUp 
-} from "lucide-react";
+import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Progress } from "@workspace/ui/components/progress";
 import { cn } from "@workspace/ui/lib/utils";
-import { 
-	type ValidationResult,
+import {
+	AlertTriangle,
+	CheckCircle,
+	Info,
+	TrendingUp,
+	XCircle,
+} from "lucide-react";
+import { useMemo } from "react";
+import {
 	type CarValidationData,
-	type PackageValidationData,
-	validateCarForPublication,
-	validatePackageForPublication,
-	getValidationStatusSummary,
 	canPublishSafely,
 	getPublicationReadinessText,
+	getValidationStatusSummary,
+	type PackageValidationData,
+	type ValidationResult,
+	validateCarForPublication,
+	validatePackageForPublication,
 } from "../../_utils/publication-validation";
 
 export interface PublicationValidationPanelProps {
@@ -66,10 +71,16 @@ export function PublicationValidationPanel({
 						<TrendingUp className="h-5 w-5" />
 						Publication Validation
 					</CardTitle>
-					<Badge 
-						variant={statusSummary.status === "excellent" ? "default" : 
-						        statusSummary.status === "good" ? "default" : 
-						        statusSummary.status === "fair" ? "secondary" : "destructive"}
+					<Badge
+						variant={
+							statusSummary.status === "excellent"
+								? "default"
+								: statusSummary.status === "good"
+									? "default"
+									: statusSummary.status === "fair"
+										? "secondary"
+										: "destructive"
+						}
 						className="capitalize"
 					>
 						{statusSummary.status}
@@ -80,16 +91,21 @@ export function PublicationValidationPanel({
 				{/* Score and Progress */}
 				<div className="space-y-3">
 					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium">Publication Score</span>
-						<span className={cn("text-2xl font-bold", getScoreColor(validation.score))}>
+						<span className="font-medium text-sm">Publication Score</span>
+						<span
+							className={cn(
+								"font-bold text-2xl",
+								getScoreColor(validation.score),
+							)}
+						>
 							{validation.score}/100
 						</span>
 					</div>
-					<Progress 
-						value={validation.score} 
+					<Progress
+						value={validation.score}
 						className={cn("h-3", getProgressColor(validation.score))}
 					/>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-sm">
 						{getPublicationReadinessText(validation.score)}
 					</p>
 				</div>
@@ -101,7 +117,7 @@ export function PublicationValidationPanel({
 						<AlertDescription>
 							<div className="space-y-1">
 								<p className="font-medium">Issues preventing publication:</p>
-								<ul className="list-disc list-inside space-y-0.5 text-sm">
+								<ul className="list-inside list-disc space-y-0.5 text-sm">
 									{validation.errors.map((error: string, index: number) => (
 										<li key={index}>{error}</li>
 									))}
@@ -118,7 +134,7 @@ export function PublicationValidationPanel({
 						<AlertDescription>
 							<div className="space-y-1">
 								<p className="font-medium">Recommendations for improvement:</p>
-								<ul className="list-disc list-inside space-y-0.5 text-sm">
+								<ul className="list-inside list-disc space-y-0.5 text-sm">
 									{validation.warnings.map((warning: string, index: number) => (
 										<li key={index}>{warning}</li>
 									))}
@@ -134,17 +150,17 @@ export function PublicationValidationPanel({
 						<CheckCircle className="h-4 w-4" />
 						<AlertDescription>
 							<div className="flex items-center justify-between">
-								<span>All validation checks passed! Ready for publication.</span>
+								<span>
+									All validation checks passed! Ready for publication.
+								</span>
 								<Badge>
-									<CheckCircle className="h-3 w-3 mr-1" />
+									<CheckCircle className="mr-1 h-3 w-3" />
 									Validated
 								</Badge>
 							</div>
 						</AlertDescription>
 					</Alert>
 				)}
-
-
 			</CardContent>
 		</Card>
 	);

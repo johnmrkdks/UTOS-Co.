@@ -1,6 +1,6 @@
 import { DataTable } from "@workspace/ui/components/data-table";
+import { useGetCarFuelTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-fuel-type/use-get-car-fuel-types-with-enriched-data-query";
 import { fuelTypeTableColumns } from "./fuel-type-table-columns";
-import { useGetCarFuelTypesWithEnrichedDataQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-fuel-type/use-get-car-fuel-types-with-enriched-data-query"
 
 export function FuelTypeTableList() {
 	const { data, isLoading } = useGetCarFuelTypesWithEnrichedDataQuery({});
@@ -13,5 +13,5 @@ export function FuelTypeTableList() {
 			loadingRowCount={5}
 			pageSize={5}
 		/>
-	)
+	);
 }

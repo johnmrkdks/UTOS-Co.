@@ -1,20 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { Logo } from "./logo";
 import { BUSINESS_INFO } from "@/constants/business-info";
+import { Logo } from "./logo";
 
 export function BrandLogo() {
 	return (
-		<Link to="/" className="flex items-center gap-3 group">
+		<Link to="/" className="group flex items-center gap-3">
 			<Logo />
 			<div className="hidden sm:block">
-				<h1 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+				<h1 className="font-bold text-foreground text-xl transition-colors group-hover:text-primary">
 					{BUSINESS_INFO.business.name}
 				</h1>
-				<p className="text-xs text-muted-foreground -mt-1">
+				<p className="-mt-1 text-muted-foreground text-xs">
 					{BUSINESS_INFO.business.slogan}
 				</p>
 			</div>
 		</Link>
-
-	)
+	);
 }

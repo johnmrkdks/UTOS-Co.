@@ -1,17 +1,20 @@
-import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header"
-import { Badge } from "@workspace/ui/components/badge"
-import type { ColumnDef } from "@tanstack/react-table"
-import type { CarBrandWithEnrichedData } from "server/types"
-import { BrandTableRowActions } from "./brand-table-row-actions"
-import { formatSQLiteDate } from "@/utils/formatter/format-sqlite-date"
+import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@workspace/ui/components/badge";
+import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
+import type { CarBrandWithEnrichedData } from "server/types";
+import { formatSQLiteDate } from "@/utils/formatter/format-sqlite-date";
+import { BrandTableRowActions } from "./brand-table-row-actions";
 
 export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 	{
 		id: "name",
 		accessorKey: "name",
 		header: ({ column }) => (
-			<DataTableColumnHeader className="ml-4
-				" column={column} title="Brand Name" />
+			<DataTableColumnHeader
+				className="ml-4"
+				column={column}
+				title="Brand Name"
+			/>
 		),
 		cell: ({ row }) => <div className="ml-4">{row.getValue("name")}</div>,
 		enableSorting: false,
@@ -24,7 +27,11 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Model Count" />
 		),
 		cell: ({ row }) => (
-			<div className=""><Badge variant="secondary">{Number(row.getValue("metadata.modelCount")).toLocaleString()} cars</Badge></div>
+			<div className="">
+				<Badge variant="secondary">
+					{Number(row.getValue("metadata.modelCount")).toLocaleString()} cars
+				</Badge>
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -36,7 +43,11 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Car Count" />
 		),
 		cell: ({ row }) => (
-			<div className=""><Badge variant="outline">{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars</Badge></div>
+			<div className="">
+				<Badge variant="outline">
+					{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars
+				</Badge>
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -60,7 +71,9 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Updated At" />
 		),
 		cell: ({ row }) => (
-			<div className="">{new Date(row.getValue("updatedAt")).toLocaleDateString()}</div>
+			<div className="">
+				{new Date(row.getValue("updatedAt")).toLocaleDateString()}
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -69,14 +82,18 @@ export const brandTableColumns: ColumnDef<CarBrandWithEnrichedData>[] = [
 		id: "actions",
 		accessorKey: "actions",
 		header: ({ column }) => (
-			<DataTableColumnHeader className="flex justify-end mr-4" column={column} title="Actions" />
+			<DataTableColumnHeader
+				className="mr-4 flex justify-end"
+				column={column}
+				title="Actions"
+			/>
 		),
 		cell: ({ row }) => (
-			<div className="flex justify-end mr-4">
+			<div className="mr-4 flex justify-end">
 				<BrandTableRowActions row={row} />
 			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
 	},
-]
+];

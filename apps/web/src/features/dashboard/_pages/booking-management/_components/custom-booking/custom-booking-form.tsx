@@ -1,23 +1,41 @@
 // @ts-nocheck
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Calculator } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Input } from "@workspace/ui/components/input"
-import { Textarea } from "@workspace/ui/components/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
-import { type CreateCustomBookingForm, createCustomBookingSchema, type QuoteResult } from "../../_types/booking"
-import { DateInput } from "@workspace/ui/components/date-input"
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
+import { DateInput } from "@workspace/ui/components/date-input";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { Textarea } from "@workspace/ui/components/textarea";
+import { Calculator } from "lucide-react";
+import { useForm } from "react-hook-form";
+import {
+	type CreateCustomBookingForm,
+	createCustomBookingSchema,
+	type QuoteResult,
+} from "../../_types/booking";
 
 interface BookingFormProps {
-	cars?: Array<{ id: string; name: string }>
-	carsLoading: boolean
-	onSubmit: (data: CreateCustomBookingForm) => void
-	onCalculateQuote: () => void
-	isSubmitting: boolean
-	isCalculatingQuote: boolean
-	quote: QuoteResult | null
+	cars?: Array<{ id: string; name: string }>;
+	carsLoading: boolean;
+	onSubmit: (data: CreateCustomBookingForm) => void;
+	onCalculateQuote: () => void;
+	isSubmitting: boolean;
+	isCalculatingQuote: boolean;
+	quote: QuoteResult | null;
 }
 
 export function BookingForm({
@@ -36,13 +54,13 @@ export function BookingForm({
 			customerEmail: "",
 			specialRequests: "",
 		},
-	})
+	});
 
-	const watchedValues = form.watch(["carId", "scheduledPickupTime"])
-	const canCalculateQuote = watchedValues[0] && watchedValues[1]
+	const watchedValues = form.watch(["carId", "scheduledPickupTime"]);
+	const canCalculateQuote = watchedValues[0] && watchedValues[1];
 
 	return (
-		<Form {...form as any}>
+		<Form {...(form as any)}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 				{/* Vehicle Selection */}
 				<FormField
@@ -51,10 +69,18 @@ export function BookingForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Vehicle *</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value} disabled={carsLoading}>
+							<Select
+								onValueChange={field.onChange}
+								defaultValue={field.value}
+								disabled={carsLoading}
+							>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder={carsLoading ? "Loading vehicles..." : "Select a vehicle"} />
+										<SelectValue
+											placeholder={
+												carsLoading ? "Loading vehicles..." : "Select a vehicle"
+											}
+										/>
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -72,8 +98,8 @@ export function BookingForm({
 
 				{/* Customer Information */}
 				<div className="space-y-4">
-					<h3 className="text-lg font-semibold">Customer Information</h3>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<h3 className="font-semibold text-lg">Customer Information</h3>
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<FormField
 							control={form.control as any}
 							name="customerName"
@@ -108,7 +134,11 @@ export function BookingForm({
 							<FormItem>
 								<FormLabel>Email (Optional)</FormLabel>
 								<FormControl>
-									<Input placeholder="john@example.com" type="email" {...field} />
+									<Input
+										placeholder="john@example.com"
+										type="email"
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -118,7 +148,7 @@ export function BookingForm({
 
 				{/* Trip Details */}
 				<div className="space-y-4">
-					<h3 className="text-lg font-semibold">Trip Details</h3>
+					<h3 className="font-semibold text-lg">Trip Details</h3>
 					<div className="space-y-4">
 						<FormField
 							control={form.control as any}
@@ -148,7 +178,7 @@ export function BookingForm({
 						/>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<FormField
 							control={form.control as any}
 							name="scheduledPickupTime"
@@ -156,7 +186,10 @@ export function BookingForm({
 								<FormItem>
 									<FormLabel>Pickup Date & Time *</FormLabel>
 									<FormControl>
-										<DateInput value={field.value} onDateChange={field.onChange} />
+										<DateInput
+											value={field.value}
+											onDateChange={field.onChange}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -197,7 +230,7 @@ export function BookingForm({
 						{isCalculatingQuote ? "Calculating..." : "Calculate Instant Quote"}
 					</Button>
 					{!canCalculateQuote && (
-						<p className="text-sm text-muted-foreground text-center">
+						<p className="text-center text-muted-foreground text-sm">
 							Select a vehicle and pickup time to calculate quote
 						</p>
 					)}
@@ -211,7 +244,11 @@ export function BookingForm({
 						<FormItem>
 							<FormLabel>Special Requests (Optional)</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Any special requests or notes..." className="min-h-[80px]" {...field} />
+								<Textarea
+									placeholder="Any special requests or notes..."
+									className="min-h-[80px]"
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -219,17 +256,21 @@ export function BookingForm({
 				/>
 
 				{/* Submit Button */}
-				<Button type="submit" className="w-full" disabled={isSubmitting || !quote} size="lg">
+				<Button
+					type="submit"
+					className="w-full"
+					disabled={isSubmitting || !quote}
+					size="lg"
+				>
 					{isSubmitting ? "Creating Booking..." : "Create Booking"}
 				</Button>
 
 				{!quote && (
-					<p className="text-sm text-muted-foreground text-center">
+					<p className="text-center text-muted-foreground text-sm">
 						Please calculate a quote before creating the booking
 					</p>
 				)}
 			</form>
 		</Form>
-	)
+	);
 }
-

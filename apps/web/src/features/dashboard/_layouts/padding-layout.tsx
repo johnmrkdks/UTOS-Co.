@@ -1,14 +1,18 @@
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@workspace/ui/lib/utils";
 
 type PaddingLayoutProps = {
-	children: React.ReactNode
-	className?: string
-}
+	children: React.ReactNode;
+	className?: string;
+};
 
-export function PaddingLayout({ children, className, ...props }: PaddingLayoutProps) {
+export function PaddingLayout({
+	children,
+	className,
+	...props
+}: PaddingLayoutProps) {
 	return (
-		<div className={cn("p-4 w-full min-w-0", className)} {...props}>
+		<div className={cn("w-full min-w-0 p-4", className)} {...props}>
 			{children}
 		</div>
-	)
+	);
 }

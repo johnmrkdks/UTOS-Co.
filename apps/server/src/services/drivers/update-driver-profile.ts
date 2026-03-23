@@ -1,7 +1,7 @@
-import type { DB } from "@/db";
-import { drivers, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { drivers, users } from "@/db/schema";
 
 export const UpdateDriverProfileServiceSchema = z.object({
 	driverId: z.string(),
@@ -18,9 +18,14 @@ export const UpdateDriverProfileServiceSchema = z.object({
 	licenseExpiry: z.number().optional(), // timestamp
 });
 
-export type UpdateDriverProfileParams = z.infer<typeof UpdateDriverProfileServiceSchema>;
+export type UpdateDriverProfileParams = z.infer<
+	typeof UpdateDriverProfileServiceSchema
+>;
 
-export async function updateDriverProfileService(db: DB, data: UpdateDriverProfileParams) {
+export async function updateDriverProfileService(
+	db: DB,
+	data: UpdateDriverProfileParams,
+) {
 	console.log("=== DEBUG: Starting updateDriverProfileService ===");
 	console.log("Input data:", JSON.stringify(data, null, 2));
 
@@ -46,9 +51,10 @@ export async function updateDriverProfileService(db: DB, data: UpdateDriverProfi
 		});
 
 		// Update user profile if name or phone changed
-		if ((name !== undefined && name !== currentDriver.user?.name) ||
-		    (phone !== undefined && phone !== (currentDriver.user as any)?.phone)) {
-
+		if (
+			(name !== undefined && name !== currentDriver.user?.name) ||
+			(phone !== undefined && phone !== (currentDriver.user as any)?.phone)
+		) {
 			const userUpdateData: any = {
 				updatedAt: new Date(),
 			};
@@ -89,32 +95,47 @@ export async function updateDriverProfileService(db: DB, data: UpdateDriverProfi
 
 		// Convert ALL timestamp fields to Date objects (Drizzle SQLite timestamp mode expects Date objects)
 		if (driverUpdateData.dateOfBirth !== undefined) {
-			if (typeof driverUpdateData.dateOfBirth === 'number') {
+			if (typeof driverUpdateData.dateOfBirth === "number") {
 				// Convert milliseconds to Date object
 				driverUpdateData.dateOfBirth = new Date(driverUpdateData.dateOfBirth);
 			}
 		}
 
 		if (driverUpdateData.licenseExpiry !== undefined) {
-			if (typeof driverUpdateData.licenseExpiry === 'number') {
+			if (typeof driverUpdateData.licenseExpiry === "number") {
 				// Convert milliseconds to Date object
-				driverUpdateData.licenseExpiry = new Date(driverUpdateData.licenseExpiry);
+				driverUpdateData.licenseExpiry = new Date(
+					driverUpdateData.licenseExpiry,
+				);
 			}
 		}
 
 		// updatedAt is already a Date object, no conversion needed
 
 		// Remove undefined values to avoid overwriting with null
-		Object.keys(driverUpdateData).forEach(key => {
+		Object.keys(driverUpdateData).forEach((key) => {
 			if (driverUpdateData[key] === undefined) {
 				delete driverUpdateData[key];
 			}
 		});
 
 		console.log("DEBUG: Raw driverData before processing:", driverData);
-		console.log("DEBUG: dateOfBirth AFTER conversion:", driverUpdateData.dateOfBirth, "length:", driverUpdateData.dateOfBirth?.toString().length);
-		console.log("DEBUG: licenseExpiry AFTER conversion:", driverUpdateData.licenseExpiry, "length:", driverUpdateData.licenseExpiry?.toString().length);
-		console.log("DEBUG: Final driverUpdateData after timestamp conversion:", driverUpdateData);
+		console.log(
+			"DEBUG: dateOfBirth AFTER conversion:",
+			driverUpdateData.dateOfBirth,
+			"length:",
+			driverUpdateData.dateOfBirth?.toString().length,
+		);
+		console.log(
+			"DEBUG: licenseExpiry AFTER conversion:",
+			driverUpdateData.licenseExpiry,
+			"length:",
+			driverUpdateData.licenseExpiry?.toString().length,
+		);
+		console.log(
+			"DEBUG: Final driverUpdateData after timestamp conversion:",
+			driverUpdateData,
+		);
 
 		const [updatedDriver] = await db
 			.update(drivers)
@@ -136,9 +157,10 @@ export async function updateDriverProfileService(db: DB, data: UpdateDriverProfi
 			},
 		});
 
-		console.log("=== DEBUG: updateDriverProfileService completed successfully ===");
+		console.log(
+			"=== DEBUG: updateDriverProfileService completed successfully ===",
+		);
 		return result;
-
 	} catch (error) {
 		console.error("ERROR in updateDriverProfileService:", error);
 		throw error;

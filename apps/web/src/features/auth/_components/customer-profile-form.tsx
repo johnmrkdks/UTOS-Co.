@@ -1,9 +1,12 @@
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { customerProfileSchema } from "@/features/auth/_schemas/customer-profile-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import {
 	Form,
 	FormControl,
@@ -12,6 +15,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
 import {
 	Select,
 	SelectContent,
@@ -19,9 +23,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
-import { useUpdateCustomerProfileMutation } from "@/features/auth/_hooks/query/use-update-customer-profile-mutation";
 import { cn } from "@workspace/ui/lib/utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { useUpdateCustomerProfileMutation } from "@/features/auth/_hooks/query/use-update-customer-profile-mutation";
+import { customerProfileSchema } from "@/features/auth/_schemas/customer-profile-schema";
 
 type CustomerProfileFormProps = {
 	initialData?: Partial<CustomerProfileFormData>;
@@ -30,7 +36,10 @@ type CustomerProfileFormProps = {
 
 type CustomerProfileFormData = z.infer<typeof customerProfileSchema>;
 
-export function CustomerProfileForm({ initialData, className }: CustomerProfileFormProps) {
+export function CustomerProfileForm({
+	initialData,
+	className,
+}: CustomerProfileFormProps) {
 	const mutation = useUpdateCustomerProfileMutation();
 
 	const form = useForm<CustomerProfileFormData>({
@@ -46,9 +55,11 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 			country: initialData?.country || "Australia",
 			emergencyContactName: initialData?.emergencyContactName || "",
 			emergencyContactPhone: initialData?.emergencyContactPhone || "",
-			emergencyContactRelationship: initialData?.emergencyContactRelationship || "",
+			emergencyContactRelationship:
+				initialData?.emergencyContactRelationship || "",
 			preferredCarType: initialData?.preferredCarType || "",
-			communicationPreferences: initialData?.communicationPreferences || "email",
+			communicationPreferences:
+				initialData?.communicationPreferences || "email",
 		},
 		disabled: mutation.isPending,
 	});
@@ -60,8 +71,8 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 	};
 
 	return (
-		<div className={cn("w-full max-w-4xl mx-auto", className)}>
-			<Form {...form as any}>
+		<div className={cn("mx-auto w-full max-w-4xl", className)}>
+			<Form {...(form as any)}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 					{/* Personal Information */}
 					<Card>
@@ -71,7 +82,7 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								Your basic personal details for bookings and identification.
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<FormField
 								name="name"
 								render={({ field }) => (
@@ -129,7 +140,10 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Preferred Car Type</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select car type preference" />
@@ -158,7 +172,7 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								Your address details for pickup and delivery services.
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div className="md:col-span-2">
 								<FormField
 									name="address"
@@ -183,10 +197,7 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 									<FormItem>
 										<FormLabel>City</FormLabel>
 										<FormControl>
-											<Input
-												{...field}
-												placeholder="Enter city"
-											/>
+											<Input {...field} placeholder="Enter city" />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -198,7 +209,10 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>State</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select state" />
@@ -212,7 +226,9 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 												<SelectItem value="WA">Western Australia</SelectItem>
 												<SelectItem value="TAS">Tasmania</SelectItem>
 												<SelectItem value="NT">Northern Territory</SelectItem>
-												<SelectItem value="ACT">Australian Capital Territory</SelectItem>
+												<SelectItem value="ACT">
+													Australian Capital Territory
+												</SelectItem>
 											</SelectContent>
 										</Select>
 										<FormMessage />
@@ -226,10 +242,7 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 									<FormItem>
 										<FormLabel>Postal Code</FormLabel>
 										<FormControl>
-											<Input
-												{...field}
-												placeholder="Enter postal code"
-											/>
+											<Input {...field} placeholder="Enter postal code" />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -262,7 +275,7 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								Emergency contact details for safety and security purposes.
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<FormField
 								name="emergencyContactName"
 								render={({ field }) => (
@@ -301,7 +314,10 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Relationship</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select relationship" />
@@ -327,7 +343,10 @@ export function CustomerProfileForm({ initialData, className }: CustomerProfileF
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Communication Preference</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select preference" />

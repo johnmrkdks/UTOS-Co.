@@ -1,11 +1,13 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { users } from "./users";
-import { relations, sql } from "drizzle-orm";
-import type { RateableTypeEnum } from "../enums";
 import { createId } from "@paralleldrive/cuid2";
+import { relations, sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import type { RateableTypeEnum } from "../enums";
+import { users } from "./users";
 
 export const ratings = sqliteTable("ratings", {
-	id: text("id").primaryKey().$defaultFn(() => createId()),
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => createId()),
 	entityId: text("entity_id").notNull(),
 	entityType: text("entity_type").$type<RateableTypeEnum>().notNull(),
 	userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),

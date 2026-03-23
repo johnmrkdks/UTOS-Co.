@@ -1,8 +1,8 @@
+import { z } from "zod";
 import { deleteRating } from "@/data/ratings/delete-rating";
 import { getRatingById } from "@/data/ratings/get-rating-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const DeleteRatingServiceSchema = z.object({
 	id: z.string(),

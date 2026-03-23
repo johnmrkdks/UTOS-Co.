@@ -1,11 +1,11 @@
 import { env as cloudflareEnv } from "cloudflare:workers";
 import { trpcServer } from "@hono/trpc-server";
-import { createContext } from "@/trpc/context";
-import { appRouter } from "@/trpc/routers/_app";
-import { auth } from "@/lib/auth";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { auth } from "@/lib/auth";
 import { uploadFileService } from "@/services/file/upload-file";
+import { createContext } from "@/trpc/context";
+import { appRouter } from "@/trpc/routers/_app";
 
 /** Explicit allowed origins - no env dependency to avoid crashes */
 const ALLOWED_ORIGINS = new Set([
@@ -33,15 +33,29 @@ function isOriginAllowed(origin: string | null): boolean {
 }
 
 /** Build CORS headers - never throws. For error responses, fallback to known origins if Origin missing. */
-function buildCorsHeaders(origin: string | null, fallbackForErrors = false): Headers {
+function buildCorsHeaders(
+	origin: string | null,
+	fallbackForErrors = false,
+): Headers {
 	const headers = new Headers();
 	headers.set("Vary", "Origin");
-	const originToUse = origin && isOriginAllowed(origin) ? origin : fallbackForErrors ? "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev" : null;
+	const originToUse =
+		origin && isOriginAllowed(origin)
+			? origin
+			: fallbackForErrors
+				? "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
+				: null;
 	if (originToUse) {
 		headers.set("Access-Control-Allow-Origin", originToUse);
 		headers.set("Access-Control-Allow-Credentials", "true");
-		headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-		headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+		headers.set(
+			"Access-Control-Allow-Methods",
+			"GET, POST, PUT, DELETE, OPTIONS",
+		);
+		headers.set(
+			"Access-Control-Allow-Headers",
+			"Content-Type, Authorization, X-Requested-With, Accept, Origin",
+		);
 		headers.set("Access-Control-Max-Age", "86400");
 	}
 	return headers;
@@ -55,7 +69,11 @@ function addCorsToResponse(response: Response, request: Request): Response {
 		if (!corsHeaders.get("Access-Control-Allow-Origin")) return response;
 		const headers = new Headers(response.headers);
 		corsHeaders.forEach((v, k) => headers.set(k, v));
-		return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+		return new Response(response.body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers,
+		});
 	} catch {
 		return response;
 	}
@@ -95,7 +113,11 @@ app.on(["POST", "GET", "OPTIONS"], "/api/auth/**", async (c) => {
 		const msg = err instanceof Error ? err.message : String(err);
 		const stack = err instanceof Error ? err.stack : "";
 		console.error("Auth handler error:", msg, "origin:", origin, stack);
-		return jsonErrorWithCors(c.req.raw, { error: "Authentication failed", code: "AUTH_ERROR" }, 503);
+		return jsonErrorWithCors(
+			c.req.raw,
+			{ error: "Authentication failed", code: "AUTH_ERROR" },
+			503,
+		);
 	}
 });
 
@@ -127,7 +149,11 @@ app.post("/api/upload/:entityType", async (c) => {
 		return c.json({ error: "Unauthorized" }, 401);
 	}
 
-	const entityType = c.req.param("entityType") as "cars" | "packages" | "bookings" | "users";
+	const entityType = c.req.param("entityType") as
+		| "cars"
+		| "packages"
+		| "bookings"
+		| "users";
 	if (!["cars", "packages", "bookings", "users"].includes(entityType)) {
 		return c.json({ error: "Invalid entityType" }, 400);
 	}
@@ -191,7 +217,11 @@ export default {
 			const errStack = err instanceof Error ? err.stack : undefined;
 			console.error("Worker fetch error:", errMsg, errStack);
 			try {
-				return jsonErrorWithCors(request, { error: "Service unavailable", code: "FETCH_ERROR" }, 503);
+				return jsonErrorWithCors(
+					request,
+					{ error: "Service unavailable", code: "FETCH_ERROR" },
+					503,
+				);
 			} catch (fallbackErr) {
 				// Last resort: minimal response with CORS (origin echo required for credentials)
 				const h = new Headers({ "Content-Type": "application/json" });
@@ -199,7 +229,10 @@ export default {
 					h.set("Access-Control-Allow-Origin", origin);
 					h.set("Access-Control-Allow-Credentials", "true");
 				}
-				return new Response('{"error":"Service unavailable"}', { status: 503, headers: h });
+				return new Response('{"error":"Service unavailable"}', {
+					status: 503,
+					headers: h,
+				});
 			}
 		}
 	},

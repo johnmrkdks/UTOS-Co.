@@ -1,5 +1,5 @@
-import { createContext, useContext, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { createContext, type ReactNode, useContext } from "react";
 import { authClient } from "@/lib/auth-client";
 import type { Session } from "@/types/auth";
 
@@ -15,7 +15,13 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
 	// Use React Query directly with aggressive caching
-	const { data: session, isPending, isLoading, isFetching, refetch } = useQuery({
+	const {
+		data: session,
+		isPending,
+		isLoading,
+		isFetching,
+		refetch,
+	} = useQuery({
 		queryKey: ["auth-session"],
 		queryFn: async () => {
 			const result = await authClient.getSession();

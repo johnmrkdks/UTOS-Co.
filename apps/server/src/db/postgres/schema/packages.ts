@@ -1,10 +1,10 @@
 import {
-	pgTable,
-	text,
-	index,
-	timestamp,
 	boolean,
+	index,
+	pgTable,
 	real,
+	text,
+	timestamp,
 } from "drizzle-orm/pg-core";
 
 export const packages = pgTable(

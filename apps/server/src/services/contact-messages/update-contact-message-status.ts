@@ -4,9 +4,13 @@ import type { DB } from "@/db";
 export async function updateContactMessageStatus(
 	db: DB,
 	messageId: string,
-	status: "unread" | "read" | "archived"
+	status: "unread" | "read" | "archived",
 ) {
-	const updatedMessage = await updateContactMessageStatusData(db, messageId, status);
+	const updatedMessage = await updateContactMessageStatusData(
+		db,
+		messageId,
+		status,
+	);
 
 	if (!updatedMessage) {
 		throw new Error("Contact message not found");

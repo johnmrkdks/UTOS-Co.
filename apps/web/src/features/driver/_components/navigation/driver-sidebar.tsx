@@ -1,12 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { DriverNavigation } from "../driver-navigation";
+import { Button } from "@workspace/ui/components/button";
 import {
-	UserIcon,
-	ShieldCheckIcon
-} from "lucide-react";
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { ShieldCheckIcon, UserIcon } from "lucide-react";
+import { DriverNavigation } from "../driver-navigation";
 
 interface DriverSidebarProps {
 	driverStatus: {
@@ -17,17 +19,20 @@ interface DriverSidebarProps {
 	needsOnboarding: boolean;
 }
 
-export function DriverSidebar({ driverStatus, needsOnboarding }: DriverSidebarProps) {
+export function DriverSidebar({
+	driverStatus,
+	needsOnboarding,
+}: DriverSidebarProps) {
 	const navigate = useNavigate();
 
 	return (
-		<div className="hidden lg:block w-64 flex-shrink-0">
+		<div className="hidden w-64 flex-shrink-0 lg:block">
 			<Card>
 				<CardHeader className="pb-4">
 					<CardTitle className="text-lg">Navigation</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<DriverNavigation 
+					<DriverNavigation
 						driverStatus={driverStatus}
 						needsOnboarding={needsOnboarding}
 					/>
@@ -46,7 +51,10 @@ export function DriverSidebar({ driverStatus, needsOnboarding }: DriverSidebarPr
 							<span className="text-sm">Profile</span>
 						</div>
 						{needsOnboarding ? (
-							<Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+							<Badge
+								variant="outline"
+								className="border-blue-300 bg-blue-100 text-blue-700"
+							>
 								Incomplete
 							</Badge>
 						) : (
@@ -73,11 +81,11 @@ export function DriverSidebar({ driverStatus, needsOnboarding }: DriverSidebarPr
 					</div>
 
 					{needsOnboarding && (
-						<div className="pt-2 border-t">
+						<div className="border-t pt-2">
 							<Button
 								size="sm"
 								className="w-full"
-								onClick={() => navigate({ to: '/driver/onboarding' })}
+								onClick={() => navigate({ to: "/driver/onboarding" })}
 							>
 								Complete Onboarding
 							</Button>

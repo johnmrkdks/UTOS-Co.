@@ -1,25 +1,25 @@
-import { Toaster } from "@workspace/ui/components/sonner";
-import type { trpc } from "@/trpc";
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import {
+	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
-	createRootRouteWithContext,
 	useRouterState,
 } from "@tanstack/react-router";
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { ModalProvider } from "@/hooks/use-modal";
-import { SessionProvider } from "@/providers/session-provider";
-import { useTimezoneSync } from "@/hooks/use-timezone-sync";
-import { NotFound } from "@/components/not-found";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Toaster } from "@workspace/ui/components/sonner";
 import React from "react";
+import { NotFound } from "@/components/not-found";
+import { ModalProvider } from "@/hooks/use-modal";
+import { useTimezoneSync } from "@/hooks/use-timezone-sync";
+import { SessionProvider } from "@/providers/session-provider";
+import type { trpc } from "@/trpc";
 
 export type RouterAppContext = {
 	trpc: typeof trpc;
 	queryClient: QueryClient;
-}
+};
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	component: RootComponent,
@@ -27,19 +27,23 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title: "Down Under Chauffeurs - Premium Luxury Transportation Services Australia",
+				title:
+					"Down Under Chauffeurs - Premium Luxury Transportation Services Australia",
 			},
 			{
 				name: "description",
-				content: "Premium luxury chauffeur services in Australia. Book luxury cars, airport transfers, and corporate transportation. Professional drivers, premium vehicles, 24/7 service.",
+				content:
+					"Premium luxury chauffeur services in Australia. Book luxury cars, airport transfers, and corporate transportation. Professional drivers, premium vehicles, 24/7 service.",
 			},
 			{
 				name: "keywords",
-				content: "chauffeur service, luxury car hire, airport transfer, corporate transport, luxury transportation, premium cars, professional drivers, Australia",
+				content:
+					"chauffeur service, luxury car hire, airport transfer, corporate transport, luxury transportation, premium cars, professional drivers, Australia",
 			},
 			{
 				name: "viewport",
-				content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover",
+				content:
+					"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover",
 			},
 			{
 				name: "author",
@@ -68,7 +72,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				property: "og:description",
-				content: "Premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, and exceptional service for all your transportation needs.",
+				content:
+					"Premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, and exceptional service for all your transportation needs.",
 			},
 			{
 				property: "og:type",
@@ -105,7 +110,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "twitter:description",
-				content: "Premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, and exceptional service.",
+				content:
+					"Premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, and exceptional service.",
 			},
 			{
 				name: "twitter:image",
@@ -194,7 +200,7 @@ function RootComponent() {
 	const isFetching = useRouterState({
 		select: (s) => s.isLoading,
 	});
-	type ModifierKey = 'Alt' | 'Control' | 'Meta' | 'Shift';
+	type ModifierKey = "Alt" | "Control" | "Meta" | "Shift";
 	type KeyboardKey = ModifierKey | (string & {});
 
 	// Auto-sync timezone on login
@@ -205,18 +211,20 @@ function RootComponent() {
 		const preventZoom = () => {
 			const viewportMeta = document.querySelector('meta[name="viewport"]');
 			if (viewportMeta) {
-				viewportMeta.setAttribute('content', 
-					'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover'
+				viewportMeta.setAttribute(
+					"content",
+					"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover",
 				);
 			}
 
 			// Add event listeners to all input elements
-			const inputs = document.querySelectorAll('input, textarea, select');
-			inputs.forEach(input => {
-				input.addEventListener('focus', () => {
+			const inputs = document.querySelectorAll("input, textarea, select");
+			inputs.forEach((input) => {
+				input.addEventListener("focus", () => {
 					if (viewportMeta) {
-						viewportMeta.setAttribute('content', 
-							'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover'
+						viewportMeta.setAttribute(
+							"content",
+							"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover",
 						);
 					}
 				});
@@ -225,7 +233,7 @@ function RootComponent() {
 
 		// Run on mount and when DOM changes
 		preventZoom();
-		
+
 		// Observer for dynamically added inputs
 		const observer = new MutationObserver(preventZoom);
 		observer.observe(document.body, { childList: true, subtree: true });
@@ -237,36 +245,37 @@ function RootComponent() {
 		<SessionProvider>
 			<ModalProvider>
 				<HeadContent />
-				<div className="grid grid-rows-[auto_1fr] h-svh">
+				<div className="grid h-svh grid-rows-[auto_1fr]">
 					{/* {isFetching ? <Loader /> : <Outlet />} */}
 					<Outlet />
 				</div>
-				<Toaster 
-				richColors 
-				position="top-center"
-				toastOptions={{
-					style: {
-						marginTop: '60px', // Account for mobile header
-					},
-					className: 'mobile:max-w-[90vw] mobile:text-sm',
-				}}
-			/>
-			<TanStackDevtools
-				config={{
-					position: "bottom-left",
-					requireUrlFlag: true,
-					urlFlag: "https://localhost:3001",
-				}}
-				plugins={[
-					{
-						name: 'TanStack Query',
-						render: <ReactQueryDevtoolsPanel />,
-					},
-					{
-						name: 'TanStack Router',
-						render: <TanStackRouterDevtoolsPanel />,
-					},
-				]} />
+				<Toaster
+					richColors
+					position="top-center"
+					toastOptions={{
+						style: {
+							marginTop: "60px", // Account for mobile header
+						},
+						className: "mobile:max-w-[90vw] mobile:text-sm",
+					}}
+				/>
+				<TanStackDevtools
+					config={{
+						position: "bottom-left",
+						requireUrlFlag: true,
+						urlFlag: "https://localhost:3001",
+					}}
+					plugins={[
+						{
+							name: "TanStack Query",
+							render: <ReactQueryDevtoolsPanel />,
+						},
+						{
+							name: "TanStack Router",
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+					]}
+				/>
 			</ModalProvider>
 		</SessionProvider>
 	);

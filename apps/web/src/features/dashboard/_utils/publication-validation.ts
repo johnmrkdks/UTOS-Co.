@@ -1,6 +1,6 @@
 /**
  * Publication Validation Rules
- * 
+ *
  * Validates whether cars and packages meet requirements for publication.
  * These rules ensure quality standards and completeness before content goes live.
  */
@@ -45,7 +45,9 @@ export interface PackageValidationData {
 /**
  * Validate car for publication
  */
-export function validateCarForPublication(car: CarValidationData): ValidationResult {
+export function validateCarForPublication(
+	car: CarValidationData,
+): ValidationResult {
 	const errors: string[] = [];
 	const warnings: string[] = [];
 	let score = 100;
@@ -83,7 +85,9 @@ export function validateCarForPublication(car: CarValidationData): ValidationRes
 		if (car.insuranceExpiry < new Date()) {
 			errors.push("Insurance has expired");
 			score -= 30;
-		} else if (car.insuranceExpiry < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) {
+		} else if (
+			car.insuranceExpiry < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+		) {
 			warnings.push("Insurance expires within 30 days");
 			score -= 5;
 		}
@@ -158,7 +162,9 @@ export function validateCarForPublication(car: CarValidationData): ValidationRes
 /**
  * Validate package for publication
  */
-export function validatePackageForPublication(pkg: PackageValidationData): ValidationResult {
+export function validatePackageForPublication(
+	pkg: PackageValidationData,
+): ValidationResult {
 	const errors: string[] = [];
 	const warnings: string[] = [];
 	let score = 100;
@@ -206,8 +212,14 @@ export function validatePackageForPublication(pkg: PackageValidationData): Valid
 		score -= 10;
 	}
 
-	if (pkg.serviceType === "transfer" && pkg.maxDistance && pkg.maxDistance <= 0) {
-		warnings.push("Transfer packages with distance limits should specify valid distance");
+	if (
+		pkg.serviceType === "transfer" &&
+		pkg.maxDistance &&
+		pkg.maxDistance <= 0
+	) {
+		warnings.push(
+			"Transfer packages with distance limits should specify valid distance",
+		);
 		score -= 5;
 	}
 

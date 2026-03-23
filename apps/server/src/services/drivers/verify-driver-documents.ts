@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { DB } from "@/db";
 import { updateDriverData } from "@/data/drivers/update-driver";
+import type { DB } from "@/db";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 
 export const VerifyDriverDocumentsServiceSchema = z.object({
@@ -20,7 +20,9 @@ export const VerifyDriverDocumentsServiceSchema = z.object({
 	adminNotes: z.string().optional(),
 });
 
-export type VerifyDriverDocumentsServiceInput = z.infer<typeof VerifyDriverDocumentsServiceSchema>;
+export type VerifyDriverDocumentsServiceInput = z.infer<
+	typeof VerifyDriverDocumentsServiceSchema
+>;
 
 export interface DocumentVerificationResult {
 	id: string;
@@ -33,23 +35,29 @@ export interface DocumentVerificationResult {
 
 export async function verifyDriverDocumentsService(
 	db: DB,
-	data: VerifyDriverDocumentsServiceInput
+	data: VerifyDriverDocumentsServiceInput,
 ): Promise<DocumentVerificationResult> {
 	try {
-		const { driverId, documentVerification, verifiedBy, overallStatus, adminNotes } = data;
-		
+		const {
+			driverId,
+			documentVerification,
+			verifiedBy,
+			overallStatus,
+			adminNotes,
+		} = data;
+
 		// Determine if all documents are verified
-		const allDocumentsVerified = 
+		const allDocumentsVerified =
 			documentVerification.licenseVerified &&
 			documentVerification.insuranceVerified &&
 			documentVerification.backgroundCheckVerified &&
 			documentVerification.profilePhotoVerified;
-		
+
 		// Calculate verification status based on document checks and overall status
 		let verificationStatus: string;
 		let isApproved: boolean;
 		let isActive: boolean;
-		
+
 		if (overallStatus === "approved" && allDocumentsVerified) {
 			verificationStatus = "verified";
 			isApproved = true;
@@ -67,7 +75,7 @@ export async function verifyDriverDocumentsService(
 			isApproved = false;
 			isActive = false;
 		}
-		
+
 		// Update driver with verification details
 		const updateData = {
 			id: driverId,
@@ -84,12 +92,14 @@ export async function verifyDriverDocumentsService(
 			approvedBy: isApproved ? verifiedBy : null,
 			updatedAt: new Date(),
 		};
-		
+
 		const updatedDriver = await updateDriverData(db, updateData);
-		
+
 		// Email notification removed for faster implementation
-		console.log(`Driver ${data.driverId} verification status updated to: ${overallStatus}`);
-		
+		console.log(
+			`Driver ${data.driverId} verification status updated to: ${overallStatus}`,
+		);
+
 		return {
 			id: updatedDriver[0].id,
 			verificationStatus,
@@ -98,7 +108,6 @@ export async function verifyDriverDocumentsService(
 			verifiedBy,
 			adminNotes,
 		};
-		
 	} catch (error) {
 		console.error("Failed to verify driver documents:", error);
 		throw new Error("Failed to verify driver documents");

@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Form,
@@ -10,11 +11,10 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateContactMessageMutation } from "../../../_hooks/query/use-create-contact-message-mutation";
-import { Loader2 } from "lucide-react";
 
 type ContactUsFormProps = {
 	className?: string;
@@ -22,8 +22,14 @@ type ContactUsFormProps = {
 
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-	email: z.string().email("Invalid email address").max(255, "Email is too long"),
-	message: z.string().min(1, "Message is required").max(2000, "Message is too long"),
+	email: z
+		.string()
+		.email("Invalid email address")
+		.max(255, "Email is too long"),
+	message: z
+		.string()
+		.min(1, "Message is required")
+		.max(2000, "Message is too long"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -50,11 +56,12 @@ export function ContactUsForm({ className, ...props }: ContactUsFormProps) {
 
 	return (
 		<div {...props} className={cn("flex flex-col gap-4", className)}>
-			<h1 className="text-2xl font-bold">Contact Us</h1>
-			<Form {...form as any}>
+			<h1 className="font-bold text-2xl">Contact Us</h1>
+			<Form {...(form as any)}>
 				<form
 					className="flex flex-col gap-6"
-					onSubmit={form.handleSubmit(handleSubmit)}>
+					onSubmit={form.handleSubmit(handleSubmit)}
+				>
 					<div className="flex flex-col gap-4">
 						<FormField
 							control={form.control as any}

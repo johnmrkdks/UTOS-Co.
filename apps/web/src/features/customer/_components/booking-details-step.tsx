@@ -1,14 +1,38 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Calendar, Users, ArrowLeft, User, Phone, Mail, MessageSquare } from "lucide-react";
+import {
+	ArrowLeft,
+	Calendar,
+	Mail,
+	MessageSquare,
+	Phone,
+	User,
+	Users,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUserQuery } from "@/hooks/query/use-user-query";
-import { bookingDetailsSchema, type BookingDetailsFormData } from "../_schemas/instant-quote";
 import { ImprovedDateTimePicker } from "@/components/improved-datetime-picker";
+import { useUserQuery } from "@/hooks/query/use-user-query";
+import {
+	type BookingDetailsFormData,
+	bookingDetailsSchema,
+} from "../_schemas/instant-quote";
 
 interface BookingDetailsStepProps {
 	selectedCarId: string;
@@ -17,14 +41,14 @@ interface BookingDetailsStepProps {
 	isSubmitting?: boolean;
 }
 
-export function BookingDetailsStep({ 
-	selectedCarId, 
-	onSubmit, 
-	onBack, 
-	isSubmitting = false 
+export function BookingDetailsStep({
+	selectedCarId,
+	onSubmit,
+	onBack,
+	isSubmitting = false,
 }: BookingDetailsStepProps) {
 	const { session } = useUserQuery();
-	
+
 	const form = useForm<BookingDetailsFormData>({
 		resolver: zodResolver(bookingDetailsSchema) as any,
 		defaultValues: {
@@ -37,7 +61,7 @@ export function BookingDetailsStep({
 			specialRequests: "",
 			selectedCarId: selectedCarId,
 			tollPreference: "toll" as const,
-		}
+		},
 	});
 
 	const handleSubmit = (data: BookingDetailsFormData) => {
@@ -51,13 +75,14 @@ export function BookingDetailsStep({
 					<User className="h-5 w-5" />
 					Booking Details
 				</CardTitle>
-				<CardDescription>
-					Complete your booking information
-				</CardDescription>
+				<CardDescription>Complete your booking information</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<Form {...form as any}>
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+				<Form {...(form as any)}>
+					<form
+						onSubmit={form.handleSubmit(handleSubmit)}
+						className="space-y-4"
+					>
 						{/* Customer Name */}
 						<FormField
 							control={form.control as any}
@@ -67,8 +92,12 @@ export function BookingDetailsStep({
 									<FormLabel>Full Name *</FormLabel>
 									<FormControl>
 										<div className="relative">
-											<User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-											<Input {...field} placeholder="Enter your full name" className="pl-10" />
+											<User className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
+											<Input
+												{...field}
+												placeholder="Enter your full name"
+												className="pl-10"
+											/>
 										</div>
 									</FormControl>
 									<FormMessage />
@@ -85,8 +114,12 @@ export function BookingDetailsStep({
 									<FormLabel>Phone Number *</FormLabel>
 									<FormControl>
 										<div className="relative">
-											<Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-											<Input {...field} placeholder="Enter your phone number" className="pl-10" />
+											<Phone className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
+											<Input
+												{...field}
+												placeholder="Enter your phone number"
+												className="pl-10"
+											/>
 										</div>
 									</FormControl>
 									<FormMessage />
@@ -103,8 +136,12 @@ export function BookingDetailsStep({
 									<FormLabel>Email (Optional)</FormLabel>
 									<FormControl>
 										<div className="relative">
-											<Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-											<Input {...field} placeholder="Enter your email" className="pl-10" />
+											<Mail className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
+											<Input
+												{...field}
+												placeholder="Enter your email"
+												className="pl-10"
+											/>
 										</div>
 									</FormControl>
 									<FormMessage />
@@ -113,7 +150,7 @@ export function BookingDetailsStep({
 						/>
 
 						{/* Passenger and Luggage Count side by side */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<FormField
 								control={form.control as any}
 								name="passengerCount"
@@ -122,7 +159,7 @@ export function BookingDetailsStep({
 										<FormLabel>Number of Passengers *</FormLabel>
 										<FormControl>
 											<div className="relative">
-												<Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+												<Users className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
 												<Input
 													{...field}
 													type="number"
@@ -130,7 +167,9 @@ export function BookingDetailsStep({
 													max="8"
 													placeholder="Number of passengers"
 													className="pl-10"
-													onChange={(e) => field.onChange(Number(e.target.value))}
+													onChange={(e) =>
+														field.onChange(Number(e.target.value))
+													}
 												/>
 											</div>
 										</FormControl>
@@ -170,7 +209,7 @@ export function BookingDetailsStep({
 									<FormLabel>Route preference</FormLabel>
 									<FormControl>
 										<div className="flex gap-4">
-											<label className="flex items-center gap-2 cursor-pointer">
+											<label className="flex cursor-pointer items-center gap-2">
 												<input
 													type="radio"
 													value="toll"
@@ -180,7 +219,7 @@ export function BookingDetailsStep({
 												/>
 												<span>Use toll roads</span>
 											</label>
-											<label className="flex items-center gap-2 cursor-pointer">
+											<label className="flex cursor-pointer items-center gap-2">
 												<input
 													type="radio"
 													value="no_toll"
@@ -226,11 +265,11 @@ export function BookingDetailsStep({
 									<FormLabel>Special Requests (Optional)</FormLabel>
 									<FormControl>
 										<div className="relative">
-											<MessageSquare className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+											<MessageSquare className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
 											<Textarea
 												{...field}
 												placeholder="Any special requirements or requests..."
-												className="pl-10 min-h-[80px]"
+												className="min-h-[80px] pl-10"
 											/>
 										</div>
 									</FormControl>
@@ -242,7 +281,7 @@ export function BookingDetailsStep({
 						{/* Navigation Buttons */}
 						<div className="flex justify-between pt-4">
 							<Button type="button" variant="outline" onClick={onBack}>
-								<ArrowLeft className="h-4 w-4 mr-2" />
+								<ArrowLeft className="mr-2 h-4 w-4" />
 								Back
 							</Button>
 							<Button type="submit" disabled={isSubmitting}>

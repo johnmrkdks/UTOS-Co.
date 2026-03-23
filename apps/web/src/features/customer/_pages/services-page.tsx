@@ -1,54 +1,64 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Badge } from "@workspace/ui/components/badge";
-import { 
-	Search, 
-	MapPin, 
-	Clock, 
-	Users, 
-	Star, 
-	Package,
-	Filter,
-	Loader2
-} from "lucide-react";
-import { useState, useMemo } from "react";
-import { useGetPublishedServicesQuery } from "@/features/customer/_hooks/query/use-get-published-services-query";
 import { Link } from "@tanstack/react-router";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Clock,
+	Filter,
+	Loader2,
+	MapPin,
+	Package,
+	Search,
+	Star,
+	Users,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { useGetPublishedServicesQuery } from "@/features/customer/_hooks/query/use-get-published-services-query";
 
 export function ServicesPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [activeCategory, setActiveCategory] = useState("All");
 
 	// Fetch published services (packages from customer perspective)
-	const { data: servicesData, isLoading, error } = useGetPublishedServicesQuery({
+	const {
+		data: servicesData,
+		isLoading,
+		error,
+	} = useGetPublishedServicesQuery({
 		limit: 50,
 		offset: 0,
 	});
 
 	const services = servicesData?.data || [];
 
-
 	// Helper function to format price
 	const formatPrice = (service: any) => {
 		const serviceType = service.serviceType;
-		if (serviceType === 'hourly' && service.hourlyRate) {
+		if (serviceType === "hourly" && service.hourlyRate) {
 			return {
 				price: `$${service.hourlyRate.toFixed(2)}`,
-				unit: '/hour',
-				type: 'Hourly'
+				unit: "/hour",
+				type: "Hourly",
 			};
-		} else if (service.fixedPrice) {
+		}
+		if (service.fixedPrice) {
 			return {
 				price: `$${service.fixedPrice.toFixed(2)}`,
-				unit: '',
-				type: 'Fixed'
+				unit: "",
+				type: "Fixed",
 			};
 		}
 		return {
-			price: '$0.00',
-			unit: '',
-			type: 'Fixed'
+			price: "$0.00",
+			unit: "",
+			type: "Fixed",
 		};
 	};
 
@@ -65,29 +75,40 @@ export function ServicesPage() {
 	// Helper function to get service type display name
 	const getServiceTypeDisplay = (serviceType: string) => {
 		switch (serviceType) {
-			case "transfer": return "Transfer";
-			case "tour": return "Tour";
-			case "event": return "Event";
-			case "hourly": return "Hourly";
-			default: return serviceType;
+			case "transfer":
+				return "Transfer";
+			case "tour":
+				return "Tour";
+			case "event":
+				return "Event";
+			case "hourly":
+				return "Hourly";
+			default:
+				return serviceType;
 		}
 	};
 
 	// Get unique service types for filtering - memoized to prevent recalculation on every render
 	const serviceTypes = useMemo(() => {
-		return Array.from(new Set(services.map(s => (s as any).serviceType))).map(type => getServiceTypeDisplay(type));
+		return Array.from(new Set(services.map((s) => (s as any).serviceType))).map(
+			(type) => getServiceTypeDisplay(type),
+		);
 	}, [services]);
 
 	const filteredServices = useMemo(() => {
-		return services.filter(service => {
-		const matchesSearch = 
-			service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			(service as any).serviceType.toLowerCase().includes(searchTerm.toLowerCase());
-		
-		const matchesCategory = activeCategory === "All" || getServiceTypeDisplay((service as any).serviceType) === activeCategory;
+		return services.filter((service) => {
+			const matchesSearch =
+				service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				(service as any).serviceType
+					.toLowerCase()
+					.includes(searchTerm.toLowerCase());
 
-		return matchesSearch && matchesCategory;
+			const matchesCategory =
+				activeCategory === "All" ||
+				getServiceTypeDisplay((service as any).serviceType) === activeCategory;
+
+			return matchesSearch && matchesCategory;
 		});
 	}, [services, searchTerm, activeCategory]);
 
@@ -96,14 +117,16 @@ export function ServicesPage() {
 			{/* Header */}
 			<div className="space-y-4">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">Luxury Services</h1>
-					<p className="text-gray-600">Discover our curated collection of premium travel services</p>
+					<h1 className="font-bold text-3xl text-gray-900">Luxury Services</h1>
+					<p className="text-gray-600">
+						Discover our curated collection of premium travel services
+					</p>
 				</div>
 
 				{/* Search and Filters */}
-				<div className="flex flex-col sm:flex-row gap-4">
+				<div className="flex flex-col gap-4 sm:flex-row">
 					<div className="relative flex-1">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
 						<Input
 							placeholder="Search services..."
 							value={searchTerm}
@@ -121,12 +144,12 @@ export function ServicesPage() {
 			{/* Service Categories */}
 			<div className="w-full">
 				{/* Mobile: Flex wrap, Desktop: Horizontal scroll */}
-				<div className="flex flex-wrap gap-2 sm:flex-nowrap sm:overflow-x-auto pb-2">
+				<div className="flex flex-wrap gap-2 pb-2 sm:flex-nowrap sm:overflow-x-auto">
 					{["All", ...serviceTypes].map((category) => (
 						<Badge
 							key={category}
 							variant={category === activeCategory ? "default" : "secondary"}
-							className="whitespace-nowrap cursor-pointer hover:bg-primary/20 transition-colors flex-shrink-0 px-3 py-1.5 text-sm font-medium"
+							className="flex-shrink-0 cursor-pointer whitespace-nowrap px-3 py-1.5 font-medium text-sm transition-colors hover:bg-primary/20"
 							onClick={() => setActiveCategory(category)}
 						>
 							{category}
@@ -137,7 +160,7 @@ export function ServicesPage() {
 
 			{/* Loading State */}
 			{isLoading && (
-				<div className="flex justify-center items-center py-12">
+				<div className="flex items-center justify-center py-12">
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
 					<span className="ml-2 text-gray-600">Loading services...</span>
 				</div>
@@ -145,38 +168,48 @@ export function ServicesPage() {
 
 			{/* Error State */}
 			{error && (
-				<div className="text-center py-12">
-					<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-					<h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load services</h3>
+				<div className="py-12 text-center">
+					<Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+					<h3 className="mb-2 font-medium text-gray-900 text-lg">
+						Failed to load services
+					</h3>
 					<p className="text-gray-600">Please try again later</p>
 				</div>
 			)}
 
 			{/* Services Grid */}
 			{!isLoading && !error && (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-				{filteredServices.length === 0 ? (
-					<div className="text-center py-12 col-span-full">
-						<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-						<h3 className="text-lg font-medium text-gray-900 mb-2">No services found</h3>
-						<p className="text-gray-600">Try adjusting your search or filter criteria</p>
-					</div>
-				) : (
-					filteredServices.map((service) => {
-						const pricing = formatPrice(service);
-						return (
-							<Card key={service.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border">
-								{/* Service Image */}
-								<div className="h-40 relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
-									{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
-										<>
-											<img
-												src={service.bannerImageUrl}
-												alt={service.name}
-												className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-												onError={(e) => {
-													// Show fallback design on image error
-													e.currentTarget.parentElement!.innerHTML = `
+				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					{filteredServices.length === 0 ? (
+						<div className="col-span-full py-12 text-center">
+							<Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+							<h3 className="mb-2 font-medium text-gray-900 text-lg">
+								No services found
+							</h3>
+							<p className="text-gray-600">
+								Try adjusting your search or filter criteria
+							</p>
+						</div>
+					) : (
+						filteredServices.map((service) => {
+							const pricing = formatPrice(service);
+							return (
+								<Card
+									key={service.id}
+									className="group overflow-hidden border transition-all duration-300 hover:shadow-lg"
+								>
+									{/* Service Image */}
+									<div className="relative h-40 overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+										{service.bannerImageUrl &&
+										service.bannerImageUrl.trim() !== "" ? (
+											<>
+												<img
+													src={service.bannerImageUrl}
+													alt={service.name}
+													className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+													onError={(e) => {
+														// Show fallback design on image error
+														e.currentTarget.parentElement!.innerHTML = `
 														<div class="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
 															<div class="text-center">
 																<div class="w-12 h-12 mx-auto mb-2 bg-primary/20 rounded-xl flex items-center justify-center">
@@ -188,121 +221,138 @@ export function ServicesPage() {
 															</div>
 														</div>
 													`;
-												}}
-											/>
-											<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-										</>
-									) : (
-										<div className="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
-											<div className="text-center">
-												<div className="w-12 h-12 mx-auto mb-2 bg-primary/20 rounded-xl flex items-center justify-center">
-													<Package className="w-6 h-6 text-primary/60" />
+													}}
+												/>
+												<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+											</>
+										) : (
+											<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20">
+												<div className="text-center">
+													<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
+														<Package className="h-6 w-6 text-primary/60" />
+													</div>
+													<p className="px-2 font-medium text-gray-600 text-xs">
+														{service.name}
+													</p>
 												</div>
-												<p className="text-gray-600 font-medium text-xs px-2">{service.name}</p>
 											</div>
-										</div>
-									)}
+										)}
 
-									{/* Rate Type Badge */}
-									<div className="absolute top-2 left-2">
-										<Badge
-											variant={pricing.type === 'Hourly' ? 'default' : 'secondary'}
-											className="text-xs font-medium shadow-sm"
-										>
-											{pricing.type}
-										</Badge>
-									</div>
-
-									{/* Service Type Badge */}
-									<div className="absolute bottom-2 left-2">
-										<Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-xs shadow-sm">
-											{getServiceTypeDisplay((service as any).serviceType)}
-										</Badge>
-									</div>
-
-									{/* Deposit Required Badge */}
-									{service.depositRequired && (
-										<div className="absolute top-2 right-2">
-											<Badge variant="destructive" className="text-xs shadow-sm">
-												Deposit Required
+										{/* Rate Type Badge */}
+										<div className="absolute top-2 left-2">
+											<Badge
+												variant={
+													pricing.type === "Hourly" ? "default" : "secondary"
+												}
+												className="font-medium text-xs shadow-sm"
+											>
+												{pricing.type}
 											</Badge>
 										</div>
-									)}
-								</div>
 
-								<CardContent className="p-4">
-									<div className="space-y-3">
-										{/* Header */}
-										<div>
-											<CardTitle className="text-sm font-semibold leading-tight mb-1 line-clamp-1">
-												{service.name}
-											</CardTitle>
-											<CardDescription className="line-clamp-2 text-xs leading-relaxed min-h-[32px]">
-												{service.description}
-											</CardDescription>
+										{/* Service Type Badge */}
+										<div className="absolute bottom-2 left-2">
+											<Badge
+												variant="outline"
+												className="bg-white/90 text-xs shadow-sm backdrop-blur-sm"
+											>
+												{getServiceTypeDisplay((service as any).serviceType)}
+											</Badge>
 										</div>
 
-										{/* Pricing */}
-										<div className="flex items-center justify-between">
-											<div className="flex items-baseline gap-1">
-												<span className="font-bold text-lg text-primary">
-													{pricing.price}
-												</span>
-												{pricing.unit && (
-													<span className="text-xs text-muted-foreground">
-														{pricing.unit}
-													</span>
-												)}
-											</div>
-
-											{/* Service Stats */}
-											<div className="flex items-center gap-2 text-xs text-muted-foreground">
-												{service.duration && (
-													<div className="flex items-center gap-1">
-														<Clock className="h-3 w-3" />
-														<span>{Math.floor(service.duration / 60)}h</span>
-													</div>
-												)}
-											</div>
-										</div>
-
-										{/* Advance Booking Notice */}
-										{service.advanceBookingHours && service.advanceBookingHours > 0 && (
-											<div className="text-xs text-muted-foreground">
-												Book {service.advanceBookingHours}h in advance
+										{/* Deposit Required Badge */}
+										{service.depositRequired && (
+											<div className="absolute top-2 right-2">
+												<Badge
+													variant="destructive"
+													className="text-xs shadow-sm"
+												>
+													Deposit Required
+												</Badge>
 											</div>
 										)}
 									</div>
 
-									{/* Action Buttons */}
-									<div className="flex gap-2 mt-4 pt-3 border-t">
-										<Button className="flex-1 text-xs" asChild>
-											<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
-												<Package className="h-3 w-3 mr-1" />
-												Book Service
-											</Link>
-										</Button>
-										<Button variant="outline" size="sm" className="text-xs">
-											<MapPin className="h-3 w-3" />
-										</Button>
-									</div>
-								</CardContent>
-							</Card>
-						);
-					})
-				)}
+									<CardContent className="p-4">
+										<div className="space-y-3">
+											{/* Header */}
+											<div>
+												<CardTitle className="mb-1 line-clamp-1 font-semibold text-sm leading-tight">
+													{service.name}
+												</CardTitle>
+												<CardDescription className="line-clamp-2 min-h-[32px] text-xs leading-relaxed">
+													{service.description}
+												</CardDescription>
+											</div>
+
+											{/* Pricing */}
+											<div className="flex items-center justify-between">
+												<div className="flex items-baseline gap-1">
+													<span className="font-bold text-lg text-primary">
+														{pricing.price}
+													</span>
+													{pricing.unit && (
+														<span className="text-muted-foreground text-xs">
+															{pricing.unit}
+														</span>
+													)}
+												</div>
+
+												{/* Service Stats */}
+												<div className="flex items-center gap-2 text-muted-foreground text-xs">
+													{service.duration && (
+														<div className="flex items-center gap-1">
+															<Clock className="h-3 w-3" />
+															<span>{Math.floor(service.duration / 60)}h</span>
+														</div>
+													)}
+												</div>
+											</div>
+
+											{/* Advance Booking Notice */}
+											{service.advanceBookingHours &&
+												service.advanceBookingHours > 0 && (
+													<div className="text-muted-foreground text-xs">
+														Book {service.advanceBookingHours}h in advance
+													</div>
+												)}
+										</div>
+
+										{/* Action Buttons */}
+										<div className="mt-4 flex gap-2 border-t pt-3">
+											<Button className="flex-1 text-xs" asChild>
+												<Link
+													to="/book-service/$serviceId"
+													params={{ serviceId: service.id }}
+												>
+													<Package className="mr-1 h-3 w-3" />
+													Book Service
+												</Link>
+											</Button>
+											<Button variant="outline" size="sm" className="text-xs">
+												<MapPin className="h-3 w-3" />
+											</Button>
+										</div>
+									</CardContent>
+								</Card>
+							);
+						})
+					)}
 				</div>
 			)}
 
 			{/* Call to Action */}
-			<Card className="bg-primary/5 border-primary/20">
+			<Card className="border-primary/20 bg-primary/5">
 				<CardContent className="p-6 text-center">
-					<h3 className="text-lg font-semibold mb-2">Need a Custom Service?</h3>
-					<p className="text-gray-600 mb-4">
-						Can't find what you're looking for? Get an instant quote for a custom car booking.
+					<h3 className="mb-2 font-semibold text-lg">Need a Custom Service?</h3>
+					<p className="mb-4 text-gray-600">
+						Can't find what you're looking for? Get an instant quote for a
+						custom car booking.
 					</p>
 					<Button variant="outline" asChild>
-						<Link to="/calculate-quote" search={{ selectedCarId: "" }}>Get Instant Quote</Link>
+						<Link to="/calculate-quote" search={{ selectedCarId: "" }}>
+							Get Instant Quote
+						</Link>
 					</Button>
 				</CardContent>
 			</Card>

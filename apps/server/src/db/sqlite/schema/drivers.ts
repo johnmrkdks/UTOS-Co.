@@ -1,11 +1,13 @@
+import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { cars } from "./cars";
 import { users } from "./users";
-import { createId } from "@paralleldrive/cuid2";
 
 export const drivers = sqliteTable("drivers", {
-	id: text("id").primaryKey().$defaultFn(() => createId()),
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => createId()),
 	userId: text("user_id").references(() => users.id),
 	licenseNumber: text("license_number").notNull(),
 	licenseExpiry: integer("license_expiry", { mode: "timestamp" }).notNull(),
@@ -22,23 +24,29 @@ export const drivers = sqliteTable("drivers", {
 	emergencyContactPhone: text("emergency_contact_phone"),
 	address: text("address"),
 	dateOfBirth: integer("date_of_birth", { mode: "timestamp" }),
-	
+
 	// Onboarding status
-	onboardingStatus: text("onboarding_status").notNull().default("pending_approval"), // pending_approval, documents_uploaded, approved, rejected
+	onboardingStatus: text("onboarding_status")
+		.notNull()
+		.default("pending_approval"), // pending_approval, documents_uploaded, approved, rejected
 	onboardingNotes: text("onboarding_notes"),
 	approvedAt: integer("approved_at", { mode: "timestamp" }),
 	approvedBy: text("approved_by").references(() => users.id),
-	
+
 	// Document verification
 	documentVerification: text("document_verification"), // JSON string storing individual document verification status
 	verificationStatus: text("verification_status").default("pending"), // pending, pending_documents, verified, rejected, needs_revision
 	verifiedAt: integer("verified_at", { mode: "timestamp" }),
 	verifiedBy: text("verified_by").references(() => users.id),
-	
+
 	// Email verification tracking
-	emailVerificationSentAt: integer("email_verification_sent_at", { mode: "timestamp" }),
+	emailVerificationSentAt: integer("email_verification_sent_at", {
+		mode: "timestamp",
+	}),
 	emailVerifiedAt: integer("email_verified_at", { mode: "timestamp" }),
-	onboardingEmailSentAt: integer("onboarding_email_sent_at", { mode: "timestamp" }),
+	onboardingEmailSentAt: integer("onboarding_email_sent_at", {
+		mode: "timestamp",
+	}),
 
 	// Availability
 	isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),

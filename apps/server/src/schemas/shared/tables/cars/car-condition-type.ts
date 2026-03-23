@@ -1,10 +1,10 @@
-import { carConditionTypes } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { carConditionTypes } from "@/db/schema";
 
 // Base schemas
 export const CarConditionTypeSchema = createSelectSchema(carConditionTypes, {
@@ -36,4 +36,3 @@ export type UpdateCarConditionType = z.infer<
 export type CarConditionTypeWithEnrichedData = z.infer<
 	typeof CarConditionTypeWithEnrichedDataSchema
 >;
-

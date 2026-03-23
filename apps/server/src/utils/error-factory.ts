@@ -14,12 +14,14 @@ export class ErrorFactory {
 	}
 
 	static duplicateEntry(resource: string, field?: string): AppError {
-		const details = field ? [{ field, message: `${field} already exists` }] : undefined;
+		const details = field
+			? [{ field, message: `${field} already exists` }]
+			: undefined;
 		return new AppError(
 			`${resource} already exists`,
 			ErrorCode.DUPLICATE_ENTRY,
 			409,
-			details
+			details,
 		);
 	}
 
@@ -28,18 +30,28 @@ export class ErrorFactory {
 	}
 
 	static missingEntry(resource: string, field: string): AppError {
-		return new AppError(`${resource} is missing ${field}`, ErrorCode.MISSING_ENTRY, 400);
+		return new AppError(
+			`${resource} is missing ${field}`,
+			ErrorCode.MISSING_ENTRY,
+			400,
+		);
 	}
 
-	static unauthorized(message: string = 'Unauthorized'): AppError {
+	static unauthorized(message = "Unauthorized"): AppError {
 		return new AppError(message, ErrorCode.UNAUTHORIZED, 401);
 	}
 
-	static forbidden(message: string = 'Forbidden'): AppError {
+	static forbidden(message = "Forbidden"): AppError {
 		return new AppError(message, ErrorCode.FORBIDDEN, 403);
 	}
 
-	static internal(message: string = 'Internal server error'): AppError {
-		return new AppError(message, ErrorCode.INTERNAL_ERROR, 500, undefined, false);
+	static internal(message = "Internal server error"): AppError {
+		return new AppError(
+			message,
+			ErrorCode.INTERNAL_ERROR,
+			500,
+			undefined,
+			false,
+		);
 	}
 }

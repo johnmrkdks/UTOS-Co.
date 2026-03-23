@@ -2,7 +2,9 @@ import { format } from "date-fns";
 import { BUSINESS_INFO } from "@/constants/business-info";
 
 const formatCurrency = (n: number) =>
-	new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(n);
+	new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(
+		n,
+	);
 
 /** Hex colors for PDF export - html2pdf/html2canvas does not support oklch */
 const colors = {
@@ -67,11 +69,13 @@ function generateInvoiceNumber(
 	type: "driver" | "company",
 	periodStart: Date | string,
 	periodEnd: Date | string,
-	identifier: string
+	identifier: string,
 ): string {
 	const prefix = type === "driver" ? "DRV" : "CO";
 	const dateStr = format(periodStart, "yyyyMMdd");
-	const hash = Math.abs(identifier.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 1000;
+	const hash =
+		Math.abs(identifier.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) %
+		1000;
 	return `INV-${prefix}-${dateStr}-${hash.toString().padStart(3, "0")}`;
 }
 
@@ -111,7 +115,9 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 				>
 					{BUSINESS_INFO.business.name}
 				</h1>
-				<p style={{ fontSize: "0.875rem", color: colors.teal600, marginTop: 2 }}>
+				<p
+					style={{ fontSize: "0.875rem", color: colors.teal600, marginTop: 2 }}
+				>
 					{BUSINESS_INFO.business.slogan}
 				</p>
 				<div
@@ -201,25 +207,73 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 
 			{/* Line items table */}
 			<div style={{ overflowX: "auto" }}>
-				<table style={{ width: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
+				<table
+					style={{
+						width: "100%",
+						fontSize: "0.875rem",
+						borderCollapse: "collapse",
+					}}
+				>
 					<thead>
 						<tr style={{ borderBottom: `2px solid ${colors.gray200}` }}>
-							<th style={{ textAlign: "left", padding: "12px 8px", fontWeight: 600, color: colors.gray700 }}>
+							<th
+								style={{
+									textAlign: "left",
+									padding: "12px 8px",
+									fontWeight: 600,
+									color: colors.gray700,
+								}}
+							>
 								Ref
 							</th>
-							<th style={{ textAlign: "left", padding: "12px 8px", fontWeight: 600, color: colors.gray700 }}>
+							<th
+								style={{
+									textAlign: "left",
+									padding: "12px 8px",
+									fontWeight: 600,
+									color: colors.gray700,
+								}}
+							>
 								Transfer type
 							</th>
-							<th style={{ textAlign: "left", padding: "12px 8px", fontWeight: 600, color: colors.gray700 }}>
+							<th
+								style={{
+									textAlign: "left",
+									padding: "12px 8px",
+									fontWeight: 600,
+									color: colors.gray700,
+								}}
+							>
 								Distance
 							</th>
-							<th style={{ textAlign: "left", padding: "12px 8px", fontWeight: 600, color: colors.gray700 }}>
+							<th
+								style={{
+									textAlign: "left",
+									padding: "12px 8px",
+									fontWeight: 600,
+									color: colors.gray700,
+								}}
+							>
 								Origin
 							</th>
-							<th style={{ textAlign: "left", padding: "12px 8px", fontWeight: 600, color: colors.gray700 }}>
+							<th
+								style={{
+									textAlign: "left",
+									padding: "12px 8px",
+									fontWeight: 600,
+									color: colors.gray700,
+								}}
+							>
 								Destination
 							</th>
-							<th style={{ textAlign: "right", padding: "12px 8px", fontWeight: 600, color: colors.gray700 }}>
+							<th
+								style={{
+									textAlign: "right",
+									padding: "12px 8px",
+									fontWeight: 600,
+									color: colors.gray700,
+								}}
+							>
 								{type === "driver" ? "Amount" : "Price"}
 							</th>
 						</tr>
@@ -227,8 +281,17 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 					<tbody>
 						{type === "driver"
 							? data.jobs.map((job) => (
-									<tr key={job.referenceNumber} style={{ borderBottom: `1px solid ${colors.gray200}` }}>
-										<td style={{ padding: "8px", fontFamily: "monospace", fontSize: "0.75rem" }}>
+									<tr
+										key={job.referenceNumber}
+										style={{ borderBottom: `1px solid ${colors.gray200}` }}
+									>
+										<td
+											style={{
+												padding: "8px",
+												fontFamily: "monospace",
+												fontSize: "0.75rem",
+											}}
+										>
 											{job.referenceNumber}
 										</td>
 										<td style={{ padding: "8px" }}>{job.transferType}</td>
@@ -239,14 +302,29 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 										</td>
 										<td style={{ padding: "8px" }}>{job.originSuburb}</td>
 										<td style={{ padding: "8px" }}>{job.destinationSuburb}</td>
-										<td style={{ padding: "8px", textAlign: "right", fontWeight: 500 }}>
+										<td
+											style={{
+												padding: "8px",
+												textAlign: "right",
+												fontWeight: 500,
+											}}
+										>
 											{formatCurrency(job.driverShare)}
 										</td>
 									</tr>
 								))
 							: data.jobs.map((job) => (
-									<tr key={job.referenceNumber} style={{ borderBottom: `1px solid ${colors.gray200}` }}>
-										<td style={{ padding: "8px", fontFamily: "monospace", fontSize: "0.75rem" }}>
+									<tr
+										key={job.referenceNumber}
+										style={{ borderBottom: `1px solid ${colors.gray200}` }}
+									>
+										<td
+											style={{
+												padding: "8px",
+												fontFamily: "monospace",
+												fontSize: "0.75rem",
+											}}
+										>
 											{job.referenceNumber}
 										</td>
 										<td style={{ padding: "8px" }}>{job.transferType}</td>
@@ -267,7 +345,9 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 			</div>
 
 			{/* Totals */}
-			<div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
+			<div
+				style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}
+			>
 				<div style={{ width: "100%", maxWidth: 320 }}>
 					<div
 						style={{
@@ -316,13 +396,15 @@ export function InvoiceDocument(props: InvoiceDocumentProps) {
 					<p>Bank details: {BUSINESS_INFO.invoice.bankDetails}</p>
 				)}
 				<p style={{ marginTop: 16 }}>
-					Thank you for your business. For queries, contact {BUSINESS_INFO.email.display} or{" "}
-					{BUSINESS_INFO.phone.display}.
+					Thank you for your business. For queries, contact{" "}
+					{BUSINESS_INFO.email.display} or {BUSINESS_INFO.phone.display}.
 				</p>
 				<p style={{ marginTop: 8, color: colors.gray400 }}>
 					{BUSINESS_INFO.business.name}
-					{BUSINESS_INFO.invoice.abn ? ` • ABN: ${BUSINESS_INFO.invoice.abn}` : ""} •{" "}
-					{BUSINESS_INFO.invoice.address}
+					{BUSINESS_INFO.invoice.abn
+						? ` • ABN: ${BUSINESS_INFO.invoice.abn}`
+						: ""}{" "}
+					• {BUSINESS_INFO.invoice.address}
 				</p>
 			</footer>
 		</div>

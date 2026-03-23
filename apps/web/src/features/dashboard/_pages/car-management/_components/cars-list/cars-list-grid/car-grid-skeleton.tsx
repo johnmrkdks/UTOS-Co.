@@ -1,19 +1,24 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@workspace/ui/components/card"
-import { Skeleton } from "@workspace/ui/components/skeleton"
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from "@workspace/ui/components/card";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function CarGridSkeleton() {
 	return (
 		<Card className="overflow-hidden">
-			<div className="aspect-video relative">
-				<Skeleton className="w-full h-full" />
+			<div className="relative aspect-video">
+				<Skeleton className="h-full w-full" />
 			</div>
 			<CardHeader>
 				<div className="flex items-start justify-between">
 					<div className="flex-1">
-						<Skeleton className="h-5 w-3/4 mb-2" />
+						<Skeleton className="mb-2 h-5 w-3/4" />
 						<Skeleton className="h-4 w-full" />
 					</div>
-					<Skeleton className="h-5 w-16 ml-2" />
+					<Skeleton className="ml-2 h-5 w-16" />
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -36,6 +41,5 @@ export function CarGridSkeleton() {
 				<Skeleton className="h-4 w-full" />
 			</CardFooter>
 		</Card>
-	)
+	);
 }
-

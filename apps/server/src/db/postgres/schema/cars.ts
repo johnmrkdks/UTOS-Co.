@@ -1,11 +1,11 @@
 import { relations } from "drizzle-orm";
 import {
-	pgTable,
+	boolean,
 	integer,
+	jsonb,
+	pgTable,
 	text,
 	timestamp,
-	boolean,
-	jsonb,
 } from "drizzle-orm/pg-core";
 
 export const cars = pgTable("cars", {

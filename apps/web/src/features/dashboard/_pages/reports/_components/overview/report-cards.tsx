@@ -1,5 +1,4 @@
 import { cn } from "@workspace/ui/lib/utils";
-import { ReportCard } from "./report-card";
 import {
 	CheckCheckIcon,
 	CircleDashedIcon,
@@ -7,19 +6,24 @@ import {
 	ListIcon,
 } from "lucide-react";
 import { useGetDashboardAnalyticsEnhancedQuery } from "@/features/dashboard/_hooks/query/use-get-dashboard-analytics-enhanced-query";
+import { ReportCard } from "./report-card";
 
 export function ReportCards({
 	className,
 	...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-	const { data: analyticsData, isLoading, error } = useGetDashboardAnalyticsEnhancedQuery();
+	const {
+		data: analyticsData,
+		isLoading,
+		error,
+	} = useGetDashboardAnalyticsEnhancedQuery();
 
 	if (isLoading) {
 		return (
 			<div className={cn("flex flex-col gap-4", className)} {...props}>
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+				<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 					{[1, 2, 3, 4].map((i) => (
-						<div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
+						<div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
 					))}
 				</div>
 			</div>
@@ -28,7 +32,7 @@ export function ReportCards({
 
 	if (error) {
 		return (
-			<div className={cn("text-destructive py-4", className)} {...props}>
+			<div className={cn("py-4 text-destructive", className)} {...props}>
 				Failed to load report data
 			</div>
 		);
@@ -41,7 +45,7 @@ export function ReportCards({
 
 	return (
 		<div className={cn("flex flex-col gap-4", className)} {...props}>
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 				<ReportCard
 					title="Completed Bookings"
 					value={completedBookings}

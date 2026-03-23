@@ -1,10 +1,10 @@
-import { verifications } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { verifications } from "@/db/sqlite/schema";
 
 export const VerificationSchema = createSelectSchema(verifications, {
 	createdAt: z.union([z.date(), z.string()]),

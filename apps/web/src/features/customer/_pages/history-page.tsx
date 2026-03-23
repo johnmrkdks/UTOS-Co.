@@ -1,20 +1,43 @@
-import { useState, useMemo } from "react";
-import { Card, CardContent } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { Calendar, Package, Car, Clock, MapPin, Users, CheckCircle, AlertTriangle, ArrowRightIcon, Loader2, Star, DollarSign, X, ChevronRight, MessageSquare } from "lucide-react";
-import { format } from "date-fns";
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent } from "@workspace/ui/components/card";
+import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import { cn } from "@workspace/ui/lib/utils";
+import { format } from "date-fns";
+import {
+	AlertTriangle,
+	ArrowRightIcon,
+	Calendar,
+	Car,
+	CheckCircle,
+	ChevronRight,
+	Clock,
+	DollarSign,
+	Loader2,
+	MapPin,
+	MessageSquare,
+	Package,
+	Star,
+	Users,
+	X,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { BookingTypeBadge } from "@/components/booking-type-badge";
 import { useUnifiedUserBookingsQuery } from "@/hooks/query/use-unified-user-bookings-query";
 import { useUserQuery } from "@/hooks/query/use-user-query";
-import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
-import { BookingTypeBadge } from "@/components/booking-type-badge";
 
 export function CustomerHistoryPage() {
 	// Check if mobile using window width
 	const isMobile = useMemo(() => {
-		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+			navigator.userAgent,
+		);
 	}, []);
 
 	// State for selected trip details
@@ -22,10 +45,13 @@ export function CustomerHistoryPage() {
 
 	// State for trip details dialog
 	const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
-	const [selectedBookingForDetails, setSelectedBookingForDetails] = useState<any>(null);
+	const [selectedBookingForDetails, setSelectedBookingForDetails] =
+		useState<any>(null);
 
 	// State for active tab
-	const [activeTab, setActiveTab] = useState<"all" | "completed" | "cancelled">("all");
+	const [activeTab, setActiveTab] = useState<"all" | "completed" | "cancelled">(
+		"all",
+	);
 
 	// Get real booking data (fetch all completed bookings)
 	const { data: bookingsData, isLoading } = useUnifiedUserBookingsQuery({
@@ -37,25 +63,37 @@ export function CustomerHistoryPage() {
 	const trips = useMemo(() => {
 		if (!bookingsData?.data) return [];
 
-		return bookingsData.data.map((booking: any) => ({
-			id: booking.id,
-			pickupAddress: booking.originAddress,
-			destinationAddress: booking.destinationAddress,
-			stops: booking.stops ? booking.stops.sort((a: any, b: any) => a.stopOrder - b.stopOrder) : [],
-			scheduledTime: new Date(booking.scheduledPickupTime),
-			completedTime: booking.serviceCompletedAt ? new Date(booking.serviceCompletedAt) : null,
-			passengers: booking.passengerCount || 1,
-			finalAmount: booking.finalAmount ?? (booking.quotedAmount || 0) + (booking.extraCharges || 0),
-			distance: "N/A", // Customer history doesn't track distance
-			duration: "N/A", // Customer history doesn't track duration
-			status: booking.status as "completed" | "cancelled" | "no_show",
-			bookingType: booking.bookingType,
-			packageId: booking.packageId
-		})).filter(trip => ['completed', 'cancelled', 'no_show'].includes(trip.status));
+		return bookingsData.data
+			.map((booking: any) => ({
+				id: booking.id,
+				pickupAddress: booking.originAddress,
+				destinationAddress: booking.destinationAddress,
+				stops: booking.stops
+					? booking.stops.sort((a: any, b: any) => a.stopOrder - b.stopOrder)
+					: [],
+				scheduledTime: new Date(booking.scheduledPickupTime),
+				completedTime: booking.serviceCompletedAt
+					? new Date(booking.serviceCompletedAt)
+					: null,
+				passengers: booking.passengerCount || 1,
+				finalAmount:
+					booking.finalAmount ??
+					(booking.quotedAmount || 0) + (booking.extraCharges || 0),
+				distance: "N/A", // Customer history doesn't track distance
+				duration: "N/A", // Customer history doesn't track duration
+				status: booking.status as "completed" | "cancelled" | "no_show",
+				bookingType: booking.bookingType,
+				packageId: booking.packageId,
+			}))
+			.filter((trip) =>
+				["completed", "cancelled", "no_show"].includes(trip.status),
+			);
 	}, [bookingsData]);
 
-	const completedTrips = trips.filter(trip => trip.status === "completed" || trip.status === "no_show");
-	const cancelledTrips = trips.filter(trip => trip.status === "cancelled");
+	const completedTrips = trips.filter(
+		(trip) => trip.status === "completed" || trip.status === "no_show",
+	);
+	const cancelledTrips = trips.filter((trip) => trip.status === "cancelled");
 
 	// Handle trip click to show details
 	const handleTripClick = (trip: any) => {
@@ -67,7 +105,9 @@ export function CustomerHistoryPage() {
 	const handleOpenBookingDetails = (booking: any) => {
 		// Convert trip data structure to booking data structure for the dialog
 		// Note: We need to get the original booking data to access extraCharges and extras
-		const originalBooking = bookingsData?.data?.find((b: any) => b.id === booking.id);
+		const originalBooking = bookingsData?.data?.find(
+			(b: any) => b.id === booking.id,
+		);
 
 		// Debug logging
 		console.log("DEBUG: Original booking data:", originalBooking);
@@ -79,7 +119,9 @@ export function CustomerHistoryPage() {
 			originAddress: booking.pickupAddress,
 			destinationAddress: booking.destinationAddress,
 			stops: booking.stops || [],
-			customerName: booking.passengers ? `${booking.passengers} Passenger${booking.passengers > 1 ? 's' : ''}` : '1 Passenger',
+			customerName: booking.passengers
+				? `${booking.passengers} Passenger${booking.passengers > 1 ? "s" : ""}`
+				: "1 Passenger",
 			customerPhone: null, // History doesn't have phone data
 			status: booking.status,
 			finalAmount: booking.finalAmount,
@@ -88,7 +130,7 @@ export function CustomerHistoryPage() {
 			totalAmount: booking.finalAmount,
 			extraCharges: originalBooking?.extraCharges || 0, // Get extraCharges from original booking
 			extras: (originalBooking as any)?.extras || [], // Get extras breakdown from original booking
-			car: null // TODO: Add car information to history data
+			car: null, // TODO: Add car information to history data
 		};
 
 		setSelectedBookingForDetails(bookingData);
@@ -108,95 +150,121 @@ export function CustomerHistoryPage() {
 		});
 
 		// Sort dates in descending order (newest first)
-		const sortedDates = Object.keys(grouped).sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime());
+		const sortedDates = Object.keys(grouped).sort(
+			(a: string, b: string) => new Date(b).getTime() - new Date(a).getTime(),
+		);
 
 		const result: Array<{ date: string; trips: typeof trips }> = [];
-		sortedDates.forEach(date => {
+		sortedDates.forEach((date) => {
 			result.push({
 				date,
-				trips: grouped[date].sort((a, b) => b.scheduledTime.getTime() - a.scheduledTime.getTime())
+				trips: grouped[date].sort(
+					(a, b) => b.scheduledTime.getTime() - a.scheduledTime.getTime(),
+				),
 			});
 		});
 
 		return result;
 	};
 
-	const TripCard = ({ trip, onClick }: { trip: typeof trips[0], onClick?: () => void }) => {
+	const TripCard = ({
+		trip,
+		onClick,
+	}: {
+		trip: (typeof trips)[0];
+		onClick?: () => void;
+	}) => {
 		return (
 			<Card
 				className={cn(
-					"bg-white transition-colors w-full overflow-hidden cursor-pointer hover:shadow-md",
-					isMobile ? "border-0 border-b border-gray-200 rounded-none shadow-none" : "border border-gray-200 shadow-sm"
+					"w-full cursor-pointer overflow-hidden bg-white transition-colors hover:shadow-md",
+					isMobile
+						? "rounded-none border-0 border-gray-200 border-b shadow-none"
+						: "border border-gray-200 shadow-sm",
 				)}
 				onClick={onClick}
 			>
-				<CardContent className={cn("min-w-0 w-full overflow-x-hidden", isMobile ? "px-4 py-3" : "p-4")}>
+				<CardContent
+					className={cn(
+						"w-full min-w-0 overflow-x-hidden",
+						isMobile ? "px-4 py-3" : "p-4",
+					)}
+				>
 					{/* Booking ID and Date/Time */}
-					<div className="flex items-center justify-between mb-3">
+					<div className="mb-3 flex items-center justify-between">
 						<div className="flex items-center gap-2">
-							<span className="text-sm font-semibold text-gray-900">Trip #{trip.id.slice(-6)}</span>
+							<span className="font-semibold text-gray-900 text-sm">
+								Trip #{trip.id.slice(-6)}
+							</span>
 							<BookingTypeBadge booking={trip} />
 						</div>
 						<div className="flex items-center gap-2">
 							<Badge
-								variant={trip.status === 'completed' ? 'default' :
-								        trip.status === 'cancelled' ? 'destructive' : 'outline'}
-								className="text-xs px-2 py-0.5"
+								variant={
+									trip.status === "completed"
+										? "default"
+										: trip.status === "cancelled"
+											? "destructive"
+											: "outline"
+								}
+								className="px-2 py-0.5 text-xs"
 							>
-								{trip.status.replace('_', ' ').toUpperCase()}
+								{trip.status.replace("_", " ").toUpperCase()}
 							</Badge>
-							<span className="text-xs text-gray-500">{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}</span>
+							<span className="text-gray-500 text-xs">
+								{format(trip.scheduledTime, "MMM dd 'at' h:mm a")}
+							</span>
 						</div>
 					</div>
 
 					<div className="flex items-center justify-between">
 						{/* Left side - Route info */}
-						<div className="flex-1 min-w-0 space-y-2">
+						<div className="min-w-0 flex-1 space-y-2">
 							{/* Route - Pickup to Drop-off */}
 							<div className="space-y-2">
 								<div className="flex items-start gap-2">
-									<div className="w-2 h-2 bg-green-500 rounded-full mt-1 flex-shrink-0"></div>
-									<p className="text-xs text-gray-600 leading-tight">
+									<div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-green-500" />
+									<p className="text-gray-600 text-xs leading-tight">
 										{trip.pickupAddress
 											? isMobile
 												? trip.pickupAddress.length > 35
-													? trip.pickupAddress.substring(0, 35) + '...'
+													? trip.pickupAddress.substring(0, 35) + "..."
 													: trip.pickupAddress
 												: trip.pickupAddress
-											: 'Pickup location unavailable'
-										}
+											: "Pickup location unavailable"}
 									</p>
 								</div>
 
 								{/* Stops (if any) */}
 								{trip.stops && trip.stops.length > 0 && (
 									<div className="flex items-start gap-2">
-										<div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
-										<p className="text-xs text-blue-600 leading-tight">
-											{trip.stops.length} stop{trip.stops.length > 1 ? 's' : ''}
+										<div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+										<p className="text-blue-600 text-xs leading-tight">
+											{trip.stops.length} stop{trip.stops.length > 1 ? "s" : ""}
 										</p>
 									</div>
 								)}
 
 								<div className="flex items-start gap-2">
-									<div className="w-2 h-2 bg-red-500 rounded-full mt-1 flex-shrink-0"></div>
-									<p className="text-xs text-gray-600 leading-tight">
+									<div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
+									<p className="text-gray-600 text-xs leading-tight">
 										{trip.destinationAddress
 											? isMobile
 												? trip.destinationAddress.length > 35
-													? trip.destinationAddress.substring(0, 35) + '...'
+													? trip.destinationAddress.substring(0, 35) + "..."
 													: trip.destinationAddress
 												: trip.destinationAddress
-											: 'Destination unavailable'
-										}
+											: "Destination unavailable"}
 									</p>
 								</div>
 							</div>
 						</div>
 
 						{/* Right side - Amount and Arrow */}
-						<div className="flex items-center gap-2 flex-shrink-0 ml-4">
-							<span className="text-sm font-semibold text-gray-900">{formatPrice(trip.finalAmount)}</span>
+						<div className="ml-4 flex flex-shrink-0 items-center gap-2">
+							<span className="font-semibold text-gray-900 text-sm">
+								{formatPrice(trip.finalAmount)}
+							</span>
 							<ChevronRight className="h-4 w-4 text-gray-400" />
 						</div>
 					</div>
@@ -206,7 +274,8 @@ export function CustomerHistoryPage() {
 	};
 
 	// Helper functions
-	const formatPrice = (priceInDollars: number) => `$${priceInDollars.toFixed(2)}`;
+	const formatPrice = (priceInDollars: number) =>
+		`$${priceInDollars.toFixed(2)}`;
 
 	// Render function for trips with date groups (same as driver history)
 	const renderTripsWithDateGroups = (tripsList: typeof trips) => {
@@ -214,14 +283,20 @@ export function CustomerHistoryPage() {
 
 		if (groupedTrips.length === 0) {
 			return (
-				<div className={cn(
-					"flex items-center justify-center h-full py-12",
-					isMobile ? "px-4" : ""
-				)}>
+				<div
+					className={cn(
+						"flex h-full items-center justify-center py-12",
+						isMobile ? "px-4" : "",
+					)}
+				>
 					<div className="text-center">
-						<Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-						<h3 className="text-lg font-semibold text-gray-900 mb-2">No trips found</h3>
-						<p className="text-gray-600 text-sm">You don't have any trips in this category yet.</p>
+						<Clock className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+						<h3 className="mb-2 font-semibold text-gray-900 text-lg">
+							No trips found
+						</h3>
+						<p className="text-gray-600 text-sm">
+							You don't have any trips in this category yet.
+						</p>
 					</div>
 				</div>
 			);
@@ -232,18 +307,15 @@ export function CustomerHistoryPage() {
 				{groupedTrips.map((group) => (
 					<div key={group.date}>
 						{/* Date Header */}
-						<div className="flex items-center gap-3 mb-4">
-							<h3 className="text-lg font-semibold text-gray-900">
+						<div className="mb-4 flex items-center gap-3">
+							<h3 className="font-semibold text-gray-900 text-lg">
 								{format(new Date(group.date), "EEEE, do MMMM yyyy")}
 							</h3>
-							<div className="flex-1 h-px bg-gray-200"></div>
+							<div className="h-px flex-1 bg-gray-200" />
 						</div>
 
 						{/* Trips for this date */}
-						<div className={cn(
-							"space-y-0",
-							isMobile ? "" : "space-y-3"
-						)}>
+						<div className={cn("space-y-0", isMobile ? "" : "space-y-3")}>
 							{group.trips.map((trip) => (
 								<TripCard
 									key={trip.id}
@@ -260,26 +332,34 @@ export function CustomerHistoryPage() {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center min-h-[400px]">
+			<div className="flex min-h-[400px] items-center justify-center">
 				<Loader2 className="h-6 w-6 animate-spin" />
 			</div>
 		);
 	}
 
 	return (
-		<div className="w-full h-full flex flex-col">
+		<div className="flex h-full w-full flex-col">
 			{/* Header */}
-			<div className={cn(
-				"bg-white border-b border-gray-200 flex-shrink-0",
-				isMobile ? "px-4 py-3" : "px-6 py-4"
-			)}>
+			<div
+				className={cn(
+					"flex-shrink-0 border-gray-200 border-b bg-white",
+					isMobile ? "px-4 py-3" : "px-6 py-4",
+				)}
+			>
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className={cn(
-							"font-bold text-gray-900",
-							isMobile ? "text-lg" : "text-2xl"
-						)}>History</h1>
-						<p className="text-gray-600 text-xs">View all your past trips and earnings</p>
+						<h1
+							className={cn(
+								"font-bold text-gray-900",
+								isMobile ? "text-lg" : "text-2xl",
+							)}
+						>
+							History
+						</h1>
+						<p className="text-gray-600 text-xs">
+							View all your past trips and earnings
+						</p>
 					</div>
 				</div>
 			</div>
@@ -290,15 +370,15 @@ export function CustomerHistoryPage() {
 					// Mobile: Custom tab design matching trips page
 					<>
 						{/* Mobile Tab Headers */}
-						<div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+						<div className="sticky top-0 z-20 border-gray-200 border-b bg-white">
 							<div className="flex w-full">
 								<button
 									onClick={() => setActiveTab("all")}
 									className={cn(
-										"flex-1 py-3 px-1 text-xs font-medium text-center border-b-2 transition-all duration-200 min-w-0",
+										"min-w-0 flex-1 border-b-2 px-1 py-3 text-center font-medium text-xs transition-all duration-200",
 										activeTab === "all"
-											? "border-primary text-primary bg-primary/5"
-											: "border-transparent text-gray-600 hover:text-gray-900"
+											? "border-primary bg-primary/5 text-primary"
+											: "border-transparent text-gray-600 hover:text-gray-900",
 									)}
 								>
 									<span className="truncate">All ({trips.length})</span>
@@ -306,24 +386,28 @@ export function CustomerHistoryPage() {
 								<button
 									onClick={() => setActiveTab("completed")}
 									className={cn(
-										"flex-1 py-3 px-1 text-xs font-medium text-center border-b-2 transition-all duration-200 min-w-0",
+										"min-w-0 flex-1 border-b-2 px-1 py-3 text-center font-medium text-xs transition-all duration-200",
 										activeTab === "completed"
-											? "border-primary text-primary bg-primary/5"
-											: "border-transparent text-gray-600 hover:text-gray-900"
+											? "border-primary bg-primary/5 text-primary"
+											: "border-transparent text-gray-600 hover:text-gray-900",
 									)}
 								>
-									<span className="truncate">Done ({completedTrips.length})</span>
+									<span className="truncate">
+										Done ({completedTrips.length})
+									</span>
 								</button>
 								<button
 									onClick={() => setActiveTab("cancelled")}
 									className={cn(
-										"flex-1 py-3 px-1 text-xs font-medium text-center border-b-2 transition-all duration-200 min-w-0",
+										"min-w-0 flex-1 border-b-2 px-1 py-3 text-center font-medium text-xs transition-all duration-200",
 										activeTab === "cancelled"
-											? "border-primary text-primary bg-primary/5"
-											: "border-transparent text-gray-600 hover:text-gray-900"
+											? "border-primary bg-primary/5 text-primary"
+											: "border-transparent text-gray-600 hover:text-gray-900",
 									)}
 								>
-									<span className="truncate">Cancelled ({cancelledTrips.length})</span>
+									<span className="truncate">
+										Cancelled ({cancelledTrips.length})
+									</span>
 								</button>
 							</div>
 						</div>
@@ -331,17 +415,23 @@ export function CustomerHistoryPage() {
 						{/* Mobile Tab Content */}
 						<div className="flex-1">
 							{activeTab === "all" && renderTripsWithDateGroups(trips)}
-							{activeTab === "completed" && renderTripsWithDateGroups(completedTrips)}
-							{activeTab === "cancelled" && renderTripsWithDateGroups(cancelledTrips)}
+							{activeTab === "completed" &&
+								renderTripsWithDateGroups(completedTrips)}
+							{activeTab === "cancelled" &&
+								renderTripsWithDateGroups(cancelledTrips)}
 						</div>
 					</>
 				) : (
 					// Desktop: Use shadcn Tabs component matching trips page
 					<Tabs defaultValue="all" className="w-full">
-						<TabsList className="grid w-full grid-cols-3 h-12">
+						<TabsList className="grid h-12 w-full grid-cols-3">
 							<TabsTrigger value="all">All ({trips.length})</TabsTrigger>
-							<TabsTrigger value="completed">Done ({completedTrips.length})</TabsTrigger>
-							<TabsTrigger value="cancelled">Cancelled ({cancelledTrips.length})</TabsTrigger>
+							<TabsTrigger value="completed">
+								Done ({completedTrips.length})
+							</TabsTrigger>
+							<TabsTrigger value="cancelled">
+								Cancelled ({cancelledTrips.length})
+							</TabsTrigger>
 						</TabsList>
 
 						<TabsContent value="all" className="mt-6">
@@ -364,27 +454,37 @@ export function CustomerHistoryPage() {
 				<DialogContent
 					showCloseButton={false}
 					className={cn(
-						isMobile ? "max-w-full w-full h-full m-0 rounded-none p-0 bg-gray-50 flex flex-col" : "max-w-md bg-gray-50"
+						isMobile
+							? "m-0 flex h-full w-full max-w-full flex-col rounded-none bg-gray-50 p-0"
+							: "max-w-md bg-gray-50",
 					)}
 				>
 					{selectedBookingForDetails && (
-						<div className={cn(
-							isMobile ? "flex flex-col h-full" : "flex flex-col"
-						)}>
+						<div
+							className={cn(
+								isMobile ? "flex h-full flex-col" : "flex flex-col",
+							)}
+						>
 							{/* Header */}
-							<div className="flex items-center justify-between p-4 bg-gradient-to-br from-primary to-primary/80 text-white flex-shrink-0">
+							<div className="flex flex-shrink-0 items-center justify-between bg-gradient-to-br from-primary to-primary/80 p-4 text-white">
 								<div className="flex items-center gap-3">
 									<Clock className="h-5 w-5 text-white/80" />
 									<div>
-										<h2 className="text-lg font-bold">
-											{format(new Date(selectedBookingForDetails.scheduledPickupTime), "MMM dd, yyyy h:mm a")}
+										<h2 className="font-bold text-lg">
+											{format(
+												new Date(selectedBookingForDetails.scheduledPickupTime),
+												"MMM dd, yyyy h:mm a",
+											)}
 										</h2>
-										<div className="flex items-center gap-2 mt-1">
-											<span className="text-xs text-white/80">
-												Trip ID: {selectedBookingForDetails.id.slice(-6).toUpperCase()}
+										<div className="mt-1 flex items-center gap-2">
+											<span className="text-white/80 text-xs">
+												Trip ID:{" "}
+												{selectedBookingForDetails.id.slice(-6).toUpperCase()}
 											</span>
-											<Badge className="bg-white/20 text-white border-white/30 text-xs px-2 py-0.5">
-												{selectedBookingForDetails.status.replace('_', ' ').toUpperCase()}
+											<Badge className="border-white/30 bg-white/20 px-2 py-0.5 text-white text-xs">
+												{selectedBookingForDetails.status
+													.replace("_", " ")
+													.toUpperCase()}
 											</Badge>
 										</div>
 									</div>
@@ -393,7 +493,7 @@ export function CustomerHistoryPage() {
 								<Button
 									variant="ghost"
 									size="lg"
-									className="h-12 w-12 p-0 text-white hover:bg-white/20 rounded-full flex-shrink-0 border-2 border-white/30 hover:border-white/50 transition-all duration-200"
+									className="h-12 w-12 flex-shrink-0 rounded-full border-2 border-white/30 p-0 text-white transition-all duration-200 hover:border-white/50 hover:bg-white/20"
 									onClick={() => setBookingDetailsOpen(false)}
 								>
 									<X className="h-6 w-6" />
@@ -401,51 +501,62 @@ export function CustomerHistoryPage() {
 							</div>
 
 							{/* Content */}
-							<div className={cn(
-								"flex-1 p-4 space-y-4",
-								isMobile ? "overflow-y-auto flex-grow min-h-0" : ""
-							)}>
+							<div
+								className={cn(
+									"flex-1 space-y-4 p-4",
+									isMobile ? "min-h-0 flex-grow overflow-y-auto" : "",
+								)}
+							>
 								{/* Route Details */}
-								<div className="bg-white rounded-lg p-4 border">
-									<h3 className="font-semibold text-gray-900 mb-3">Route</h3>
+								<div className="rounded-lg border bg-white p-4">
+									<h3 className="mb-3 font-semibold text-gray-900">Route</h3>
 									<div className="space-y-3">
 										<div className="flex items-start gap-3">
-											<div className="w-2.5 h-2.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-											<div className="flex-1 min-w-0">
-												<p className="text-xs font-medium text-green-700 mb-0.5">Pick up</p>
-												<p className="text-xs text-gray-600 leading-tight break-words line-clamp-2">
+											<div className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-green-500" />
+											<div className="min-w-0 flex-1">
+												<p className="mb-0.5 font-medium text-green-700 text-xs">
+													Pick up
+												</p>
+												<p className="line-clamp-2 break-words text-gray-600 text-xs leading-tight">
 													{selectedBookingForDetails.originAddress}
 												</p>
 											</div>
 										</div>
 
 										{/* Stops (if any) */}
-										{selectedBookingForDetails.stops && selectedBookingForDetails.stops.length > 0 && (
-											<>
-												{selectedBookingForDetails.stops.map((stop: any, index: number) => (
-													<div key={stop.id || index}>
-														<div className="border-l border-gray-200 ml-1 h-2"></div>
-														<div className="flex items-start gap-2">
-															<div className="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
-															<div className="flex-1 min-w-0">
-																<p className="text-xs font-medium text-blue-700 mb-0.5">Stop {index + 1}</p>
-																<p className="text-xs text-gray-600 leading-tight break-words line-clamp-2">
-																	{stop.address}
-																</p>
+										{selectedBookingForDetails.stops &&
+											selectedBookingForDetails.stops.length > 0 && (
+												<>
+													{selectedBookingForDetails.stops.map(
+														(stop: any, index: number) => (
+															<div key={stop.id || index}>
+																<div className="ml-1 h-2 border-gray-200 border-l" />
+																<div className="flex items-start gap-2">
+																	<div className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-blue-500" />
+																	<div className="min-w-0 flex-1">
+																		<p className="mb-0.5 font-medium text-blue-700 text-xs">
+																			Stop {index + 1}
+																		</p>
+																		<p className="line-clamp-2 break-words text-gray-600 text-xs leading-tight">
+																			{stop.address}
+																		</p>
+																	</div>
+																</div>
 															</div>
-														</div>
-													</div>
-												))}
-											</>
-										)}
+														),
+													)}
+												</>
+											)}
 
-										<div className="border-l border-gray-200 ml-1 h-2"></div>
+										<div className="ml-1 h-2 border-gray-200 border-l" />
 
 										<div className="flex items-start gap-2">
-											<div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
-											<div className="flex-1 min-w-0">
-												<p className="text-xs font-medium text-red-700 mb-0.5">Drop off</p>
-												<p className="text-xs text-gray-600 leading-tight break-words line-clamp-2">
+											<div className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-red-500" />
+											<div className="min-w-0 flex-1">
+												<p className="mb-0.5 font-medium text-red-700 text-xs">
+													Drop off
+												</p>
+												<p className="line-clamp-2 break-words text-gray-600 text-xs leading-tight">
 													{selectedBookingForDetails.destinationAddress}
 												</p>
 											</div>
@@ -454,154 +565,214 @@ export function CustomerHistoryPage() {
 								</div>
 
 								{/* Trip Fare */}
-								<div className="bg-white rounded-lg p-4 border">
-									<h3 className="font-semibold text-gray-900 mb-3">Trip Fare</h3>
+								<div className="rounded-lg border bg-white p-4">
+									<h3 className="mb-3 font-semibold text-gray-900">
+										Trip Fare
+									</h3>
 									<div className="space-y-2">
 										{/* Base trip fare */}
 										<div className="flex items-center justify-between">
-											<span className="text-sm text-gray-600">Base Trip Fare:</span>
-											<span className="text-sm font-semibold">
-												{formatPrice(selectedBookingForDetails.quotedAmount || 0)}
+											<span className="text-gray-600 text-sm">
+												Base Trip Fare:
+											</span>
+											<span className="font-semibold text-sm">
+												{formatPrice(
+													selectedBookingForDetails.quotedAmount || 0,
+												)}
 											</span>
 										</div>
 
 										{/* Extras breakdown if any - only show when there are non-zero charges */}
 										{selectedBookingForDetails.extras &&
-										 selectedBookingForDetails.extras.length > 0 &&
-										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
-											<div className="space-y-2">
-												<div className="text-sm font-medium text-gray-700 mt-3 mb-2">Extra Charges:</div>
-												{(() => {
-													const allExtras = selectedBookingForDetails.extras;
-													const extras = allExtras.filter(
-														(e: any) =>
-															(e.additionalWaitTime ?? 0) > 0 ||
-															(e.unscheduledStops ?? 0) > 0 ||
-															(e.parkingCharges ?? 0) > 0 ||
-															(e.tollCharges ?? 0) > 0 ||
-															(e.otherChargesAmount ?? 0) > 0
-													);
-													if (extras.length === 0) return null;
-													const totalTolls = allExtras.reduce((s: number, e: any) => s + (e.tollCharges ?? 0), 0);
-													const totalParking = allExtras.reduce((s: number, e: any) => s + (e.parkingCharges ?? 0), 0);
-													const totalOther = allExtras.reduce((s: number, e: any) => s + (e.otherChargesAmount ?? 0), 0);
-													const extraTotal = selectedBookingForDetails.extraCharges ?? 0;
-													const waitingTimeCharge = Math.max(0, extraTotal - totalTolls - totalParking - totalOther);
-													return (
-														<>
-															{waitingTimeCharge > 0 && (
-																<div className="flex items-center justify-between bg-amber-50 px-3 py-2 rounded mb-2">
-																	<span className="text-xs text-gray-600">Waiting Time Charge:</span>
-																	<span className="text-xs font-semibold text-amber-600">
-																		+{formatPrice(waitingTimeCharge)}
-																	</span>
-																</div>
-															)}
-															{extras.map((extra: any, index: number) => (
-																<div key={index} className="bg-gray-50 rounded-lg p-3 space-y-2">
-																	{(extra.additionalWaitTime ?? 0) > 0 && (
-																		<div className="flex items-center justify-between">
-																			<span className="text-xs text-gray-600">Additional Wait Time:</span>
-																			<span className="text-xs font-semibold text-amber-600">
-																				{extra.additionalWaitTime} minutes
-																			</span>
-																		</div>
-																	)}
-																	{(extra.unscheduledStops ?? 0) > 0 && (
-																		<div className="flex items-center justify-between">
-																			<span className="text-xs text-gray-600">Unscheduled Stops:</span>
-																			<span className="text-xs font-semibold text-blue-600">
-																				+{formatPrice(extra.unscheduledStops)}
-																			</span>
-																		</div>
-																	)}
-																	{(extra.parkingCharges ?? 0) > 0 && (
-																		<div className="flex items-center justify-between">
-																			<span className="text-xs text-gray-600">Parking Charges:</span>
-																			<span className="text-xs font-semibold text-purple-600">
-																				+{formatPrice(extra.parkingCharges)}
-																			</span>
-																		</div>
-																	)}
-																	{(extra.tollCharges ?? 0) > 0 && (
-																		<div className="flex items-center justify-between">
-																			<span className="text-xs text-gray-600">
-																				Toll Charges{extra.tollLocation ? ` (${extra.tollLocation})` : ''}:
-																			</span>
-																			<span className="text-xs font-semibold text-orange-600">
-																				+{formatPrice(extra.tollCharges)}
-																			</span>
-																		</div>
-																	)}
-																	{(extra.otherChargesAmount ?? 0) > 0 && (
-																		<div className="space-y-1">
+											selectedBookingForDetails.extras.length > 0 &&
+											(selectedBookingForDetails.extraCharges ?? 0) > 0 && (
+												<div className="space-y-2">
+													<div className="mt-3 mb-2 font-medium text-gray-700 text-sm">
+														Extra Charges:
+													</div>
+													{(() => {
+														const allExtras = selectedBookingForDetails.extras;
+														const extras = allExtras.filter(
+															(e: any) =>
+																(e.additionalWaitTime ?? 0) > 0 ||
+																(e.unscheduledStops ?? 0) > 0 ||
+																(e.parkingCharges ?? 0) > 0 ||
+																(e.tollCharges ?? 0) > 0 ||
+																(e.otherChargesAmount ?? 0) > 0,
+														);
+														if (extras.length === 0) return null;
+														const totalTolls = allExtras.reduce(
+															(s: number, e: any) => s + (e.tollCharges ?? 0),
+															0,
+														);
+														const totalParking = allExtras.reduce(
+															(s: number, e: any) =>
+																s + (e.parkingCharges ?? 0),
+															0,
+														);
+														const totalOther = allExtras.reduce(
+															(s: number, e: any) =>
+																s + (e.otherChargesAmount ?? 0),
+															0,
+														);
+														const extraTotal =
+															selectedBookingForDetails.extraCharges ?? 0;
+														const waitingTimeCharge = Math.max(
+															0,
+															extraTotal -
+																totalTolls -
+																totalParking -
+																totalOther,
+														);
+														return (
+															<>
+																{waitingTimeCharge > 0 && (
+																	<div className="mb-2 flex items-center justify-between rounded bg-amber-50 px-3 py-2">
+																		<span className="text-gray-600 text-xs">
+																			Waiting Time Charge:
+																		</span>
+																		<span className="font-semibold text-amber-600 text-xs">
+																			+{formatPrice(waitingTimeCharge)}
+																		</span>
+																	</div>
+																)}
+																{extras.map((extra: any, index: number) => (
+																	<div
+																		key={index}
+																		className="space-y-2 rounded-lg bg-gray-50 p-3"
+																	>
+																		{(extra.additionalWaitTime ?? 0) > 0 && (
 																			<div className="flex items-center justify-between">
-																				<span className="text-xs text-gray-600">Other Charges:</span>
-																				<span className="text-xs font-semibold text-red-600">
-																					+{formatPrice(extra.otherChargesAmount)}
+																				<span className="text-gray-600 text-xs">
+																					Additional Wait Time:
+																				</span>
+																				<span className="font-semibold text-amber-600 text-xs">
+																					{extra.additionalWaitTime} minutes
 																				</span>
 																			</div>
-																			{extra.otherChargesDescription && (
-																				<p className="text-xs text-gray-500 italic">
-																					{extra.otherChargesDescription}
+																		)}
+																		{(extra.unscheduledStops ?? 0) > 0 && (
+																			<div className="flex items-center justify-between">
+																				<span className="text-gray-600 text-xs">
+																					Unscheduled Stops:
+																				</span>
+																				<span className="font-semibold text-blue-600 text-xs">
+																					+{formatPrice(extra.unscheduledStops)}
+																				</span>
+																			</div>
+																		)}
+																		{(extra.parkingCharges ?? 0) > 0 && (
+																			<div className="flex items-center justify-between">
+																				<span className="text-gray-600 text-xs">
+																					Parking Charges:
+																				</span>
+																				<span className="font-semibold text-purple-600 text-xs">
+																					+{formatPrice(extra.parkingCharges)}
+																				</span>
+																			</div>
+																		)}
+																		{(extra.tollCharges ?? 0) > 0 && (
+																			<div className="flex items-center justify-between">
+																				<span className="text-gray-600 text-xs">
+																					Toll Charges
+																					{extra.tollLocation
+																						? ` (${extra.tollLocation})`
+																						: ""}
+																					:
+																				</span>
+																				<span className="font-semibold text-orange-600 text-xs">
+																					+{formatPrice(extra.tollCharges)}
+																				</span>
+																			</div>
+																		)}
+																		{(extra.otherChargesAmount ?? 0) > 0 && (
+																			<div className="space-y-1">
+																				<div className="flex items-center justify-between">
+																					<span className="text-gray-600 text-xs">
+																						Other Charges:
+																					</span>
+																					<span className="font-semibold text-red-600 text-xs">
+																						+
+																						{formatPrice(
+																							extra.otherChargesAmount,
+																						)}
+																					</span>
+																				</div>
+																				{extra.otherChargesDescription && (
+																					<p className="text-gray-500 text-xs italic">
+																						{extra.otherChargesDescription}
+																					</p>
+																				)}
+																			</div>
+																		)}
+																		{extra.notes && (
+																			<div className="border-gray-200 border-t pt-1">
+																				<p className="text-gray-500 text-xs">
+																					<span className="font-medium">
+																						Notes:
+																					</span>{" "}
+																					{extra.notes}
 																				</p>
-																			)}
-																		</div>
-																	)}
-																	{extra.notes && (
-																		<div className="pt-1 border-t border-gray-200">
-																			<p className="text-xs text-gray-500">
-																				<span className="font-medium">Notes:</span> {extra.notes}
-																			</p>
-																		</div>
-																	)}
-													</div>
-															))}
-														</>
-													);
-												})()}
-											</div>
-										)}
+																			</div>
+																		)}
+																	</div>
+																))}
+															</>
+														);
+													})()}
+												</div>
+											)}
 
 										{/* Simple extras total if no detailed breakdown available */}
-										{(!selectedBookingForDetails.extras || selectedBookingForDetails.extras.length === 0) &&
-										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
-											<div className="flex items-center justify-between">
-												<span className="text-sm text-gray-600">Additional Charges:</span>
-												<span className="text-sm font-semibold text-orange-600">
-													+{formatPrice(selectedBookingForDetails.extraCharges)}
-												</span>
-											</div>
-										)}
+										{(!selectedBookingForDetails.extras ||
+											selectedBookingForDetails.extras.length === 0) &&
+											(selectedBookingForDetails.extraCharges ?? 0) > 0 && (
+												<div className="flex items-center justify-between">
+													<span className="text-gray-600 text-sm">
+														Additional Charges:
+													</span>
+													<span className="font-semibold text-orange-600 text-sm">
+														+
+														{formatPrice(
+															selectedBookingForDetails.extraCharges,
+														)}
+													</span>
+												</div>
+											)}
 
 										{/* Show total extras amount if we have detailed breakdown and extraCharges > 0 */}
 										{selectedBookingForDetails.extras &&
-										 selectedBookingForDetails.extras.length > 0 &&
-										 (selectedBookingForDetails.extraCharges ?? 0) > 0 && (
-											<div className="flex items-center justify-between bg-orange-50 px-3 py-2 rounded">
-												<span className="text-sm font-medium text-orange-700">Total Additional Charges:</span>
-												<span className="text-sm font-bold text-orange-700">
-													+{formatPrice(selectedBookingForDetails.extraCharges || 0)}
-												</span>
-											</div>
-										)}
+											selectedBookingForDetails.extras.length > 0 &&
+											(selectedBookingForDetails.extraCharges ?? 0) > 0 && (
+												<div className="flex items-center justify-between rounded bg-orange-50 px-3 py-2">
+													<span className="font-medium text-orange-700 text-sm">
+														Total Additional Charges:
+													</span>
+													<span className="font-bold text-orange-700 text-sm">
+														+
+														{formatPrice(
+															selectedBookingForDetails.extraCharges || 0,
+														)}
+													</span>
+												</div>
+											)}
 
 										{/* Divider if there are extra charges */}
 										{(selectedBookingForDetails.extraCharges ?? 0) > 0 && (
-											<div className="border-t border-gray-200"></div>
+											<div className="border-gray-200 border-t" />
 										)}
 									</div>
 								</div>
 
 								{/* Special Requests */}
 								{selectedBookingForDetails.specialRequests && (
-									<div className="bg-white rounded-lg p-4 border">
-										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+									<div className="rounded-lg border bg-white p-4">
+										<h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
 											<MessageSquare className="h-4 w-4 text-blue-600" />
 											Special Requests
 										</h3>
-										<div className="bg-blue-50 rounded-lg p-3">
-											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+										<div className="rounded-lg bg-blue-50 p-3">
+											<p className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed">
 												{selectedBookingForDetails.specialRequests}
 											</p>
 										</div>
@@ -610,13 +781,13 @@ export function CustomerHistoryPage() {
 
 								{/* Additional Notes */}
 								{selectedBookingForDetails.additionalNotes && (
-									<div className="bg-white rounded-lg p-4 border">
-										<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+									<div className="rounded-lg border bg-white p-4">
+										<h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
 											<MessageSquare className="h-4 w-4 text-orange-600" />
 											Additional Notes
 										</h3>
-										<div className="bg-orange-50 rounded-lg p-3">
-											<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+										<div className="rounded-lg bg-orange-50 p-3">
+											<p className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed">
 												{selectedBookingForDetails.additionalNotes}
 											</p>
 										</div>
@@ -624,15 +795,20 @@ export function CustomerHistoryPage() {
 								)}
 
 								{/* Final Invoice */}
-								<div className="bg-white rounded-lg p-4 border">
-									<h3 className="font-semibold text-gray-900 mb-3">Invoice</h3>
+								<div className="rounded-lg border bg-white p-4">
+									<h3 className="mb-3 font-semibold text-gray-900">Invoice</h3>
 									<div className="space-y-2">
-
 										{/* Total */}
 										<div className="flex items-center justify-between">
-											<span className="text-base font-bold text-gray-900">Total Paid:</span>
-											<span className="text-lg font-bold text-gray-900">
-												{formatPrice(selectedBookingForDetails.finalAmount ?? (selectedBookingForDetails.quotedAmount || 0) + (selectedBookingForDetails.extraCharges || 0))}
+											<span className="font-bold text-base text-gray-900">
+												Total Paid:
+											</span>
+											<span className="font-bold text-gray-900 text-lg">
+												{formatPrice(
+													selectedBookingForDetails.finalAmount ??
+														(selectedBookingForDetails.quotedAmount || 0) +
+															(selectedBookingForDetails.extraCharges || 0),
+												)}
 											</span>
 										</div>
 									</div>

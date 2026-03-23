@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export interface UpdateUserInput {
 	name?: string;
@@ -22,7 +22,9 @@ export const useUpdateUserMutation = () => {
 
 				if (result.error) {
 					console.error("❌ Better Auth error:", result.error);
-					throw new Error(result.error.message || "Failed to update user profile");
+					throw new Error(
+						result.error.message || "Failed to update user profile",
+					);
 				}
 
 				console.log("✅ User profile updated successfully");

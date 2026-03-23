@@ -1,4 +1,11 @@
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import {
 	Dialog,
 	DialogContent,
@@ -7,10 +14,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { User, Car, Phone, Mail, Calendar, CreditCard } from "lucide-react";
+import { Calendar, Car, CreditCard, Mail, Phone, User } from "lucide-react";
 
 type ViewDriverDialogProps = {
 	driver: any;
@@ -18,10 +23,17 @@ type ViewDriverDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialogProps) {
+export function ViewDriverDialog({
+	driver,
+	open,
+	onOpenChange,
+}: ViewDriverDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+			<DialogContent
+				className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
+				showCloseButton={false}
+			>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<User className="h-5 w-5" />
@@ -29,7 +41,7 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 					</DialogTitle>
 					<DialogDescription>Driver profile and details</DialogDescription>
 				</DialogHeader>
-				
+
 				<div className="space-y-4">
 					{/* Status Badges */}
 					<div className="flex gap-2">
@@ -40,13 +52,13 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 							{driver?.isApproved ? "Approved" : "Pending Approval"}
 						</Badge>
 					</div>
-					
+
 					<Separator />
-					
+
 					{/* Personal Information */}
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-lg flex items-center gap-2">
+							<CardTitle className="flex items-center gap-2 text-lg">
 								<User className="h-4 w-4" />
 								Personal Information
 							</CardTitle>
@@ -54,29 +66,37 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 						<CardContent className="space-y-3">
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<p className="text-sm font-medium">Full Name</p>
-									<p className="text-sm text-muted-foreground">{driver?.user?.name || "Not provided"}</p>
+									<p className="font-medium text-sm">Full Name</p>
+									<p className="text-muted-foreground text-sm">
+										{driver?.user?.name || "Not provided"}
+									</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium flex items-center gap-1">
+									<p className="flex items-center gap-1 font-medium text-sm">
 										<Mail className="h-3 w-3" />
 										Email
 									</p>
-									<p className="text-sm text-muted-foreground">{driver?.user?.email || "Not provided"}</p>
+									<p className="text-muted-foreground text-sm">
+										{driver?.user?.email || "Not provided"}
+									</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium flex items-center gap-1">
+									<p className="flex items-center gap-1 font-medium text-sm">
 										<Phone className="h-3 w-3" />
 										Phone
 									</p>
-									<p className="text-sm text-muted-foreground">{driver?.user?.phone || "Not provided"}</p>
+									<p className="text-muted-foreground text-sm">
+										{driver?.user?.phone || "Not provided"}
+									</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium flex items-center gap-1">
+									<p className="flex items-center gap-1 font-medium text-sm">
 										<CreditCard className="h-3 w-3" />
 										License Number
 									</p>
-									<p className="text-sm text-muted-foreground font-mono">{driver?.licenseNumber || "Not provided"}</p>
+									<p className="font-mono text-muted-foreground text-sm">
+										{driver?.licenseNumber || "Not provided"}
+									</p>
 								</div>
 							</div>
 						</CardContent>
@@ -86,7 +106,7 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 					{driver?.car && (
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg flex items-center gap-2">
+								<CardTitle className="flex items-center gap-2 text-lg">
 									<Car className="h-4 w-4" />
 									Assigned Vehicle
 								</CardTitle>
@@ -94,18 +114,28 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 							<CardContent className="space-y-3">
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<p className="text-sm font-medium">Vehicle Name</p>
-										<p className="text-sm text-muted-foreground">{driver.car.name}</p>
+										<p className="font-medium text-sm">Vehicle Name</p>
+										<p className="text-muted-foreground text-sm">
+											{driver.car.name}
+										</p>
 									</div>
 									<div>
-										<p className="text-sm font-medium">License Plate</p>
-										<p className="text-sm text-muted-foreground font-mono">{driver.car.licensePlate}</p>
+										<p className="font-medium text-sm">License Plate</p>
+										<p className="font-mono text-muted-foreground text-sm">
+											{driver.car.licensePlate}
+										</p>
 									</div>
 								</div>
 								{driver.car.status && (
 									<div>
-										<p className="text-sm font-medium">Vehicle Status</p>
-										<Badge variant={driver.car.status === "available" ? "default" : "secondary"}>
+										<p className="font-medium text-sm">Vehicle Status</p>
+										<Badge
+											variant={
+												driver.car.status === "available"
+													? "default"
+													: "secondary"
+											}
+										>
 											{driver.car.status}
 										</Badge>
 									</div>
@@ -117,7 +147,7 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 					{/* Account Information */}
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-lg flex items-center gap-2">
+							<CardTitle className="flex items-center gap-2 text-lg">
 								<Calendar className="h-4 w-4" />
 								Account Information
 							</CardTitle>
@@ -125,15 +155,19 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 						<CardContent className="space-y-3">
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<p className="text-sm font-medium">Registered</p>
-									<p className="text-sm text-muted-foreground">
-										{driver?.createdAt ? new Date(driver.createdAt).toLocaleDateString() : "Unknown"}
+									<p className="font-medium text-sm">Registered</p>
+									<p className="text-muted-foreground text-sm">
+										{driver?.createdAt
+											? new Date(driver.createdAt).toLocaleDateString()
+											: "Unknown"}
 									</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium">Last Updated</p>
-									<p className="text-sm text-muted-foreground">
-										{driver?.updatedAt ? new Date(driver.updatedAt).toLocaleDateString() : "Unknown"}
+									<p className="font-medium text-sm">Last Updated</p>
+									<p className="text-muted-foreground text-sm">
+										{driver?.updatedAt
+											? new Date(driver.updatedAt).toLocaleDateString()
+											: "Unknown"}
 									</p>
 								</div>
 							</div>
@@ -144,8 +178,9 @@ export function ViewDriverDialog({ driver, open, onOpenChange }: ViewDriverDialo
 					{!driver?.isApproved && (
 						<Card className="border-amber-200 bg-amber-50">
 							<CardContent className="pt-4">
-								<p className="text-sm text-amber-800">
-									⚠️ This driver is pending approval. Use the Actions menu in the table to approve or reject their application.
+								<p className="text-amber-800 text-sm">
+									⚠️ This driver is pending approval. Use the Actions menu in the
+									table to approve or reject their application.
 								</p>
 							</CardContent>
 						</Card>

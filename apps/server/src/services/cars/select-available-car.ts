@@ -1,6 +1,6 @@
+import { and, eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { cars } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
 import { CarStatusEnum } from "@/types";
 
 export interface CarSelectionParams {
@@ -10,7 +10,10 @@ export interface CarSelectionParams {
 	preferredCategoryId?: string; // Fallback to category preference
 }
 
-export async function selectAvailableCarService(db: DB, params: CarSelectionParams) {
+export async function selectAvailableCarService(
+	db: DB,
+	params: CarSelectionParams,
+) {
 	// For now, implement a simple car selection logic
 	// In the future, this could include more sophisticated matching based on:
 	// - Location proximity
@@ -23,13 +26,13 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 			eq(cars.isPublished, true),
 			eq(cars.isActive, true),
 			eq(cars.isAvailable, true),
-			eq(cars.status, CarStatusEnum.Available)
+			eq(cars.status, CarStatusEnum.Available),
 		),
 		with: {
 			model: {
 				with: {
-					brand: true
-				}
+					brand: true,
+				},
 			},
 			category: true,
 			bodyType: true,
@@ -40,10 +43,10 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 			images: true,
 			carsToFeatures: {
 				with: {
-					feature: true
-				}
-			}
-		}
+					feature: true,
+				},
+			},
+		},
 	});
 
 	if (availableCars.length === 0) {
@@ -51,29 +54,34 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 	}
 
 	// Filter by passenger capacity
-	const suitableCars = availableCars.filter(car =>
-		car.seatingCapacity >= params.passengerCount
+	const suitableCars = availableCars.filter(
+		(car) => car.seatingCapacity >= params.passengerCount,
 	);
 
 	if (suitableCars.length === 0) {
-		throw new Error(`No cars available with capacity for ${params.passengerCount} passengers`);
+		throw new Error(
+			`No cars available with capacity for ${params.passengerCount} passengers`,
+		);
 	}
 
 	// PRIORITY 1: If a specific car ID is requested (from quote), try to use that exact car
 	if (params.preferredCarId) {
-		const exactCarMatch = suitableCars.find(car => car.id === params.preferredCarId);
+		const exactCarMatch = suitableCars.find(
+			(car) => car.id === params.preferredCarId,
+		);
 		if (exactCarMatch) {
 			console.log("✅ Found exact car match from quote:", exactCarMatch.id);
 			return exactCarMatch;
-		} else {
-			console.warn(`⚠️ Preferred car ${params.preferredCarId} not available, falling back to category/sorting`);
 		}
+		console.warn(
+			`⚠️ Preferred car ${params.preferredCarId} not available, falling back to category/sorting`,
+		);
 	}
 
 	// PRIORITY 2: If preferred category is specified, try to find a car in that category
 	if (params.preferredCategoryId) {
-		const categoryMatch = suitableCars.find(car =>
-			car.categoryId === params.preferredCategoryId
+		const categoryMatch = suitableCars.find(
+			(car) => car.categoryId === params.preferredCategoryId,
 		);
 		if (categoryMatch) {
 			console.log("✅ Found category match:", categoryMatch.categoryId);
@@ -90,12 +98,12 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 		if (a.seatingCapacity !== b.seatingCapacity) {
 			return b.seatingCapacity - a.seatingCapacity;
 		}
-		
+
 		// Prefer newer model years
 		if (a.model?.year !== b.model?.year) {
 			return (b.model?.year || 0) - (a.model?.year || 0);
 		}
-		
+
 		return 0;
 	});
 
@@ -103,19 +111,23 @@ export async function selectAvailableCarService(db: DB, params: CarSelectionPara
 	return sortedCars[0];
 }
 
-export async function getCarAvailability(db: DB, carId: string, scheduledPickupTime: Date) {
+export async function getCarAvailability(
+	db: DB,
+	carId: string,
+	scheduledPickupTime: Date,
+) {
 	// Check if car is available at the requested time
 	// This would typically check against existing bookings
 	// For now, return true if car exists and is published
-	
+
 	const car = await db.query.cars.findFirst({
 		where: and(
 			eq(cars.id, carId),
 			eq(cars.isPublished, true),
 			eq(cars.isActive, true),
 			eq(cars.isAvailable, true),
-			eq(cars.status, CarStatusEnum.Available)
-		)
+			eq(cars.status, CarStatusEnum.Available),
+		),
 	});
 
 	return !!car;

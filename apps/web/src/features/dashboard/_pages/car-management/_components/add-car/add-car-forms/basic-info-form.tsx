@@ -1,18 +1,24 @@
-import type { Control } from "react-hook-form"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form"
-import { Input } from "@workspace/ui/components/input"
-import { Textarea } from "@workspace/ui/components/textarea"
-import type { AddCarFormValues } from "../add-car-form"
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { Textarea } from "@workspace/ui/components/textarea";
+import type { Control } from "react-hook-form";
+import type { AddCarFormValues } from "../add-car-form";
 
 type BasicInfoFormProps = {
-	control: Control<AddCarFormValues>
-}
+	control: Control<AddCarFormValues>;
+};
 
 export function BasicInfoForm({ control }: BasicInfoFormProps) {
 	return (
 		<div className="space-y-4">
-			<h3 className="text-lg font-medium">Basic Information</h3>
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<h3 className="font-medium text-lg">Basic Information</h3>
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 				<FormField
 					control={control}
 					name="name"
@@ -46,6 +52,5 @@ export function BasicInfoForm({ control }: BasicInfoFormProps) {
 				)}
 			/>
 		</div>
-	)
+	);
 }
-

@@ -1,10 +1,10 @@
-import { carFuelTypes } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { carFuelTypes } from "@/db/schema";
 
 // Base schemas
 export const CarFuelTypeSchema = createSelectSchema(carFuelTypes, {
@@ -29,4 +29,3 @@ export type UpdateCarFuelType = z.infer<typeof UpdateCarFuelTypeSchema>;
 export type CarFuelTypeWithEnrichedData = z.infer<
 	typeof CarFuelTypeWithEnrichedDataSchema
 >;
-

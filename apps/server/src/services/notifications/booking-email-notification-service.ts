@@ -1,19 +1,19 @@
-import { eq, or } from "drizzle-orm";
-import { db } from "@/db";
-import { bookings } from "@/db/sqlite/schema/bookings";
-import { drivers } from "@/db/sqlite/schema/drivers";
-import { users } from "@/db/sqlite/schema/users";
-import { cars } from "@/db/sqlite/schema/cars";
-import { packages } from "@/db/sqlite/schema/packages";
-import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
-import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
-import { systemSettings } from "@/db/sqlite/schema/settings";
-import { UserRoleEnum } from "@/db/sqlite/enums";
 import { getMailService, renderAdminNewBookingEmail } from "@workspace/mail";
-import { BUSINESS_INFO } from "@/constants/business-info";
-import type { Env } from "@/types/env";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { eq, or } from "drizzle-orm";
+import { BUSINESS_INFO } from "@/constants/business-info";
+import { db } from "@/db";
+import { UserRoleEnum } from "@/db/sqlite/enums";
+import { bookings } from "@/db/sqlite/schema/bookings";
+import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
+import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
+import { cars } from "@/db/sqlite/schema/cars";
+import { drivers } from "@/db/sqlite/schema/drivers";
+import { packages } from "@/db/sqlite/schema/packages";
+import { systemSettings } from "@/db/sqlite/schema/settings";
+import { users } from "@/db/sqlite/schema/users";
+import type { Env } from "@/types/env";
 
 /** Basic email validation - must have @ and domain */
 function isValidEmail(email: string | null | undefined): boolean {
@@ -61,7 +61,9 @@ interface BookingDetailsForEmail {
 /**
  * Get comprehensive booking details for email notifications
  */
-async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDetailsForEmail> {
+async function getBookingDetailsForEmail(
+	bookingId: string,
+): Promise<BookingDetailsForEmail> {
 	console.log(`📧 EMAIL SERVICE: Getting booking details for ${bookingId}`);
 
 	// Get booking first
@@ -75,66 +77,75 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
 		throw new Error(`Booking ${bookingId} not found`);
 	}
 
-	console.log(`📧 EMAIL SERVICE: Found booking, getting related data...`);
+	console.log("📧 EMAIL SERVICE: Found booking, getting related data...");
 
 	// Get related data separately to avoid column limit issues
-	const [driver, customer, car, packageData, stops, extras] = await Promise.all([
-		// Get driver and driver user data
-		booking.driverId ?
-			db.select({
-				driver: drivers,
-				driverUser: users,
-			})
-			.from(drivers)
-			.leftJoin(users, eq(drivers.userId, users.id))
-			.where(eq(drivers.id, booking.driverId))
-			.get() : null,
+	const [driver, customer, car, packageData, stops, extras] = await Promise.all(
+		[
+			// Get driver and driver user data
+			booking.driverId
+				? db
+						.select({
+							driver: drivers,
+							driverUser: users,
+						})
+						.from(drivers)
+						.leftJoin(users, eq(drivers.userId, users.id))
+						.where(eq(drivers.id, booking.driverId))
+						.get()
+				: null,
 
-		// Get customer data (guest bookings have no userId - use booking's customer fields)
-		booking.userId
-			? db.select()
-				.from(users)
-				.where(eq(users.id, booking.userId))
-				.get()
-			: Promise.resolve(null),
+			// Get customer data (guest bookings have no userId - use booking's customer fields)
+			booking.userId
+				? db.select().from(users).where(eq(users.id, booking.userId)).get()
+				: Promise.resolve(null),
 
-		// Get car data
-		booking.carId ?
-			db.select()
-				.from(cars)
-				.where(eq(cars.id, booking.carId))
-				.get() : null,
+			// Get car data
+			booking.carId
+				? db.select().from(cars).where(eq(cars.id, booking.carId)).get()
+				: null,
 
-		// Get package data
-		booking.packageId ?
-			db.select()
-				.from(packages)
-				.where(eq(packages.id, booking.packageId))
-				.get() : null,
+			// Get package data
+			booking.packageId
+				? db
+						.select()
+						.from(packages)
+						.where(eq(packages.id, booking.packageId))
+						.get()
+				: null,
 
-		// Get booking stops
-		db.select()
-			.from(bookingStops)
-			.where(eq(bookingStops.bookingId, bookingId))
-			.orderBy(bookingStops.stopOrder),
+			// Get booking stops
+			db
+				.select()
+				.from(bookingStops)
+				.where(eq(bookingStops.bookingId, bookingId))
+				.orderBy(bookingStops.stopOrder),
 
-		// Get booking extras
-		db.select()
-			.from(bookingExtras)
-			.where(eq(bookingExtras.bookingId, bookingId))
-			.get()
-	]);
+			// Get booking extras
+			db
+				.select()
+				.from(bookingExtras)
+				.where(eq(bookingExtras.bookingId, bookingId))
+				.get(),
+		],
+	);
 
-	console.log(`📧 EMAIL SERVICE: Retrieved all related data for booking ${bookingId}`);
+	console.log(
+		`📧 EMAIL SERVICE: Retrieved all related data for booking ${bookingId}`,
+	);
 
 	// For guest bookings (no userId), build customer from booking's customer fields
-	const effectiveCustomer = customer ?? (booking.userId ? null : {
-		name: booking.customerName,
-		email: booking.customerEmail,
-		phone: booking.customerPhone,
-		phoneNumber: booking.customerPhone,
-		timezone: booking.timezone,
-	});
+	const effectiveCustomer =
+		customer ??
+		(booking.userId
+			? null
+			: {
+					name: booking.customerName,
+					email: booking.customerEmail,
+					phone: booking.customerPhone,
+					phoneNumber: booking.customerPhone,
+					timezone: booking.timezone,
+				});
 
 	return {
 		booking,
@@ -153,7 +164,7 @@ async function getBookingDetailsForEmail(bookingId: string): Promise<BookingDeta
  */
 function generateDriverAssignmentEmailTemplate(
 	driverName: string,
-	bookingDetails: BookingDetailsForEmail
+	bookingDetails: BookingDetailsForEmail,
 ): { subject: string; html: string } {
 	const { booking, customer, car, package: pkg, stops } = bookingDetails;
 
@@ -171,13 +182,13 @@ function generateDriverAssignmentEmailTemplate(
 	let routeInfo = `<strong>Pickup:</strong> ${pickupAddress}<br/>`;
 
 	if (stops && stops.length > 0) {
-		routeInfo += `<strong>Stops:</strong><br/>`;
+		routeInfo += "<strong>Stops:</strong><br/>";
 		stops.forEach((stop, index) => {
 			routeInfo += `${index + 1}. ${stop.address}`;
 			if (stop.waitingTime > 0) {
 				routeInfo += ` (${stop.waitingTime} min wait)`;
 			}
-			routeInfo += `<br/>`;
+			routeInfo += "<br/>";
 		});
 	}
 
@@ -197,7 +208,8 @@ function generateDriverAssignmentEmailTemplate(
 
 	const websiteUrl = BUSINESS_INFO.business.websiteUrl;
 	const customerName = customer?.name || booking.customerName || "Not provided";
-	const customerEmail = customer?.email || booking.customerEmail || "Not provided";
+	const customerEmail =
+		customer?.email || booking.customerEmail || "Not provided";
 
 	// Table-based layout for email client compatibility
 	const html = `
@@ -239,10 +251,10 @@ function generateDriverAssignmentEmailTemplate(
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${serviceType}</td></tr>
 							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Vehicle</td></tr>
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${vehicleInfo}</td></tr>
-							${booking.passengerCount ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Passengers</td></tr><tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.passengerCount}</td></tr>` : ''}
+							${booking.passengerCount ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Passengers</td></tr><tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.passengerCount}</td></tr>` : ""}
 							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Route</td></tr>
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;line-height:1.6;">${routeInfo}</td></tr>
-							${booking.specialRequirements ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Special Requirements</td></tr><tr><td style="padding:0;font-size:15px;color:#1e293b;">${booking.specialRequirements}</td></tr>` : ''}
+							${booking.specialRequirements ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Special Requirements</td></tr><tr><td style="padding:0;font-size:15px;color:#1e293b;">${booking.specialRequirements}</td></tr>` : ""}
 						</table>
 					</td></tr>
 				</table>
@@ -255,7 +267,7 @@ function generateDriverAssignmentEmailTemplate(
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${customerName}</td></tr>
 							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Email</td></tr>
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${customerEmail}</td></tr>
-							${booking.customerPhone ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Phone</td></tr><tr><td style="padding:0;font-size:15px;"><a href="tel:${booking.customerPhone}" style="color:#22818e;text-decoration:none;">${booking.customerPhone}</a></td></tr>` : ''}
+							${booking.customerPhone ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Phone</td></tr><tr><td style="padding:0;font-size:15px;"><a href="tel:${booking.customerPhone}" style="color:#22818e;text-decoration:none;">${booking.customerPhone}</a></td></tr>` : ""}
 						</table>
 					</td></tr>
 				</table>
@@ -291,7 +303,7 @@ function generateDriverAssignmentEmailTemplate(
  */
 function generateTripStatusEmailTemplate(
 	status: string,
-	bookingDetails: BookingDetailsForEmail
+	bookingDetails: BookingDetailsForEmail,
 ): { subject: string; html: string } {
 	const { booking, driverUser, car, package: pkg, extras } = bookingDetails;
 
@@ -310,33 +322,39 @@ function generateTripStatusEmailTemplate(
 	switch (status) {
 		case "confirmed":
 			statusTitle = "Booking Confirmed";
-			statusMessage = "Your booking has been confirmed. We will assign a driver and notify you soon.";
+			statusMessage =
+				"Your booking has been confirmed. We will assign a driver and notify you soon.";
 			statusIcon = "✅";
 			break;
 		case "driver_assigned":
 			statusTitle = "Driver Assigned";
-			statusMessage = "A driver has been assigned to your booking. They will be in touch closer to your pickup time.";
+			statusMessage =
+				"A driver has been assigned to your booking. They will be in touch closer to your pickup time.";
 			statusIcon = "👤";
 			break;
 		case "driver_en_route":
 			statusTitle = "Driver En Route to Pickup";
-			statusMessage = "Your driver is now en route to your pickup location. Please be ready for pickup.";
+			statusMessage =
+				"Your driver is now en route to your pickup location. Please be ready for pickup.";
 			statusIcon = "🚗";
 			break;
 		case "arrived_pickup":
 			statusTitle = "Driver Has Arrived at Pickup Location";
-			statusMessage = "Your driver has arrived at your pickup location and is ready to begin your trip.";
+			statusMessage =
+				"Your driver has arrived at your pickup location and is ready to begin your trip.";
 			statusIcon = "📍";
 			break;
 		case "in_progress":
 		case "passenger_on_board":
 			statusTitle = "Trip in Progress";
-			statusMessage = "Your trip has started and you are now en route to your destination.";
+			statusMessage =
+				"Your trip has started and you are now en route to your destination.";
 			statusIcon = "🚙";
 			break;
 		case "dropped_off":
 			statusTitle = "Dropped Off at Destination";
-			statusMessage = "You have been safely dropped off at your destination. Your trip is nearly complete.";
+			statusMessage =
+				"You have been safely dropped off at your destination. Your trip is nearly complete.";
 			statusIcon = "🏁";
 			break;
 		case "completed":
@@ -353,7 +371,8 @@ function generateTripStatusEmailTemplate(
 			break;
 		case "no_show":
 			statusTitle = "No Show Recorded";
-			statusMessage = "Our driver was unable to locate you at the pickup location. As your payment was already authorized, the total fare has been charged to your card. Please contact us if there was an issue.";
+			statusMessage =
+				"Our driver was unable to locate you at the pickup location. As your payment was already authorized, the total fare has been charged to your card. Please contact us if there was an issue.";
 			statusIcon = "⚠️";
 			break;
 		default:
@@ -376,16 +395,16 @@ function generateTripStatusEmailTemplate(
 
 	// Convert oklch colors to standard CSS
 	const colors = {
-		primary: '#22818e', // oklch(0.45 0.08 180) converted
-		primaryLight: '#86d6e5', // oklch(0.75 0.18 180) converted
-		background: '#ffffff', // oklch(1 0 0)
-		foreground: '#3c3c3c', // oklch(0.235 0 0)
-		beige: '#f7f2ee', // oklch(0.9404 0.0446 107.23)
-		softBeige: '#faf8f5', // oklch(0.9726 0.0132 111.27)
-		card: '#fefdf9', // oklch(0.98 0.01 85)
-		muted: '#e8e3db', // oklch(0.9 0.02 85)
-		mutedForeground: '#737373', // oklch(0.45 0 0)
-		border: '#d4cabe' // oklch(0.85 0.02 85)
+		primary: "#22818e", // oklch(0.45 0.08 180) converted
+		primaryLight: "#86d6e5", // oklch(0.75 0.18 180) converted
+		background: "#ffffff", // oklch(1 0 0)
+		foreground: "#3c3c3c", // oklch(0.235 0 0)
+		beige: "#f7f2ee", // oklch(0.9404 0.0446 107.23)
+		softBeige: "#faf8f5", // oklch(0.9726 0.0132 111.27)
+		card: "#fefdf9", // oklch(0.98 0.01 85)
+		muted: "#e8e3db", // oklch(0.9 0.02 85)
+		mutedForeground: "#737373", // oklch(0.45 0 0)
+		border: "#d4cabe", // oklch(0.85 0.02 85)
 	};
 
 	// Table-based layout for email client compatibility (Gmail, Outlook, etc.)
@@ -425,10 +444,14 @@ function generateTripStatusEmailTemplate(
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${pickupDate} at ${pickupTime}</td></tr>
 							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">From</td></tr>
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.originAddress || booking.pickupAddress}</td></tr>
-							${booking.destinationAddress ? `
+							${
+								booking.destinationAddress
+									? `
 							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">To</td></tr>
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${booking.destinationAddress}</td></tr>
-							` : ''}
+							`
+									: ""
+							}
 						</table>
 					</td></tr>
 				</table>
@@ -446,17 +469,30 @@ function generateTripStatusEmailTemplate(
 					</td></tr>
 				</table>
 
-				${(status === "completed" || status === "no_show") ? `
+				${
+					status === "completed" || status === "no_show"
+						? `
 				<!-- Fare Breakdown -->
 				${(() => {
 					const tollCharges = extras?.tollCharges ?? 0;
 					const parkingCharges = extras?.parkingCharges ?? 0;
 					const otherCharges = extras?.otherChargesAmount ?? 0;
 					const extraChargesTotal = booking.extraCharges ?? 0;
-					const waitingTimeCharge = Math.max(0, extraChargesTotal - tollCharges - parkingCharges - otherCharges);
-					const baseAmount = ((booking.baseFare ?? 0) + (booking.distanceFare ?? 0)) || (booking.quotedAmount ?? 0);
-					const finalAmount = booking.finalAmount ?? ((booking.quotedAmount ?? 0) + (booking.extraCharges ?? 0));
-					const hasBreakdown = tollCharges > 0 || parkingCharges > 0 || waitingTimeCharge > 0 || otherCharges > 0;
+					const waitingTimeCharge = Math.max(
+						0,
+						extraChargesTotal - tollCharges - parkingCharges - otherCharges,
+					);
+					const baseAmount =
+						(booking.baseFare ?? 0) + (booking.distanceFare ?? 0) ||
+						(booking.quotedAmount ?? 0);
+					const finalAmount =
+						booking.finalAmount ??
+						(booking.quotedAmount ?? 0) + (booking.extraCharges ?? 0);
+					const hasBreakdown =
+						tollCharges > 0 ||
+						parkingCharges > 0 ||
+						waitingTimeCharge > 0 ||
+						otherCharges > 0;
 					if (!hasBreakdown && extraChargesTotal <= 0) {
 						return `
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
@@ -474,26 +510,34 @@ function generateTripStatusEmailTemplate(
 					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Fare Breakdown</td></tr>
 					<tr><td style="padding:16px 20px;">
 						<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#334155;">
-							${baseAmount > 0 ? `<tr><td style="padding:6px 0;">Trip fare</td><td style="padding:6px 0;text-align:right;">$${baseAmount.toFixed(2)}</td></tr>` : ''}
-							${tollCharges > 0 ? `<tr><td style="padding:6px 0;">Tolls</td><td style="padding:6px 0;text-align:right;">$${tollCharges.toFixed(2)}</td></tr>` : ''}
-							${parkingCharges > 0 ? `<tr><td style="padding:6px 0;">Parking</td><td style="padding:6px 0;text-align:right;">$${parkingCharges.toFixed(2)}</td></tr>` : ''}
-							${waitingTimeCharge > 0 ? `<tr><td style="padding:6px 0;">Waiting time</td><td style="padding:6px 0;text-align:right;">$${waitingTimeCharge.toFixed(2)}</td></tr>` : ''}
-							${otherCharges > 0 ? `<tr><td style="padding:6px 0;">Other charges</td><td style="padding:6px 0;text-align:right;">$${otherCharges.toFixed(2)}</td></tr>` : ''}
+							${baseAmount > 0 ? `<tr><td style="padding:6px 0;">Trip fare</td><td style="padding:6px 0;text-align:right;">$${baseAmount.toFixed(2)}</td></tr>` : ""}
+							${tollCharges > 0 ? `<tr><td style="padding:6px 0;">Tolls</td><td style="padding:6px 0;text-align:right;">$${tollCharges.toFixed(2)}</td></tr>` : ""}
+							${parkingCharges > 0 ? `<tr><td style="padding:6px 0;">Parking</td><td style="padding:6px 0;text-align:right;">$${parkingCharges.toFixed(2)}</td></tr>` : ""}
+							${waitingTimeCharge > 0 ? `<tr><td style="padding:6px 0;">Waiting time</td><td style="padding:6px 0;text-align:right;">$${waitingTimeCharge.toFixed(2)}</td></tr>` : ""}
+							${otherCharges > 0 ? `<tr><td style="padding:6px 0;">Other charges</td><td style="padding:6px 0;text-align:right;">$${otherCharges.toFixed(2)}</td></tr>` : ""}
 							<tr><td style="padding:12px 0 0 0;font-weight:600;color:#0f172a;">Total charged</td><td style="padding:12px 0 0 0;text-align:right;font-weight:600;color:#0f172a;">$${finalAmount.toFixed(2)}</td></tr>
 						</table>
 					</td></tr>
 				</table>`;
 				})()}
-				${status === "completed" ? `
+				${
+					status === "completed"
+						? `
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #86efac;border-radius:8px;background:#f0fdf4;">
 					<tr><td style="padding:20px;text-align:center;font-size:16px;color:#166534;">Thank you for choosing ${BUSINESS_INFO.business.name}. We hope you enjoyed your luxury travel experience.</td></tr>
 				</table>
-				` : status === "no_show" ? `
+				`
+						: status === "no_show"
+							? `
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #fef3c7;border-radius:8px;background:#fffbeb;">
 					<tr><td style="padding:20px;text-align:center;font-size:16px;color:#92400e;">If you believe this was recorded in error, please contact us to discuss.</td></tr>
 				</table>
-				` : ''}
-				` : ''}
+				`
+							: ""
+				}
+				`
+						: ""
+				}
 
 				<!-- CTA Buttons -->
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
@@ -528,40 +572,71 @@ function generateTripStatusEmailTemplate(
  * Send driver assignment notification email
  * Duplicate prevention: skips if already sent to this driver (allows resend on driver reassignment)
  */
-export async function sendDriverAssignmentNotification(data: DriverAssignmentEmailData): Promise<{ success: boolean; message: string }> {
+export async function sendDriverAssignmentNotification(
+	data: DriverAssignmentEmailData,
+): Promise<{ success: boolean; message: string }> {
 	try {
 		const { bookingId, driverId, env } = data;
-		console.log(`📧 EMAIL SERVICE: Starting driver assignment notification for booking ${bookingId}, driver ${driverId}`);
+		console.log(
+			`📧 EMAIL SERVICE: Starting driver assignment notification for booking ${bookingId}, driver ${driverId}`,
+		);
 
 		if (!env) {
-			console.error(`❌ DRIVER ASSIGNMENT: env is missing - check tRPC context passes env`);
+			console.error(
+				"❌ DRIVER ASSIGNMENT: env is missing - check tRPC context passes env",
+			);
 			return { success: false, message: "Environment not available" };
 		}
 
 		// Get booking details
-		console.log(`📧 EMAIL SERVICE: Fetching booking details for booking ${bookingId}`);
+		console.log(
+			`📧 EMAIL SERVICE: Fetching booking details for booking ${bookingId}`,
+		);
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
-		const { booking, driverUser, car, package: pkg, stops, customer } = bookingDetails;
-		console.log(`📧 EMAIL SERVICE: Booking details fetched. Driver user email: ${driverUser?.email}`);
+		const {
+			booking,
+			driverUser,
+			car,
+			package: pkg,
+			stops,
+			customer,
+		} = bookingDetails;
+		console.log(
+			`📧 EMAIL SERVICE: Booking details fetched. Driver user email: ${driverUser?.email}`,
+		);
 
 		if (!isValidEmail(driverUser?.email)) {
-			console.log(`❌ EMAIL SERVICE: No valid driver email for driver ${driverId}`);
+			console.log(
+				`❌ EMAIL SERVICE: No valid driver email for driver ${driverId}`,
+			);
 			return { success: false, message: "Driver email not found or invalid" };
 		}
 
 		// Duplicate prevention - skip if already sent to this driver (allows resend when driver is reassigned)
 		if (booking.driverAssignmentEmailSentToDriverId === driverId) {
-			console.log(`⏭️ EMAIL SERVICE: Skipping - driver assignment email already sent to driver ${driverId}`);
-			return { success: true, message: "Driver assignment email already sent to this driver" };
+			console.log(
+				`⏭️ EMAIL SERVICE: Skipping - driver assignment email already sent to driver ${driverId}`,
+			);
+			return {
+				success: true,
+				message: "Driver assignment email already sent to this driver",
+			};
 		}
 
 		const driverName = driverUser.name || "Driver";
 		// Use plain HTML template (works in Cloudflare Workers - no React)
-		console.log(`📧 EMAIL SERVICE: Generating email template for driver ${driverName}`);
-		const template = generateDriverAssignmentEmailTemplate(driverName, bookingDetails);
+		console.log(
+			`📧 EMAIL SERVICE: Generating email template for driver ${driverName}`,
+		);
+		const template = generateDriverAssignmentEmailTemplate(
+			driverName,
+			bookingDetails,
+		);
 
 		// Send email
-		console.log(`📧 EMAIL SERVICE: Getting mail service and sending email to ${bookingDetails.driverUser.email}`);
+		console.log(
+			`📧 EMAIL SERVICE: Getting mail service and sending email to ${bookingDetails.driverUser.email}`,
+		);
 		const mailService = getMailService(env);
 		const success = await mailService.sendEmail({
 			to: bookingDetails.driverUser.email,
@@ -576,13 +651,19 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 
 		// Mark as sent (duplicate prevention, track which driver) - run migration 0015 if this fails
 		try {
-			await db.update(bookings).set({
-				driverAssignmentEmailSentAt: new Date(),
-				driverAssignmentEmailSentToDriverId: driverId,
-				updatedAt: new Date(),
-			}).where(eq(bookings.id, bookingId));
+			await db
+				.update(bookings)
+				.set({
+					driverAssignmentEmailSentAt: new Date(),
+					driverAssignmentEmailSentToDriverId: driverId,
+					updatedAt: new Date(),
+				})
+				.where(eq(bookings.id, bookingId));
 		} catch (dbErr) {
-			console.warn(`⚠️ DRIVER ASSIGNMENT: Could not update driverAssignmentEmailSentAt (run migration 0015):`, dbErr);
+			console.warn(
+				"⚠️ DRIVER ASSIGNMENT: Could not update driverAssignmentEmailSentAt (run migration 0015):",
+				dbErr,
+			);
 		}
 
 		return {
@@ -593,7 +674,8 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
 		console.error("Error sending driver assignment notification:", error);
 		return {
 			success: false,
-			message: error instanceof Error ? error.message : "Unknown error occurred",
+			message:
+				error instanceof Error ? error.message : "Unknown error occurred",
 		};
 	}
 }
@@ -602,13 +684,19 @@ export async function sendDriverAssignmentNotification(data: DriverAssignmentEma
  * Send trip status / job completion summary email to customer (registered user or guest)
  * For status=completed: duplicate prevention via completionSummaryEmailSentAt
  */
-export async function sendTripStatusNotification(data: TripStatusEmailData): Promise<{ success: boolean; message: string }> {
+export async function sendTripStatusNotification(
+	data: TripStatusEmailData,
+): Promise<{ success: boolean; message: string }> {
 	try {
 		const { bookingId, status, env } = data;
-		console.log(`📧 TRIP EMAIL DEBUG: sendTripStatusNotification called for booking ${bookingId}, status: ${status}`);
+		console.log(
+			`📧 TRIP EMAIL DEBUG: sendTripStatusNotification called for booking ${bookingId}, status: ${status}`,
+		);
 
 		if (!env) {
-			console.error(`❌ TRIP EMAIL: env is missing - check tRPC context passes env`);
+			console.error(
+				"❌ TRIP EMAIL: env is missing - check tRPC context passes env",
+			);
 			return { success: false, message: "Environment not available" };
 		}
 
@@ -620,15 +708,22 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		// customer is the user account (admin for walk-in), so we must not use it for client emails.
 		const recipientEmail = booking.customerEmail || customer?.email;
 		if (!isValidEmail(recipientEmail)) {
-			console.log(`⏭️ TRIP EMAIL: Skipping - no valid customer email for booking ${bookingId}`);
+			console.log(
+				`⏭️ TRIP EMAIL: Skipping - no valid customer email for booking ${bookingId}`,
+			);
 			return { success: false, message: "No valid customer email" };
 		}
 
 		// For completion summary: duplicate prevention
 		if (status === "completed") {
 			if (booking.completionSummaryEmailSentAt) {
-				console.log(`⏭️ TRIP EMAIL: Skipping - completion summary already sent for booking ${bookingId}`);
-				return { success: true, message: "Completion summary email already sent" };
+				console.log(
+					`⏭️ TRIP EMAIL: Skipping - completion summary already sent for booking ${bookingId}`,
+				);
+				return {
+					success: true,
+					message: "Completion summary email already sent",
+				};
 			}
 		}
 
@@ -636,7 +731,9 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		const template = generateTripStatusEmailTemplate(status, bookingDetails);
 
 		// Send email
-		console.log(`📧 TRIP EMAIL DEBUG: Getting mail service and sending email to ${recipientEmail}`);
+		console.log(
+			`📧 TRIP EMAIL DEBUG: Getting mail service and sending email to ${recipientEmail}`,
+		);
 		const mailService = getMailService(env);
 		const success = await mailService.sendEmail({
 			to: recipientEmail,
@@ -652,12 +749,18 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		// For completion summary: mark as sent (duplicate prevention)
 		if (status === "completed") {
 			try {
-				await db.update(bookings).set({
-					completionSummaryEmailSentAt: new Date(),
-					updatedAt: new Date(),
-				}).where(eq(bookings.id, bookingId));
+				await db
+					.update(bookings)
+					.set({
+						completionSummaryEmailSentAt: new Date(),
+						updatedAt: new Date(),
+					})
+					.where(eq(bookings.id, bookingId));
 			} catch (dbErr) {
-				console.warn(`⚠️ TRIP EMAIL: Could not update completionSummaryEmailSentAt (run migration 0015):`, dbErr);
+				console.warn(
+					"⚠️ TRIP EMAIL: Could not update completionSummaryEmailSentAt (run migration 0015):",
+					dbErr,
+				);
 			}
 		}
 
@@ -669,7 +772,8 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
 		console.error("Error sending trip status notification:", error);
 		return {
 			success: false,
-			message: error instanceof Error ? error.message : "Unknown error occurred",
+			message:
+				error instanceof Error ? error.message : "Unknown error occurred",
 		};
 	}
 }
@@ -677,12 +781,19 @@ export async function sendTripStatusNotification(data: TripStatusEmailData): Pro
  * Send booking confirmation email to customer (registered user or guest)
  * Duplicate prevention: skips if confirmationEmailSentAt is already set
  */
-export async function sendBookingConfirmationEmail(bookingId: string, env: Env) {
+export async function sendBookingConfirmationEmail(
+	bookingId: string,
+	env: Env,
+) {
 	try {
-		console.log(`📧 BOOKING CONFIRMATION: Starting email for booking ${bookingId}`);
+		console.log(
+			`📧 BOOKING CONFIRMATION: Starting email for booking ${bookingId}`,
+		);
 
 		if (!env) {
-			console.error(`❌ BOOKING CONFIRMATION: env is missing - check tRPC context passes env`);
+			console.error(
+				"❌ BOOKING CONFIRMATION: env is missing - check tRPC context passes env",
+			);
 			return { success: false, message: "Environment not available" };
 		}
 
@@ -694,18 +805,25 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		// customer is the user account (admin for walk-in), so we must not use it for client emails.
 		const recipientEmail = booking.customerEmail || customer?.email;
 		if (!isValidEmail(recipientEmail)) {
-			console.log(`⏭️ BOOKING CONFIRMATION: Skipping - no valid customer email for booking ${bookingId}`);
+			console.log(
+				`⏭️ BOOKING CONFIRMATION: Skipping - no valid customer email for booking ${bookingId}`,
+			);
 			return { success: false, message: "No valid customer email" };
 		}
 
 		// Duplicate prevention
 		if (booking.confirmationEmailSentAt) {
-			console.log(`⏭️ BOOKING CONFIRMATION: Skipping - already sent at ${booking.confirmationEmailSentAt}`);
+			console.log(
+				`⏭️ BOOKING CONFIRMATION: Skipping - already sent at ${booking.confirmationEmailSentAt}`,
+			);
 			return { success: true, message: "Confirmation email already sent" };
 		}
 
 		// Use plain HTML template (works in Cloudflare Workers - no React)
-		const template = generateTripStatusEmailTemplate("confirmed", bookingDetails);
+		const template = generateTripStatusEmailTemplate(
+			"confirmed",
+			bookingDetails,
+		);
 
 		// Send email
 		console.log(`📧 BOOKING CONFIRMATION: Sending email to ${recipientEmail}`);
@@ -723,12 +841,18 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 
 		// Mark as sent (duplicate prevention) - run migration 0015 if this fails
 		try {
-			await db.update(bookings).set({
-				confirmationEmailSentAt: new Date(),
-				updatedAt: new Date(),
-			}).where(eq(bookings.id, bookingId));
+			await db
+				.update(bookings)
+				.set({
+					confirmationEmailSentAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.where(eq(bookings.id, bookingId));
 		} catch (dbErr) {
-			console.warn(`⚠️ BOOKING CONFIRMATION: Could not update confirmationEmailSentAt (run migration 0015):`, dbErr);
+			console.warn(
+				"⚠️ BOOKING CONFIRMATION: Could not update confirmationEmailSentAt (run migration 0015):",
+				dbErr,
+			);
 		}
 
 		return {
@@ -739,7 +863,8 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
 		console.error("Error sending booking confirmation:", error);
 		return {
 			success: false,
-			message: error instanceof Error ? error.message : "Unknown error occurred",
+			message:
+				error instanceof Error ? error.message : "Unknown error occurred",
 		};
 	}
 }
@@ -748,7 +873,10 @@ export async function sendBookingConfirmationEmail(bookingId: string, env: Env) 
  * Send payment link email to client for admin-created custom bookings.
  * Client receives link to /pay/{shareToken} to complete payment (authorization).
  */
-export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise<{ success: boolean; message: string }> {
+export async function sendPaymentLinkEmail(
+	bookingId: string,
+	env: Env,
+): Promise<{ success: boolean; message: string }> {
 	try {
 		console.log(`📧 PAYMENT LINK: Starting email for booking ${bookingId}`);
 
@@ -763,7 +891,11 @@ export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise
 		// customer is the user account (admin for walk-in), so we must not use it for payment link.
 		const recipientEmail = booking.customerEmail || customer?.email;
 		if (!isValidEmail(recipientEmail)) {
-			return { success: false, message: "No valid customer email - add customer email to send payment link" };
+			return {
+				success: false,
+				message:
+					"No valid customer email - add customer email to send payment link",
+			};
 		}
 
 		if (booking.paymentStatus !== "pending_payment") {
@@ -775,10 +907,13 @@ export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise
 		}
 
 		// Use SITE_URL from env (staging vs production), fallback to BUSINESS_INFO
-		const websiteUrl = (env as { SITE_URL?: string }).SITE_URL || BUSINESS_INFO.business.websiteUrl;
+		const websiteUrl =
+			(env as { SITE_URL?: string }).SITE_URL ||
+			BUSINESS_INFO.business.websiteUrl;
 		const paymentUrl = `${websiteUrl}/pay/${booking.shareToken}`;
 
-		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
+		const pickupDateTime =
+			booking.scheduledPickupTime || booking.pickupDateTime;
 		const tz = booking.timezone || "Australia/Sydney";
 		const zonedDate = toZonedTime(new Date(pickupDateTime), tz);
 		const pickupDate = format(zonedDate, "EEEE, MMMM d, yyyy");
@@ -829,7 +964,11 @@ export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise
 </html>`;
 
 		const mailService = getMailService(env);
-		const success = await mailService.sendEmail({ to: recipientEmail, subject, html });
+		const success = await mailService.sendEmail({
+			to: recipientEmail,
+			subject,
+			html,
+		});
 
 		if (!success) throw new Error("Failed to send payment link email");
 
@@ -839,7 +978,8 @@ export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise
 		console.error("Error sending payment link email:", error);
 		return {
 			success: false,
-			message: error instanceof Error ? error.message : "Unknown error occurred",
+			message:
+				error instanceof Error ? error.message : "Unknown error occurred",
 		};
 	}
 }
@@ -849,7 +989,9 @@ export async function sendPaymentLinkEmail(bookingId: string, env: Env): Promise
  */
 export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 	try {
-		console.log(`📧 ADMIN NOTIFICATION: Starting email for new booking ${bookingId}`);
+		console.log(
+			`📧 ADMIN NOTIFICATION: Starting email for new booking ${bookingId}`,
+		);
 
 		// Get booking details
 		const bookingDetails = await getBookingDetailsForEmail(bookingId);
@@ -862,7 +1004,8 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 
 		// Format pickup date and time
 		// Display time in UTC (as stored) without timezone conversion
-		const pickupDateTime = booking.scheduledPickupTime || booking.pickupDateTime;
+		const pickupDateTime =
+			booking.scheduledPickupTime || booking.pickupDateTime;
 		// Format pickup date and time using booking's timezone
 		const userTimezone = booking.timezone || "Australia/Sydney"; // Default to Sydney if not set
 		const dateObj = new Date(pickupDateTime);
@@ -888,13 +1031,14 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 		const bookingReference = booking.referenceNumber || "N/A";
 
 		// Get all admin and super_admin users
-		const adminUsers = await db.select()
+		const adminUsers = await db
+			.select()
 			.from(users)
 			.where(
 				or(
 					eq(users.role, UserRoleEnum.Admin),
-					eq(users.role, UserRoleEnum.SuperAdmin)
-				)
+					eq(users.role, UserRoleEnum.SuperAdmin),
+				),
 			);
 
 		if (!adminUsers || adminUsers.length === 0) {
@@ -905,7 +1049,9 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 			};
 		}
 
-		console.log(`📧 ADMIN NOTIFICATION: Found ${adminUsers.length} admin users`);
+		console.log(
+			`📧 ADMIN NOTIFICATION: Found ${adminUsers.length} admin users`,
+		);
 
 		// Generate email template
 		const template = await renderAdminNewBookingEmail({
@@ -920,7 +1066,7 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 			destinationAddress: booking.destinationAddress,
 			vehicleInfo,
 			websiteUrl: "https://downunderchauffeurs.com",
-			stops: stops?.map(stop => ({ address: stop.address })) || [],
+			stops: stops?.map((stop) => ({ address: stop.address })) || [],
 			passengerCount: booking.passengerCount || 1,
 			luggageCount: booking.luggageCount || 0,
 			specialRequests: booking.specialRequests,
@@ -930,20 +1076,24 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 		// Send email to all admins
 		const mailService = getMailService(env);
 		const emailResults = await Promise.allSettled(
-			adminUsers.map(admin => {
+			adminUsers.map((admin) => {
 				console.log(`📧 ADMIN NOTIFICATION: Sending email to ${admin.email}`);
 				return mailService.sendEmail({
 					to: admin.email,
 					subject: template.subject,
 					html: template.html,
 				});
-			})
+			}),
 		);
 
-		const successCount = emailResults.filter(result => result.status === 'fulfilled' && result.value).length;
+		const successCount = emailResults.filter(
+			(result) => result.status === "fulfilled" && result.value,
+		).length;
 		const failureCount = emailResults.length - successCount;
 
-		console.log(`📧 ADMIN NOTIFICATION: Sent to ${successCount}/${adminUsers.length} admins (${failureCount} failed)`);
+		console.log(
+			`📧 ADMIN NOTIFICATION: Sent to ${successCount}/${adminUsers.length} admins (${failureCount} failed)`,
+		);
 
 		return {
 			success: successCount > 0,
@@ -953,7 +1103,8 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 		console.error("Error sending admin notification:", error);
 		return {
 			success: false,
-			message: error instanceof Error ? error.message : "Unknown error occurred",
+			message:
+				error instanceof Error ? error.message : "Unknown error occurred",
 		};
 	}
 }

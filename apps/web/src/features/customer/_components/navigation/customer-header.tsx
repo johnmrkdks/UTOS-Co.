@@ -1,15 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Logo } from "@/components/logo";
 import { Button } from "@workspace/ui/components/button";
-import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetTrigger,
+} from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
 import { LogOut, Menu, X } from "lucide-react";
-import type { CustomerNavigationItem } from "./types";
-import { BUSINESS_INFO } from "@/constants/business-info";
-import { CustomerUserMenu } from "./customer-user-menu";
+import { useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
+import { Logo } from "@/components/logo";
+import { BUSINESS_INFO } from "@/constants/business-info";
 import { CustomerMobileMenuContent } from "./customer-mobile-menu-content";
+import { CustomerUserMenu } from "./customer-user-menu";
+import type { CustomerNavigationItem } from "./types";
 
 interface CustomerHeaderProps {
 	session: any;
@@ -20,14 +24,14 @@ interface CustomerHeaderProps {
 export function CustomerHeader({
 	session,
 	navigationItems,
-	onSignOut
+	onSignOut,
 }: CustomerHeaderProps) {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 	return (
-		<header className="sticky top-0 z-50 border-b border-border bg-beige/95 backdrop-blur supports-[backdrop-filter]:bg-beige/60">
+		<header className="sticky top-0 z-50 border-border border-b bg-beige/95 backdrop-blur supports-[backdrop-filter]:bg-beige/60">
 			<div className="container mx-auto px-4 py-3 md:py-4">
 				{/* Desktop Header */}
-				<div className="hidden md:flex items-center justify-between">
+				<div className="hidden items-center justify-between md:flex">
 					<BrandLogo />
 
 					<div className="flex items-center space-x-6">
@@ -38,10 +42,10 @@ export function CustomerHeader({
 									key={item.name}
 									to={item.href}
 									className={cn(
-										"text-sm font-medium transition-colors hover:text-foreground",
+										"font-medium text-sm transition-colors hover:text-foreground",
 										item.active
-											? "text-foreground border-b-2 border-primary pb-1"
-											: "text-muted-foreground"
+											? "border-primary border-b-2 pb-1 text-foreground"
+											: "text-muted-foreground",
 									)}
 								>
 									{item.name}
@@ -63,15 +67,14 @@ export function CustomerHeader({
 							{/* Mobile Menu Button with Sheet - Moved to Left */}
 							<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
 								<SheetTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-10 w-10"
-									>
+									<Button variant="ghost" size="icon" className="h-10 w-10">
 										<Menu className="h-5 w-5" />
 									</Button>
 								</SheetTrigger>
-								<SheetContent side="left" className="p-0 w-full sm:w-80 flex flex-col">
+								<SheetContent
+									side="left"
+									className="flex w-full flex-col p-0 sm:w-80"
+								>
 									<CustomerMobileMenuContent
 										session={session}
 										navigationItems={navigationItems}
@@ -80,10 +83,10 @@ export function CustomerHeader({
 									/>
 								</SheetContent>
 							</Sheet>
-							
+
 							<Logo className="h-8 w-8" />
 							<div>
-								<h1 className="text-base font-bold text-foreground">
+								<h1 className="font-bold text-base text-foreground">
 									{BUSINESS_INFO.business.name}
 								</h1>
 								<p className="text-[10px] text-muted-foreground">
@@ -91,7 +94,6 @@ export function CustomerHeader({
 								</p>
 							</div>
 						</div>
-
 					</div>
 				</div>
 			</div>

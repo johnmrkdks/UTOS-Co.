@@ -1,11 +1,11 @@
-import { Badge } from "@workspace/ui/components/badge";
-import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
-import { Checkbox } from "@workspace/ui/components/checkbox";
 import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@workspace/ui/components/badge";
+import { Checkbox } from "@workspace/ui/components/checkbox";
+import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
 import { format } from "date-fns";
-import { User, Car, UserCheck, Phone, CircleDot } from "lucide-react";
-import { BookingTableRowActions } from "./booking-table-row-actions";
+import { Car, CircleDot, Phone, User, UserCheck } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { BookingTableRowActions } from "./booking-table-row-actions";
 
 // Booking interface
 export interface Booking {
@@ -17,7 +17,7 @@ export interface Booking {
 	customerEmail?: string | null;
 	originAddress: string;
 	destinationAddress: string;
-	stops?: Array<{ id: string; address: string; }>;
+	stops?: Array<{ id: string; address: string }>;
 	scheduledPickupTime: string;
 	quotedAmount: number;
 	carId: string | null;
@@ -77,7 +77,9 @@ interface BookingTableColumnsOptions {
 	compact?: boolean;
 }
 
-export const createBookingTableColumns = (options: BookingTableColumnsOptions = {}): ColumnDef<Booking>[] => {
+export const createBookingTableColumns = (
+	options: BookingTableColumnsOptions = {},
+): ColumnDef<Booking>[] => {
 	const {
 		selectedBookings = [],
 		onToggleBookingSelection,
@@ -87,7 +89,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		onArchiveBooking,
 		onDeleteBooking,
 		enableRowSelection = false,
-		compact = false
+		compact = false,
 	} = options;
 
 	const columns: ColumnDef<Booking>[] = [];
@@ -149,7 +151,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<DataTableColumnHeader column={column} title="ID" />
 		),
 		cell: ({ row }) => (
-			<div className="font-mono text-xs truncate">
+			<div className="truncate font-mono text-xs">
 				#{row.getValue("id")?.toString().slice(-6)}
 			</div>
 		),
@@ -167,8 +169,20 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			cell: ({ row }) => {
 				const type = row.getValue("bookingType") as string;
 				return (
-					<Badge variant={type === "package" ? "default" : type === "offload" ? "destructive" : "secondary"}>
-						{type === "package" ? "Package" : type === "offload" ? "Offload" : "Custom"}
+					<Badge
+						variant={
+							type === "package"
+								? "default"
+								: type === "offload"
+									? "destructive"
+									: "secondary"
+						}
+					>
+						{type === "package"
+							? "Package"
+							: type === "offload"
+								? "Offload"
+								: "Custom"}
 					</Badge>
 				);
 			},
@@ -199,8 +213,15 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		),
 		cell: ({ row }) => {
 			const status = (row.original.paymentStatus ?? "—") as string;
-			if (!status || status === "—") return <span className="text-xs text-muted-foreground">—</span>;
-			const config: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+			if (!status || status === "—")
+				return <span className="text-muted-foreground text-xs">—</span>;
+			const config: Record<
+				string,
+				{
+					label: string;
+					variant: "default" | "secondary" | "destructive" | "outline";
+				}
+			> = {
 				pending_payment: { label: "Pending", variant: "secondary" },
 				payment_authorized: { label: "Authorized", variant: "default" },
 				awaiting_capture: { label: "Awaiting Capture", variant: "outline" },
@@ -209,8 +230,15 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 				payment_cancelled: { label: "Cancelled", variant: "destructive" },
 				refunded: { label: "Refunded", variant: "secondary" },
 			};
-			const c = config[status] ?? { label: status.replace(/_/g, " "), variant: "outline" as const };
-			return <Badge variant={c.variant} className="text-xs">{c.label}</Badge>;
+			const c = config[status] ?? {
+				label: status.replace(/_/g, " "),
+				variant: "outline" as const,
+			};
+			return (
+				<Badge variant={c.variant} className="text-xs">
+					{c.label}
+				</Badge>
+			);
 		},
 		size: 140,
 	});
@@ -223,20 +251,27 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<DataTableColumnHeader column={column} title="Customer" />
 		),
 		cell: ({ row }) => (
-			<div className="flex items-center space-x-2 min-w-0 overflow-hidden">
-				<User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-				<div className="min-w-0 overflow-hidden flex-1">
-					<div className="flex items-center gap-1.5 min-w-0">
-						<span className="font-medium text-xs truncate min-w-0">{row.getValue("customerName") as string}</span>
+			<div className="flex min-w-0 items-center space-x-2 overflow-hidden">
+				<User className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+				<div className="min-w-0 flex-1 overflow-hidden">
+					<div className="flex min-w-0 items-center gap-1.5">
+						<span className="min-w-0 truncate font-medium text-xs">
+							{row.getValue("customerName") as string}
+						</span>
 						{row.original.isGuestBooking && (
-							<Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal flex-shrink-0">
+							<Badge
+								variant="outline"
+								className="h-4 flex-shrink-0 px-1.5 py-0 font-normal text-[10px]"
+							>
 								Guest
 							</Badge>
 						)}
 					</div>
-					<div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+					<div className="flex min-w-0 items-center gap-1 text-muted-foreground text-xs">
 						<Phone className="h-3 w-3 flex-shrink-0" />
-						<span className="truncate min-w-0">{row.original.customerPhone}</span>
+						<span className="min-w-0 truncate">
+							{row.original.customerPhone}
+						</span>
 					</div>
 				</div>
 			</div>
@@ -252,16 +287,23 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			accessorKey: "route",
 			header: "Route",
 			cell: ({ row }) => (
-				<div className="min-w-0 overflow-hidden space-y-0.5">
-					<div className="text-xs font-medium truncate block" title={row.original.originAddress}>
+				<div className="min-w-0 space-y-0.5 overflow-hidden">
+					<div
+						className="block truncate font-medium text-xs"
+						title={row.original.originAddress}
+					>
 						From: {row.original.originAddress}
 					</div>
 					{row.original.stops && row.original.stops.length > 0 && (
-						<div className="text-xs text-blue-600 truncate block">
-							{row.original.stops.length} stop{row.original.stops.length > 1 ? 's' : ''}
+						<div className="block truncate text-blue-600 text-xs">
+							{row.original.stops.length} stop
+							{row.original.stops.length > 1 ? "s" : ""}
 						</div>
 					)}
-					<div className="text-xs text-muted-foreground truncate block" title={row.original.destinationAddress}>
+					<div
+						className="block truncate text-muted-foreground text-xs"
+						title={row.original.destinationAddress}
+					>
 						To: {row.original.destinationAddress}
 					</div>
 				</div>
@@ -280,14 +322,17 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 				if (!stops || stops.length === 0) {
 					return (
 						<div className="text-center">
-							<span className="text-xs text-muted-foreground">—</span>
+							<span className="text-muted-foreground text-xs">—</span>
 						</div>
 					);
 				}
 				return (
 					<div className="flex items-center gap-1">
 						<CircleDot className="h-3 w-3 text-blue-500" />
-						<Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+						<Badge
+							variant="secondary"
+							className="border-blue-200 bg-blue-50 px-1.5 py-0.5 text-blue-700 text-xs"
+						>
 							{stops.length}
 						</Badge>
 					</div>
@@ -325,11 +370,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		),
 		cell: ({ row }) => {
 			const amount = row.getValue("quotedAmount") as number;
-			return (
-				<div className="font-medium text-xs">
-					${amount.toFixed(2)}
-				</div>
-			);
+			return <div className="font-medium text-xs">${amount.toFixed(2)}</div>;
 		},
 		size: 100,
 	});
@@ -341,9 +382,9 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			accessorKey: "car",
 			header: "Vehicle",
 			cell: ({ row }) => (
-				<div className="flex items-center space-x-2 min-w-0 overflow-hidden">
-					<Car className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-					<div className="text-xs truncate min-w-0">
+				<div className="flex min-w-0 items-center space-x-2 overflow-hidden">
+					<Car className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+					<div className="min-w-0 truncate text-xs">
 						{row.original.car?.name || "Not assigned"}
 					</div>
 				</div>
@@ -360,17 +401,17 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			cell: ({ row }) => {
 				// Try different possible driver data structures
 				const booking = row.original;
-				const driverName = 
-					booking.driver?.user?.name ||  // Nested driver.user.name
-					booking.driver?.name ||        // Direct driver.name
-					booking.driverName ||          // Flat driverName field
+				const driverName =
+					booking.driver?.user?.name || // Nested driver.user.name
+					booking.driver?.name || // Direct driver.name
+					booking.driverName || // Flat driverName field
 					booking.assignedDriver?.name || // assignedDriver.name
 					booking.assignedDriver?.user?.name; // assignedDriver.user.name
-				
+
 				return (
 					<div className="flex items-center space-x-2">
 						<UserCheck className="h-4 w-4 text-muted-foreground" />
-						<div className="text-xs truncate">
+						<div className="truncate text-xs">
 							{driverName || "Not assigned"}
 						</div>
 					</div>
@@ -384,8 +425,9 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 };
 
 // Pre-configured column sets for easier use
-export const bookingTableColumns = (options: BookingTableColumnsOptions = {}) => 
+export const bookingTableColumns = (options: BookingTableColumnsOptions = {}) =>
 	createBookingTableColumns({ ...options, compact: false });
 
-export const compactBookingTableColumns = (options: BookingTableColumnsOptions = {}) => 
-	createBookingTableColumns({ ...options, compact: true });
+export const compactBookingTableColumns = (
+	options: BookingTableColumnsOptions = {},
+) => createBookingTableColumns({ ...options, compact: true });

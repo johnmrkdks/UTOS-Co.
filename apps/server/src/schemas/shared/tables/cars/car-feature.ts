@@ -1,10 +1,10 @@
-import { carFeatures } from "@/db/sqlite/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { carFeatures } from "@/db/sqlite/schema";
 
 // Base schemas
 export const CarFeatureSchema = createSelectSchema(carFeatures, {

@@ -1,3 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -5,11 +8,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Textarea } from "@workspace/ui/components/textarea";
-import { Checkbox } from "@workspace/ui/components/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import {
 	Form,
 	FormControl,
@@ -19,15 +17,26 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { Textarea } from "@workspace/ui/components/textarea";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useModal } from "@/hooks/use-modal";
 import { useUpdatePackageServiceTypeMutation } from "../../_hooks/query/use-update-package-service-type-mutation";
-import { useEffect } from "react";
 
 const formSchema = z.object({
-	name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
+	name: z
+		.string()
+		.min(1, "Name is required")
+		.max(100, "Name must be 100 characters or less"),
 	description: z.string().optional(),
 	rateType: z.enum(["fixed", "hourly"]).default("fixed"),
 	isActive: z.boolean(),
@@ -39,7 +48,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function EditPackageServiceTypeDialog() {
 	const { isModalOpen, closeModal, modalState } = useModal();
 	const updateMutation = useUpdatePackageServiceTypeMutation();
-	
+
 	const isOpen = isModalOpen("edit-package-service-type");
 	const data = modalState.data;
 
@@ -76,7 +85,7 @@ export function EditPackageServiceTypeDialog() {
 					closeModal();
 					form.reset();
 				},
-			}
+			},
 		);
 	};
 
@@ -90,7 +99,7 @@ export function EditPackageServiceTypeDialog() {
 					</DialogDescription>
 				</DialogHeader>
 
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control as any}
@@ -99,7 +108,10 @@ export function EditPackageServiceTypeDialog() {
 								<FormItem>
 									<FormLabel>Name</FormLabel>
 									<FormControl>
-										<Input placeholder="e.g. Transfer, Tour, Event, Hourly" {...field} />
+										<Input
+											placeholder="e.g. Transfer, Tour, Event, Hourly"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -136,12 +148,17 @@ export function EditPackageServiceTypeDialog() {
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="fixed">Fixed Rate (Weddings, Concerts, Events)</SelectItem>
-											<SelectItem value="hourly">Hourly Rate (Tours, City Transfers)</SelectItem>
+											<SelectItem value="fixed">
+												Fixed Rate (Weddings, Concerts, Events)
+											</SelectItem>
+											<SelectItem value="hourly">
+												Hourly Rate (Tours, City Transfers)
+											</SelectItem>
 										</SelectContent>
 									</Select>
 									<FormDescription>
-										Fixed rate packages have one price, hourly packages charge per hour
+										Fixed rate packages have one price, hourly packages charge
+										per hour
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -201,7 +218,9 @@ export function EditPackageServiceTypeDialog() {
 								Cancel
 							</Button>
 							<Button type="submit" disabled={updateMutation.isPending}>
-								{updateMutation.isPending ? "Updating..." : "Update Service Type"}
+								{updateMutation.isPending
+									? "Updating..."
+									: "Update Service Type"}
 							</Button>
 						</div>
 					</form>

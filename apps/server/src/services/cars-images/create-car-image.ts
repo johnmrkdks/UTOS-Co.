@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { createCarImage } from "@/data/cars-images/create-car-image";
 import type { DB } from "@/db";
 import { InsertCarImageSchema } from "@/schemas/shared";
-import { z } from "zod";
 
 export const CreateCarImageServiceSchema = InsertCarImageSchema.extend({
 	carId: z.string().min(1, "Car ID is required"),

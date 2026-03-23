@@ -1,15 +1,15 @@
 import { Outlet, useLocation } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { useUserQuery } from "@/hooks/query/use-user-query";
-import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
+import { useEffect, useState } from "react";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
 import { Loader } from "@/components/loader";
+import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 import {
-	DriverTopNavigation,
-	DriverMobileMenuContent,
 	DriverBottomNavigation,
+	DriverMobileMenuContent,
 	DriverSidebar,
-	useDriverNavigation
+	DriverTopNavigation,
+	useDriverNavigation,
 } from "../navigation";
 
 export function DriverLayout() {
@@ -29,7 +29,7 @@ export function DriverLayout() {
 	// Show loading while session is being fetched
 	if (isPending) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
+			<div className="flex min-h-screen items-center justify-center">
 				<Loader />
 			</div>
 		);
@@ -44,7 +44,7 @@ export function DriverLayout() {
 		phoneNumber: null,
 		isApproved: false,
 		isActive: false,
-		...currentDriver
+		...currentDriver,
 	};
 
 	const driverStatus = {
@@ -77,7 +77,7 @@ export function DriverLayout() {
 				mobileMenuContent={mobileMenuContent}
 			/>
 
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 pb-20 lg:pb-8">
+			<div className="mx-auto max-w-7xl px-4 py-4 pb-20 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
 				<div className="lg:flex lg:gap-8">
 					{/* Desktop Sidebar Navigation - Hidden on mobile */}
 					<DriverSidebar
@@ -99,7 +99,14 @@ export function DriverLayout() {
 				isOpen={signOutWithConfirmation.isDialogOpen}
 				onClose={signOutWithConfirmation.closeSignOutDialog}
 				onConfirm={signOutWithConfirmation.confirmSignOut}
-				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userRole={
+					session?.user.role as
+						| "user"
+						| "driver"
+						| "admin"
+						| "super_admin"
+						| undefined
+				}
 				userName={session?.user.name}
 				isLoading={signOutWithConfirmation.isSigningOut}
 			/>

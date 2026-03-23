@@ -1,4 +1,13 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import {
 	Dialog,
 	DialogContent,
@@ -7,18 +16,28 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Badge } from "@workspace/ui/components/badge";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Car, Loader2, MapPin, Phone, User } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { useGetAvailableDriversQuery } from "@/features/dashboard/_pages/drivers/_hooks/query/use-get-available-drivers-query";
 import { useAssignDriverMutation } from "../_hooks/query/use-assign-driver-mutation";
-import { Loader2, User, Car, Phone, MapPin } from "lucide-react";
 
 const assignDriverSchema = z.object({
 	driverId: z.string().min(1, "Please select a driver"),
@@ -32,18 +51,31 @@ type AssignDriverDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriverDialogProps) {
+export function AssignDriverDialog({
+	booking,
+	open,
+	onOpenChange,
+}: AssignDriverDialogProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const assignDriverMutation = useAssignDriverMutation();
 
 	// Debug props
-	console.log("🚗 AssignDriverDialog props:", { booking: booking?.id, open, bookingData: booking });
+	console.log("🚗 AssignDriverDialog props:", {
+		booking: booking?.id,
+		open,
+		bookingData: booking,
+	});
 
 	// Calculate time slot for availability check
-	const timeSlot = booking?.scheduledPickupTime ? {
-		start: new Date(booking.scheduledPickupTime),
-		end: new Date(new Date(booking.scheduledPickupTime).getTime() + (booking.estimatedDuration || 3600) * 1000),
-	} : undefined;
+	const timeSlot = booking?.scheduledPickupTime
+		? {
+				start: new Date(booking.scheduledPickupTime),
+				end: new Date(
+					new Date(booking.scheduledPickupTime).getTime() +
+						(booking.estimatedDuration || 3600) * 1000,
+				),
+			}
+		: undefined;
 
 	const availableDriversQuery = useGetAvailableDriversQuery({ timeSlot });
 
@@ -55,11 +87,13 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 	});
 
 	const selectedDriverId = form.watch("driverId");
-	const selectedDriver = availableDriversQuery.data?.find((d: any) => d.id === selectedDriverId);
+	const selectedDriver = availableDriversQuery.data?.find(
+		(d: any) => d.id === selectedDriverId,
+	);
 
 	const onSubmit = async (data: AssignDriverForm) => {
 		if (!booking?.id) return;
-		
+
 		setIsSubmitting(true);
 		try {
 			await assignDriverMutation.mutateAsync({
@@ -80,12 +114,12 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 				<DialogHeader>
 					<DialogTitle>Assign Driver to Booking</DialogTitle>
 					<DialogDescription>
-						Select an available driver for this booking. Only approved and active drivers are shown.
+						Select an available driver for this booking. Only approved and
+						active drivers are shown.
 					</DialogDescription>
 				</DialogHeader>
-				
 
-				<Form {...form as any}>
+				<Form {...(form as any)}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control as any}
@@ -93,7 +127,10 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Available Drivers</FormLabel>
-									<Select onValueChange={field.onChange} defaultValue={field.value}>
+									<Select
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+									>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select a driver" />
@@ -135,7 +172,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 						{selectedDriver && (
 							<Card>
 								<CardHeader>
-									<CardTitle className="text-lg flex items-center gap-2">
+									<CardTitle className="flex items-center gap-2 text-lg">
 										<User className="h-5 w-5" />
 										Driver Details
 									</CardTitle>
@@ -143,23 +180,29 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 								<CardContent className="space-y-3">
 									<div className="grid grid-cols-2 gap-4">
 										<div>
-											<p className="text-sm font-medium">Name</p>
-											<p className="text-sm text-muted-foreground">{selectedDriver.user?.name}</p>
+											<p className="font-medium text-sm">Name</p>
+											<p className="text-muted-foreground text-sm">
+												{selectedDriver.user?.name}
+											</p>
 										</div>
 										<div>
-											<p className="text-sm font-medium">Email</p>
-											<p className="text-sm text-muted-foreground">{selectedDriver.user?.email}</p>
+											<p className="font-medium text-sm">Email</p>
+											<p className="text-muted-foreground text-sm">
+												{selectedDriver.user?.email}
+											</p>
 										</div>
 										<div>
-											<p className="text-sm font-medium">Phone</p>
-											<p className="text-sm text-muted-foreground flex items-center gap-1">
+											<p className="font-medium text-sm">Phone</p>
+											<p className="flex items-center gap-1 text-muted-foreground text-sm">
 												<Phone className="h-3 w-3" />
 												{selectedDriver.phoneNumber || "Not provided"}
 											</p>
 										</div>
 										<div>
-											<p className="text-sm font-medium">License Number</p>
-											<p className="text-sm text-muted-foreground">{selectedDriver.licenseNumber}</p>
+											<p className="font-medium text-sm">License Number</p>
+											<p className="text-muted-foreground text-sm">
+												{selectedDriver.licenseNumber}
+											</p>
 										</div>
 									</div>
 
@@ -167,15 +210,26 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 										<>
 											<Separator />
 											<div>
-												<p className="text-sm font-medium mb-2 flex items-center gap-1">
+												<p className="mb-2 flex items-center gap-1 font-medium text-sm">
 													<Car className="h-4 w-4" />
 													Assigned Vehicle
 												</p>
 												<div className="flex items-center gap-2">
-													<span className="text-sm">{(selectedDriver as any).car?.name}</span>
-													<Badge variant="outline">{(selectedDriver as any).car?.licensePlate}</Badge>
+													<span className="text-sm">
+														{(selectedDriver as any).car?.name}
+													</span>
+													<Badge variant="outline">
+														{(selectedDriver as any).car?.licensePlate}
+													</Badge>
 													{(selectedDriver as any).car?.status && (
-														<Badge variant={(selectedDriver as any).car?.status === "available" ? "default" : "secondary"}>
+														<Badge
+															variant={
+																(selectedDriver as any).car?.status ===
+																"available"
+																	? "default"
+																	: "secondary"
+															}
+														>
 															{(selectedDriver as any).car?.status}
 														</Badge>
 													)}
@@ -188,16 +242,21 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 						)}
 
 						<DialogFooter>
-							<Button 
-								type="button" 
-								variant="secondary" 
+							<Button
+								type="button"
+								variant="secondary"
 								onClick={() => onOpenChange(false)}
 								disabled={isSubmitting}
 							>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={isSubmitting || !selectedDriverId}>
-								{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+							<Button
+								type="submit"
+								disabled={isSubmitting || !selectedDriverId}
+							>
+								{isSubmitting && (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								)}
 								Assign Driver
 							</Button>
 						</DialogFooter>

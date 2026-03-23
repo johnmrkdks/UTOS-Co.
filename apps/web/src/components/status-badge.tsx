@@ -1,5 +1,8 @@
 import { cn } from "@workspace/ui/lib/utils";
-import { getStatusConfig, type BookingStatus } from "@/lib/booking-status-config";
+import {
+	type BookingStatus,
+	getStatusConfig,
+} from "@/lib/booking-status-config";
 
 export interface StatusBadgeProps {
 	/** The booking status */
@@ -19,25 +22,25 @@ export function StatusBadge({
 	status,
 	variant = "default",
 	className,
-	size = "md"
+	size = "md",
 }: StatusBadgeProps) {
 	const config = getStatusConfig(status);
 
 	const sizeClasses = {
 		sm: "px-1.5 py-0.5 text-xs",
 		md: "px-2.5 py-1 text-xs",
-		lg: "px-3 py-1.5 text-sm"
+		lg: "px-3 py-1.5 text-sm",
 	};
 
 	return (
 		<span
 			className={cn(
-				"inline-flex items-center rounded-full font-medium border",
+				"inline-flex items-center rounded-full border font-medium",
 				sizeClasses[size],
 				config.bg,
 				config.text,
 				config.border,
-				className
+				className,
 			)}
 		>
 			{variant === "short" ? config.shortLabel : config.label}
@@ -69,7 +72,7 @@ export function StatusActionButton({
 	onClick,
 	disabled = false,
 	className,
-	size = "sm"
+	size = "sm",
 }: StatusActionButtonProps) {
 	const config = getStatusConfig(status);
 
@@ -80,7 +83,7 @@ export function StatusActionButton({
 	const sizeClasses = {
 		sm: "h-6 px-2 text-xs",
 		md: "h-8 px-3 text-sm",
-		lg: "h-10 px-4 text-base"
+		lg: "h-10 px-4 text-base",
 	};
 
 	return (
@@ -89,10 +92,10 @@ export function StatusActionButton({
 			disabled={disabled}
 			className={cn(
 				"inline-flex items-center justify-center rounded-md font-medium transition-colors",
-				"hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed",
+				"hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50",
 				sizeClasses[size],
 				config.actionColor,
-				className
+				className,
 			)}
 		>
 			{config.actionLabel}

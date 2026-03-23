@@ -8,7 +8,7 @@ interface ListContactMessagesInput extends ResourceList {
 
 export async function listContactMessages(
 	db: DB,
-	input: ListContactMessagesInput = {}
+	input: ListContactMessagesInput = {},
 ) {
 	return await listContactMessagesData(db, input);
 }

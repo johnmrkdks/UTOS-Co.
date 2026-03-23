@@ -1,7 +1,7 @@
-import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 
 interface UseEmailVerificationGuardOptions {
 	/** Whether to redirect to verification page if email is not verified */
@@ -12,10 +12,12 @@ interface UseEmailVerificationGuardOptions {
 	showToast?: boolean;
 }
 
-export function useEmailVerificationGuard(options: UseEmailVerificationGuardOptions = {}) {
+export function useEmailVerificationGuard(
+	options: UseEmailVerificationGuardOptions = {},
+) {
 	const { session } = useUserQuery();
 	const navigate = useNavigate();
-	
+
 	const {
 		redirectOnUnverified = false,
 		customMessage = "Please verify your email address to continue",
@@ -35,9 +37,16 @@ export function useEmailVerificationGuard(options: UseEmailVerificationGuardOpti
 			}
 			navigate({ to: "/driver/settings" });
 		}
-	}, [user, isEmailVerified, redirectOnUnverified, customMessage, showToast, navigate]);
+	}, [
+		user,
+		isEmailVerified,
+		redirectOnUnverified,
+		customMessage,
+		showToast,
+		navigate,
+	]);
 
-	const requireEmailVerification = (action: string = "perform this action") => {
+	const requireEmailVerification = (action = "perform this action") => {
 		if (!isEmailVerified) {
 			toast.warning("Email verification required", {
 				description: `Please verify your email address to ${action}`,
@@ -69,10 +78,10 @@ export function useEmailVerificationGuard(options: UseEmailVerificationGuardOpti
 		showVerificationPrompt,
 		canAccessFeature: (featureName?: string) => {
 			if (!isEmailVerified) {
-				const message = featureName 
+				const message = featureName
 					? `Please verify your email to access ${featureName}`
 					: "Please verify your email to access this feature";
-				
+
 				if (showToast) {
 					toast.warning("Email verification required", {
 						description: message,

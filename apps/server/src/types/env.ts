@@ -1,5 +1,5 @@
-import type { DB } from "@/db";
 import type { R2Bucket } from "@cloudflare/workers-types";
+import type { DB } from "@/db";
 
 export type Env = {
 	DB: DB;
@@ -26,4 +26,3 @@ export type Env = {
 	GOOGLE_EMAIL_USER?: string;
 	GMAIL_USER?: string;
 };
-

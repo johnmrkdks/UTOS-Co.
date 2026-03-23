@@ -1,8 +1,8 @@
 import { render } from "@react-email/render";
-import TripStatusEmail from "./trip-status-email";
-import DriverAssignmentEmail from "./driver-assignment-email";
-import BookingConfirmationEmail from "./booking-confirmation-email";
 import AdminNewBookingEmail from "./admin-new-booking-email";
+import BookingConfirmationEmail from "./booking-confirmation-email";
+import DriverAssignmentEmail from "./driver-assignment-email";
+import TripStatusEmail from "./trip-status-email";
 
 export interface TripStatusData {
 	customerName: string;
@@ -93,21 +93,27 @@ export interface AdminNewBookingData {
 	quotedAmount?: number;
 }
 
-export async function renderTripStatusEmail(data: TripStatusData): Promise<{ subject: string; html: string }> {
+export async function renderTripStatusEmail(
+	data: TripStatusData,
+): Promise<{ subject: string; html: string }> {
 	const html = await render(TripStatusEmail(data));
 	const subject = `${data.statusTitle} - Booking ${data.bookingReference}`;
 
 	return { subject, html };
 }
 
-export async function renderDriverAssignmentEmail(data: DriverAssignmentData): Promise<{ subject: string; html: string }> {
+export async function renderDriverAssignmentEmail(
+	data: DriverAssignmentData,
+): Promise<{ subject: string; html: string }> {
 	const html = await render(DriverAssignmentEmail(data));
 	const subject = `New Booking Assignment - ${data.bookingReference}`;
 
 	return { subject, html };
 }
 
-export async function renderBookingConfirmationEmail(data: BookingConfirmationData): Promise<{ subject: string; html: string }> {
+export async function renderBookingConfirmationEmail(
+	data: BookingConfirmationData,
+): Promise<{ subject: string; html: string }> {
 	const html = await render(BookingConfirmationEmail(data));
 	// Show only last 6 characters of reference (e.g., #ABC123 instead of DUC-ABC123)
 	const shortRef = `#${data.bookingReference.slice(-6)}`;
@@ -116,7 +122,9 @@ export async function renderBookingConfirmationEmail(data: BookingConfirmationDa
 	return { subject, html };
 }
 
-export async function renderAdminNewBookingEmail(data: AdminNewBookingData): Promise<{ subject: string; html: string }> {
+export async function renderAdminNewBookingEmail(
+	data: AdminNewBookingData,
+): Promise<{ subject: string; html: string }> {
 	const html = await render(AdminNewBookingEmail(data));
 	const subject = `New Booking - ${data.bookingReference}`;
 
@@ -124,4 +132,9 @@ export async function renderAdminNewBookingEmail(data: AdminNewBookingData): Pro
 }
 
 // Export the React components for external use
-export { TripStatusEmail, DriverAssignmentEmail, BookingConfirmationEmail, AdminNewBookingEmail };
+export {
+	TripStatusEmail,
+	DriverAssignmentEmail,
+	BookingConfirmationEmail,
+	AdminNewBookingEmail,
+};

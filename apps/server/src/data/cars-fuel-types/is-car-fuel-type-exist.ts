@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { carFuelTypes } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function isCarFuelTypeExist(
 	db: DB,

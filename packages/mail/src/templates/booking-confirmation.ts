@@ -1,36 +1,39 @@
-import type { EmailTemplate, BookingDetails } from "../types";
+import type { BookingDetails, EmailTemplate } from "../types";
 
 export function generateBookingConfirmationTemplate(
 	customerName: string,
-	bookingDetails: BookingDetails
+	bookingDetails: BookingDetails,
 ): EmailTemplate {
-	const formattedAmount = new Intl.NumberFormat('en-AU', {
-		style: 'currency',
-		currency: bookingDetails.currency || 'AUD'
+	const formattedAmount = new Intl.NumberFormat("en-AU", {
+		style: "currency",
+		currency: bookingDetails.currency || "AUD",
 	}).format(bookingDetails.amount / 100);
 
-	const formattedDate = new Date(bookingDetails.pickupDate).toLocaleDateString("en-AU", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
+	const formattedDate = new Date(bookingDetails.pickupDate).toLocaleDateString(
+		"en-AU",
+		{
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		},
+	);
 
 	// Generate booking reference - last 6 digits or use reference number if available
 	const bookingReference = bookingDetails.bookingId.slice(-6).toUpperCase();
 
 	// Convert oklch colors to standard CSS to match website design
 	const colors = {
-		primary: '#22818e', // oklch(0.45 0.08 180) converted
-		primaryLight: '#86d6e5', // oklch(0.75 0.18 180) converted
-		background: '#ffffff', // oklch(1 0 0)
-		foreground: '#3c3c3c', // oklch(0.235 0 0)
-		beige: '#f7f2ee', // oklch(0.9404 0.0446 107.23)
-		softBeige: '#faf8f5', // oklch(0.9726 0.0132 111.27)
-		card: '#fefdf9', // oklch(0.98 0.01 85)
-		muted: '#e8e3db', // oklch(0.9 0.02 85)
-		mutedForeground: '#737373', // oklch(0.45 0 0)
-		border: '#d4cabe' // oklch(0.85 0.02 85)
+		primary: "#22818e", // oklch(0.45 0.08 180) converted
+		primaryLight: "#86d6e5", // oklch(0.75 0.18 180) converted
+		background: "#ffffff", // oklch(1 0 0)
+		foreground: "#3c3c3c", // oklch(0.235 0 0)
+		beige: "#f7f2ee", // oklch(0.9404 0.0446 107.23)
+		softBeige: "#faf8f5", // oklch(0.9726 0.0132 111.27)
+		card: "#fefdf9", // oklch(0.98 0.01 85)
+		muted: "#e8e3db", // oklch(0.9 0.02 85)
+		mutedForeground: "#737373", // oklch(0.45 0 0)
+		border: "#d4cabe", // oklch(0.85 0.02 85)
 	};
 
 	return {
@@ -483,12 +486,16 @@ export function generateBookingConfirmationTemplate(
 									<span class="detail-value">${bookingDetails.serviceType}</span>
 								</div>
 
-								${bookingDetails.packageName ? `
+								${
+									bookingDetails.packageName
+										? `
 								<div class="detail-row">
 									<span class="detail-label">Package</span>
 									<span class="detail-value">${bookingDetails.packageName}</span>
 								</div>
-								` : ''}
+								`
+										: ""
+								}
 
 								<div class="detail-row">
 									<span class="detail-label">Date & Time</span>
@@ -503,26 +510,38 @@ export function generateBookingConfirmationTemplate(
 									<span class="detail-value">${bookingDetails.pickupAddress}</span>
 								</div>
 
-								${bookingDetails.destinationAddress ? `
+								${
+									bookingDetails.destinationAddress
+										? `
 								<div class="detail-row">
 									<span class="detail-label">Destination</span>
 									<span class="detail-value">${bookingDetails.destinationAddress}</span>
 								</div>
-								` : ''}
+								`
+										: ""
+								}
 
-								${bookingDetails.driverName ? `
+								${
+									bookingDetails.driverName
+										? `
 								<div class="detail-row">
 									<span class="detail-label">Your Driver</span>
 									<span class="detail-value">${bookingDetails.driverName}</span>
 								</div>
-								` : ''}
+								`
+										: ""
+								}
 
-								${bookingDetails.vehicleDetails ? `
+								${
+									bookingDetails.vehicleDetails
+										? `
 								<div class="detail-row">
 									<span class="detail-label">Vehicle</span>
 									<span class="detail-value">${bookingDetails.vehicleDetails}</span>
 								</div>
-								` : ''}
+								`
+										: ""
+								}
 
 								<div class="total-section">
 									<div class="total-row">

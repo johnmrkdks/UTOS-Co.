@@ -1,5 +1,5 @@
-import { authClient } from "@/lib/auth-client";
 import { redirect } from "@tanstack/react-router";
+import { authClient } from "@/lib/auth-client";
 
 // Auth guard functions
 export async function requireAuth() {
@@ -109,7 +109,7 @@ export async function handlePostLoginRedirect(params: {
 		userRole,
 		defaultDashboard,
 		redirectPath,
-		finalRedirect
+		finalRedirect,
 	});
 
 	// Navigate to the appropriate dashboard
@@ -118,7 +118,10 @@ export async function handlePostLoginRedirect(params: {
 	});
 }
 
-function parseRedirectUrl(url: string): { to: string; search?: Record<string, string> } {
+function parseRedirectUrl(url: string): {
+	to: string;
+	search?: Record<string, string>;
+} {
 	if (!url.startsWith("/")) return { to: url };
 	const [path, searchStr] = url.split("?");
 	if (!searchStr) return { to: path };
@@ -132,7 +135,9 @@ function parseRedirectUrl(url: string): { to: string; search?: Record<string, st
 
 export async function redirectIfAuthenticated(options?: {
 	redirectUrl?: string;
-	queryClient?: { invalidateQueries: (opts: { queryKey: string[] }) => Promise<unknown> };
+	queryClient?: {
+		invalidateQueries: (opts: { queryKey: string[] }) => Promise<unknown>;
+	};
 }) {
 	const session = await authClient.getSession();
 
@@ -140,7 +145,9 @@ export async function redirectIfAuthenticated(options?: {
 	if (session?.data?.user) {
 		// Invalidate session cache so destination page gets fresh data (prevents redirect loop)
 		if (options?.queryClient) {
-			await options.queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+			await options.queryClient.invalidateQueries({
+				queryKey: ["auth-session"],
+			});
 		}
 
 		const userRole = session.data.user.role;
@@ -152,4 +159,3 @@ export async function redirectIfAuthenticated(options?: {
 		throw redirect(target);
 	}
 }
-

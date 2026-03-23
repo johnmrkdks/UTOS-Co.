@@ -1,7 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Progress } from "@workspace/ui/components/progress";
-import { Eye, EyeOff, TrendingUp, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff, TrendingUp } from "lucide-react";
 
 export interface PublicationStatsProps {
 	total: number;
@@ -20,13 +25,15 @@ export function PublicationStatsCard({
 	type,
 	className,
 }: PublicationStatsProps) {
-	const publishedPercentage = total > 0 ? Math.round((published / total) * 100) : 0;
-	const issuesPercentage = total > 0 ? Math.round((publishedWithIssues / total) * 100) : 0;
+	const publishedPercentage =
+		total > 0 ? Math.round((published / total) * 100) : 0;
+	const issuesPercentage =
+		total > 0 ? Math.round((publishedWithIssues / total) * 100) : 0;
 
 	return (
 		<Card className={className}>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-				<CardTitle className="text-sm font-medium capitalize">
+				<CardTitle className="font-medium text-sm capitalize">
 					{type} Publication Status
 				</CardTitle>
 				<TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -36,22 +43,28 @@ export function PublicationStatsCard({
 					{/* Main Stats */}
 					<div className="grid grid-cols-3 gap-2 text-center">
 						<div>
-							<div className="text-2xl font-bold text-green-600">{published}</div>
-							<div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+							<div className="font-bold text-2xl text-green-600">
+								{published}
+							</div>
+							<div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
 								<Eye className="h-3 w-3" />
 								Published
 							</div>
 						</div>
 						<div>
-							<div className="text-2xl font-bold text-gray-600">{unpublished}</div>
-							<div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+							<div className="font-bold text-2xl text-gray-600">
+								{unpublished}
+							</div>
+							<div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
 								<EyeOff className="h-3 w-3" />
 								Unpublished
 							</div>
 						</div>
 						<div>
-							<div className="text-2xl font-bold text-amber-600">{publishedWithIssues}</div>
-							<div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+							<div className="font-bold text-2xl text-amber-600">
+								{publishedWithIssues}
+							</div>
+							<div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
 								<AlertTriangle className="h-3 w-3" />
 								With Issues
 							</div>
@@ -64,10 +77,7 @@ export function PublicationStatsCard({
 							<span>Publication Rate</span>
 							<span className="font-medium">{publishedPercentage}%</span>
 						</div>
-						<Progress 
-							value={publishedPercentage} 
-							className="h-2"
-						/>
+						<Progress value={publishedPercentage} className="h-2" />
 					</div>
 
 					{/* Summary Badges */}

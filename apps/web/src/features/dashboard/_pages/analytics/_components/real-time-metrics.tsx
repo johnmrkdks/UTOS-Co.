@@ -1,14 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import {
 	Activity,
-	Users,
 	Car,
+	CheckCircle,
 	Clock,
 	MapPin,
 	TrendingUp,
-	CheckCircle,
+	Users,
 	Wifi,
 } from "lucide-react";
 
@@ -35,7 +40,9 @@ interface RealTimeMetricsProps {
 
 function formatTimeAgo(date: Date): string {
 	const now = new Date();
-	const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+	const diffInMinutes = Math.floor(
+		(now.getTime() - date.getTime()) / (1000 * 60),
+	);
 	if (diffInMinutes < 1) return "Just now";
 	if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
 	const diffInHours = Math.floor(diffInMinutes / 60);
@@ -54,8 +61,16 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 
 	const metrics = [
 		{ id: "1", label: "Active Bookings", value: String(activeBookings) },
-		{ id: "2", label: "Active Drivers", value: `${activeDrivers} of ${totalDrivers}` },
-		{ id: "3", label: "This Month Revenue", value: `$${monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
+		{
+			id: "2",
+			label: "Active Drivers",
+			value: `${activeDrivers} of ${totalDrivers}`,
+		},
+		{
+			id: "3",
+			label: "This Month Revenue",
+			value: `$${monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+		},
 	];
 
 	const getActivityIcon = (type: string) => {
@@ -93,7 +108,10 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 					<CardTitle className="flex items-center gap-2 text-lg">
 						<Wifi className="h-5 w-5 text-green-500" />
 						Live Dashboard
-						<Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+						<Badge
+							variant="outline"
+							className="border-green-200 bg-green-50 text-green-700"
+						>
 							Connected
 						</Badge>
 					</CardTitle>
@@ -109,16 +127,21 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{metrics.map((metric) => (
-						<div key={metric.id} className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
+						<div
+							key={metric.id}
+							className="flex items-center justify-between rounded-lg bg-muted/50 p-2"
+						>
 							<div>
-								<p className="text-sm font-medium">{metric.label}</p>
-								<p className="text-xs text-muted-foreground">From analytics API</p>
+								<p className="font-medium text-sm">{metric.label}</p>
+								<p className="text-muted-foreground text-xs">
+									From analytics API
+								</p>
 							</div>
 							<div className="text-right">
-								<p className="text-lg font-bold">{metric.value}</p>
+								<p className="font-bold text-lg">{metric.value}</p>
 								<div className="flex items-center gap-1">
 									<TrendingUp className="h-3 w-3 text-green-500 opacity-70" />
-									<span className="text-xs text-muted-foreground">Live</span>
+									<span className="text-muted-foreground text-xs">Live</span>
 								</div>
 							</div>
 						</div>
@@ -136,19 +159,21 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-2">
-						<div className="flex justify-between items-center p-2 rounded-lg border bg-card">
+						<div className="flex items-center justify-between rounded-lg border bg-card p-2">
 							<div>
-								<p className="text-sm font-medium">Active Drivers</p>
-								<p className="text-xs text-muted-foreground">Currently available</p>
+								<p className="font-medium text-sm">Active Drivers</p>
+								<p className="text-muted-foreground text-xs">
+									Currently available
+								</p>
 							</div>
-							<span className="text-lg font-bold">{activeDrivers}</span>
+							<span className="font-bold text-lg">{activeDrivers}</span>
 						</div>
-						<div className="flex justify-between items-center p-2 rounded-lg border bg-card">
+						<div className="flex items-center justify-between rounded-lg border bg-card p-2">
 							<div>
-								<p className="text-sm font-medium">Total Fleet</p>
-								<p className="text-xs text-muted-foreground">All drivers</p>
+								<p className="font-medium text-sm">Total Fleet</p>
+								<p className="text-muted-foreground text-xs">All drivers</p>
 							</div>
-							<span className="text-lg font-bold">{totalDrivers}</span>
+							<span className="font-bold text-lg">{totalDrivers}</span>
 						</div>
 					</div>
 				</CardContent>
@@ -165,32 +190,38 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 					<ScrollArea className="h-[250px] pr-2">
 						<div className="space-y-2">
 							{recentBookings.length === 0 ? (
-								<p className="text-sm text-muted-foreground">No recent bookings.</p>
+								<p className="text-muted-foreground text-sm">
+									No recent bookings.
+								</p>
 							) : (
 								recentBookings.map((booking) => (
 									<div
 										key={booking.id}
-										className={`flex items-start gap-3 p-3 rounded-lg border ${getStatusColor(booking.status)}`}
+										className={`flex items-start gap-3 rounded-lg border p-3 ${getStatusColor(booking.status)}`}
 									>
-										<div className="flex-shrink-0 mt-0.5">
+										<div className="mt-0.5 flex-shrink-0">
 											{getActivityIcon(booking.bookingType)}
 										</div>
-										<div className="flex-1 min-w-0">
-											<p className="text-sm font-medium">
+										<div className="min-w-0 flex-1">
+											<p className="font-medium text-sm">
 												{booking.bookingType === "package"
 													? `Package booking for ${booking.customerName || "Customer"}`
 													: `Custom booking for ${booking.customerName || "Customer"}`}
 											</p>
 											{booking.originAddress && booking.destinationAddress && (
-												<p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+												<p className="mt-0.5 flex items-center gap-1 text-muted-foreground text-xs">
 													<MapPin className="h-3 w-3" />
 													{booking.originAddress} → {booking.destinationAddress}
 												</p>
 											)}
-											<p className="text-xs text-muted-foreground mt-1">
-												{formatTimeAgo(new Date(booking.createdAt))} · {booking.status}
+											<p className="mt-1 text-muted-foreground text-xs">
+												{formatTimeAgo(new Date(booking.createdAt))} ·{" "}
+												{booking.status}
 												{booking.totalAmount != null && (
-													<> · ${((booking.totalAmount ?? 0) / 100).toFixed(2)}</>
+													<>
+														{" "}
+														· ${((booking.totalAmount ?? 0) / 100).toFixed(2)}
+													</>
 												)}
 											</p>
 										</div>

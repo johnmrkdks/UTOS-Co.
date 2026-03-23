@@ -1,8 +1,14 @@
-import type { DB } from "@/db";
-import { bookings, drivers, users, offloadBookingDetails, bookingExtras } from "@/db/sqlite/schema";
-import { eq, and, sql, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import {
+	bookingExtras,
+	bookings,
+	drivers,
+	offloadBookingDetails,
+	users,
+} from "@/db/sqlite/schema";
 import { computeDriverShare } from "@/utils/compute-driver-share";
 
 export const GetDriverInvoiceDataSchema = z.object({
@@ -13,21 +19,33 @@ export const GetDriverInvoiceDataSchema = z.object({
 	commissionRate: z.number().min(1).max(100).optional(),
 });
 
-export type GetDriverInvoiceDataInput = z.infer<typeof GetDriverInvoiceDataSchema>;
+export type GetDriverInvoiceDataInput = z.infer<
+	typeof GetDriverInvoiceDataSchema
+>;
 
 /** Extract suburb from Australian-style address (e.g. "123 Main St, Melbourne VIC 3000" -> "Melbourne") */
 function extractSuburb(address: string): string {
 	if (!address?.trim()) return address || "";
 	// Match pattern: ", Suburb STATE Postcode" - suburb is before state
-	const match = address.match(/,\s*([^,]+?)\s+(?:NSW|VIC|QLD|WA|SA|TAS|NT|ACT)\s+\d{4}/i);
+	const match = address.match(
+		/,\s*([^,]+?)\s+(?:NSW|VIC|QLD|WA|SA|TAS|NT|ACT)\s+\d{4}/i,
+	);
 	if (match) return match[1].trim();
 	// Fallback: last comma-separated part before numbers (postcode)
 	const parts = address.split(",").map((p) => p.trim());
 	return parts.length >= 2 ? parts[parts.length - 2] : address;
 }
 
-export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoiceDataInput) {
-	const { driverId, startDate, endDate, commissionRate: commissionRateOverride } = input;
+export async function getDriverInvoiceDataService(
+	db: DB,
+	input: GetDriverInvoiceDataInput,
+) {
+	const {
+		driverId,
+		startDate,
+		endDate,
+		commissionRate: commissionRateOverride,
+	} = input;
 
 	const startTs = Math.floor(startDate.getTime() / 1000);
 	const endTs = Math.floor(endDate.getTime() / 1000);
@@ -72,14 +90,17 @@ export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoic
 			vehicleType: offloadBookingDetails.vehicleType,
 		})
 		.from(bookings)
-		.leftJoin(offloadBookingDetails, eq(bookings.id, offloadBookingDetails.bookingId))
+		.leftJoin(
+			offloadBookingDetails,
+			eq(bookings.id, offloadBookingDetails.bookingId),
+		)
 		.where(
 			and(
 				eq(bookings.driverId, driverId),
 				eq(bookings.status, BookingStatusEnum.Completed),
 				sql`COALESCE(${bookings.serviceCompletedAt}, ${bookings.actualDropoffTime}, ${bookings.scheduledPickupTime}) >= ${startTs}`,
-				sql`COALESCE(${bookings.serviceCompletedAt}, ${bookings.actualDropoffTime}, ${bookings.scheduledPickupTime}) <= ${endTs}`
-			)
+				sql`COALESCE(${bookings.serviceCompletedAt}, ${bookings.actualDropoffTime}, ${bookings.scheduledPickupTime}) <= ${endTs}`,
+			),
 		)
 		.orderBy(bookings.scheduledPickupTime);
 
@@ -95,14 +116,20 @@ export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoic
 				.from(bookingExtras)
 				.where(inArray(bookingExtras.bookingId, bookingIds))
 		: [];
-	const extrasByBooking = extrasRows.reduce((acc: Record<string, { tollCharges: number; parkingCharges: number }[]>, row) => {
-		if (!acc[row.bookingId]) acc[row.bookingId] = [];
-		acc[row.bookingId].push({
-			tollCharges: row.tollCharges ?? 0,
-			parkingCharges: row.parkingCharges ?? 0,
-		});
-		return acc;
-	}, {});
+	const extrasByBooking = extrasRows.reduce(
+		(
+			acc: Record<string, { tollCharges: number; parkingCharges: number }[]>,
+			row,
+		) => {
+			if (!acc[row.bookingId]) acc[row.bookingId] = [];
+			acc[row.bookingId].push({
+				tollCharges: row.tollCharges ?? 0,
+				parkingCharges: row.parkingCharges ?? 0,
+			});
+			return acc;
+		},
+		{},
+	);
 
 	const jobs = completedBookings.map((b) => {
 		const amount = b.finalAmount ?? b.quotedAmount ?? 0;
@@ -124,7 +151,7 @@ export async function getDriverInvoiceDataService(db: DB, input: GetDriverInvoic
 				extraCharges: b.extraCharges,
 				extras: extrasByBooking[b.id] ?? [],
 			},
-			commissionRate
+			commissionRate,
 		);
 
 		return {

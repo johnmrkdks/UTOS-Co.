@@ -1,8 +1,13 @@
-import { createFileRoute, Link, Outlet, useMatchRoute } from '@tanstack/react-router';
-import { Settings, Shield, Link as LinkIcon, Globe } from "lucide-react";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useMatchRoute,
+} from "@tanstack/react-router";
 import { cn } from "@workspace/ui/lib/utils";
+import { Globe, Link as LinkIcon, Settings, Shield } from "lucide-react";
 
-export const Route = createFileRoute('/admin/dashboard/_layout/settings')({
+export const Route = createFileRoute("/admin/dashboard/_layout/settings")({
 	component: SettingsLayout,
 });
 
@@ -34,7 +39,7 @@ function SettingsLayout() {
 		<div className="space-y-6 p-6">
 			{/* Header */}
 			<div className="space-y-2">
-				<h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+				<h1 className="font-bold text-3xl tracking-tight">Settings</h1>
 				<p className="text-muted-foreground">
 					Manage your account settings and preferences.
 				</p>
@@ -53,10 +58,10 @@ function SettingsLayout() {
 									key={section.href}
 									to={section.href}
 									className={cn(
-										"inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+										"inline-flex items-center gap-3 rounded-md px-3 py-2 font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
 										isActive
 											? "bg-accent text-accent-foreground"
-											: "text-muted-foreground"
+											: "text-muted-foreground",
 									)}
 								>
 									<Icon className="h-4 w-4" />

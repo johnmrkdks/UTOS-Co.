@@ -3,12 +3,13 @@
  * If final amount exceeds authorized amount (e.g. tolls, parking, waiting time),
  * updates the payment via Square UpdatePayment before capture so the client is charged the final amount.
  */
-import type { DB } from "@/db";
-import { getSquareClient } from "./square-client";
-import { bookingPayments } from "@/db/sqlite/schema/payments";
-import { bookings } from "@/db/sqlite/schema/bookings";
+
 import { eq } from "drizzle-orm";
+import type { DB } from "@/db";
 import { BookingPaymentStatusEnum } from "@/db/sqlite/enums";
+import { bookings } from "@/db/sqlite/schema/bookings";
+import { bookingPayments } from "@/db/sqlite/schema/payments";
+import { getSquareClient } from "./square-client";
 
 export interface CapturePaymentParams {
 	db: DB;
@@ -55,15 +56,24 @@ export async function captureBookingPayment(params: CapturePaymentParams) {
 
 	// If final amount differs from authorized, update payment before capture (Square UpdatePayment API)
 	if (finalAmountCents !== existing.authorizedAmountCents) {
-		const getResult = await client.payments.get({ paymentId: existing.squarePaymentId }) as { payment?: { versionToken?: string }; data?: { payment?: { versionToken?: string } } };
+		const getResult = (await client.payments.get({
+			paymentId: existing.squarePaymentId,
+		})) as {
+			payment?: { versionToken?: string };
+			data?: { payment?: { versionToken?: string } };
+		};
 		const payment = getResult?.data?.payment ?? getResult?.payment;
 		if (!payment) {
 			throw new Error("Could not retrieve payment from Square");
 		}
-		const versionToken = (payment as { versionToken?: string; version_token?: string }).versionToken ?? (payment as { versionToken?: string; version_token?: string }).version_token;
+		const versionToken =
+			(payment as { versionToken?: string; version_token?: string })
+				.versionToken ??
+			(payment as { versionToken?: string; version_token?: string })
+				.version_token;
 		const updateIdempotencyKey = `upd-${bookingId}`.slice(0, 45);
 		try {
-			const updateResult = await client.payments.update({
+			const updateResult = (await client.payments.update({
 				paymentId: existing.squarePaymentId,
 				payment: {
 					amountMoney: {
@@ -73,15 +83,27 @@ export async function captureBookingPayment(params: CapturePaymentParams) {
 					...(versionToken && { versionToken }),
 				},
 				idempotencyKey: updateIdempotencyKey,
-			}) as { payment?: unknown; data?: { payment?: unknown }; errors?: Array<{ detail?: string }> };
-			const updatedPayment = updateResult?.data?.payment ?? (updateResult as { payment?: unknown }).payment;
+			})) as {
+				payment?: unknown;
+				data?: { payment?: unknown };
+				errors?: Array<{ detail?: string }>;
+			};
+			const updatedPayment =
+				updateResult?.data?.payment ??
+				(updateResult as { payment?: unknown }).payment;
 			if (!updatedPayment) {
-				const errMsg = (updateResult as { errors?: Array<{ detail?: string }> }).errors?.[0]?.detail ?? "Update failed";
-				throw new Error(`Could not update payment amount to $${finalAmountDollars.toFixed(2)}: ${errMsg}. The client may need to pay the difference separately.`);
+				const errMsg =
+					(updateResult as { errors?: Array<{ detail?: string }> }).errors?.[0]
+						?.detail ?? "Update failed";
+				throw new Error(
+					`Could not update payment amount to $${finalAmountDollars.toFixed(2)}: ${errMsg}. The client may need to pay the difference separately.`,
+				);
 			}
 		} catch (err) {
 			if (err instanceof Error) throw err;
-			throw new Error("Could not update payment amount. Capture the original amount or contact the customer for the difference.");
+			throw new Error(
+				"Could not update payment amount. Capture the original amount or contact the customer for the difference.",
+			);
 		}
 	}
 

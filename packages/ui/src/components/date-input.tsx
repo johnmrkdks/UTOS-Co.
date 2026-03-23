@@ -1,3 +1,4 @@
+import type { PopoverContentProps } from "@radix-ui/react-popover";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Popover,
@@ -12,7 +13,6 @@ import {
 	SelectValue,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
-import type { PopoverContentProps } from "@radix-ui/react-popover";
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
 import * as React from "react";
 
@@ -267,7 +267,7 @@ const Calendar = React.memo(
 				nextMonth.getFullYear() < effectiveMaxYear ||
 				(nextMonth.getFullYear() === effectiveMaxYear &&
 					nextMonth.getMonth() <=
-					(effectiveMaxYear === today.getFullYear() ? today.getMonth() : 11))
+						(effectiveMaxYear === today.getFullYear() ? today.getMonth() : 11))
 			) {
 				setViewDate(nextMonth);
 			}
@@ -393,8 +393,8 @@ const Calendar = React.memo(
 		}, [months, viewDate, today, effectiveMaxYear]);
 
 		return (
-			<div className="p-3 bg-popover text-popover-foreground">
-				<div className="flex items-center justify-between mb-4">
+			<div className="bg-popover p-3 text-popover-foreground">
+				<div className="mb-4 flex items-center justify-between">
 					<div className="flex gap-2">
 						<Select
 							value={months[viewDate.getMonth()]}
@@ -432,11 +432,11 @@ const Calendar = React.memo(
 						</Select>
 					</div>
 				</div>
-				<div className="grid grid-cols-7 gap-1 mb-2">
+				<div className="mb-2 grid grid-cols-7 gap-1">
 					{["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
 						<div
 							key={day}
-							className="text-center text-sm text-muted-foreground"
+							className="text-center text-muted-foreground text-sm"
 						>
 							{day}
 						</div>
@@ -453,15 +453,15 @@ const Calendar = React.memo(
 								handleDateSelect(day.day)
 							}
 							className={cn(
-								"h-8 w-8 text-center rounded-full text-sm",
+								"h-8 w-8 rounded-full text-center text-sm",
 								"hover:bg-accent hover:text-accent-foreground",
 								"focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
 								day.isSelected &&
-								"bg-primary text-primary-foreground hover:bg-primary",
+									"bg-primary text-primary-foreground hover:bg-primary",
 								!day.isCurrentMonth && "text-muted-foreground opacity-50",
 								day.isToday && !day.isSelected && "border border-border",
 								day.isDisabled &&
-								"opacity-50 cursor-not-allowed hover:bg-transparent",
+									"cursor-not-allowed opacity-50 hover:bg-transparent",
 							)}
 							disabled={!day.isCurrentMonth || day.isDisabled}
 						>
@@ -469,7 +469,7 @@ const Calendar = React.memo(
 						</button>
 					))}
 				</div>
-				<div className="mt-4 flex justify-between items-center">
+				<div className="mt-4 flex items-center justify-between">
 					<Button
 						type="button"
 						variant="outline"
@@ -642,7 +642,8 @@ const DateInput = React.forwardRef<HTMLDivElement, DateInputProps>(
 
 					onDateChange(newDate);
 					return { ...newState, errorMessage: null };
-				} else if (onDateChange) {
+				}
+				if (onDateChange) {
 					if (!newState.month && !newState.day && !newState.year) {
 						onDateChange(undefined);
 					}
@@ -695,10 +696,10 @@ const DateInput = React.forwardRef<HTMLDivElement, DateInputProps>(
 				<div
 					ref={ref}
 					className={cn(
-						"flex h-9 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-within:ring-1 focus-within:ring-ring relative",
+						"relative flex h-9 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-within:ring-1 focus-within:ring-ring",
 						disabled && "cursor-not-allowed opacity-50",
 						(error || errorMessage) &&
-						"border-destructive focus-within:ring-destructive",
+							"border-destructive focus-within:ring-destructive",
 						className,
 					)}
 					{...props}
@@ -732,7 +733,7 @@ const DateInput = React.forwardRef<HTMLDivElement, DateInputProps>(
 						disabled={disabled || !editable}
 						placeholder="yyyy"
 					/>
-					<div className="flex gap-1 ml-auto">
+					<div className="ml-auto flex gap-1">
 						{isFilled && !disabled && editable && (
 							<button
 								type="button"
@@ -765,8 +766,8 @@ const DateInput = React.forwardRef<HTMLDivElement, DateInputProps>(
 									<Calendar
 										selectedDate={
 											month !== undefined &&
-												day !== undefined &&
-												year !== undefined
+											day !== undefined &&
+											year !== undefined
 												? new Date(year, month - 1, day)
 												: undefined
 										}
@@ -780,7 +781,7 @@ const DateInput = React.forwardRef<HTMLDivElement, DateInputProps>(
 					</div>
 				</div>
 				{isDateLabeled && isFilled && (
-					<div className="text-xs italic text-muted-foreground mt-4">
+					<div className="mt-4 text-muted-foreground text-xs italic">
 						{new Date(year!, month! - 1, day!).toLocaleDateString("en-PH", {
 							year: "numeric",
 							month: "long",
@@ -789,7 +790,7 @@ const DateInput = React.forwardRef<HTMLDivElement, DateInputProps>(
 					</div>
 				)}
 				{errorMessage && (
-					<div className="text-xs text-destructive">{errorMessage}</div>
+					<div className="text-destructive text-xs">{errorMessage}</div>
 				)}
 			</div>
 		);

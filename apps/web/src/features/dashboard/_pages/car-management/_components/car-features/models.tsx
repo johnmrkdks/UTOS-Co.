@@ -1,6 +1,12 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { ModelTableList } from "./models/model-table-list";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { AddModelDialog } from "./models/add-model-dialog";
+import { ModelTableList } from "./models/model-table-list";
 
 export function Models() {
 	return (
@@ -9,7 +15,9 @@ export function Models() {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Car Models</CardTitle>
-						<CardDescription>Manage car models in your inventory</CardDescription>
+						<CardDescription>
+							Manage car models in your inventory
+						</CardDescription>
 					</div>
 					<AddModelDialog />
 				</div>
@@ -18,6 +26,5 @@ export function Models() {
 				<ModelTableList />
 			</CardContent>
 		</Card>
-	)
+	);
 }
-

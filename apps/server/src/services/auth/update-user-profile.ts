@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { users } from "@/db/sqlite/schema";
-import { eq } from "drizzle-orm";
 
 export const UpdateUserProfileServiceSchema = z.object({
 	userId: z.string().optional(), // Optional because it will be provided by session context
@@ -10,7 +10,9 @@ export const UpdateUserProfileServiceSchema = z.object({
 	// Note: Email updates should be handled separately with verification
 });
 
-export type UpdateUserProfileServiceInput = z.infer<typeof UpdateUserProfileServiceSchema>;
+export type UpdateUserProfileServiceInput = z.infer<
+	typeof UpdateUserProfileServiceSchema
+>;
 
 export const updateUserProfileService = async (
 	db: DB,
@@ -35,11 +37,18 @@ export const updateUserProfileService = async (
 		}
 
 		const currentUser = existingUser[0];
-		console.log("DEBUG: Current user data:", JSON.stringify({
-			id: currentUser.id,
-			name: currentUser.name,
-			phone: currentUser.phone,
-		}, null, 2));
+		console.log(
+			"DEBUG: Current user data:",
+			JSON.stringify(
+				{
+					id: currentUser.id,
+					name: currentUser.name,
+					phone: currentUser.phone,
+				},
+				null,
+				2,
+			),
+		);
 
 		// Prepare update data - only include fields that are provided
 		const updateData: any = {
@@ -65,13 +74,22 @@ export const updateUserProfileService = async (
 			.returning();
 
 		console.log("DEBUG: User profile updated successfully");
-		console.log("DEBUG: Updated user:", JSON.stringify({
-			id: updatedUser[0].id,
-			name: updatedUser[0].name,
-			phone: updatedUser[0].phone,
-		}, null, 2));
+		console.log(
+			"DEBUG: Updated user:",
+			JSON.stringify(
+				{
+					id: updatedUser[0].id,
+					name: updatedUser[0].name,
+					phone: updatedUser[0].phone,
+				},
+				null,
+				2,
+			),
+		);
 
-		console.log("=== DEBUG: updateUserProfileService completed successfully ===");
+		console.log(
+			"=== DEBUG: updateUserProfileService completed successfully ===",
+		);
 		return {
 			success: true,
 			message: "Profile updated successfully.",
@@ -80,9 +98,18 @@ export const updateUserProfileService = async (
 	} catch (error) {
 		console.error("=== ERROR in updateUserProfileService ===");
 		console.error("Error type:", typeof error);
-		console.error("Error name:", error instanceof Error ? error.name : "Unknown");
-		console.error("Error message:", error instanceof Error ? error.message : error);
-		console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+		console.error(
+			"Error name:",
+			error instanceof Error ? error.name : "Unknown",
+		);
+		console.error(
+			"Error message:",
+			error instanceof Error ? error.message : error,
+		);
+		console.error(
+			"Error stack:",
+			error instanceof Error ? error.stack : "No stack trace",
+		);
 		console.error("Full error object:", error);
 		console.error("=== END ERROR LOG ===");
 		throw error;

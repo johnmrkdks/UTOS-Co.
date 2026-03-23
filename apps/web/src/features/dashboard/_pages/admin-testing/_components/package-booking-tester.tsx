@@ -1,13 +1,28 @@
-import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
+import { Calendar as CalendarComponent } from "@workspace/ui/components/calendar";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Calendar, CalendarIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
-import { Calendar as CalendarComponent } from "@workspace/ui/components/calendar";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@workspace/ui/components/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
 import { format } from "date-fns";
+import { Calendar, CalendarIcon } from "lucide-react";
+import { useState } from "react";
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
 import type { TestResult } from "../index";
 
@@ -47,11 +62,11 @@ export function PackageBookingTester({ onResult }: PackageBookingTesterProps) {
 				customerEmail,
 				customerPhone,
 				scheduledPickupTime: pickupDate.toISOString(),
-				passengerCount: parseInt(passengerCount),
+				passengerCount: Number.parseInt(passengerCount),
 			};
 
 			// Simulate API call delay
-			await new Promise(resolve => setTimeout(resolve, 2000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			// Simulate successful booking creation
 			onResult({
@@ -68,7 +83,6 @@ export function PackageBookingTester({ onResult }: PackageBookingTesterProps) {
 			setCustomerPhone("+61400000000");
 			setPickupDate(undefined);
 			setPassengerCount("2");
-
 		} catch (error) {
 			onResult({
 				type: "package",
@@ -161,9 +175,9 @@ export function PackageBookingTester({ onResult }: PackageBookingTesterProps) {
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{[1,2,3,4,5,6,7,8].map(count => (
+							{[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
 								<SelectItem key={count} value={count.toString()}>
-									{count} {count === 1 ? 'person' : 'people'}
+									{count} {count === 1 ? "person" : "people"}
 								</SelectItem>
 							))}
 						</SelectContent>
@@ -171,8 +185,8 @@ export function PackageBookingTester({ onResult }: PackageBookingTesterProps) {
 				</div>
 			</div>
 
-			<Button 
-				onClick={handleTest} 
+			<Button
+				onClick={handleTest}
 				disabled={isLoading || !selectedPackage || !pickupDate}
 				className="w-full"
 			>

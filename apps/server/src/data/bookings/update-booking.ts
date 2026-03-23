@@ -1,8 +1,8 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import type { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
 import type { UpdateBooking } from "@/schemas/shared";
-import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
 
 type UpdateBookingParams = {
 	id: string;
@@ -22,16 +22,23 @@ export async function updateBooking(db: DB, { id, data }: UpdateBookingParams) {
 
 	// Convert scheduledPickupTime from ISO string to Date if it's a string
 	if (updateData.scheduledPickupTime) {
-		if (typeof updateData.scheduledPickupTime === 'string') {
+		if (typeof updateData.scheduledPickupTime === "string") {
 			updateData.scheduledPickupTime = new Date(updateData.scheduledPickupTime);
 		} else if (updateData.scheduledPickupTime instanceof Date) {
 			console.log("✅ Already a Date object");
 		} else {
-			console.warn("⚠️ scheduledPickupTime is neither string nor Date:", updateData.scheduledPickupTime);
+			console.warn(
+				"⚠️ scheduledPickupTime is neither string nor Date:",
+				updateData.scheduledPickupTime,
+			);
 		}
 	}
 
-	const [updatedBooking] = await db.update(bookings).set(updateData).where(eq(bookings.id, id)).returning();
+	const [updatedBooking] = await db
+		.update(bookings)
+		.set(updateData)
+		.where(eq(bookings.id, id))
+		.returning();
 
 	return updatedBooking;
 }

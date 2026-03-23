@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarTransmissionType } from "server/types"
-import { EditTransmissionTypeDialog } from "./edit-transmission-type-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarTransmissionType } from "server/types";
 import { DeleteTransmissionTypeDialog } from "./delete-transmission-type-dialog";
+import { EditTransmissionTypeDialog } from "./edit-transmission-type-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function TransmissionTypeTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function TransmissionTypeTableRowActions<TData>({
 			<EditTransmissionTypeDialog transmissionType={transmissionType} />
 			<DeleteTransmissionTypeDialog transmissionType={transmissionType} />
 		</div>
-	)
+	);
 }

@@ -1,19 +1,27 @@
+import formatter from "lodash";
+import { z } from "zod";
 import { getCarTransmissionTypeById } from "@/data/cars-transmission-types/get-car-transmission-type-by-id";
 import { updateCarTransmissionType } from "@/data/cars-transmission-types/update-car-transmission-type";
 import type { DB } from "@/db";
-import { UpdateCarTransmissionTypeSchema, type UpdateCarTransmissionType } from "@/schemas/shared";
+import {
+	type UpdateCarTransmissionType,
+	UpdateCarTransmissionTypeSchema,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const UpdateCarTransmissionTypeServiceSchema = z.object({
 	id: z.string(),
 	data: UpdateCarTransmissionTypeSchema,
 });
 
-export type UpdateCarTransmissionTypeParams = z.infer<typeof UpdateCarTransmissionTypeServiceSchema>;
+export type UpdateCarTransmissionTypeParams = z.infer<
+	typeof UpdateCarTransmissionTypeServiceSchema
+>;
 
-export async function updateCarTransmissionTypeService(db: DB, { id, data }: UpdateCarTransmissionTypeParams) {
+export async function updateCarTransmissionTypeService(
+	db: DB,
+	{ id, data }: UpdateCarTransmissionTypeParams,
+) {
 	const carTransmissionType = await getCarTransmissionTypeById(db, id);
 
 	if (!carTransmissionType) {
@@ -25,7 +33,10 @@ export async function updateCarTransmissionTypeService(db: DB, { id, data }: Upd
 		name: data.name ? formatter.startCase(data.name) : undefined,
 	} as UpdateCarTransmissionType;
 
-	const updatedCarTransmissionType = await updateCarTransmissionType(db, { id, data: values });
+	const updatedCarTransmissionType = await updateCarTransmissionType(db, {
+		id,
+		data: values,
+	});
 
 	return updatedCarTransmissionType;
 }

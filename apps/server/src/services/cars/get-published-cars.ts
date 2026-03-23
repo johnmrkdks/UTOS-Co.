@@ -13,10 +13,11 @@ function transformCarForFrontend(car: any) {
 		// Get the first available image URL
 		imageUrl: car.images?.[0]?.url || null,
 		// Transform features to a simple array
-		features: car.carsToFeatures?.map((ctf: any) => ({
-			id: ctf.feature?.id,
-			name: ctf.feature?.name,
-		})) || [],
+		features:
+			car.carsToFeatures?.map((ctf: any) => ({
+				id: ctf.feature?.id,
+				name: ctf.feature?.name,
+			})) || [],
 		// Engine type from fuel type
 		engineType: car.fuelType?.name || "",
 	};
@@ -24,7 +25,7 @@ function transformCarForFrontend(car: any) {
 
 export async function getPublishedCarsService(db: DB, params: ResourceList) {
 	const carsResult = await getPublishedCars(db, params);
-	
+
 	// Transform the cars data if it exists
 	if (carsResult.data) {
 		const transformedCars = carsResult.data.map(transformCarForFrontend);
@@ -33,6 +34,6 @@ export async function getPublishedCarsService(db: DB, params: ResourceList) {
 			data: transformedCars,
 		};
 	}
-	
+
 	return carsResult;
 }

@@ -1,16 +1,26 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { cn } from "@workspace/ui/lib/utils";
 
 export type AboutProps = {
 	title: string;
 	description: string;
-}
+};
 
 type AboutCardProps = AboutProps & {
 	className?: string;
 };
 
-export function AboutCard({ title, description, className, ...props }: AboutCardProps) {
+export function AboutCard({
+	title,
+	description,
+	className,
+	...props
+}: AboutCardProps) {
 	return (
 		<Card className={cn("bg-black/20 shadow-none", className)} {...props}>
 			<CardHeader>
@@ -20,5 +30,5 @@ export function AboutCard({ title, description, className, ...props }: AboutCard
 				<p className="text-sm">{description}</p>
 			</CardContent>
 		</Card>
-	)
+	);
 }

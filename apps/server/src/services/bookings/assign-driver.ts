@@ -1,7 +1,7 @@
-import type { DB } from "@/db";
-import { bookings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { bookings } from "@/db/schema";
 import { ErrorFactory } from "@/utils/error-factory";
 
 export const AssignDriverServiceSchema = z.object({
@@ -27,7 +27,7 @@ export async function assignDriverService(db: DB, data: AssignDriverParams) {
 
 	if (!existingBooking.carId) {
 		throw ErrorFactory.badRequest(
-			"Cannot assign driver - no vehicle assigned to this booking. Please assign a vehicle first before assigning a driver."
+			"Cannot assign driver - no vehicle assigned to this booking. Please assign a vehicle first before assigning a driver.",
 		);
 	}
 

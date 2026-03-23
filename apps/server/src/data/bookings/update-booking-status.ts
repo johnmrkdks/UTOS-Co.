@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
 import type { UpdateBooking } from "@/schemas/shared";
-import { eq } from "drizzle-orm";
 
 type UpdateBookingStatusParams = {
 	id: string;

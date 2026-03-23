@@ -1,7 +1,7 @@
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { users } from "./users";
 import { relations, sql } from "drizzle-orm";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { rateableTypeEnum } from "./enums";
+import { users } from "./users";
 
 export const ratings = pgTable("ratings", {
 	id: text("id").primaryKey(),

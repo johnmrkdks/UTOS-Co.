@@ -7,7 +7,7 @@ import type { ResourceList } from "@/utils/query/resource-list";
 
 export async function getCarModelsWithBrand(db: DB, options: ResourceList) {
 	const query = await db.query.carModels.findMany({
-		with: { brand: true }
+		with: { brand: true },
 	});
 
 	const queryBuilder: QueryBuilder = {
@@ -17,5 +17,4 @@ export async function getCarModelsWithBrand(db: DB, options: ResourceList) {
 	};
 
 	return filterPaginationSort(queryBuilder, options);
-
 }

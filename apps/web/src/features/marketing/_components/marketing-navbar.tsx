@@ -1,39 +1,47 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { useState } from "react";
-import { cn } from "@workspace/ui/lib/utils";
-import { Button } from "@workspace/ui/components/button";
-import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
-import { Logo } from "@/components/logo";
-import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
-import { AuthCTA } from "./navbar/auth-cta";
-import { MARKETING_ROUTES } from "@/constants/marketing-routes";
 import {
-	Phone,
-	Menu,
-	X,
-	Star,
-	Shield,
-	Clock,
-	FacebookIcon,
-	InstagramIcon,
-	MailIcon,
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@workspace/ui/components/avatar";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Sheet,
+	SheetContent,
+	SheetTrigger,
+} from "@workspace/ui/components/sheet";
+import { cn } from "@workspace/ui/lib/utils";
+import {
 	CalendarIcon,
-	UserIcon,
-	SettingsIcon,
-	LogOutIcon,
-	HomeIcon,
 	CarIcon,
-	InfoIcon,
-	HelpCircleIcon,
+	ChevronsLeft,
+	Clock,
 	ContactIcon,
+	FacebookIcon,
+	HelpCircleIcon,
+	HomeIcon,
+	InfoIcon,
+	InstagramIcon,
+	LogOutIcon,
+	MailIcon,
+	Menu,
 	Package,
-	ChevronsLeft
+	Phone,
+	SettingsIcon,
+	Shield,
+	Star,
+	UserIcon,
+	X,
 } from "lucide-react";
-import { BUSINESS_INFO } from "@/constants/business-info";
-import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
+import { Logo } from "@/components/logo";
+import { BUSINESS_INFO } from "@/constants/business-info";
+import { MARKETING_ROUTES } from "@/constants/marketing-routes";
+import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
+import { useUserQuery } from "@/hooks/query/use-user-query";
+import { AuthCTA } from "./navbar/auth-cta";
 
 type HeaderProps = {
 	className?: string;
@@ -44,7 +52,10 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	return (
-		<div className={cn("bg-beige shadow-lg relative z-50", className)} {...props}>
+		<div
+			className={cn("relative z-50 bg-beige shadow-lg", className)}
+			{...props}
+		>
 			{/* Top Contact Bar */}
 			{/* <div className="hidden md:block bg-foreground border-b border-border"> */}
 			{/* 	<div className="container mx-auto px-6 py-2"> */}
@@ -92,42 +103,49 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 								<Button
 									variant="ghost"
 									size="sm"
-									className="lg:hidden text-foreground hover:text-primary"
+									className="text-foreground hover:text-primary lg:hidden"
 								>
-									<Menu className="w-6 h-6" />
+									<Menu className="h-6 w-6" />
 								</Button>
 							</SheetTrigger>
-							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full [&>button]:hidden">
+							<SheetContent
+								side="left"
+								className="flex h-full w-full flex-col p-0 sm:w-80 [&>button]:hidden"
+							>
 								{/* Fixed Header */}
-								<div className="p-4 border-b flex-shrink-0">
+								<div className="flex-shrink-0 border-b p-4">
 									<div className="flex items-center justify-between">
 										<div className="flex items-center">
 											<Logo />
 											<div className="ml-2">
-												<h2 className="text-lg font-semibold">Down Under Chauffeur</h2>
+												<h2 className="font-semibold text-lg">
+													Down Under Chauffeur
+												</h2>
 											</div>
 										</div>
 										<Button
 											variant="ghost"
 											size="sm"
 											onClick={() => setIsSheetOpen(false)}
-											className="p-2 hover:bg-gray-100 rounded-lg"
+											className="rounded-lg p-2 hover:bg-gray-100"
 										>
-											<ChevronsLeft className="w-5 h-5 text-gray-600" />
+											<ChevronsLeft className="h-5 w-5 text-gray-600" />
 										</Button>
 									</div>
 								</div>
 
 								{/* Mobile Menu Content */}
-								<MarketingMobileMenuContent onClose={() => setIsSheetOpen(false)} />
+								<MarketingMobileMenuContent
+									onClose={() => setIsSheetOpen(false)}
+								/>
 							</SheetContent>
 						</Sheet>
-						
+
 						<BrandLogo />
 					</div>
 
 					{/* Desktop Navigation */}
-					<nav className="hidden lg:flex items-center gap-8">
+					<nav className="hidden items-center gap-8 lg:flex">
 						<NavLinks />
 					</nav>
 
@@ -138,7 +156,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 								<Button
 									size="sm"
 									variant="dark"
-									className="text-primary-foreground font-semibold"
+									className="font-semibold text-primary-foreground"
 								>
 									Book Now
 								</Button>
@@ -149,8 +167,6 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 					</div>
 				</div>
 			</div>
-
-
 		</div>
 	);
 }
@@ -158,22 +174,22 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 function NavLinks() {
 	const { session } = useUserQuery();
 	const isCustomer = session?.user?.role === "user";
-	
+
 	// Add My Bookings for authenticated customers
-	const routes = isCustomer 
+	const routes = isCustomer
 		? [...MARKETING_ROUTES, { path: "/my-bookings", label: "My Bookings" }]
 		: MARKETING_ROUTES;
-	
+
 	const links = routes.map(({ path, label }) => {
 		return (
 			<Link
 				key={path}
 				to={path}
 				activeProps={{ className: "text-primary" }}
-				className="text-foreground hover:text-primary transition-colors font-medium relative group"
+				className="group relative font-medium text-foreground transition-colors hover:text-primary"
 			>
 				{label}
-				<div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+				<div className="-bottom-1 absolute left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
 			</Link>
 		);
 	});
@@ -184,12 +200,12 @@ function NavLinks() {
 function MobileNavLinks({ onClose }: { onClose: () => void }) {
 	const { session } = useUserQuery();
 	const isCustomer = session?.user?.role === "user";
-	
+
 	// Add My Bookings for authenticated customers
-	const routes = isCustomer 
+	const routes = isCustomer
 		? [...MARKETING_ROUTES, { path: "/my-bookings", label: "My Bookings" }]
 		: MARKETING_ROUTES;
-	
+
 	const links = routes.map(({ path, label }) => {
 		return (
 			<Link
@@ -197,7 +213,7 @@ function MobileNavLinks({ onClose }: { onClose: () => void }) {
 				to={path}
 				onClick={onClose}
 				activeProps={{ className: "text-primary bg-primary/10" }}
-				className="text-foreground hover:text-primary hover:bg-primary/5 transition-all px-4 py-1.5 rounded-lg font-medium"
+				className="rounded-lg px-4 py-1.5 font-medium text-foreground transition-all hover:bg-primary/5 hover:text-primary"
 			>
 				{label}
 			</Link>
@@ -207,8 +223,15 @@ function MobileNavLinks({ onClose }: { onClose: () => void }) {
 	return <>{links}</>;
 }
 
-function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () => void }) {
-	const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
+function MobileDashboardLinks({
+	session,
+	onClose,
+}: {
+	session: any;
+	onClose: () => void;
+}) {
+	const isAdmin =
+		session.user.role === "admin" || session.user.role === "super_admin";
 	const isDriver = session.user.role === "driver";
 
 	return (
@@ -220,7 +243,7 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 					asChild
 				>
 					<Link to="/admin/dashboard">
-						<SettingsIcon className="w-4 h-4" />
+						<SettingsIcon className="h-4 w-4" />
 						Admin Dashboard
 					</Link>
 				</Button>
@@ -233,7 +256,7 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 					asChild
 				>
 					<Link to="/driver">
-						<UserIcon className="w-4 h-4" />
+						<UserIcon className="h-4 w-4" />
 						Driver Dashboard
 					</Link>
 				</Button>
@@ -242,18 +265,24 @@ function MobileDashboardLinks({ session, onClose }: { session: any; onClose: () 
 	);
 }
 
-function MobileUserProfile({ session, onClose }: { session: any; onClose: () => void }) {
+function MobileUserProfile({
+	session,
+	onClose,
+}: {
+	session: any;
+	onClose: () => void;
+}) {
 	const isCustomer = session.user.role === "user";
 
 	if (!isCustomer) return null;
 
 	return (
-		<div className="flex flex-col gap-2 pt-2 border-t border-border">
+		<div className="flex flex-col gap-2 border-border border-t pt-2">
 			<div className="px-2 py-1">
-				<p className="text-sm font-medium text-foreground truncate">
+				<p className="truncate font-medium text-foreground text-sm">
 					{session.user.name}
 				</p>
-				<p className="text-xs text-muted-foreground truncate">
+				<p className="truncate text-muted-foreground text-xs">
 					{session.user.email}
 				</p>
 			</div>
@@ -261,18 +290,18 @@ function MobileUserProfile({ session, onClose }: { session: any; onClose: () => 
 			<Link
 				to="/profile"
 				onClick={onClose}
-				className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-primary hover:bg-primary/5 transition-all rounded-lg"
+				className="flex items-center gap-2 rounded-lg px-3 py-2 text-foreground text-sm transition-all hover:bg-primary/5 hover:text-primary"
 			>
-				<UserIcon className="w-4 h-4" />
+				<UserIcon className="h-4 w-4" />
 				Profile
 			</Link>
 
 			<Link
 				to="/account/settings"
 				onClick={onClose}
-				className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:text-primary hover:bg-primary/5 transition-all rounded-lg"
+				className="flex items-center gap-2 rounded-lg px-3 py-2 text-foreground text-sm transition-all hover:bg-primary/5 hover:text-primary"
 			>
-				<SettingsIcon className="w-4 h-4" />
+				<SettingsIcon className="h-4 w-4" />
 				Account Settings
 			</Link>
 		</div>
@@ -298,14 +327,18 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 
 		// Add My Bookings for authenticated customers
 		if (isCustomer) {
-			baseRoutes.splice(2, 0, { path: "/my-bookings", label: "My Bookings", icon: CalendarIcon });
+			baseRoutes.splice(2, 0, {
+				path: "/my-bookings",
+				label: "My Bookings",
+				icon: CalendarIcon,
+			});
 		}
 
 		return baseRoutes;
 	};
 
 	const navigationItems = getNavigationItems();
-	
+
 	const isActive = (path: string) => {
 		return location.pathname === path;
 	};
@@ -316,18 +349,31 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 			<div className="flex-1 overflow-y-auto">
 				{/* User Info Section */}
 				{session && (
-					<div className="p-4 border-b">
+					<div className="border-b p-4">
 						<div className="flex items-center space-x-3">
-							<Avatar className="w-12 h-12">
-								<AvatarImage src={session?.user?.image ?? undefined} alt="Profile image" />
-								<AvatarFallback className="bg-primary/10 text-primary text-lg">
-									{session?.user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+							<Avatar className="h-12 w-12">
+								<AvatarImage
+									src={session?.user?.image ?? undefined}
+									alt="Profile image"
+								/>
+								<AvatarFallback className="bg-primary/10 text-lg text-primary">
+									{session?.user?.name
+										?.split(" ")
+										.map((n) => n[0])
+										.join("")
+										.toUpperCase() || "U"}
 								</AvatarFallback>
 							</Avatar>
 							<div className="flex-1">
-								<p className="text-sm font-medium text-gray-900">{session?.user.name}</p>
-								<p className="text-xs text-gray-500">{session?.user.email}</p>
-								<p className="text-xs text-blue-600 font-medium capitalize">{session?.user.role === 'user' ? 'Customer' : session?.user.role}</p>
+								<p className="font-medium text-gray-900 text-sm">
+									{session?.user.name}
+								</p>
+								<p className="text-gray-500 text-xs">{session?.user.email}</p>
+								<p className="font-medium text-blue-600 text-xs capitalize">
+									{session?.user.role === "user"
+										? "Customer"
+										: session?.user.role}
+								</p>
 							</div>
 						</div>
 					</div>
@@ -345,19 +391,21 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 									to={item.path}
 									onClick={onClose}
 									className={cn(
-										"flex items-center gap-4 p-3 rounded-lg transition-all duration-200 touch-manipulation group hover:bg-muted/50 active:scale-[0.98]",
-										active 
-											? "bg-primary/10 text-primary border border-primary/20 shadow-sm" 
-											: "text-foreground hover:text-primary"
+										"group flex touch-manipulation items-center gap-4 rounded-lg p-3 transition-all duration-200 hover:bg-muted/50 active:scale-[0.98]",
+										active
+											? "border border-primary/20 bg-primary/10 text-primary shadow-sm"
+											: "text-foreground hover:text-primary",
 									)}
 								>
 									{/* Icon Container */}
-									<div className={cn(
-										"w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200",
-										active 
-											? "bg-primary text-white shadow-md" 
-											: "bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-									)}>
+									<div
+										className={cn(
+											"flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200",
+											active
+												? "bg-primary text-white shadow-md"
+												: "bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary",
+										)}
+									>
 										<Icon className="h-5 w-5" />
 									</div>
 
@@ -366,21 +414,29 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 										<div className="flex items-center justify-between">
 											<span className="font-medium text-sm">{item.label}</span>
 											{active && (
-												<div className="w-2 h-2 bg-primary rounded-full"></div>
+												<div className="h-2 w-2 rounded-full bg-primary" />
 											)}
 										</div>
 										{/* Optional descriptions for key items */}
 										{item.path === "/" && (
-											<p className="text-xs text-muted-foreground mt-0.5">Welcome to our platform</p>
+											<p className="mt-0.5 text-muted-foreground text-xs">
+												Welcome to our platform
+											</p>
 										)}
 										{item.path === "/fleet" && (
-											<p className="text-xs text-muted-foreground mt-0.5">Explore luxury vehicles</p>
+											<p className="mt-0.5 text-muted-foreground text-xs">
+												Explore luxury vehicles
+											</p>
 										)}
 										{item.path === "/services" && (
-											<p className="text-xs text-muted-foreground mt-0.5">Browse our premium services</p>
+											<p className="mt-0.5 text-muted-foreground text-xs">
+												Browse our premium services
+											</p>
 										)}
 										{item.path === "/my-bookings" && (
-											<p className="text-xs text-muted-foreground mt-0.5">View and manage bookings</p>
+											<p className="mt-0.5 text-muted-foreground text-xs">
+												View and manage bookings
+											</p>
 										)}
 									</div>
 								</Link>
@@ -391,7 +447,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 
 				{/* Dashboard Links for authenticated users */}
 				{session && (
-					<div className="p-4 border-t">
+					<div className="border-t p-4">
 						<div className="space-y-2">
 							<MobileDashboardLinks session={session} onClose={onClose} />
 							{session.user.role === "user" && (
@@ -402,19 +458,25 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 				)}
 
 				{/* Contact Information */}
-				<div className="p-4 border-t">
+				<div className="border-t p-4">
 					<div className="space-y-3">
-						<h3 className="text-sm font-semibold text-gray-900">Contact Us</h3>
+						<h3 className="font-semibold text-gray-900 text-sm">Contact Us</h3>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 text-sm">
-								<Phone className="w-4 h-4 text-primary" />
-								<a href={BUSINESS_INFO.phone.link} className="hover:text-primary transition-colors">
+								<Phone className="h-4 w-4 text-primary" />
+								<a
+									href={BUSINESS_INFO.phone.link}
+									className="transition-colors hover:text-primary"
+								>
 									{BUSINESS_INFO.phone.display}
 								</a>
 							</div>
 							<div className="flex items-center gap-2 text-sm">
-								<MailIcon className="w-4 h-4 text-primary" />
-								<a href={BUSINESS_INFO.email.link} className="hover:text-primary transition-colors">
+								<MailIcon className="h-4 w-4 text-primary" />
+								<a
+									href={BUSINESS_INFO.email.link}
+									className="transition-colors hover:text-primary"
+								>
 									{BUSINESS_INFO.email.display}
 								</a>
 							</div>
@@ -424,11 +486,11 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 			</div>
 
 			{/* Fixed Footer */}
-			<div className="p-4 border-t flex-shrink-0 bg-white">
+			<div className="flex-shrink-0 border-t bg-white p-4">
 				{session ? (
 					<Button
 						variant="outline"
-						className="w-full flex items-center justify-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+						className="flex w-full items-center justify-center gap-2 border-red-200 text-red-600 hover:bg-red-50"
 						onClick={() => {
 							signOutWithConfirmation.openSignOutDialog();
 						}}
@@ -437,7 +499,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 						<span>Sign Out</span>
 					</Button>
 				) : (
-					<div className="flex gap-2 w-full">
+					<div className="flex w-full gap-2">
 						<AuthCTA />
 					</div>
 				)}

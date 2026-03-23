@@ -1,13 +1,12 @@
-import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
+import { Loader } from "@/components/loader";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { getDashboardPath } from "@/utils/auth";
-import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
-import { useLocation } from "@tanstack/react-router";
-import { Loader } from "@/components/loader";
 import {
-	CustomerHeader,
 	CustomerBottomNavigation,
+	CustomerHeader,
 	CustomerMobileMenuContent,
 	CustomerUserMenu,
 } from "../navigation";
@@ -16,7 +15,8 @@ import { useCustomerBookingsNavigation } from "../navigation/use-customer-bookin
 export function CustomerBookingsLayout() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { session, isPending, isFetching, signOutWithConfirmation } = useUserQuery();
+	const { session, isPending, isFetching, signOutWithConfirmation } =
+		useUserQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const navigationItems = useCustomerBookingsNavigation();
 
@@ -30,7 +30,7 @@ export function CustomerBookingsLayout() {
 	// Show loading while session is being fetched or refetching (prevents redirect loop)
 	if (isPending || isFetching) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
+			<div className="flex min-h-screen items-center justify-center">
 				<Loader />
 			</div>
 		);
@@ -38,12 +38,12 @@ export function CustomerBookingsLayout() {
 
 	// Redirect if not authenticated (only after fetch is complete)
 	if (!user) {
-		navigate({ to: '/sign-in' });
+		navigate({ to: "/sign-in" });
 		return null;
 	}
 
 	// Redirect if not customer
-	if (user && user.role !== 'user') {
+	if (user && user.role !== "user") {
 		navigate({ to: getDashboardPath(user.role) });
 		return null;
 	}
@@ -57,7 +57,7 @@ export function CustomerBookingsLayout() {
 				onSignOut={signOutWithConfirmation.openSignOutDialog}
 			/>
 
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 pb-20 lg:pb-8">
+			<div className="mx-auto max-w-7xl px-4 py-4 pb-20 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
 				{/* Main Content */}
 				<div className="flex-1 lg:mt-0">
 					<Outlet />
@@ -65,7 +65,7 @@ export function CustomerBookingsLayout() {
 			</div>
 
 			{/* Bottom Navigation for Mobile */}
-			<div className="fixed bottom-0 left-0 right-0 z-40">
+			<div className="fixed right-0 bottom-0 left-0 z-40">
 				<CustomerBottomNavigation navigationItems={navigationItems} />
 			</div>
 
@@ -73,7 +73,14 @@ export function CustomerBookingsLayout() {
 				isOpen={signOutWithConfirmation.isDialogOpen}
 				onClose={signOutWithConfirmation.closeSignOutDialog}
 				onConfirm={signOutWithConfirmation.confirmSignOut}
-				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userRole={
+					session?.user.role as
+						| "user"
+						| "driver"
+						| "admin"
+						| "super_admin"
+						| undefined
+				}
 				userName={session?.user.name}
 				isLoading={signOutWithConfirmation.isSigningOut}
 			/>

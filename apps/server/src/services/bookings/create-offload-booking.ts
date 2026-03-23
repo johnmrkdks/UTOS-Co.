@@ -1,10 +1,10 @@
+import { z } from "zod";
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import { createOffloadBookingDetails } from "@/data/offload-booking-details/create-offload-booking-details";
 import type { DB } from "@/db";
-import { type InsertBooking } from "@/schemas/shared/tables/booking";
+import type { InsertBooking } from "@/schemas/shared/tables/booking";
 import { BookingStatusEnum, BookingTypeEnum } from "@/types";
-import { z } from "zod";
 
 // Schema for creating an offload booking - only fields that frontend should provide
 export const CreateOffloadBookingServiceSchema = z.object({
@@ -28,19 +28,27 @@ export const CreateOffloadBookingServiceSchema = z.object({
 	}),
 
 	// Stops array (without bookingId - will be added by service)
-	stops: z.array(z.object({
-		stopOrder: z.number().int(),
-		address: z.string().min(1, "Stop address is required"),
-		latitude: z.number().nullable().optional(),
-		longitude: z.number().nullable().optional(),
-		notes: z.string().optional().or(z.literal("")),
-		waitingTime: z.number().int().optional().default(0),
-	})),
+	stops: z.array(
+		z.object({
+			stopOrder: z.number().int(),
+			address: z.string().min(1, "Stop address is required"),
+			latitude: z.number().nullable().optional(),
+			longitude: z.number().nullable().optional(),
+			notes: z.string().optional().or(z.literal("")),
+			waitingTime: z.number().int().optional().default(0),
+		}),
+	),
 });
 
-export type CreateOffloadBookingParams = z.infer<typeof CreateOffloadBookingServiceSchema>
+export type CreateOffloadBookingParams = z.infer<
+	typeof CreateOffloadBookingServiceSchema
+>;
 
-export async function createOffloadBookingService(db: DB, data: CreateOffloadBookingParams, adminUserId: string) {
+export async function createOffloadBookingService(
+	db: DB,
+	data: CreateOffloadBookingParams,
+	adminUserId: string,
+) {
 	console.log("\n🔧 createOffloadBookingService - START");
 	console.log("📥 Service received data:", JSON.stringify(data, null, 2));
 	console.log("👤 Admin User ID:", adminUserId);
@@ -74,13 +82,15 @@ export async function createOffloadBookingService(db: DB, data: CreateOffloadBoo
 		status: BookingStatusEnum.Confirmed, // Offload bookings start as confirmed
 	} satisfies InsertBooking;
 
-	console.log("📝 Booking data prepared:", JSON.stringify(bookingData, null, 2));
+	console.log(
+		"📝 Booking data prepared:",
+		JSON.stringify(bookingData, null, 2),
+	);
 
 	// Create the booking first
 	console.log("💾 Creating booking record...");
 	const newBooking = await createBooking(db, bookingData);
 	console.log("✅ Booking created with ID:", newBooking.id);
-
 
 	// Create stops if provided
 	if (data.stops && data.stops.length > 0) {
@@ -101,7 +111,10 @@ export async function createOffloadBookingService(db: DB, data: CreateOffloadBoo
 	}
 
 	console.log("📋 Creating offload booking details...");
-	await createOffloadBookingDetails(db, { ...data.offloadDetails, bookingId: newBooking.id });
+	await createOffloadBookingDetails(db, {
+		...data.offloadDetails,
+		bookingId: newBooking.id,
+	});
 	console.log("✅ Offload booking details created");
 
 	console.log("🎉 createOffloadBookingService - COMPLETE\n");

@@ -1,7 +1,7 @@
-import { drizzle } from "drizzle-orm/d1";
-import * as schema from "../../src/db/sqlite/schema";
-import { UserRoleEnum } from "../../src/db/sqlite/enums";
 import { createId } from "@paralleldrive/cuid2";
+import { drizzle } from "drizzle-orm/d1";
+import { UserRoleEnum } from "../../src/db/sqlite/enums";
+import * as schema from "../../src/db/sqlite/schema";
 
 // Super Admin User Data
 const superAdminUser = {
@@ -119,14 +119,29 @@ const carModels = [
 
 // Car Categories
 const carCategories = [
-	{ name: "Luxury Sedan", description: "Premium executive sedans for business and formal occasions" },
+	{
+		name: "Luxury Sedan",
+		description: "Premium executive sedans for business and formal occasions",
+	},
 	{ name: "SUV", description: "Spacious luxury SUVs for groups and families" },
 	{ name: "Sports Car", description: "High-performance luxury sports cars" },
-	{ name: "Electric Vehicle", description: "Luxury electric vehicles for eco-conscious travel" },
-	{ name: "Van/Minibus", description: "Large capacity vehicles for group transportation" },
-	{ name: "Convertible", description: "Open-top luxury vehicles for special occasions" },
+	{
+		name: "Electric Vehicle",
+		description: "Luxury electric vehicles for eco-conscious travel",
+	},
+	{
+		name: "Van/Minibus",
+		description: "Large capacity vehicles for group transportation",
+	},
+	{
+		name: "Convertible",
+		description: "Open-top luxury vehicles for special occasions",
+	},
 	{ name: "Coupe", description: "Elegant two-door luxury vehicles" },
-	{ name: "Wagon", description: "Luxury station wagons with extra cargo space" },
+	{
+		name: "Wagon",
+		description: "Luxury station wagons with extra cargo space",
+	},
 ];
 
 // Car Features
@@ -135,26 +150,50 @@ const carFeatures = [
 	{ name: "Wi-Fi Hotspot", description: "Internet connectivity on the go" },
 	{ name: "Leather Seats", description: "Premium leather upholstery" },
 	{ name: "Heated Seats", description: "Temperature-controlled seating" },
-	{ name: "Cooled Seats", description: "Air-conditioned seating for hot weather" },
+	{
+		name: "Cooled Seats",
+		description: "Air-conditioned seating for hot weather",
+	},
 	{ name: "Massage Seats", description: "Built-in seat massage functionality" },
 	{ name: "Sunroof", description: "Panoramic or standard sunroof" },
 	{ name: "Navigation System", description: "Built-in GPS navigation" },
 	{ name: "Premium Sound System", description: "High-end audio system" },
-	{ name: "Rear Entertainment", description: "Screens and entertainment for rear passengers" },
+	{
+		name: "Rear Entertainment",
+		description: "Screens and entertainment for rear passengers",
+	},
 	{ name: "Mini Bar", description: "Built-in refreshment storage" },
-	{ name: "Champagne Cooler", description: "Temperature-controlled beverage storage" },
-	{ name: "Privacy Partition", description: "Separation between driver and passenger areas" },
+	{
+		name: "Champagne Cooler",
+		description: "Temperature-controlled beverage storage",
+	},
+	{
+		name: "Privacy Partition",
+		description: "Separation between driver and passenger areas",
+	},
 	{ name: "Tinted Windows", description: "Privacy and UV protection glass" },
 	{ name: "Air Conditioning", description: "Climate control system" },
 	{ name: "USB Charging", description: "Multiple USB charging ports" },
 	{ name: "Wireless Charging", description: "Qi wireless phone charging pad" },
-	{ name: "Keyless Entry", description: "Push-button start and keyless access" },
-	{ name: "Adaptive Cruise Control", description: "Advanced driver assistance" },
+	{
+		name: "Keyless Entry",
+		description: "Push-button start and keyless access",
+	},
+	{
+		name: "Adaptive Cruise Control",
+		description: "Advanced driver assistance",
+	},
 	{ name: "360° Camera", description: "Surround view monitoring system" },
 	{ name: "Lane Departure Warning", description: "Safety assistance feature" },
-	{ name: "Automatic Emergency Braking", description: "Collision avoidance system" },
+	{
+		name: "Automatic Emergency Braking",
+		description: "Collision avoidance system",
+	},
 	{ name: "Night Vision", description: "Enhanced visibility in low light" },
-	{ name: "Heads-Up Display", description: "Information projected on windshield" },
+	{
+		name: "Heads-Up Display",
+		description: "Information projected on windshield",
+	},
 	{ name: "Ambient Lighting", description: "Customizable interior lighting" },
 ];
 
@@ -182,8 +221,14 @@ const carTransmissionTypes = [
 const carDriveTypes = [
 	{ name: "Front-Wheel Drive (FWD)", description: "Power to front wheels" },
 	{ name: "Rear-Wheel Drive (RWD)", description: "Power to rear wheels" },
-	{ name: "All-Wheel Drive (AWD)", description: "Power to all wheels automatically" },
-	{ name: "Four-Wheel Drive (4WD)", description: "Selectable four-wheel power" },
+	{
+		name: "All-Wheel Drive (AWD)",
+		description: "Power to all wheels automatically",
+	},
+	{
+		name: "Four-Wheel Drive (4WD)",
+		description: "Selectable four-wheel power",
+	},
 ];
 
 // Condition Types
@@ -251,121 +296,140 @@ export async function seed(db: any) {
 
 		// 2. Insert Car Brands
 		console.log("🏢 Inserting car brands...");
-		const insertedBrands = await db.insert(schema.carBrands).values(
-			carBrands.map(brand => ({
-				id: createId(),
-				name: brand.name,
-			}))
-		).returning();
+		const insertedBrands = await db
+			.insert(schema.carBrands)
+			.values(
+				carBrands.map((brand) => ({
+					id: createId(),
+					name: brand.name,
+				})),
+			)
+			.returning();
 
 		// Create brand lookup for models
 		const brandLookup = new Map(
-			insertedBrands.map((brand: { name: string; id: string }) => [brand.name, brand.id])
+			insertedBrands.map((brand: { name: string; id: string }) => [
+				brand.name,
+				brand.id,
+			]),
 		);
 
 		// 3. Insert Car Models
 		console.log("🚗 Inserting car models...");
 		await db.insert(schema.carModels).values(
-			carModels.map(model => ({
+			carModels.map((model) => ({
 				id: createId(),
 				name: model.name,
 				brandId: brandLookup.get(model.brandName)!,
-			}))
+			})),
 		);
 
 		// 4. Insert Car Categories
 		console.log("📋 Inserting car categories...");
 		await db.insert(schema.carCategories).values(
-			carCategories.map(category => ({
+			carCategories.map((category) => ({
 				id: createId(),
 				name: category.name,
 				description: category.description,
-			}))
+			})),
 		);
 
 		// 5. Insert Car Features
 		console.log("✨ Inserting car features...");
 		await db.insert(schema.carFeatures).values(
-			carFeatures.map(feature => ({
+			carFeatures.map((feature) => ({
 				id: createId(),
 				name: feature.name,
 				description: feature.description,
-			}))
+			})),
 		);
 
 		// 6. Insert Fuel Types
 		console.log("⛽ Inserting fuel types...");
 		await db.insert(schema.carFuelTypes).values(
-			carFuelTypes.map(fuelType => ({
+			carFuelTypes.map((fuelType) => ({
 				id: createId(),
 				name: fuelType.name,
 				description: fuelType.description,
-			}))
+			})),
 		);
 
 		// 7. Insert Transmission Types
 		console.log("⚙️ Inserting transmission types...");
 		await db.insert(schema.carTransmissionTypes).values(
-			carTransmissionTypes.map(transmission => ({
+			carTransmissionTypes.map((transmission) => ({
 				id: createId(),
 				name: transmission.name,
 				description: transmission.description,
-			}))
+			})),
 		);
 
 		// 8. Insert Drive Types
 		console.log("🛞 Inserting drive types...");
 		await db.insert(schema.carDriveTypes).values(
-			carDriveTypes.map(driveType => ({
+			carDriveTypes.map((driveType) => ({
 				id: createId(),
 				name: driveType.name,
 				description: driveType.description,
-			}))
+			})),
 		);
 
 		// 9. Insert Condition Types
 		console.log("🔧 Inserting condition types...");
 		await db.insert(schema.carConditionTypes).values(
-			carConditionTypes.map(condition => ({
+			carConditionTypes.map((condition) => ({
 				id: createId(),
 				name: condition.name,
 				description: condition.description,
-			}))
+			})),
 		);
 
 		// 10. Insert Package Service Types
 		console.log("📦 Inserting package service types...");
 		await db.insert(schema.packageServiceTypes).values(
-			packageServiceTypes.map(serviceType => ({
+			packageServiceTypes.map((serviceType) => ({
 				id: createId(),
 				name: serviceType.name,
 				description: serviceType.description,
 				icon: serviceType.icon,
 				isActive: true,
 				displayOrder: serviceType.displayOrder,
-			}))
+			})),
 		);
 
 		// 11. Insert Package Categories
 		console.log("📂 Inserting package categories...");
-		const insertedPackageCategories = await db.insert(schema.packageCategories).values(
-			packageCategories.map(category => ({
-				id: createId(),
-				name: category.name,
-				description: category.description,
-				displayOrder: category.displayOrder,
-			}))
-		).returning();
+		const insertedPackageCategories = await db
+			.insert(schema.packageCategories)
+			.values(
+				packageCategories.map((category) => ({
+					id: createId(),
+					name: category.name,
+					description: category.description,
+					displayOrder: category.displayOrder,
+				})),
+			)
+			.returning();
 
 		// Create category lookup for packages
 		const categoryLookup = new Map(
-			insertedPackageCategories.map((category: { name: string; id: string }) => [category.name, category.id])
+			insertedPackageCategories.map(
+				(category: { name: string; id: string }) => [
+					category.name,
+					category.id,
+				],
+			),
 		);
 
 		// Create service type lookup for packages
-		const insertedServiceTypes = await db.select().from(schema.packageServiceTypes);
+		const insertedServiceTypes = await db
+			.select()
+			.from(schema.packageServiceTypes);
 		const serviceTypeLookup = new Map(
-			insertedServiceTypes.map((serviceType: { name: string; id: string }) => [serviceType.name, serviceType.id])
+			insertedServiceTypes.map((serviceType: { name: string; id: string }) => [
+				serviceType.name,
+				serviceType.id,
+			]),
 		);
 
 		// 12. Insert Sample Packages with Banner Images
@@ -373,10 +437,12 @@ export async function seed(db: any) {
 		const samplePackages = [
 			{
 				name: "Sydney Airport Transfer",
-				description: "Luxury airport pickup and drop-off service with professional chauffeur",
+				description:
+					"Luxury airport pickup and drop-off service with professional chauffeur",
 				categoryName: "Airport Transfer",
 				serviceTypeName: "Transfer",
-				bannerImageUrl: "https://images.unsplash.com/photo-1563450392430-d3e4c2d30d12?w=800&h=400&fit=crop&crop=center",
+				bannerImageUrl:
+					"https://images.unsplash.com/photo-1563450392430-d3e4c2d30d12?w=800&h=400&fit=crop&crop=center",
 				duration: 60,
 				maxDistance: 50,
 				fixedPrice: 12000, // $120.00
@@ -388,10 +454,12 @@ export async function seed(db: any) {
 			},
 			{
 				name: "Sydney Harbor Bridge Tour",
-				description: "Scenic 3-hour luxury tour of Sydney's iconic landmarks and harbor views",
+				description:
+					"Scenic 3-hour luxury tour of Sydney's iconic landmarks and harbor views",
 				categoryName: "Private Tours",
 				serviceTypeName: "Tours",
-				bannerImageUrl: "https://images.unsplash.com/photo-1528072164453-f4e8ef0d475a?w=800&h=400&fit=crop&crop=center",
+				bannerImageUrl:
+					"https://images.unsplash.com/photo-1528072164453-f4e8ef0d475a?w=800&h=400&fit=crop&crop=center",
 				duration: 180,
 				fixedPrice: 35000, // $350.00
 				maxPassengers: 6,
@@ -402,10 +470,12 @@ export async function seed(db: any) {
 			},
 			{
 				name: "Corporate Executive Transfer",
-				description: "Professional business transportation with luxury vehicles and experienced drivers",
+				description:
+					"Professional business transportation with luxury vehicles and experienced drivers",
 				categoryName: "Corporate Transfers",
 				serviceTypeName: "Transfer",
-				bannerImageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=400&fit=crop&crop=center",
+				bannerImageUrl:
+					"https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=400&fit=crop&crop=center",
 				duration: 120,
 				maxDistance: 100,
 				fixedPrice: 25000, // $250.00
@@ -419,10 +489,12 @@ export async function seed(db: any) {
 			},
 			{
 				name: "Wedding Day Luxury Transport",
-				description: "Elegant wedding transportation with premium vehicles for your special day",
+				description:
+					"Elegant wedding transportation with premium vehicles for your special day",
 				categoryName: "Wedding/Special Events",
 				serviceTypeName: "Event",
-				bannerImageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c818?w=800&h=400&fit=crop&crop=center",
+				bannerImageUrl:
+					"https://images.unsplash.com/photo-1520637836862-4d197d17c818?w=800&h=400&fit=crop&crop=center",
 				duration: 480,
 				fixedPrice: 80000, // $800.00
 				depositRequired: 20000, // $200.00 deposit
@@ -434,10 +506,12 @@ export async function seed(db: any) {
 			},
 			{
 				name: "Blue Mountains Day Tour",
-				description: "Full-day luxury tour to the scenic Blue Mountains with wine tasting",
+				description:
+					"Full-day luxury tour to the scenic Blue Mountains with wine tasting",
 				categoryName: "Private Tours",
 				serviceTypeName: "Tours",
-				bannerImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&crop=center",
+				bannerImageUrl:
+					"https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&crop=center",
 				duration: 600, // 10 hours
 				maxDistance: 300,
 				fixedPrice: 95000, // $950.00
@@ -450,10 +524,12 @@ export async function seed(db: any) {
 			},
 			{
 				name: "VIP City Transfer",
-				description: "Premium point-to-point transportation with luxury amenities",
+				description:
+					"Premium point-to-point transportation with luxury amenities",
 				categoryName: "Corporate Transfers",
 				serviceTypeName: "Transfer",
-				bannerImageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop&crop=center",
+				bannerImageUrl:
+					"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop&crop=center",
 				duration: 90,
 				maxDistance: 75,
 				fixedPrice: 18000, // $180.00
@@ -463,11 +539,11 @@ export async function seed(db: any) {
 				includesDriver: true,
 				includesFuel: true,
 				includesTolls: false,
-			}
+			},
 		];
 
 		await db.insert(schema.packages).values(
-			samplePackages.map(pkg => ({
+			samplePackages.map((pkg) => ({
 				id: createId(),
 				name: pkg.name,
 				description: pkg.description,
@@ -490,7 +566,7 @@ export async function seed(db: any) {
 				waitingTimeMinutes: pkg.waitingTimeMinutes || 0,
 				isAvailable: true,
 				isPublished: true, // Make them visible to customers
-			}))
+			})),
 		);
 
 		// 11. Create Default Booking Policy
@@ -498,7 +574,8 @@ export async function seed(db: any) {
 		await db.insert(schema.bookingPolicies).values({
 			id: createId(),
 			name: "Standard Booking Policy",
-			description: "Default policy allowing edits and cancellations 4 hours before pickup",
+			description:
+				"Default policy allowing edits and cancellations 4 hours before pickup",
 			editAllowedHours: 4,
 			editDisabledAfterDriverAssignment: true,
 			cancellationAllowedHours: 4,
@@ -525,7 +602,6 @@ export async function seed(db: any) {
    🎁 Sample Packages: ${samplePackages.length}
    📋 Booking Policy: 1 default policy
 		`);
-
 	} catch (error) {
 		console.error("❌ Seeding failed:", error);
 		throw error;

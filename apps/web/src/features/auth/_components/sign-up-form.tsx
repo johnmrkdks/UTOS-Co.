@@ -1,13 +1,7 @@
-import { Loader } from "@/components/loader";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { authClient } from "@/lib/auth-client";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { signUpSchema } from "@/features/auth/_schemas/sign-up-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Form,
 	FormControl,
@@ -16,10 +10,16 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@workspace/ui/components/form";
-import { SignUpWithOAuth } from "./sign-up-with-oauth";
+import { Input } from "@workspace/ui/components/input";
 import { InputPassword } from "@workspace/ui/components/input-password";
-import { useSignUpMutation } from "@/features/auth/_hooks/query/use-sign-up-mutation";
 import { cn } from "@workspace/ui/lib/utils";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { Loader } from "@/components/loader";
+import { useSignUpMutation } from "@/features/auth/_hooks/query/use-sign-up-mutation";
+import { signUpSchema } from "@/features/auth/_schemas/sign-up-schema";
+import { authClient } from "@/lib/auth-client";
+import { SignUpWithOAuth } from "./sign-up-with-oauth";
 
 type SignUpFromProps = {
 	className?: string;
@@ -64,10 +64,13 @@ export default function SignUpForm({ className, ...props }: SignUpFromProps) {
 	};
 
 	return (
-		<div className={cn("flex flex-col gap-4 mx-auto w-full max-w-md", className)} {...props}>
-			<h1 className="text-center text-2xl md:text-3xl font-bold">Sign Up</h1>
+		<div
+			className={cn("mx-auto flex w-full max-w-md flex-col gap-4", className)}
+			{...props}
+		>
+			<h1 className="text-center font-bold text-2xl md:text-3xl">Sign Up</h1>
 
-			<Form {...form as any}>
+			<Form {...(form as any)}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<div>
 						<FormField
@@ -137,7 +140,7 @@ export default function SignUpForm({ className, ...props }: SignUpFromProps) {
 				</form>
 			</Form>
 			<div className="flex flex-col gap-2 text-center">
-				<h2 className="text-center text-xs text-muted-foreground font-medium">
+				<h2 className="text-center font-medium text-muted-foreground text-xs">
 					Or sign up with
 				</h2>
 				<SignUpWithOAuth />

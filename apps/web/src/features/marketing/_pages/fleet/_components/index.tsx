@@ -1,46 +1,45 @@
-import { cn } from "@workspace/ui/lib/utils";
-import { Button } from "@workspace/ui/components/button";
-import { BookingCard } from "./booking-card";
 import { Link } from "@tanstack/react-router";
-import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
-import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
+import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import {
-	Car,
+	Award,
 	Calendar,
+	Car,
 	Clock,
+	Coffee,
+	Luggage,
 	MapPin,
+	Phone,
 	Shield,
 	Star,
-	Phone,
 	Users,
-	Luggage,
 	Wifi,
-	Coffee,
-	Award
 } from "lucide-react";
-
+import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
+import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
+import { BookingCard } from "./booking-card";
 
 const serviceFeatures = [
 	{
 		icon: Shield,
 		title: "Licensed & Insured",
-		description: "Fully licensed chauffeurs with comprehensive insurance"
+		description: "Fully licensed chauffeurs with comprehensive insurance",
 	},
 	{
 		icon: Clock,
 		title: "Available 00:00 – 23:45",
-		description: "Nearly 24/7 service - we are always at your disposal"
+		description: "Nearly 24/7 service - we are always at your disposal",
 	},
 	{
 		icon: Star,
 		title: "5-Star Service",
-		description: "Consistently rated excellent by our valued clients"
+		description: "Consistently rated excellent by our valued clients",
 	},
 	{
 		icon: Award,
 		title: "Premium Fleet",
-		description: "Luxury vehicles maintained to the highest standards"
-	}
+		description: "Luxury vehicles maintained to the highest standards",
+	},
 ];
 
 type FleetProps = {
@@ -50,86 +49,100 @@ type FleetProps = {
 export function Fleet({ className, ...props }: FleetProps) {
 	// Fetch published cars - show all available cars
 	const { data: carsData, isLoading: carsLoading } = useGetPublishedCarsQuery({
-		limit: 50 // Increased to show more cars
+		limit: 50, // Increased to show more cars
 	});
 
-	const bookingCards = carsData?.data?.map((car: any, index: number) => {
-		const sortedImages = [...(car.images || [])].sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
-		const mainImage = sortedImages.find((img: any) => img.isMain) || sortedImages[0];
-		return {
-			id: car.id,
-			model: car.name,
-			brand: car.brand?.name || car.model?.brand?.name || "Luxury",
-			category: car.category?.name || "Economy",
-			description: car.description,
-			features: [
-				`${car.seatingCapacity} seats`,
-				car.luggageCapacity ? `${car.luggageCapacity} bags` : null,
-				car.fuelType?.name || "Petrol",
-				car.transmissionType?.name || "Automatic",
-				"Air Conditioning",
-				"USB Charging Ports"
-			].filter(Boolean),
-			image: mainImage?.url || "placeholder.svg",
-			images: sortedImages.map((img: any) => ({ url: img.url, altText: img.altText })),
-			popular: index === 1
-		};
-	}) || [];
+	const bookingCards =
+		carsData?.data?.map((car: any, index: number) => {
+			const sortedImages = [...(car.images || [])].sort(
+				(a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+			);
+			const mainImage =
+				sortedImages.find((img: any) => img.isMain) || sortedImages[0];
+			return {
+				id: car.id,
+				model: car.name,
+				brand: car.brand?.name || car.model?.brand?.name || "Luxury",
+				category: car.category?.name || "Economy",
+				description: car.description,
+				features: [
+					`${car.seatingCapacity} seats`,
+					car.luggageCapacity ? `${car.luggageCapacity} bags` : null,
+					car.fuelType?.name || "Petrol",
+					car.transmissionType?.name || "Automatic",
+					"Air Conditioning",
+					"USB Charging Ports",
+				].filter(Boolean),
+				image: mainImage?.url || "placeholder.svg",
+				images: sortedImages.map((img: any) => ({
+					url: img.url,
+					altText: img.altText,
+				})),
+				popular: index === 1,
+			};
+		}) || [];
 	return (
 		<div className={cn("", className)} {...props}>
 			{/* Vehicle Selection */}
-			<section className="py-24 bg-soft-beige">
+			<section className="bg-soft-beige py-24">
 				<div className="container mx-auto px-6">
-					<div className="text-center mb-16">
-						<h2 className="text-4xl font-bold text-foreground mb-4">
+					<div className="mb-16 text-center">
+						<h2 className="mb-4 font-bold text-4xl text-foreground">
 							Select Your Luxury Vehicle
 						</h2>
-						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							Choose from our premium fleet of meticulously maintained luxury vehicles.
-							Each vehicle comes with a professional chauffeur and premium amenities.
+						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
+							Choose from our premium fleet of meticulously maintained luxury
+							vehicles. Each vehicle comes with a professional chauffeur and
+							premium amenities.
 						</p>
 					</div>
 
-					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-8">
+					<div className="grid gap-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
 						{carsLoading ? (
 							// Compact loading skeleton to match new design
 							Array.from({ length: 6 }).map((_, index) => (
-								<div key={index} className="bg-white border border-border shadow-lg rounded-lg overflow-hidden">
+								<div
+									key={index}
+									className="overflow-hidden rounded-lg border border-border bg-white shadow-lg"
+								>
 									{/* Image skeleton */}
-									<div className="aspect-[4/3] bg-muted animate-pulse" />
-									
+									<div className="aspect-[4/3] animate-pulse bg-muted" />
+
 									{/* Content skeleton */}
-									<div className="p-4 space-y-4">
+									<div className="space-y-4 p-4">
 										{/* Title and description */}
 										<div className="space-y-2">
-											<div className="h-5 bg-muted rounded w-3/4 animate-pulse" />
-											<div className="h-3 bg-muted rounded w-full animate-pulse" />
-											<div className="h-3 bg-muted rounded w-2/3 animate-pulse" />
+											<div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
+											<div className="h-3 w-full animate-pulse rounded bg-muted" />
+											<div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
 										</div>
-										
+
 										{/* Features skeleton */}
 										<div className="space-y-3">
 											<div className="flex items-center gap-2">
-												<div className="w-4 h-4 bg-muted rounded animate-pulse" />
-												<div className="h-4 bg-muted rounded w-20 animate-pulse" />
+												<div className="h-4 w-4 animate-pulse rounded bg-muted" />
+												<div className="h-4 w-20 animate-pulse rounded bg-muted" />
 											</div>
 											<div className="grid grid-cols-2 gap-1.5">
 												{Array.from({ length: 4 }).map((_, i) => (
-													<div key={i} className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-														<div className="w-4 h-4 bg-muted rounded animate-pulse" />
-														<div className="h-3 bg-muted rounded flex-1 animate-pulse" />
+													<div
+														key={i}
+														className="flex items-center gap-2 rounded-lg bg-muted/50 p-2"
+													>
+														<div className="h-4 w-4 animate-pulse rounded bg-muted" />
+														<div className="h-3 flex-1 animate-pulse rounded bg-muted" />
 													</div>
 												))}
 											</div>
 										</div>
-										
+
 										{/* Pricing skeleton */}
-										<div className="bg-muted/30 rounded-lg p-3">
-											<div className="h-6 bg-muted rounded w-20 mx-auto animate-pulse" />
+										<div className="rounded-lg bg-muted/30 p-3">
+											<div className="mx-auto h-6 w-20 animate-pulse rounded bg-muted" />
 										</div>
-										
+
 										{/* Button skeleton */}
-										<div className="h-10 bg-muted rounded-lg animate-pulse" />
+										<div className="h-10 animate-pulse rounded-lg bg-muted" />
 									</div>
 								</div>
 							))
@@ -139,15 +152,16 @@ export function Fleet({ className, ...props }: FleetProps) {
 							))
 						) : (
 							// Empty state
-							<div className="col-span-full text-center py-16">
-								<div className="w-24 h-24 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
-									<Car className="w-12 h-12 text-muted-foreground" />
+							<div className="col-span-full py-16 text-center">
+								<div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-muted">
+									<Car className="h-12 w-12 text-muted-foreground" />
 								</div>
-								<h3 className="text-2xl font-bold text-foreground mb-4">
+								<h3 className="mb-4 font-bold text-2xl text-foreground">
 									No Vehicles Available
 								</h3>
-								<p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-									We're currently preparing our luxury fleet. Please check back soon or contact us for more information.
+								<p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
+									We're currently preparing our luxury fleet. Please check back
+									soon or contact us for more information.
 								</p>
 								<Link to="/contact-us">
 									<Button size="lg" className="px-8 py-6">

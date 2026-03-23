@@ -4,10 +4,16 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
-	DropdownMenuTrigger
+	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { Eye, EyeOff, MoreHorizontal, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
+import {
+	AlertTriangle,
+	CheckCircle,
+	Eye,
+	EyeOff,
+	MoreHorizontal,
+} from "lucide-react";
 
 export interface PublicationToggleButtonProps {
 	isPublished: boolean;
@@ -34,17 +40,20 @@ export function PublicationToggleButton({
 	disabled = false,
 	size = "default",
 }: PublicationToggleButtonProps) {
-	const isPubliclyVisible = type === "car"
-		? isPublished && isActive && isAvailable && status === "available"
-		: isPublished && isAvailable;
+	const isPubliclyVisible =
+		type === "car"
+			? isPublished && isActive && isAvailable && status === "available"
+			: isPublished && isAvailable;
 
-	const hasIssues = type === "car"
-		? isPublished && (!isActive || !isAvailable || status !== "available")
-		: isPublished && !isAvailable;
+	const hasIssues =
+		type === "car"
+			? isPublished && (!isActive || !isAvailable || status !== "available")
+			: isPublished && !isAvailable;
 
-	const canPublish = type === "car"
-		? isActive && isAvailable && status === "available" && hasPricingConfig
-		: isAvailable;
+	const canPublish =
+		type === "car"
+			? isActive && isAvailable && status === "available" && hasPricingConfig
+			: isAvailable;
 
 	const getPublishButtonConfig = () => {
 		if (isPubliclyVisible) {
@@ -54,14 +63,13 @@ export function PublicationToggleButton({
 				label: "Unpublish",
 				action: () => onTogglePublish(false),
 			};
-		} else {
-			return {
-				variant: "default" as const,
-				icon: Eye,
-				label: "Publish",
-				action: () => onTogglePublish(true),
-			};
 		}
+		return {
+			variant: "default" as const,
+			icon: Eye,
+			label: "Publish",
+			action: () => onTogglePublish(true),
+		};
 	};
 
 	const buttonConfig = getPublishButtonConfig();
@@ -75,7 +83,8 @@ export function PublicationToggleButton({
 					size={size}
 					disabled={disabled || isLoading || (!isPublished && !canPublish)}
 					className={cn(
-						hasIssues && "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+						hasIssues &&
+							"border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
 					)}
 				>
 					<IconComponent className="h-4 w-4" />
@@ -84,24 +93,23 @@ export function PublicationToggleButton({
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
-				<DropdownMenuItem 
-					onClick={buttonConfig.action} 
+				<DropdownMenuItem
+					onClick={buttonConfig.action}
 					disabled={isLoading || (!isPublished && !canPublish)}
 				>
 					<IconComponent className="h-4 w-4" />
 					{buttonConfig.label}
 				</DropdownMenuItem>
 
-
 				{(hasIssues || (!isPublished && type === "car")) && (
 					<>
 						<DropdownMenuSeparator />
-						<div className="px-2 py-2 text-xs text-amber-600">
-							<div className="flex items-center gap-2 mb-1">
+						<div className="px-2 py-2 text-amber-600 text-xs">
+							<div className="mb-1 flex items-center gap-2">
 								<AlertTriangle className="h-3 w-3" />
 								{hasIssues ? "Publication Issues:" : "Requirements:"}
 							</div>
-							<ul className="text-xs text-muted-foreground space-y-0.5 ml-5">
+							<ul className="ml-5 space-y-0.5 text-muted-foreground text-xs">
 								{type === "car" && (
 									<>
 										{!isActive && <li>• Car is inactive</li>}
@@ -121,10 +129,11 @@ export function PublicationToggleButton({
 				)}
 
 				<DropdownMenuSeparator />
-				<div className="px-2 py-2 text-xs text-muted-foreground">
+				<div className="px-2 py-2 text-muted-foreground text-xs">
 					<div className="flex items-center gap-2">
 						<CheckCircle className="h-3 w-3" />
-						Status: {isPubliclyVisible ? "Publicly Visible" : "Hidden from Customers"}
+						Status:{" "}
+						{isPubliclyVisible ? "Publicly Visible" : "Hidden from Customers"}
 					</div>
 				</div>
 			</DropdownMenuContent>

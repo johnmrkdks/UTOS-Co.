@@ -1,48 +1,120 @@
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { getBookingByShareToken } from "@/data/bookings/get-booking-by-share-token";
+import type { DB } from "@/db";
+import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { bookingExtras, bookings } from "@/db/sqlite/schema";
+import { users } from "@/db/sqlite/schema/users";
 import {
 	InsertBookingSchema,
 	UpdateBookingSchema,
 } from "@/schemas/shared/tables/booking";
-import { bookings, bookingExtras } from "@/db/sqlite/schema";
-import { eq } from "drizzle-orm";
-import { createBookingService, CreateBookingServiceSchema } from "@/services/bookings/create-booking";
-import { createPackageBookingService, CreatePackageBookingSchema, AdminCreatePackageBookingSchema } from "@/services/bookings/create-package-booking";
-import { createCustomBookingService, CreateCustomBookingSchema, AdminCreateCustomBookingSchema } from "@/services/bookings/create-custom-booking";
-import { createCustomBookingFromQuoteService, CreateCustomBookingFromQuoteSchema } from "@/services/bookings/create-custom-booking-from-quote";
-import { calculateInstantQuoteService, CalculateInstantQuoteSchema } from "@/services/bookings/calculate-instant-quote";
-import { updateBookingStatusService, UpdateBookingStatusSchema, assignDriverService, AssignDriverSchema } from "@/services/bookings/update-booking-status";
-import { DeleteBookingServiceSchema, deleteBookingService } from "@/services/bookings/delete-booking";
-import { GetBookingServiceSchema, getBookingService } from "@/services/bookings/get-booking";
-import { getBookingsService } from "@/services/bookings/get-bookings";
-import { updateBookingService, UpdateBookingServiceSchema } from "@/services/bookings/update-booking";
-import { editBooking } from "@/services/bookings/edit-booking";
+import {
+	ArchiveBookingServiceSchema,
+	archiveBookingService,
+} from "@/services/bookings/archive-booking";
+import {
+	BulkArchiveBookingsSchema,
+	BulkDeleteBookingsSchema,
+	bulkArchiveBookingsService,
+	bulkDeleteBookingsService,
+} from "@/services/bookings/bulk-booking-operations";
+import {
+	CalculateInstantQuoteSchema,
+	calculateInstantQuoteService,
+} from "@/services/bookings/calculate-instant-quote";
 import { cancelBooking } from "@/services/bookings/cancel-booking";
+import {
+	closeTripWithExtrasByShareToken,
+	closeTripWithoutExtrasByShareToken,
+} from "@/services/bookings/close-trip-by-share-token";
+import {
+	closeTripWithExtras,
+	closeTripWithoutExtras,
+} from "@/services/bookings/close-trip-with-extras";
+import {
+	CreateBookingServiceSchema,
+	createBookingService,
+} from "@/services/bookings/create-booking";
+import {
+	AdminCreateCustomBookingSchema,
+	CreateCustomBookingSchema,
+	createCustomBookingService,
+} from "@/services/bookings/create-custom-booking";
+import {
+	CreateCustomBookingFromQuoteSchema,
+	createCustomBookingFromQuoteService,
+} from "@/services/bookings/create-custom-booking-from-quote";
+import {
+	CreateOffloadBookingServiceSchema,
+	createOffloadBookingService,
+} from "@/services/bookings/create-offload-booking";
+import {
+	AdminCreatePackageBookingSchema,
+	CreatePackageBookingSchema,
+	createPackageBookingService,
+} from "@/services/bookings/create-package-booking";
+import {
+	DeleteBookingServiceSchema,
+	deleteBookingService,
+} from "@/services/bookings/delete-booking";
+import { editBooking } from "@/services/bookings/edit-booking";
+import { generateBookingShareTokenService } from "@/services/bookings/generate-booking-share-token";
+import {
+	GetBookingServiceSchema,
+	getBookingService,
+} from "@/services/bookings/get-booking";
+import { getBookingsService } from "@/services/bookings/get-bookings";
+import {
+	UpdateBookingServiceSchema,
+	updateBookingService,
+} from "@/services/bookings/update-booking";
+import {
+	AssignDriverSchema,
+	assignDriverService,
+	UpdateBookingStatusSchema,
+	updateBookingStatusService,
+} from "@/services/bookings/update-booking-status";
+import {
+	UpdateBookingStatusByTokenSchema,
+	updateBookingStatusByTokenService,
+} from "@/services/bookings/update-booking-status-by-token";
 import { validateBookingOperations } from "@/services/bookings/validate-booking-operations";
-import { closeTripWithExtras, closeTripWithoutExtras } from "@/services/bookings/close-trip-with-extras";
-import { archiveBookingService, ArchiveBookingServiceSchema } from "@/services/bookings/archive-booking";
-import { bulkArchiveBookingsService, bulkDeleteBookingsService, BulkArchiveBookingsSchema, BulkDeleteBookingsSchema } from "@/services/bookings/bulk-booking-operations";
-import { sendBookingConfirmationEmail, sendAdminNewBookingEmail, sendTripStatusNotification, sendPaymentLinkEmail } from "@/services/notifications/booking-email-notification-service";
-import { protectedProcedure, router, publicProcedure, guestProcedure } from "@/trpc/init";
+import {
+	sendAdminNewBookingEmail,
+	sendBookingConfirmationEmail,
+	sendPaymentLinkEmail,
+	sendTripStatusNotification,
+} from "@/services/notifications/booking-email-notification-service";
+import {
+	CreateBookingReviewSchema,
+	createBookingReviewService,
+} from "@/services/reviews/create-booking-review";
+import {
+	HasBookingReviewSchema,
+	hasBookingReviewService,
+} from "@/services/reviews/has-booking-review";
+import {
+	guestProcedure,
+	protectedProcedure,
+	publicProcedure,
+	router,
+} from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { users } from "@/db/sqlite/schema/users";
-import { BookingStatusEnum } from "@/db/sqlite/enums";
-import { createOffloadBookingService, CreateOffloadBookingServiceSchema } from "@/services/bookings/create-offload-booking";
-import { createBookingReviewService, CreateBookingReviewSchema } from "@/services/reviews/create-booking-review";
-import { hasBookingReviewService, HasBookingReviewSchema } from "@/services/reviews/has-booking-review";
-import { getBookingByShareToken } from "@/data/bookings/get-booking-by-share-token";
-import { updateBookingStatusByTokenService, UpdateBookingStatusByTokenSchema } from "@/services/bookings/update-booking-status-by-token";
-import { closeTripWithExtrasByShareToken, closeTripWithoutExtrasByShareToken } from "@/services/bookings/close-trip-by-share-token";
-import { generateBookingShareTokenService } from "@/services/bookings/generate-booking-share-token";
 
 // Helper function to get user role from database
-const getUserRole = async (db: any, userId: string) => {
-	const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+const getUserRole = async (db: DB, userId: string) => {
+	const user = await db
+		.select({ role: users.role })
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
 	return user[0]?.role;
 };
 
-async function requireAdmin(db: any, userId: string) {
+async function requireAdmin(db: DB, userId: string) {
 	const role = await getUserRole(db, userId);
 	if (role !== "admin" && role !== "super_admin") {
 		throw new TRPCError({
@@ -90,14 +162,15 @@ export const bookingsRouter = router({
 				}
 
 				// Apply role-based access control
-				if (userRole === 'admin' || userRole === 'super_admin') {
+				if (userRole === "admin" || userRole === "super_admin") {
 					// Admins can delete any booking
 				} else {
 					// Regular users and drivers cannot delete bookings via this endpoint
 					// They should use the cancelBooking endpoint instead
 					throw new TRPCError({
 						code: "FORBIDDEN",
-						message: "Only admins can delete bookings. Use cancelBooking to cancel your bookings.",
+						message:
+							"Only admins can delete bookings. Use cancelBooking to cancel your bookings.",
 					});
 				}
 
@@ -133,10 +206,11 @@ export const bookingsRouter = router({
 				}
 
 				// Apply role-based access control
-				if (userRole === 'admin' || userRole === 'super_admin') {
+				if (userRole === "admin" || userRole === "super_admin") {
 					// Admins can see any booking
 					return booking;
-				} else if (userRole === 'driver') {
+				}
+				if (userRole === "driver") {
 					// Drivers can only see bookings assigned to them
 					const driverProfile = await db.query.drivers.findFirst({
 						where: (drivers, { eq }) => eq(drivers.userId, userId),
@@ -157,17 +231,16 @@ export const bookingsRouter = router({
 					}
 
 					return booking;
-				} else {
-					// Regular users (customers) can only see their own bookings
-					if (booking.userId !== userId) {
-						throw new TRPCError({
-							code: "FORBIDDEN",
-							message: "You can only view your own bookings",
-						});
-					}
-
-					return booking;
 				}
+				// Regular users (customers) can only see their own bookings
+				if (booking.userId !== userId) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "You can only view your own bookings",
+					});
+				}
+
+				return booking;
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -188,25 +261,17 @@ export const bookingsRouter = router({
 
 				const userRole = await getUserRole(db, userId);
 
-				console.log("🔍 Admin Bookings List Debug:");
-				console.log("- User ID:", userId);
-				console.log("- User Role:", userRole);
-				console.log("- Input params:", input);
-
 				// Apply role-based filtering
-				if (userRole === 'admin' || userRole === 'super_admin') {
+				if (userRole === "admin" || userRole === "super_admin") {
 					// Admins see all bookings EXCEPT pending_payment (not shown until payment goes through)
 					const result = await getBookingsService(db, input);
 					const filteredData = (result?.data ?? []).filter(
-						(b: { paymentStatus?: string | null }) => b.paymentStatus !== "pending_payment"
+						(b: { paymentStatus?: string | null }) =>
+							b.paymentStatus !== "pending_payment",
 					);
-					console.log("- Bookings result:", {
-						count: filteredData?.length || 0,
-						hasData: !!filteredData?.length,
-						excludedPending: (result?.data?.length ?? 0) - filteredData.length
-					});
 					return { ...result, data: filteredData };
-				} else if (userRole === 'driver') {
+				}
+				if (userRole === "driver") {
 					// Drivers can only see their assigned bookings
 					const driverProfile = await db.query.drivers.findFirst({
 						where: (drivers, { eq }) => eq(drivers.userId, userId),
@@ -227,17 +292,16 @@ export const bookingsRouter = router({
 						},
 					});
 					return bookings;
-				} else {
-					// Regular users (customers) can only see their own bookings
-					const bookings = await getBookingsService(db, {
-						...input,
-						filters: {
-							...input.filters,
-							userId: userId,
-						},
-					});
-					return bookings;
 				}
+				// Regular users (customers) can only see their own bookings
+				const bookings = await getBookingsService(db, {
+					...input,
+					filters: {
+						...input.filters,
+						userId: userId,
+					},
+				});
+				return bookings;
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -246,18 +310,10 @@ export const bookingsRouter = router({
 		.input(UpdateBookingServiceSchema)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
-				console.log("🔍 DEBUG bookings.update - START");
-				console.log("📥 Input received:", JSON.stringify(input, null, 2));
-				console.log("📅 scheduledPickupTime type:", typeof input.data.scheduledPickupTime);
-				console.log("📅 scheduledPickupTime value:", input.data.scheduledPickupTime);
-				console.log("👤 Session object:", JSON.stringify(session, null, 2));
-
 				// Get user info from session
 				const userId = session?.user?.id || session?.session?.userId;
-				console.log("🆔 Extracted userId:", userId);
 
 				if (!userId) {
-					console.error("❌ No userId found in session");
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "User must be authenticated to update bookings",
@@ -265,81 +321,87 @@ export const bookingsRouter = router({
 				}
 
 				const userRole = await getUserRole(db, userId);
-				console.log("👤 User role:", userRole);
 
 				// Get the booking first to check ownership
-				console.log("🔍 Fetching existing booking with id:", input.id);
 				const existingBooking = await getBookingService(db, { id: input.id });
 
 				if (!existingBooking) {
-					console.error("❌ Booking not found for id:", input.id);
 					throw new TRPCError({
 						code: "NOT_FOUND",
 						message: "Booking not found",
 					});
 				}
 
-				console.log("📋 Existing booking found:", {
-					id: existingBooking.id,
-					status: existingBooking.status,
-					bookingType: existingBooking.bookingType,
-					scheduledPickupTime: existingBooking.scheduledPickupTime,
-				});
-
 				// Apply role-based access control
-				if (userRole === 'admin' || userRole === 'super_admin') {
-					console.log("✅ Admin access granted");
+				if (userRole === "admin" || userRole === "super_admin") {
 					// Admins can update any booking
 				} else {
-					console.error("❌ Non-admin user attempting to use admin endpoint");
 					// Regular users and drivers cannot update bookings via this endpoint
 					// They should use the specific editBooking endpoint which has proper validation
 					throw new TRPCError({
 						code: "FORBIDDEN",
-						message: "Only admins can use this update endpoint. Use editBooking for customer updates.",
+						message:
+							"Only admins can use this update endpoint. Use editBooking for customer updates.",
 					});
 				}
 
-				console.log("🚀 Calling updateBookingService...");
-				console.log("📝 Update data:", JSON.stringify(input.data, null, 2));
-
 				const updatedBooking = await updateBookingService(db, input);
-
-				console.log("✅ Booking updated successfully:", updatedBooking?.id);
-				console.log("📋 Updated booking data:", JSON.stringify(updatedBooking, null, 2));
 
 				// When admin finalizes a booking awaiting_pricing_review (driver closed with waiting time or no-show with extras),
 				// capture payment + send the deferred completion or no-show email to the client
-				const hasAmountUpdate = input.data.finalAmount !== undefined || input.data.extraCharges !== undefined;
+				const hasAmountUpdate =
+					input.data.finalAmount !== undefined ||
+					input.data.extraCharges !== undefined;
 				const statusSetToCompleted = input.data.status === "completed";
-				const wasAwaitingPricingReview = existingBooking.status === "awaiting_pricing_review";
+				const wasAwaitingPricingReview =
+					existingBooking.status === "awaiting_pricing_review";
 				const isNoShowWithExtras = existingBooking.actualDropoffTime === null; // No-show: driver set actualDropoffTime to null
-				if ((hasAmountUpdate || statusSetToCompleted) && wasAwaitingPricingReview && env) {
+				if (
+					(hasAmountUpdate || statusSetToCompleted) &&
+					wasAwaitingPricingReview &&
+					env
+				) {
 					try {
-						const finalStatus = isNoShowWithExtras ? BookingStatusEnum.NoShow : BookingStatusEnum.Completed;
+						const finalStatus = isNoShowWithExtras
+							? BookingStatusEnum.NoShow
+							: BookingStatusEnum.Completed;
 						const emailStatus = isNoShowWithExtras ? "no_show" : "completed";
 						// Ensure status is set (completed for normal trips, no_show for no-show with extras)
-						await db.update(bookings).set({
-							status: finalStatus,
-							updatedAt: new Date(),
-						}).where(eq(bookings.id, input.id));
+						await db
+							.update(bookings)
+							.set({
+								status: finalStatus,
+								updatedAt: new Date(),
+							})
+							.where(eq(bookings.id, input.id));
 						// Capture payment with FINAL amount (includes tolls, parking, waiting time)
-						const { maybeCapturePaymentOnCompletion } = await import("@/services/payments/maybe-capture-on-completion");
-						const finalAmount = input.data.finalAmount ?? updatedBooking?.finalAmount ?? (existingBooking.quotedAmount ?? 0) + (existingBooking.extraCharges ?? 0);
-						console.log(`📷 Capturing payment for booking ${input.id} with final amount: $${finalAmount.toFixed(2)}${isNoShowWithExtras ? " (no-show with extras)" : ""}`);
-						await maybeCapturePaymentOnCompletion(db, input.id, finalAmount, env, true);
-						await sendTripStatusNotification({ bookingId: input.id, status: emailStatus, env });
-						console.log(`✅ ${emailStatus === "no_show" ? "No-show" : "Completion"} email sent after admin finalized charges`);
-					} catch (emailErr) {
-						console.error("❌ Failed to send completion email or capture payment:", emailErr);
+						const { maybeCapturePaymentOnCompletion } = await import(
+							"@/services/payments/maybe-capture-on-completion"
+						);
+						const finalAmount =
+							input.data.finalAmount ??
+							updatedBooking?.finalAmount ??
+							(existingBooking.quotedAmount ?? 0) +
+								(existingBooking.extraCharges ?? 0);
+						await maybeCapturePaymentOnCompletion(
+							db,
+							input.id,
+							finalAmount,
+							env,
+							true,
+						);
+						await sendTripStatusNotification({
+							bookingId: input.id,
+							status: emailStatus,
+							env,
+						});
+					} catch {
+						// Email/payment capture failed; don't fail the update
 					}
 				}
 
 				return updatedBooking;
 			} catch (error) {
-				console.error("💥 ERROR in bookings.update:", error);
-				console.error("📚 Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-				console.error("🔍 Input that caused error:", JSON.stringify(input, null, 2));
 				handleTRPCError(error);
 			}
 		}),
@@ -349,42 +411,32 @@ export const bookingsRouter = router({
 		.input(CreatePackageBookingSchema.omit({ userId: true }))
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
-				console.log("🔍 DEBUG createPackageBooking - START");
-				console.log("📥 Input received:", JSON.stringify(input, null, 2));
-				console.log("👤 Session object:", JSON.stringify(session, null, 2));
-
 				// Better Auth anonymous plugin - check both user and session structures
 				// Guest bookings allowed: userId is optional
-				const userId = session?.user?.id || session?.session?.userId || undefined;
-				console.log("🆔 Extracted userId:", userId ?? "(guest booking)");
-
-				console.log("📅 Original scheduledPickupTime:", input.scheduledPickupTime, typeof input.scheduledPickupTime);
+				const userId =
+					session?.user?.id || session?.session?.userId || undefined;
 
 				// Convert scheduledPickupTime string to Date object; userId optional for guests
 				const processedInput = {
 					...input,
 					scheduledPickupTime: new Date(input.scheduledPickupTime),
-					userId
+					userId,
 				};
 
-				console.log("📝 Processed input:", JSON.stringify(processedInput, null, 2));
-				console.log("🕐 Processed scheduledPickupTime:", processedInput.scheduledPickupTime, typeof processedInput.scheduledPickupTime);
-
-				console.log("🏃‍♂️ Calling createPackageBookingService...");
-				const newBooking = await createPackageBookingService(db, processedInput);
-				console.log("✅ Service returned successfully:", newBooking?.id);
+				const newBooking = await createPackageBookingService(
+					db,
+					processedInput,
+				);
 
 				// Send admin notification only - confirmation email sent when admin confirms
 				try {
 					await sendAdminNewBookingEmail(newBooking.id, env);
-				} catch (emailError) {
-					console.error("❌ Error sending admin email:", emailError);
+				} catch {
+					// Admin email failed; don't fail the booking
 				}
 
 				return newBooking;
 			} catch (error) {
-				console.error("💥 ERROR in createPackageBooking:", error);
-				console.error("📚 Error stack:", error instanceof Error ? error.stack : 'No stack trace');
 				handleTRPCError(error);
 			}
 		}),
@@ -414,8 +466,8 @@ export const bookingsRouter = router({
 
 				try {
 					await sendAdminNewBookingEmail(newBooking.id, env);
-				} catch (emailError) {
-					console.error("Error sending admin email:", emailError);
+				} catch {
+					// Admin email failed; don't fail the booking
 				}
 
 				// When sendPaymentToClient: email payment link to client
@@ -426,12 +478,11 @@ export const bookingsRouter = router({
 						const result = await sendPaymentLinkEmail(newBooking.id, env);
 						paymentLinkSent = result.success;
 						paymentLinkMessage = result.message;
-						if (!result.success) {
-							console.warn("Payment link email:", result.message);
-						}
 					} catch (emailError) {
-						console.error("Error sending payment link email:", emailError);
-						paymentLinkMessage = emailError instanceof Error ? emailError.message : "Failed to send payment link";
+						paymentLinkMessage =
+							emailError instanceof Error
+								? emailError.message
+								: "Failed to send payment link";
 					}
 				}
 
@@ -446,36 +497,28 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingSchema)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
-				console.log("🔍 DEBUG createCustomBooking - RECEIVED INPUT:");
-				console.log("📦 Input data:", JSON.stringify(input, null, 2));
-				console.log("🛑 Stops in input:", input.stops ? input.stops.length : 'No stops');
-				console.log("👤 Session data:", JSON.stringify(session, null, 2));
-
-				// Better Auth anonymous plugin - check both user and session structures
 				const userId = session?.user?.id || session?.session?.userId;
 
 				if (!userId) {
-					throw new Error("User session is required. Please sign in or create a guest account.");
+					throw new Error(
+						"User session is required. Please sign in or create a guest account.",
+					);
 				}
 
-				console.log("📝 Calling createCustomBookingService with userId:", userId);
-				const newBooking = await createCustomBookingService(db, { ...input, userId });
-				console.log("✅ Custom booking created successfully:", newBooking.id);
+				const newBooking = await createCustomBookingService(db, {
+					...input,
+					userId,
+				});
 
 				// Send admin notification only - confirmation email sent when admin confirms
 				try {
 					await sendAdminNewBookingEmail(newBooking.id, env);
-				} catch (emailError) {
-					console.error("❌ Error sending admin email:", emailError);
+				} catch {
+					// Admin email failed; don't fail the booking
 				}
 
 				return newBooking;
 			} catch (error) {
-				console.error("❌ TRPC Error in createCustomBooking:", {
-					error: error instanceof Error ? error.message : String(error),
-					stack: error instanceof Error ? error.stack : undefined,
-					input: JSON.stringify(input, null, 2)
-				});
 				handleTRPCError(error);
 			}
 		}),
@@ -504,8 +547,8 @@ export const bookingsRouter = router({
 
 				try {
 					await sendAdminNewBookingEmail(newBooking.id, env);
-				} catch (emailError) {
-					console.error("Error sending admin email:", emailError);
+				} catch {
+					// Admin email failed; don't fail the booking
 				}
 
 				// When sendPaymentToClient: email payment link to client
@@ -516,12 +559,11 @@ export const bookingsRouter = router({
 						const result = await sendPaymentLinkEmail(newBooking.id, env);
 						paymentLinkSent = result.success;
 						paymentLinkMessage = result.message;
-						if (!result.success) {
-							console.warn("Payment link email:", result.message);
-						}
 					} catch (emailError) {
-						console.error("Error sending payment link email:", emailError);
-						paymentLinkMessage = emailError instanceof Error ? emailError.message : "Failed to send payment link";
+						paymentLinkMessage =
+							emailError instanceof Error
+								? emailError.message
+								: "Failed to send payment link";
 					}
 				}
 
@@ -536,150 +578,82 @@ export const bookingsRouter = router({
 		.input(CreateCustomBookingFromQuoteSchema)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
-				console.log("🔍 DEBUG createCustomBookingFromQuote - RECEIVED INPUT:");
-				console.log("📦 Input data:", JSON.stringify(input, null, 2));
-				console.log("🛑 Stops in input:", input.stops ? input.stops.length : 'No stops');
-				console.log("👤 Session data:", JSON.stringify(session, null, 2));
-
-				// Better Auth anonymous plugin - check both user and session structures
 				const userId = session?.user?.id || session?.session?.userId;
 
 				if (!userId) {
-					console.log("🔍 Session structure:", JSON.stringify(session, null, 2));
-					throw new Error("User session is required. Please sign in or create a guest account.");
+					throw new Error(
+						"User session is required. Please sign in or create a guest account.",
+					);
 				}
 
-				console.log("🚀 Creating custom booking from quote for userId:", userId);
 				const inputWithUserId = { ...input, userId, isGuest: false };
-				console.log("📦 Final payload to service:", JSON.stringify(inputWithUserId, null, 2));
+				const newBooking = await createCustomBookingFromQuoteService(
+					db,
+					inputWithUserId,
+				);
 
-				const newBooking = await createCustomBookingFromQuoteService(db, inputWithUserId);
-				console.log("✅ Custom booking created successfully:", newBooking.id);
-
-				// Send booking confirmation and admin notification emails
 				try {
 					await sendAdminNewBookingEmail(newBooking.id, env);
-				} catch (emailError) {
-					console.error("❌ Error sending emails:", emailError);
-					// Don't fail the booking creation if emails fail
+				} catch {
+					// Emails failed; don't fail the booking creation
 				}
 
 				return newBooking;
 			} catch (error) {
-				console.error("❌ TRPC Error in createCustomBookingFromQuote:", {
-					error: error instanceof Error ? error.message : String(error),
-					stack: error instanceof Error ? error.stack : undefined,
-					input: JSON.stringify(input, null, 2)
-				});
 				handleTRPCError(error);
 			}
 		}),
 
 	// Create custom booking from quote as guest (no auth required)
 	createCustomBookingFromQuoteAsGuest: publicProcedure
-		.input(CreateCustomBookingFromQuoteSchema.omit({ userId: true }).extend({ isGuest: z.literal(true) }))
+		.input(
+			CreateCustomBookingFromQuoteSchema.omit({ userId: true }).extend({
+				isGuest: z.literal(true),
+			}),
+		)
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
-				console.log("🔍 DEBUG createCustomBookingFromQuoteAsGuest - Guest booking:");
-
 				const inputWithGuest = { ...input, isGuest: true };
-				const newBooking = await createCustomBookingFromQuoteService(db, inputWithGuest);
+				const newBooking = await createCustomBookingFromQuoteService(
+					db,
+					inputWithGuest,
+				);
 
 				try {
 					await sendAdminNewBookingEmail(newBooking.id, env);
-				} catch (emailError) {
-					console.error("❌ Error sending emails:", emailError);
+				} catch {
+					// Emails failed; don't fail the booking creation
 				}
 
 				return newBooking;
 			} catch (error) {
-				console.error("❌ TRPC Error in createCustomBookingFromQuoteAsGuest:", error);
 				handleTRPCError(error);
 			}
 		}),
 
 	// Create offload booking (admin only)
 	createOffloadBooking: protectedProcedure
-		.use(async (opts) => {
-			const rawInput = "rawInput" in opts ? (opts as { rawInput: unknown }).rawInput : undefined;
-			console.log("\n" + "🟡".repeat(40));
-			console.log("🔍 PRE-VALIDATION - RAW INPUT RECEIVED:");
-			console.log(JSON.stringify(rawInput, null, 2));
-			console.log("🟡".repeat(40) + "\n");
-
-			try {
-				const result = await opts.next();
-				return result;
-			} catch (error) {
-				console.error("\n" + "🔴".repeat(40));
-				console.error("❌ MIDDLEWARE ERROR:");
-				console.error("Error:", error instanceof Error ? error.message : String(error));
-				if (error instanceof z.ZodError) {
-					console.error("🔴 VALIDATION FAILED:");
-					console.error(JSON.stringify(error.issues, null, 2));
-				}
-				console.error("🔴".repeat(40) + "\n");
-				throw error;
-			}
-		})
 		.input(CreateOffloadBookingServiceSchema)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
-				console.log("\n" + "=".repeat(80));
-				console.log("🔍 DEBUG createOffloadBooking - START");
-				console.log("=".repeat(80));
-				console.log("📥 RECEIVED INPUT:");
-				console.log(JSON.stringify(input, null, 2));
-				console.log("\n📊 INPUT ANALYSIS:");
-				console.log("- originAddress:", input.originAddress);
-				console.log("- destinationAddress:", input.destinationAddress);
-				console.log("- quotedAmount:", input.quotedAmount, "Type:", typeof input.quotedAmount);
-				console.log("- scheduledPickupTime:", input.scheduledPickupTime, "Type:", typeof input.scheduledPickupTime);
-				console.log("- offloadDetails:", JSON.stringify(input.offloadDetails, null, 2));
-				console.log("- stops:", JSON.stringify(input.stops, null, 2));
-				console.log("- stops length:", input.stops?.length || 0);
-
-				// Check if user is admin or super_admin
 				const userId = session?.user?.id || session?.session?.userId;
 				if (!userId) {
-					console.error("❌ Authentication failed: No user ID in session");
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message: "Authentication required",
 					});
 				}
 
-				console.log("👤 User ID:", userId);
 				const userRole = await getUserRole(db, userId);
-				console.log("👤 User role:", userRole);
-
-				if (!userRole || !['admin', 'super_admin'].includes(userRole)) {
-					console.error("❌ Authorization failed: User role is", userRole);
+				if (!userRole || !["admin", "super_admin"].includes(userRole)) {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Admin access required to create offload bookings",
 					});
 				}
 
-				console.log("🚀 Calling createOffloadBookingService...");
-				const newBooking = await createOffloadBookingService(db, input, userId);
-				console.log("✅ Offload booking created successfully!");
-				console.log("📋 Booking ID:", newBooking?.id);
-				console.log("=".repeat(80) + "\n");
-
-				return newBooking;
+				return await createOffloadBookingService(db, input, userId);
 			} catch (error) {
-				console.error("\n" + "=".repeat(80));
-				console.error("❌ TRPC Error in createOffloadBooking");
-				console.error("=".repeat(80));
-				console.error("Error message:", error instanceof Error ? error.message : String(error));
-				console.error("Error stack:", error instanceof Error ? error.stack : undefined);
-				console.error("Input that caused error:", JSON.stringify(input, null, 2));
-				if (error instanceof z.ZodError) {
-					console.error("🔴 VALIDATION ERROR - Zod Issues:");
-					console.error(JSON.stringify(error.issues, null, 2));
-				}
-				console.error("=".repeat(80) + "\n");
 				handleTRPCError(error);
 			}
 		}),
@@ -689,18 +663,8 @@ export const bookingsRouter = router({
 		.input(CalculateInstantQuoteSchema)
 		.query(async ({ ctx: { db, env }, input }) => {
 			try {
-				console.log("🔍 calculateInstantQuote - Input received:", JSON.stringify(input, null, 2));
-				console.log("🔍 calculateInstantQuote - Environment keys:", Object.keys(env || {}));
-				console.log("🔍 calculateInstantQuote - Has Google Maps key:", !!env?.GOOGLE_MAPS_API_KEY);
-
-				const quote = await calculateInstantQuoteService(db, input, env);
-
-				console.log("✅ calculateInstantQuote - Quote calculated successfully:", JSON.stringify(quote, null, 2));
-				return quote;
+				return await calculateInstantQuoteService(db, input, env);
 			} catch (error) {
-				console.error("❌ calculateInstantQuote - Error:", error);
-				console.error("❌ calculateInstantQuote - Error message:", error instanceof Error ? error.message : String(error));
-				console.error("❌ calculateInstantQuote - Error stack:", error instanceof Error ? error.stack : undefined);
 				handleTRPCError(error);
 			}
 		}),
@@ -760,26 +724,36 @@ export const bookingsRouter = router({
 
 	/** Public: Close trip with extras via share token (for external drivers without account - no auth) */
 	closeTripWithExtrasByShareToken: publicProcedure
-		.input(z.object({
-			shareToken: z.string().min(1),
-			isNoShow: z.boolean().default(false),
-			extrasData: z.object({
-				additionalWaitTime: z.number().min(0).default(0),
-				unscheduledStops: z.number().min(0).default(0),
-				parkingCharges: z.number().min(0).default(0),
-				tollCharges: z.number().min(0).default(0),
-				location: z.string().default(""),
-				otherCharges: z.object({
-					description: z.string().default(""),
-					amount: z.number().min(0).default(0),
+		.input(
+			z.object({
+				shareToken: z.string().min(1),
+				isNoShow: z.boolean().default(false),
+				extrasData: z.object({
+					additionalWaitTime: z.number().min(0).default(0),
+					unscheduledStops: z.number().min(0).default(0),
+					parkingCharges: z.number().min(0).default(0),
+					tollCharges: z.number().min(0).default(0),
+					location: z.string().default(""),
+					otherCharges: z.object({
+						description: z.string().default(""),
+						amount: z.number().min(0).default(0),
+					}),
+					extraType: z
+						.enum(["general", "driver", "operator"])
+						.default("general"),
+					notes: z.string().default(""),
 				}),
-				extraType: z.enum(["general", "driver", "operator"]).default("general"),
-				notes: z.string().default(""),
 			}),
-		}))
+		)
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
-				return await closeTripWithExtrasByShareToken(db, input.shareToken, input.extrasData, env, input.isNoShow);
+				return await closeTripWithExtrasByShareToken(
+					db,
+					input.shareToken,
+					input.extrasData,
+					env,
+					input.isNoShow,
+				);
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -787,13 +761,20 @@ export const bookingsRouter = router({
 
 	/** Public: Close trip without extras via share token (for external drivers without account - no auth) */
 	closeTripWithoutExtrasByShareToken: publicProcedure
-		.input(z.object({
-			shareToken: z.string().min(1),
-			isNoShow: z.boolean().default(false),
-		}))
+		.input(
+			z.object({
+				shareToken: z.string().min(1),
+				isNoShow: z.boolean().default(false),
+			}),
+		)
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
-				return await closeTripWithoutExtrasByShareToken(db, input.shareToken, env, input.isNoShow);
+				return await closeTripWithoutExtrasByShareToken(
+					db,
+					input.shareToken,
+					env,
+					input.isNoShow,
+				);
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -805,13 +786,22 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
-				if (!userId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required" });
+				if (!userId)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Authentication required",
+					});
 				const role = await getUserRole(db, userId);
 				const booking = await getBookingService(db, { id: input.bookingId });
-				if (!booking) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+				if (!booking)
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Booking not found",
+					});
 				// Admin or assigned driver can generate
 				const isAdmin = role === "admin" || role === "super_admin";
-				const isAssignedDriver = booking.driverId && booking.driver?.userId === userId;
+				const isAssignedDriver =
+					booking.driverId && booking.driver?.userId === userId;
 				if (!isAdmin && !isAssignedDriver) {
 					throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
 				}
@@ -827,7 +817,11 @@ export const bookingsRouter = router({
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
-				if (!userId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required" });
+				if (!userId)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Authentication required",
+					});
 				await requireAdmin(db, userId);
 				const result = await sendPaymentLinkEmail(input.bookingId, env);
 				return result;
@@ -838,9 +832,13 @@ export const bookingsRouter = router({
 
 	// Get bookings by type
 	listByType: protectedProcedure
-		.input(ResourceListSchema.extend({
-			bookingType: z.enum(["package", "custom", "guest", "offload"]).optional(),
-		}))
+		.input(
+			ResourceListSchema.extend({
+				bookingType: z
+					.enum(["package", "custom", "guest", "offload"])
+					.optional(),
+			}),
+		)
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Get user info from session
@@ -856,14 +854,16 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Apply role-based filtering
-				if (userRole === 'admin' || userRole === 'super_admin') {
+				if (userRole === "admin" || userRole === "super_admin") {
 					// Admins see all bookings EXCEPT pending_payment (not shown until payment goes through)
 					const result = await getBookingsService(db, input);
 					const filteredData = (result?.data ?? []).filter(
-						(b: { paymentStatus?: string | null }) => b.paymentStatus !== "pending_payment"
+						(b: { paymentStatus?: string | null }) =>
+							b.paymentStatus !== "pending_payment",
 					);
 					return { ...result, data: filteredData };
-				} else if (userRole === 'driver') {
+				}
+				if (userRole === "driver") {
 					// Drivers can only see their assigned bookings
 					const driverProfile = await db.query.drivers.findFirst({
 						where: (drivers, { eq }) => eq(drivers.userId, userId),
@@ -884,17 +884,16 @@ export const bookingsRouter = router({
 						},
 					});
 					return bookings;
-				} else {
-					// Regular users (customers) can only see their own bookings
-					const bookings = await getBookingsService(db, {
-						...input,
-						filters: {
-							...input.filters,
-							userId: userId,
-						},
-					});
-					return bookings;
 				}
+				// Regular users (customers) can only see their own bookings
+				const bookings = await getBookingsService(db, {
+					...input,
+					filters: {
+						...input.filters,
+						userId: userId,
+					},
+				});
+				return bookings;
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -902,9 +901,11 @@ export const bookingsRouter = router({
 
 	// Get user's own bookings only with validation included
 	getUserBookings: protectedProcedure
-		.input(ResourceListSchema.extend({
-			userId: z.string().optional(),
-		}))
+		.input(
+			ResourceListSchema.extend({
+				userId: z.string().optional(),
+			}),
+		)
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Ensure user can only see their own bookings
@@ -927,68 +928,83 @@ export const bookingsRouter = router({
 				});
 
 				// Add validation information to each booking
-				const bookingsWithValidation = bookings.data ? {
-					...bookings,
-					data: await Promise.all(bookings.data.map(async (booking) => {
-						// Skip validation for completed/cancelled bookings to save processing
-						if (["completed", "cancelled"].includes(booking.status)) {
-							return {
-								...booking,
-								canEdit: false,
-								canCancel: false,
-								editReason: `Cannot modify ${booking.status} booking`,
-								cancelReason: `Cannot cancel ${booking.status} booking`,
-							};
+				const bookingsWithValidation = bookings.data
+					? {
+							...bookings,
+							data: await Promise.all(
+								bookings.data.map(async (booking) => {
+									// Skip validation for completed/cancelled bookings to save processing
+									if (["completed", "cancelled"].includes(booking.status)) {
+										return {
+											...booking,
+											canEdit: false,
+											canCancel: false,
+											editReason: `Cannot modify ${booking.status} booking`,
+											cancelReason: `Cannot cancel ${booking.status} booking`,
+										};
+									}
+
+									// Calculate validation for active bookings
+									const now = new Date();
+									const pickupTime = new Date(booking.scheduledPickupTime);
+									const hoursUntilPickup =
+										(pickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+									const hasDriverAssigned = !!booking.driverAssignedAt;
+
+									// Use default 4-hour policy
+									const defaultPolicy = {
+										editAllowedHours: 4,
+										editDisabledAfterDriverAssignment: true,
+										cancellationAllowedHours: 4,
+										cancellationFeePercentage: 0,
+										cancellationDisabledAfterDriverAssignment: false,
+									};
+
+									// Check edit permissions
+									let canEdit = true;
+									let editReason: string | undefined;
+									if (hoursUntilPickup < defaultPolicy.editAllowedHours) {
+										canEdit = false;
+										editReason = `Edits must be made at least ${defaultPolicy.editAllowedHours} hours before pickup`;
+									} else if (
+										hasDriverAssigned &&
+										defaultPolicy.editDisabledAfterDriverAssignment
+									) {
+										canEdit = false;
+										editReason =
+											"Cannot edit booking after driver has been assigned";
+									}
+
+									// Check cancellation permissions
+									let canCancel = true;
+									let cancelReason: string | undefined;
+									if (
+										hoursUntilPickup < defaultPolicy.cancellationAllowedHours
+									) {
+										canCancel = false;
+										cancelReason = `Cancellations must be made at least ${defaultPolicy.cancellationAllowedHours} hours before pickup`;
+									} else if (
+										hasDriverAssigned &&
+										defaultPolicy.cancellationDisabledAfterDriverAssignment
+									) {
+										canCancel = false;
+										cancelReason =
+											"Cannot cancel booking after driver has been assigned";
+									}
+
+									return {
+										...booking,
+										canEdit,
+										canCancel,
+										editReason,
+										cancelReason,
+										hoursUntilPickup,
+										hasDriverAssigned,
+									};
+								}),
+							),
 						}
-
-						// Calculate validation for active bookings
-						const now = new Date();
-						const pickupTime = new Date(booking.scheduledPickupTime);
-						const hoursUntilPickup = (pickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-						const hasDriverAssigned = !!booking.driverAssignedAt;
-
-						// Use default 4-hour policy
-						const defaultPolicy = {
-							editAllowedHours: 4,
-							editDisabledAfterDriverAssignment: true,
-							cancellationAllowedHours: 4,
-							cancellationFeePercentage: 0,
-							cancellationDisabledAfterDriverAssignment: false,
-						};
-
-						// Check edit permissions
-						let canEdit = true;
-						let editReason: string | undefined;
-						if (hoursUntilPickup < defaultPolicy.editAllowedHours) {
-							canEdit = false;
-							editReason = `Edits must be made at least ${defaultPolicy.editAllowedHours} hours before pickup`;
-						} else if (hasDriverAssigned && defaultPolicy.editDisabledAfterDriverAssignment) {
-							canEdit = false;
-							editReason = "Cannot edit booking after driver has been assigned";
-						}
-
-						// Check cancellation permissions
-						let canCancel = true;
-						let cancelReason: string | undefined;
-						if (hoursUntilPickup < defaultPolicy.cancellationAllowedHours) {
-							canCancel = false;
-							cancelReason = `Cancellations must be made at least ${defaultPolicy.cancellationAllowedHours} hours before pickup`;
-						} else if (hasDriverAssigned && defaultPolicy.cancellationDisabledAfterDriverAssignment) {
-							canCancel = false;
-							cancelReason = "Cannot cancel booking after driver has been assigned";
-						}
-
-						return {
-							...booking,
-							canEdit,
-							canCancel,
-							editReason,
-							cancelReason,
-							hoursUntilPickup,
-							hasDriverAssigned,
-						};
-					}))
-				} : bookings;
+					: bookings;
 
 				return bookingsWithValidation;
 			} catch (error) {
@@ -998,9 +1014,11 @@ export const bookingsRouter = router({
 
 	// Get user's own bookings (authenticated users only)
 	getUnifiedUserBookings: protectedProcedure
-		.input(ResourceListSchema.extend({
-			userId: z.string().optional(),
-		}))
+		.input(
+			ResourceListSchema.extend({
+				userId: z.string().optional(),
+			}),
+		)
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Ensure user can only see their own bookings
@@ -1029,9 +1047,11 @@ export const bookingsRouter = router({
 
 	// Get driver's assigned bookings only
 	getDriverBookings: protectedProcedure
-		.input(ResourceListSchema.extend({
-			driverId: z.string().optional(),
-		}))
+		.input(
+			ResourceListSchema.extend({
+				driverId: z.string().optional(),
+			}),
+		)
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Get the current user's driver profile
@@ -1065,7 +1085,9 @@ export const bookingsRouter = router({
 
 				// Compute driver share for each booking (excludes toll/parking, includes waiting time)
 				const commissionRate = driverProfile.commissionRate ?? 50;
-				const { computeDriverShare } = await import("@/utils/compute-driver-share");
+				const { computeDriverShare } = await import(
+					"@/utils/compute-driver-share"
+				);
 
 				const dataWithDriverShare = (result.data || []).map((b: any) => {
 					const driverShare = computeDriverShare(
@@ -1075,7 +1097,7 @@ export const bookingsRouter = router({
 							extraCharges: b.extraCharges,
 							extras: b.extras,
 						},
-						commissionRate
+						commissionRate,
 					);
 					const { extras: _extras, ...rest } = b;
 					return {
@@ -1098,92 +1120,70 @@ export const bookingsRouter = router({
 
 	// Validate booking operations
 	validateOperations: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-		}))
+		.input(
+			z.object({
+				bookingId: z.string(),
+			}),
+		)
 		.query(async ({ ctx: { db, session }, input }) => {
-			console.log("🔍 validateOperations - START");
-			console.log("📥 Input:", JSON.stringify(input, null, 2));
-			console.log("👤 Session:", JSON.stringify(session, null, 2));
-
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
-				console.log("🆔 Extracted userId:", userId);
 
 				if (!userId) {
-					console.error("❌ No userId found in session");
 					throw new Error("User session is required");
 				}
 
-				console.log("🔍 Querying booking with ID:", input.bookingId);
-
-				// Get the booking first
 				const [booking] = await db
 					.select()
 					.from(bookings)
 					.where(eq(bookings.id, input.bookingId));
 
-				console.log("📋 Found booking:", booking ? "Yes" : "No");
-				if (booking) {
-					console.log("📋 Booking details:", {
-						id: booking.id,
-						userId: booking.userId,
-						status: booking.status,
-						scheduledPickupTime: booking.scheduledPickupTime,
-						driverAssignedAt: booking.driverAssignedAt
-					});
-				}
-
 				if (!booking) {
-					console.error("❌ Booking not found for ID:", input.bookingId);
 					throw new Error("Booking not found");
 				}
 
 				const userRole = await getUserRole(db, userId);
 				const isAdmin = userRole === "admin" || userRole === "super_admin";
-				// Guest bookings (userId is null) can only be validated by admins
 				if (booking.userId === null) {
 					if (!isAdmin) {
-						throw new Error("Guest bookings can only be managed by administrators");
+						throw new Error(
+							"Guest bookings can only be managed by administrators",
+						);
 					}
 				} else if (booking.userId !== userId) {
-					console.error("❌ User mismatch. Booking userId:", booking.userId, "Session userId:", userId);
 					throw new Error("You can only check your own bookings");
 				}
 
-				console.log("🔍 Calling validateBookingOperations...");
-				const validation = await validateBookingOperations(db, booking);
-				console.log("✅ Validation result:", JSON.stringify(validation, null, 2));
-
-				return validation;
+				return await validateBookingOperations(db, booking);
 			} catch (error) {
-				console.error("💥 ERROR in validateOperations:", error);
-				console.error("📚 Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-				console.error("🔍 Input that caused error:", JSON.stringify(input, null, 2));
-				console.error("👤 Session that caused error:", JSON.stringify(session, null, 2));
 				handleTRPCError(error);
 			}
 		}),
 
 	// Edit booking
 	editBooking: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-			originAddress: z.string().optional(),
-			originLatitude: z.number().optional(),
-			originLongitude: z.number().optional(),
-			destinationAddress: z.string().optional(),
-			destinationLatitude: z.number().optional(),
-			destinationLongitude: z.number().optional(),
-			scheduledPickupTime: z.string().transform((str) => new Date(str)).optional(),
-			customerName: z.string().optional(),
-			customerPhone: z.string().optional(),
-			customerEmail: z.string().optional(),
-			passengerCount: z.number().optional(),
-			luggageCount: z.number().optional(),
-			specialRequests: z.string().optional(),
-			additionalNotes: z.string().optional(),
-		}))
+		.input(
+			z.object({
+				bookingId: z.string(),
+				originAddress: z.string().optional(),
+				originLatitude: z.number().optional(),
+				originLongitude: z.number().optional(),
+				destinationAddress: z.string().optional(),
+				destinationLatitude: z.number().optional(),
+				destinationLongitude: z.number().optional(),
+				scheduledPickupTime: z
+					.string()
+					.transform((str) => new Date(str))
+					.optional(),
+				customerName: z.string().optional(),
+				customerPhone: z.string().optional(),
+				customerEmail: z.string().optional(),
+				passengerCount: z.number().optional(),
+				luggageCount: z.number().optional(),
+				specialRequests: z.string().optional(),
+				additionalNotes: z.string().optional(),
+			}),
+		)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
@@ -1201,10 +1201,12 @@ export const bookingsRouter = router({
 
 	// Cancel booking
 	cancelBooking: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-			cancellationReason: z.string().optional(),
-		}))
+		.input(
+			z.object({
+				bookingId: z.string(),
+				cancellationReason: z.string().optional(),
+			}),
+		)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
@@ -1213,7 +1215,14 @@ export const bookingsRouter = router({
 				}
 
 				const userRole = await getUserRole(db, userId);
-				return await cancelBooking(db, input.bookingId, userId, input.cancellationReason, userRole, env);
+				return await cancelBooking(
+					db,
+					input.bookingId,
+					userId,
+					input.cancellationReason,
+					userRole,
+					env,
+				);
 			} catch (error) {
 				handleTRPCError(error);
 			}
@@ -1221,9 +1230,11 @@ export const bookingsRouter = router({
 
 	// Get available trips for drivers (unassigned bookings)
 	getAvailableTrips: protectedProcedure
-		.input(ResourceListSchema.extend({
-			status: z.enum(["confirmed", "pending"]).optional(),
-		}))
+		.input(
+			ResourceListSchema.extend({
+				status: z.enum(["confirmed", "pending"]).optional(),
+			}),
+		)
 		.query(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Get user info from session
@@ -1239,7 +1250,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only drivers can access available trips
-				if (userRole !== 'driver') {
+				if (userRole !== "driver") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only drivers can view available trips",
@@ -1266,23 +1277,27 @@ export const bookingsRouter = router({
 
 	// Close trip with extras (drivers only)
 	closeTripWithExtras: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-			isNoShow: z.boolean().default(false),
-			extrasData: z.object({
-				additionalWaitTime: z.number().min(0).default(0),
-				unscheduledStops: z.number().min(0).default(0),
-				parkingCharges: z.number().min(0).default(0),
-				tollCharges: z.number().min(0).default(0),
-				location: z.string().default(''),
-				otherCharges: z.object({
-					description: z.string().default(''),
-					amount: z.number().min(0).default(0),
+		.input(
+			z.object({
+				bookingId: z.string(),
+				isNoShow: z.boolean().default(false),
+				extrasData: z.object({
+					additionalWaitTime: z.number().min(0).default(0),
+					unscheduledStops: z.number().min(0).default(0),
+					parkingCharges: z.number().min(0).default(0),
+					tollCharges: z.number().min(0).default(0),
+					location: z.string().default(""),
+					otherCharges: z.object({
+						description: z.string().default(""),
+						amount: z.number().min(0).default(0),
+					}),
+					extraType: z
+						.enum(["general", "driver", "operator"])
+						.default("general"),
+					notes: z.string().default(""),
 				}),
-				extraType: z.enum(['general', 'driver', 'operator']).default('general'),
-				notes: z.string().default(''),
 			}),
-		}))
+		)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
@@ -1297,7 +1312,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only drivers can close trips
-				if (userRole !== 'driver') {
+				if (userRole !== "driver") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only drivers can close trips",
@@ -1322,7 +1337,7 @@ export const bookingsRouter = router({
 					driverProfile.id,
 					input.extrasData,
 					env,
-					input.isNoShow
+					input.isNoShow,
 				);
 
 				return result;
@@ -1333,10 +1348,12 @@ export const bookingsRouter = router({
 
 	// Close trip without extras (drivers only)
 	closeTripWithoutExtras: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-			isNoShow: z.boolean().default(false),
-		}))
+		.input(
+			z.object({
+				bookingId: z.string(),
+				isNoShow: z.boolean().default(false),
+			}),
+		)
 		.mutation(async ({ ctx: { db, session, env }, input }) => {
 			try {
 				const userId = session?.user?.id || session?.session?.userId;
@@ -1351,7 +1368,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only drivers can close trips
-				if (userRole !== 'driver') {
+				if (userRole !== "driver") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only drivers can close trips",
@@ -1375,7 +1392,7 @@ export const bookingsRouter = router({
 					input.bookingId,
 					driverProfile.id,
 					env,
-					input.isNoShow
+					input.isNoShow,
 				);
 
 				return result;
@@ -1402,7 +1419,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only admins can archive bookings
-				if (userRole !== 'admin' && userRole !== 'super_admin') {
+				if (userRole !== "admin" && userRole !== "super_admin") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only administrators can archive bookings",
@@ -1434,7 +1451,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only admins can bulk archive bookings
-				if (userRole !== 'admin' && userRole !== 'super_admin') {
+				if (userRole !== "admin" && userRole !== "super_admin") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only administrators can archive bookings",
@@ -1466,7 +1483,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only admins can bulk delete bookings
-				if (userRole !== 'admin' && userRole !== 'super_admin') {
+				if (userRole !== "admin" && userRole !== "super_admin") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only administrators can delete bookings",
@@ -1511,9 +1528,11 @@ export const bookingsRouter = router({
 
 	// Unassign driver from booking
 	unassignDriver: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-		}))
+		.input(
+			z.object({
+				bookingId: z.string(),
+			}),
+		)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Get user info from session
@@ -1529,7 +1548,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only admins can unassign drivers
-				if (userRole !== 'admin' && userRole !== 'super_admin') {
+				if (userRole !== "admin" && userRole !== "super_admin") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only administrators can unassign drivers",
@@ -1541,8 +1560,8 @@ export const bookingsRouter = router({
 					id: input.bookingId,
 					data: {
 						driverId: null,
-						status: BookingStatusEnum.Confirmed
-					}
+						status: BookingStatusEnum.Confirmed,
+					},
 				});
 
 				return updatedBooking;
@@ -1553,9 +1572,11 @@ export const bookingsRouter = router({
 
 	// Unassign car from booking
 	unassignCar: protectedProcedure
-		.input(z.object({
-			bookingId: z.string(),
-		}))
+		.input(
+			z.object({
+				bookingId: z.string(),
+			}),
+		)
 		.mutation(async ({ ctx: { db, session }, input }) => {
 			try {
 				// Get user info from session
@@ -1571,7 +1592,7 @@ export const bookingsRouter = router({
 				const userRole = await getUserRole(db, userId);
 
 				// Only admins can unassign cars
-				if (userRole !== 'admin' && userRole !== 'super_admin') {
+				if (userRole !== "admin" && userRole !== "super_admin") {
 					throw new TRPCError({
 						code: "FORBIDDEN",
 						message: "Only administrators can unassign cars",
@@ -1582,8 +1603,8 @@ export const bookingsRouter = router({
 				const updatedBooking = await updateBookingService(db, {
 					id: input.bookingId,
 					data: {
-						carId: null
-					}
+						carId: null,
+					},
 				});
 
 				return updatedBooking;
@@ -1592,4 +1613,3 @@ export const bookingsRouter = router({
 			}
 		}),
 });
-

@@ -1,9 +1,9 @@
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client, putObject } from "@/lib/s3";
-import { z } from "zod";
-import { ErrorFactory } from "@/utils/error-factory";
 import { env } from "cloudflare:workers";
 import crypto from "node:crypto";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { z } from "zod";
+import { putObject, s3Client } from "@/lib/s3";
+import { ErrorFactory } from "@/utils/error-factory";
 
 export const CreatePresignedUrlServiceSchema = z.object({
 	entityType: z.enum(["cars", "packages", "bookings", "users"]), // e.g "cars", "package"
@@ -12,25 +12,32 @@ export const CreatePresignedUrlServiceSchema = z.object({
 	fileSize: z.number(),
 });
 
-export type CreatePresignedUrlParams = z.infer<typeof CreatePresignedUrlServiceSchema>;
+export type CreatePresignedUrlParams = z.infer<
+	typeof CreatePresignedUrlServiceSchema
+>;
 
-export async function createPresignedUrlService({ entityType, fileName, fileType, fileSize }: CreatePresignedUrlParams) {
+export async function createPresignedUrlService({
+	entityType,
+	fileName,
+	fileType,
+	fileSize,
+}: CreatePresignedUrlParams) {
 	const randomSuffix = crypto.randomBytes(8).toString("hex");
 	const extension = fileName.split(".").pop();
-	let key = ""
+	let key = "";
 
 	switch (entityType) {
 		case "cars":
-			key = `${entityType}/car-${randomSuffix}${extension ? `.${extension}` : ''}`;
+			key = `${entityType}/car-${randomSuffix}${extension ? `.${extension}` : ""}`;
 			break;
 		case "packages":
-			key = `${entityType}/package-${randomSuffix}${extension ? `.${extension}` : ''}`;
+			key = `${entityType}/package-${randomSuffix}${extension ? `.${extension}` : ""}`;
 			break;
 		case "bookings":
-			key = `${entityType}/booking-${randomSuffix}${extension ? `.${extension}` : ''}`;
+			key = `${entityType}/booking-${randomSuffix}${extension ? `.${extension}` : ""}`;
 			break;
 		case "users":
-			key = `${entityType}/user-${randomSuffix}${extension ? `.${extension}` : ''}`;
+			key = `${entityType}/user-${randomSuffix}${extension ? `.${extension}` : ""}`;
 			break;
 	}
 
@@ -49,7 +56,9 @@ export async function createPresignedUrlService({ entityType, fileName, fileType
 
 		// Use proxy URL so images load even if R2 public access is disabled
 		const baseUrl = env.BETTER_AUTH_URL?.replace(/\/$/, "") || "";
-		const imageUrl = baseUrl ? `${baseUrl}/api/images/${key}` : `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+		const imageUrl = baseUrl
+			? `${baseUrl}/api/images/${key}`
+			: `${env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
 
 		return {
 			url,

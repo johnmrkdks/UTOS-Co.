@@ -1,32 +1,60 @@
-import { getDriversService } from "@/services/drivers/get-drivers";
+import { z } from "zod";
+import {
+	AssignDriverServiceSchema,
+	assignDriverService,
+} from "@/services/bookings/assign-driver";
+import {
+	ApproveDriverApplicationServiceSchema,
+	approveDriverApplicationService,
+} from "@/services/drivers/approve-driver-application";
+import {
+	CreateDriverApplicationServiceSchema,
+	createDriverApplicationService,
+} from "@/services/drivers/create-driver-application";
+import {
+	DeleteDriverServiceSchema,
+	deleteDriverService,
+} from "@/services/drivers/delete-driver";
 import { getAvailableDriversService } from "@/services/drivers/get-available-drivers";
-import { updateDriverService, UpdateDriverServiceSchema } from "@/services/drivers/update-driver";
-import { createDriverApplicationService, CreateDriverApplicationServiceSchema } from "@/services/drivers/create-driver-application";
-import { approveDriverApplicationService, ApproveDriverApplicationServiceSchema } from "@/services/drivers/approve-driver-application";
-import { getDriversByStatusService, GetDriversByStatusServiceSchema } from "@/services/drivers/get-drivers-by-status";
-import { deleteDriverService, DeleteDriverServiceSchema } from "@/services/drivers/delete-driver";
-import { assignDriverService, AssignDriverServiceSchema } from "@/services/bookings/assign-driver";
-import { getCurrentDriverService, GetCurrentDriverServiceSchema } from "@/services/drivers/get-current-driver";
-import { verifyDriverDocumentsService, VerifyDriverDocumentsServiceSchema } from "@/services/drivers/verify-driver-documents";
-import { updateDriverProfileService, UpdateDriverProfileServiceSchema } from "@/services/drivers/update-driver-profile";
+import {
+	GetCurrentDriverServiceSchema,
+	getCurrentDriverService,
+} from "@/services/drivers/get-current-driver";
+import { getDriversService } from "@/services/drivers/get-drivers";
+import {
+	GetDriversByStatusServiceSchema,
+	getDriversByStatusService,
+} from "@/services/drivers/get-drivers-by-status";
+import {
+	UpdateDriverServiceSchema,
+	updateDriverService,
+} from "@/services/drivers/update-driver";
+import {
+	UpdateDriverProfileServiceSchema,
+	updateDriverProfileService,
+} from "@/services/drivers/update-driver-profile";
+import {
+	VerifyDriverDocumentsServiceSchema,
+	verifyDriverDocumentsService,
+} from "@/services/drivers/verify-driver-documents";
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { z } from "zod";
 
 export const driversRouter = router({
-	current: protectedProcedure
-		.query(async ({ ctx: { db, session } }) => {
-			try {
-				if (!session?.user?.id) {
-					throw new Error("Unauthorized");
-				}
-				const driver = await getCurrentDriverService(db, { userId: session.user.id });
-				return driver;
-			} catch (error) {
-				handleTRPCError(error);
+	current: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+		try {
+			if (!session?.user?.id) {
+				throw new Error("Unauthorized");
 			}
-		}),
+			const driver = await getCurrentDriverService(db, {
+				userId: session.user.id,
+			});
+			return driver;
+		} catch (error) {
+			handleTRPCError(error);
+		}
+	}),
 	list: protectedProcedure
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
@@ -38,12 +66,18 @@ export const driversRouter = router({
 			}
 		}),
 	available: protectedProcedure
-		.input(z.object({
-			timeSlot: z.object({
-				start: z.coerce.date(),
-				end: z.coerce.date(),
-			}).optional(),
-		}).optional())
+		.input(
+			z
+				.object({
+					timeSlot: z
+						.object({
+							start: z.coerce.date(),
+							end: z.coerce.date(),
+						})
+						.optional(),
+				})
+				.optional(),
+		)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
 				const drivers = await getAvailableDriversService(db, input?.timeSlot);

@@ -1,4 +1,5 @@
-import { Button } from "@workspace/ui/components/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogClose,
@@ -8,34 +9,36 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@workspace/ui/components/dialog"
-import { Form } from "@workspace/ui/components/form"
-import { SquarePenIcon } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod/v3"
-import { zodResolver } from "@hookform/resolvers/zod"
-import type { CarDriveType } from "server/types"
-import { ValidatedTextInputField } from "@/components/form-fields"
-import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
-import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useUpdateCarDriveTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-update-car-drive-type-mutation"
-import { useIsCarDriveTypeExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-is-car-drive-type-exist-mutation"
+} from "@workspace/ui/components/dialog";
+import { Form } from "@workspace/ui/components/form";
+import { SquarePenIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { CarDriveType } from "server/types";
+import { z } from "zod/v3";
+import { ValidatedTextInputField } from "@/components/form-fields";
+import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display";
+import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation";
+import { useIsCarDriveTypeExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-is-car-drive-type-exist-mutation";
+import { useUpdateCarDriveTypeMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-drive-type/use-update-car-drive-type-mutation";
 
 type EditDriveTypeDialogProps = {
-	driveType: CarDriveType
-}
+	driveType: CarDriveType;
+};
 
 const FormSchema = z.object({
-	name: z.string().min(1, "Drive type is required").max(50, "Drive type must be less than 50 characters"),
-})
+	name: z
+		.string()
+		.min(1, "Drive type is required")
+		.max(50, "Drive type must be less than 50 characters"),
+});
 
-type FormValues = z.infer<typeof FormSchema>
+type FormValues = z.infer<typeof FormSchema>;
 
 export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
-	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const mutation = useUpdateCarDriveTypeMutation()
-	const checkNameMutation = useIsCarDriveTypeExistMutation()
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const mutation = useUpdateCarDriveTypeMutation();
+	const checkNameMutation = useIsCarDriveTypeExistMutation();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -43,16 +46,16 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 		defaultValues: {
 			name: driveType.name,
 		},
-	})
+	});
 
 	// Reset form when dialog opens or driveType changes
 	useEffect(() => {
 		if (isDialogOpen) {
 			form.reset({
 				name: driveType.name,
-			})
+			});
 		}
-	}, [driveType, form, isDialogOpen])
+	}, [driveType, form, isDialogOpen]);
 
 	const validateName = (name: string): Promise<boolean> => {
 		return new Promise((resolve, reject) => {
@@ -61,10 +64,10 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 				{
 					onSuccess: (isAvailable) => resolve(isAvailable!),
 					onError: (error) => reject(error),
-				}
-			)
-		})
-	}
+				},
+			);
+		});
+	};
 
 	const nameValidation = useEntityNameValidation({
 		form,
@@ -72,7 +75,7 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 		validateNameFn: validateName,
 		originalValue: driveType.name,
 		errorMessage: `${form.watch("name")} already used.`,
-	})
+	});
 
 	const validationDisplay = EntityNameValidationDisplay({
 		isChecking: nameValidation.isChecking,
@@ -80,14 +83,14 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 		hasValue: !!form.watch("name")?.trim(),
 		hasError: !!form.formState.errors.name,
 		entityName: form.watch("name")?.trim(),
-	})
+	});
 
 	const handleReset = () => {
 		form.reset({
 			name: driveType.name,
-		})
-		nameValidation.reset()
-	}
+		});
+		nameValidation.reset();
+	};
 
 	const handleSubmit = (data: FormValues) => {
 		mutation.mutate(
@@ -97,47 +100,55 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 			},
 			{
 				onSuccess: () => {
-					setIsDialogOpen(false)
+					setIsDialogOpen(false);
 				},
 			},
-		)
-	}
+		);
+	};
 
 	// Check if form has changed from original values
 	const hasChanges = () => {
-		const currentValues = form.getValues()
-		return (
-			currentValues.name !== driveType.name
-		)
-	}
+		const currentValues = form.getValues();
+		return currentValues.name !== driveType.name;
+	};
 
 	// Check if form is valid and ready to submit
 	const canSubmit = () => {
-		const values = form.getValues()
-		const hasErrors = Object.keys(form.formState.errors).length > 0
-		const isNameUnavailable = nameValidation.nameAvailability === false
-		const isCheckingName = nameValidation.isChecking
+		const values = form.getValues();
+		const hasErrors = Object.keys(form.formState.errors).length > 0;
+		const isNameUnavailable = nameValidation.nameAvailability === false;
+		const isCheckingName = nameValidation.isChecking;
 		const hasRequiredFields = values.name?.trim();
 
 		return (
-			hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
-		)
-	}
+			hasChanges() &&
+			hasRequiredFields &&
+			!hasErrors &&
+			!isNameUnavailable &&
+			!isCheckingName &&
+			!mutation.isPending
+		);
+	};
 
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 			<DialogTrigger asChild>
 				<Button variant="outline" size="icon">
-					<SquarePenIcon className="w-4 h-4" />
+					<SquarePenIcon className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
 				<DialogHeader>
 					<DialogTitle>Edit Drive Type</DialogTitle>
-					<DialogDescription>Edit the details of the drive type.</DialogDescription>
+					<DialogDescription>
+						Edit the details of the drive type.
+					</DialogDescription>
 				</DialogHeader>
-				<Form {...form as any}>
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+				<Form {...(form as any)}>
+					<form
+						onSubmit={form.handleSubmit(handleSubmit)}
+						className="flex flex-col gap-4"
+					>
 						<ValidatedTextInputField
 							form={form}
 							name="name"
@@ -151,7 +162,11 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 									Cancel
 								</Button>
 							</DialogClose>
-							<Button type="submit" disabled={!canSubmit()} loading={mutation.isPending}>
+							<Button
+								type="submit"
+								disabled={!canSubmit()}
+								loading={mutation.isPending}
+							>
 								{mutation.isPending ? "Updating..." : "Save Changes"}
 							</Button>
 						</DialogFooter>
@@ -159,5 +174,5 @@ export function EditDriveTypeDialog({ driveType }: EditDriveTypeDialogProps) {
 				</Form>
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }

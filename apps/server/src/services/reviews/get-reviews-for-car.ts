@@ -1,8 +1,8 @@
+import { desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
-import { bookingReviews } from "@/db/sqlite/schema/bookings/booking-reviews";
 import { bookings } from "@/db/sqlite/schema/bookings";
-import { eq, desc, inArray } from "drizzle-orm";
+import { bookingReviews } from "@/db/sqlite/schema/bookings/booking-reviews";
 
 export const GetReviewsForCarSchema = z.object({
 	carId: z.string().min(1),
@@ -19,7 +19,9 @@ async function getCompanyReviews(db: DB, limit: number) {
 		.orderBy(desc(bookingReviews.createdAt));
 
 	const totalCount = allReviews.length;
-	const bookingIds = [...new Set(allReviews.map((r) => r.bookingId).filter(Boolean))];
+	const bookingIds = [
+		...new Set(allReviews.map((r) => r.bookingId).filter(Boolean)),
+	];
 	const bookingNames = new Map<string, string>();
 	if (bookingIds.length > 0) {
 		const bookingRows = await db
@@ -46,7 +48,13 @@ async function getCompanyReviews(db: DB, limit: number) {
 	const averageRating =
 		totalCount > 0 ? (avgService + avgDriver + avgVehicle) / 3 : 0;
 
-	const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+	const ratingDistribution: Record<number, number> = {
+		1: 0,
+		2: 0,
+		3: 0,
+		4: 0,
+		5: 0,
+	};
 	for (const r of allReviews) {
 		const avg = (r.serviceRating + r.driverRating + r.vehicleRating) / 3;
 		const rounded = Math.round(avg);
@@ -70,13 +78,16 @@ async function getCompanyReviews(db: DB, limit: number) {
 			review: r.review,
 			createdAt: r.createdAt,
 			rating: Math.round(
-				(r.serviceRating + r.driverRating + r.vehicleRating) / 3
+				(r.serviceRating + r.driverRating + r.vehicleRating) / 3,
 			),
 		})),
 	};
 }
 
-export async function getReviewsForCarService(db: DB, input: GetReviewsForCarInput) {
+export async function getReviewsForCarService(
+	db: DB,
+	input: GetReviewsForCarInput,
+) {
 	const { carId, limit, fallbackToCompany } = input;
 
 	// Get booking IDs for this car
@@ -122,7 +133,13 @@ export async function getReviewsForCarService(db: DB, input: GetReviewsForCarInp
 	const averageRating =
 		totalCount > 0 ? (avgService + avgDriver + avgVehicle) / 3 : 0;
 
-	const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+	const ratingDistribution: Record<number, number> = {
+		1: 0,
+		2: 0,
+		3: 0,
+		4: 0,
+		5: 0,
+	};
 	for (const r of allReviews) {
 		const avg = (r.serviceRating + r.driverRating + r.vehicleRating) / 3;
 		const rounded = Math.round(avg);
@@ -147,7 +164,7 @@ export async function getReviewsForCarService(db: DB, input: GetReviewsForCarInp
 			review: r.review,
 			createdAt: r.createdAt,
 			rating: Math.round(
-				(r.serviceRating + r.driverRating + r.vehicleRating) / 3
+				(r.serviceRating + r.driverRating + r.vehicleRating) / 3,
 			),
 		})),
 	};

@@ -1,15 +1,15 @@
-import "@/styles/globals.css"
-import { scan } from "react-scan";
-
-import { RouterProvider, createRouter } from "@tanstack/react-router";
-import ReactDOM from "react-dom/client";
-import { Loader } from "./components/loader";
-import { NotFound } from "./components/not-found";
-import { routeTree } from "../.tanstack/routeTree.gen";
+import "@/styles/globals.css";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient, trpc } from "@/trpc";
+
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
+import { scan } from "react-scan";
+import { queryClient, trpc } from "@/trpc";
+import { routeTree } from "../.tanstack/routeTree.gen";
+import { Loader } from "./components/loader";
+import { NotFound } from "./components/not-found";
 
 scan({
 	enabled: import.meta.env.DEV,

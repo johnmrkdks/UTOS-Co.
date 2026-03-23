@@ -1,6 +1,6 @@
-import { authClient } from "@/lib/auth-client";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export function useLinkGoogleAccount() {
 	return useMutation({

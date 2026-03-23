@@ -1,10 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Services } from '@/features/marketing/_pages/services/_components'
+import { createFileRoute } from "@tanstack/react-router";
+import { Services } from "@/features/marketing/_pages/services/_components";
 
-export const Route = createFileRoute('/_marketing/services')({
-  component: RouteComponent,
-})
+export const Route = createFileRoute("/_marketing/services")({
+	component: RouteComponent,
+});
 
 function RouteComponent() {
-  return <Services />
+	return <Services />;
 }

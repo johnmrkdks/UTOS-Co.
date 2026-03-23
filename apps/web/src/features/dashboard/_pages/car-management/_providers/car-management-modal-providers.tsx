@@ -1,6 +1,6 @@
 import { useModal } from "@/hooks/use-modal";
-import { EditCarModal } from "../_components/modals/edit-car-modal";
 import { DeleteCarModal } from "../_components/modals/delete-car-modal";
+import { EditCarModal } from "../_components/modals/edit-car-modal";
 
 export function CarManagementModalProviders() {
 	const { isModalOpen } = useModal();

@@ -1,70 +1,70 @@
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@workspace/ui/components/select"
-import { Badge } from "@workspace/ui/components/badge"
-import { FilterIcon, XIcon, SearchIcon } from "lucide-react"
-import { useGetCarBrandsQuery } from "../../_hooks/query/car-brand/use-get-car-brands-query"
-import { useGetCarCategoriesQuery } from "../../_hooks/query/car-category/use-get-car-categories-query"
-import { useState, useEffect } from "react"
+} from "@workspace/ui/components/select";
+import { FilterIcon, SearchIcon, XIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useGetCarBrandsQuery } from "../../_hooks/query/car-brand/use-get-car-brands-query";
+import { useGetCarCategoriesQuery } from "../../_hooks/query/car-category/use-get-car-categories-query";
 
 interface CarsFiltersProps {
 	filters: {
-		search: string
-		brand: string
-		category: string
-		availability: "all" | "available" | "unavailable"
-		minPrice: number
-		maxPrice: number
-		page: number
-		pageSize: number
-	}
+		search: string;
+		brand: string;
+		category: string;
+		availability: "all" | "available" | "unavailable";
+		minPrice: number;
+		maxPrice: number;
+		page: number;
+		pageSize: number;
+	};
 	onFiltersChange: (filters: {
-		search?: string
-		brand?: string
-		category?: string
-		availability?: "all" | "available" | "unavailable"
-		minPrice?: number
-		maxPrice?: number
-		page?: number
-		pageSize?: number
-	}) => void
-	onResetFilters: () => void
-	isLoading: boolean
+		search?: string;
+		brand?: string;
+		category?: string;
+		availability?: "all" | "available" | "unavailable";
+		minPrice?: number;
+		maxPrice?: number;
+		page?: number;
+		pageSize?: number;
+	}) => void;
+	onResetFilters: () => void;
+	isLoading: boolean;
 }
 
 export function CarsFilters({
 	filters,
 	onFiltersChange,
 	onResetFilters,
-	isLoading
+	isLoading,
 }: CarsFiltersProps) {
-	const { data: brandsData } = useGetCarBrandsQuery({})
-	const { data: categoriesData } = useGetCarCategoriesQuery({})
+	const { data: brandsData } = useGetCarBrandsQuery({});
+	const { data: categoriesData } = useGetCarCategoriesQuery({});
 
 	// Local state for search input
-	const [searchTerm, setSearchTerm] = useState(filters.search)
+	const [searchTerm, setSearchTerm] = useState(filters.search);
 
 	// Handle search when user clicks search button or presses Enter
 	const handleSearch = () => {
-		onFiltersChange({ search: searchTerm, page: 1 })
-	}
+		onFiltersChange({ search: searchTerm, page: 1 });
+	};
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') {
-			handleSearch()
+		if (e.key === "Enter") {
+			handleSearch();
 		}
-	}
+	};
 
 	// Update local search term when filters change (e.g., from reset or URL change)
 	useEffect(() => {
-		setSearchTerm(filters.search)
-	}, [filters.search])
+		setSearchTerm(filters.search);
+	}, [filters.search]);
 
 	const activeFiltersCount = [
 		filters.search,
@@ -72,8 +72,8 @@ export function CarsFilters({
 		filters.category,
 		filters.availability !== "all",
 		filters.minPrice > 0,
-		filters.maxPrice < 10000
-	].filter(Boolean).length
+		filters.maxPrice < 10000,
+	].filter(Boolean).length;
 
 	return (
 		<div className="">
@@ -91,12 +91,12 @@ export function CarsFilters({
 				)}
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
 				{/* Search */}
 				<div className="relative lg:col-span-2">
 					<div className="flex gap-2">
 						<div className="relative flex-1">
-							<SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							<SearchIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
 							<Input
 								placeholder="Search cars..."
 								value={searchTerm}
@@ -119,7 +119,12 @@ export function CarsFilters({
 				{/* Brand Filter */}
 				<Select
 					value={filters.brand || "all-brands"}
-					onValueChange={(value) => onFiltersChange({ brand: value === "all-brands" ? "" : value, page: 1 })}
+					onValueChange={(value) =>
+						onFiltersChange({
+							brand: value === "all-brands" ? "" : value,
+							page: 1,
+						})
+					}
 				>
 					<SelectTrigger>
 						<SelectValue placeholder="All Brands" />
@@ -137,7 +142,12 @@ export function CarsFilters({
 				{/* Category Filter */}
 				<Select
 					value={filters.category || "all-categories"}
-					onValueChange={(value) => onFiltersChange({ category: value === "all-categories" ? "" : value, page: 1 })}
+					onValueChange={(value) =>
+						onFiltersChange({
+							category: value === "all-categories" ? "" : value,
+							page: 1,
+						})
+					}
 				>
 					<SelectTrigger>
 						<SelectValue placeholder="All Categories" />
@@ -156,7 +166,8 @@ export function CarsFilters({
 				<Select
 					value={filters.availability}
 					onValueChange={(value: "all" | "available" | "unavailable") =>
-						onFiltersChange({ availability: value, page: 1 })}
+						onFiltersChange({ availability: value, page: 1 })
+					}
 				>
 					<SelectTrigger>
 						<SelectValue placeholder="All Status" />
@@ -227,5 +238,5 @@ export function CarsFilters({
 				</div>
 			)}
 		</div>
-	)
+	);
 }

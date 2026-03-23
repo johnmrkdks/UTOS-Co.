@@ -7,7 +7,13 @@ export default defineConfig({
 	splitting: false,
 	sourcemap: true,
 	clean: true,
-	external: ["nodemailer", "googleapis", "react", "@react-email/components", "@react-email/render"],
+	external: [
+		"nodemailer",
+		"googleapis",
+		"react",
+		"@react-email/components",
+		"@react-email/render",
+	],
 	esbuildOptions: (options) => {
 		options.jsx = "automatic";
 		options.jsxImportSource = "react";

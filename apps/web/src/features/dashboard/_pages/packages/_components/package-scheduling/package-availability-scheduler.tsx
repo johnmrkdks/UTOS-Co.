@@ -1,20 +1,26 @@
-import React, { useState, useEffect } from "react";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Switch } from "@workspace/ui/components/switch";
-import { Badge } from "@workspace/ui/components/badge";
-import { Checkbox } from "@workspace/ui/components/checkbox";
-import { 
-	Clock, 
-	Calendar, 
-	Save,
+import {
 	AlertCircle,
+	Calendar,
 	CheckCircle,
+	Clock,
 	Loader2,
-	Settings
+	Save,
+	Settings,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useGetPackagesQuery } from "../../_hooks/query/use-get-packages-query";
 import { useUpdatePackageSchedulingMutation } from "../../_hooks/query/use-update-package-scheduling-mutation";
 
@@ -44,20 +50,22 @@ const DAYS_OF_WEEK = [
 	{ id: "sunday", label: "Sunday", short: "Sun" },
 ];
 
-export function PackageAvailabilityScheduler({ 
-	packageId, 
-	packageName
+export function PackageAvailabilityScheduler({
+	packageId,
+	packageName,
 }: PackageAvailabilitySchedulerProps) {
 	const packagesQuery = useGetPackagesQuery({});
 	const updateSchedulingMutation = useUpdatePackageSchedulingMutation();
-	
-	const currentPackage = packagesQuery.data?.data?.find((pkg: any) => pkg.id === packageId);
-	
+
+	const currentPackage = packagesQuery.data?.data?.find(
+		(pkg: any) => pkg.id === packageId,
+	);
+
 	const [schedule, setSchedule] = useState<PackageSchedule>({
 		isAvailable: true,
 		availableDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
 		availableTimeStart: "09:00",
-		availableTimeEnd: "17:00", 
+		availableTimeEnd: "17:00",
 		advanceBookingHours: 24,
 		cancellationHours: 24,
 		maxBookingsPerDay: 10,
@@ -71,7 +79,9 @@ export function PackageAvailabilityScheduler({
 		if (currentPackage) {
 			setSchedule({
 				isAvailable: currentPackage.isAvailable ?? true,
-				availableDays: currentPackage.availableDays ? JSON.parse(currentPackage.availableDays) : ["monday", "tuesday", "wednesday", "thursday", "friday"],
+				availableDays: currentPackage.availableDays
+					? JSON.parse(currentPackage.availableDays)
+					: ["monday", "tuesday", "wednesday", "thursday", "friday"],
 				availableTimeStart: currentPackage.availableTimeStart || "09:00",
 				availableTimeEnd: currentPackage.availableTimeEnd || "17:00",
 				advanceBookingHours: currentPackage.advanceBookingHours || 24,
@@ -83,34 +93,34 @@ export function PackageAvailabilityScheduler({
 	}, [currentPackage]);
 
 	const handleDayToggle = (dayId: string, checked: boolean) => {
-		setSchedule(prev => ({
+		setSchedule((prev) => ({
 			...prev,
-			availableDays: checked 
+			availableDays: checked
 				? [...prev.availableDays, dayId]
-				: prev.availableDays.filter(d => d !== dayId)
+				: prev.availableDays.filter((d) => d !== dayId),
 		}));
 	};
 
 	const handleAddBlackoutDate = () => {
 		if (newBlackoutDate && !schedule.blackoutDates.includes(newBlackoutDate)) {
-			setSchedule(prev => ({
+			setSchedule((prev) => ({
 				...prev,
-				blackoutDates: [...prev.blackoutDates, newBlackoutDate]
+				blackoutDates: [...prev.blackoutDates, newBlackoutDate],
 			}));
 			setNewBlackoutDate("");
 		}
 	};
 
 	const handleRemoveBlackoutDate = (date: string) => {
-		setSchedule(prev => ({
+		setSchedule((prev) => ({
 			...prev,
-			blackoutDates: prev.blackoutDates.filter(d => d !== date)
+			blackoutDates: prev.blackoutDates.filter((d) => d !== date),
 		}));
 	};
 
 	const handleSave = async () => {
 		if (!currentPackage) return;
-		
+
 		try {
 			await updateSchedulingMutation.mutateAsync({
 				id: currentPackage.id,
@@ -124,14 +134,15 @@ export function PackageAvailabilityScheduler({
 					cancellationHours: schedule.cancellationHours,
 					// Convert fixedPrice from cents for the API
 					fixedPrice: currentPackage.fixedPrice / 100,
-				}
+				},
 			});
 		} catch (error) {
 			console.error("Failed to save package scheduling:", error);
 		}
 	};
 
-	const isValidTimeRange = schedule.availableTimeStart < schedule.availableTimeEnd;
+	const isValidTimeRange =
+		schedule.availableTimeStart < schedule.availableTimeEnd;
 	const hasAvailableDays = schedule.availableDays.length > 0;
 
 	return (
@@ -141,25 +152,31 @@ export function PackageAvailabilityScheduler({
 				<CardHeader>
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
-							<div className="p-2 bg-primary/20 rounded-lg">
+							<div className="rounded-lg bg-primary/20 p-2">
 								<Calendar className="h-6 w-6 text-primary" />
 							</div>
 							<div>
-								<CardTitle className="text-xl flex items-center gap-2">
+								<CardTitle className="flex items-center gap-2 text-xl">
 									Availability Scheduling
 								</CardTitle>
 								<CardDescription className="text-base">
-									Configure when <span className="font-medium text-foreground">"{packageName}"</span> is available for booking
+									Configure when{" "}
+									<span className="font-medium text-foreground">
+										"{packageName}"
+									</span>{" "}
+									is available for booking
 								</CardDescription>
 							</div>
 						</div>
-						<Button 
-							onClick={handleSave} 
+						<Button
+							onClick={handleSave}
 							className="flex items-center gap-2"
 							disabled={updateSchedulingMutation.isPending || !currentPackage}
 							size="lg"
 						>
-							{updateSchedulingMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+							{updateSchedulingMutation.isPending && (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							)}
 							<Save className="h-4 w-4" />
 							Save Schedule
 						</Button>
@@ -172,7 +189,7 @@ export function PackageAvailabilityScheduler({
 				<Card className="h-fit">
 					<CardHeader className="pb-4">
 						<div className="flex items-center gap-2">
-							<div className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+							<div className="rounded-lg bg-blue-100 p-1.5 text-blue-700">
 								<Clock className="h-4 w-4" />
 							</div>
 							<div>
@@ -187,13 +204,15 @@ export function PackageAvailabilityScheduler({
 						<div className="flex items-center justify-between rounded-lg border p-4">
 							<div>
 								<Label className="font-medium">Package Available</Label>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									Master switch for package availability
 								</p>
 							</div>
 							<Switch
 								checked={schedule.isAvailable}
-								onCheckedChange={(checked) => setSchedule(prev => ({ ...prev, isAvailable: checked }))}
+								onCheckedChange={(checked) =>
+									setSchedule((prev) => ({ ...prev, isAvailable: checked }))
+								}
 							/>
 						</div>
 
@@ -207,7 +226,9 @@ export function PackageAvailabilityScheduler({
 												<Checkbox
 													id={day.id}
 													checked={schedule.availableDays.includes(day.id)}
-													onCheckedChange={(checked) => handleDayToggle(day.id, checked as boolean)}
+													onCheckedChange={(checked) =>
+														handleDayToggle(day.id, checked as boolean)
+													}
 												/>
 												<Label htmlFor={day.id} className="text-sm">
 													{day.label}
@@ -216,7 +237,7 @@ export function PackageAvailabilityScheduler({
 										))}
 									</div>
 									{!hasAvailableDays && (
-										<div className="flex items-center gap-2 text-sm text-destructive">
+										<div className="flex items-center gap-2 text-destructive text-sm">
 											<AlertCircle className="h-4 w-4" />
 											Select at least one available day
 										</div>
@@ -230,7 +251,12 @@ export function PackageAvailabilityScheduler({
 											id="startTime"
 											type="time"
 											value={schedule.availableTimeStart}
-											onChange={(e) => setSchedule(prev => ({ ...prev, availableTimeStart: e.target.value }))}
+											onChange={(e) =>
+												setSchedule((prev) => ({
+													...prev,
+													availableTimeStart: e.target.value,
+												}))
+											}
 										/>
 									</div>
 									<div>
@@ -239,12 +265,17 @@ export function PackageAvailabilityScheduler({
 											id="endTime"
 											type="time"
 											value={schedule.availableTimeEnd}
-											onChange={(e) => setSchedule(prev => ({ ...prev, availableTimeEnd: e.target.value }))}
+											onChange={(e) =>
+												setSchedule((prev) => ({
+													...prev,
+													availableTimeEnd: e.target.value,
+												}))
+											}
 										/>
 									</div>
 								</div>
 								{!isValidTimeRange && (
-									<div className="flex items-center gap-2 text-sm text-destructive">
+									<div className="flex items-center gap-2 text-destructive text-sm">
 										<AlertCircle className="h-4 w-4" />
 										End time must be after start time
 									</div>
@@ -258,7 +289,7 @@ export function PackageAvailabilityScheduler({
 				<Card className="h-fit">
 					<CardHeader className="pb-4">
 						<div className="flex items-center gap-2">
-							<div className="p-1.5 bg-purple-100 text-purple-700 rounded-lg">
+							<div className="rounded-lg bg-purple-100 p-1.5 text-purple-700">
 								<Settings className="h-4 w-4" />
 							</div>
 							<div>
@@ -278,30 +309,36 @@ export function PackageAvailabilityScheduler({
 								min="0"
 								max="720"
 								value={schedule.advanceBookingHours}
-								onChange={(e) => setSchedule(prev => ({ 
-									...prev, 
-									advanceBookingHours: parseInt(e.target.value) || 0 
-								}))}
+								onChange={(e) =>
+									setSchedule((prev) => ({
+										...prev,
+										advanceBookingHours: Number.parseInt(e.target.value) || 0,
+									}))
+								}
 							/>
-							<p className="text-xs text-muted-foreground mt-1">
+							<p className="mt-1 text-muted-foreground text-xs">
 								Minimum hours in advance required to book
 							</p>
 						</div>
 
 						<div>
-							<Label htmlFor="cancellationHours">Cancellation Notice (Hours)</Label>
+							<Label htmlFor="cancellationHours">
+								Cancellation Notice (Hours)
+							</Label>
 							<Input
 								id="cancellationHours"
 								type="number"
 								min="0"
 								max="168"
 								value={schedule.cancellationHours}
-								onChange={(e) => setSchedule(prev => ({ 
-									...prev, 
-									cancellationHours: parseInt(e.target.value) || 0 
-								}))}
+								onChange={(e) =>
+									setSchedule((prev) => ({
+										...prev,
+										cancellationHours: Number.parseInt(e.target.value) || 0,
+									}))
+								}
 							/>
-							<p className="text-xs text-muted-foreground mt-1">
+							<p className="mt-1 text-muted-foreground text-xs">
 								Hours before service to allow cancellation
 							</p>
 						</div>
@@ -314,12 +351,14 @@ export function PackageAvailabilityScheduler({
 								min="1"
 								max="100"
 								value={schedule.maxBookingsPerDay}
-								onChange={(e) => setSchedule(prev => ({ 
-									...prev, 
-									maxBookingsPerDay: parseInt(e.target.value) || 1 
-								}))}
+								onChange={(e) =>
+									setSchedule((prev) => ({
+										...prev,
+										maxBookingsPerDay: Number.parseInt(e.target.value) || 1,
+									}))
+								}
 							/>
-							<p className="text-xs text-muted-foreground mt-1">
+							<p className="mt-1 text-muted-foreground text-xs">
 								Maximum bookings allowed per day
 							</p>
 						</div>
@@ -331,7 +370,7 @@ export function PackageAvailabilityScheduler({
 			<Card>
 				<CardHeader className="pb-4">
 					<div className="flex items-center gap-2">
-						<div className="p-1.5 bg-red-100 text-red-700 rounded-lg">
+						<div className="rounded-lg bg-red-100 p-1.5 text-red-700">
 							<Calendar className="h-4 w-4" />
 						</div>
 						<div>
@@ -351,7 +390,7 @@ export function PackageAvailabilityScheduler({
 							placeholder="Select date"
 							className="flex-1"
 						/>
-						<Button 
+						<Button
 							onClick={handleAddBlackoutDate}
 							disabled={!newBlackoutDate}
 							variant="outline"
@@ -365,9 +404,9 @@ export function PackageAvailabilityScheduler({
 							<Label>Blackout Dates</Label>
 							<div className="flex flex-wrap gap-2">
 								{schedule.blackoutDates.map((date) => (
-									<Badge 
-										key={date} 
-										variant="secondary" 
+									<Badge
+										key={date}
+										variant="secondary"
 										className="flex items-center gap-2"
 									>
 										{new Date(date).toLocaleDateString()}
@@ -384,8 +423,8 @@ export function PackageAvailabilityScheduler({
 							</div>
 						</div>
 					) : (
-						<div className="text-center py-4 text-muted-foreground">
-							<Calendar className="mx-auto h-8 w-8 mb-2" />
+						<div className="py-4 text-center text-muted-foreground">
+							<Calendar className="mx-auto mb-2 h-8 w-8" />
 							<p>No blackout dates configured</p>
 						</div>
 					)}
@@ -396,7 +435,7 @@ export function PackageAvailabilityScheduler({
 			<Card className="border-green-200 bg-green-50/50">
 				<CardHeader className="pb-4">
 					<div className="flex items-center gap-2">
-						<div className="p-1.5 bg-green-100 text-green-700 rounded-lg">
+						<div className="rounded-lg bg-green-100 p-1.5 text-green-700">
 							<CheckCircle className="h-4 w-4" />
 						</div>
 						<div>
@@ -420,17 +459,19 @@ export function PackageAvailabilityScheduler({
 									{schedule.isAvailable ? "Available" : "Unavailable"}
 								</span>
 							</div>
-							
+
 							{schedule.isAvailable && (
 								<>
 									<div className="text-sm">
 										<span className="font-medium">Days:</span>{" "}
-										{schedule.availableDays.length === 7 
+										{schedule.availableDays.length === 7
 											? "Every day"
-											: schedule.availableDays.map(day => 
-													DAYS_OF_WEEK.find(d => d.id === day)?.short
-												).join(", ")
-										}
+											: schedule.availableDays
+													.map(
+														(day) =>
+															DAYS_OF_WEEK.find((d) => d.id === day)?.short,
+													)
+													.join(", ")}
 									</div>
 									<div className="text-sm">
 										<span className="font-medium">Hours:</span>{" "}
@@ -442,16 +483,20 @@ export function PackageAvailabilityScheduler({
 
 						<div className="space-y-2 text-sm">
 							<div>
-								<span className="font-medium">Advance booking:</span> {schedule.advanceBookingHours}h
+								<span className="font-medium">Advance booking:</span>{" "}
+								{schedule.advanceBookingHours}h
 							</div>
 							<div>
-								<span className="font-medium">Cancellation notice:</span> {schedule.cancellationHours}h
+								<span className="font-medium">Cancellation notice:</span>{" "}
+								{schedule.cancellationHours}h
 							</div>
 							<div>
-								<span className="font-medium">Max bookings/day:</span> {schedule.maxBookingsPerDay}
+								<span className="font-medium">Max bookings/day:</span>{" "}
+								{schedule.maxBookingsPerDay}
 							</div>
 							<div>
-								<span className="font-medium">Blackout dates:</span> {schedule.blackoutDates.length}
+								<span className="font-medium">Blackout dates:</span>{" "}
+								{schedule.blackoutDates.length}
 							</div>
 						</div>
 					</div>

@@ -1,7 +1,10 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
-import type { ColumnDef } from "@tanstack/react-table";
-import { PublicationStatusBadge, PublicationToggleButton } from "@/features/dashboard/_components/publication";
+import {
+	PublicationStatusBadge,
+	PublicationToggleButton,
+} from "@/features/dashboard/_components/publication";
 
 interface PackagesPublicationColumnsProps {
 	onTogglePublish: (packageId: string) => void;
@@ -10,7 +13,7 @@ interface PackagesPublicationColumnsProps {
 
 export const getPackagesPublicationColumns = ({
 	onTogglePublish,
-	isToggling
+	isToggling,
 }: PackagesPublicationColumnsProps): ColumnDef<any>[] => [
 	{
 		accessorKey: "name",
@@ -22,7 +25,7 @@ export const getPackagesPublicationColumns = ({
 			return (
 				<div className="space-y-1">
 					<div className="font-medium">{pkg.name}</div>
-					<div className="text-sm text-muted-foreground line-clamp-2">
+					<div className="line-clamp-2 text-muted-foreground text-sm">
 						{pkg.description}
 					</div>
 				</div>
@@ -45,7 +48,11 @@ export const getPackagesPublicationColumns = ({
 	{
 		accessorKey: "status",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Publication Status" sortable={false} />
+			<DataTableColumnHeader
+				column={column}
+				title="Publication Status"
+				sortable={false}
+			/>
 		),
 		cell: ({ row }) => {
 			const pkg = row.original;
@@ -70,17 +77,27 @@ export const getPackagesPublicationColumns = ({
 	{
 		accessorKey: "availability_status",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Availability Status" sortable={false} />
+			<DataTableColumnHeader
+				column={column}
+				title="Availability Status"
+				sortable={false}
+			/>
 		),
 		cell: ({ row }) => {
 			const pkg = row.original;
 			return (
 				<div className="space-y-1">
-					<Badge className={pkg.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+					<Badge
+						className={
+							pkg.isAvailable
+								? "bg-green-100 text-green-800"
+								: "bg-red-100 text-red-800"
+						}
+					>
 						{pkg.isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
 					</Badge>
 					{pkg.maxBookings && (
-						<div className="text-xs text-muted-foreground">
+						<div className="text-muted-foreground text-xs">
 							Max: {pkg.maxBookings} bookings
 						</div>
 					)}
@@ -98,7 +115,7 @@ export const getPackagesPublicationColumns = ({
 			return (
 				<div className="text-sm">
 					{date.toLocaleDateString()}
-					<div className="text-xs text-muted-foreground">
+					<div className="text-muted-foreground text-xs">
 						{date.toLocaleTimeString()}
 					</div>
 				</div>
@@ -108,7 +125,12 @@ export const getPackagesPublicationColumns = ({
 	{
 		id: "actions",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Actions" sortable={false} pinnable={false} />
+			<DataTableColumnHeader
+				column={column}
+				title="Actions"
+				sortable={false}
+				pinnable={false}
+			/>
 		),
 		cell: ({ row }) => {
 			const pkg = row.original;

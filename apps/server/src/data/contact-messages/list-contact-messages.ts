@@ -1,7 +1,7 @@
+import { desc, eq } from "drizzle-orm";
 import type { DB } from "@/db";
-import { contactMessages } from "@/db/sqlite/schema";
 import type { ContactMessage } from "@/db/sqlite/schema";
-import { eq, desc } from "drizzle-orm";
+import { contactMessages } from "@/db/sqlite/schema";
 import type { ResourceList } from "@/utils/query/resource-list";
 
 interface ListContactMessagesOptions extends ResourceList {
@@ -10,12 +10,14 @@ interface ListContactMessagesOptions extends ResourceList {
 
 export async function listContactMessages(
 	db: DB,
-	options: ListContactMessagesOptions = {}
+	options: ListContactMessagesOptions = {},
 ) {
 	const { status, limit = 50, offset = 0 } = options;
 
 	// Build the where condition based on status filter
-	const whereCondition = status ? eq(contactMessages.status, status) : undefined;
+	const whereCondition = status
+		? eq(contactMessages.status, status)
+		: undefined;
 
 	// Execute the query with filtering
 	const data = await db

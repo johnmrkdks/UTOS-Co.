@@ -1,18 +1,24 @@
-import { Button } from "@workspace/ui/components/button"
-import { cn } from "@workspace/ui/lib/utils"
-import { Loader2Icon } from "lucide-react"
-import type { ReactNode } from "react"
+import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
+import { Loader2Icon } from "lucide-react";
+import type { ReactNode } from "react";
 
 type OAuthButtonProps = {
-	provider: string
-	icon: string | ReactNode
-	onClick: () => void
-	isLoading?: boolean
-	disabled?: boolean
-	className?: string
-	variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
-	showLabel?: boolean
-}
+	provider: string;
+	icon: string | ReactNode;
+	onClick: () => void;
+	isLoading?: boolean;
+	disabled?: boolean;
+	className?: string;
+	variant?:
+		| "default"
+		| "destructive"
+		| "outline"
+		| "secondary"
+		| "ghost"
+		| "link";
+	showLabel?: boolean;
+};
 
 export function OAuthButton({
 	provider,
@@ -25,15 +31,21 @@ export function OAuthButton({
 }: OAuthButtonProps) {
 	const renderIcon = () => {
 		if (isLoading) {
-			return <Loader2Icon className="w-4 h-4 animate-spin" />
+			return <Loader2Icon className="h-4 w-4 animate-spin" />;
 		}
 
 		if (typeof icon === "string") {
-			return <img src={icon || "/placeholder.svg"} alt={`${provider} icon`} className="w-4 h-4" />
+			return (
+				<img
+					src={icon || "/placeholder.svg"}
+					alt={`${provider} icon`}
+					className="h-4 w-4"
+				/>
+			);
 		}
 
-		return icon
-	}
+		return icon;
+	};
 
 	return (
 		<Button
@@ -45,6 +57,5 @@ export function OAuthButton({
 		>
 			<div>{renderIcon()}</div>
 		</Button>
-	)
+	);
 }
-

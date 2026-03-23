@@ -1,10 +1,13 @@
+import { env } from "cloudflare:workers";
+import { getMailService } from "@workspace/mail";
+import {
+	generateDriverEmailVerificationTemplate,
+	generateDriverOnboardingTemplate,
+} from "@workspace/mail/templates";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { drivers } from "@/db/sqlite/schema/drivers";
 import { users } from "@/db/sqlite/schema/users";
-import { getMailService } from "@workspace/mail";
-import { generateDriverEmailVerificationTemplate, generateDriverOnboardingTemplate } from "@workspace/mail/templates";
-import { env } from "cloudflare:workers";
 import { auth } from "@/lib/auth";
 
 interface SendDriverVerificationEmailInput {
@@ -19,7 +22,9 @@ interface SendDriverOnboardingEmailInput {
 	adminContactEmail?: string;
 }
 
-export async function sendDriverVerificationEmail(input: SendDriverVerificationEmailInput) {
+export async function sendDriverVerificationEmail(
+	input: SendDriverVerificationEmailInput,
+) {
 	const { driverId, adminContactEmail } = input;
 
 	// Get driver and user information
@@ -43,7 +48,7 @@ export async function sendDriverVerificationEmail(input: SendDriverVerificationE
 		throw new Error("Driver email not found");
 	}
 
-	// Generate verification URL using Better Auth  
+	// Generate verification URL using Better Auth
 	// For now, we'll use a placeholder URL - Better Auth handles verification internally
 	const verificationUrl = `${env.BETTER_AUTH_URL}/api/auth/verify-email?token=verification_token&email=${encodeURIComponent(user.email)}`;
 
@@ -51,7 +56,7 @@ export async function sendDriverVerificationEmail(input: SendDriverVerificationE
 	const template = generateDriverEmailVerificationTemplate(
 		user.name || "Driver",
 		verificationUrl.toString(),
-		adminContactEmail
+		adminContactEmail,
 	);
 
 	// Send email using mail service
@@ -74,7 +79,9 @@ export async function sendDriverVerificationEmail(input: SendDriverVerificationE
 	return { success: true, email: user.email };
 }
 
-export async function sendDriverOnboardingEmail(input: SendDriverOnboardingEmailInput) {
+export async function sendDriverOnboardingEmail(
+	input: SendDriverOnboardingEmailInput,
+) {
 	const { driverId, loginUrl, googleLinkingUrl, adminContactEmail } = input;
 
 	// Get driver and user information
@@ -100,7 +107,9 @@ export async function sendDriverOnboardingEmail(input: SendDriverOnboardingEmail
 
 	// Check if email is verified
 	if (!user.emailVerified) {
-		throw new Error("Driver email must be verified before sending onboarding email");
+		throw new Error(
+			"Driver email must be verified before sending onboarding email",
+		);
 	}
 
 	// Generate email template
@@ -108,7 +117,7 @@ export async function sendDriverOnboardingEmail(input: SendDriverOnboardingEmail
 		user.name || "Driver",
 		loginUrl,
 		googleLinkingUrl,
-		adminContactEmail
+		adminContactEmail,
 	);
 
 	// Send email using mail service

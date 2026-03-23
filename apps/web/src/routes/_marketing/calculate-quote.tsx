@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalculateQuotePage } from "@/features/marketing/_pages/calculate-quote/calculate-quote-page";
 import { z } from "zod";
+import { CalculateQuotePage } from "@/features/marketing/_pages/calculate-quote/calculate-quote-page";
 
 const calculateQuoteSearchSchema = z.object({
 	origin: z.string().optional(),

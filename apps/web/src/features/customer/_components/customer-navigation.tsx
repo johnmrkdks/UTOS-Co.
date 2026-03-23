@@ -7,7 +7,10 @@ interface CustomerNavigationProps {
 	onNavigate?: () => void;
 }
 
-export function CustomerNavigation({ navigationItems, onNavigate }: CustomerNavigationProps) {
+export function CustomerNavigation({
+	navigationItems,
+	onNavigate,
+}: CustomerNavigationProps) {
 	return (
 		<nav className="space-y-1">
 			{navigationItems.map((item, index) => {
@@ -18,19 +21,21 @@ export function CustomerNavigation({ navigationItems, onNavigate }: CustomerNavi
 						to={item.href}
 						onClick={onNavigate}
 						className={cn(
-							"flex items-center gap-4 p-3 rounded-lg transition-all duration-200 touch-manipulation group hover:bg-muted/50 active:scale-[0.98]",
+							"group flex touch-manipulation items-center gap-4 rounded-lg p-3 transition-all duration-200 hover:bg-muted/50 active:scale-[0.98]",
 							item.active
-								? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
-								: "text-foreground hover:text-primary"
+								? "border border-primary/20 bg-primary/10 text-primary shadow-sm"
+								: "text-foreground hover:text-primary",
 						)}
 					>
 						{/* Icon Container */}
-						<div className={cn(
-							"w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200",
-							item.active
-								? "bg-primary text-white shadow-md"
-								: "bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-						)}>
+						<div
+							className={cn(
+								"flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200",
+								item.active
+									? "bg-primary text-white shadow-md"
+									: "bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary",
+							)}
+						>
 							<Icon className="h-5 w-5" />
 						</div>
 
@@ -39,24 +44,34 @@ export function CustomerNavigation({ navigationItems, onNavigate }: CustomerNavi
 							<div className="flex items-center justify-between">
 								<span className="font-medium text-sm">{item.name}</span>
 								{item.active && (
-									<div className="w-2 h-2 bg-primary rounded-full"></div>
+									<div className="h-2 w-2 rounded-full bg-primary" />
 								)}
 							</div>
 							{/* Optional description for key items */}
 							{index === 0 && (
-								<p className="text-xs text-muted-foreground mt-0.5">View your overview and quick actions</p>
+								<p className="mt-0.5 text-muted-foreground text-xs">
+									View your overview and quick actions
+								</p>
 							)}
 							{item.name === "Browse Services" && (
-								<p className="text-xs text-muted-foreground mt-0.5">Explore luxury travel packages</p>
+								<p className="mt-0.5 text-muted-foreground text-xs">
+									Explore luxury travel packages
+								</p>
 							)}
 							{item.name === "Instant Quote" && (
-								<p className="text-xs text-muted-foreground mt-0.5">Get custom pricing instantly</p>
+								<p className="mt-0.5 text-muted-foreground text-xs">
+									Get custom pricing instantly
+								</p>
 							)}
 							{item.name === "My Bookings" && (
-								<p className="text-xs text-muted-foreground mt-0.5">View and manage your reservations</p>
+								<p className="mt-0.5 text-muted-foreground text-xs">
+									View and manage your reservations
+								</p>
 							)}
 							{item.name === "Profile" && (
-								<p className="text-xs text-muted-foreground mt-0.5">Update your personal information</p>
+								<p className="mt-0.5 text-muted-foreground text-xs">
+									Update your personal information
+								</p>
 							)}
 						</div>
 					</Link>

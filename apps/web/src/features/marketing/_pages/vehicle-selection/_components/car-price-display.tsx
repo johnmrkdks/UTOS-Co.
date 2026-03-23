@@ -6,13 +6,17 @@ interface CarPriceDisplayProps {
 	variant?: "card" | "summary"; // card for main display, summary for bottom bar
 }
 
-export function CarPriceDisplay({ carId, className, variant = "card" }: CarPriceDisplayProps) {
+export function CarPriceDisplay({
+	carId,
+	className,
+	variant = "card",
+}: CarPriceDisplayProps) {
 	const { data: pricing, isLoading } = useGetCarPricingEstimateQuery({ carId });
 
 	if (isLoading) {
 		return (
 			<div className={className}>
-				<div className="text-sm text-muted-foreground animate-pulse">
+				<div className="animate-pulse text-muted-foreground text-sm">
 					Loading...
 				</div>
 			</div>
@@ -24,13 +28,17 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 			<div className={className}>
 				{variant === "card" ? (
 					<>
-						<div className="text-sm sm:text-lg lg:text-xl font-bold text-primary">
+						<div className="font-bold text-primary text-sm sm:text-lg lg:text-xl">
 							Contact for Price
 						</div>
-						<div className="text-xs text-muted-foreground hidden sm:block">custom quote</div>
+						<div className="hidden text-muted-foreground text-xs sm:block">
+							custom quote
+						</div>
 					</>
 				) : (
-					<span className="text-sm text-muted-foreground">Contact for pricing</span>
+					<span className="text-muted-foreground text-sm">
+						Contact for pricing
+					</span>
 				)}
 			</div>
 		);
@@ -40,7 +48,10 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 		const additionalKmRate = pricing?.additionalKmRate || 0;
 		return (
 			<div className={className}>
-				<span>From ${pricing?.firstKmRate || 0}{additionalKmRate > 0 ? ` + $${additionalKmRate}/km` : ''}</span>
+				<span>
+					From ${pricing?.firstKmRate || 0}
+					{additionalKmRate > 0 ? ` + $${additionalKmRate}/km` : ""}
+				</span>
 			</div>
 		);
 	}
@@ -48,10 +59,10 @@ export function CarPriceDisplay({ carId, className, variant = "card" }: CarPrice
 	const additionalKmRate = pricing?.additionalKmRate || 0;
 	return (
 		<div className={className}>
-			<div className="text-2xl font-bold text-primary">
+			<div className="font-bold text-2xl text-primary">
 				${pricing?.firstKmRate || 0}
 			</div>
-			<div className="text-sm text-gray-600">
+			<div className="text-gray-600 text-sm">
 				first {pricing?.firstKmLimit || 10}km
 			</div>
 		</div>

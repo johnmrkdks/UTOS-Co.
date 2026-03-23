@@ -1,4 +1,7 @@
-
+import {
+	CheckCarCategoryUsageServiceSchema,
+	checkCarCategoryUsageService,
+} from "@/services/cars-categories/check-car-category-usage";
 import {
 	CreateCarCategoryServiceSchema,
 	createCarCategoryService,
@@ -7,13 +10,16 @@ import {
 	DeleteCarCategoryServiceSchema,
 	deleteCarCategoryService,
 } from "@/services/cars-categories/delete-car-category";
+import { getCarCategoriesService } from "@/services/cars-categories/get-car-categories";
+import { getCarCategoriesWithEnrichedDataService } from "@/services/cars-categories/get-car-categories-with-enriched-data";
 import {
 	GetCarCategoryServiceSchema,
 	getCarCategoryService,
 } from "@/services/cars-categories/get-car-category";
-import { getCarCategoriesService } from "@/services/cars-categories/get-car-categories";
-import { getCarCategoriesWithEnrichedDataService } from "@/services/cars-categories/get-car-categories-with-enriched-data";
-import { isCarCategoryExistService, IsCarCategoryExistServiceSchema } from "@/services/cars-categories/is-car-category-exist";
+import {
+	IsCarCategoryExistServiceSchema,
+	isCarCategoryExistService,
+} from "@/services/cars-categories/is-car-category-exist";
 import {
 	UpdateCarCategoryServiceSchema,
 	updateCarCategoryService,
@@ -21,14 +27,16 @@ import {
 import { protectedProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { checkCarCategoryUsageService, CheckCarCategoryUsageServiceSchema } from "@/services/cars-categories/check-car-category-usage";
 
 export const carCategoriesRouter = router({
 	checkUsage: protectedProcedure
 		.input(CheckCarCategoryUsageServiceSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const checkCarCategoryUsage = await checkCarCategoryUsageService(db, input);
+				const checkCarCategoryUsage = await checkCarCategoryUsageService(
+					db,
+					input,
+				);
 				return checkCarCategoryUsage;
 			} catch (error) {
 				handleTRPCError(error);
@@ -88,7 +96,10 @@ export const carCategoriesRouter = router({
 		.input(ResourceListSchema)
 		.query(async ({ ctx: { db }, input }) => {
 			try {
-				const carCategories = await getCarCategoriesWithEnrichedDataService(db, input);
+				const carCategories = await getCarCategoriesWithEnrichedDataService(
+					db,
+					input,
+				);
 				return carCategories;
 			} catch (error) {
 				handleTRPCError(error);

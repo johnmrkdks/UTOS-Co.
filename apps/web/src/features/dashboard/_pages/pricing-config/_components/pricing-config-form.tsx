@@ -1,35 +1,80 @@
-import { Button } from "@workspace/ui/components/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { Switch } from "@workspace/ui/components/switch";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Separator } from "@workspace/ui/components/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useState, useEffect } from "react";
-import { useCreatePricingConfigMutation } from "../_hooks/query/use-create-pricing-config-mutation";
-import { useUpdatePricingConfigMutation } from "../_hooks/query/use-update-pricing-config-mutation";
-import { Loader2, DollarSign, Clock, Calendar, Car, Plus, ArrowRight } from "lucide-react";
-import { useGetCarsWithoutPricingQuery } from "../_hooks/query/use-get-cars-without-pricing-query";
 import { Link } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import { Separator } from "@workspace/ui/components/separator";
+import { Switch } from "@workspace/ui/components/switch";
+import {
+	ArrowRight,
+	Calendar,
+	Car,
+	Clock,
+	DollarSign,
+	Loader2,
+	Plus,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useCreatePricingConfigMutation } from "../_hooks/query/use-create-pricing-config-mutation";
+import { useGetCarsWithoutPricingQuery } from "../_hooks/query/use-get-cars-without-pricing-query";
+import { useUpdatePricingConfigMutation } from "../_hooks/query/use-update-pricing-config-mutation";
 
 const pricingConfigSchema = z.object({
-	name: z.string().min(1, "Please enter a configuration name").max(100, "Name too long"),
-	carId: z.string().min(1, "Please select a car for this pricing configuration"),
-	firstKmRate: z.number({ 
-		message: "Please enter the first KM rate",
-		invalid_type_error: "First KM rate must be a valid number"
-	}).min(0.01, "First KM rate must be greater than 0"),
-	firstKmLimit: z.union([
-		z.number({ invalid_type_error: "First KM limit must be a valid number" }).min(1, "First KM limit must be at least 1"),
-		z.undefined()
-	]).optional(),
-	pricePerKm: z.union([
-		z.number({ invalid_type_error: "Additional KM rate must be a valid number" }).min(0.01, "Additional KM rate must be greater than 0"),
-		z.undefined()
-	]).optional(),
+	name: z
+		.string()
+		.min(1, "Please enter a configuration name")
+		.max(100, "Name too long"),
+	carId: z
+		.string()
+		.min(1, "Please select a car for this pricing configuration"),
+	firstKmRate: z
+		.number({
+			message: "Please enter the first KM rate",
+			invalid_type_error: "First KM rate must be a valid number",
+		})
+		.min(0.01, "First KM rate must be greater than 0"),
+	firstKmLimit: z
+		.union([
+			z
+				.number({ invalid_type_error: "First KM limit must be a valid number" })
+				.min(1, "First KM limit must be at least 1"),
+			z.undefined(),
+		])
+		.optional(),
+	pricePerKm: z
+		.union([
+			z
+				.number({
+					invalid_type_error: "Additional KM rate must be a valid number",
+				})
+				.min(0.01, "Additional KM rate must be greater than 0"),
+			z.undefined(),
+		])
+		.optional(),
 	isActive: z.boolean().default(true),
 });
 
@@ -50,11 +95,21 @@ type PricingConfigFormProps = {
 	};
 };
 
-export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "create", contextData }: PricingConfigFormProps) {
+export function PricingConfigForm({
+	initialData,
+	onSuccess,
+	onCancel,
+	mode = "create",
+	contextData,
+}: PricingConfigFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const createMutation = useCreatePricingConfigMutation();
 	const updateMutation = useUpdatePricingConfigMutation();
-	const { data: cars, isLoading: carsLoading, error: carsError } = useGetCarsWithoutPricingQuery();
+	const {
+		data: cars,
+		isLoading: carsLoading,
+		error: carsError,
+	} = useGetCarsWithoutPricingQuery();
 
 	const form = useForm({
 		resolver: zodResolver(pricingConfigSchema),
@@ -69,7 +124,11 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 	});
 
 	// Debug logging
-	console.log("Cars query result:", { cars, isLoading: carsLoading, error: carsError });
+	console.log("Cars query result:", {
+		cars,
+		isLoading: carsLoading,
+		error: carsError,
+	});
 
 	// Auto-generate name based on selected car
 	const selectedCarId = form.watch("carId");
@@ -78,7 +137,7 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 	useEffect(() => {
 		// Only auto-generate name if creating a new config (not editing) and carId is selected
 		if (mode === "create" && selectedCarId && cars) {
-			const selectedCar = cars.find(car => car.id === selectedCarId);
+			const selectedCar = cars.find((car) => car.id === selectedCarId);
 			if (selectedCar) {
 				const autoGeneratedName = `${selectedCar.name} Pricing Config`;
 				// Only update if current name is empty or was previously auto-generated
@@ -100,7 +159,10 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 			};
 
 			if (mode === "edit" && initialData?.id) {
-				await updateMutation.mutateAsync({ id: initialData.id, ...processedData });
+				await updateMutation.mutateAsync({
+					id: initialData.id,
+					...processedData,
+				});
 			} else {
 				await createMutation.mutateAsync(processedData);
 			}
@@ -114,11 +176,11 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 	};
 
 	return (
-		<Form {...form as any}>
-			<div className="flex flex-col h-full">
+		<Form {...(form as any)}>
+			<div className="flex h-full flex-col">
 				<div className="flex-1 overflow-y-auto px-6 py-4">
 					<div className="space-y-6">
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+						<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 							{/* Left Column */}
 							<div className="space-y-6">
 								{/* Basic Configuration */}
@@ -128,40 +190,49 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 											<DollarSign className="h-5 w-5" />
 											Pricing Configuration
 										</CardTitle>
-										<CardDescription>Simplified pricing structure with first 10KM rate and additional KM rate</CardDescription>
+										<CardDescription>
+											Simplified pricing structure with first 10KM rate and
+											additional KM rate
+										</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-4">
 										{/* Car Selection - Show selector only when creating new config */}
 										{contextData?.fromPublicationManagement ? (
 											<div className="space-y-2">
 												<FormLabel>Selected Car</FormLabel>
-												<div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
+												<div className="flex items-center gap-2 rounded-md border bg-muted/50 p-3">
 													<Car className="h-4 w-4" />
-													<span className="font-medium">{contextData.carName}</span>
+													<span className="font-medium">
+														{contextData.carName}
+													</span>
 													{contextData.carBrand && contextData.carModel && (
 														<span className="text-muted-foreground">
 															({contextData.carBrand} {contextData.carModel})
 														</span>
 													)}
 												</div>
-												<p className="text-sm text-muted-foreground">
-													This pricing configuration will be applied to the selected car from Publication Management.
+												<p className="text-muted-foreground text-sm">
+													This pricing configuration will be applied to the
+													selected car from Publication Management.
 												</p>
 											</div>
 										) : mode === "edit" ? (
 											<div className="space-y-2">
 												<FormLabel>Selected Car</FormLabel>
-												<div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
+												<div className="flex items-center gap-2 rounded-md border bg-muted/50 p-3">
 													<Car className="h-4 w-4" />
-													<span className="font-medium">{initialData?.car?.name || 'Selected Car'}</span>
+													<span className="font-medium">
+														{initialData?.car?.name || "Selected Car"}
+													</span>
 													{initialData?.car?.licensePlate && (
 														<span className="text-muted-foreground">
 															({initialData.car.licensePlate})
 														</span>
 													)}
 												</div>
-												<p className="text-sm text-muted-foreground">
-													Car selection cannot be changed when editing existing pricing configurations.
+												<p className="text-muted-foreground text-sm">
+													Car selection cannot be changed when editing existing
+													pricing configurations.
 												</p>
 											</div>
 										) : (
@@ -173,7 +244,10 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 														render={({ field }) => (
 															<FormItem>
 																<FormLabel>Select Car</FormLabel>
-																<Select onValueChange={field.onChange} value={field.value || ""}>
+																<Select
+																	onValueChange={field.onChange}
+																	value={field.value || ""}
+																>
 																	<FormControl>
 																		<SelectTrigger className="bg-white">
 																			<SelectValue placeholder="Choose a car for this pricing configuration" />
@@ -181,18 +255,27 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 																	</FormControl>
 																	<SelectContent>
 																		{carsLoading ? (
-																			<SelectItem value="loading" disabled>Loading cars...</SelectItem>
+																			<SelectItem value="loading" disabled>
+																				Loading cars...
+																			</SelectItem>
 																		) : carsError ? (
 																			<SelectItem value="error" disabled>
-																				Error loading cars. Please refresh the page.
+																				Error loading cars. Please refresh the
+																				page.
 																			</SelectItem>
 																		) : (
 																			cars.map((car) => (
-																				<SelectItem key={car.id} value={car.id} className="bg-white">
+																				<SelectItem
+																					key={car.id}
+																					value={car.id}
+																					className="bg-white"
+																				>
 																					<div className="flex items-center gap-2">
 																						<Car className="h-4 w-4" />
 																						<span>{car.name}</span>
-																						<span className="text-muted-foreground">({car.licensePlate})</span>
+																						<span className="text-muted-foreground">
+																							({car.licensePlate})
+																						</span>
 																					</div>
 																				</SelectItem>
 																			))
@@ -200,7 +283,8 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 																	</SelectContent>
 																</Select>
 																<FormDescription>
-																	Each car can have its own pricing configuration for different luxury tiers.
+																	Each car can have its own pricing
+																	configuration for different luxury tiers.
 																</FormDescription>
 																<FormMessage />
 															</FormItem>
@@ -209,21 +293,26 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 												) : carsLoading ? (
 													<div className="space-y-2">
 														<FormLabel>Select Car</FormLabel>
-														<div className="flex items-center gap-2 p-3 border rounded-md">
+														<div className="flex items-center gap-2 rounded-md border p-3">
 															<Loader2 className="h-4 w-4 animate-spin" />
-															<span className="text-muted-foreground">Loading available cars...</span>
+															<span className="text-muted-foreground">
+																Loading available cars...
+															</span>
 														</div>
 													</div>
 												) : carsError ? (
 													<div className="space-y-2">
 														<FormLabel>Select Car</FormLabel>
-														<div className="p-4 border border-red-200 rounded-lg bg-red-50">
-															<div className="flex items-center gap-2 text-red-800 mb-2">
+														<div className="rounded-lg border border-red-200 bg-red-50 p-4">
+															<div className="mb-2 flex items-center gap-2 text-red-800">
 																<Car className="h-4 w-4" />
-																<span className="font-medium">Error Loading Cars</span>
+																<span className="font-medium">
+																	Error Loading Cars
+																</span>
 															</div>
-															<p className="text-sm text-red-700 mb-3">
-																Unable to load available cars. Please refresh the page and try again.
+															<p className="mb-3 text-red-700 text-sm">
+																Unable to load available cars. Please refresh
+																the page and try again.
 															</p>
 															<Button
 																type="button"
@@ -239,30 +328,33 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 												) : (
 													<div className="space-y-2">
 														<FormLabel>Select Car</FormLabel>
-														<div className="p-6 border border-primary/20 rounded-lg bg-primary/5">
-															<div className="text-center space-y-4">
+														<div className="rounded-lg border border-primary/20 bg-primary/5 p-6">
+															<div className="space-y-4 text-center">
 																<div className="flex justify-center">
 																	<div className="rounded-full bg-primary/10 p-3">
 																		<Car className="h-8 w-8 text-primary" />
 																	</div>
 																</div>
 																<div>
-																	<h3 className="text-lg font-medium text-foreground mb-2">
+																	<h3 className="mb-2 font-medium text-foreground text-lg">
 																		No Cars Available
 																	</h3>
-																	<p className="text-sm text-muted-foreground mb-4">
-																		All cars already have pricing configurations. You need to add a new car to create additional pricing configurations.
+																	<p className="mb-4 text-muted-foreground text-sm">
+																		All cars already have pricing
+																		configurations. You need to add a new car to
+																		create additional pricing configurations.
 																	</p>
 																</div>
 																<Link to="/admin/dashboard/cars/add-car">
-																	<Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-																		<Plus className="h-4 w-4 mr-2" />
+																	<Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+																		<Plus className="mr-2 h-4 w-4" />
 																		Add New Car
-																		<ArrowRight className="h-4 w-4 ml-2" />
+																		<ArrowRight className="ml-2 h-4 w-4" />
 																	</Button>
 																</Link>
-																<p className="text-xs text-muted-foreground">
-																	After adding a car, return here to create its pricing configuration.
+																<p className="text-muted-foreground text-xs">
+																	After adding a car, return here to create its
+																	pricing configuration.
 																</p>
 															</div>
 														</div>
@@ -278,10 +370,15 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 												<FormItem>
 													<FormLabel>Configuration Name</FormLabel>
 													<FormControl>
-														<Input placeholder="e.g., Mercedes S-Class Pricing Config" {...field} className="bg-white" />
+														<Input
+															placeholder="e.g., Mercedes S-Class Pricing Config"
+															{...field}
+															className="bg-white"
+														/>
 													</FormControl>
-													<FormDescription className="text-sm text-muted-foreground">
-														Auto-generated based on selected car. You can modify it if needed.
+													<FormDescription className="text-muted-foreground text-sm">
+														Auto-generated based on selected car. You can modify
+														it if needed.
 													</FormDescription>
 													<FormMessage />
 												</FormItem>
@@ -303,19 +400,23 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 																placeholder="e.g. 200"
 																className="bg-white"
 																{...field}
-																value={field.value ?? ''}
+																value={field.value ?? ""}
 																onChange={(e) => {
 																	const value = e.target.value;
-																	if (value === '') {
+																	if (value === "") {
 																		field.onChange(undefined);
 																	} else {
-																		const numValue = parseFloat(value);
-																		field.onChange(isNaN(numValue) ? undefined : numValue);
+																		const numValue = Number.parseFloat(value);
+																		field.onChange(
+																			isNaN(numValue) ? undefined : numValue,
+																		);
 																	}
 																}}
 															/>
 														</FormControl>
-														<FormDescription>Rate per kilometer for the first KM tier</FormDescription>
+														<FormDescription>
+															Rate per kilometer for the first KM tier
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												)}
@@ -335,19 +436,26 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 																placeholder="Default: 10"
 																className="bg-white"
 																{...field}
-																value={field.value === undefined ? '' : field.value}
+																value={
+																	field.value === undefined ? "" : field.value
+																}
 																onChange={(e) => {
 																	const value = e.target.value;
-																	if (value === '') {
+																	if (value === "") {
 																		field.onChange(undefined);
 																	} else {
-																		const numValue = parseInt(value);
-																		field.onChange(isNaN(numValue) ? undefined : numValue);
+																		const numValue = Number.parseInt(value);
+																		field.onChange(
+																			isNaN(numValue) ? undefined : numValue,
+																		);
 																	}
 																}}
 															/>
 														</FormControl>
-														<FormDescription>How many kilometers at the first KM rate (defaults to 10 if left empty)</FormDescription>
+														<FormDescription>
+															How many kilometers at the first KM rate (defaults
+															to 10 if left empty)
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												)}
@@ -367,36 +475,54 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 																placeholder="Default: 4.85"
 																className="bg-white"
 																{...field}
-																value={field.value === undefined ? '' : field.value}
+																value={
+																	field.value === undefined ? "" : field.value
+																}
 																onChange={(e) => {
 																	const value = e.target.value;
-																	if (value === '') {
+																	if (value === "") {
 																		field.onChange(undefined);
 																	} else {
-																		const numValue = parseFloat(value);
-																		field.onChange(isNaN(numValue) ? undefined : numValue);
+																		const numValue = Number.parseFloat(value);
+																		field.onChange(
+																			isNaN(numValue) ? undefined : numValue,
+																		);
 																	}
 																}}
 															/>
 														</FormControl>
-														<FormDescription>Rate charged per kilometer above the first KM limit (defaults to $4.85 if left empty)</FormDescription>
+														<FormDescription>
+															Rate charged per kilometer above the first KM
+															limit (defaults to $4.85 if left empty)
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												)}
 											/>
 										</div>
 
-										<div className="rounded-lg border p-4 bg-blue-50 border-blue-200">
+										<div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
 											<div className="flex items-start gap-3">
 												<div className="rounded-full bg-blue-100 p-1">
 													<DollarSign className="h-4 w-4 text-blue-600" />
 												</div>
-												<div className="text-sm text-blue-800">
-													<p className="font-medium mb-1">How flexible pricing works:</p>
+												<div className="text-blue-800 text-sm">
+													<p className="mb-1 font-medium">
+														How flexible pricing works:
+													</p>
 													<ul className="space-y-1 text-blue-700">
-														<li>• First tier: Flat rate for distances up to the KM limit</li>
-														<li>• Additional tier: Remaining KM × Additional KM Rate</li>
-														<li>• Example: 15KM trip with 10KM limit = $200 + (5 × $4.85)</li>
+														<li>
+															• First tier: Flat rate for distances up to the KM
+															limit
+														</li>
+														<li>
+															• Additional tier: Remaining KM × Additional KM
+															Rate
+														</li>
+														<li>
+															• Example: 15KM trip with 10KM limit = $200 + (5 ×
+															$4.85)
+														</li>
 													</ul>
 												</div>
 											</div>
@@ -411,14 +537,16 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 								<Card>
 									<CardHeader>
 										<CardTitle>Configuration Status</CardTitle>
-										<CardDescription>Enable or disable this pricing configuration</CardDescription>
+										<CardDescription>
+											Enable or disable this pricing configuration
+										</CardDescription>
 									</CardHeader>
 									<CardContent>
 										<FormField
 											control={form.control as any}
 											name="isActive"
 											render={({ field }) => (
-												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-white">
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border bg-white p-3">
 													<div className="space-y-0.5">
 														<FormLabel>Active Configuration</FormLabel>
 														<FormDescription>
@@ -441,24 +569,51 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 								<Card>
 									<CardHeader>
 										<CardTitle>Pricing Preview</CardTitle>
-										<CardDescription>How the pricing calculation will work</CardDescription>
+										<CardDescription>
+											How the pricing calculation will work
+										</CardDescription>
 									</CardHeader>
 									<CardContent>
 										<div className="space-y-3 text-sm">
 											<div className="flex justify-between">
-												<span className="text-muted-foreground">First {form.watch("firstKmLimit") || 10} KM:</span>
-												<span className="font-medium">${form.watch("firstKmRate") || 0} flat rate</span>
+												<span className="text-muted-foreground">
+													First {form.watch("firstKmLimit") || 10} KM:
+												</span>
+												<span className="font-medium">
+													${form.watch("firstKmRate") || 0} flat rate
+												</span>
 											</div>
 											<div className="flex justify-between">
-												<span className="text-muted-foreground">Additional KM:</span>
-												<span className="font-medium">${form.watch("pricePerKm") || 4.85} per KM</span>
+												<span className="text-muted-foreground">
+													Additional KM:
+												</span>
+												<span className="font-medium">
+													${form.watch("pricePerKm") || 4.85} per KM
+												</span>
 											</div>
-											<div className="pt-2 border-t">
-												<div className="text-xs text-muted-foreground mb-1">Example: 15KM trip</div>
-												<div className="text-xs space-y-1">
-													<div>• First {form.watch("firstKmLimit") || 10}KM: ${form.watch("firstKmRate") || 0} (flat rate)</div>
-													<div>• Additional 5KM: 5 × ${form.watch("pricePerKm") || 4.85} = ${(5 * (form.watch("pricePerKm") || 4.85)).toFixed(2)}</div>
-													<div className="font-medium pt-1 border-t">Total: ${((form.watch("firstKmRate") || 0) + (5 * (form.watch("pricePerKm") || 4.85))).toFixed(2)}</div>
+											<div className="border-t pt-2">
+												<div className="mb-1 text-muted-foreground text-xs">
+													Example: 15KM trip
+												</div>
+												<div className="space-y-1 text-xs">
+													<div>
+														• First {form.watch("firstKmLimit") || 10}KM: $
+														{form.watch("firstKmRate") || 0} (flat rate)
+													</div>
+													<div>
+														• Additional 5KM: 5 × $
+														{form.watch("pricePerKm") || 4.85} = $
+														{(5 * (form.watch("pricePerKm") || 4.85)).toFixed(
+															2,
+														)}
+													</div>
+													<div className="border-t pt-1 font-medium">
+														Total: $
+														{(
+															(form.watch("firstKmRate") || 0) +
+															5 * (form.watch("pricePerKm") || 4.85)
+														).toFixed(2)}
+													</div>
 												</div>
 											</div>
 										</div>
@@ -466,12 +621,11 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 								</Card>
 							</div>
 						</div>
-
 					</div>
 				</div>
 
 				{/* Sticky Footer */}
-				<div className="flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6">
+				<div className="flex-shrink-0 border-t bg-background/95 p-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className="flex justify-end space-x-2">
 							{onCancel && (
@@ -487,11 +641,20 @@ export function PricingConfigForm({ initialData, onSuccess, onCancel, mode = "cr
 							)}
 							<Button
 								type="submit"
-								disabled={isSubmitting || (!cars?.length && mode === "create" && !contextData?.fromPublicationManagement)}
+								disabled={
+									isSubmitting ||
+									(!cars?.length &&
+										mode === "create" &&
+										!contextData?.fromPublicationManagement)
+								}
 								size="lg"
 							>
-								{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-								{mode === "edit" ? "Update Configuration" : "Create Configuration"}
+								{isSubmitting && (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								)}
+								{mode === "edit"
+									? "Update Configuration"
+									: "Create Configuration"}
 							</Button>
 						</div>
 					</form>

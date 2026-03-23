@@ -1,11 +1,19 @@
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	integer,
+	real,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 
 export const carCategories = sqliteTable(
 	"car_categories",
 	{
-		id: text("id").primaryKey().$defaultFn(() => createId()),
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
 		name: text("name").notNull(), // "Economy", "Standard", "Premium", "Luxury"
 		description: text("description"),
 

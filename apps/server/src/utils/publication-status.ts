@@ -1,6 +1,6 @@
 /**
  * Publication Status Utilities
- * 
+ *
  * Provides consistent logic for determining publication status across cars and packages.
  * This ensures all publication-related queries use the same criteria.
  */
@@ -11,7 +11,7 @@ import type { CarStatusEnum } from "@/types";
  * Publication status for cars
  * A car is publicly visible when it's:
  * - Published by admin (isPublished = true)
- * - Active in the system (isActive = true) 
+ * - Active in the system (isActive = true)
  * - Available for booking (isAvailable = true)
  * - Has an available status (status = 'available')
  */
@@ -37,16 +37,20 @@ export interface PackagePublicationStatus {
  * Check if a car is publicly available
  */
 export function isCarPubliclyAvailable(car: CarPublicationStatus): boolean {
-	return car.isPublished && 
-	       car.isActive && 
-	       car.isAvailable && 
-	       car.status === 'available';
+	return (
+		car.isPublished &&
+		car.isActive &&
+		car.isAvailable &&
+		car.status === "available"
+	);
 }
 
 /**
  * Check if a package is publicly available
  */
-export function isPackagePubliclyAvailable(pkg: PackagePublicationStatus): boolean {
+export function isPackagePubliclyAvailable(
+	pkg: PackagePublicationStatus,
+): boolean {
 	return pkg.isPublished && pkg.isAvailable;
 }
 
@@ -55,15 +59,15 @@ export function isPackagePubliclyAvailable(pkg: PackagePublicationStatus): boole
  */
 export function getPublicationSummary(
 	items: (CarPublicationStatus | PackagePublicationStatus)[],
-	type: 'car' | 'package'
+	type: "car" | "package",
 ) {
 	const total = items.length;
-	const published = items.filter(item => 
-		type === 'car' 
+	const published = items.filter((item) =>
+		type === "car"
 			? isCarPubliclyAvailable(item as CarPublicationStatus)
-			: isPackagePubliclyAvailable(item as PackagePublicationStatus)
+			: isPackagePubliclyAvailable(item as PackagePublicationStatus),
 	).length;
-	
+
 	return {
 		total,
 		published,

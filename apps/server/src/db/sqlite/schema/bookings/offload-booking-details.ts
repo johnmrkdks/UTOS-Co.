@@ -1,10 +1,12 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { relations, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
+import { relations, sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { bookings } from "@/db/sqlite/schema/bookings";
 
 export const offloadBookingDetails = sqliteTable("offload_booking_details", {
-	id: text("id").primaryKey().$defaultFn(() => createId()),
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => createId()),
 	bookingId: text("booking_id")
 		.notNull()
 		.references(() => bookings.id, { onDelete: "cascade" })
@@ -23,9 +25,12 @@ export const offloadBookingDetails = sqliteTable("offload_booking_details", {
 		.default(sql`(unixepoch())`),
 });
 
-export const offloadBookingDetailsRelations = relations(offloadBookingDetails, ({ one }) => ({
-	booking: one(bookings, {
-		fields: [offloadBookingDetails.bookingId],
-		references: [bookings.id],
+export const offloadBookingDetailsRelations = relations(
+	offloadBookingDetails,
+	({ one }) => ({
+		booking: one(bookings, {
+			fields: [offloadBookingDetails.bookingId],
+			references: [bookings.id],
+		}),
 	}),
-}));
+);

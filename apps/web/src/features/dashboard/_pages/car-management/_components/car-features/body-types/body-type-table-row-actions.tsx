@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarFuelType } from "server/types"
-import { EditBodyTypeDialog } from "./edit-body-type-dialog";
+import type { Row } from "@tanstack/react-table";
+import type { CarFuelType } from "server/types";
 import { DeleteBodyTypeDialog } from "./delete-body-type-dialog";
+import { EditBodyTypeDialog } from "./edit-body-type-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function BodyTypeTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function BodyTypeTableRowActions<TData>({
 			<EditBodyTypeDialog bodyType={bodyType} />
 			<DeleteBodyTypeDialog bodyType={bodyType} />
 		</div>
-	)
+	);
 }

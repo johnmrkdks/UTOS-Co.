@@ -1,24 +1,43 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { Eye, EyeOff, Loader2, Lock, Shield } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Eye, EyeOff, Lock, Shield, Loader2 } from "lucide-react";
 import { useUpdatePasswordMutation } from "@/hooks/auth/use-update-password-mutation";
 
-const updatePasswordSchema = z.object({
-	currentPassword: z.string().min(1, "Current password is required"),
-	newPassword: z.string()
-		.min(8, "Password must be at least 8 characters")
-		.regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
-	confirmPassword: z.string().min(1, "Please confirm your new password"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-	message: "Passwords don't match",
-	path: ["confirmPassword"],
-});
+const updatePasswordSchema = z
+	.object({
+		currentPassword: z.string().min(1, "Current password is required"),
+		newPassword: z
+			.string()
+			.min(8, "Password must be at least 8 characters")
+			.regex(
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+				"Password must contain at least one uppercase letter, one lowercase letter, and one number",
+			),
+		confirmPassword: z.string().min(1, "Please confirm your new password"),
+	})
+	.refine((data) => data.newPassword === data.confirmPassword, {
+		message: "Passwords don't match",
+		path: ["confirmPassword"],
+	});
 
 type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>;
 
@@ -33,7 +52,7 @@ export const UpdatePasswordForm = ({
 	title = "Update Password",
 	description = "Change your account password. Make sure it's strong and unique.",
 	className = "",
-	onSuccess
+	onSuccess,
 }: UpdatePasswordFormProps) => {
 	const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 	const [showNewPassword, setShowNewPassword] = useState(false);
@@ -70,14 +89,12 @@ export const UpdatePasswordForm = ({
 		<Card className={className}>
 			<CardHeader className="space-y-1">
 				<div className="flex items-center gap-2">
-					<div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
 						<Lock className="h-4 w-4 text-orange-600" />
 					</div>
 					<div>
 						<CardTitle className="text-lg">{title}</CardTitle>
-						<CardDescription className="text-sm">
-							{description}
-						</CardDescription>
+						<CardDescription className="text-sm">{description}</CardDescription>
 					</div>
 				</div>
 			</CardHeader>
@@ -103,8 +120,10 @@ export const UpdatePasswordForm = ({
 												type="button"
 												variant="ghost"
 												size="sm"
-												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-												onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+												className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+												onClick={() =>
+													setShowCurrentPassword(!showCurrentPassword)
+												}
 												disabled={updatePasswordMutation.isPending}
 											>
 												{showCurrentPassword ? (
@@ -139,7 +158,7 @@ export const UpdatePasswordForm = ({
 												type="button"
 												variant="ghost"
 												size="sm"
-												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+												className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
 												onClick={() => setShowNewPassword(!showNewPassword)}
 												disabled={updatePasswordMutation.isPending}
 											>
@@ -175,8 +194,10 @@ export const UpdatePasswordForm = ({
 												type="button"
 												variant="ghost"
 												size="sm"
-												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-												onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+												className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+												onClick={() =>
+													setShowConfirmPassword(!showConfirmPassword)
+												}
 												disabled={updatePasswordMutation.isPending}
 											>
 												{showConfirmPassword ? (
@@ -193,12 +214,15 @@ export const UpdatePasswordForm = ({
 						/>
 
 						{/* Security Notice */}
-						<div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+						<div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
 							<div className="flex items-start gap-2">
-								<Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-								<div className="text-sm text-blue-800">
-									<p className="font-medium mb-1">Security Notice</p>
-									<p>Changing your password will sign you out of all other devices and sessions for security.</p>
+								<Shield className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
+								<div className="text-blue-800 text-sm">
+									<p className="mb-1 font-medium">Security Notice</p>
+									<p>
+										Changing your password will sign you out of all other
+										devices and sessions for security.
+									</p>
 								</div>
 							</div>
 						</div>

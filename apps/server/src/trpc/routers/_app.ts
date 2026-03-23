@@ -1,34 +1,39 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-import { protectedProcedure, publicProcedure, router, guestProcedure } from "@/trpc/init";
-import { carsRouter } from "./cars";
+import {
+	guestProcedure,
+	protectedProcedure,
+	publicProcedure,
+	router,
+} from "@/trpc/init";
+import { adminRouter } from "./admin";
+import { analyticsRouter } from "./analytics";
+import { authRouter } from "./auth";
+import { bookingsRouter } from "./bookings";
 import { carBodyTypesRouter } from "./car-body-types";
 import { carBrandsRouter } from "./car-brands";
+import { carCategoriesRouter } from "./car-categories";
 import { carConditionTypesRouter } from "./car-condition-types";
 import { carDriveTypesRouter } from "./car-drive-types";
 import { carFeaturesRouter } from "./car-features";
 import { carFuelTypesRouter } from "./car-fuel-types";
 import { carModelsRouter } from "./car-models";
 import { carTransmissionTypesRouter } from "./car-transmission-types";
-import { bookingsRouter } from "./bookings";
-import { packagesRouter } from "./packages";
+import { carsRouter } from "./cars";
+import { contactMessagesRouter } from "./contact-messages";
+import { customerProfileRouter } from "./customer-profile";
+import { driversRouter } from "./drivers";
+import { fileRouter } from "./file";
+import { instantQuoteRouter } from "./instant-quote";
+import { invoicesRouter } from "./invoices";
+import { mailRouter } from "./mail";
 import { packageCategoriesRouter } from "./package-categories";
 import { packageRoutesRouter } from "./package-routes";
 import { packageServiceTypesRouter } from "./package-service-types";
-import { ratingsRouter } from "./ratings";
-import { carCategoriesRouter } from "./car-categories";
-import { fileRouter } from "./file";
-import { pricingConfigRouter } from "./pricing-config";
-import { driversRouter } from "./drivers";
-import { adminRouter } from "./admin";
-import { mailRouter } from "./mail";
-import { customerProfileRouter } from "./customer-profile";
-import { instantQuoteRouter } from "./instant-quote";
-import { analyticsRouter } from "./analytics";
-import { contactMessagesRouter } from "./contact-messages";
-import { authRouter } from "./auth";
-import { systemSettingsRouter } from "./system-settings";
-import { invoicesRouter } from "./invoices";
+import { packagesRouter } from "./packages";
 import { paymentsRouter } from "./payments";
+import { pricingConfigRouter } from "./pricing-config";
+import { ratingsRouter } from "./ratings";
+import { systemSettingsRouter } from "./system-settings";
 
 export const appRouter = router({
 	healthCheck: publicProcedure.query(() => {

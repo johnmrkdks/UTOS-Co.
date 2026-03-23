@@ -1,6 +1,10 @@
-import { LogOutIcon, SettingsIcon } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
-import { Button } from "@workspace/ui/components/button"
+import { Link } from "@tanstack/react-router";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@workspace/ui/components/avatar";
+import { Button } from "@workspace/ui/components/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -8,25 +12,29 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu"
-import { Skeleton } from "@workspace/ui/components/skeleton"
-import { getNameInitials } from "@/utils/format"
-import { useUserQuery } from "@/hooks/query/use-user-query"
-import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog"
-import { Link } from "@tanstack/react-router"
+} from "@workspace/ui/components/dropdown-menu";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { LogOutIcon, SettingsIcon } from "lucide-react";
+import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
+import { useUserQuery } from "@/hooks/query/use-user-query";
+import { getNameInitials } from "@/utils/format";
 
 export function DashboardUserMenu() {
-	const { session, isPending, signOutWithConfirmation } = useUserQuery()
+	const { session, isPending, signOutWithConfirmation } = useUserQuery();
 
 	// Show skeleton while loading
 	if (isPending) {
 		return (
-			<Button variant="ghost" className="h-auto p-0 hover:bg-transparent" disabled>
+			<Button
+				variant="ghost"
+				className="h-auto p-0 hover:bg-transparent"
+				disabled
+			>
 				<Avatar>
 					<Skeleton className="h-full w-full rounded-full" />
 				</Avatar>
 			</Button>
-		)
+		);
 	}
 
 	return (
@@ -34,22 +42,36 @@ export function DashboardUserMenu() {
 			<DropdownMenuTrigger asChild>
 				<Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
 					<Avatar>
-						<AvatarImage src={session?.user.image ?? undefined} alt="Profile image" />
-						<AvatarFallback>{getNameInitials(session?.user.name!)}</AvatarFallback>
+						<AvatarImage
+							src={session?.user.image ?? undefined}
+							alt="Profile image"
+						/>
+						<AvatarFallback>
+							{getNameInitials(session?.user.name!)}
+						</AvatarFallback>
 					</Avatar>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="max-w-64" align="end">
 				<DropdownMenuLabel className="flex min-w-0 flex-col">
-					<span className="text-foreground truncate text-sm font-medium">{session?.user.name}</span>
-					<span className="text-muted-foreground truncate text-xs font-normal">{session?.user.email}</span>
+					<span className="truncate font-medium text-foreground text-sm">
+						{session?.user.name}
+					</span>
+					<span className="truncate font-normal text-muted-foreground text-xs">
+						{session?.user.email}
+					</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{(session?.user.role === "admin" || session?.user.role === "super_admin") && (
+				{(session?.user.role === "admin" ||
+					session?.user.role === "super_admin") && (
 					<>
 						<DropdownMenuItem asChild>
 							<Link to="/admin/dashboard/settings">
-								<SettingsIcon size={16} className="opacity-60" aria-hidden="true" />
+								<SettingsIcon
+									size={16}
+									className="opacity-60"
+									aria-hidden="true"
+								/>
 								<span>Settings</span>
 							</Link>
 						</DropdownMenuItem>
@@ -61,16 +83,22 @@ export function DashboardUserMenu() {
 					<span>Sign Out</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
-			
+
 			<SignOutConfirmationDialog
 				isOpen={signOutWithConfirmation.isDialogOpen}
 				onClose={signOutWithConfirmation.closeSignOutDialog}
 				onConfirm={signOutWithConfirmation.confirmSignOut}
-				userRole={session?.user.role as "user" | "driver" | "admin" | "super_admin" | undefined}
+				userRole={
+					session?.user.role as
+						| "user"
+						| "driver"
+						| "admin"
+						| "super_admin"
+						| undefined
+				}
 				userName={session?.user.name}
 				isLoading={signOutWithConfirmation.isSigningOut}
 			/>
 		</DropdownMenu>
-	)
+	);
 }
-

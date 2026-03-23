@@ -1,18 +1,27 @@
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
 import { users } from "@/db/sqlite/schema";
-import { eq, sql, desc, inArray } from "drizzle-orm";
 
 export const GetAdminUsersServiceSchema = z.object({
-	role: z.enum([UserRoleEnum.User, UserRoleEnum.Driver, UserRoleEnum.Admin, UserRoleEnum.SuperAdmin]).optional(),
+	role: z
+		.enum([
+			UserRoleEnum.User,
+			UserRoleEnum.Driver,
+			UserRoleEnum.Admin,
+			UserRoleEnum.SuperAdmin,
+		])
+		.optional(),
 	/** When "admins", returns both admin and super_admin */
 	roleFilter: z.enum(["clients", "admins"]).optional(),
 	limit: z.number().min(1).max(100).default(20),
 	offset: z.number().min(0).default(0),
 });
 
-export type GetAdminUsersServiceInput = z.infer<typeof GetAdminUsersServiceSchema>;
+export type GetAdminUsersServiceInput = z.infer<
+	typeof GetAdminUsersServiceSchema
+>;
 
 export const getAdminUsersService = async (
 	db: DB,
@@ -20,9 +29,15 @@ export const getAdminUsersService = async (
 ) => {
 	try {
 		// Build the where condition (roleFilter takes precedence over role)
-		let whereCondition: ReturnType<typeof eq> | ReturnType<typeof inArray> | undefined;
+		let whereCondition:
+			| ReturnType<typeof eq>
+			| ReturnType<typeof inArray>
+			| undefined;
 		if (input.roleFilter === "admins") {
-			whereCondition = inArray(users.role, [UserRoleEnum.Admin, UserRoleEnum.SuperAdmin]);
+			whereCondition = inArray(users.role, [
+				UserRoleEnum.Admin,
+				UserRoleEnum.SuperAdmin,
+			]);
 		} else if (input.roleFilter === "clients") {
 			whereCondition = eq(users.role, UserRoleEnum.User);
 		} else if (input.role) {
@@ -43,7 +58,7 @@ export const getAdminUsersService = async (
 			.select({ count: sql<number>`count(*)` })
 			.from(users)
 			.where(whereCondition);
-		
+
 		const count = countResult[0]?.count || 0;
 
 		return {

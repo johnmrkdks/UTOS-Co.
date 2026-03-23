@@ -1,12 +1,12 @@
+import { count, eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { carModels } from "@/db/schema";
-import { eq, count } from "drizzle-orm";
 
 export async function getCarModelsCountByBrandId(db: DB, id: string) {
 	const [record] = await db
 		.select({
 			brandId: carModels.brandId,
-			count: count(carModels.id).as('count')
+			count: count(carModels.id).as("count"),
 		})
 		.from(carModels)
 		.where(eq(carModels.brandId, id))

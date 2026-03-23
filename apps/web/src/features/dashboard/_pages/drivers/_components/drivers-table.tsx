@@ -1,3 +1,12 @@
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
 	Table,
 	TableBody,
@@ -6,30 +15,35 @@ import {
 	TableHeader,
 	TableRow,
 } from "@workspace/ui/components/table";
-import { Button } from "@workspace/ui/components/button";
-import { Badge } from "@workspace/ui/components/badge";
-import { MoreHorizontal, Pencil, Eye, UserCheck, UserX, Trash2, Shield } from "lucide-react";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
-import { useGetDriversQuery } from "../_hooks/query/use-get-drivers-query";
-import { useUpdateDriverMutation } from "../_hooks/query/use-update-driver-mutation";
-import { useDeleteDriverMutation } from "../_hooks/query/use-delete-driver-mutation";
-import { useRemoveUserMutation } from "../_hooks/query/use-remove-user-mutation";
-import { Skeleton } from "@workspace/ui/components/skeleton";
+	Eye,
+	MoreHorizontal,
+	Pencil,
+	Shield,
+	Trash2,
+	UserCheck,
+	UserX,
+} from "lucide-react";
 import { useState } from "react";
-import { EditDriverDialog } from "./edit-driver-dialog";
-import { ViewDriverDialog } from "./view-driver-dialog";
+import { useDeleteDriverMutation } from "../_hooks/query/use-delete-driver-mutation";
+import { useGetDriversQuery } from "../_hooks/query/use-get-drivers-query";
+import { useRemoveUserMutation } from "../_hooks/query/use-remove-user-mutation";
+import { useUpdateDriverMutation } from "../_hooks/query/use-update-driver-mutation";
 import { DeleteDriverConfirmationDialog } from "./delete-driver-confirmation-dialog";
-import { RemoveUserConfirmationDialog } from "./remove-user-confirmation-dialog";
 import { DriverActionConfirmationDialog } from "./driver-action-confirmation-dialog";
 import { DriverDocumentVerificationDialog } from "./driver-document-verification-dialog";
+import { EditDriverDialog } from "./edit-driver-dialog";
+import { RemoveUserConfirmationDialog } from "./remove-user-confirmation-dialog";
+import { ViewDriverDialog } from "./view-driver-dialog";
 
 type DriversTableProps = {
-	filter?: "all" | "active" | "inactive" | "pending" | "approved-active" | "approved-inactive";
+	filter?:
+		| "all"
+		| "active"
+		| "inactive"
+		| "pending"
+		| "approved-active"
+		| "approved-inactive";
 };
 
 export function DriversTable({ filter = "all" }: DriversTableProps) {
@@ -38,8 +52,11 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 	const [deletingDriver, setDeletingDriver] = useState<any>(null);
 	const [removingUserDriver, setRemovingUserDriver] = useState<any>(null);
 	const [verifyingDriver, setVerifyingDriver] = useState<any>(null);
-	const [actionDriver, setActionDriver] = useState<{ driver: any; action: "approve" | "reject" | "activate" | "deactivate" } | null>(null);
-	
+	const [actionDriver, setActionDriver] = useState<{
+		driver: any;
+		action: "approve" | "reject" | "activate" | "deactivate";
+	} | null>(null);
+
 	const driversQuery = useGetDriversQuery({});
 	const updateDriverMutation = useUpdateDriverMutation();
 	const deleteDriverMutation = useDeleteDriverMutation();
@@ -50,7 +67,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 
 		try {
 			const { action } = actionDriver;
-			
+
 			switch (action) {
 				case "approve":
 					await updateDriverMutation.mutateAsync({
@@ -85,12 +102,16 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 		}
 	};
 
-	const handleDelete = async (driverId: string, forceDelete: boolean = false, confirmationText: string = "") => {
+	const handleDelete = async (
+		driverId: string,
+		forceDelete = false,
+		confirmationText = "",
+	) => {
 		try {
-			await deleteDriverMutation.mutateAsync({ 
-				id: driverId, 
-				forceDelete, 
-				confirmationText 
+			await deleteDriverMutation.mutateAsync({
+				id: driverId,
+				forceDelete,
+				confirmationText,
 			});
 		} catch (error) {
 			console.error("Failed to delete driver:", error);
@@ -101,10 +122,10 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 
 	const handleRemoveUser = async (userId: string) => {
 		try {
-			await removeUserMutation.mutateAsync({ 
-				userId, 
-				forceDelete: true, 
-				confirmationText: "DELETE" 
+			await removeUserMutation.mutateAsync({
+				userId,
+				forceDelete: true,
+				confirmationText: "DELETE",
 			});
 		} catch (error) {
 			console.error("Failed to remove user:", error);
@@ -117,7 +138,7 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 
 	if (driversQuery.isError) {
 		return (
-			<div className="text-center py-4">
+			<div className="py-4 text-center">
 				<p className="text-muted-foreground">Failed to load drivers</p>
 			</div>
 		);
@@ -127,22 +148,28 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 
 	// Apply filter
 	if (filter === "active") {
-		drivers = drivers.filter((driver: any) => driver.isActive && driver.isApproved);
+		drivers = drivers.filter(
+			(driver: any) => driver.isActive && driver.isApproved,
+		);
 	} else if (filter === "inactive") {
 		drivers = drivers.filter((driver: any) => !driver.isActive);
 	} else if (filter === "pending") {
 		drivers = drivers.filter((driver: any) => !driver.isApproved);
 	} else if (filter === "approved-active") {
-		drivers = drivers.filter((driver: any) => driver.isApproved && driver.isActive);
+		drivers = drivers.filter(
+			(driver: any) => driver.isApproved && driver.isActive,
+		);
 	} else if (filter === "approved-inactive") {
-		drivers = drivers.filter((driver: any) => driver.isApproved && !driver.isActive);
+		drivers = drivers.filter(
+			(driver: any) => driver.isApproved && !driver.isActive,
+		);
 	}
 
 	if (drivers.length === 0) {
 		return (
-			<div className="text-center py-8">
+			<div className="py-8 text-center">
 				<p className="text-muted-foreground">No drivers found</p>
-				<p className="text-sm text-muted-foreground">
+				<p className="text-muted-foreground text-sm">
 					{filter === "pending" && "No pending approvals"}
 					{filter === "active" && "No active drivers"}
 					{filter === "inactive" && "No inactive drivers"}
@@ -174,16 +201,24 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 						<TableRow key={driver.id}>
 							<TableCell>
 								<div>
-									<p className="font-medium">{driver.user?.name || "Unknown"}</p>
-									<p className="text-sm text-muted-foreground">{driver.user?.email}</p>
+									<p className="font-medium">
+										{driver.user?.name || "Unknown"}
+									</p>
+									<p className="text-muted-foreground text-sm">
+										{driver.user?.email}
+									</p>
 								</div>
 							</TableCell>
-							<TableCell className="font-mono">{driver.licenseNumber}</TableCell>
+							<TableCell className="font-mono">
+								{driver.licenseNumber}
+							</TableCell>
 							<TableCell>
 								{driver.car ? (
 									<div>
 										<p className="font-medium">{driver.car.name}</p>
-										<p className="text-sm text-muted-foreground">{driver.car.licensePlate}</p>
+										<p className="text-muted-foreground text-sm">
+											{driver.car.licensePlate}
+										</p>
 									</div>
 								) : (
 									<span className="text-muted-foreground">Not assigned</span>
@@ -241,13 +276,17 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 											<Pencil className="mr-2 h-4 w-4" />
 											Edit
 										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setVerifyingDriver(driver)}>
+										<DropdownMenuItem
+											onClick={() => setVerifyingDriver(driver)}
+										>
 											<Shield className="mr-2 h-4 w-4" />
 											Verify Documents
 										</DropdownMenuItem>
 										{!driver.isApproved && (
-											<DropdownMenuItem 
-												onClick={() => setActionDriver({ driver, action: "approve" })}
+											<DropdownMenuItem
+												onClick={() =>
+													setActionDriver({ driver, action: "approve" })
+												}
 												className="text-green-600"
 											>
 												<UserCheck className="mr-2 h-4 w-4" />
@@ -255,8 +294,10 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 											</DropdownMenuItem>
 										)}
 										{!driver.isApproved && (
-											<DropdownMenuItem 
-												onClick={() => setActionDriver({ driver, action: "reject" })}
+											<DropdownMenuItem
+												onClick={() =>
+													setActionDriver({ driver, action: "reject" })
+												}
 												className="text-red-600"
 											>
 												<UserX className="mr-2 h-4 w-4" />
@@ -264,11 +305,13 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 											</DropdownMenuItem>
 										)}
 										{driver.isApproved && (
-											<DropdownMenuItem 
-												onClick={() => setActionDriver({ 
-													driver, 
-													action: driver.isActive ? "deactivate" : "activate" 
-												})}
+											<DropdownMenuItem
+												onClick={() =>
+													setActionDriver({
+														driver,
+														action: driver.isActive ? "deactivate" : "activate",
+													})
+												}
 											>
 												{driver.isActive ? (
 													<>
@@ -283,14 +326,14 @@ export function DriversTable({ filter = "all" }: DriversTableProps) {
 												)}
 											</DropdownMenuItem>
 										)}
-										<DropdownMenuItem 
+										<DropdownMenuItem
 											onClick={() => setDeletingDriver(driver)}
 											className="text-red-600"
 										>
 											<Trash2 className="mr-2 h-4 w-4" />
 											Delete Driver Only
 										</DropdownMenuItem>
-										<DropdownMenuItem 
+										<DropdownMenuItem
 											onClick={() => setRemovingUserDriver(driver)}
 											className="text-red-600"
 										>
@@ -383,18 +426,28 @@ function DriversTableSkeleton() {
 								<Skeleton className="h-3 w-32" />
 							</div>
 						</TableCell>
-						<TableCell><Skeleton className="h-4 w-24" /></TableCell>
+						<TableCell>
+							<Skeleton className="h-4 w-24" />
+						</TableCell>
 						<TableCell>
 							<div className="space-y-1">
 								<Skeleton className="h-4 w-20" />
 								<Skeleton className="h-3 w-16" />
 							</div>
 						</TableCell>
-						<TableCell><Skeleton className="h-6 w-16" /></TableCell>
-						<TableCell><Skeleton className="h-6 w-20" /></TableCell>
+						<TableCell>
+							<Skeleton className="h-6 w-16" />
+						</TableCell>
+						<TableCell>
+							<Skeleton className="h-6 w-20" />
+						</TableCell>
 						{/* <TableCell><Skeleton className="h-6 w-24" /></TableCell> */}
-						<TableCell><Skeleton className="h-4 w-20" /></TableCell>
-						<TableCell><Skeleton className="h-8 w-8" /></TableCell>
+						<TableCell>
+							<Skeleton className="h-4 w-20" />
+						</TableCell>
+						<TableCell>
+							<Skeleton className="h-8 w-8" />
+						</TableCell>
 					</TableRow>
 				))}
 			</TableBody>

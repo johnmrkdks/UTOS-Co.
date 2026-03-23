@@ -1,14 +1,19 @@
-import nodemailer from "nodemailer";
 import { OAuth2Client } from "google-auth-library";
+import nodemailer from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
-import type { MailConfig, EmailOptions, BookingDetails, InvoiceData } from "./types";
 import {
 	generateAccountVerificationTemplate,
-	generatePasswordResetTemplate,
-	generateDriverOnboardingTemplate,
 	generateBookingConfirmationTemplate,
+	generateDriverOnboardingTemplate,
 	generateInvoiceTemplate,
+	generatePasswordResetTemplate,
 } from "./templates";
+import type {
+	BookingDetails,
+	EmailOptions,
+	InvoiceData,
+	MailConfig,
+} from "./types";
 
 export class MailService {
 	private config: MailConfig;
@@ -19,14 +24,16 @@ export class MailService {
 		this.oauth2Client = new OAuth2Client(
 			config.clientId,
 			config.clientSecret,
-			"https://developers.google.com/oauthplayground"
+			"https://developers.google.com/oauthplayground",
 		);
 		this.oauth2Client.setCredentials({
 			refresh_token: config.refreshToken,
 		});
 	}
 
-	private async createTransporter(): Promise<nodemailer.Transporter<SMTPTransport.SentMessageInfo>> {
+	private async createTransporter(): Promise<
+		nodemailer.Transporter<SMTPTransport.SentMessageInfo>
+	> {
 		try {
 			// Always refresh OAuth2 token to avoid expired token issues
 			console.log("📧 MAIL SERVICE: Refreshing OAuth2 access token...");
@@ -54,8 +61,8 @@ export class MailService {
 				// Disable pooling to avoid connection reuse issues with OAuth2 tokens
 				pool: false,
 				// Add debug logging for development
-				debug: process.env.NODE_ENV === 'development',
-				logger: process.env.NODE_ENV === 'development',
+				debug: process.env.NODE_ENV === "development",
+				logger: process.env.NODE_ENV === "development",
 			} as SMTPTransport.Options);
 
 			// Don't cache transporter to always use fresh OAuth2 tokens
@@ -63,16 +70,20 @@ export class MailService {
 			return transporter;
 		} catch (error) {
 			console.error("❌ MAIL SERVICE: Error creating mail transporter:", error);
-			throw new Error(`Failed to create mail transporter: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new Error(
+				`Failed to create mail transporter: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		}
 	}
 
-	async sendEmail(options: EmailOptions, retries: number = 2): Promise<boolean> {
+	async sendEmail(options: EmailOptions, retries = 2): Promise<boolean> {
 		const maxRetries = retries;
 
 		for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
 			try {
-				console.log(`📧 MAIL SERVICE: Email send attempt ${attempt}/${maxRetries + 1} to ${options.to}`);
+				console.log(
+					`📧 MAIL SERVICE: Email send attempt ${attempt}/${maxRetries + 1} to ${options.to}`,
+				);
 
 				const transporter = await this.createTransporter();
 
@@ -84,17 +95,28 @@ export class MailService {
 					attachments: options.attachments,
 				};
 
-				console.log(`📧 MAIL SERVICE: Sending email with subject: "${options.subject}"`);
+				console.log(
+					`📧 MAIL SERVICE: Sending email with subject: "${options.subject}"`,
+				);
 
 				// Reduce timeout to 20 seconds to fail faster
 				const sendPromise = transporter.sendMail(mailOptions);
 				const timeoutPromise = new Promise((_, reject) => {
-					setTimeout(() => reject(new Error('Email send timeout after 20 seconds')), 20000);
+					setTimeout(
+						() => reject(new Error("Email send timeout after 20 seconds")),
+						20000,
+					);
 				});
 
-				const result = await Promise.race([sendPromise, timeoutPromise]) as any;
+				const result = (await Promise.race([
+					sendPromise,
+					timeoutPromise,
+				])) as any;
 
-				console.log("✅ MAIL SERVICE: Email sent successfully:", result.messageId);
+				console.log(
+					"✅ MAIL SERVICE: Email sent successfully:",
+					result.messageId,
+				);
 
 				// Close transporter after successful send
 				try {
@@ -105,20 +127,25 @@ export class MailService {
 
 				return true;
 			} catch (error) {
-				console.error(`❌ MAIL SERVICE: Email send attempt ${attempt} failed:`, error);
+				console.error(
+					`❌ MAIL SERVICE: Email send attempt ${attempt} failed:`,
+					error,
+				);
 
 				// Note: No transporter caching - each attempt creates fresh transporter
 
 				// If this was the last attempt, return false
 				if (attempt > maxRetries) {
-					console.error(`❌ MAIL SERVICE: All ${maxRetries + 1} email send attempts failed for ${options.to}`);
+					console.error(
+						`❌ MAIL SERVICE: All ${maxRetries + 1} email send attempts failed for ${options.to}`,
+					);
 					return false;
 				}
 
 				// Wait before retrying (exponential backoff)
-				const waitTime = Math.min(2000 * Math.pow(2, attempt - 1), 10000); // Max 10 seconds
+				const waitTime = Math.min(2000 * 2 ** (attempt - 1), 10000); // Max 10 seconds
 				console.log(`⏳ MAIL SERVICE: Waiting ${waitTime}ms before retry...`);
-				await new Promise(resolve => setTimeout(resolve, waitTime));
+				await new Promise((resolve) => setTimeout(resolve, waitTime));
 			}
 		}
 
@@ -127,11 +154,20 @@ export class MailService {
 
 	// Cleanup method (no longer needed since we don't cache transporters)
 	async cleanup(): Promise<void> {
-		console.log("📧 MAIL SERVICE: Cleanup called - no cached transporters to clean");
+		console.log(
+			"📧 MAIL SERVICE: Cleanup called - no cached transporters to clean",
+		);
 	}
 
-	async sendAccountVerification(to: string, verificationToken: string, baseUrl: string): Promise<boolean> {
-		const template = generateAccountVerificationTemplate(verificationToken, baseUrl);
+	async sendAccountVerification(
+		to: string,
+		verificationToken: string,
+		baseUrl: string,
+	): Promise<boolean> {
+		const template = generateAccountVerificationTemplate(
+			verificationToken,
+			baseUrl,
+		);
 		return this.sendEmail({
 			to,
 			subject: template.subject,
@@ -139,7 +175,11 @@ export class MailService {
 		});
 	}
 
-	async sendPasswordReset(to: string, resetToken: string, baseUrl: string): Promise<boolean> {
+	async sendPasswordReset(
+		to: string,
+		resetToken: string,
+		baseUrl: string,
+	): Promise<boolean> {
 		const template = generatePasswordResetTemplate(resetToken, baseUrl);
 		return this.sendEmail({
 			to,
@@ -148,7 +188,11 @@ export class MailService {
 		});
 	}
 
-	async sendDriverOnboarding(to: string, driverName: string, loginUrl: string): Promise<boolean> {
+	async sendDriverOnboarding(
+		to: string,
+		driverName: string,
+		loginUrl: string,
+	): Promise<boolean> {
 		const template = generateDriverOnboardingTemplate(driverName, loginUrl);
 		return this.sendEmail({
 			to,
@@ -157,8 +201,15 @@ export class MailService {
 		});
 	}
 
-	async sendBookingConfirmation(to: string, customerName: string, bookingDetails: BookingDetails): Promise<boolean> {
-		const template = generateBookingConfirmationTemplate(customerName, bookingDetails);
+	async sendBookingConfirmation(
+		to: string,
+		customerName: string,
+		bookingDetails: BookingDetails,
+	): Promise<boolean> {
+		const template = generateBookingConfirmationTemplate(
+			customerName,
+			bookingDetails,
+		);
 		return this.sendEmail({
 			to,
 			subject: template.subject,
@@ -166,8 +217,17 @@ export class MailService {
 		});
 	}
 
-	async sendInvoice(to: string, customerName: string, bookingId: string, invoiceData: InvoiceData): Promise<boolean> {
-		const template = generateInvoiceTemplate(customerName, bookingId, invoiceData);
+	async sendInvoice(
+		to: string,
+		customerName: string,
+		bookingId: string,
+		invoiceData: InvoiceData,
+	): Promise<boolean> {
+		const template = generateInvoiceTemplate(
+			customerName,
+			bookingId,
+			invoiceData,
+		);
 		return this.sendEmail({
 			to,
 			subject: template.subject,

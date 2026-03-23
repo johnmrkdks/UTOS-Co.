@@ -1,4 +1,3 @@
-import type { RouteConfig } from "@/types/route-config";
 import {
 	BarChart3Icon,
 	BookmarkIcon,
@@ -19,8 +18,10 @@ import {
 	UserCogIcon,
 	UsersIcon,
 } from "lucide-react";
+import type { RouteConfig } from "@/types/route-config";
 
-const isDevelopment = import.meta.env.MODE === "development" || import.meta.env.DEV;
+const isDevelopment =
+	import.meta.env.MODE === "development" || import.meta.env.DEV;
 
 // Helper function to filter routes based on environment
 const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
@@ -130,14 +131,25 @@ const ALL_DASHBOARD_SYSTEM_ROUTES: RouteConfig[] = [
 ];
 
 // Export filtered routes based on environment
-export const DASHBOARD_OVERVIEW_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_OVERVIEW_ROUTES);
-export const DASHBOARD_OPERATIONS_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_OPERATIONS_ROUTES);
-export const DASHBOARD_INVENTORY_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_INVENTORY_ROUTES);
-export const DASHBOARD_SYSTEM_ROUTES = filterRoutesByEnvironment(ALL_DASHBOARD_SYSTEM_ROUTES);
+export const DASHBOARD_OVERVIEW_ROUTES = filterRoutesByEnvironment(
+	ALL_DASHBOARD_OVERVIEW_ROUTES,
+);
+export const DASHBOARD_OPERATIONS_ROUTES = filterRoutesByEnvironment(
+	ALL_DASHBOARD_OPERATIONS_ROUTES,
+);
+export const DASHBOARD_INVENTORY_ROUTES = filterRoutesByEnvironment(
+	ALL_DASHBOARD_INVENTORY_ROUTES,
+);
+export const DASHBOARD_SYSTEM_ROUTES = filterRoutesByEnvironment(
+	ALL_DASHBOARD_SYSTEM_ROUTES,
+);
 
 // Backward compatibility - deprecated, use specific route groups above
 export const DASHBOARD_ROUTES = DASHBOARD_OVERVIEW_ROUTES;
-export const DASHBOARD_MANAGEMENT_SUB_ROUTES = [...DASHBOARD_OPERATIONS_ROUTES, ...DASHBOARD_INVENTORY_ROUTES];
+export const DASHBOARD_MANAGEMENT_SUB_ROUTES = [
+	...DASHBOARD_OPERATIONS_ROUTES,
+	...DASHBOARD_INVENTORY_ROUTES,
+];
 export const DASHBOARD_SUB_ROUTES = DASHBOARD_SYSTEM_ROUTES;
 
 // Export all dashboard routes combined for breadcrumbs

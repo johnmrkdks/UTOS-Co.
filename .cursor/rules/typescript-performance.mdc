@@ -1,0 +1,22 @@
+---
+description: TypeScript and performance conventions
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript & Performance
+
+## TypeScript
+- **Strict typing:** Avoid `any`; use `unknown` with type guards when needed
+- **Type assertions:** Use sparingly; prefer proper typing; use `as unknown as T` when narrowing from generic
+- **Enums:** Use `BookingStatusEnum`, `UserRoleEnum` etc. from `@/db/sqlite/enums` - not string literals for DB/API
+- **Schemas:** Zod schema → `z.infer<typeof Schema>` for types; keep single source of truth
+
+## Performance
+- **Server:** Avoid N+1 queries; use `.innerJoin`/subqueries when fetching related data
+- **Frontend:** Debounce search inputs; paginate large lists; virtualize if 100+ rows
+- **API:** Return only needed fields; avoid over-fetching in tRPC procedures
+
+## Error Messages
+- **User-facing:** Map external errors (Square, Google) to clear messages before throwing
+- **Logging:** `console.error` with context; avoid logging sensitive data (tokens, passwords)

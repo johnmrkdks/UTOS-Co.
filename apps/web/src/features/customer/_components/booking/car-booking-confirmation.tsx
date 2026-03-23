@@ -1,17 +1,28 @@
-import { CheckCircle, Users, Clock, Car } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { Separator } from "@workspace/ui/components/separator"
-import type { CarAppointmentForm } from "../../_schemas/car-appointment-schema"
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Separator } from "@workspace/ui/components/separator";
+import { Car, CheckCircle, Clock, Users } from "lucide-react";
+import type { CarAppointmentForm } from "../../_schemas/car-appointment-schema";
 
 interface CarBookingConfirmationProps {
-	car: any
-	formData: CarAppointmentForm
-	onConfirm: () => void
-	onBack: () => void
+	car: any;
+	formData: CarAppointmentForm;
+	onConfirm: () => void;
+	onBack: () => void;
 }
 
-export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: CarBookingConfirmationProps) {
+export function CarBookingConfirmation({
+	car,
+	formData,
+	onConfirm,
+	onBack,
+}: CarBookingConfirmationProps) {
 	// Format date for display
 	const formatDateTime = (date: Date) => {
 		return new Intl.DateTimeFormat("en-AU", {
@@ -21,8 +32,8 @@ export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: Car
 			day: "numeric",
 			hour: "2-digit",
 			minute: "2-digit",
-		}).format(date)
-	}
+		}).format(date);
+	};
 
 	return (
 		<div className="grid gap-8 lg:grid-cols-3">
@@ -39,30 +50,52 @@ export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: Car
 						<div className="space-y-8">
 							{/* Service Details */}
 							<div>
-								<h4 className="mb-4 text-lg font-semibold">Service Information</h4>
+								<h4 className="mb-4 font-semibold text-lg">
+									Service Information
+								</h4>
 								<div className="grid gap-6 sm:grid-cols-2">
 									<div className="space-y-3">
 										<div>
-											<span className="text-sm text-muted-foreground">Pickup Date & Time</span>
-											<div className="text-base font-medium">{formatDateTime(formData.scheduledPickupTime)}</div>
+											<span className="text-muted-foreground text-sm">
+												Pickup Date & Time
+											</span>
+											<div className="font-medium text-base">
+												{formatDateTime(formData.scheduledPickupTime)}
+											</div>
 										</div>
 										<div>
-											<span className="text-sm text-muted-foreground">Passengers</span>
-											<div className="text-base font-medium">{formData.passengerCount} person(s)</div>
+											<span className="text-muted-foreground text-sm">
+												Passengers
+											</span>
+											<div className="font-medium text-base">
+												{formData.passengerCount} person(s)
+											</div>
 										</div>
 										<div>
-											<span className="text-sm text-muted-foreground">Service Type</span>
-											<div className="text-base font-medium">Distance-based luxury chauffeur</div>
+											<span className="text-muted-foreground text-sm">
+												Service Type
+											</span>
+											<div className="font-medium text-base">
+												Distance-based luxury chauffeur
+											</div>
 										</div>
 									</div>
 									<div className="space-y-3">
 										<div>
-											<span className="text-sm text-muted-foreground">Pickup Location</span>
-											<div className="text-base font-medium">{formData.originAddress}</div>
+											<span className="text-muted-foreground text-sm">
+												Pickup Location
+											</span>
+											<div className="font-medium text-base">
+												{formData.originAddress}
+											</div>
 										</div>
 										<div>
-											<span className="text-sm text-muted-foreground">Destination</span>
-											<div className="text-base font-medium">{formData.destinationAddress}</div>
+											<span className="text-muted-foreground text-sm">
+												Destination
+											</span>
+											<div className="font-medium text-base">
+												{formData.destinationAddress}
+											</div>
 										</div>
 									</div>
 								</div>
@@ -72,25 +105,43 @@ export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: Car
 
 							{/* Customer Details */}
 							<div>
-								<h4 className="mb-4 text-lg font-semibold">Contact Information</h4>
+								<h4 className="mb-4 font-semibold text-lg">
+									Contact Information
+								</h4>
 								<div className="grid gap-6 sm:grid-cols-2">
 									<div>
-										<span className="text-sm text-muted-foreground">Full Name</span>
-										<div className="text-base font-medium">{formData.customerName}</div>
+										<span className="text-muted-foreground text-sm">
+											Full Name
+										</span>
+										<div className="font-medium text-base">
+											{formData.customerName}
+										</div>
 									</div>
 									<div>
-										<span className="text-sm text-muted-foreground">Phone Number</span>
-										<div className="text-base font-medium">{formData.customerPhone}</div>
+										<span className="text-muted-foreground text-sm">
+											Phone Number
+										</span>
+										<div className="font-medium text-base">
+											{formData.customerPhone}
+										</div>
 									</div>
 									<div>
-										<span className="text-sm text-muted-foreground">Email Address</span>
-										<div className="text-base font-medium">{formData.customerEmail || "Not provided"}</div>
+										<span className="text-muted-foreground text-sm">
+											Email Address
+										</span>
+										<div className="font-medium text-base">
+											{formData.customerEmail || "Not provided"}
+										</div>
 									</div>
 								</div>
 								{formData.specialRequests && (
 									<div className="mt-4">
-										<span className="text-sm text-muted-foreground">Special Requests</span>
-										<div className="mt-1 rounded-lg bg-muted/50 p-3 text-sm">{formData.specialRequests}</div>
+										<span className="text-muted-foreground text-sm">
+											Special Requests
+										</span>
+										<div className="mt-1 rounded-lg bg-muted/50 p-3 text-sm">
+											{formData.specialRequests}
+										</div>
 									</div>
 								)}
 							</div>
@@ -100,11 +151,20 @@ export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: Car
 
 				{/* Action Buttons */}
 				<div className="mt-8 flex flex-col gap-4 sm:flex-row sm:gap-6">
-					<Button onClick={onConfirm} size="lg" className="text-base font-semibold">
+					<Button
+						onClick={onConfirm}
+						size="lg"
+						className="font-semibold text-base"
+					>
 						Confirm Appointment
 						<CheckCircle className="ml-2 h-5 w-5" />
 					</Button>
-					<Button variant="outline" size="lg" onClick={onBack} className="text-base sm:w-auto sm:px-8">
+					<Button
+						variant="outline"
+						size="lg"
+						onClick={onBack}
+						className="text-base sm:w-auto sm:px-8"
+					>
 						Back to Edit Details
 					</Button>
 				</div>
@@ -115,20 +175,29 @@ export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: Car
 				<div className="sticky top-8">
 					<Card className="border-0 shadow-lg">
 						<CardHeader className="border-b bg-green-50 pb-4">
-							<CardTitle className="text-lg text-green-800">Ready to Book</CardTitle>
+							<CardTitle className="text-green-800 text-lg">
+								Ready to Book
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="pt-6">
 							<div className="space-y-4">
 								<div className="flex items-center gap-3">
 									<Car className="h-5 w-5 text-muted-foreground" />
 									<div>
-										<div className="font-medium">{car.model?.brand?.name} {car.model?.name}</div>
-										<div className="text-sm text-muted-foreground">{car.category?.name}</div>
+										<div className="font-medium">
+											{car.model?.brand?.name} {car.model?.name}
+										</div>
+										<div className="text-muted-foreground text-sm">
+											{car.category?.name}
+										</div>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<Users className="h-5 w-5 text-muted-foreground" />
-									<span className="text-sm">{formData.passengerCount} of {car.seatingCapacity} passengers</span>
+									<span className="text-sm">
+										{formData.passengerCount} of {car.seatingCapacity}{" "}
+										passengers
+									</span>
 								</div>
 								<div className="flex items-center gap-3">
 									<Clock className="h-5 w-5 text-muted-foreground" />
@@ -157,5 +226,5 @@ export function CarBookingConfirmation({ car, formData, onConfirm, onBack }: Car
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

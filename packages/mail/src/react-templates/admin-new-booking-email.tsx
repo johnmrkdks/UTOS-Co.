@@ -1,16 +1,16 @@
 import {
-	Html,
-	Head,
-	Preview,
 	Body,
-	Container,
-	Section,
-	Row,
-	Column,
-	Heading,
-	Text,
 	Button,
+	Column,
+	Container,
+	Head,
+	Heading,
 	Hr,
+	Html,
+	Preview,
+	Row,
+	Section,
+	Text,
 } from "@react-email/components";
 
 interface AdminNewBookingEmailProps {
@@ -55,13 +55,15 @@ export function AdminNewBookingEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>New Booking Alert - {bookingReference} - {customerName}</Preview>
+			<Preview>
+				New Booking Alert - {bookingReference} - {customerName}
+			</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
 					<Section style={logoHeader}>
 						<Row>
-							<Column style={{ verticalAlign: 'middle', flexGrow: 1 }}>
+							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
 								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
 								<Text style={brandTagline}>Admin Dashboard</Text>
 							</Column>
@@ -80,11 +82,11 @@ export function AdminNewBookingEmail({
 					<Section style={bookingCard}>
 						{/* Booking Header */}
 						<Row>
-							<Column style={{ width: '60%' }}>
+							<Column style={{ width: "60%" }}>
 								<Text style={bookingTime}>{pickupTime}</Text>
 								<Text style={bookingDate}>{pickupDate}</Text>
 							</Column>
-							<Column style={{ width: '40%', textAlign: 'right' as const }}>
+							<Column style={{ width: "40%", textAlign: "right" as const }}>
 								<Text style={bookingReferenceStyle}>{bookingReference}</Text>
 							</Column>
 						</Row>
@@ -95,23 +97,27 @@ export function AdminNewBookingEmail({
 						<Section style={customerSection}>
 							<Text style={sectionTitle}>Customer Information</Text>
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Name</Text>
 									<Text style={detailValue}>{customerName}</Text>
 								</Column>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Email</Text>
 									<Text style={detailValue}>
-										<a href={`mailto:${customerEmail}`} style={emailLink}>{customerEmail}</a>
+										<a href={`mailto:${customerEmail}`} style={emailLink}>
+											{customerEmail}
+										</a>
 									</Text>
 								</Column>
 							</Row>
 							{customerPhone && (
-								<Row style={{ marginTop: '8px' }}>
+								<Row style={{ marginTop: "8px" }}>
 									<Column>
 										<Text style={detailLabel}>Phone</Text>
 										<Text style={detailValue}>
-											<a href={`tel:${customerPhone}`} style={phoneLink}>{customerPhone}</a>
+											<a href={`tel:${customerPhone}`} style={phoneLink}>
+												{customerPhone}
+											</a>
 										</Text>
 									</Column>
 								</Row>
@@ -171,11 +177,11 @@ export function AdminNewBookingEmail({
 							<Hr style={detailSeparator} />
 
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Vehicle Requested</Text>
 									<Text style={detailValue}>{vehicleInfo}</Text>
 								</Column>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Passengers</Text>
 									<Text style={detailValue}>{passengerCount}</Text>
 								</Column>
@@ -184,9 +190,11 @@ export function AdminNewBookingEmail({
 							<Hr style={detailSeparator} />
 
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Luggage</Text>
-									<Text style={detailValue}>{luggageCount} piece{luggageCount !== 1 ? 's' : ''}</Text>
+									<Text style={detailValue}>
+										{luggageCount} piece{luggageCount !== 1 ? "s" : ""}
+									</Text>
 								</Column>
 							</Row>
 
@@ -208,7 +216,9 @@ export function AdminNewBookingEmail({
 									<Row>
 										<Column>
 											<Text style={detailLabel}>Quoted Amount</Text>
-											<Text style={amountValue}>${quotedAmount.toFixed(2)}</Text>
+											<Text style={amountValue}>
+												${quotedAmount.toFixed(2)}
+											</Text>
 										</Column>
 									</Row>
 								</>
@@ -219,35 +229,61 @@ export function AdminNewBookingEmail({
 						<Section style={actionSection}>
 							<Text style={actionTitle}>⚡ Action Required</Text>
 							<Text style={actionText}>
-								• Assign a driver to this booking<br/>
-								• Verify vehicle availability<br/>
-								• Confirm pickup details with customer if needed
+								• Assign a driver to this booking
+								<br />• Verify vehicle availability
+								<br />• Confirm pickup details with customer if needed
 							</Text>
 						</Section>
 
 						{/* CTA Section */}
 						<Section style={ctaSection}>
-							<Button style={ctaButton} href={`${websiteUrl}/dashboard/bookings`}>
+							<Button
+								style={ctaButton}
+								href={`${websiteUrl}/dashboard/bookings`}
+							>
 								Manage Booking
 							</Button>
 							<Text style={contactText}>
 								Quick Actions:{" "}
-								<a href={`${websiteUrl}/dashboard/bookings/${bookingReference}`} style={quickLink}>View Details</a>
+								<a
+									href={`${websiteUrl}/dashboard/bookings/${bookingReference}`}
+									style={quickLink}
+								>
+									View Details
+								</a>
 								{" | "}
-								<a href={`${websiteUrl}/dashboard/drivers`} style={quickLink}>Assign Driver</a>
+								<a href={`${websiteUrl}/dashboard/drivers`} style={quickLink}>
+									Assign Driver
+								</a>
 							</Text>
 						</Section>
 					</Section>
 
 					{/* Footer */}
 					<Section style={footer}>
-						<Text style={footerBrand}>Down Under Chauffeurs - Admin System</Text>
+						<Text style={footerBrand}>
+							Down Under Chauffeurs - Admin System
+						</Text>
 						<Text style={footerDisclaimer}>
-							Automated notification | <a href={`${websiteUrl}/dashboard`} style={footerLink}>Admin Dashboard</a>
+							Automated notification |{" "}
+							<a href={`${websiteUrl}/dashboard`} style={footerLink}>
+								Admin Dashboard
+							</a>
 						</Text>
 						{/* Anti-clipping measures */}
-						<Text style={{ fontSize: '1px', color: '#ffffff', lineHeight: '1px', opacity: 0, overflow: 'hidden', display: 'none' }}>
-							Admin: {bookingReference}-{customerName.replace(/\s/g, '')}-{new Date().getTime().toString().slice(-6)}-{Math.random().toString(36).substr(2, 5)}
+						<Text
+							style={{
+								fontSize: "1px",
+								color: "#ffffff",
+								lineHeight: "1px",
+								opacity: 0,
+								overflow: "hidden",
+								display: "none",
+							}}
+						>
+							Admin: {bookingReference}-{customerName.replace(/\s/g, "")}-
+							{new Date().getTime().toString().slice(-6)}-
+							{Math.random().toString(36).substr(2, 5)}
 						</Text>
 					</Section>
 				</Container>
@@ -260,7 +296,8 @@ export default AdminNewBookingEmail;
 
 // Styles
 const main = {
-	fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+	fontFamily:
+		"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 	margin: "0",
 	padding: "10px",
 	background: "#f8fafc",

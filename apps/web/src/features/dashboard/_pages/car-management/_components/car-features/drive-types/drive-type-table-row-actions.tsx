@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import type { CarDriveType } from "server/types"
+import type { Row } from "@tanstack/react-table";
+import type { CarDriveType } from "server/types";
 import { DeleteDriveTypeDialog } from "./delete-drive-type-dialog";
 import { EditDriveTypeDialog } from "./edit-drive-type-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function DriveTypeTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function DriveTypeTableRowActions<TData>({
 			<EditDriveTypeDialog driveType={driveType} />
 			<DeleteDriveTypeDialog driveType={driveType} />
 		</div>
-	)
+	);
 }

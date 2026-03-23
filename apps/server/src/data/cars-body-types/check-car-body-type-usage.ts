@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { cars } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function checkCarBodyTypeUsage(db: DB, id: string) {
 	const carsUsingBodyType = await db.query.cars.findMany({

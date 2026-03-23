@@ -1,24 +1,30 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Switch } from "@workspace/ui/components/switch";
 import { Separator } from "@workspace/ui/components/separator";
-import { Badge } from "@workspace/ui/components/badge";
+import { Switch } from "@workspace/ui/components/switch";
 import {
-	KeyIcon,
-	ShieldIcon,
+	AlertCircleIcon,
 	BellIcon,
-	SmartphoneIcon,
-	MailIcon,
-	ExternalLinkIcon,
 	CheckCircleIcon,
-	AlertCircleIcon
+	ExternalLinkIcon,
+	KeyIcon,
+	MailIcon,
+	ShieldIcon,
+	SmartphoneIcon,
 } from "lucide-react";
-import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useState } from "react";
-import { UpdatePasswordForm } from "@/components/forms/update-password-form";
 import { AccountLinkingForm } from "@/components/forms/account-linking-form";
+import { UpdatePasswordForm } from "@/components/forms/update-password-form";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 
 export function AccountSettingsPage() {
 	const { session } = useUserQuery();
@@ -30,14 +36,15 @@ export function AccountSettingsPage() {
 		promotionalEmails: false,
 	});
 
-
 	return (
 		<div className="min-h-screen bg-gray-50/50">
 			<div className="mx-auto max-w-4xl px-4 py-8">
 				{/* Header */}
 				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
-					<p className="text-gray-600">Manage your security settings and account preferences</p>
+					<h1 className="font-bold text-3xl text-gray-900">Account Settings</h1>
+					<p className="text-gray-600">
+						Manage your security settings and account preferences
+					</p>
 				</div>
 
 				<div className="space-y-6">
@@ -48,9 +55,7 @@ export function AccountSettingsPage() {
 					/>
 
 					{/* Account Linking Section */}
-					<AccountLinkingForm
-						userEmail={session?.user?.email}
-					/>
+					<AccountLinkingForm userEmail={session?.user?.email} />
 
 					{/* Notification Settings - Hidden for now */}
 					{/* <Card>
@@ -136,33 +141,47 @@ export function AccountSettingsPage() {
 					<Card>
 						<CardHeader>
 							<CardTitle>Account Information</CardTitle>
-							<CardDescription>View your account details and current status</CardDescription>
+							<CardDescription>
+								View your account details and current status
+							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="grid gap-4 sm:grid-cols-2">
 								<div className="space-y-2">
-									<Label className="text-sm font-medium text-gray-500">Account Email</Label>
+									<Label className="font-medium text-gray-500 text-sm">
+										Account Email
+									</Label>
 									<p className="font-medium">{session?.user.email}</p>
 								</div>
 								<div className="space-y-2">
-									<Label className="text-sm font-medium text-gray-500">Account Type</Label>
+									<Label className="font-medium text-gray-500 text-sm">
+										Account Type
+									</Label>
 									<Badge variant="secondary" className="capitalize">
 										{session?.user.role || "Customer"}
 									</Badge>
 								</div>
 								<div className="space-y-2">
-									<Label className="text-sm font-medium text-gray-500">Email Verified</Label>
+									<Label className="font-medium text-gray-500 text-sm">
+										Email Verified
+									</Label>
 									<div className="flex items-center gap-2">
 										{session?.user.emailVerified ? (
 											<>
 												<CheckCircleIcon className="h-4 w-4 text-green-600" />
-												<span className="text-sm text-green-600">Verified</span>
+												<span className="text-green-600 text-sm">Verified</span>
 											</>
 										) : (
 											<>
 												<AlertCircleIcon className="h-4 w-4 text-orange-600" />
-												<span className="text-sm text-orange-600">Not verified</span>
-												<Button variant="link" size="sm" className="p-0 h-auto text-blue-600">
+												<span className="text-orange-600 text-sm">
+													Not verified
+												</span>
+												<Button
+													variant="link"
+													size="sm"
+													className="h-auto p-0 text-blue-600"
+												>
 													Verify now
 												</Button>
 											</>
@@ -170,9 +189,13 @@ export function AccountSettingsPage() {
 									</div>
 								</div>
 								<div className="space-y-2">
-									<Label className="text-sm font-medium text-gray-500">Member Since</Label>
+									<Label className="font-medium text-gray-500 text-sm">
+										Member Since
+									</Label>
 									<p className="font-medium">
-										{session?.user.createdAt ? new Date(session.user.createdAt).toLocaleDateString() : "Unknown"}
+										{session?.user.createdAt
+											? new Date(session.user.createdAt).toLocaleDateString()
+											: "Unknown"}
 									</p>
 								</div>
 							</div>

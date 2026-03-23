@@ -1,7 +1,7 @@
+import z from "zod";
 import { getBookingById } from "@/data/bookings/get-booking-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import z from "zod";
 
 export const GetBookingServiceSchema = z.object({
 	id: z.string(),

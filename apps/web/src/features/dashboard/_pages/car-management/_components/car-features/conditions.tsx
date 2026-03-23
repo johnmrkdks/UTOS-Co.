@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { AddConditionTypeDialog } from "./condition-types/add-condition-type-dialog";
 import { ConditionTypeTableList } from "./condition-types/drive-type-table-list";
 
@@ -9,7 +15,9 @@ export function ConditionTypes() {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Car Condition Types</CardTitle>
-						<CardDescription>Manage car condition types in your inventory</CardDescription>
+						<CardDescription>
+							Manage car condition types in your inventory
+						</CardDescription>
 					</div>
 					<AddConditionTypeDialog />
 				</div>
@@ -18,5 +26,5 @@ export function ConditionTypes() {
 				<ConditionTypeTableList />
 			</CardContent>
 		</Card>
-	)
-}	
+	);
+}

@@ -3,10 +3,11 @@
  * Only runs if booking has an authorized payment. Does not fail the close-trip if Square is not configured.
  * @param throwOnError - When true (admin finalize), rethrow so admin sees the error. When false (driver close), log and continue.
  */
-import type { DB } from "@/db";
-import type { Env } from "@/types/env";
-import { bookingPayments } from "@/db/sqlite/schema/payments";
+
 import { eq } from "drizzle-orm";
+import type { DB } from "@/db";
+import { bookingPayments } from "@/db/sqlite/schema/payments";
+import type { Env } from "@/types/env";
 import { captureBookingPayment } from "./capture-booking-payment";
 
 export async function maybeCapturePaymentOnCompletion(
@@ -14,7 +15,7 @@ export async function maybeCapturePaymentOnCompletion(
 	bookingId: string,
 	finalAmountDollars: number,
 	env?: Env,
-	throwOnError = false
+	throwOnError = false,
 ): Promise<void> {
 	const accessToken = env?.SQUARE_ACCESS_TOKEN;
 	const locationId = env?.SQUARE_LOCATION_ID;
@@ -42,9 +43,14 @@ export async function maybeCapturePaymentOnCompletion(
 			locationId,
 			env: (env?.SQUARE_ENVIRONMENT as "sandbox" | "production") || "sandbox",
 		});
-		console.log(`✅ Payment captured for booking ${bookingId} ($${finalAmountDollars.toFixed(2)})`);
+		console.log(
+			`✅ Payment captured for booking ${bookingId} ($${finalAmountDollars.toFixed(2)})`,
+		);
 	} catch (err) {
-		console.error(`❌ Failed to capture payment for booking ${bookingId}:`, err);
+		console.error(
+			`❌ Failed to capture payment for booking ${bookingId}:`,
+			err,
+		);
 		if (throwOnError) throw err;
 		// Driver close: don't throw - admin can capture manually
 	}

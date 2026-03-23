@@ -1,15 +1,15 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import {
+	AlertTriangle,
+	Calendar,
+	Car,
 	CheckCircle,
 	Clock,
-	User,
-	Car,
-	AlertTriangle,
-	XCircle,
-	Calendar,
 	Package,
 	Route as RouteIcon,
+	User,
+	XCircle,
 } from "lucide-react";
 
 interface BookingStatusIndicatorProps {
@@ -104,9 +104,10 @@ export function BookingStatusIndicator({
 		}
 	};
 
-	const isUpcoming = showUpcoming && 
-		scheduledPickupTime && 
-		new Date(scheduledPickupTime) > new Date() && 
+	const isUpcoming =
+		showUpcoming &&
+		scheduledPickupTime &&
+		new Date(scheduledPickupTime) > new Date() &&
 		!["completed", "cancelled"].includes(status);
 
 	const statusConfig = getStatusConfig(status);
@@ -128,23 +129,29 @@ export function BookingStatusIndicator({
 				className={cn(
 					statusConfig.color,
 					sizeClasses[size],
-					"font-medium border"
+					"border font-medium",
 				)}
 			>
-				{showIcon && <IconComponent className={cn(
-					size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4",
-					"mr-1"
-				)} />}
-				<span className="capitalize">{statusConfig.label.replace('_', ' ')}</span>
+				{showIcon && (
+					<IconComponent
+						className={cn(
+							size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4",
+							"mr-1",
+						)}
+					/>
+				)}
+				<span className="capitalize">
+					{statusConfig.label.replace("_", " ")}
+				</span>
 			</Badge>
 
 			{/* Show upcoming indicator only if needed */}
 			{isUpcoming && size !== "sm" && (
 				<Badge
 					variant="secondary"
-					className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200"
+					className="border-blue-200 bg-blue-50 px-2 py-0.5 text-blue-700 text-xs"
 				>
-					<Calendar className="h-3 w-3 mr-1" />
+					<Calendar className="mr-1 h-3 w-3" />
 					Upcoming
 				</Badge>
 			)}

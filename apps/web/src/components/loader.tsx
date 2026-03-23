@@ -5,7 +5,10 @@ type LoaderProps = React.ComponentProps<"div">;
 
 export function Loader({ className, ...props }: LoaderProps) {
 	return (
-		<div className={cn("flex h-full items-center justify-center pt-8", className)} {...props}>
+		<div
+			className={cn("flex h-full items-center justify-center pt-8", className)}
+			{...props}
+		>
 			<Loader2Icon className="animate-spin" />
 		</div>
 	);

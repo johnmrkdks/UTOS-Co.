@@ -1,7 +1,7 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { cars } from "@/db/schema";
 import type { Car, UpdateCar } from "@/schemas/shared";
-import { eq } from "drizzle-orm";
 
 type UpdateCarParams = {
 	id: string;

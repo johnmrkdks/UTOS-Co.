@@ -8,7 +8,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
-import { LogOutIcon, UserIcon, ShieldIcon, TruckIcon } from "lucide-react";
+import { LogOutIcon, ShieldIcon, TruckIcon, UserIcon } from "lucide-react";
 
 interface SignOutConfirmationDialogProps {
 	isOpen: boolean;
@@ -69,14 +69,14 @@ export function SignOutConfirmationDialog({
 			<AlertDialogContent className="sm:max-w-[425px]">
 				<AlertDialogHeader>
 					<AlertDialogTitle className="flex items-center gap-3">
-						<div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+						<div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
 							<LogOutIcon className="h-5 w-5 text-red-600" />
 						</div>
 						<div>
 							<span>Sign Out Confirmation</span>
-							<div className="flex items-center gap-2 mt-1">
+							<div className="mt-1 flex items-center gap-2">
 								{getRoleIcon()}
-								<span className="text-sm font-normal text-muted-foreground">
+								<span className="font-normal text-muted-foreground text-sm">
 									{getRoleDisplayName()} Account
 								</span>
 							</div>
@@ -90,14 +90,15 @@ export function SignOutConfirmationDialog({
 							)}
 							?
 						</div>
-						<div className="text-sm text-muted-foreground">
+						<div className="text-muted-foreground text-sm">
 							{getCustomMessage()}
 						</div>
-						<div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-							<div className="text-amber-600 mt-0.5">⚠️</div>
-							<div className="text-sm text-amber-800">
-								<span className="font-medium">Important:</span> Any unsaved changes will be lost.
-								Make sure to save your work before signing out.
+						<div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+							<div className="mt-0.5 text-amber-600">⚠️</div>
+							<div className="text-amber-800 text-sm">
+								<span className="font-medium">Important:</span> Any unsaved
+								changes will be lost. Make sure to save your work before signing
+								out.
 							</div>
 						</div>
 					</AlertDialogDescription>

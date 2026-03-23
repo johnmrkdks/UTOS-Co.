@@ -1,5 +1,5 @@
-import { memo } from "react";
 import { MapPin } from "lucide-react";
+import { memo } from "react";
 import type { Car as CarType } from "server/types";
 
 interface LocationInfoProps {
@@ -13,11 +13,11 @@ export const LocationInfo = memo<LocationInfoProps>(({ car }) => {
 
 	return (
 		<div>
-			<h3 className="font-semibold mb-3 flex items-center gap-2">
+			<h3 className="mb-3 flex items-center gap-2 font-semibold">
 				<MapPin className="h-5 w-5" />
 				Current Location
 			</h3>
-			<div className="text-sm space-y-2">
+			<div className="space-y-2 text-sm">
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">Coordinates:</span>
 					<span className="font-medium font-mono">
@@ -27,7 +27,9 @@ export const LocationInfo = memo<LocationInfoProps>(({ car }) => {
 				{car.lastLocationUpdate && (
 					<div className="flex justify-between">
 						<span className="text-muted-foreground">Last Updated:</span>
-						<span className="font-medium">{new Date(car.lastLocationUpdate).toLocaleString()}</span>
+						<span className="font-medium">
+							{new Date(car.lastLocationUpdate).toLocaleString()}
+						</span>
 					</div>
 				)}
 			</div>

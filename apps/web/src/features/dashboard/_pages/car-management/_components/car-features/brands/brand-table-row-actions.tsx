@@ -1,11 +1,11 @@
-import type { Row } from "@tanstack/react-table"
-import { EditBrandDialog } from "./edit-brand-dialog"
-import { DeleteBrandDialog } from "./delete-brand-dialog"
-import type { CarBrand } from "server/types"
+import type { Row } from "@tanstack/react-table";
+import type { CarBrand } from "server/types";
+import { DeleteBrandDialog } from "./delete-brand-dialog";
+import { EditBrandDialog } from "./edit-brand-dialog";
 
 type DataTableRowActionsProps<TData> = {
-	row: Row<TData>
-}
+	row: Row<TData>;
+};
 
 export function BrandTableRowActions<TData>({
 	row,
@@ -17,5 +17,5 @@ export function BrandTableRowActions<TData>({
 			<EditBrandDialog brand={brand} />
 			<DeleteBrandDialog brand={brand} />
 		</div>
-	)
+	);
 }

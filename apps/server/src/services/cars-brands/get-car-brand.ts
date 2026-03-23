@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { getCarBrandById } from "@/data/cars-brands/get-car-brand-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const GetCarBrandServiceSchema = z.object({
 	id: z.string(),
@@ -9,7 +9,10 @@ export const GetCarBrandServiceSchema = z.object({
 
 export type GetCarBrandByIdParams = z.infer<typeof GetCarBrandServiceSchema>;
 
-export async function getCarBrandService(db: DB, { id }: GetCarBrandByIdParams) {
+export async function getCarBrandService(
+	db: DB,
+	{ id }: GetCarBrandByIdParams,
+) {
 	const carBrand = await getCarBrandById(db, id);
 
 	if (!carBrand) {

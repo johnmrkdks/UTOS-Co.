@@ -1,16 +1,16 @@
 import {
-	Html,
-	Head,
-	Preview,
 	Body,
-	Container,
-	Section,
-	Row,
-	Column,
-	Heading,
-	Text,
 	Button,
+	Column,
+	Container,
+	Head,
+	Heading,
 	Hr,
+	Html,
+	Preview,
+	Row,
+	Section,
+	Text,
 } from "@react-email/components";
 
 interface BookingConfirmationEmailProps {
@@ -45,15 +45,19 @@ export function BookingConfirmationEmail({
 	return (
 		<Html>
 			<Head />
-			<Preview>Booking Confirmed - #{bookingReference} - {customerName}</Preview>
+			<Preview>
+				Booking Confirmed - #{bookingReference} - {customerName}
+			</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					{/* Header with Logo */}
 					<Section style={logoHeader}>
 						<Row>
-							<Column style={{ verticalAlign: 'middle', flexGrow: 1 }}>
+							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
 								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
-								<Text style={brandTagline}>Premium Luxury Transportation Services</Text>
+								<Text style={brandTagline}>
+									Premium Luxury Transportation Services
+								</Text>
 							</Column>
 						</Row>
 					</Section>
@@ -62,7 +66,8 @@ export function BookingConfirmationEmail({
 					<Section style={successHeader}>
 						<Heading style={successTitle}>Booking Confirmed! ✓</Heading>
 						<Text style={successSubtitle}>
-							Thank you for choosing Down Under Chauffeurs. Your booking has been confirmed.
+							Thank you for choosing Down Under Chauffeurs. Your booking has
+							been confirmed.
 						</Text>
 					</Section>
 
@@ -70,11 +75,11 @@ export function BookingConfirmationEmail({
 					<Section style={bookingCard}>
 						{/* Booking Header */}
 						<Row>
-							<Column style={{ width: '60%' }}>
+							<Column style={{ width: "60%" }}>
 								<Text style={bookingTime}>{pickupTime}</Text>
 								<Text style={bookingDate}>{pickupDate}</Text>
 							</Column>
-							<Column style={{ width: '40%', textAlign: 'right' as const }}>
+							<Column style={{ width: "40%", textAlign: "right" as const }}>
 								<Text style={bookingReferenceStyle}>#{bookingReference}</Text>
 							</Column>
 						</Row>
@@ -130,11 +135,11 @@ export function BookingConfirmationEmail({
 							<Hr style={detailSeparator} />
 
 							<Row>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Vehicle</Text>
 									<Text style={detailValue}>{vehicleInfo}</Text>
 								</Column>
-								<Column style={{ width: '50%' }}>
+								<Column style={{ width: "50%" }}>
 									<Text style={detailLabel}>Passengers</Text>
 									<Text style={detailValue}>{passengerCount}</Text>
 								</Column>
@@ -146,7 +151,9 @@ export function BookingConfirmationEmail({
 									<Row>
 										<Column>
 											<Text style={detailLabel}>Quoted Amount</Text>
-											<Text style={amountValue}>${quotedAmount.toFixed(2)}</Text>
+											<Text style={amountValue}>
+												${quotedAmount.toFixed(2)}
+											</Text>
 										</Column>
 									</Row>
 								</>
@@ -157,10 +164,12 @@ export function BookingConfirmationEmail({
 						<Section style={noticeSection}>
 							<Text style={noticeTitle}>What Happens Next?</Text>
 							<Text style={noticeText}>
-								• We'll assign a professional driver to your booking<br/>
-								• You'll receive an email notification once a driver is assigned<br/>
-								• Your driver will contact you before the scheduled pickup time<br/>
-								• Track your booking status anytime from your dashboard
+								• We'll assign a professional driver to your booking
+								<br />• You'll receive an email notification once a driver is
+								assigned
+								<br />• Your driver will contact you before the scheduled pickup
+								time
+								<br />• Track your booking status anytime from your dashboard
 							</Text>
 						</Section>
 
@@ -171,7 +180,9 @@ export function BookingConfirmationEmail({
 							</Button>
 							<Text style={contactText}>
 								Need help? Call{" "}
-								<a href="tel:+61422693233" style={contactLink}>+61 422 693 233</a>
+								<a href="tel:+61422693233" style={contactLink}>
+									+61 422 693 233
+								</a>
 							</Text>
 						</Section>
 					</Section>
@@ -180,11 +191,25 @@ export function BookingConfirmationEmail({
 					<Section style={footer}>
 						<Text style={footerBrand}>Down Under Chauffeurs</Text>
 						<Text style={footerDisclaimer}>
-							Automated notification | <a href={`${websiteUrl}/contact-us`} style={footerLink}>Contact Support</a>
+							Automated notification |{" "}
+							<a href={`${websiteUrl}/contact-us`} style={footerLink}>
+								Contact Support
+							</a>
 						</Text>
 						{/* Anti-clipping measures */}
-						<Text style={{ fontSize: '1px', color: '#ffffff', lineHeight: '1px', opacity: 0, overflow: 'hidden', display: 'none' }}>
-							Unique: {bookingReference}-{customerName.replace(/\s/g, '')}-{new Date().getTime().toString().slice(-6)}-{Math.random().toString(36).substr(2, 5)}
+						<Text
+							style={{
+								fontSize: "1px",
+								color: "#ffffff",
+								lineHeight: "1px",
+								opacity: 0,
+								overflow: "hidden",
+								display: "none",
+							}}
+						>
+							Unique: {bookingReference}-{customerName.replace(/\s/g, "")}-
+							{new Date().getTime().toString().slice(-6)}-
+							{Math.random().toString(36).substr(2, 5)}
 						</Text>
 					</Section>
 				</Container>
@@ -197,7 +222,8 @@ export default BookingConfirmationEmail;
 
 // Styles
 const main = {
-	fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+	fontFamily:
+		"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 	margin: "0",
 	padding: "10px",
 	background: "#f8fafc",

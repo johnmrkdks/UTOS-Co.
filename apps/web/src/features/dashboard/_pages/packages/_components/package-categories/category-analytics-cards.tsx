@@ -1,13 +1,16 @@
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import {
-	FolderOpen,
-	Package,
-	BarChart3,
-	Hash,
-	TrendingUp,
 	Activity,
-	ArrowUpRight
+	ArrowUpRight,
+	BarChart3,
+	FolderOpen,
+	Hash,
+	Package,
+	TrendingUp,
 } from "lucide-react";
+import {
+	AnalyticsCard,
+	type AnalyticsCardData,
+} from "@/components/analytics-card";
 
 interface CategoryAnalyticsCardsProps {
 	categories: any[];
@@ -15,12 +18,16 @@ interface CategoryAnalyticsCardsProps {
 	isLoading?: boolean;
 }
 
-export function CategoryAnalyticsCards({ categories, packages, isLoading }: CategoryAnalyticsCardsProps) {
+export function CategoryAnalyticsCards({
+	categories,
+	packages,
+	isLoading,
+}: CategoryAnalyticsCardsProps) {
 	if (isLoading) {
 		return (
 			<div className="grid gap-4 md:grid-cols-3">
 				{[...Array(2)].map((_, index) => (
-					<AnalyticsCard 
+					<AnalyticsCard
 						key={index}
 						data={{
 							id: `loading-${index}`,
@@ -28,7 +35,7 @@ export function CategoryAnalyticsCards({ categories, packages, isLoading }: Cate
 							value: "...",
 							icon: FolderOpen,
 							showIcon: false,
-							showBackgroundIcon: false
+							showBackgroundIcon: false,
 						}}
 						view="compact"
 						className="animate-pulse"
@@ -40,7 +47,7 @@ export function CategoryAnalyticsCards({ categories, packages, isLoading }: Cate
 
 	const totalCategories = categories.length;
 	const categoriesWithPackages = categories.filter((cat: any) =>
-		packages.some((pkg: any) => pkg.categoryId === cat.id)
+		packages.some((pkg: any) => pkg.categoryId === cat.id),
 	).length;
 
 	const analyticsData: AnalyticsCardData[] = [
@@ -56,7 +63,7 @@ export function CategoryAnalyticsCards({ categories, packages, isLoading }: Cate
 			changeType: "neutral",
 			showTrend: false,
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
 			id: "active-categories",
@@ -66,22 +73,21 @@ export function CategoryAnalyticsCards({ categories, packages, isLoading }: Cate
 			bgGradient: "bg-gradient-to-br from-emerald-50 to-emerald-100",
 			iconBg: "bg-emerald-500",
 			textColor: "text-gray-900",
-			changeText: totalCategories > 0 ? `${((categoriesWithPackages / totalCategories) * 100).toFixed(0)}% utilized` : "No categories",
+			changeText:
+				totalCategories > 0
+					? `${((categoriesWithPackages / totalCategories) * 100).toFixed(0)}% utilized`
+					: "No categories",
 			changeType: "positive",
 			showTrend: true,
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 	];
 
 	return (
 		<div className="grid gap-4 md:grid-cols-3">
 			{analyticsData.map((data) => (
-				<AnalyticsCard 
-					key={data.id} 
-					data={data} 
-					view="compact"
-				/>
+				<AnalyticsCard key={data.id} data={data} view="compact" />
 			))}
 		</div>
 	);

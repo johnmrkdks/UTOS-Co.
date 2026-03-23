@@ -1,13 +1,17 @@
-import type { DB } from "@/db";
-import { drivers, users } from "@/db/sqlite/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { drivers, users } from "@/db/sqlite/schema";
 
 export const GetDriversByStatusServiceSchema = z.object({
-	onboardingStatus: z.enum(["pending", "documents_uploaded", "approved", "rejected"]).optional(),
+	onboardingStatus: z
+		.enum(["pending", "documents_uploaded", "approved", "rejected"])
+		.optional(),
 });
 
-export type GetDriversByStatusServiceInput = z.infer<typeof GetDriversByStatusServiceSchema>;
+export type GetDriversByStatusServiceInput = z.infer<
+	typeof GetDriversByStatusServiceSchema
+>;
 
 export const getDriversByStatusService = async (
 	db: DB,

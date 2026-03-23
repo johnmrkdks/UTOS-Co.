@@ -1,15 +1,19 @@
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
+import type { DB } from "@/db";
 import { systemSettings } from "@/db/sqlite/schema/settings";
 import { users } from "@/db/sqlite/schema/users";
-import { eq } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
+import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 import { clearBookingReferencePrefixCache } from "@/utils/generate-booking-reference";
-import type { DB } from "@/db";
 
 // Helper function to get user role from database
 const getUserRole = async (db: DB, userId: string) => {
-	const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+	const user = await db
+		.select({ role: users.role })
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
 	return user[0]?.role;
 };
 
@@ -96,7 +100,10 @@ export const systemSettingsRouter = router({
 					.string()
 					.min(1, "Prefix must be at least 1 character")
 					.max(10, "Prefix must be at most 10 characters")
-					.regex(/^[A-Z0-9]+$/, "Prefix must contain only uppercase letters and numbers"),
+					.regex(
+						/^[A-Z0-9]+$/,
+						"Prefix must contain only uppercase letters and numbers",
+					),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -147,7 +154,10 @@ export const systemSettingsRouter = router({
 					.string()
 					.min(1, "Prefix must be at least 1 character")
 					.max(10, "Prefix must be at most 10 characters")
-					.regex(/^[A-Z0-9]+$/, "Prefix must contain only uppercase letters and numbers")
+					.regex(
+						/^[A-Z0-9]+$/,
+						"Prefix must contain only uppercase letters and numbers",
+					)
 					.optional(),
 			}),
 		)

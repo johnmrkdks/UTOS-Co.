@@ -1,6 +1,6 @@
-import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { trpc } from "@/trpc";
 
 export const useUpdateBookingStatusByTokenMutation = (shareToken: string) => {
 	const queryClient = useQueryClient();
@@ -16,6 +16,6 @@ export const useUpdateBookingStatusByTokenMutation = (shareToken: string) => {
 			onError: (error) => {
 				toast.error("Failed to update status", { description: error.message });
 			},
-		})
+		}),
 	);
 };

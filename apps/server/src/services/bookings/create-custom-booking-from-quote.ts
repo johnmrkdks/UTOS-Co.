@@ -1,10 +1,14 @@
+import { z } from "zod";
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import type { DB } from "@/db";
-import { BookingTypeEnum, BookingStatusEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
+import {
+	BookingPaymentStatusEnum,
+	BookingStatusEnum,
+	BookingTypeEnum,
+} from "@/db/sqlite/enums";
 import type { InsertBooking } from "@/schemas/shared";
 import { selectAvailableCarService } from "@/services/cars/select-available-car";
-import { z } from "zod";
 
 export const CreateCustomBookingFromQuoteSchema = z.object({
 	userId: z.string().optional(),
@@ -19,11 +23,16 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	destinationLongitude: z.number().optional(),
 
 	// Stops from quote
-	stops: z.array(z.object({
-		address: z.string(),
-		latitude: z.number().optional(),
-		longitude: z.number().optional(),
-	})).optional().default([]),
+	stops: z
+		.array(
+			z.object({
+				address: z.string(),
+				latitude: z.number().optional(),
+				longitude: z.number().optional(),
+			}),
+		)
+		.optional()
+		.default([]),
 
 	// Timing
 	scheduledPickupTime: z.string().transform((str) => new Date(str)),
@@ -54,9 +63,14 @@ export const CreateCustomBookingFromQuoteSchema = z.object({
 	tollPreference: z.enum(["toll", "no_toll"]).optional().default("toll"),
 });
 
-export type CreateCustomBookingFromQuoteParams = z.infer<typeof CreateCustomBookingFromQuoteSchema>;
+export type CreateCustomBookingFromQuoteParams = z.infer<
+	typeof CreateCustomBookingFromQuoteSchema
+>;
 
-export async function createCustomBookingFromQuoteService(db: DB, data: CreateCustomBookingFromQuoteParams) {
+export async function createCustomBookingFromQuoteService(
+	db: DB,
+	data: CreateCustomBookingFromQuoteParams,
+) {
 	const effectiveUserId = data.isGuest ? null : (data.userId ?? null);
 	const isGuestBooking = !!data.isGuest;
 
@@ -66,20 +80,24 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 		scheduledPickupTime: data.scheduledPickupTime,
 		passengerCount: data.passengerCount,
 		preferredCarId: data.preferredCarId,
-		preferredCategoryId: data.preferredCategoryId
+		preferredCategoryId: data.preferredCategoryId,
 	});
 
 	// Validate minimum booking time (1 hour in advance)
-	const hoursUntilPickup = (data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
+	const hoursUntilPickup =
+		(data.scheduledPickupTime.getTime() - Date.now()) / (1000 * 60 * 60);
 	console.log("⏰ Time validation:", {
 		scheduledTime: data.scheduledPickupTime.toISOString(),
 		currentTime: new Date().toISOString(),
-		hoursUntilPickup: hoursUntilPickup.toFixed(2)
+		hoursUntilPickup: hoursUntilPickup.toFixed(2),
 	});
 
 	// Temporarily disabled for testing - re-enable after debugging
-	if (hoursUntilPickup < -24) { // Only block bookings more than 24 hours in the past
-		throw new Error(`Custom bookings require at least 1 hour advance notice. Current time difference: ${hoursUntilPickup.toFixed(2)} hours`);
+	if (hoursUntilPickup < -24) {
+		// Only block bookings more than 24 hours in the past
+		throw new Error(
+			`Custom bookings require at least 1 hour advance notice. Current time difference: ${hoursUntilPickup.toFixed(2)} hours`,
+		);
 	}
 
 	// Auto-select an available car based on requirements
@@ -93,16 +111,25 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 
 	if (!selectedCar) {
 		console.error("❌ No suitable cars available");
-		throw new Error("No suitable cars available for the selected date and passenger count");
+		throw new Error(
+			"No suitable cars available for the selected date and passenger count",
+		);
 	}
 
-	console.log("✅ Selected car:", { id: selectedCar.id, name: selectedCar.model?.name });
+	console.log("✅ Selected car:", {
+		id: selectedCar.id,
+		name: selectedCar.model?.name,
+	});
 
 	// Prepare booking data (userId is null for guest bookings - no user record)
 	const bookingData: InsertBooking = {
-		bookingType: isGuestBooking ? BookingTypeEnum.Guest : BookingTypeEnum.Custom,
+		bookingType: isGuestBooking
+			? BookingTypeEnum.Guest
+			: BookingTypeEnum.Custom,
 		carId: selectedCar.id,
-		...(effectiveUserId != null ? { userId: effectiveUserId } : { userId: null }),
+		...(effectiveUserId != null
+			? { userId: effectiveUserId }
+			: { userId: null }),
 		isGuestBooking,
 
 		originAddress: data.originAddress,
@@ -166,6 +193,6 @@ export async function createCustomBookingFromQuoteService(db: DB, data: CreateCu
 			year: selectedCar.model?.year || 0,
 			category: selectedCar.category?.name || "Standard",
 			seatingCapacity: selectedCar.seatingCapacity,
-		}
+		},
 	};
 }

@@ -1,29 +1,37 @@
-import { Card, CardContent } from "@workspace/ui/components/card"
-import { cn } from "@workspace/ui/lib/utils"
-import { type LucideIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react"
+import { Card, CardContent } from "@workspace/ui/components/card";
+import { cn } from "@workspace/ui/lib/utils";
+import {
+	type LucideIcon,
+	TrendingDownIcon,
+	TrendingUpIcon,
+} from "lucide-react";
 
 export type AnalyticsCardData = {
-	id: string
-	title: string
-	value: string | number
-	icon: LucideIcon
-	bgGradient?: string
-	iconBg?: string
-	textColor?: string
-	changeText?: string
-	changeType?: "positive" | "negative" | "warning" | "neutral"
-	showTrend?: boolean
-	showIcon?: boolean
-	showBackgroundIcon?: boolean
-}
+	id: string;
+	title: string;
+	value: string | number;
+	icon: LucideIcon;
+	bgGradient?: string;
+	iconBg?: string;
+	textColor?: string;
+	changeText?: string;
+	changeType?: "positive" | "negative" | "warning" | "neutral";
+	showTrend?: boolean;
+	showIcon?: boolean;
+	showBackgroundIcon?: boolean;
+};
 
 type AnalyticsCardProps = {
-	data: AnalyticsCardData
-	className?: string
-	view?: boolean | "default" | "compact"
-}
+	data: AnalyticsCardData;
+	className?: string;
+	view?: boolean | "default" | "compact";
+};
 
-export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCardProps) {
+export function AnalyticsCard({
+	data,
+	className,
+	view = "default",
+}: AnalyticsCardProps) {
 	const {
 		title,
 		value,
@@ -36,15 +44,23 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 		showTrend = false,
 		showIcon = true,
 		showBackgroundIcon = true,
-	} = data
+	} = data;
 
-	const isCompact = view === true || view === "compact"
+	const isCompact = view === true || view === "compact";
 
 	return (
-		<Card className={cn("group relative overflow-hidden border border-gray-200 shadow-sm py-4", bgGradient, className)}>
+		<Card
+			className={cn(
+				"group relative overflow-hidden border border-gray-200 py-4 shadow-sm",
+				bgGradient,
+				className,
+			)}
+		>
 			<CardContent
 				className={cn(
-					isCompact ? "flex flex-row items-center gap-3 px-4 py-2" : "px-4 py-2",
+					isCompact
+						? "flex flex-row items-center gap-3 px-4 py-2"
+						: "px-4 py-2",
 				)}
 			>
 				{isCompact ? (
@@ -53,29 +69,26 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 						{showIcon && (
 							<div
 								className={cn(
-									"flex items-center justify-center rounded-lg shadow-sm flex-shrink-0",
-									"w-8 h-8",
+									"flex flex-shrink-0 items-center justify-center rounded-lg shadow-sm",
+									"h-8 w-8",
 									iconBg,
 								)}
 							>
-								<Icon
-									className="w-4 h-4 text-white"
-									strokeWidth={2}
-								/>
+								<Icon className="h-4 w-4 text-white" strokeWidth={2} />
 							</div>
 						)}
 
 						{/* Content for Compact */}
-						<div className="flex-1 min-w-0 flex flex-col justify-center">
+						<div className="flex min-w-0 flex-1 flex-col justify-center">
 							{/* Title */}
-							<p className="font-semibold text-gray-700 truncate leading-tight text-sm mb-2">
+							<p className="mb-2 truncate font-semibold text-gray-700 text-sm leading-tight">
 								{title}
 							</p>
 
 							{/* Value */}
 							<div
 								className={cn(
-									"font-bold leading-none mb-1",
+									"mb-1 font-bold leading-none",
 									"text-xl sm:text-2xl",
 									textColor,
 								)}
@@ -88,7 +101,7 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 								<div className="flex items-center gap-1">
 									<p
 										className={cn(
-											"text-xs font-medium truncate",
+											"truncate font-medium text-xs",
 											changeType === "positive"
 												? "text-emerald-600"
 												: changeType === "negative"
@@ -101,10 +114,10 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 										{changeText}
 									</p>
 									{showTrend && changeType === "positive" && (
-										<TrendingUpIcon className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+										<TrendingUpIcon className="h-3 w-3 flex-shrink-0 text-emerald-500" />
 									)}
 									{showTrend && changeType === "negative" && (
-										<TrendingDownIcon className="w-3 h-3 text-red-500 flex-shrink-0" />
+										<TrendingDownIcon className="h-3 w-3 flex-shrink-0 text-red-500" />
 									)}
 								</div>
 							)}
@@ -114,22 +127,22 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 					<>
 						{/* Default View */}
 						{/* Icon and Title */}
-						<div className="flex items-center gap-3 mb-3">
+						<div className="mb-3 flex items-center gap-3">
 							{showIcon && (
 								<div
 									className={cn(
-										"flex items-center justify-center rounded-lg shadow-sm flex-shrink-0",
-										"w-8 h-8 sm:w-9 sm:h-9",
+										"flex flex-shrink-0 items-center justify-center rounded-lg shadow-sm",
+										"h-8 w-8 sm:h-9 sm:w-9",
 										iconBg,
 									)}
 								>
 									<Icon
-										className="w-4 h-4 sm:w-5 sm:h-5 text-white"
+										className="h-4 w-4 text-white sm:h-5 sm:w-5"
 										strokeWidth={2}
 									/>
 								</div>
 							)}
-							<p className="font-semibold text-gray-700 text-sm sm:text-base truncate">
+							<p className="truncate font-semibold text-gray-700 text-sm sm:text-base">
 								{title}
 							</p>
 						</div>
@@ -152,7 +165,7 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 							<div className="flex items-center gap-1">
 								<p
 									className={cn(
-										"text-xs sm:text-sm font-medium",
+										"font-medium text-xs sm:text-sm",
 										changeType === "positive"
 											? "text-emerald-600"
 											: changeType === "negative"
@@ -165,10 +178,10 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 									{changeText}
 								</p>
 								{showTrend && changeType === "positive" && (
-									<TrendingUpIcon className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-500" />
+									<TrendingUpIcon className="h-3 w-3 text-emerald-500 sm:h-4 sm:w-4" />
 								)}
 								{showTrend && changeType === "negative" && (
-									<TrendingDownIcon className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
+									<TrendingDownIcon className="h-3 w-3 text-red-500 sm:h-4 sm:w-4" />
 								)}
 							</div>
 						)}
@@ -180,16 +193,13 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 					<div
 						className={cn(
 							"absolute opacity-10",
-							isCompact
-								? "top-2 right-2 w-8 h-8"
-								: "top-2 right-2 w-10 h-10",
+							isCompact ? "top-2 right-2 h-8 w-8" : "top-2 right-2 h-10 w-10",
 						)}
 					>
-						<Icon className="w-full h-full text-gray-600" strokeWidth={0.5} />
+						<Icon className="h-full w-full text-gray-600" strokeWidth={0.5} />
 					</div>
 				)}
 			</CardContent>
 		</Card>
-	)
+	);
 }
-

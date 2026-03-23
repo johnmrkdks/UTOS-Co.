@@ -1,14 +1,14 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarBodyType } from "@/data/cars-body-types/create-car-body-type";
 import { getCarBodyTypeByName } from "@/data/cars-body-types/get-car-body-type-by-name";
 import type { DB } from "@/db";
 import {
-	InsertCarBodyTypeSchema,
 	type CarBodyType,
 	type InsertCarBodyType,
+	InsertCarBodyTypeSchema,
 } from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
 export const CreateCarBodyTypeServiceSchema = InsertCarBodyTypeSchema;
 

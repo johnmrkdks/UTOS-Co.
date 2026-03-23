@@ -1,10 +1,6 @@
-import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react"
-
-import {
-	formatBytes,
-	useFileUpload,
-} from "@/hooks/use-file-upload"
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@workspace/ui/components/button";
+import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
+import { formatBytes, useFileUpload } from "@/hooks/use-file-upload";
 
 // Create some dummy initial files
 const initialFiles = [
@@ -29,12 +25,12 @@ const initialFiles = [
 		url: "https://picsum.photos/1000/800?grayscale&random=3",
 		id: "image-03-123456789",
 	},
-]
+];
 
 export default function Component() {
-	const maxSizeMB = 5
-	const maxSize = maxSizeMB * 1024 * 1024 // 5MB default
-	const maxFiles = 6
+	const maxSizeMB = 5;
+	const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
+	const maxFiles = 6;
 
 	const [
 		{ files, isDragging, errors },
@@ -54,7 +50,7 @@ export default function Component() {
 		multiple: true,
 		maxFiles,
 		initialFiles,
-	})
+	});
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -66,7 +62,7 @@ export default function Component() {
 				onDrop={handleDrop}
 				data-dragging={isDragging || undefined}
 				data-files={files.length > 0 || undefined}
-				className="border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors not-data-[files]:justify-center has-[input:focus]:ring-[3px]"
+				className="relative flex min-h-52 flex-col items-center not-data-[files]:justify-center overflow-hidden rounded-xl border border-input border-dashed p-4 transition-colors has-[input:focus]:border-ring has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50"
 			>
 				<input
 					{...getInputProps()}
@@ -75,12 +71,12 @@ export default function Component() {
 				/>
 				<div className="flex flex-col items-center justify-center px-4 py-3 text-center">
 					<div
-						className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border"
+						className="mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border bg-background"
 						aria-hidden="true"
 					>
 						<ImageIcon className="size-4 opacity-60" />
 					</div>
-					<p className="mb-1.5 text-sm font-medium">Drop your images here</p>
+					<p className="mb-1.5 font-medium text-sm">Drop your images here</p>
 					<p className="text-muted-foreground text-xs">
 						SVG, PNG, JPG or GIF (max. {maxSizeMB}MB)
 					</p>
@@ -93,7 +89,7 @@ export default function Component() {
 
 			{errors.length > 0 && (
 				<div
-					className="text-destructive flex items-center gap-1 text-xs"
+					className="flex items-center gap-1 text-destructive text-xs"
 					role="alert"
 				>
 					<AlertCircleIcon className="size-3 shrink-0" />
@@ -107,10 +103,10 @@ export default function Component() {
 					{files.map((file) => (
 						<div
 							key={file.id}
-							className="bg-background flex items-center justify-between gap-2 rounded-lg border p-2 pe-3"
+							className="flex items-center justify-between gap-2 rounded-lg border bg-background p-2 pe-3"
 						>
 							<div className="flex items-center gap-3 overflow-hidden">
-								<div className="bg-accent aspect-square shrink-0 rounded">
+								<div className="aspect-square shrink-0 rounded bg-accent">
 									<img
 										src={file.preview}
 										alt={file.file.name}
@@ -118,7 +114,7 @@ export default function Component() {
 									/>
 								</div>
 								<div className="flex min-w-0 flex-col gap-0.5">
-									<p className="truncate text-[13px] font-medium">
+									<p className="truncate font-medium text-[13px]">
 										{file.file.name}
 									</p>
 									<p className="text-muted-foreground text-xs">
@@ -130,7 +126,7 @@ export default function Component() {
 							<Button
 								size="icon"
 								variant="ghost"
-								className="text-muted-foreground/80 hover:text-foreground -me-2 size-8 hover:bg-transparent"
+								className="-me-2 size-8 text-muted-foreground/80 hover:bg-transparent hover:text-foreground"
 								onClick={() => removeFile(file.id)}
 								aria-label="Remove file"
 							>
@@ -153,16 +149,16 @@ export default function Component() {
 			<p
 				aria-live="polite"
 				role="region"
-				className="text-muted-foreground mt-2 text-center text-xs"
+				className="mt-2 text-center text-muted-foreground text-xs"
 			>
 				Multiple image uploader w/ image list ∙{" "}
 				<a
 					href="https://github.com/origin-space/originui/tree/main/docs/use-file-upload.md"
-					className="hover:text-foreground underline"
+					className="underline hover:text-foreground"
 				>
 					API
 				</a>
 			</p>
 		</div>
-	)
+	);
 }

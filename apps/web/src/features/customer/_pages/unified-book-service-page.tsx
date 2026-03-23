@@ -1,56 +1,70 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Link, useParams, useRouter } from "@tanstack/react-router";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Textarea } from "@workspace/ui/components/textarea";
-import { Badge } from "@workspace/ui/components/badge";
 import { Separator } from "@workspace/ui/components/separator";
-import { 
-	ArrowLeft, 
-	Clock, 
-	Users, 
-	MapPin, 
+import { Textarea } from "@workspace/ui/components/textarea";
+import {
+	AlertCircle,
+	ArrowLeft,
 	Calendar,
-	Phone,
-	Mail,
-	User,
-	Loader2,
-	Package,
 	CheckCircle,
-	AlertCircle
+	Clock,
+	Loader2,
+	Mail,
+	MapPin,
+	Package,
+	Phone,
+	User,
+	Users,
 } from "lucide-react";
-import { toast } from "sonner";
 import { useState } from "react";
-import { Link, useParams, useRouter } from "@tanstack/react-router";
-import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/query/use-get-published-service-by-id-query";
+import { toast } from "sonner";
+import { z } from "zod";
 import { useCreateUnifiedServiceBookingMutation } from "@/features/customer/_hooks/query/use-create-unified-service-booking-mutation";
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
+import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/query/use-get-published-service-by-id-query";
 import { useUserQuery } from "@/hooks/query/use-unified-user-query";
-import { z } from "zod";
 
 // Booking form schema
-const BookingFormSchema = z.object({
-	originAddress: z.string().min(1, "Pickup location is required"),
-	destinationAddress: z.string().min(1, "Destination is required"),
-	scheduledPickupDate: z.string().min(1, "Pickup date is required"),
-	scheduledPickupTime: z.string().min(1, "Pickup time is required"),
-	customerName: z.string().min(1, "Name is required"),
-	customerPhone: z.string().min(1, "Phone number is required"),
-	customerEmail: z.string().email("Valid email required"),
-	passengerCount: z.number().min(1, "At least 1 passenger required"),
-	specialRequests: z.string().optional(),
-}).refine((data) => {
-	// Validate 24-hour advance notice for package bookings
-	if (!data.scheduledPickupDate || !data.scheduledPickupTime) return true; // Let required validation handle this
+const BookingFormSchema = z
+	.object({
+		originAddress: z.string().min(1, "Pickup location is required"),
+		destinationAddress: z.string().min(1, "Destination is required"),
+		scheduledPickupDate: z.string().min(1, "Pickup date is required"),
+		scheduledPickupTime: z.string().min(1, "Pickup time is required"),
+		customerName: z.string().min(1, "Name is required"),
+		customerPhone: z.string().min(1, "Phone number is required"),
+		customerEmail: z.string().email("Valid email required"),
+		passengerCount: z.number().min(1, "At least 1 passenger required"),
+		specialRequests: z.string().optional(),
+	})
+	.refine(
+		(data) => {
+			// Validate 24-hour advance notice for package bookings
+			if (!data.scheduledPickupDate || !data.scheduledPickupTime) return true; // Let required validation handle this
 
-	const scheduledPickupTime = new Date(`${data.scheduledPickupDate}T${data.scheduledPickupTime}`);
-	const now = new Date();
-	const hoursUntilPickup = (scheduledPickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-	return hoursUntilPickup >= 24;
-}, {
-	message: "Package bookings require at least 24 hours advance notice",
-	path: ["scheduledPickupDate"], // Show error on date field
-});
+			const scheduledPickupTime = new Date(
+				`${data.scheduledPickupDate}T${data.scheduledPickupTime}`,
+			);
+			const now = new Date();
+			const hoursUntilPickup =
+				(scheduledPickupTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+			return hoursUntilPickup >= 24;
+		},
+		{
+			message: "Package bookings require at least 24 hours advance notice",
+			path: ["scheduledPickupDate"], // Show error on date field
+		},
+	);
 
 type BookingFormData = z.infer<typeof BookingFormSchema>;
 
@@ -58,19 +72,29 @@ interface UnifiedBookServicePageProps {
 	serviceId?: string;
 }
 
-export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBookServicePageProps) {
+export function UnifiedBookServicePage({
+	serviceId: propServiceId,
+}: UnifiedBookServicePageProps) {
 	// Try to get serviceId from params if not provided as prop
 	const params = useParams({ strict: false });
 	const serviceId = propServiceId || (params as any)?.serviceId;
-	
+
 	const router = useRouter();
-	
+
 	// Use user query for authenticated users
 	const { data: sessionData, isLoading: sessionLoading } = useUserQuery();
-	
+
 	// Fetch service details and available cars
-	const { data: service, isLoading, error } = useGetPublishedServiceByIdQuery(serviceId);
-	const { data: carsData, isLoading: carsLoading, error: carsError } = useGetAvailableCarsQuery();
+	const {
+		data: service,
+		isLoading,
+		error,
+	} = useGetPublishedServiceByIdQuery(serviceId);
+	const {
+		data: carsData,
+		isLoading: carsLoading,
+		error: carsError,
+	} = useGetAvailableCarsQuery();
 	const createBookingMutation = useCreateUnifiedServiceBookingMutation();
 
 	// Determine if this is an hourly service
@@ -83,7 +107,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 	console.log("User info:", sessionData?.user);
 	console.log("Service data:", service);
 	console.log("Cars data:", carsData);
-	
+
 	// Form state - pre-populate with user info if available
 	const [formData, setFormData] = useState<Partial<BookingFormData>>({
 		customerName: sessionData?.user?.name || "",
@@ -91,11 +115,14 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 		passengerCount: 1,
 	});
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-	const [step, setStep] = useState<"details" | "booking" | "confirmation">("details");
+	const [step, setStep] = useState<"details" | "booking" | "confirmation">(
+		"details",
+	);
 
 	// Helper functions
-	const formatPrice = (priceInCents: number) => `$${(priceInCents / 100).toFixed(0)}`;
-	
+	const formatPrice = (priceInCents: number) =>
+		`$${(priceInCents / 100).toFixed(0)}`;
+
 	const formatDuration = (minutes?: number) => {
 		if (!minutes) return "Custom duration";
 		const hours = Math.floor(minutes / 60);
@@ -107,19 +134,24 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 
 	const getServiceTypeDisplay = (serviceType: string) => {
 		switch (serviceType) {
-			case "transfer": return "Transfer";
-			case "tour": return "Tour";  
-			case "event": return "Event";
-			case "hourly": return "Hourly";
-			default: return serviceType;
+			case "transfer":
+				return "Transfer";
+			case "tour":
+				return "Tour";
+			case "event":
+				return "Event";
+			case "hourly":
+				return "Hourly";
+			default:
+				return serviceType;
 		}
 	};
 
 	const updateFormData = (field: keyof BookingFormData, value: any) => {
-		setFormData(prev => ({ ...prev, [field]: value }));
+		setFormData((prev) => ({ ...prev, [field]: value }));
 		// Clear error when user starts typing
 		if (formErrors[field]) {
-			setFormErrors(prev => ({ ...prev, [field]: "" }));
+			setFormErrors((prev) => ({ ...prev, [field]: "" }));
 		}
 	};
 
@@ -157,7 +189,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 		if (!validateForm()) {
 			console.error("❌ Form validation failed");
 			toast.error("Please fill in all required fields", {
-				description: "Check the form for any errors and try again."
+				description: "Check the form for any errors and try again.",
 			});
 			return;
 		}
@@ -165,7 +197,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 		if (!service) {
 			console.error("❌ No service data available");
 			toast.error("Service information not loaded", {
-				description: "Please refresh the page and try again."
+				description: "Please refresh the page and try again.",
 			});
 			return;
 		}
@@ -173,7 +205,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 		if (!sessionData?.user) {
 			console.error("❌ No user session available");
 			toast.error("Session not available", {
-				description: "Please refresh the page and try again."
+				description: "Please refresh the page and try again.",
 			});
 			return;
 		}
@@ -182,12 +214,15 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 		if (!availableCar) {
 			console.error("❌ No cars available for booking");
 			toast.error("No vehicles available", {
-				description: "Currently no vehicles are available for booking. Please try again later."
+				description:
+					"Currently no vehicles are available for booking. Please try again later.",
 			});
 			return;
 		}
 
-		const scheduledPickupTime = new Date(`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}`);
+		const scheduledPickupTime = new Date(
+			`${formData.scheduledPickupDate}T${formData.scheduledPickupTime}`,
+		);
 		console.log("📅 Scheduled pickup time:", scheduledPickupTime);
 
 		const bookingPayload = {
@@ -217,7 +252,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 	// Show loading state while session is being established
 	if (sessionLoading) {
 		return (
-			<div className="flex justify-center items-center py-12">
+			<div className="flex items-center justify-center py-12">
 				<Loader2 className="h-8 w-8 animate-spin text-primary" />
 				<span className="ml-2 text-gray-600">Setting up session...</span>
 			</div>
@@ -226,7 +261,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 
 	if (isLoading) {
 		return (
-			<div className="flex justify-center items-center py-12">
+			<div className="flex items-center justify-center py-12">
 				<Loader2 className="h-8 w-8 animate-spin text-primary" />
 				<span className="ml-2 text-gray-600">Loading service details...</span>
 			</div>
@@ -235,10 +270,14 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 
 	if (error || !service) {
 		return (
-			<div className="text-center py-12">
-				<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-				<h3 className="text-lg font-medium text-gray-900 mb-2">Service not found</h3>
-				<p className="text-gray-600 mb-4">The service you're looking for doesn't exist or is no longer available</p>
+			<div className="py-12 text-center">
+				<Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+				<h3 className="mb-2 font-medium text-gray-900 text-lg">
+					Service not found
+				</h3>
+				<p className="mb-4 text-gray-600">
+					The service you're looking for doesn't exist or is no longer available
+				</p>
 				<Button asChild>
 					<Link to="/dashboard/services">Browse Services</Link>
 				</Button>
@@ -248,13 +287,17 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 
 	if (step === "confirmation") {
 		return (
-			<div className="max-w-2xl mx-auto space-y-6">
+			<div className="mx-auto max-w-2xl space-y-6">
 				{/* Header */}
-				<div className="text-center space-y-4">
-					<CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+				<div className="space-y-4 text-center">
+					<CheckCircle className="mx-auto h-16 w-16 text-green-500" />
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900">Booking Confirmed!</h1>
-						<p className="text-gray-600">Your service booking has been submitted successfully</p>
+						<h1 className="font-bold text-3xl text-gray-900">
+							Booking Confirmed!
+						</h1>
+						<p className="text-gray-600">
+							Your service booking has been submitted successfully
+						</p>
 					</div>
 				</div>
 
@@ -266,7 +309,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 					<CardContent className="space-y-4">
 						<div>
 							<h4 className="font-medium">{service.name}</h4>
-							<p className="text-sm text-gray-600">{service.description}</p>
+							<p className="text-gray-600 text-sm">{service.description}</p>
 						</div>
 						<Separator />
 						<div className="grid grid-cols-2 gap-4 text-sm">
@@ -280,11 +323,17 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							</div>
 							<div>
 								<span className="text-gray-600">Date & Time:</span>
-								<p className="font-medium">{formData.scheduledPickupDate} at {formData.scheduledPickupTime}</p>
+								<p className="font-medium">
+									{formData.scheduledPickupDate} at{" "}
+									{formData.scheduledPickupTime}
+								</p>
 							</div>
 							<div>
 								<span className="text-gray-600">Passengers:</span>
-								<p className="font-medium">{formData.passengerCount} passenger{formData.passengerCount !== 1 ? 's' : ''}</p>
+								<p className="font-medium">
+									{formData.passengerCount} passenger
+									{formData.passengerCount !== 1 ? "s" : ""}
+								</p>
 							</div>
 						</div>
 					</CardContent>
@@ -293,9 +342,10 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 				{/* Next Steps */}
 				<Card>
 					<CardContent className="p-6 text-center">
-						<h3 className="font-medium mb-2">What happens next?</h3>
-						<p className="text-sm text-gray-600 mb-4">
-							Our team will review your booking and contact you within 24 hours to confirm details and assign a driver.
+						<h3 className="mb-2 font-medium">What happens next?</h3>
+						<p className="mb-4 text-gray-600 text-sm">
+							Our team will review your booking and contact you within 24 hours
+							to confirm details and assign a driver.
 						</p>
 						<div className="space-y-2">
 							<Button className="w-full" asChild>
@@ -312,7 +362,7 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 	}
 
 	return (
-		<div className="max-w-4xl mx-auto space-y-6">
+		<div className="mx-auto max-w-4xl space-y-6">
 			{/* Header */}
 			<div className="flex items-center gap-4">
 				<Button variant="outline" size="icon" asChild>
@@ -321,44 +371,48 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 					</Link>
 				</Button>
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">Book {service.name}</h1>
-					<p className="text-gray-600">
-						Complete your booking details below
-					</p>
+					<h1 className="font-bold text-3xl text-gray-900">
+						Book {service.name}
+					</h1>
+					<p className="text-gray-600">Complete your booking details below</p>
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 				{/* Service Details Sidebar */}
 				<div className="lg:col-span-1">
 					<Card className="sticky top-6">
 						<CardHeader>
-							<div className="flex justify-between items-start">
+							<div className="flex items-start justify-between">
 								<div>
 									<CardTitle>{service.name}</CardTitle>
 									<Badge variant="secondary" className="mt-2">
-										{getServiceTypeDisplay((service as any).serviceType || "service")}
+										{getServiceTypeDisplay(
+											(service as any).serviceType || "service",
+										)}
 									</Badge>
 								</div>
-								<span className="text-2xl font-bold text-primary">{formatPrice(service.fixedPrice || 0)}</span>
+								<span className="font-bold text-2xl text-primary">
+									{formatPrice(service.fixedPrice || 0)}
+								</span>
 							</div>
 							<CardDescription>{service.description}</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{/* Service Banner */}
 							{service.bannerImageUrl && (
-								<div className="h-40 rounded-lg overflow-hidden">
-									<img 
-										src={service.bannerImageUrl} 
+								<div className="h-40 overflow-hidden rounded-lg">
+									<img
+										src={service.bannerImageUrl}
 										alt={service.name}
-										className="w-full h-full object-cover"
+										className="h-full w-full object-cover"
 									/>
 								</div>
 							)}
 
 							{/* Service Details */}
 							<div className="space-y-3">
-								<div className="flex items-center gap-2 text-sm text-gray-600">
+								<div className="flex items-center gap-2 text-gray-600 text-sm">
 									<Clock className="h-4 w-4" />
 									<span>{formatDuration(service.duration || undefined)}</span>
 								</div>
@@ -366,33 +420,41 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 
 							{/* Included Services */}
 							<div>
-								<h4 className="font-medium mb-2">What's Included</h4>
-								<div className="space-y-1 text-sm text-gray-600">
-									{service.includesDriver && <div>✓ Professional chauffeur</div>}
+								<h4 className="mb-2 font-medium">What's Included</h4>
+								<div className="space-y-1 text-gray-600 text-sm">
+									{service.includesDriver && (
+										<div>✓ Professional chauffeur</div>
+									)}
 									{service.includesFuel && <div>✓ Fuel costs</div>}
 									{service.includesTolls && <div>✓ Toll charges</div>}
-									{service.includesWaiting && <div>✓ Waiting time ({service.waitingTimeMinutes}min)</div>}
+									{service.includesWaiting && (
+										<div>✓ Waiting time ({service.waitingTimeMinutes}min)</div>
+									)}
 								</div>
 							</div>
 
 							{/* Booking Requirements */}
-							{service.advanceBookingHours && service.advanceBookingHours > 0 && (
-								<div className="p-3 bg-yellow-50 rounded-lg">
-									<div className="flex items-center gap-2">
-										<AlertCircle className="h-4 w-4 text-yellow-600" />
-										<span className="text-sm font-medium text-yellow-800">Advance Booking Required</span>
+							{service.advanceBookingHours &&
+								service.advanceBookingHours > 0 && (
+									<div className="rounded-lg bg-yellow-50 p-3">
+										<div className="flex items-center gap-2">
+											<AlertCircle className="h-4 w-4 text-yellow-600" />
+											<span className="font-medium text-sm text-yellow-800">
+												Advance Booking Required
+											</span>
+										</div>
+										<p className="mt-1 text-xs text-yellow-700">
+											Book at least {service.advanceBookingHours} hours in
+											advance
+										</p>
 									</div>
-									<p className="text-xs text-yellow-700 mt-1">
-										Book at least {service.advanceBookingHours} hours in advance
-									</p>
-								</div>
-							)}
+								)}
 						</CardContent>
 					</Card>
 				</div>
 
 				{/* Booking Form */}
-				<div className="lg:col-span-2 space-y-6">
+				<div className="space-y-6 lg:col-span-2">
 					{/* Trip Details */}
 					<Card>
 						<CardHeader>
@@ -402,18 +464,22 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div>
 									<Label htmlFor="originAddress">Pickup Location</Label>
 									<Input
 										id="originAddress"
 										placeholder="Enter pickup address"
 										value={formData.originAddress || ""}
-										onChange={(e) => updateFormData("originAddress", e.target.value)}
+										onChange={(e) =>
+											updateFormData("originAddress", e.target.value)
+										}
 										className={formErrors.originAddress ? "border-red-500" : ""}
 									/>
 									{formErrors.originAddress && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.originAddress}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.originAddress}
+										</p>
 									)}
 								</div>
 								<div>
@@ -422,11 +488,17 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 										id="destinationAddress"
 										placeholder="Enter destination address"
 										value={formData.destinationAddress || ""}
-										onChange={(e) => updateFormData("destinationAddress", e.target.value)}
-										className={formErrors.destinationAddress ? "border-red-500" : ""}
+										onChange={(e) =>
+											updateFormData("destinationAddress", e.target.value)
+										}
+										className={
+											formErrors.destinationAddress ? "border-red-500" : ""
+										}
 									/>
 									{formErrors.destinationAddress && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.destinationAddress}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.destinationAddress}
+										</p>
 									)}
 								</div>
 							</div>
@@ -442,19 +514,25 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div>
 									<Label htmlFor="scheduledPickupDate">Pickup Date</Label>
 									<Input
 										id="scheduledPickupDate"
 										type="date"
 										value={formData.scheduledPickupDate || ""}
-										onChange={(e) => updateFormData("scheduledPickupDate", e.target.value)}
-										min={new Date().toISOString().split('T')[0]}
-										className={formErrors.scheduledPickupDate ? "border-red-500" : ""}
+										onChange={(e) =>
+											updateFormData("scheduledPickupDate", e.target.value)
+										}
+										min={new Date().toISOString().split("T")[0]}
+										className={
+											formErrors.scheduledPickupDate ? "border-red-500" : ""
+										}
 									/>
 									{formErrors.scheduledPickupDate && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.scheduledPickupDate}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.scheduledPickupDate}
+										</p>
 									)}
 								</div>
 								<div>
@@ -463,11 +541,17 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 										id="scheduledPickupTime"
 										type="time"
 										value={formData.scheduledPickupTime || ""}
-										onChange={(e) => updateFormData("scheduledPickupTime", e.target.value)}
-										className={formErrors.scheduledPickupTime ? "border-red-500" : ""}
+										onChange={(e) =>
+											updateFormData("scheduledPickupTime", e.target.value)
+										}
+										className={
+											formErrors.scheduledPickupTime ? "border-red-500" : ""
+										}
 									/>
 									{formErrors.scheduledPickupTime && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.scheduledPickupTime}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.scheduledPickupTime}
+										</p>
 									)}
 								</div>
 							</div>
@@ -483,18 +567,22 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div>
 									<Label htmlFor="customerName">Full Name</Label>
 									<Input
 										id="customerName"
 										placeholder="Enter your full name"
 										value={formData.customerName || ""}
-										onChange={(e) => updateFormData("customerName", e.target.value)}
+										onChange={(e) =>
+											updateFormData("customerName", e.target.value)
+										}
 										className={formErrors.customerName ? "border-red-500" : ""}
 									/>
 									{formErrors.customerName && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.customerName}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.customerName}
+										</p>
 									)}
 								</div>
 								<div>
@@ -505,15 +593,24 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 										min="1"
 										max={service.maxPassengers || (isHourlyService ? 15 : 8)}
 										value={formData.passengerCount || 1}
-										onChange={(e) => updateFormData("passengerCount", parseInt(e.target.value) || 1)}
-										className={formErrors.passengerCount ? "border-red-500" : ""}
+										onChange={(e) =>
+											updateFormData(
+												"passengerCount",
+												Number.parseInt(e.target.value) || 1,
+											)
+										}
+										className={
+											formErrors.passengerCount ? "border-red-500" : ""
+										}
 									/>
 									{formErrors.passengerCount && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.passengerCount}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.passengerCount}
+										</p>
 									)}
 								</div>
 							</div>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div>
 									<Label htmlFor="customerPhone">Phone Number</Label>
 									<Input
@@ -521,11 +618,15 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 										type="tel"
 										placeholder="Enter your phone number"
 										value={formData.customerPhone || ""}
-										onChange={(e) => updateFormData("customerPhone", e.target.value)}
+										onChange={(e) =>
+											updateFormData("customerPhone", e.target.value)
+										}
 										className={formErrors.customerPhone ? "border-red-500" : ""}
 									/>
 									{formErrors.customerPhone && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.customerPhone}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.customerPhone}
+										</p>
 									)}
 								</div>
 								<div>
@@ -535,21 +636,29 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 										type="email"
 										placeholder="Enter your email"
 										value={formData.customerEmail || ""}
-										onChange={(e) => updateFormData("customerEmail", e.target.value)}
+										onChange={(e) =>
+											updateFormData("customerEmail", e.target.value)
+										}
 										className={formErrors.customerEmail ? "border-red-500" : ""}
 									/>
 									{formErrors.customerEmail && (
-										<p className="text-red-500 text-sm mt-1">{formErrors.customerEmail}</p>
+										<p className="mt-1 text-red-500 text-sm">
+											{formErrors.customerEmail}
+										</p>
 									)}
 								</div>
 							</div>
 							<div>
-								<Label htmlFor="specialRequests">Special Requests (Optional)</Label>
+								<Label htmlFor="specialRequests">
+									Special Requests (Optional)
+								</Label>
 								<Textarea
 									id="specialRequests"
 									placeholder="Any special requirements or requests..."
 									value={formData.specialRequests || ""}
-									onChange={(e) => updateFormData("specialRequests", e.target.value)}
+									onChange={(e) =>
+										updateFormData("specialRequests", e.target.value)
+									}
 									rows={3}
 								/>
 							</div>
@@ -559,17 +668,26 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 					{/* Book Service Button */}
 					<Card>
 						<CardContent className="p-6">
-							<div className="flex items-center justify-between mb-4">
+							<div className="mb-4 flex items-center justify-between">
 								<div>
-									<div className="text-lg font-medium">Total Cost</div>
-									<div className="text-sm text-gray-600">Fixed price for this service</div>
+									<div className="font-medium text-lg">Total Cost</div>
+									<div className="text-gray-600 text-sm">
+										Fixed price for this service
+									</div>
 								</div>
-								<div className="text-3xl font-bold text-primary">{formatPrice(service.fixedPrice || 0)}</div>
+								<div className="font-bold text-3xl text-primary">
+									{formatPrice(service.fixedPrice || 0)}
+								</div>
 							</div>
-							<Button 
-								className="w-full" 
+							<Button
+								className="w-full"
 								onClick={handleSubmit}
-								disabled={createBookingMutation.isPending || !service || !sessionData?.user || !carsData?.data?.length}
+								disabled={
+									createBookingMutation.isPending ||
+									!service ||
+									!sessionData?.user ||
+									!carsData?.data?.length
+								}
 							>
 								{createBookingMutation.isPending ? (
 									<>
@@ -583,22 +701,26 @@ export function UnifiedBookServicePage({ serviceId: propServiceId }: UnifiedBook
 									</>
 								)}
 							</Button>
-							
+
 							{/* Debug/Help Messages */}
-							{(!service || !sessionData?.user || !carsData?.data?.length) && !createBookingMutation.isPending && (
-								<div className="mt-2 p-2 bg-yellow-50 rounded text-sm text-yellow-800">
-									{!service && <div>⚠️ Service information is still loading...</div>}
-									{!sessionData?.user && <div>⚠️ Setting up session...</div>}
-									{!carsData?.data?.length && (
-										<div>
-											⚠️ No vehicles are currently available
-											<div className="text-xs mt-1 text-yellow-600">
-												Cars must be published and active to be available for booking
+							{(!service || !sessionData?.user || !carsData?.data?.length) &&
+								!createBookingMutation.isPending && (
+									<div className="mt-2 rounded bg-yellow-50 p-2 text-sm text-yellow-800">
+										{!service && (
+											<div>⚠️ Service information is still loading...</div>
+										)}
+										{!sessionData?.user && <div>⚠️ Setting up session...</div>}
+										{!carsData?.data?.length && (
+											<div>
+												⚠️ No vehicles are currently available
+												<div className="mt-1 text-xs text-yellow-600">
+													Cars must be published and active to be available for
+													booking
+												</div>
 											</div>
-										</div>
-									)}
-								</div>
-							)}
+										)}
+									</div>
+								)}
 						</CardContent>
 					</Card>
 				</div>

@@ -1,14 +1,16 @@
-import { packageCategories } from "@/db/schema";
 import {
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
 } from "drizzle-zod";
-import { z } from "zod";
+import type { z } from "zod";
+import { packageCategories } from "@/db/schema";
 
 export const PackageCategorySchema = createSelectSchema(packageCategories);
-export const InsertPackageCategorySchema = createInsertSchema(packageCategories);
-export const UpdatePackageCategorySchema = createUpdateSchema(packageCategories);
+export const InsertPackageCategorySchema =
+	createInsertSchema(packageCategories);
+export const UpdatePackageCategorySchema =
+	createUpdateSchema(packageCategories);
 
 export type PackageCategory = z.infer<typeof PackageCategorySchema>;
 export type InsertPackageCategory = z.infer<typeof InsertPackageCategorySchema>;

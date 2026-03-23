@@ -1,27 +1,53 @@
-import { Loader } from "@/components/loader";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
-import { BookingManagementModalProviders } from "@/features/dashboard/_pages/booking-management/_providers/booking-management-modal-providers";
-import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
-import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
-import { BookingFilters, type BookingFilters as BookingFiltersType } from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
-import { BookingCalendar } from "@/features/dashboard/_pages/booking-management/_components/booking-calendar";
-import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
-import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-package-booking-dialog";
-import { CreateOffloadBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-offload-booking-dialog";
-import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
-import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-driver-dialog";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import {
+	Activity,
+	Archive,
+	Calendar,
+	CalendarDays,
+	CalendarPlus,
+	CheckCircle,
+	Clock,
+	TruckIcon,
+} from "lucide-react";
+import { Suspense, useState } from "react";
+import {
+	AnalyticsCard,
+	type AnalyticsCardData,
+} from "@/components/analytics-card";
+import { Loader } from "@/components/loader";
+import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
 import { AssignCarDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-car-dialog";
-import { EditBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/edit-booking-dialog";
+import { AssignDriverDialog } from "@/features/dashboard/_pages/booking-management/_components/assign-driver-dialog";
+import { BookingCalendar } from "@/features/dashboard/_pages/booking-management/_components/booking-calendar";
+import { BookingDetailsDialog } from "@/features/dashboard/_pages/booking-management/_components/booking-details-dialog";
+import {
+	BookingFilters,
+	type BookingFilters as BookingFiltersType,
+} from "@/features/dashboard/_pages/booking-management/_components/booking-filters";
+import { BookingsListTable } from "@/features/dashboard/_pages/booking-management/_components/bookings-list-table";
 import { ChangeStatusDialog } from "@/features/dashboard/_pages/booking-management/_components/change-status-dialog";
 import { ConfirmBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/confirm-booking-dialog";
+import { CreateCustomBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-custom-booking-dialog";
+import { CreateOffloadBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-offload-booking-dialog";
+import { CreatePackageBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/create-package-booking-dialog";
+import { EditBookingDialog } from "@/features/dashboard/_pages/booking-management/_components/edit-booking-dialog";
 import { useGetBookingsQuery } from "@/features/dashboard/_pages/booking-management/_hooks/query/use-get-bookings-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, Clock, Activity, TruckIcon, Archive, CheckCircle, CalendarDays, Calendar } from "lucide-react";
-import { Suspense, useState } from "react";
-import { PaddingLayout } from "@/features/dashboard/_layouts/padding-layout";
+import { useBookingManagementModalProvider } from "@/features/dashboard/_pages/booking-management/_hooks/use-booking-management-modal-provider";
+import { BookingManagementModalProviders } from "@/features/dashboard/_pages/booking-management/_providers/booking-management-modal-providers";
 
 export const Route = createFileRoute("/admin/dashboard/_layout/bookings/")({
 	component: RouteComponent,
@@ -32,7 +58,7 @@ function RouteComponent() {
 		<BookingManagementModalProviders>
 			<BookingManagementContent />
 		</BookingManagementModalProviders>
-	)
+	);
 }
 
 function BookingManagementContent() {
@@ -54,132 +80,146 @@ function BookingManagementContent() {
 		closeChangeStatusDialog,
 		isConfirmBookingDialogOpen,
 		selectedBookingForConfirm,
-		closeConfirmBookingDialog
+		closeConfirmBookingDialog,
 	} = useBookingManagementModalProvider();
 
 	const [filters, setFilters] = useState<BookingFiltersType>({});
-	const [sortBy, setSortBy] = useState<string>('scheduledPickupTime');
-	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); // Upcoming bookings first
+	const [sortBy, setSortBy] = useState<string>("scheduledPickupTime");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Upcoming bookings first
 
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
 		sortBy,
 		sortOrder,
 		...filters,
-	})
+	});
 
 	// Calculate real-time metrics from bookings data
 	const bookingsData = bookingsQuery.data?.data || [];
 	const totalBookings = bookingsData.length;
-	const pendingBookings = bookingsData.filter(b => b.status === "pending").length;
-	const todaysBookings = bookingsData.filter(b => {
+	const pendingBookings = bookingsData.filter(
+		(b) => b.status === "pending",
+	).length;
+	const todaysBookings = bookingsData.filter((b) => {
 		const today = new Date();
 		const bookingDate = new Date(b.scheduledPickupTime);
 		return bookingDate.toDateString() === today.toDateString();
 	}).length;
-	const activeBookings = bookingsData.filter(b =>
-		["driver_assigned", "in_progress"].includes(b.status)
+	const activeBookings = bookingsData.filter((b) =>
+		["driver_assigned", "in_progress"].includes(b.status),
 	).length;
-	const readyBookings = bookingsData.filter(b =>
-		b.driverId && b.carId && ["confirmed", "driver_assigned"].includes(b.status)
+	const readyBookings = bookingsData.filter(
+		(b) =>
+			b.driverId &&
+			b.carId &&
+			["confirmed", "driver_assigned"].includes(b.status),
 	).length;
-	const archivedBookings = bookingsData.filter(b => b.isArchived === true).length;
+	const archivedBookings = bookingsData.filter(
+		(b) => b.isArchived === true,
+	).length;
 
 	// Analytics card data for booking management
 	const bookingManagementStatsData: AnalyticsCardData[] = [
 		{
-			id: 'total-bookings',
-			title: 'Total Bookings',
+			id: "total-bookings",
+			title: "Total Bookings",
 			value: totalBookings,
 			icon: CalendarPlus,
-			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-			iconBg: 'bg-blue-500',
-			changeText: 'All time bookings',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
+			iconBg: "bg-blue-500",
+			changeText: "All time bookings",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'pending',
-			title: 'Pending',
+			id: "pending",
+			title: "Pending",
 			value: pendingBookings,
 			icon: Clock,
-			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
-			iconBg: 'bg-orange-500',
-			changeText: 'Awaiting confirmation',
-			changeType: 'warning',
+			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
+			iconBg: "bg-orange-500",
+			changeText: "Awaiting confirmation",
+			changeType: "warning",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'todays-bookings',
+			id: "todays-bookings",
 			title: "Today's Bookings",
 			value: todaysBookings,
 			icon: CalendarPlus,
-			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
-			iconBg: 'bg-green-500',
-			changeText: 'Scheduled for today',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
+			iconBg: "bg-green-500",
+			changeText: "Scheduled for today",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'ready',
-			title: 'Ready',
+			id: "ready",
+			title: "Ready",
 			value: readyBookings,
 			icon: CheckCircle,
-			bgGradient: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
-			iconBg: 'bg-emerald-500',
-			changeText: 'Driver & car assigned',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-emerald-50 to-emerald-100",
+			iconBg: "bg-emerald-500",
+			changeText: "Driver & car assigned",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'active',
-			title: 'Active',
+			id: "active",
+			title: "Active",
 			value: activeBookings,
 			icon: Activity,
-			bgGradient: 'bg-gradient-to-br from-purple-50 to-purple-100',
-			iconBg: 'bg-purple-500',
-			changeText: 'Currently in progress',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-purple-50 to-purple-100",
+			iconBg: "bg-purple-500",
+			changeText: "Currently in progress",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'archived',
-			title: 'Archived',
+			id: "archived",
+			title: "Archived",
 			value: archivedBookings,
 			icon: Archive,
-			bgGradient: 'bg-gradient-to-br from-gray-50 to-gray-100',
-			iconBg: 'bg-gray-500',
-			changeText: 'Archived bookings',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-gray-50 to-gray-100",
+			iconBg: "bg-gray-500",
+			changeText: "Archived bookings",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
-		}
-	]
+			showBackgroundIcon: true,
+		},
+	];
 
 	const clearFilters = () => {
 		setFilters({});
-	}
+	};
 
-	const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+	const handleSortChange = (
+		newSortBy: string,
+		newSortOrder: "asc" | "desc",
+	) => {
 		setSortBy(newSortBy);
 		setSortOrder(newSortOrder);
-	}
+	};
 
 	return (
 		<PaddingLayout className="flex-1 space-y-4">
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center border border-blue-200/50">
+					<div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-blue-100">
 						<Calendar className="h-5 w-5 text-blue-600" />
 					</div>
 					<div>
-						<h2 className="text-2xl font-bold tracking-tight">Booking Management</h2>
-						<p className="text-sm text-muted-foreground">Manage bookings, calendar, and assignments</p>
+						<h2 className="font-bold text-2xl tracking-tight">
+							Booking Management
+						</h2>
+						<p className="text-muted-foreground text-sm">
+							Manage bookings, calendar, and assignments
+						</p>
 					</div>
 				</div>
 				<div className="flex items-center space-x-2">
@@ -215,8 +255,8 @@ function BookingManagementContent() {
 					<AnalyticsCard
 						key={data.id}
 						data={data}
-						view='compact'
-						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+						view="compact"
+						className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
 					/>
 				))}
 			</div>
@@ -235,7 +275,7 @@ function BookingManagementContent() {
 				<TabsList>
 					<TabsTrigger value="all">All Bookings</TabsTrigger>
 					<TabsTrigger value="calendar">
-						<CalendarDays className="h-4 w-4 mr-1" />
+						<CalendarDays className="mr-1 h-4 w-4" />
 						Calendar
 					</TabsTrigger>
 					<TabsTrigger value="pending">Pending</TabsTrigger>
@@ -284,7 +324,8 @@ function BookingManagementContent() {
 						<CardHeader>
 							<CardTitle>Package Bookings</CardTitle>
 							<CardDescription>
-								Fixed-price package bookings with predetermined routes and services.
+								Fixed-price package bookings with predetermined routes and
+								services.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -348,12 +389,17 @@ function BookingManagementContent() {
 						<CardHeader>
 							<CardTitle>Ready Bookings</CardTitle>
 							<CardDescription>
-								Bookings with both driver and car assigned, ready to begin service.
+								Bookings with both driver and car assigned, ready to begin
+								service.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<Suspense fallback={<Loader />}>
-								<BookingsListTable hasDriver={true} hasCar={true} filters={filters} />
+								<BookingsListTable
+									hasDriver={true}
+									hasCar={true}
+									filters={filters}
+								/>
 							</Suspense>
 						</CardContent>
 					</Card>
@@ -364,7 +410,8 @@ function BookingManagementContent() {
 						<CardHeader>
 							<CardTitle>Offload Bookings</CardTitle>
 							<CardDescription>
-								Manual bookings from other companies to help with workload distribution.
+								Manual bookings from other companies to help with workload
+								distribution.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -380,7 +427,8 @@ function BookingManagementContent() {
 						<CardHeader>
 							<CardTitle>Archived Bookings</CardTitle>
 							<CardDescription>
-								Bookings that have been archived for record keeping. Archived bookings are hidden from regular views.
+								Bookings that have been archived for record keeping. Archived
+								bookings are hidden from regular views.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -422,5 +470,5 @@ function BookingManagementContent() {
 				onOpenChange={closeConfirmBookingDialog}
 			/>
 		</PaddingLayout>
-	)
+	);
 }

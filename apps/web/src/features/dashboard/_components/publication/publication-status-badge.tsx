@@ -1,6 +1,6 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { cn } from "@workspace/ui/lib/utils";
-import { Eye, EyeOff, Clock, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Clock, Eye, EyeOff } from "lucide-react";
 
 export interface PublicationStatusBadgeProps {
 	isPublished?: boolean;
@@ -20,9 +20,10 @@ export function PublicationStatusBadge({
 	size = "md",
 }: PublicationStatusBadgeProps) {
 	// Determine overall publication status
-	const isPubliclyVisible = type === "car" 
-		? isPublished && isActive && isAvailable && status === "available"
-		: isPublished && isAvailable;
+	const isPubliclyVisible =
+		type === "car"
+			? isPublished && isActive && isAvailable && status === "available"
+			: isPublished && isAvailable;
 
 	// Get appropriate styling and content
 	const getStatusConfig = () => {
@@ -35,7 +36,11 @@ export function PublicationStatusBadge({
 			};
 		}
 
-		if (isPublished && type === "car" && (!isActive || !isAvailable || status !== "available")) {
+		if (
+			isPublished &&
+			type === "car" &&
+			(!isActive || !isAvailable || status !== "available")
+		) {
 			return {
 				variant: "destructive" as const,
 				icon: AlertTriangle,
@@ -81,7 +86,7 @@ export function PublicationStatusBadge({
 			variant={config.variant}
 			className={cn(
 				"inline-flex items-center gap-1.5 font-medium",
-				sizeClasses[size]
+				sizeClasses[size],
 			)}
 			title={config.description}
 		>

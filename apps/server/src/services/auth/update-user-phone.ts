@@ -1,14 +1,16 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { users } from "@/db/sqlite/schema";
-import { eq } from "drizzle-orm";
 
 export const UpdateUserPhoneServiceSchema = z.object({
 	userId: z.string().optional(), // Optional because it will be provided by session context
 	phone: z.string().optional(), // Allow empty string or null to clear phone number
 });
 
-export type UpdateUserPhoneServiceInput = z.infer<typeof UpdateUserPhoneServiceSchema>;
+export type UpdateUserPhoneServiceInput = z.infer<
+	typeof UpdateUserPhoneServiceSchema
+>;
 
 export const updateUserPhoneService = async (
 	db: DB,
@@ -53,9 +55,18 @@ export const updateUserPhoneService = async (
 	} catch (error) {
 		console.error("=== ERROR in updateUserPhoneService ===");
 		console.error("Error type:", typeof error);
-		console.error("Error name:", error instanceof Error ? error.name : "Unknown");
-		console.error("Error message:", error instanceof Error ? error.message : error);
-		console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+		console.error(
+			"Error name:",
+			error instanceof Error ? error.name : "Unknown",
+		);
+		console.error(
+			"Error message:",
+			error instanceof Error ? error.message : error,
+		);
+		console.error(
+			"Error stack:",
+			error instanceof Error ? error.stack : "No stack trace",
+		);
 		console.error("Full error object:", error);
 		console.error("=== END ERROR LOG ===");
 		throw error;

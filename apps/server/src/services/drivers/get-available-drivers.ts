@@ -1,10 +1,13 @@
+import { and, eq, isNull, or } from "drizzle-orm";
 import type { DB } from "@/db";
-import { drivers, users, bookings } from "@/db/schema";
-import { eq, and, isNull, or } from "drizzle-orm";
+import { bookings, drivers, users } from "@/db/schema";
 
-export async function getAvailableDriversService(db: DB, timeSlot?: { start: Date; end: Date }) {
+export async function getAvailableDriversService(
+	db: DB,
+	timeSlot?: { start: Date; end: Date },
+) {
 	// Get all active and approved drivers
-	let query = db
+	const query = db
 		.select({
 			id: drivers.id,
 			userId: drivers.userId,
@@ -22,12 +25,7 @@ export async function getAvailableDriversService(db: DB, timeSlot?: { start: Dat
 		})
 		.from(drivers)
 		.leftJoin(users, eq(drivers.userId, users.id))
-		.where(
-			and(
-				eq(drivers.isActive, true),
-				eq(drivers.isApproved, true)
-			)
-		);
+		.where(and(eq(drivers.isActive, true), eq(drivers.isApproved, true)));
 
 	// If timeSlot is provided, filter out drivers who are already booked during that time
 	if (timeSlot) {
@@ -43,15 +41,17 @@ export async function getAvailableDriversService(db: DB, timeSlot?: { start: Dat
 					or(
 						and(
 							eq(bookings.scheduledPickupTime, timeSlot.start),
-							eq(bookings.actualDropoffTime, timeSlot.end)
-						)
+							eq(bookings.actualDropoffTime, timeSlot.end),
+						),
 						// Add more sophisticated overlap logic as needed
-					)
-				)
+					),
+				),
 			);
 
-		const unavailableDriverIds = conflictingBookings.map(b => b.driverId).filter(Boolean);
-		
+		const unavailableDriverIds = conflictingBookings
+			.map((b) => b.driverId)
+			.filter(Boolean);
+
 		if (unavailableDriverIds.length > 0) {
 			// Filter out unavailable drivers - this would need proper SQL NOT IN implementation
 			// For now, we'll return all drivers and let the frontend handle availability

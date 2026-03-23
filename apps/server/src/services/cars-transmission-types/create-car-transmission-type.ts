@@ -1,20 +1,32 @@
+import formatter from "lodash";
+import type { z } from "zod";
 import { createCarTransmissionType } from "@/data/cars-transmission-types/create-car-transmission-type";
 import { getCarTransmissionTypeByName } from "@/data/cars-transmission-types/get-car-transmission-type-by-name";
 import type { DB } from "@/db";
-import { InsertCarTransmissionTypeSchema, type InsertCarTransmissionType } from "@/schemas/shared";
+import {
+	type InsertCarTransmissionType,
+	InsertCarTransmissionTypeSchema,
+} from "@/schemas/shared";
 import { ErrorFactory } from "@/utils/error-factory";
-import formatter from "lodash";
-import { z } from "zod";
 
-export const CreateCarTransmissionTypeServiceSchema = InsertCarTransmissionTypeSchema;
+export const CreateCarTransmissionTypeServiceSchema =
+	InsertCarTransmissionTypeSchema;
 
-export type CreateCarTransmissionTypeParams = z.infer<typeof CreateCarTransmissionTypeServiceSchema>;
+export type CreateCarTransmissionTypeParams = z.infer<
+	typeof CreateCarTransmissionTypeServiceSchema
+>;
 
-export async function createCarTransmissionTypeService(db: DB, data: CreateCarTransmissionTypeParams) {
-	const carTransmissionTypeName = await getCarTransmissionTypeByName(db, data.name);
+export async function createCarTransmissionTypeService(
+	db: DB,
+	data: CreateCarTransmissionTypeParams,
+) {
+	const carTransmissionTypeName = await getCarTransmissionTypeByName(
+		db,
+		data.name,
+	);
 
 	if (carTransmissionTypeName) {
-		throw ErrorFactory.duplicateEntry('Car transmission type', "name");
+		throw ErrorFactory.duplicateEntry("Car transmission type", "name");
 	}
 
 	const values = {

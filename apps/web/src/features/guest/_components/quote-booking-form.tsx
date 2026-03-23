@@ -1,29 +1,42 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useCreateCustomBookingFromQuoteMutation } from "@/features/customer/_hooks/query/use-create-custom-booking-from-quote-mutation";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { ImprovedDateTimePicker } from "@/components/improved-datetime-picker";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { ImprovedDateTimePicker } from "@/components/improved-datetime-picker";
+import { useCreateCustomBookingFromQuoteMutation } from "@/features/customer/_hooks/query/use-create-custom-booking-from-quote-mutation";
 
 const quoteBookingSchema = z.object({
 	customerName: z.string().min(2, "Name must be at least 2 characters"),
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
-	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
-	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
-	scheduledPickupTime: z.date({
-		message: "Please select a pickup date and time",
-	}).refine((date) => {
-		const now = new Date();
-		const hoursUntilPickup = (date.getTime() - now.getTime()) / (1000 * 60 * 60);
-		return hoursUntilPickup >= 1;
-	}, {
-		message: "Custom bookings require at least 1 hour advance notice",
-	}),
+	passengerCount: z
+		.number()
+		.min(1, "At least 1 passenger required")
+		.max(8, "Maximum 8 passengers allowed"),
+	luggageCount: z
+		.number()
+		.int()
+		.min(0, "Luggage count cannot be negative")
+		.max(10, "Maximum 10 pieces of luggage allowed"),
+	scheduledPickupTime: z
+		.date({
+			message: "Please select a pickup date and time",
+		})
+		.refine(
+			(date) => {
+				const now = new Date();
+				const hoursUntilPickup =
+					(date.getTime() - now.getTime()) / (1000 * 60 * 60);
+				return hoursUntilPickup >= 1;
+			},
+			{
+				message: "Custom bookings require at least 1 hour advance notice",
+			},
+		),
 	specialRequirements: z.string().optional(),
 });
 
@@ -52,7 +65,6 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			specialRequirements: "",
 		},
 	});
-
 
 	const onSubmit = (data: QuoteBookingFormData) => {
 		const bookingData = {
@@ -85,9 +97,9 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			{/* Customer Details */}
 			<div className="space-y-4">
 				<h3 className="font-semibold">Contact Information</h3>
-				
+
 				<div>
-					<label className="block text-sm font-medium mb-1">Full Name</label>
+					<label className="mb-1 block font-medium text-sm">Full Name</label>
 					<Input
 						{...form.register("customerName")}
 						placeholder="Enter your full name"
@@ -96,7 +108,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium mb-1">Email</label>
+					<label className="mb-1 block font-medium text-sm">Email</label>
 					<Input
 						type="email"
 						{...form.register("customerEmail")}
@@ -106,7 +118,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium mb-1">Phone Number</label>
+					<label className="mb-1 block font-medium text-sm">Phone Number</label>
 					<Input
 						type="tel"
 						{...form.register("customerPhone")}
@@ -121,10 +133,14 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 				<h3 className="font-semibold">Trip Details</h3>
 
 				{/* Passengers and Luggage side by side */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					<div>
-						<label className="block text-sm font-medium mb-1">Number of Passengers *</label>
-						<p className="text-xs text-gray-600 mb-2">Maximum capacity: 8 passengers</p>
+						<label className="mb-1 block font-medium text-sm">
+							Number of Passengers *
+						</label>
+						<p className="mb-2 text-gray-600 text-xs">
+							Maximum capacity: 8 passengers
+						</p>
 						<Input
 							type="number"
 							min={1}
@@ -136,8 +152,12 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium mb-1">Luggage Pieces *</label>
-						<p className="text-xs text-gray-600 mb-2">Maximum capacity: 10 pieces of luggage</p>
+						<label className="mb-1 block font-medium text-sm">
+							Luggage Pieces *
+						</label>
+						<p className="mb-2 text-gray-600 text-xs">
+							Maximum capacity: 10 pieces of luggage
+						</p>
 						<Input
 							type="number"
 							min={0}
@@ -150,7 +170,9 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium mb-1">Pickup Date & Time</label>
+					<label className="mb-1 block font-medium text-sm">
+						Pickup Date & Time
+					</label>
 					<ImprovedDateTimePicker
 						value={form.getValues("scheduledPickupTime")}
 						onChange={(date) => form.setValue("scheduledPickupTime", date)}
@@ -158,14 +180,16 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 						minDate={minDate}
 					/>
 					{form.formState.errors.scheduledPickupTime && (
-						<p className="text-sm text-red-600 mt-1">
+						<p className="mt-1 text-red-600 text-sm">
 							{form.formState.errors.scheduledPickupTime.message}
 						</p>
 					)}
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium mb-1">Special Requirements (Optional)</label>
+					<label className="mb-1 block font-medium text-sm">
+						Special Requirements (Optional)
+					</label>
 					<Textarea
 						{...form.register("specialRequirements")}
 						placeholder="Any special requests or requirements..."
@@ -176,20 +200,20 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 
 			{/* Pricing Summary */}
 			<div className="border-t pt-4">
-				<div className="flex justify-between items-center mb-4">
+				<div className="mb-4 flex items-center justify-between">
 					<span className="font-semibold">Total Fare:</span>
-					<span className="text-2xl font-bold text-green-600">
+					<span className="font-bold text-2xl text-green-600">
 						${quoteData.totalFare.toFixed(2)}
 					</span>
 				</div>
-				<p className="text-xs text-gray-500 mb-4">
+				<p className="mb-4 text-gray-500 text-xs">
 					Payment will be processed after booking confirmation.
 				</p>
 			</div>
 
-			<Button 
-				type="submit" 
-				className="w-full" 
+			<Button
+				type="submit"
+				className="w-full"
 				disabled={createBookingMutation.isPending}
 			>
 				{createBookingMutation.isPending ? (
@@ -202,7 +226,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 				)}
 			</Button>
 
-			<p className="text-xs text-gray-500 text-center">
+			<p className="text-center text-gray-500 text-xs">
 				By booking, you agree to our terms of service and privacy policy.
 			</p>
 		</form>

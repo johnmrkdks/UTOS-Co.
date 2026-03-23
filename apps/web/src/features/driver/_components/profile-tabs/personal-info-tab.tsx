@@ -1,19 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { useUpdateDriverProfileMutation } from "@/features/driver/_hooks/query/use-update-driver-profile-mutation";
-import { useUserQuery } from "@/hooks/query/use-user-query";
-import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
 import {
-	UserIcon,
-	PhoneIcon,
 	FileTextIcon,
-	SaveIcon,
 	Loader2,
+	PhoneIcon,
+	SaveIcon,
+	UserIcon,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useUpdateDriverProfileMutation } from "@/features/driver/_hooks/query/use-update-driver-profile-mutation";
+import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 
 interface PersonalInfoTabProps {
 	driverProfile: any;
@@ -21,7 +27,11 @@ interface PersonalInfoTabProps {
 	userName?: string;
 }
 
-export function PersonalInfoTab({ driverProfile, userEmail, userName }: PersonalInfoTabProps) {
+export function PersonalInfoTab({
+	driverProfile,
+	userEmail,
+	userName,
+}: PersonalInfoTabProps) {
 	const { session } = useUserQuery();
 	const { data: driverData } = useCurrentDriverQuery();
 	const [isEditing, setIsEditing] = useState(false);
@@ -47,11 +57,15 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 				email: session.user.email || "",
 				phone: (session.user as any)?.phone || driverData?.phoneNumber || "",
 				address: driverData?.address || "",
-				dateOfBirth: driverData?.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : "",
+				dateOfBirth: driverData?.dateOfBirth
+					? new Date(driverData.dateOfBirth).toISOString().split("T")[0]
+					: "",
 				emergencyContactName: driverData?.emergencyContactName || "",
 				emergencyContactPhone: driverData?.emergencyContactPhone || "",
 				licenseNumber: driverData?.licenseNumber || "",
-				licenseExpiry: driverData?.licenseExpiry ? new Date(driverData.licenseExpiry).toISOString().split('T')[0] : "",
+				licenseExpiry: driverData?.licenseExpiry
+					? new Date(driverData.licenseExpiry).toISOString().split("T")[0]
+					: "",
 			});
 		}
 	}, [session?.user, driverData]);
@@ -69,8 +83,12 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 			}
 
 			// Prepare comprehensive update data
-			const currentDateOfBirth = driverData?.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : "";
-			const currentLicenseExpiry = driverData?.licenseExpiry ? new Date(driverData.licenseExpiry).toISOString().split('T')[0] : "";
+			const currentDateOfBirth = driverData?.dateOfBirth
+				? new Date(driverData.dateOfBirth).toISOString().split("T")[0]
+				: "";
+			const currentLicenseExpiry = driverData?.licenseExpiry
+				? new Date(driverData.licenseExpiry).toISOString().split("T")[0]
+				: "";
 
 			const updateData: any = {
 				driverId: driverData.id,
@@ -79,43 +97,93 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 			// Add user-related updates
 			if (formData.name !== session?.user?.name) {
 				updateData.name = formData.name;
-				console.log("📝 Name changed from:", session?.user?.name, "to:", formData.name);
+				console.log(
+					"📝 Name changed from:",
+					session?.user?.name,
+					"to:",
+					formData.name,
+				);
 			}
 
 			if (formData.phone !== (session?.user as any)?.phone) {
 				updateData.phone = formData.phone;
-				console.log("📞 Phone changed from:", (session?.user as any)?.phone, "to:", formData.phone);
+				console.log(
+					"📞 Phone changed from:",
+					(session?.user as any)?.phone,
+					"to:",
+					formData.phone,
+				);
 			}
 
 			// Add driver-specific updates
 			if (formData.address !== driverData?.address) {
 				updateData.address = formData.address;
-				console.log("🏠 Address changed from:", driverData?.address, "to:", formData.address);
+				console.log(
+					"🏠 Address changed from:",
+					driverData?.address,
+					"to:",
+					formData.address,
+				);
 			}
 
 			if (formData.dateOfBirth !== currentDateOfBirth) {
-				updateData.dateOfBirth = formData.dateOfBirth ? new Date(formData.dateOfBirth).getTime() : null;
-				console.log("📅 Date of birth changed from:", currentDateOfBirth, "to:", formData.dateOfBirth);
+				updateData.dateOfBirth = formData.dateOfBirth
+					? new Date(formData.dateOfBirth).getTime()
+					: null;
+				console.log(
+					"📅 Date of birth changed from:",
+					currentDateOfBirth,
+					"to:",
+					formData.dateOfBirth,
+				);
 			}
 
 			if (formData.emergencyContactName !== driverData?.emergencyContactName) {
 				updateData.emergencyContactName = formData.emergencyContactName;
-				console.log("👤 Emergency contact name changed from:", driverData?.emergencyContactName, "to:", formData.emergencyContactName);
+				console.log(
+					"👤 Emergency contact name changed from:",
+					driverData?.emergencyContactName,
+					"to:",
+					formData.emergencyContactName,
+				);
 			}
 
-			if (formData.emergencyContactPhone !== driverData?.emergencyContactPhone) {
+			if (
+				formData.emergencyContactPhone !== driverData?.emergencyContactPhone
+			) {
 				updateData.emergencyContactPhone = formData.emergencyContactPhone;
-				console.log("📞 Emergency contact phone changed from:", driverData?.emergencyContactPhone, "to:", formData.emergencyContactPhone);
+				console.log(
+					"📞 Emergency contact phone changed from:",
+					driverData?.emergencyContactPhone,
+					"to:",
+					formData.emergencyContactPhone,
+				);
 			}
 
-			if (formData.licenseNumber !== driverData?.licenseNumber && formData.licenseNumber) {
+			if (
+				formData.licenseNumber !== driverData?.licenseNumber &&
+				formData.licenseNumber
+			) {
 				updateData.licenseNumber = formData.licenseNumber;
-				console.log("🪪 License number changed from:", driverData?.licenseNumber, "to:", formData.licenseNumber);
+				console.log(
+					"🪪 License number changed from:",
+					driverData?.licenseNumber,
+					"to:",
+					formData.licenseNumber,
+				);
 			}
 
-			if (formData.licenseExpiry !== currentLicenseExpiry && formData.licenseExpiry) {
+			if (
+				formData.licenseExpiry !== currentLicenseExpiry &&
+				formData.licenseExpiry
+			) {
 				updateData.licenseExpiry = new Date(formData.licenseExpiry).getTime();
-				console.log("📅 License expiry changed from:", currentLicenseExpiry, "to:", formData.licenseExpiry);
+				console.log(
+					"📅 License expiry changed from:",
+					currentLicenseExpiry,
+					"to:",
+					formData.licenseExpiry,
+				);
 			}
 
 			// Check if any changes were made
@@ -128,7 +196,10 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 			}
 
 			// Execute the comprehensive update
-			console.log("⚡ Executing comprehensive driver profile update with:", updateData);
+			console.log(
+				"⚡ Executing comprehensive driver profile update with:",
+				updateData,
+			);
 			await updateDriverProfileMutation.mutateAsync(updateData);
 			console.log("✅ Driver profile update completed successfully");
 
@@ -171,7 +242,9 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 						<Input
 							id="name"
 							value={formData.name}
-							onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+							onChange={(e) =>
+								setFormData((prev) => ({ ...prev, name: e.target.value }))
+							}
 							disabled={!isEditing}
 							placeholder="Enter your full name"
 						/>
@@ -186,8 +259,9 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							placeholder="Enter your email"
 							className="bg-gray-50"
 						/>
-						<p className="text-xs text-gray-500">
-							Email changes require verification and are handled through account settings.
+						<p className="text-gray-500 text-xs">
+							Email changes require verification and are handled through account
+							settings.
 						</p>
 					</div>
 				</div>
@@ -198,7 +272,9 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 						id="phone"
 						type="tel"
 						value={formData.phone}
-						onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+						onChange={(e) =>
+							setFormData((prev) => ({ ...prev, phone: e.target.value }))
+						}
 						disabled={!isEditing}
 						placeholder="Enter your phone number"
 					/>
@@ -210,10 +286,12 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 						id="dateOfBirth"
 						type="date"
 						value={formData.dateOfBirth}
-						onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+						onChange={(e) =>
+							setFormData((prev) => ({ ...prev, dateOfBirth: e.target.value }))
+						}
 						disabled={!isEditing}
 					/>
-					<p className="text-xs text-gray-500">
+					<p className="text-gray-500 text-xs">
 						Additional information updates require admin approval.
 					</p>
 				</div>
@@ -223,19 +301,21 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 					<Textarea
 						id="address"
 						value={formData.address}
-						onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+						onChange={(e) =>
+							setFormData((prev) => ({ ...prev, address: e.target.value }))
+						}
 						disabled={!isEditing}
 						rows={3}
 						placeholder="Enter your address"
 					/>
-					<p className="text-xs text-gray-500">
+					<p className="text-gray-500 text-xs">
 						Address updates require admin approval.
 					</p>
 				</div>
 
 				{/* License Information */}
-				<div className="pt-4 border-t">
-					<h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+				<div className="border-t pt-4">
+					<h3 className="mb-3 flex items-center gap-2 font-semibold text-base">
 						<FileTextIcon className="h-4 w-4" />
 						License Information
 					</h3>
@@ -245,11 +325,16 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							<Input
 								id="licenseNumber"
 								value={formData.licenseNumber}
-								onChange={(e) => setFormData(prev => ({ ...prev, licenseNumber: e.target.value }))}
+								onChange={(e) =>
+									setFormData((prev) => ({
+										...prev,
+										licenseNumber: e.target.value,
+									}))
+								}
 								disabled={!isEditing}
 								placeholder="Enter license number"
 							/>
-							<p className="text-xs text-gray-500">
+							<p className="text-gray-500 text-xs">
 								License updates require admin approval.
 							</p>
 						</div>
@@ -259,10 +344,15 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 								id="licenseExpiry"
 								type="date"
 								value={formData.licenseExpiry}
-								onChange={(e) => setFormData(prev => ({ ...prev, licenseExpiry: e.target.value }))}
+								onChange={(e) =>
+									setFormData((prev) => ({
+										...prev,
+										licenseExpiry: e.target.value,
+									}))
+								}
 								disabled={!isEditing}
 							/>
-							<p className="text-xs text-gray-500">
+							<p className="text-gray-500 text-xs">
 								License updates require admin approval.
 							</p>
 						</div>
@@ -270,8 +360,8 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 				</div>
 
 				{/* Emergency Contact */}
-				<div className="pt-4 border-t">
-					<h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+				<div className="border-t pt-4">
+					<h3 className="mb-3 flex items-center gap-2 font-semibold text-base">
 						<PhoneIcon className="h-4 w-4" />
 						Emergency Contact
 					</h3>
@@ -281,11 +371,16 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 							<Input
 								id="emergencyContactName"
 								value={formData.emergencyContactName}
-								onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactName: e.target.value }))}
+								onChange={(e) =>
+									setFormData((prev) => ({
+										...prev,
+										emergencyContactName: e.target.value,
+									}))
+								}
 								disabled={!isEditing}
 								placeholder="Enter emergency contact name"
 							/>
-							<p className="text-xs text-gray-500">
+							<p className="text-gray-500 text-xs">
 								Emergency contact updates require admin approval.
 							</p>
 						</div>
@@ -295,11 +390,16 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 								id="emergencyContactPhone"
 								type="tel"
 								value={formData.emergencyContactPhone}
-								onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactPhone: e.target.value }))}
+								onChange={(e) =>
+									setFormData((prev) => ({
+										...prev,
+										emergencyContactPhone: e.target.value,
+									}))
+								}
 								disabled={!isEditing}
 								placeholder="Enter emergency contact phone"
 							/>
-							<p className="text-xs text-gray-500">
+							<p className="text-gray-500 text-xs">
 								Emergency contact updates require admin approval.
 							</p>
 						</div>
@@ -317,13 +417,26 @@ export function PersonalInfoTab({ driverProfile, userEmail, userName }: Personal
 									setFormData({
 										name: session.user.name || "",
 										email: session.user.email || "",
-										phone: (session.user as any)?.phone || driverData?.phoneNumber || "",
+										phone:
+											(session.user as any)?.phone ||
+											driverData?.phoneNumber ||
+											"",
 										address: driverData?.address || "",
-										dateOfBirth: driverData?.dateOfBirth ? new Date(driverData.dateOfBirth).toISOString().split('T')[0] : "",
-										emergencyContactName: driverData?.emergencyContactName || "",
-										emergencyContactPhone: driverData?.emergencyContactPhone || "",
+										dateOfBirth: driverData?.dateOfBirth
+											? new Date(driverData.dateOfBirth)
+													.toISOString()
+													.split("T")[0]
+											: "",
+										emergencyContactName:
+											driverData?.emergencyContactName || "",
+										emergencyContactPhone:
+											driverData?.emergencyContactPhone || "",
 										licenseNumber: driverData?.licenseNumber || "",
-										licenseExpiry: driverData?.licenseExpiry ? new Date(driverData.licenseExpiry).toISOString().split('T')[0] : "",
+										licenseExpiry: driverData?.licenseExpiry
+											? new Date(driverData.licenseExpiry)
+													.toISOString()
+													.split("T")[0]
+											: "",
 									});
 								}
 							}}

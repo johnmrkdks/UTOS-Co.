@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { bookings } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getBookingByShareToken(db: DB, shareToken: string) {
 	const record = await db.query.bookings.findFirst({

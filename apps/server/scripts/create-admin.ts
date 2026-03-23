@@ -8,8 +8,8 @@
  */
 
 import { execSync } from "child_process";
-import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -17,7 +17,8 @@ const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_PASSWORD = "admin123";
 const ADMIN_NAME = "Super Admin";
 const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000";
-const USE_REMOTE = process.env.REMOTE === "1" || AUTH_URL.includes("workers.dev");
+const USE_REMOTE =
+	process.env.REMOTE === "1" || AUTH_URL.includes("workers.dev");
 
 async function createAdmin() {
 	console.log("Creating super_admin account...");
@@ -37,7 +38,11 @@ async function createAdmin() {
 
 	if (!signUpRes.ok) {
 		const text = await signUpRes.text();
-		if (text.includes("already") || text.includes("exists") || signUpRes.status === 409) {
+		if (
+			text.includes("already") ||
+			text.includes("exists") ||
+			signUpRes.status === 409
+		) {
 			console.log("User already exists. Updating role to super_admin...");
 		} else {
 			console.error("Signup failed:", signUpRes.status, text);
@@ -60,12 +65,14 @@ async function createAdmin() {
 			{
 				cwd: join(__dirname, ".."),
 				stdio: "inherit",
-			}
+			},
 		);
 	} catch {
 		if (USE_REMOTE) {
 			console.log("");
-			console.log("Remote update failed. Run this manually in D1 Studio (my-dev-db):");
+			console.log(
+				"Remote update failed. Run this manually in D1 Studio (my-dev-db):",
+			);
 			console.log(`  ${updateSql}`);
 			console.log("");
 		} else {

@@ -1,13 +1,28 @@
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Badge } from "@workspace/ui/components/badge";
-import { Car, Users, ArrowLeft, ArrowRight, AlertCircle, Calculator, TrendingUp, TrendingDown } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import {
+	AlertCircle,
+	ArrowLeft,
+	ArrowRight,
+	Calculator,
+	Car,
+	TrendingDown,
+	TrendingUp,
+	Users,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
 import { useCalculateCarSpecificQuoteMutation } from "../_hooks/query/use-calculate-car-specific-quote-mutation";
-import { type QuoteResult, type RouteData } from "../_types/instant-quote";
+import type { QuoteResult, RouteData } from "../_types/instant-quote";
 
 interface CarSelectionStepProps {
 	selectedCarId?: string;
@@ -19,13 +34,13 @@ interface CarSelectionStepProps {
 	routeData?: RouteData;
 }
 
-export function CarSelectionStep({ 
-	selectedCarId, 
-	onCarSelect, 
-	onBack, 
+export function CarSelectionStep({
+	selectedCarId,
+	onCarSelect,
+	onBack,
 	onNext,
 	instantQuote,
-	routeData
+	routeData,
 }: CarSelectionStepProps) {
 	const { data: carsData, isLoading, error } = useGetAvailableCarsQuery();
 	const cars = carsData?.data;
@@ -39,10 +54,10 @@ export function CarSelectionStep({
 			cars.forEach(async (car) => {
 				// Skip if we already calculated a price for this car
 				if (loadedPricesRef.current.has(car.id)) return;
-				
+
 				// Mark as loading to prevent duplicate requests
 				loadedPricesRef.current.add(car.id);
-				
+
 				try {
 					const quote = await calculateCarQuoteMutation.mutateAsync({
 						carId: car.id,
@@ -55,9 +70,9 @@ export function CarSelectionStep({
 						stops: routeData.stops,
 					});
 					if (quote?.totalAmount) {
-						setCarPrices(prev => ({
+						setCarPrices((prev) => ({
 							...prev,
-							[car.id]: quote.totalAmount
+							[car.id]: quote.totalAmount,
 						}));
 					}
 				} catch (error) {
@@ -70,19 +85,21 @@ export function CarSelectionStep({
 	}, [cars, routeData]);
 
 	const formatPrice = (price: number) => `$${(price / 100).toFixed(2)}`;
-	
+
 	const getPriceComparison = (carPrice: number) => {
 		if (!instantQuote) return null;
-		
+
 		const difference = carPrice - instantQuote.totalAmount;
-		const percentChange = Math.abs((difference / instantQuote.totalAmount) * 100);
-		
+		const percentChange = Math.abs(
+			(difference / instantQuote.totalAmount) * 100,
+		);
+
 		if (Math.abs(difference) < 50) return null; // Ignore small differences
-		
+
 		return {
 			difference,
 			percentChange: Math.round(percentChange),
-			isHigher: difference > 0
+			isHigher: difference > 0,
 		};
 	};
 
@@ -117,7 +134,9 @@ export function CarSelectionStep({
 					<Alert>
 						<AlertCircle className="h-4 w-4" />
 						<AlertDescription>
-							{error ? "Failed to load available cars." : "No cars available at the moment."}
+							{error
+								? "Failed to load available cars."
+								: "No cars available at the moment."}
 						</AlertDescription>
 					</Alert>
 				</CardContent>
@@ -135,8 +154,8 @@ export function CarSelectionStep({
 				<CardDescription>
 					Choose the perfect car for your journey
 					{instantQuote && (
-						<span className="block text-xs mt-1">
-							<Calculator className="h-3 w-3 inline mr-1" />
+						<span className="mt-1 block text-xs">
+							<Calculator className="mr-1 inline h-3 w-3" />
 							Prices updated for your specific route
 						</span>
 					)}
@@ -145,12 +164,14 @@ export function CarSelectionStep({
 			<CardContent className="space-y-4">
 				{/* Show instant quote reference if available */}
 				{instantQuote && (
-					<div className="bg-muted/50 p-3 rounded-lg border">
+					<div className="rounded-lg border bg-muted/50 p-3">
 						<div className="flex items-center gap-2 text-sm">
 							<Calculator className="h-4 w-4 text-muted-foreground" />
-							<span className="font-medium">Your instant quote: {formatPrice(instantQuote.totalAmount)}</span>
+							<span className="font-medium">
+								Your instant quote: {formatPrice(instantQuote.totalAmount)}
+							</span>
 						</div>
-						<p className="text-xs text-muted-foreground mt-1">
+						<p className="mt-1 text-muted-foreground text-xs">
 							Prices below are calculated with each car's specific base fare
 						</p>
 					</div>
@@ -159,13 +180,15 @@ export function CarSelectionStep({
 				<div className="grid gap-3">
 					{cars.map((car) => {
 						const carPrice = carPrices[car.id];
-						const priceComparison = carPrice ? getPriceComparison(carPrice) : null;
-						
+						const priceComparison = carPrice
+							? getPriceComparison(carPrice)
+							: null;
+
 						return (
 							<div
 								key={car.id}
 								onClick={() => onCarSelect(car.id)}
-								className={`border rounded-lg p-4 cursor-pointer transition-all ${
+								className={`cursor-pointer rounded-lg border p-4 transition-all ${
 									selectedCarId === car.id
 										? "border-primary bg-primary/5"
 										: "border-border hover:border-primary/50"
@@ -176,11 +199,11 @@ export function CarSelectionStep({
 										<img
 											src={car.imageUrl}
 											alt={`${car.brandName} ${car.modelName}`}
-											className="w-16 h-12 object-cover rounded"
+											className="h-12 w-16 rounded object-cover"
 										/>
 									)}
 									<div className="flex-1">
-										<div className="flex items-center gap-2 justify-between">
+										<div className="flex items-center justify-between gap-2">
 											<div className="flex items-center gap-2">
 												<h3 className="font-semibold">
 													{car.brandName} {car.modelName}
@@ -191,7 +214,7 @@ export function CarSelectionStep({
 													</Badge>
 												)}
 											</div>
-											
+
 											{/* Price Display */}
 											<div className="text-right">
 												{carPrice ? (
@@ -200,38 +223,43 @@ export function CarSelectionStep({
 															{formatPrice(carPrice)}
 														</div>
 														{priceComparison && (
-															<div className={`flex items-center gap-1 text-xs ${
-																priceComparison.isHigher ? 'text-red-600' : 'text-green-600'
-															}`}>
+															<div
+																className={`flex items-center gap-1 text-xs ${
+																	priceComparison.isHigher
+																		? "text-red-600"
+																		: "text-green-600"
+																}`}
+															>
 																{priceComparison.isHigher ? (
 																	<TrendingUp className="h-3 w-3" />
 																) : (
 																	<TrendingDown className="h-3 w-3" />
 																)}
 																<span>
-																	{priceComparison.isHigher ? '+' : '-'}
-																	{formatPrice(Math.abs(priceComparison.difference))}
-																	{priceComparison.percentChange > 5 && 
-																		` (${priceComparison.percentChange}%)`
-																	}
+																	{priceComparison.isHigher ? "+" : "-"}
+																	{formatPrice(
+																		Math.abs(priceComparison.difference),
+																	)}
+																	{priceComparison.percentChange > 5 &&
+																		` (${priceComparison.percentChange}%)`}
 																</span>
 															</div>
 														)}
 														{instantQuote && !priceComparison && (
-															<div className="text-xs text-muted-foreground">
+															<div className="text-muted-foreground text-xs">
 																Same as quoted
 															</div>
 														)}
 													</div>
 												) : routeData ? (
-													<div className="text-xs text-muted-foreground">
+													<div className="text-muted-foreground text-xs">
 														Calculating...
 													</div>
 												) : null}
 											</div>
 										</div>
-										
-										<div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+
+										<div className="mt-1 flex items-center gap-4 text-muted-foreground text-sm">
 											<div className="flex items-center gap-1">
 												<Users className="h-3 w-3" />
 												<span>{car.passengerCapacity} seats</span>
@@ -239,11 +267,15 @@ export function CarSelectionStep({
 											<span>{car.categoryName}</span>
 											<span>{car.engineType}</span>
 										</div>
-										
+
 										{car.features && car.features.length > 0 && (
-											<div className="flex flex-wrap gap-1 mt-2">
+											<div className="mt-2 flex flex-wrap gap-1">
 												{car.features.slice(0, 3).map((feature: any) => (
-													<Badge key={feature.id} variant="secondary" className="text-xs">
+													<Badge
+														key={feature.id}
+														variant="secondary"
+														className="text-xs"
+													>
 														{feature.name}
 													</Badge>
 												))}
@@ -264,15 +296,12 @@ export function CarSelectionStep({
 				{/* Navigation Buttons */}
 				<div className="flex justify-between pt-4">
 					<Button variant="outline" onClick={onBack}>
-						<ArrowLeft className="h-4 w-4 mr-2" />
+						<ArrowLeft className="mr-2 h-4 w-4" />
 						Back
 					</Button>
-					<Button 
-						onClick={onNext} 
-						disabled={!selectedCarId}
-					>
+					<Button onClick={onNext} disabled={!selectedCarId}>
 						Next
-						<ArrowRight className="h-4 w-4 ml-2" />
+						<ArrowRight className="ml-2 h-4 w-4" />
 					</Button>
 				</div>
 			</CardContent>

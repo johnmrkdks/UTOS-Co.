@@ -1,21 +1,33 @@
+import { createId } from "@paralleldrive/cuid2";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
-import { users, accounts } from "@/db/sqlite/schema";
+import { accounts, users } from "@/db/sqlite/schema";
 import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
-import { eq, and, sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 export const UpdateUserCredentialsServiceSchema = z.object({
 	userId: z.string().min(1, "User ID is required"),
 	name: z.string().min(2, "Name must be at least 2 characters").optional(),
 	email: z.string().email("Invalid email format").optional(),
 	phone: z.string().optional(),
-	password: z.string().min(8, "Password must be at least 8 characters").optional(),
-	role: z.enum([UserRoleEnum.User, UserRoleEnum.Admin, UserRoleEnum.Driver, UserRoleEnum.SuperAdmin]).optional(),
+	password: z
+		.string()
+		.min(8, "Password must be at least 8 characters")
+		.optional(),
+	role: z
+		.enum([
+			UserRoleEnum.User,
+			UserRoleEnum.Admin,
+			UserRoleEnum.Driver,
+			UserRoleEnum.SuperAdmin,
+		])
+		.optional(),
 });
 
-export type UpdateUserCredentialsServiceInput = z.infer<typeof UpdateUserCredentialsServiceSchema>;
+export type UpdateUserCredentialsServiceInput = z.infer<
+	typeof UpdateUserCredentialsServiceSchema
+>;
 
 export const updateUserCredentialsService = async (
 	db: DB,
@@ -56,7 +68,9 @@ export const updateUserCredentialsService = async (
 				.from(users)
 				.where(eq(users.role, UserRoleEnum.SuperAdmin));
 			if ((superAdminCount[0]?.count ?? 0) <= 1) {
-				throw new Error("Cannot demote the last Super Admin. Promote another user first.");
+				throw new Error(
+					"Cannot demote the last Super Admin. Promote another user first.",
+				);
 			}
 		}
 
@@ -81,8 +95,8 @@ export const updateUserCredentialsService = async (
 				.where(
 					and(
 						eq(accounts.userId, input.userId),
-						eq(accounts.providerId, "credential")
-					)
+						eq(accounts.providerId, "credential"),
+					),
 				)
 				.limit(1);
 

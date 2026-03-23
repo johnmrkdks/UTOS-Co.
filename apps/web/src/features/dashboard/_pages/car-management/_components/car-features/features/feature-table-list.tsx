@@ -13,5 +13,5 @@ export function FeatureTableList() {
 			loadingRowCount={5}
 			pageSize={5}
 		/>
-	)
+	);
 }

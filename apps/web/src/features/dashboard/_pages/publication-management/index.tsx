@@ -1,26 +1,40 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import { Car, Package2 } from "lucide-react";
+import { useState } from "react";
 
-import { OverviewTab, CarsTab, PackagesTab } from "./_components/tabs";
+import { CarsTab, OverviewTab, PackagesTab } from "./_components/tabs";
 
 export function PublicationManagementPage() {
 	const [activeTab, setActiveTab] = useState("overview");
 
 	return (
-		<div className="p-4 space-y-6">
+		<div className="space-y-6 p-4">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Publication Management</h1>
+				<h1 className="font-bold text-3xl tracking-tight">
+					Publication Management
+				</h1>
 				<p className="text-muted-foreground">
 					Manage publication status for cars and packages across your platform
 				</p>
 			</div>
 
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+			<Tabs
+				value={activeTab}
+				onValueChange={setActiveTab}
+				className="space-y-4"
+			>
 				<TabsList className="grid grid-cols-3">
 					<TabsTrigger value="overview" className="flex items-center gap-2">
-						<Badge variant="outline" className="h-2 w-2 rounded-full bg-blue-500" />
+						<Badge
+							variant="outline"
+							className="h-2 w-2 rounded-full bg-blue-500"
+						/>
 						Overview
 					</TabsTrigger>
 					<TabsTrigger value="cars" className="flex items-center gap-2">

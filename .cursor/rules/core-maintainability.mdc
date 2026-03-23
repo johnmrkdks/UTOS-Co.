@@ -1,0 +1,25 @@
+---
+description: Core coding standards and maintainability for the monorepo
+alwaysApply: true
+---
+
+# Down Under Chauffeur - Core Standards
+
+## Tech Stack
+- **Monorepo:** pnpm workspaces + Turbo
+- **Server:** Hono, tRPC, Drizzle ORM, Cloudflare Workers (D1, R2), Better Auth, Square
+- **Web:** React 19, Vite 6, TanStack Router/Query/Form, Tailwind CSS 4, react-hook-form
+- **Tooling:** Biome (format + lint), TypeScript, Zod
+
+## Project Structure
+- `apps/server` - API, tRPC routers, services, Drizzle schema
+- `apps/web` - React SPA, routes under `src/routes/`, features under `src/features/`
+- `packages/ui` - Shared components
+- `packages/mail` - Email templates
+
+## Maintainability Rules
+1. **Colocate related code** - Keep components, hooks, and types together (e.g. `_components/`, `_hooks/`)
+2. **Use path aliases** - `@/` for src, `@workspace/` for workspace packages
+3. **Run `pnpm check`** - Biome format + lint before committing
+4. **Services over inline logic** - Put business logic in `services/`, call from tRPC routers
+5. **Zod for validation** - Define schemas in service files, reuse in tRPC `.input()`

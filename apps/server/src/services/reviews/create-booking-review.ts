@@ -1,10 +1,10 @@
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
-import { bookingReviews } from "@/db/sqlite/schema/bookings/booking-reviews";
-import { bookings } from "@/db/sqlite/schema/bookings";
-import { eq } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
+import { bookings } from "@/db/sqlite/schema/bookings";
+import { bookingReviews } from "@/db/sqlite/schema/bookings/booking-reviews";
 
 export const CreateBookingReviewSchema = z.object({
 	bookingId: z.string().min(1),
@@ -14,10 +14,17 @@ export const CreateBookingReviewSchema = z.object({
 	review: z.string().max(2000).optional(),
 });
 
-export type CreateBookingReviewInput = z.infer<typeof CreateBookingReviewSchema>;
+export type CreateBookingReviewInput = z.infer<
+	typeof CreateBookingReviewSchema
+>;
 
-export async function createBookingReviewService(db: DB, input: CreateBookingReviewInput, userId: string) {
-	const { bookingId, serviceRating, driverRating, vehicleRating, review } = input;
+export async function createBookingReviewService(
+	db: DB,
+	input: CreateBookingReviewInput,
+	userId: string,
+) {
+	const { bookingId, serviceRating, driverRating, vehicleRating, review } =
+		input;
 
 	const [booking] = await db
 		.select()

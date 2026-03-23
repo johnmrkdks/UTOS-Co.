@@ -1,18 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Badge } from "@workspace/ui/components/badge";
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
-import { Clock, User, Car, MapPin, DollarSign, Grid3X3, Table2 } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { format } from "date-fns";
-import { useState, useMemo } from "react";
-import type { BookingFilters } from "./booking-filters";
-import { KanbanProvider, KanbanBoard, KanbanCards, KanbanCard } from "@/components/kanban";
-import type { KanbanItemProps, KanbanColumnProps } from "@/components/kanban";
-import { getAllStatuses, getStatusConfig, getNextStatus, isFinalStatus, type BookingStatus } from "@/lib/booking-status-config";
+import {
+	Car,
+	Clock,
+	DollarSign,
+	Grid3X3,
+	MapPin,
+	Table2,
+	User,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import type { KanbanColumnProps, KanbanItemProps } from "@/components/kanban";
+import {
+	KanbanBoard,
+	KanbanCard,
+	KanbanCards,
+	KanbanProvider,
+} from "@/components/kanban";
 import { StatusActionButton } from "@/components/status-badge";
+import {
+	type BookingStatus,
+	getAllStatuses,
+	getNextStatus,
+	getStatusConfig,
+	isFinalStatus,
+} from "@/lib/booking-status-config";
+import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
 import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
 import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import type { BookingFilters } from "./booking-filters";
 
 interface BookingStatusPipelineProps {
 	filters?: BookingFilters;
@@ -49,12 +73,12 @@ const statusColumns: StatusColumn[] = getAllStatuses().map((statusId) => {
 		title: config.shortLabel,
 		description: config.description,
 		color: config.kanbanBg,
-		headerColor: config.kanbanHeader
+		headerColor: config.kanbanHeader,
 	};
 });
 
 export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
-	const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
+	const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
 	const updateStatusMutation = useUpdateBookingStatusMutation();
 	const { openBookingDetailsDialog } = useBookingManagementModalProvider();
 
@@ -65,13 +89,20 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 	// Apply filters and convert to kanban format
 	const kanbanData: BookingKanbanItem[] = useMemo(() => {
 		if (!bookingsQuery.data?.data) return [];
-		
+
 		return bookingsQuery.data.data
-			.filter(booking => {
+			.filter((booking) => {
 				if (!filters) return true;
-				
-				if (filters.bookingType && booking.bookingType !== filters.bookingType) return false;
-				if (filters.customerName && !booking.customerName.toLowerCase().includes(filters.customerName.toLowerCase())) return false;
+
+				if (filters.bookingType && booking.bookingType !== filters.bookingType)
+					return false;
+				if (
+					filters.customerName &&
+					!booking.customerName
+						.toLowerCase()
+						.includes(filters.customerName.toLowerCase())
+				)
+					return false;
 				if (filters.dateFrom) {
 					const fromDate = new Date(filters.dateFrom);
 					if (new Date(booking.scheduledPickupTime) < fromDate) return false;
@@ -81,12 +112,14 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 					toDate.setHours(23, 59, 59, 999);
 					if (new Date(booking.scheduledPickupTime) > toDate) return false;
 				}
-				if (filters.minAmount && booking.quotedAmount < filters.minAmount) return false;
-				if (filters.maxAmount && booking.quotedAmount > filters.maxAmount) return false;
-				
+				if (filters.minAmount && booking.quotedAmount < filters.minAmount)
+					return false;
+				if (filters.maxAmount && booking.quotedAmount > filters.maxAmount)
+					return false;
+
 				return true;
 			})
-			.map(booking => ({
+			.map((booking) => ({
 				id: booking.id,
 				name: booking.customerName,
 				column: booking.status,
@@ -121,49 +154,53 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 	};
 
 	const getColumnBookings = (columnId: string) => {
-		return kanbanData.filter(item => item.column === columnId);
+		return kanbanData.filter((item) => item.column === columnId);
 	};
 
 	if (bookingsQuery.isLoading) {
-		return <div className="text-center py-8">Loading bookings...</div>;
+		return <div className="py-8 text-center">Loading bookings...</div>;
 	}
 
 	if (bookingsQuery.error) {
-		return <div className="text-center py-8 text-red-500">Error loading bookings: {bookingsQuery.error.message}</div>;
+		return (
+			<div className="py-8 text-center text-red-500">
+				Error loading bookings: {bookingsQuery.error.message}
+			</div>
+		);
 	}
 
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h3 className="text-lg font-semibold">Booking Status Pipeline</h3>
+				<h3 className="font-semibold text-lg">Booking Status Pipeline</h3>
 				<div className="flex items-center gap-3">
 					<Badge variant="outline">
-						{kanbanData.length} booking{kanbanData.length !== 1 ? 's' : ''}
+						{kanbanData.length} booking{kanbanData.length !== 1 ? "s" : ""}
 					</Badge>
-					<div className="flex items-center border rounded-lg p-1">
+					<div className="flex items-center rounded-lg border p-1">
 						<Button
-							variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+							variant={viewMode === "kanban" ? "default" : "ghost"}
 							size="sm"
 							className="h-7 px-2"
-							onClick={() => setViewMode('kanban')}
+							onClick={() => setViewMode("kanban")}
 						>
-							<Grid3X3 className="h-4 w-4 mr-1" />
+							<Grid3X3 className="mr-1 h-4 w-4" />
 							Kanban
 						</Button>
 						<Button
-							variant={viewMode === 'table' ? 'default' : 'ghost'}
+							variant={viewMode === "table" ? "default" : "ghost"}
 							size="sm"
 							className="h-7 px-2"
-							onClick={() => setViewMode('table')}
+							onClick={() => setViewMode("table")}
 						>
-							<Table2 className="h-4 w-4 mr-1" />
+							<Table2 className="mr-1 h-4 w-4" />
 							Table
 						</Button>
 					</div>
 				</div>
 			</div>
 
-			{viewMode === 'kanban' ? (
+			{viewMode === "kanban" ? (
 				<KanbanProvider
 					columns={statusColumns}
 					data={kanbanData}
@@ -173,23 +210,29 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 					{(column) => (
 						<KanbanBoard key={column.id} id={column.id}>
 							<Card className={`${column.color} h-full`}>
-								<CardHeader className={`${column.headerColor} rounded-t-lg pb-3`}>
+								<CardHeader
+									className={`${column.headerColor} rounded-t-lg pb-3`}
+								>
 									<div className="flex items-center justify-between">
-										<CardTitle className="text-sm font-medium">
+										<CardTitle className="font-medium text-sm">
 											{column.title}
 										</CardTitle>
 										<Badge variant="secondary">
 											{getColumnBookings(column.id).length}
 										</Badge>
 									</div>
-									<p className="text-xs text-muted-foreground">
+									<p className="text-muted-foreground text-xs">
 										{column.description}
 									</p>
 								</CardHeader>
 								<CardContent className="p-2">
 									<KanbanCards items={getColumnBookings(column.id)}>
 										{(booking) => (
-											<KanbanCard key={booking.id} id={booking.id} name={booking.name}>
+											<KanbanCard
+												key={booking.id}
+												id={booking.id}
+												name={booking.name}
+											>
 												<div className="space-y-2">
 													<div className="flex items-start justify-between">
 														<div className="flex items-center space-x-2">
@@ -200,41 +243,54 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 															</Avatar>
 															<div>
 																<div className="flex items-center gap-1.5">
-																	<p className="text-sm font-medium truncate">
+																	<p className="truncate font-medium text-sm">
 																		{booking.customerName}
 																	</p>
 																	{booking.isGuestBooking && (
-																		<Badge variant="outline" className="text-[10px] px-1 py-0 h-4 font-normal">
+																		<Badge
+																			variant="outline"
+																			className="h-4 px-1 py-0 font-normal text-[10px]"
+																		>
 																			Guest
 																		</Badge>
 																	)}
 																</div>
-																<p className="text-xs text-muted-foreground">
-																	#{(booking as any).referenceNumber || 'N/A'}
+																<p className="text-muted-foreground text-xs">
+																	#{(booking as any).referenceNumber || "N/A"}
 																</p>
 															</div>
 														</div>
-														<Badge variant={booking.bookingType === "package" ? "default" : "secondary"} className="text-xs">
+														<Badge
+															variant={
+																booking.bookingType === "package"
+																	? "default"
+																	: "secondary"
+															}
+															className="text-xs"
+														>
 															{booking.bookingType}
 														</Badge>
 													</div>
 
 													<div className="space-y-1">
-														<div className="flex items-center text-xs text-muted-foreground">
-															<Clock className="h-3 w-3 mr-1" />
-															{format(new Date(booking.scheduledPickupTime), "MMM dd, h:mm a")}
+														<div className="flex items-center text-muted-foreground text-xs">
+															<Clock className="mr-1 h-3 w-3" />
+															{format(
+																new Date(booking.scheduledPickupTime),
+																"MMM dd, h:mm a",
+															)}
 														</div>
-														
-														<div className="flex items-center text-xs text-muted-foreground">
-															<MapPin className="h-3 w-3 mr-1" />
+
+														<div className="flex items-center text-muted-foreground text-xs">
+															<MapPin className="mr-1 h-3 w-3" />
 															<span className="truncate">
 																{booking.originAddress.slice(0, 20)}...
 															</span>
 														</div>
 
 														{booking.car && (
-															<div className="flex items-center text-xs text-muted-foreground">
-																<Car className="h-3 w-3 mr-1" />
+															<div className="flex items-center text-muted-foreground text-xs">
+																<Car className="mr-1 h-3 w-3" />
 																<span className="truncate">
 																	{booking.car.name}
 																</span>
@@ -242,7 +298,7 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 														)}
 
 														<div className="flex items-center text-xs">
-															<DollarSign className="h-3 w-3 mr-1" />
+															<DollarSign className="mr-1 h-3 w-3" />
 															<span className="font-medium">
 																${booking.quotedAmount.toFixed(2)}
 															</span>
@@ -266,7 +322,9 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 															<StatusActionButton
 																status={booking.column}
 																onClick={() => {
-																	const nextStatus = getNextStatus(booking.column);
+																	const nextStatus = getNextStatus(
+																		booking.column,
+																	);
 																	if (nextStatus !== booking.column) {
 																		updateStatusMutation.mutate({
 																			id: booking.id,
@@ -283,8 +341,10 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 										)}
 									</KanbanCards>
 									{getColumnBookings(column.id).length === 0 && (
-										<div className="text-center py-8 text-muted-foreground">
-											<p className="text-sm">No {column.title.toLowerCase()} bookings</p>
+										<div className="py-8 text-center text-muted-foreground">
+											<p className="text-sm">
+												No {column.title.toLowerCase()} bookings
+											</p>
 										</div>
 									)}
 								</CardContent>
@@ -295,10 +355,12 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 			) : (
 				<Card>
 					<CardContent className="p-4">
-						<div className="text-center py-8 text-muted-foreground">
-							<Table2 className="h-8 w-8 mx-auto mb-2" />
+						<div className="py-8 text-center text-muted-foreground">
+							<Table2 className="mx-auto mb-2 h-8 w-8" />
 							<p>Table view coming soon...</p>
-							<p className="text-sm">Use the booking tables in other tabs for now.</p>
+							<p className="text-sm">
+								Use the booking tables in other tabs for now.
+							</p>
 						</div>
 					</CardContent>
 				</Card>

@@ -1,25 +1,44 @@
-import { useState } from "react";
 import { DataTable } from "@workspace/ui/components/data-table";
 import { Input } from "@workspace/ui/components/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
-import { Search, Filter, Car, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@workspace/ui/components/select";
+import {
+	AlertCircle,
+	Car,
+	CheckCircle,
+	EyeOff,
+	Filter,
+	Search,
+} from "lucide-react";
+import { useState } from "react";
+import {
+	AnalyticsCard,
+	type AnalyticsCardData,
+} from "@/components/analytics-card";
 
 import { useGetCarsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car/use-get-cars-query";
 import { useTogglePublishCarMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/use-toggle-publish-car-mutation";
+import { useCarPricingStatusSafe } from "../_hooks/use-car-pricing-status-safe";
 import { getCarsPublicationColumns } from "./columns";
 import { TableSkeleton } from "./skeletons";
-import { useCarPricingStatusSafe } from "../_hooks/use-car-pricing-status-safe";
-
 
 export function CarsPublicationTable() {
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
-	const { hasCarPricingConfig, getCarPricingConfig, isLoading: pricingStatusLoading } = useCarPricingStatusSafe();
+	const {
+		hasCarPricingConfig,
+		getCarPricingConfig,
+		isLoading: pricingStatusLoading,
+	} = useCarPricingStatusSafe();
 
 	const { data: carsData, isLoading } = useGetCarsQuery({
 		limit: 50,
-		filters: search ? { search } : undefined
+		filters: search ? { search } : undefined,
 	});
 
 	const togglePublishMutation = useTogglePublishCarMutation();
@@ -27,99 +46,137 @@ export function CarsPublicationTable() {
 	const cars = carsData?.data || [];
 
 	// Filter cars based on publication status
-	const filteredCars = cars.filter(car => {
+	const filteredCars = cars.filter((car) => {
 		if (statusFilter === "published") {
-			return car.isPublished && car.isActive && car.isAvailable && car.status === 'available';
+			return (
+				car.isPublished &&
+				car.isActive &&
+				car.isAvailable &&
+				car.status === "available"
+			);
 		}
 		if (statusFilter === "unpublished") {
-			return !car.isPublished || !car.isActive || !car.isAvailable || car.status !== 'available';
+			return (
+				!car.isPublished ||
+				!car.isActive ||
+				!car.isAvailable ||
+				car.status !== "available"
+			);
 		}
 		if (statusFilter === "ready") {
-			return !car.isPublished && car.isActive && car.isAvailable && car.status === 'available';
+			return (
+				!car.isPublished &&
+				car.isActive &&
+				car.isAvailable &&
+				car.status === "available"
+			);
 		}
 		if (statusFilter === "issues") {
-			return car.isPublished && (!car.isActive || !car.isAvailable || car.status !== 'available');
+			return (
+				car.isPublished &&
+				(!car.isActive || !car.isAvailable || car.status !== "available")
+			);
 		}
 		return true;
 	});
 
 	const getPublicationStatus = (car: any) => {
-		const isFullyPublished = car.isPublished && car.isActive && car.isAvailable && car.status === 'available';
+		const isFullyPublished =
+			car.isPublished &&
+			car.isActive &&
+			car.isAvailable &&
+			car.status === "available";
 
 		if (isFullyPublished) return "published";
 		if (car.isPublished) return "published-with-issues";
-		if (car.isActive && car.isAvailable && car.status === 'available') return "ready";
+		if (car.isActive && car.isAvailable && car.status === "available")
+			return "ready";
 		return "unpublished";
 	};
 
 	const handleTogglePublish = (carId: string) => {
-		const car = filteredCars.find(c => c.id === carId);
+		const car = filteredCars.find((c) => c.id === carId);
 		if (!car) return;
 
 		togglePublishMutation.mutate({
 			id: carId,
-			isPublished: !car.isPublished
+			isPublished: !car.isPublished,
 		});
 	};
-
 
 	// Analytics data for cars publication stats
 	const carsStatsData: AnalyticsCardData[] = [
 		{
-			id: 'published-cars',
-			title: 'Published',
-			value: cars.filter(car => car.isPublished && car.isActive && car.isAvailable && car.status === 'available').length,
+			id: "published-cars",
+			title: "Published",
+			value: cars.filter(
+				(car) =>
+					car.isPublished &&
+					car.isActive &&
+					car.isAvailable &&
+					car.status === "available",
+			).length,
 			icon: Car,
-			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
-			iconBg: 'bg-green-500',
-			changeText: 'Publicly visible',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
+			iconBg: "bg-green-500",
+			changeText: "Publicly visible",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'unpublished-cars',
-			title: 'Unpublished',
-			value: cars.filter(car => !car.isPublished).length,
+			id: "unpublished-cars",
+			title: "Unpublished",
+			value: cars.filter((car) => !car.isPublished).length,
 			icon: EyeOff,
-			bgGradient: 'bg-gradient-to-br from-gray-50 to-gray-100',
-			iconBg: 'bg-gray-500',
-			changeText: 'Not visible to customers',
-			changeType: 'neutral',
+			bgGradient: "bg-gradient-to-br from-gray-50 to-gray-100",
+			iconBg: "bg-gray-500",
+			changeText: "Not visible to customers",
+			changeType: "neutral",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'ready-cars',
-			title: 'Ready',
-			value: cars.filter(car => !car.isPublished && car.isActive && car.isAvailable && car.status === 'available').length,
+			id: "ready-cars",
+			title: "Ready",
+			value: cars.filter(
+				(car) =>
+					!car.isPublished &&
+					car.isActive &&
+					car.isAvailable &&
+					car.status === "available",
+			).length,
 			icon: CheckCircle,
-			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
-			iconBg: 'bg-blue-500',
-			changeText: 'Ready to publish',
-			changeType: 'positive',
+			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
+			iconBg: "bg-blue-500",
+			changeText: "Ready to publish",
+			changeType: "positive",
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
-			id: 'issues-cars',
-			title: 'Issues',
-			value: cars.filter(car => car.isPublished && (!car.isActive || !car.isAvailable || car.status !== 'available')).length,
+			id: "issues-cars",
+			title: "Issues",
+			value: cars.filter(
+				(car) =>
+					car.isPublished &&
+					(!car.isActive || !car.isAvailable || car.status !== "available"),
+			).length,
 			icon: AlertCircle,
-			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
-			iconBg: 'bg-orange-500',
-			changeText: 'Need attention',
-			changeType: 'warning',
+			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
+			iconBg: "bg-orange-500",
+			changeText: "Need attention",
+			changeType: "warning",
 			showIcon: true,
-			showBackgroundIcon: true
-		}
+			showBackgroundIcon: true,
+		},
 	];
 
 	const columns = getCarsPublicationColumns({
 		onTogglePublish: handleTogglePublish,
 		hasCarPricingConfig,
 		getCarPricingConfig,
-		isToggling: togglePublishMutation.isPending
+		isToggling: togglePublishMutation.isPending,
 	});
 
 	if (isLoading) {
@@ -130,8 +187,8 @@ export function CarsPublicationTable() {
 		<div className="space-y-4">
 			{/* Filters */}
 			<div className="flex items-center gap-4">
-				<div className="flex-1 relative">
-					<Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+				<div className="relative flex-1">
+					<Search className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
 					<Input
 						placeholder="Search cars..."
 						value={search}
@@ -157,11 +214,7 @@ export function CarsPublicationTable() {
 			{/* Stats Summary */}
 			<div className="grid grid-cols-4 gap-4">
 				{carsStatsData.map((data) => (
-					<AnalyticsCard 
-						key={data.id} 
-						data={data} 
-						view="compact" 
-					/>
+					<AnalyticsCard key={data.id} data={data} view="compact" />
 				))}
 			</div>
 

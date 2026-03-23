@@ -1,20 +1,30 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { useQuery } from "@tanstack/react-query";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@workspace/ui/components/avatar";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
-import { UserIcon, CameraIcon, SaveIcon, Loader2 } from "lucide-react";
-import { useUserQuery } from "@/hooks/query/use-user-query";
+import { CameraIcon, Loader2, SaveIcon, UserIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useUpdateUserProfileMutation } from "@/hooks/customer/use-update-user-profile-mutation";
+import { useUserQuery } from "@/hooks/query/use-user-query";
 import { trpc } from "@/trpc";
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 
 export function ProfilePage() {
 	const { session } = useUserQuery();
 	const { data: userProfile } = useQuery({
 		...trpc.customerProfile.getProfile.queryOptions(),
-		enabled: true
+		enabled: true,
 	});
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({
@@ -31,7 +41,10 @@ export function ProfilePage() {
 		console.log("Session user:", session?.user);
 		console.log("UserProfile query data:", userProfile);
 		console.log("UserProfile user:", userProfile?.user);
-		console.log("UserProfile user phone specifically:", userProfile?.user?.phone);
+		console.log(
+			"UserProfile user phone specifically:",
+			userProfile?.user?.phone,
+		);
 		console.log("Current formData before update:", formData);
 
 		if (userProfile?.user) {
@@ -79,13 +92,23 @@ export function ProfilePage() {
 			if (formData.name !== currentUser?.name) {
 				updateData.name = formData.name;
 				hasChanges = true;
-				console.log("📝 Name changed from:", currentUser?.name, "to:", formData.name);
+				console.log(
+					"📝 Name changed from:",
+					currentUser?.name,
+					"to:",
+					formData.name,
+				);
 			}
 
 			if (formData.phone !== (currentUser as any)?.phone) {
 				updateData.phone = formData.phone;
 				hasChanges = true;
-				console.log("📞 Phone changed from:", (currentUser as any)?.phone, "to:", formData.phone);
+				console.log(
+					"📞 Phone changed from:",
+					(currentUser as any)?.phone,
+					"to:",
+					formData.phone,
+				);
 			}
 
 			if (hasChanges) {
@@ -106,7 +129,7 @@ export function ProfilePage() {
 	const getInitials = (name: string) => {
 		return name
 			.split(" ")
-			.map(word => word[0])
+			.map((word) => word[0])
 			.join("")
 			.toUpperCase()
 			.slice(0, 2);
@@ -117,8 +140,10 @@ export function ProfilePage() {
 			<div className="mx-auto max-w-4xl px-4 py-8">
 				{/* Header */}
 				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-					<p className="text-gray-600">Manage your personal information and preferences</p>
+					<h1 className="font-bold text-3xl text-gray-900">Profile</h1>
+					<p className="text-gray-600">
+						Manage your personal information and preferences
+					</p>
 				</div>
 
 				<div className="grid gap-6">
@@ -162,7 +187,9 @@ export function ProfilePage() {
 						<CardHeader className="flex flex-row items-center justify-between">
 							<div>
 								<CardTitle>Personal Information</CardTitle>
-								<CardDescription>Update your personal details and contact information</CardDescription>
+								<CardDescription>
+									Update your personal details and contact information
+								</CardDescription>
 							</div>
 							{!isEditing && (
 								<Button
@@ -181,7 +208,9 @@ export function ProfilePage() {
 									<Input
 										id="name"
 										value={formData.name}
-										onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+										onChange={(e) =>
+											setFormData((prev) => ({ ...prev, name: e.target.value }))
+										}
 										disabled={!isEditing}
 										placeholder="Enter your full name"
 									/>
@@ -196,8 +225,9 @@ export function ProfilePage() {
 										placeholder="Enter your email"
 										className="bg-gray-50"
 									/>
-									<p className="text-xs text-gray-500">
-										Email changes require verification and are handled through account settings.
+									<p className="text-gray-500 text-xs">
+										Email changes require verification and are handled through
+										account settings.
 									</p>
 								</div>
 							</div>
@@ -208,7 +238,9 @@ export function ProfilePage() {
 									id="phone"
 									type="tel"
 									value={formData.phone}
-									onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+									onChange={(e) =>
+										setFormData((prev) => ({ ...prev, phone: e.target.value }))
+									}
 									disabled={!isEditing}
 									placeholder="Enter your phone number"
 								/>
@@ -260,23 +292,35 @@ export function ProfilePage() {
 				<Card className="mt-6">
 					<CardHeader>
 						<CardTitle>Account Information</CardTitle>
-						<CardDescription>View your account details and status</CardDescription>
+						<CardDescription>
+							View your account details and status
+						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							<div>
-								<Label className="text-sm font-medium text-gray-500">Account Type</Label>
-								<p className="text-sm font-medium capitalize">{session?.user.role || "Customer"}</p>
-							</div>
-							<div>
-								<Label className="text-sm font-medium text-gray-500">Member Since</Label>
-								<p className="text-sm font-medium">
-									{session?.user.createdAt ? new Date(session.user.createdAt).toLocaleDateString() : "Unknown"}
+								<Label className="font-medium text-gray-500 text-sm">
+									Account Type
+								</Label>
+								<p className="font-medium text-sm capitalize">
+									{session?.user.role || "Customer"}
 								</p>
 							</div>
 							<div>
-								<Label className="text-sm font-medium text-gray-500">Account Status</Label>
-								<p className="text-sm font-medium text-green-600">Active</p>
+								<Label className="font-medium text-gray-500 text-sm">
+									Member Since
+								</Label>
+								<p className="font-medium text-sm">
+									{session?.user.createdAt
+										? new Date(session.user.createdAt).toLocaleDateString()
+										: "Unknown"}
+								</p>
+							</div>
+							<div>
+								<Label className="font-medium text-gray-500 text-sm">
+									Account Status
+								</Label>
+								<p className="font-medium text-green-600 text-sm">Active</p>
 							</div>
 						</div>
 					</CardContent>

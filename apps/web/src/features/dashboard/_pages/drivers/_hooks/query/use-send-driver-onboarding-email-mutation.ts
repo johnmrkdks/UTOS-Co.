@@ -1,6 +1,6 @@
-import { trpc } from "@/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { trpc } from "@/trpc";
 
 export const useSendDriverOnboardingEmailMutation = () => {
 	const queryClient = useQueryClient();
@@ -8,7 +8,9 @@ export const useSendDriverOnboardingEmailMutation = () => {
 	return useMutation(
 		trpc.drivers.sendOnboardingEmail.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: trpc.drivers.listByStatus.queryKey() });
+				queryClient.invalidateQueries({
+					queryKey: trpc.drivers.listByStatus.queryKey(),
+				});
 				toast.success("Onboarding email sent successfully", {
 					description: `Driver onboarding instructions sent to ${data.email}`,
 				});
@@ -18,6 +20,6 @@ export const useSendDriverOnboardingEmailMutation = () => {
 					description: error.message,
 				});
 			},
-		})
+		}),
 	);
 };

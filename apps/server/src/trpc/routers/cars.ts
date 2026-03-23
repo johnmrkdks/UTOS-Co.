@@ -1,18 +1,33 @@
+import { z } from "zod";
 import { InsertCarSchema, UpdateCarSchema } from "@/schemas/shared/tables/car";
-import { createCarService, CreateCarServiceSchema } from "@/services/cars/create-car";
-import { deleteCarService, DeleteCarServiceSchema } from "@/services/cars/delete-car";
-import { getCarService, GetCarServiceSchema } from "@/services/cars/get-car";
+import {
+	CreateCarServiceSchema,
+	createCarService,
+} from "@/services/cars/create-car";
+import {
+	DeleteCarServiceSchema,
+	deleteCarService,
+} from "@/services/cars/delete-car";
+import { getAvailableCars } from "@/services/cars/get-available-cars";
+import { GetCarServiceSchema, getCarService } from "@/services/cars/get-car";
+import {
+	GetCarPricingEstimateSchema,
+	getCarPricingEstimateService,
+} from "@/services/cars/get-car-pricing-estimate";
 import { getCarsService } from "@/services/cars/get-cars";
 import { getPublishedCarsService } from "@/services/cars/get-published-cars";
-import { getAvailableCars } from "@/services/cars/get-available-cars";
-import { getCarPricingEstimateService, GetCarPricingEstimateSchema } from "@/services/cars/get-car-pricing-estimate";
-import { togglePublishCarService, TogglePublishCarServiceSchema } from "@/services/cars/toggle-publish-car";
-import { updateCarService, UpdateCarServiceSchema } from "@/services/cars/update-car";
+import {
+	TogglePublishCarServiceSchema,
+	togglePublishCarService,
+} from "@/services/cars/toggle-publish-car";
+import {
+	UpdateCarServiceSchema,
+	updateCarService,
+} from "@/services/cars/update-car";
 import { protectedProcedure, publicProcedure, router } from "@/trpc/init";
 import { handleTRPCError } from "@/trpc/utils/error-handler";
 import { transformCarImages } from "@/utils/image-url";
 import { ResourceListSchema } from "@/utils/query/resource-list";
-import { z } from "zod";
 
 export const carsRouter = router({
 	create: protectedProcedure
@@ -54,7 +69,9 @@ export const carsRouter = router({
 				const baseUrl = env.BETTER_AUTH_URL || "";
 				return {
 					...result,
-					data: result.data?.map((car) => transformCarImages(car, baseUrl)) ?? result.data,
+					data:
+						result.data?.map((car) => transformCarImages(car, baseUrl)) ??
+						result.data,
 				};
 			} catch (error) {
 				handleTRPCError(error);
@@ -65,23 +82,27 @@ export const carsRouter = router({
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
 				const updatedCar = await updateCarService(db, input);
-				return updatedCar ? transformCarImages(updatedCar, env.BETTER_AUTH_URL || "") : updatedCar;
+				return updatedCar
+					? transformCarImages(updatedCar, env.BETTER_AUTH_URL || "")
+					: updatedCar;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
-	
+
 	togglePublish: protectedProcedure
 		.input(TogglePublishCarServiceSchema)
 		.mutation(async ({ ctx: { db, env }, input }) => {
 			try {
 				const updatedCar = await togglePublishCarService(db, input);
-				return updatedCar ? transformCarImages(updatedCar, env.BETTER_AUTH_URL || "") : updatedCar;
+				return updatedCar
+					? transformCarImages(updatedCar, env.BETTER_AUTH_URL || "")
+					: updatedCar;
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
-	
+
 	// Public endpoints for customer-facing functionality
 	listPublished: publicProcedure
 		.input(ResourceListSchema)
@@ -91,7 +112,9 @@ export const carsRouter = router({
 				const baseUrl = env.BETTER_AUTH_URL || "";
 				return {
 					...result,
-					data: result.data?.map((car) => transformCarImages(car, baseUrl)) ?? result.data,
+					data:
+						result.data?.map((car) => transformCarImages(car, baseUrl)) ??
+						result.data,
 				};
 			} catch (error) {
 				handleTRPCError(error);
@@ -115,26 +138,36 @@ export const carsRouter = router({
 
 	// Get available cars with time-based conflict checking
 	listAvailable: protectedProcedure
-		.input(ResourceListSchema.extend({
-			scheduledPickupTime: z.string().datetime().optional(),
-			estimatedDuration: z.number().optional(),
-		}))
+		.input(
+			ResourceListSchema.extend({
+				scheduledPickupTime: z.string().datetime().optional(),
+				estimatedDuration: z.number().optional(),
+			}),
+		)
 		.query(async ({ ctx: { db, env }, input }) => {
 			try {
-				const { scheduledPickupTime, estimatedDuration, ...resourceListParams } = input;
+				const {
+					scheduledPickupTime,
+					estimatedDuration,
+					...resourceListParams
+				} = input;
 				const availableCars = await getAvailableCars(db, {
 					...resourceListParams,
-					scheduledPickupTime: scheduledPickupTime ? new Date(scheduledPickupTime) : undefined,
-					estimatedDuration
+					scheduledPickupTime: scheduledPickupTime
+						? new Date(scheduledPickupTime)
+						: undefined,
+					estimatedDuration,
 				});
 				const baseUrl = env.BETTER_AUTH_URL || "";
-				const transformed = availableCars.map((car) => transformCarImages(car, baseUrl));
+				const transformed = availableCars.map((car) =>
+					transformCarImages(car, baseUrl),
+				);
 				return { data: transformed, count: transformed.length };
 			} catch (error) {
 				handleTRPCError(error);
 			}
 		}),
-	
+
 	getPricingEstimate: publicProcedure
 		.input(GetCarPricingEstimateSchema)
 		.query(async ({ ctx: { db }, input }) => {
@@ -145,5 +178,4 @@ export const carsRouter = router({
 				handleTRPCError(error);
 			}
 		}),
-	
 });

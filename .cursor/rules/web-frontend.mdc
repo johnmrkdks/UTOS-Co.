@@ -1,0 +1,27 @@
+---
+description: Web frontend patterns - React, TanStack, performance
+globs: apps/web/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Web Frontend Rules
+
+## React & TanStack
+- **Routing:** TanStack Router - routes under `src/routes/`, use `Link` and `useNavigate`
+- **Data:** TanStack Query - `useQuery` / `useMutation`, colocate hooks in `_hooks/`
+- **Forms:** react-hook-form + Zod resolver; use `@hookform/resolvers`
+- **State:** Prefer server state (Query) over client state; use Zustand only for UI state
+
+## Performance
+- **Code splitting:** Use `React.lazy()` + `Suspense` for heavy route-level components
+- **Memoization:** `useMemo`/`useCallback` only when profiling shows benefit; avoid premature optimization
+- **Images:** Use appropriate sizes; consider `loading="lazy"` for below-fold
+- **Bundle size:** Prefer `import { X }` over default imports; avoid pulling large libs for one util
+
+## Component Patterns
+- **Feature structure:** `_components/`, `_hooks/`, `_pages/` under each feature
+- **UI primitives:** Use `@workspace/ui` (Button, Input, Card, etc.)
+- **Tailwind:** Use `cn()` from tailwind-merge for conditional classes; prefer `useSortedClasses` for clsx/cva
+
+## tRPC Client
+- Import `trpcClient` from `@/trpc`; use `trpcClient.routerName.procedureName.mutate/query` with proper input typing

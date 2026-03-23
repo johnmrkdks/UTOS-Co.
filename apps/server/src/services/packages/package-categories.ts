@@ -1,4 +1,4 @@
-import { eq, asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { packageCategories } from "@/db/sqlite/schema/packages/package-categories";
 
@@ -15,7 +15,7 @@ export async function getPackageCategoryById(db: DB, id: string) {
 		.from(packageCategories)
 		.where(eq(packageCategories.id, id))
 		.limit(1);
-	
+
 	return result[0] || null;
 }
 
@@ -35,7 +35,7 @@ export async function createPackageCategory(
 			displayOrder: data.displayOrder ?? 0,
 		})
 		.returning();
-	
+
 	return category;
 }
 
@@ -57,7 +57,7 @@ export async function updatePackageCategory(
 		})
 		.where(eq(packageCategories.id, id))
 		.returning();
-	
+
 	return category;
 }
 
@@ -66,6 +66,6 @@ export async function deletePackageCategory(db: DB, id: string) {
 		.delete(packageCategories)
 		.where(eq(packageCategories.id, id))
 		.returning();
-	
+
 	return deletedCategory;
 }

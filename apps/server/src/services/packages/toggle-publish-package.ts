@@ -1,14 +1,16 @@
-import type { DB } from "@/db";
-import { packages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import type { DB } from "@/db";
+import { packages } from "@/db/schema";
 
 export const TogglePublishPackageServiceSchema = z.object({
 	id: z.string(),
 	isPublished: z.boolean(),
 });
 
-export type TogglePublishPackageService = z.infer<typeof TogglePublishPackageServiceSchema>;
+export type TogglePublishPackageService = z.infer<
+	typeof TogglePublishPackageServiceSchema
+>;
 
 export async function togglePublishPackageService(
 	db: DB,
@@ -16,7 +18,7 @@ export async function togglePublishPackageService(
 ) {
 	const [updatedPackage] = await db
 		.update(packages)
-		.set({ 
+		.set({
 			isPublished,
 			updatedAt: new Date(),
 		})

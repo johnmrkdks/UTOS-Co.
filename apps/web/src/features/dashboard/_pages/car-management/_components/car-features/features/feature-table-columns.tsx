@@ -1,16 +1,15 @@
-import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header"
-import { Badge } from "@workspace/ui/components/badge"
-import type { ColumnDef } from "@tanstack/react-table"
-import type { CarFeatureWithEnrichedData } from "server/types"
-import { FeatureTableRowActions } from "./feature-table-row-actions"
+import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@workspace/ui/components/badge";
+import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
+import type { CarFeatureWithEnrichedData } from "server/types";
+import { FeatureTableRowActions } from "./feature-table-row-actions";
 
 export const featureTableColumns: ColumnDef<CarFeatureWithEnrichedData>[] = [
 	{
 		id: "name",
 		accessorKey: "name",
 		header: ({ column }) => (
-			<DataTableColumnHeader className="ml-4
-				" column={column} title="Feature" />
+			<DataTableColumnHeader className="ml-4" column={column} title="Feature" />
 		),
 		cell: ({ row }) => <div className="ml-4">{row.getValue("name")}</div>,
 		enableSorting: false,
@@ -23,7 +22,11 @@ export const featureTableColumns: ColumnDef<CarFeatureWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Car Count" />
 		),
 		cell: ({ row }) => (
-			<div className=""><Badge variant="outline">{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars</Badge></div>
+			<div className="">
+				<Badge variant="outline">
+					{Number(row.getValue("metadata.carsCount")).toLocaleString()} cars
+				</Badge>
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -35,7 +38,9 @@ export const featureTableColumns: ColumnDef<CarFeatureWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Created At" />
 		),
 		cell: ({ row }) => (
-			<div className="">{new Date(row.getValue("createdAt")).toLocaleDateString()}</div>
+			<div className="">
+				{new Date(row.getValue("createdAt")).toLocaleDateString()}
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -47,7 +52,9 @@ export const featureTableColumns: ColumnDef<CarFeatureWithEnrichedData>[] = [
 			<DataTableColumnHeader column={column} title="Updated At" />
 		),
 		cell: ({ row }) => (
-			<div className="">{new Date(row.getValue("updatedAt")).toLocaleDateString()}</div>
+			<div className="">
+				{new Date(row.getValue("updatedAt")).toLocaleDateString()}
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -56,14 +63,18 @@ export const featureTableColumns: ColumnDef<CarFeatureWithEnrichedData>[] = [
 		id: "actions",
 		accessorKey: "actions",
 		header: ({ column }) => (
-			<DataTableColumnHeader className="flex justify-end mr-4" column={column} title="Actions" />
+			<DataTableColumnHeader
+				className="mr-4 flex justify-end"
+				column={column}
+				title="Actions"
+			/>
 		),
 		cell: ({ row }) => (
-			<div className="flex justify-end mr-4">
+			<div className="mr-4 flex justify-end">
 				<FeatureTableRowActions row={row} />
 			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
 	},
-]
+];

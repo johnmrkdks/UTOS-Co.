@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { QuoteResultsPage } from "@/features/marketing/_pages/quote-results/quote-results-page";
 import { z } from "zod";
+import { QuoteResultsPage } from "@/features/marketing/_pages/quote-results/quote-results-page";
 
 const quoteResultsSearchSchema = z.object({
 	quoteId: z.string(),

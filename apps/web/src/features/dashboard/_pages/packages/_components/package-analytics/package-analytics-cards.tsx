@@ -1,27 +1,33 @@
-import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import {
-	Package,
-	CheckCircle,
-	XCircle,
-	Eye,
 	AlertTriangle,
-	TrendingUp,
-	DollarSign,
+	ArrowUpRight,
 	BarChart3,
-	ArrowUpRight
+	CheckCircle,
+	DollarSign,
+	Eye,
+	Package,
+	TrendingUp,
+	XCircle,
 } from "lucide-react";
+import {
+	AnalyticsCard,
+	type AnalyticsCardData,
+} from "@/components/analytics-card";
 
 interface PackageAnalyticsCardsProps {
 	packages: any[];
 	isLoading?: boolean;
 }
 
-export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsCardsProps) {
+export function PackageAnalyticsCards({
+	packages,
+	isLoading,
+}: PackageAnalyticsCardsProps) {
 	if (isLoading) {
 		return (
 			<div className="grid gap-4 md:grid-cols-3">
 				{[...Array(3)].map((_, index) => (
-					<AnalyticsCard 
+					<AnalyticsCard
 						key={index}
 						data={{
 							id: `loading-${index}`,
@@ -29,7 +35,7 @@ export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsC
 							value: "...",
 							icon: Package,
 							showIcon: false,
-							showBackgroundIcon: false
+							showBackgroundIcon: false,
 						}}
 						view="compact"
 						className="animate-pulse"
@@ -41,8 +47,12 @@ export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsC
 
 	const totalPackages = packages.length;
 	const activePackages = packages.filter((pkg: any) => pkg.isAvailable).length;
-	const publishedPackages = packages.filter((pkg: any) => pkg.isPublished && pkg.isAvailable).length;
-	const unpublishedPackages = packages.filter((pkg: any) => !pkg.isPublished).length;
+	const publishedPackages = packages.filter(
+		(pkg: any) => pkg.isPublished && pkg.isAvailable,
+	).length;
+	const unpublishedPackages = packages.filter(
+		(pkg: any) => !pkg.isPublished,
+	).length;
 
 	const analyticsData: AnalyticsCardData[] = [
 		{
@@ -57,7 +67,7 @@ export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsC
 			changeType: "neutral",
 			showTrend: false,
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
 			id: "active",
@@ -67,11 +77,14 @@ export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsC
 			bgGradient: "bg-gradient-to-br from-emerald-50 to-emerald-100",
 			iconBg: "bg-emerald-500",
 			textColor: "text-gray-900",
-			changeText: totalPackages > 0 ? `${((activePackages / totalPackages) * 100).toFixed(0)}% active` : "No packages",
+			changeText:
+				totalPackages > 0
+					? `${((activePackages / totalPackages) * 100).toFixed(0)}% active`
+					: "No packages",
 			changeType: "positive",
 			showTrend: true,
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 		{
 			id: "published",
@@ -81,22 +94,23 @@ export function PackageAnalyticsCards({ packages, isLoading }: PackageAnalyticsC
 			bgGradient: "bg-gradient-to-br from-purple-50 to-purple-100",
 			iconBg: "bg-purple-500",
 			textColor: "text-gray-900",
-			changeText: totalPackages > 0 ? `${unpublishedPackages} drafts` : "None published",
+			changeText:
+				totalPackages > 0 ? `${unpublishedPackages} drafts` : "None published",
 			changeType: "warning",
 			showTrend: false,
 			showIcon: true,
-			showBackgroundIcon: true
+			showBackgroundIcon: true,
 		},
 	];
 
 	return (
 		<div className="grid gap-4 md:grid-cols-3">
 			{analyticsData.map((data) => (
-				<AnalyticsCard 
-					key={data.id} 
-					data={data} 
+				<AnalyticsCard
+					key={data.id}
+					data={data}
 					view="compact"
-					className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+					className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
 				/>
 			))}
 		</div>

@@ -9,7 +9,7 @@ interface CreateContactMessageInput {
 
 export async function createContactMessage(
 	db: DB,
-	input: CreateContactMessageInput
+	input: CreateContactMessageInput,
 ) {
 	const contactMessage = await createContactMessageData(db, {
 		name: input.name.trim(),

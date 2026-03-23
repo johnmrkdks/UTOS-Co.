@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { VehicleSelectionPage } from "@/features/marketing/_pages/vehicle-selection/vehicle-selection-page";
 import { z } from "zod";
+import { VehicleSelectionPage } from "@/features/marketing/_pages/vehicle-selection/vehicle-selection-page";
 
 const vehicleSelectionSearchSchema = z.object({
 	origin: z.string().optional(),

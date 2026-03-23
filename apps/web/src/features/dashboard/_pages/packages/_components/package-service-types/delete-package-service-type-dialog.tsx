@@ -14,7 +14,7 @@ import { useDeletePackageServiceTypeMutation } from "../../_hooks/query/use-dele
 export function DeletePackageServiceTypeDialog() {
 	const { isModalOpen, closeModal, modalState } = useModal();
 	const deleteMutation = useDeletePackageServiceTypeMutation();
-	
+
 	const isOpen = isModalOpen("delete-package-service-type");
 	const data = modalState.data;
 
@@ -27,7 +27,7 @@ export function DeletePackageServiceTypeDialog() {
 				onSuccess: () => {
 					closeModal();
 				},
-			}
+			},
 		);
 	};
 
@@ -37,8 +37,8 @@ export function DeletePackageServiceTypeDialog() {
 				<AlertDialogHeader>
 					<AlertDialogTitle>Delete Service Type</AlertDialogTitle>
 					<AlertDialogDescription>
-						Are you sure you want to delete "{data?.name}"? This action cannot be undone.
-						Any packages using this service type may be affected.
+						Are you sure you want to delete "{data?.name}"? This action cannot
+						be undone. Any packages using this service type may be affected.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

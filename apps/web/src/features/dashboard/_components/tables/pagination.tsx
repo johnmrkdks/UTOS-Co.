@@ -1,10 +1,10 @@
-import type { Table } from "@tanstack/react-table"
+import type { Table } from "@tanstack/react-table";
 
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@workspace/ui/components/button";
 
 type DataTablePaginationProps<TData> = {
-	table: Table<TData>
-}
+	table: Table<TData>;
+};
 
 export function DataTablePagination<TData>({
 	table,
@@ -28,6 +28,5 @@ export function DataTablePagination<TData>({
 				Next
 			</Button>
 		</div>
-	)
+	);
 }
-

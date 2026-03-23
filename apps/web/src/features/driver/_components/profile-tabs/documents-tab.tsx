@@ -1,5 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
 
 interface DocumentsTabProps {
 	driverProfile: any;
@@ -21,29 +27,38 @@ export function DocumentsTab({ driverProfile }: DocumentsTabProps) {
 							license: "Driver's License",
 							insurance: "Insurance Certificate",
 							background: "Background Check",
-							photo: "Profile Photo"
+							photo: "Profile Photo",
 						};
 
 						const document = doc as { uploaded: boolean; approved: boolean };
 
 						return (
-							<div key={key} className="flex items-center justify-between p-3 border rounded-lg">
+							<div
+								key={key}
+								className="flex items-center justify-between rounded-lg border p-3"
+							>
 								<div>
-									<h4 className="font-medium text-sm">{labels[key as keyof typeof labels]}</h4>
-									<p className="text-xs text-gray-600">
+									<h4 className="font-medium text-sm">
+										{labels[key as keyof typeof labels]}
+									</h4>
+									<p className="text-gray-600 text-xs">
 										{document.uploaded ? "Document uploaded" : "Not uploaded"}
 									</p>
 								</div>
-								<Badge variant={document.uploaded ? "default" : "secondary"} className="text-xs">
+								<Badge
+									variant={document.uploaded ? "default" : "secondary"}
+									className="text-xs"
+								>
 									{document.uploaded ? "Uploaded" : "Optional"}
 								</Badge>
 							</div>
 						);
 					})}
 				</div>
-				<div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-					<p className="text-xs text-blue-800">
-						<strong>Note:</strong> Documents are optional for now. You can complete your profile and start driving without uploading documents.
+				<div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+					<p className="text-blue-800 text-xs">
+						<strong>Note:</strong> Documents are optional for now. You can
+						complete your profile and start driving without uploading documents.
 						We may request them later for verification purposes.
 					</p>
 				</div>

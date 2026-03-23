@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import { trpc } from "@/trpc";
-import { authClient } from "@/lib/auth-client";
 import { useMutation } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { authClient } from "@/lib/auth-client";
+import { trpc } from "@/trpc";
 
 /**
  * Auto-sync user timezone on login
@@ -9,7 +9,9 @@ import { useMutation } from "@tanstack/react-query";
  */
 export function useTimezoneSync() {
 	const { data: session } = authClient.useSession();
-	const updateTimezoneMutation = useMutation(trpc.auth.updateUserTimezone.mutationOptions());
+	const updateTimezoneMutation = useMutation(
+		trpc.auth.updateUserTimezone.mutationOptions(),
+	);
 	const hasSyncedRef = useRef(false);
 	const userIdRef = useRef<string | null>(null);
 
@@ -42,7 +44,7 @@ export function useTimezoneSync() {
 						// Reset on error so it can retry later
 						userIdRef.current = null;
 					},
-				}
+				},
 			);
 		}
 

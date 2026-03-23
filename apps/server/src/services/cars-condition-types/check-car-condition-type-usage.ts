@@ -1,14 +1,16 @@
+import { z } from "zod";
 import { checkCarConditionTypeUsage } from "@/data/cars-condition-types/check-car-condition-type-usage";
 import { getCarConditionTypeById } from "@/data/cars-condition-types/get-car-condition-type-by-id";
 import type { DB } from "@/db";
 import { ErrorFactory } from "@/utils/error-factory";
-import { z } from "zod";
 
 export const CheckCarConditionTypeUsageServiceSchema = z.object({
 	id: z.string(),
 });
 
-export type CheckCarConditionTypeUsageParams = z.infer<typeof CheckCarConditionTypeUsageServiceSchema>;
+export type CheckCarConditionTypeUsageParams = z.infer<
+	typeof CheckCarConditionTypeUsageServiceSchema
+>;
 
 export async function checkCarConditionTypeUsageService(
 	db: DB,

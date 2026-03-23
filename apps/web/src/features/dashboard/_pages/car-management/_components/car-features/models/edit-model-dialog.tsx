@@ -1,4 +1,5 @@
-import { Button } from "@workspace/ui/components/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Dialog,
 	DialogClose,
@@ -8,41 +9,50 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@workspace/ui/components/dialog"
-import { Form } from "@workspace/ui/components/form"
-import { SquarePenIcon } from "lucide-react"
-import { useEffect, useState, useMemo } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod/v3"
-import { zodResolver } from "@hookform/resolvers/zod"
-import type { CarModel } from "server/types"
-import { SelectField, ValidatedTextInputField, TextInputField } from "@/components/form-fields"
-import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation"
-import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display"
-import { useUpdateCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-update-car-model-mutation"
-import { useGetCarBrandsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-get-car-brands-query"
-import { useIsCarModelExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-is-car-model-exist-mutation"
+} from "@workspace/ui/components/dialog";
+import { Form } from "@workspace/ui/components/form";
+import { SquarePenIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { CarModel } from "server/types";
+import { z } from "zod/v3";
+import {
+	SelectField,
+	TextInputField,
+	ValidatedTextInputField,
+} from "@/components/form-fields";
+import { EntityNameValidationDisplay } from "@/features/dashboard/_components/forms/entity-name-validation-display";
+import { useEntityNameValidation } from "@/features/dashboard/_hooks/use-entity-name-validation";
+import { useGetCarBrandsQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-brand/use-get-car-brands-query";
+import { useIsCarModelExistMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-is-car-model-exist-mutation";
+import { useUpdateCarModelMutation } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-update-car-model-mutation";
 
 type EditModelDialogProps = {
-	model: CarModel
-}
+	model: CarModel;
+};
 
 const FormSchema = z.object({
-	name: z.string().min(1, "Model name is required").max(50, "Model name must be less than 50 characters"),
+	name: z
+		.string()
+		.min(1, "Model name is required")
+		.max(50, "Model name must be less than 50 characters"),
 	brandId: z.string().min(1, "Brand id is required"),
 	year: z.coerce
 		.number()
 		.min(1900, "Year must be 1900 or later")
-		.max(new Date().getFullYear(), `Year cannot be later than ${new Date().getFullYear()}`),
-})
+		.max(
+			new Date().getFullYear(),
+			`Year cannot be later than ${new Date().getFullYear()}`,
+		),
+});
 
-type FormValues = z.infer<typeof FormSchema>
+type FormValues = z.infer<typeof FormSchema>;
 
 export function EditModelDialog({ model }: EditModelDialogProps) {
-	const [isDialogOpen, setIsDialogOpen] = useState(false)
-	const { data: brands, isLoading: isBrandsLoading } = useGetCarBrandsQuery({})
-	const mutation = useUpdateCarModelMutation()
-	const checkNameMutation = useIsCarModelExistMutation()
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const { data: brands, isLoading: isBrandsLoading } = useGetCarBrandsQuery({});
+	const mutation = useUpdateCarModelMutation();
+	const checkNameMutation = useIsCarModelExistMutation();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -52,7 +62,7 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 			brandId: model.brandId,
 			year: model.year,
 		},
-	})
+	});
 
 	// Reset form when dialog opens or model changes
 	useEffect(() => {
@@ -61,9 +71,9 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 				name: model.name,
 				brandId: model.brandId,
 				year: model.year,
-			})
+			});
 		}
-	}, [model, form, isDialogOpen])
+	}, [model, form, isDialogOpen]);
 
 	const validateName = (name: string): Promise<boolean> => {
 		return new Promise((resolve, reject) => {
@@ -72,10 +82,10 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 				{
 					onSuccess: (isAvailable) => resolve(isAvailable!),
 					onError: (error) => reject(error),
-				}
-			)
-		})
-	}
+				},
+			);
+		});
+	};
 
 	const nameValidation = useEntityNameValidation({
 		form,
@@ -83,7 +93,7 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 		validateNameFn: validateName,
 		originalValue: model.name,
 		errorMessage: `${form.watch("name")} already used.`,
-	})
+	});
 
 	const validationDisplay = EntityNameValidationDisplay({
 		isChecking: nameValidation.isChecking,
@@ -91,25 +101,26 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 		hasValue: !!form.watch("name")?.trim(),
 		hasError: !!form.formState.errors.name,
 		entityName: form.watch("name")?.trim(),
-	})
+	});
 
 	// Memoize brand options to prevent unnecessary re-renders
-	const brandOptions = useMemo(() =>
-		brands?.data?.map(brand => ({
-			value: brand.id,
-			label: brand.name
-		})) || [],
-		[brands?.data]
-	)
+	const brandOptions = useMemo(
+		() =>
+			brands?.data?.map((brand) => ({
+				value: brand.id,
+				label: brand.name,
+			})) || [],
+		[brands?.data],
+	);
 
 	const handleReset = () => {
 		form.reset({
 			name: model.name,
 			brandId: model.brandId,
 			year: model.year,
-		})
-		nameValidation.reset()
-	}
+		});
+		nameValidation.reset();
+	};
 
 	const handleSubmit = (data: FormValues) => {
 		mutation.mutate(
@@ -119,40 +130,46 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 			},
 			{
 				onSuccess: () => {
-					setIsDialogOpen(false)
+					setIsDialogOpen(false);
 				},
 			},
-		)
-	}
+		);
+	};
 
 	// Check if form has changed from original values
 	const hasChanges = () => {
-		const currentValues = form.getValues()
+		const currentValues = form.getValues();
 		return (
 			currentValues.name !== model.name ||
 			currentValues.brandId !== model.brandId ||
 			currentValues.year !== model.year
-		)
-	}
+		);
+	};
 
 	// Check if form is valid and ready to submit
 	const canSubmit = () => {
-		const values = form.getValues()
-		const hasErrors = Object.keys(form.formState.errors).length > 0
-		const isNameUnavailable = nameValidation.nameAvailability === false
-		const isCheckingName = nameValidation.isChecking
-		const hasRequiredFields = values.name?.trim() && values.brandId && values.year
+		const values = form.getValues();
+		const hasErrors = Object.keys(form.formState.errors).length > 0;
+		const isNameUnavailable = nameValidation.nameAvailability === false;
+		const isCheckingName = nameValidation.isChecking;
+		const hasRequiredFields =
+			values.name?.trim() && values.brandId && values.year;
 
 		return (
-			hasChanges() && hasRequiredFields && !hasErrors && !isNameUnavailable && !isCheckingName && !mutation.isPending
-		)
-	}
+			hasChanges() &&
+			hasRequiredFields &&
+			!hasErrors &&
+			!isNameUnavailable &&
+			!isCheckingName &&
+			!mutation.isPending
+		);
+	};
 
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 			<DialogTrigger asChild>
 				<Button variant="outline" size="icon">
-					<SquarePenIcon className="w-4 h-4" />
+					<SquarePenIcon className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
 			<DialogContent showCloseButton={false} className="flex flex-col gap-8">
@@ -160,8 +177,11 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 					<DialogTitle>Edit Model</DialogTitle>
 					<DialogDescription>Edit the details of the model.</DialogDescription>
 				</DialogHeader>
-				<Form {...form as any}>
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+				<Form {...(form as any)}>
+					<form
+						onSubmit={form.handleSubmit(handleSubmit)}
+						className="flex flex-col gap-4"
+					>
 						<div className="flex flex-col gap-4">
 							<SelectField
 								form={form}
@@ -199,7 +219,11 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 									Cancel
 								</Button>
 							</DialogClose>
-							<Button type="submit" disabled={!canSubmit()} loading={mutation.isPending}>
+							<Button
+								type="submit"
+								disabled={!canSubmit()}
+								loading={mutation.isPending}
+							>
 								{mutation.isPending ? "Updating..." : "Save Changes"}
 							</Button>
 						</DialogFooter>
@@ -207,5 +231,5 @@ export function EditModelDialog({ model }: EditModelDialogProps) {
 				</Form>
 			</DialogContent>
 		</Dialog>
-	)
+	);
 }

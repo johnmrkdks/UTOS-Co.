@@ -8,22 +8,34 @@ import {
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { format } from "date-fns";
-import { Mail, MailOpen, Archive, MoreHorizontal, ExternalLink, Trash2 } from "lucide-react";
-import type { ContactMessage } from "server/db/sqlite/schema";
-import { useUpdateContactMessageStatusMutation } from "../../../_hooks/query/use-update-contact-message-status-mutation";
-import { useDeleteContactMessageMutation } from "../../../_hooks/query/use-delete-contact-message-mutation";
-import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import {
+	Archive,
+	ExternalLink,
+	Mail,
+	MailOpen,
+	MoreHorizontal,
+	Trash2,
+} from "lucide-react";
 import { useState } from "react";
+import type { ContactMessage } from "server/db/sqlite/schema";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
+import { useDeleteContactMessageMutation } from "../../../_hooks/query/use-delete-contact-message-mutation";
+import { useUpdateContactMessageStatusMutation } from "../../../_hooks/query/use-update-contact-message-status-mutation";
 
 interface ContactMessageCardProps {
 	message: ContactMessage;
 	onClick: () => void;
 }
 
-export function ContactMessageCard({ message, onClick }: ContactMessageCardProps) {
+export function ContactMessageCard({
+	message,
+	onClick,
+}: ContactMessageCardProps) {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const updateStatusMutation = useUpdateContactMessageStatusMutation();
-	const silentUpdateStatusMutation = useUpdateContactMessageStatusMutation({ silent: true });
+	const silentUpdateStatusMutation = useUpdateContactMessageStatusMutation({
+		silent: true,
+	});
 	const deleteMessageMutation = useDeleteContactMessageMutation();
 
 	const handleStatusChange = (status: "unread" | "read" | "archived") => {
@@ -36,7 +48,7 @@ export function ContactMessageCard({ message, onClick }: ContactMessageCardProps
 	const handleEmailClick = (e: React.MouseEvent) => {
 		e.stopPropagation(); // Prevent card click
 		const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(message.email)}&su=${encodeURIComponent(`Re: Contact Form Message from ${message.name}`)}`;
-		window.open(gmailUrl, '_blank');
+		window.open(gmailUrl, "_blank");
 	};
 
 	const handleCardClick = () => {
@@ -56,13 +68,16 @@ export function ContactMessageCard({ message, onClick }: ContactMessageCardProps
 	};
 
 	const handleConfirmDelete = () => {
-		deleteMessageMutation.mutate({
-			messageId: message.id,
-		}, {
-			onSuccess: () => {
-				setShowDeleteDialog(false);
+		deleteMessageMutation.mutate(
+			{
+				messageId: message.id,
 			},
-		});
+			{
+				onSuccess: () => {
+					setShowDeleteDialog(false);
+				},
+			},
+		);
 	};
 
 	const getStatusBadge = () => {
@@ -103,7 +118,7 @@ export function ContactMessageCard({ message, onClick }: ContactMessageCardProps
 						<div className="flex items-center gap-2">
 							<button
 								onClick={handleEmailClick}
-								className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+								className="flex items-center gap-1 text-blue-600 text-sm hover:text-blue-800 hover:underline"
 							>
 								{message.email}
 								<ExternalLink className="h-3 w-3" />
@@ -113,7 +128,7 @@ export function ContactMessageCard({ message, onClick }: ContactMessageCardProps
 					{getStatusBadge()}
 				</div>
 				<div className="flex items-center gap-2">
-					<span className="text-sm text-muted-foreground">
+					<span className="text-muted-foreground text-sm">
 						{format(new Date(message.createdAt), "MMM dd, yyyy • HH:mm")}
 					</span>
 					<DropdownMenu>
@@ -141,12 +156,17 @@ export function ContactMessageCard({ message, onClick }: ContactMessageCardProps
 								</DropdownMenuItem>
 							)}
 							{message.status !== "archived" && (
-								<DropdownMenuItem onClick={() => handleStatusChange("archived")}>
+								<DropdownMenuItem
+									onClick={() => handleStatusChange("archived")}
+								>
 									<Archive className="mr-2 h-4 w-4" />
 									Archive
 								</DropdownMenuItem>
 							)}
-							<DropdownMenuItem onClick={handleDeleteClick} className="text-red-600 focus:text-red-600">
+							<DropdownMenuItem
+								onClick={handleDeleteClick}
+								className="text-red-600 focus:text-red-600"
+							>
 								<Trash2 className="mr-2 h-4 w-4" />
 								Delete
 							</DropdownMenuItem>
@@ -155,7 +175,9 @@ export function ContactMessageCard({ message, onClick }: ContactMessageCardProps
 				</div>
 			</CardHeader>
 			<CardContent>
-				<p className="whitespace-pre-wrap text-sm line-clamp-3">{message.message}</p>
+				<p className="line-clamp-3 whitespace-pre-wrap text-sm">
+					{message.message}
+				</p>
 			</CardContent>
 
 			<DeleteConfirmationDialog

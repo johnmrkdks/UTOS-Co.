@@ -1,3 +1,4 @@
+import { Link, useLocation } from "@tanstack/react-router";
 import {
 	Sidebar,
 	SidebarContent,
@@ -10,18 +11,17 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 } from "@workspace/ui/components/sidebar";
-import type { RouteConfig } from "@/types/route-config";
-import { Link, useLocation } from "@tanstack/react-router";
+import { cn } from "@workspace/ui/lib/utils";
 import {
-	DASHBOARD_OVERVIEW_ROUTES,
-	DASHBOARD_OPERATIONS_ROUTES,
 	DASHBOARD_INVENTORY_ROUTES,
+	DASHBOARD_OPERATIONS_ROUTES,
+	DASHBOARD_OVERVIEW_ROUTES,
 	DASHBOARD_SYSTEM_ROUTES,
 	SUPER_ADMIN_ROUTES,
 } from "@/constants/dashboard-routes";
-import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
-import { cn } from "@workspace/ui/lib/utils";
 import { useSession } from "@/providers/session-provider";
+import type { RouteConfig } from "@/types/route-config";
+import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
 
 type LinkProps = {
 	title: string;
@@ -80,7 +80,7 @@ export function DashboardSidebar() {
 		if (path === "/dashboard" && pathname === "/dashboard") {
 			return true;
 		}
-		
+
 		// For other routes, check if the current pathname starts with the route path
 		// This handles nested routes like /dashboard/cars/add-car matching /dashboard/cars
 		return pathname === path || pathname.startsWith(`${path}/`);
@@ -89,7 +89,7 @@ export function DashboardSidebar() {
 	const links = getLinks(filterRoutesByRole, isSuperAdmin);
 
 	return (
-		<Sidebar collapsible="none" className="bg-soft-beige border-r print:hidden">
+		<Sidebar collapsible="none" className="border-r bg-soft-beige print:hidden">
 			<SidebarHeader>
 				<DashboardCompanyLogo />
 			</SidebarHeader>
