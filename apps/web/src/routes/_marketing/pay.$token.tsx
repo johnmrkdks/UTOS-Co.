@@ -138,7 +138,7 @@ function PayBookingPage() {
 						amountCents={amountCents}
 						bookingId={booking.id}
 						onAuthorized={handleAuthorized}
-						onError={(msg) => toast.error(msg)}
+						onError={(msg) => toast.error("Payment failed", { description: msg })}
 					/>
 				</CardContent>
 			</Card>

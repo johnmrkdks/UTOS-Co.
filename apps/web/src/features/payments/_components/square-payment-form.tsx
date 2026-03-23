@@ -1,10 +1,11 @@
 /**
  * Square Web Payments SDK - Card, Apple Pay.
  * Tokenizes payment and calls backend to authorize (delayed capture).
+ * Shows clear errors for card declined, insufficient funds, invalid CVV, etc.
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@workspace/ui/components/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 function getSquareSdkUrl(applicationId: string): string {
 	return applicationId.startsWith("sandbox-")
@@ -72,6 +73,7 @@ export function SquarePaymentForm({
 	const [isReady, setIsReady] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [applePayAvailable, setApplePayAvailable] = useState(false);
+	const [paymentError, setPaymentError] = useState<string | null>(null);
 	const paymentsRef = useRef<PaymentsInstance | null>(null);
 	const cardRef = useRef<Awaited<ReturnType<PaymentsInstance["card"]>> | null>(null);
 	const applePayRef = useRef<Awaited<ReturnType<PaymentsInstance["applePay"]>> | null>(null);
@@ -88,8 +90,16 @@ export function SquarePaymentForm({
 		});
 	}
 
+	function extractPaymentError(err: unknown): string {
+		if (err instanceof Error) return err.message;
+		const data = (err as { data?: { message?: string } })?.data;
+		if (data?.message) return data.message;
+		return "Payment authorization failed. Please try again or use a different card.";
+	}
+
 	const authorizeWithToken = useCallback(
 		async (token: string) => {
+			setPaymentError(null);
 			const { trpcClient } = await import("@/trpc");
 			await trpcClient.payments.authorizeBookingPayment.mutate({
 				bookingId,
@@ -116,6 +126,15 @@ export function SquarePaymentForm({
 			}
 		},
 		[authorizeWithToken]
+	);
+
+	const handlePaymentError = useCallback(
+		(err: unknown) => {
+			const msg = extractPaymentError(err);
+			setPaymentError(msg);
+			onError(msg);
+		},
+		[onError]
 	);
 
 	useEffect(() => {
@@ -166,17 +185,14 @@ export function SquarePaymentForm({
 	async function handleCardSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!cardRef.current) return;
+		setPaymentError(null);
 		setIsSubmitting(true);
 		try {
 			const { token } = await cardRef.current.tokenize();
 			if (!token) throw new Error("No payment token received");
 			await authorizeWithToken(token);
 		} catch (err) {
-			const msg =
-				err instanceof Error
-					? err.message
-					: (err as { data?: { message?: string } })?.data?.message ?? "Payment authorization failed";
-			onError(msg);
+			handlePaymentError(err);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -185,15 +201,12 @@ export function SquarePaymentForm({
 	async function handleApplePayClick(e: React.SyntheticEvent) {
 		e.preventDefault();
 		if (!applePayRef.current) return;
+		setPaymentError(null);
 		setIsSubmitting(true);
 		try {
 			await tokenizeAndAuthorize(() => applePayRef.current!.tokenize());
 		} catch (err) {
-			const msg =
-				err instanceof Error
-					? err.message
-					: (err as { data?: { message?: string } })?.data?.message ?? "Apple Pay failed";
-			onError(msg);
+			handlePaymentError(err);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -243,6 +256,15 @@ export function SquarePaymentForm({
 				<p className="text-xs text-muted-foreground">
 					Your payment method will be authorized now and charged after your trip is completed.
 				</p>
+				{paymentError && (
+					<div
+						role="alert"
+						className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200"
+					>
+						<AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+						<span>{paymentError}</span>
+					</div>
+				)}
 				<Button type="submit" disabled={!isReady || isSubmitting} className="w-full">
 					{isSubmitting ? (
 						<>

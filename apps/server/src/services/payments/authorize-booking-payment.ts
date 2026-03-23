@@ -3,6 +3,24 @@
  * Uses delayed capture - funds are held but not charged until capture.
  */
 import type { DB } from "@/db";
+
+/** Map Square error codes to user-friendly messages for card/Apple Pay declines */
+function squareErrorToMessage(code: string, detail?: string): string {
+	const messages: Record<string, string> = {
+		INSUFFICIENT_FUNDS: "Your card has insufficient funds. Please use a different card or add funds.",
+		PAYMENT_DECLINED: "Your card was declined. Please check your card details or try a different card.",
+		GENERIC_DECLINE: "Your card was declined. Please try again or use a different card.",
+		CVV_FAILURE: "The security code (CVV) is incorrect. Please check and try again.",
+		PAN_FAILURE: "The card number is invalid. Please check and try again.",
+		CARD_EXPIRED: "Your card has expired. Please use a different card.",
+		CARD_NOT_SUPPORTED: "This card is not supported. Please use a different card.",
+		CARDHOLDER_INSUFFICIENT_PERMISSIONS: "Your card does not allow this transaction. Please contact your bank.",
+		TRANSACTION_LIMIT: "The payment amount exceeds your card limit. Please try a smaller amount or use a different card.",
+		VOICE_FAILURE: "Your bank requires additional verification. Please contact them to authorize this payment.",
+	};
+	const msg = messages[code] ?? detail ?? `Payment declined: ${code}`;
+	return msg;
+}
 import { getSquareClient } from "./square-client";
 import { bookingPayments } from "@/db/sqlite/schema/payments";
 import { bookings } from "@/db/sqlite/schema/bookings";
@@ -48,24 +66,31 @@ export async function authorizeBookingPayment(params: AuthorizePaymentParams) {
 
 	const client = await getSquareClient(accessToken, env);
 
-	const result = await client.payments.create({
-		sourceId,
-		idempotencyKey,
-		amountMoney: {
-			amount: BigInt(amountCents),
-			currency: currency as "AUD" | "USD",
-		},
-		locationId,
-		// Delayed capture - hold funds, capture later (autocomplete: false)
-		autocomplete: false,
-		// Optional: link to booking for reconciliation
-		referenceId: bookingId,
-	});
+	let result: Awaited<ReturnType<typeof client.payments.create>>;
+	try {
+		result = await client.payments.create({
+			sourceId,
+			idempotencyKey,
+			amountMoney: {
+				amount: BigInt(amountCents),
+				currency: currency as "AUD" | "USD",
+			},
+			locationId,
+			autocomplete: false,
+			referenceId: bookingId,
+		});
+	} catch (err) {
+		const squareErrors = (err as { errors?: Array<{ code?: string; detail?: string }> })?.errors;
+		const first = squareErrors?.[0];
+		const code = first?.code ?? "PAYMENT_DECLINED";
+		throw new Error(squareErrorToMessage(code, first?.detail));
+	}
 
 	if (!result.payment) {
 		const squareErrors = (result as { errors?: Array<{ code?: string; detail?: string }> }).errors;
-		const detail = squareErrors?.[0]?.detail ?? squareErrors?.[0]?.code ?? "Unknown error";
-		throw new Error(`Square payment failed: ${detail}`);
+		const first = squareErrors?.[0];
+		const code = first?.code ?? "PAYMENT_DECLINED";
+		throw new Error(squareErrorToMessage(code, first?.detail));
 	}
 
 	const payment = result.payment;
