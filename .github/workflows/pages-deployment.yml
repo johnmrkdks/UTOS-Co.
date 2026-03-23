@@ -11,6 +11,7 @@ jobs:
       contents: read
       deployments: write
     name: Deploy Web to Cloudflare Workers
+    environment: Cloudflare Workers
     steps:
       - uses: actions/checkout@v4
       
