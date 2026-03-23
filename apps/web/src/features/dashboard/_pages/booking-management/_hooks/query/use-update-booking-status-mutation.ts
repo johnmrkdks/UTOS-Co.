@@ -10,12 +10,26 @@ export const useUpdateBookingStatusMutation = () => {
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.list.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.listByType.queryKey() });
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.get.queryKey() });
+			queryClient.invalidateQueries({ queryKey: trpc.bookings.getDriverBookings.queryKey() });
 
-			toast.success(`Booking status updated to ${data?.status?.replace("_", " ")}`);
+			// Shorter, mobile-friendly toast messages
+			const statusDisplayNames: Record<string, string> = {
+				'driver_en_route': 'En Route',
+				'arrived_pickup': 'Arrived',
+				'passenger_on_board': 'POB',
+				'dropped_off': 'Dropped Off',
+				'completed': 'Completed',
+				'confirmed': 'Confirmed'
+			};
+			
+			const displayName = statusDisplayNames[data?.status || ''] || data?.status?.replace("_", " ");
+			toast.success(`Status: ${displayName}`, {
+				duration: 2000, // Shorter duration for mobile
+			});
 		},
 		onError: (error) => {
-			toast.error("Error while updating booking status", {
-				description: error.message,
+			toast.error("Update failed", {
+				duration: 3000,
 			});
 		},
 	}));

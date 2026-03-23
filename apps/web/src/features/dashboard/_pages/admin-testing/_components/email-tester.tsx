@@ -11,6 +11,8 @@ import { useSendPasswordResetMutation } from "../_hooks/query/use-send-password-
 import { useSendDriverOnboardingMutation } from "../_hooks/query/use-send-driver-onboarding-mutation";
 import { useSendBookingConfirmationMutation } from "../_hooks/query/use-send-booking-confirmation-mutation";
 import { useSendInvoiceMutation } from "../_hooks/query/use-send-invoice-mutation";
+import { useSendDriverAssignmentNotificationMutation } from "../_hooks/query/use-send-driver-assignment-notification-mutation";
+import { useSendTripStatusNotificationMutation } from "../_hooks/query/use-send-trip-status-notification-mutation";
 import type { TestResult } from "..";
 
 interface EmailTesterProps {
@@ -19,6 +21,8 @@ interface EmailTesterProps {
 
 export function EmailTester({ onResult }: EmailTesterProps) {
 	const [testEmail, setTestEmail] = useState("");
+	const [testBookingId, setTestBookingId] = useState("");
+	const [testDriverId, setTestDriverId] = useState("");
 	const [isLoading, setIsLoading] = useState<string | null>(null);
 
 	// Custom callbacks to integrate with test results
@@ -28,6 +32,8 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 	const sendDriverOnboardingMutation = useSendDriverOnboardingMutation();
 	const sendBookingConfirmationMutation = useSendBookingConfirmationMutation();
 	const sendInvoiceMutation = useSendInvoiceMutation();
+	const sendDriverAssignmentMutation = useSendDriverAssignmentNotificationMutation();
+	const sendTripStatusMutation = useSendTripStatusNotificationMutation();
 
 	const handleTestConnection = () => {
 		if (!testEmail) return;
@@ -208,7 +214,61 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 		});
 	};
 
+	const handleTestDriverAssignment = () => {
+		if (!testBookingId || !testDriverId) return;
+		setIsLoading("driver-assignment");
+		sendDriverAssignmentMutation.mutate({
+			bookingId: testBookingId,
+			driverId: testDriverId,
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Driver assignment notification sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send driver assignment notification: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
+		});
+	};
+
+	const handleTestTripStatus = () => {
+		if (!testBookingId) return;
+		setIsLoading("trip-status");
+		sendTripStatusMutation.mutate({
+			bookingId: testBookingId,
+			status: "driver_en_route",
+		}, {
+			onSuccess: (data) => {
+				onResult({
+					type: "email",
+					status: "success",
+					message: `Trip status notification sent successfully: ${data.message}`,
+				});
+				setIsLoading(null);
+			},
+			onError: (error) => {
+				onResult({
+					type: "email",
+					status: "error",
+					message: `Failed to send trip status notification: ${error.message}`,
+				});
+				setIsLoading(null);
+			},
+		});
+	};
+
 	const isEmailValid = testEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail);
+	const isBookingIdValid = testBookingId && testBookingId.trim().length > 0;
+	const isDriverIdValid = testDriverId && testDriverId.trim().length > 0;
 
 	return (
 		<div className="space-y-6">
@@ -218,7 +278,7 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 					Email System Testing
 				</h3>
 				<p className="text-sm text-gray-600 mt-1">
-					Test OAuth 2.0 email functionality including all email templates
+					Test OAuth 2.0 email functionality including all email templates and notifications
 				</p>
 			</div>
 
@@ -227,18 +287,46 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 					<CardTitle>Test Configuration</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
+					<div className="grid gap-4 md:grid-cols-2">
+						<div className="space-y-2">
+							<Label htmlFor="test-email">Test Email Address</Label>
+							<Input
+								id="test-email"
+								type="email"
+								value={testEmail}
+								onChange={(e) => setTestEmail(e.target.value)}
+								placeholder="your.email@example.com"
+							/>
+							<p className="text-xs text-gray-500">
+								Email to receive test messages
+							</p>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="test-booking-id">Booking ID (for notifications)</Label>
+							<Input
+								id="test-booking-id"
+								type="text"
+								value={testBookingId}
+								onChange={(e) => setTestBookingId(e.target.value)}
+								placeholder="e.g., bkg_123456"
+							/>
+							<p className="text-xs text-gray-500">
+								Existing booking ID for notification tests
+							</p>
+						</div>
+					</div>
 					<div className="space-y-2">
-						<Label htmlFor="test-email">Test Email Address</Label>
+						<Label htmlFor="test-driver-id">Driver ID (for assignment notifications)</Label>
 						<Input
-							id="test-email"
-							type="email"
-							value={testEmail}
-							onChange={(e) => setTestEmail(e.target.value)}
-							placeholder="your.email@example.com"
+							id="test-driver-id"
+							type="text"
+							value={testDriverId}
+							onChange={(e) => setTestDriverId(e.target.value)}
+							placeholder="e.g., drv_789012"
 							className="max-w-md"
 						/>
 						<p className="text-xs text-gray-500">
-							Enter your email address to receive test emails
+							Existing driver ID for assignment notification tests
 						</p>
 					</div>
 				</CardContent>
@@ -350,6 +438,55 @@ export function EmailTester({ onResult }: EmailTesterProps) {
 								)}
 								Invoice Email
 							</Button>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>Driver & Client Notifications</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="space-y-4">
+						<p className="text-sm text-gray-600">
+							Test booking-related notifications sent to drivers and clients. These require valid booking and driver IDs.
+						</p>
+						<Separator />
+						<div className="grid gap-3 sm:grid-cols-2">
+							<Button
+								onClick={handleTestDriverAssignment}
+								disabled={!isBookingIdValid || !isDriverIdValid || isLoading === "driver-assignment"}
+								variant="outline"
+								className="justify-start"
+							>
+								{isLoading === "driver-assignment" ? (
+									<AlertCircle className="h-4 w-4 mr-2 animate-spin" />
+								) : (
+									<Send className="h-4 w-4 mr-2" />
+								)}
+								Driver Assignment Notification
+							</Button>
+
+							<Button
+								onClick={handleTestTripStatus}
+								disabled={!isBookingIdValid || isLoading === "trip-status"}
+								variant="outline"
+								className="justify-start"
+							>
+								{isLoading === "trip-status" ? (
+									<AlertCircle className="h-4 w-4 mr-2 animate-spin" />
+								) : (
+									<Send className="h-4 w-4 mr-2" />
+								)}
+								Client Trip Status Update
+							</Button>
+						</div>
+						<div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+							<p className="text-xs text-blue-700">
+								<strong>Note:</strong> Driver assignment notifications are sent to the driver's email address,
+								while trip status updates are sent to the customer's email address associated with the booking.
+							</p>
 						</div>
 					</div>
 				</CardContent>

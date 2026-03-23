@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
+import { createLocalDateForBackend } from "@/utils/timezone"
 import { useCreateCustomBookingMutation } from "@/features/customer/_hooks/mutation/use-create-custom-booking-mutation"
 import { useGetCarQuery } from "@/features/customer/_hooks/query/use-get-car-query"
 import { CarBookingForm } from "@/features/customer/_components/booking/car-booking-form"
@@ -54,10 +55,14 @@ function CarBookingPage() {
 			const distanceFare = Math.round(estimatedDistance * 0.002 * 100) // $2 per km in cents
 			const totalAmount = baseFare + distanceFare
 
-			// Ensure scheduledPickupTime is a proper Date object and convert to ISO string for tRPC
+			// Ensure scheduledPickupTime is a proper Date object and use timezone-aware conversion
 			const pickupTime = formData.scheduledPickupTime instanceof Date
 				? formData.scheduledPickupTime
 				: new Date(formData.scheduledPickupTime)
+			
+			// Extract date and time components for timezone-aware handling
+			const dateString = pickupTime.toISOString().split('T')[0];
+			const timeString = pickupTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM format
 
 			await createCustomBookingMutation.mutateAsync({
 				carId: car?.id || carId,
@@ -71,8 +76,8 @@ function CarBookingPage() {
 				destinationLatitude: destinationGeometry?.location?.lat?.(),
 				destinationLongitude: destinationGeometry?.location?.lng?.(),
 
-				// Timing - send as ISO string and convert to Date in backend
-				scheduledPickupTime: pickupTime.toISOString(),
+				// Timing - send timezone-aware ISO string
+				scheduledPickupTime: createLocalDateForBackend(dateString, timeString),
 				estimatedDistance,
 
 				// Pricing
@@ -89,14 +94,14 @@ function CarBookingPage() {
 			}, {
 				onSuccess: (data) => {
 					toast.success("Appointment booked successfully!", {
-						description: `Your luxury chauffeur appointment has been confirmed. Booking ID: ${data.id}`,
+						description: `Your luxury chauffeur appointment has been confirmed. Booking ID: ${data?.id || 'N/A'}`,
 					})
-					setBookingId(data.id)
+					setBookingId(data?.id || null)
 					setCurrentStep("success")
 
 					// Redirect to bookings page after success
 					setTimeout(() => {
-						navigate({ to: "/dashboard/bookings" })
+						navigate({ to: "/admin/dashboard/bookings" })
 					}, 3000)
 				},
 				onError: (error) => {
@@ -118,7 +123,7 @@ function CarBookingPage() {
 	}
 
 	const goBackToCars = () => {
-		navigate({ to: "/dashboard/cars" })
+		navigate({ to: "/fleet" })
 	}
 
 	if (carLoading) {

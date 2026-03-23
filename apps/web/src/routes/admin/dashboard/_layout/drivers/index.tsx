@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { DriversTable } from "@/features/dashboard/_pages/drivers/_components/drivers-table";
 import { DriverApprovalTable } from "@/features/dashboard/_pages/drivers/_components/driver-approval-table";
 import { CreateDriverUserDialog } from "@/features/dashboard/_pages/drivers/_components/create-driver-user-dialog";
@@ -28,10 +29,69 @@ function RouteComponent() {
 		navigate({ to: '/admin/dashboard/drivers/onboarding' });
 	}
 
+	const driverStatsData: AnalyticsCardData[] = [
+		{
+			id: 'total',
+			title: 'Total Drivers',
+			value: totalDrivers,
+			icon: UsersIcon,
+			bgGradient: 'bg-gradient-to-br from-blue-50 to-blue-100',
+			iconBg: 'bg-blue-500',
+			changeText: 'Registered drivers',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'active',
+			title: 'Active Drivers',
+			value: activeDrivers,
+			icon: UserCheckIcon,
+			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
+			iconBg: 'bg-green-500',
+			changeText: 'Approved and active',
+			changeType: 'positive',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'pending',
+			title: 'Pending Approval',
+			value: pendingDrivers,
+			icon: UserXIcon,
+			bgGradient: 'bg-gradient-to-br from-orange-50 to-orange-100',
+			iconBg: 'bg-orange-500',
+			changeText: 'Awaiting approval',
+			changeType: 'warning',
+			showIcon: true,
+			showBackgroundIcon: true
+		},
+		{
+			id: 'inactive',
+			title: 'Inactive Drivers',
+			value: inactiveDrivers,
+			icon: UsersIcon,
+			bgGradient: 'bg-gradient-to-br from-slate-50 to-slate-100',
+			iconBg: 'bg-slate-500',
+			changeText: 'Approved but inactive',
+			changeType: 'neutral',
+			showIcon: true,
+			showBackgroundIcon: true
+		}
+	];
+
 	return (
 		<PaddingLayout className="flex-1 space-y-4 mb-8">
-			<div className="flex items-center justify-between space-y-2">
-				<h2 className="text-3xl font-bold tracking-tight">Driver Management</h2>
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+				<div className="flex items-center gap-3">
+					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center border border-orange-200/50">
+						<UsersIcon className="h-5 w-5 text-orange-600" />
+					</div>
+					<div>
+						<h2 className="text-2xl font-bold tracking-tight">Driver Management</h2>
+						<p className="text-sm text-muted-foreground">Manage drivers and approvals</p>
+					</div>
+				</div>
 				<div className="flex gap-2">
 					<CreateDriverUserDialog>
 						<Button variant="outline">
@@ -39,65 +99,18 @@ function RouteComponent() {
 							Create Driver Account
 						</Button>
 					</CreateDriverUserDialog>
-					<Button onClick={handleAddDriver}>
-						<PlusIcon className="h-4 w-4" />
-						Driver Onboarding
-					</Button>
 				</div>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Drivers</CardTitle>
-						<UsersIcon className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{totalDrivers}</div>
-						<p className="text-xs text-muted-foreground">
-							Registered drivers
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Active Drivers</CardTitle>
-						<UserCheckIcon className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{activeDrivers}</div>
-						<p className="text-xs text-muted-foreground">
-							Approved and active
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
-						<UserXIcon className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{pendingDrivers}</div>
-						<p className="text-xs text-muted-foreground">
-							Awaiting approval
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Inactive Drivers</CardTitle>
-						<UsersIcon className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{inactiveDrivers}</div>
-						<p className="text-xs text-muted-foreground">
-							Approved but inactive
-						</p>
-					</CardContent>
-				</Card>
+				{driverStatsData.map((data) => (
+					<AnalyticsCard
+						key={data.id}
+						data={data}
+						view="compact"
+						className="hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+					/>
+				))}
 			</div>
 
 			<Tabs defaultValue="all" className="space-y-4">
@@ -107,14 +120,15 @@ function RouteComponent() {
 					<TabsTrigger value="pending">Pending Approval</TabsTrigger>
 					<TabsTrigger value="active">Active</TabsTrigger>
 					<TabsTrigger value="inactive">Inactive</TabsTrigger>
-					<TabsTrigger value="guide" className="ml-auto">
+					{/* Hidden Process Guide tab for now */}
+					{/* <TabsTrigger value="guide" className="ml-auto">
 						<InfoIcon className="h-4 w-4 mr-1" />
 						Process Guide
-					</TabsTrigger>
+					</TabsTrigger> */}
 				</TabsList>
 
 				<TabsContent value="all" className="space-y-4">
-					<Card>
+					<Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
 						<CardHeader>
 							<CardTitle>All Drivers</CardTitle>
 							<CardDescription>
@@ -133,7 +147,7 @@ function RouteComponent() {
 
 
 				<TabsContent value="pending" className="space-y-4">
-					<Card>
+					<Card className="border-orange-200/50 shadow-sm hover:shadow-md transition-shadow">
 						<CardHeader>
 							<CardTitle>Pending Approval</CardTitle>
 							<CardDescription>
@@ -147,7 +161,7 @@ function RouteComponent() {
 				</TabsContent>
 
 				<TabsContent value="active" className="space-y-4">
-					<Card>
+					<Card className="border-green-200/50 shadow-sm hover:shadow-md transition-shadow">
 						<CardHeader>
 							<CardTitle>Active Drivers</CardTitle>
 							<CardDescription>
@@ -161,7 +175,7 @@ function RouteComponent() {
 				</TabsContent>
 
 				<TabsContent value="inactive" className="space-y-4">
-					<Card>
+					<Card className="border-slate-200/50 shadow-sm hover:shadow-md transition-shadow">
 						<CardHeader>
 							<CardTitle>Inactive Drivers</CardTitle>
 							<CardDescription>
@@ -174,9 +188,10 @@ function RouteComponent() {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="guide" className="space-y-4">
+				{/* Hidden Process Guide content for now */}
+				{/* <TabsContent value="guide" className="space-y-4">
 					<DriverProcessGuide />
-				</TabsContent>
+				</TabsContent> */}
 			</Tabs>
 		</PaddingLayout>
 	)

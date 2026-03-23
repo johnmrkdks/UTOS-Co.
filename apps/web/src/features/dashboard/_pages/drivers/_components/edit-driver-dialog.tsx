@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react";
 
 const editDriverSchema = z.object({
 	licenseNumber: z.string().min(1, "License number is required"),
+	commissionRate: z.number().min(0).max(100),
 	isActive: z.boolean(),
 	isApproved: z.boolean(),
 });
@@ -38,6 +39,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 		resolver: zodResolver(editDriverSchema),
 		defaultValues: {
 			licenseNumber: driver?.licenseNumber || "",
+			commissionRate: driver?.commissionRate ?? 50,
 			isActive: driver?.isActive ?? true,
 			isApproved: driver?.isApproved ?? false,
 		},
@@ -62,7 +64,7 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Edit Driver</DialogTitle>
 					<DialogDescription>
@@ -90,6 +92,32 @@ export function EditDriverDialog({ driver, open, onOpenChange }: EditDriverDialo
 									<FormControl>
 										<Input {...field} />
 									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control as any}
+							name="commissionRate"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Commission Rate (%)</FormLabel>
+									<FormControl>
+										<Input
+											type="number"
+											min={0}
+											max={100}
+											value={field.value}
+											onChange={(e) => {
+												const v = parseInt(e.target.value, 10);
+												field.onChange(isNaN(v) ? 50 : Math.min(100, Math.max(0, v)));
+											}}
+										/>
+									</FormControl>
+									<div className="text-xs text-muted-foreground">
+										Driver&apos;s share of each job. Excludes toll &amp; parking; includes waiting time (default 50%)
+									</div>
 									<FormMessage />
 								</FormItem>
 							)}

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { MapPin, Plus, Calculator, AlertCircle } from "lucide-react";
@@ -18,16 +19,19 @@ interface InstantQuoteInputProps {
 
 export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuoteInputProps) {
 	const form = useForm<InstantQuoteFormData>({
-		resolver: zodResolver(instantQuoteSchema),
+		resolver: zodResolver(instantQuoteSchema) as any,
 		defaultValues: {
 			originAddress: initialData?.originAddress || "",
 			destinationAddress: initialData?.destinationAddress || "",
+			tollPreference: initialData?.tollPreference || "toll",
 			stops: initialData?.stops || [],
 			originLatitude: initialData?.originLatitude || 0,
 			originLongitude: initialData?.originLongitude || 0,
 			destinationLatitude: initialData?.destinationLatitude || 0,
 			destinationLongitude: initialData?.destinationLongitude || 0,
-			stopsGeometry: initialData?.stopsGeometry || []
+			stopsGeometry: initialData?.stopsGeometry || [],
+			passengerCount: initialData?.passengerCount || 1,
+			luggageCount: initialData?.luggageCount || 0
 		}
 	});
 
@@ -44,6 +48,7 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 			const result = await calculateQuoteMutation.mutateAsync({
 				originAddress: data.originAddress,
 				destinationAddress: data.destinationAddress,
+				tollPreference: data.tollPreference || "toll",
 				originLatitude: data.originLatitude,
 				originLongitude: data.originLongitude,
 				destinationLatitude: data.destinationLatitude,
@@ -58,10 +63,15 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 				originLongitude: data.originLongitude,
 				destinationLatitude: data.destinationLatitude,
 				destinationLongitude: data.destinationLongitude,
-				stops: data.stops || []
+				stops: data.stops || [],
+				passengerCount: data.passengerCount || 1,
+				luggageCount: data.luggageCount || 0,
+				tollPreference: data.tollPreference || "toll"
 			};
 
-			onQuoteCalculated(result, routeData);
+			if (result) {
+				onQuoteCalculated(result, routeData);
+			}
 		} catch (error) {
 			console.error("Quote calculation failed:", error);
 		}
@@ -111,11 +121,12 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 										<GooglePlacesInput
 											placeholder="Enter pickup location..."
 											value={field.value}
-											onAddressSelect={(address, geometry) => {
-												field.onChange(address);
-												if (geometry?.location) {
-													form.setValue("originLatitude", geometry.location.lat());
-													form.setValue("originLongitude", geometry.location.lng());
+											onChange={field.onChange}
+											onPlaceSelect={(place) => {
+												field.onChange(place.description);
+												if (place.geometry?.location) {
+													form.setValue("originLatitude", place.geometry.location.lat());
+													form.setValue("originLongitude", place.geometry.location.lng());
 												}
 											}}
 										/>
@@ -136,11 +147,12 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 										<GooglePlacesInput
 											placeholder="Enter destination..."
 											value={field.value}
-											onAddressSelect={(address, geometry) => {
-												field.onChange(address);
-												if (geometry?.location) {
-													form.setValue("destinationLatitude", geometry.location.lat());
-													form.setValue("destinationLongitude", geometry.location.lng());
+											onChange={field.onChange}
+											onPlaceSelect={(place) => {
+												field.onChange(place.description);
+												if (place.geometry?.location) {
+													form.setValue("destinationLatitude", place.geometry.location.lat());
+													form.setValue("destinationLongitude", place.geometry.location.lng());
 												}
 											}}
 										/>
@@ -149,6 +161,85 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 								</FormItem>
 							)}
 						/>
+
+						{/* Toll preference */}
+						<FormField
+							control={form.control as any}
+							name="tollPreference"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Route preference</FormLabel>
+									<FormControl>
+										<div className="flex gap-4">
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="radio"
+													value="toll"
+													checked={field.value === "toll"}
+													onChange={() => field.onChange("toll")}
+													className="rounded-full"
+												/>
+												<span>Use toll roads</span>
+											</label>
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="radio"
+													value="no_toll"
+													checked={field.value === "no_toll"}
+													onChange={() => field.onChange("no_toll")}
+													className="rounded-full"
+												/>
+												<span>No toll roads</span>
+											</label>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						{/* Trip Details */}
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control as any}
+								name="passengerCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Passengers</FormLabel>
+										<FormControl>
+											<Input
+												{...field}
+												type="number"
+												min="1"
+												max="8"
+												onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control as any}
+								name="luggageCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Luggage Pieces</FormLabel>
+										<FormControl>
+											<Input
+												{...field}
+												type="number"
+												min="0"
+												max="10"
+												onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
 						{/* Stops */}
 						{stops.map((stop, index) => (
@@ -164,11 +255,12 @@ export function InstantQuoteInput({ initialData, onQuoteCalculated }: InstantQuo
 												<GooglePlacesInput
 													placeholder="Enter stop location..."
 													value={field.value}
-													onAddressSelect={(address, geometry) => {
-														field.onChange(address);
-														if (geometry?.location) {
+													onChange={field.onChange}
+													onPlaceSelect={(place) => {
+														field.onChange(place.description);
+														if (place.geometry?.location) {
 															const stopsGeometry = form.getValues("stopsGeometry") || [];
-															stopsGeometry[index] = geometry;
+															stopsGeometry[index] = place.geometry;
 															form.setValue("stopsGeometry", stopsGeometry);
 														}
 													}}

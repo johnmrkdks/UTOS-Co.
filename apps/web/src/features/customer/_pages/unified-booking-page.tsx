@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearch } from "@tanstack/react-router";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useGetQuoteByTokenQuery } from "@/features/marketing/_pages/home/_hooks/query/use-get-quote-by-token-query";
 import { useGetAvailableCarsQuery } from "@/features/customer/_hooks/query/use-get-available-cars-query";
@@ -9,17 +9,20 @@ import { InstantQuoteInput } from "../_components/instant-quote-input";
 import { InstantQuoteResults } from "../_components/instant-quote-results";
 import { CarSelectionStep } from "../_components/car-selection-step";
 import { BookingDetailsStep } from "../_components/booking-details-step";
+import { BookingAuthChoiceStep, persistQuoteForRedirect, getPersistedQuote, clearPersistedQuote } from "../_components/booking-auth-choice-step";
 import { BookingConfirmationStep } from "../_components/booking-confirmation-step";
 import { BookingSuccessStep } from "../_components/booking-success-step";
 import { type QuoteResult, type RouteData, type Step } from "../_types/instant-quote";
 import { type BookingDetailsFormData } from "../_schemas/instant-quote";
 
 export function UnifiedBookingPage() {
+	const navigate = useNavigate();
 	const search = useSearch({ from: "/dashboard/_layout/book-appointment" });
-	const { from, token: quoteToken, carId } = search as { 
-		from?: "instant-quote", 
-		token?: string, 
-		carId?: string 
+	const { from, token: quoteToken, carId, restore } = search as { 
+		from?: "instant-quote",
+		token?: string,
+		carId?: string,
+		restore?: string;
 	};
 	
 	const {
@@ -49,8 +52,8 @@ export function UnifiedBookingPage() {
 	// Determine initial step based on entry point
 	const initialStep: Step = useMemo(() => {
 		if (from === "instant-quote") {
-			// Coming from instant quote - start with car selection
-			return "car-selection";
+			// Coming from instant quote - show results (quote) then auth choice on Book
+			return "results";
 		} else if (carId) {
 			// Direct car booking - start with route input (car already selected)
 			return "input";
@@ -59,6 +62,21 @@ export function UnifiedBookingPage() {
 			return "car-selection";
 		}
 	}, [from, carId]);
+
+	// Restore quote from sessionStorage when returning from sign-up
+	useEffect(() => {
+		if (restore === "1" && !quote) {
+			const persisted = getPersistedQuote();
+			if (persisted?.quote && persisted?.routeData) {
+				setQuote(persisted.quote as QuoteResult);
+				setRouteData(persisted.routeData as RouteData);
+				if (persisted.selectedCarId) setSelectedCarId(persisted.selectedCarId);
+				// If they had selected a car before sign-up, go to booking details; else car selection
+				goToStep(persisted.selectedCarId ? "booking-details" : "car-selection");
+				clearPersistedQuote();
+			}
+		}
+	}, [restore, quote, setQuote, setRouteData, setSelectedCarId, goToStep]);
 
 	// Set initial step and data on mount
 	useEffect(() => {
@@ -103,12 +121,12 @@ export function UnifiedBookingPage() {
 	const handleQuoteCalculated = (newQuote: QuoteResult, newRouteData: RouteData) => {
 		setQuote(newQuote);
 		setRouteData(newRouteData);
-		// If car is already selected (direct booking), go to booking details
+		// If car is already selected (direct booking), go to auth choice then booking details
 		if (selectedCarId) {
-			goToStep("booking-details");
+			goToStep("auth-choice");
 		} else {
-			// Otherwise go to car selection
-			goToStep("car-selection");
+			// Otherwise show results, then auth choice on "Book" → car selection
+			goToStep("results");
 		}
 	};
 
@@ -133,13 +151,35 @@ export function UnifiedBookingPage() {
 
 		try {
 			goToStep("processing");
-			
-			const result = await createBookingMutation.mutateAsync({
-				quoteToken: quote.quoteToken || "",
-				...bookingDetails,
-			});
 
-			setCompletedBookingId(result.id);
+			// Build full payload from quote, routeData, and bookingDetails
+			const payload = {
+				// Route from quote/routeData
+				originAddress: routeData.originAddress,
+				originLatitude: routeData.originLatitude,
+				originLongitude: routeData.originLongitude,
+				destinationAddress: routeData.destinationAddress,
+				destinationLatitude: routeData.destinationLatitude,
+				destinationLongitude: routeData.destinationLongitude,
+				stops: routeData.stops?.map((s) => ({ address: s.address, latitude: undefined, longitude: undefined })) || [],
+				// Pricing from quote (amounts already in dollars)
+				baseFare: quote.firstKmFare ?? quote.baseFare ?? 0,
+				distanceFare: quote.additionalKmFare ?? quote.distanceFare ?? 0,
+				timeFare: quote.timeFare ?? 0,
+				extraCharges: quote.extraCharges ?? 0,
+				quotedAmount: quote.totalAmount ?? 0,
+				estimatedDistance: quote.estimatedDistance,
+				estimatedDuration: quote.estimatedDuration,
+				// Customer details
+				...bookingDetails,
+				scheduledPickupTime: bookingDetails.scheduledPickupTime.toISOString(),
+				preferredCarId: selectedCarId || undefined,
+				tollPreference: bookingDetails.tollPreference ?? "toll",
+			};
+
+			const result = await (createBookingMutation as any).mutateAsync(payload);
+
+			setCompletedBookingId(result?.id || "");
 			goToStep("success");
 			toast.success("Booking confirmed successfully!");
 		} catch (error) {
@@ -195,16 +235,38 @@ export function UnifiedBookingPage() {
 					selectedCarId={selectedCarId}
 					onCarSelect={handleCarSelected}
 					onBack={() => {
-						// Determine where to go back based on entry point
-						if (from === "instant-quote" || routeData) {
+						// If we have quote (from results → auth → car flow), back goes to auth-choice
+						if (quote && routeData) {
+							goToStep("auth-choice");
+						} else if (from === "instant-quote") {
 							goToStep("results");
 						} else {
 							goToStep("input");
 						}
 					}}
-					onNext={() => goToStep("booking-details")}
-					instantQuote={quote}
-					routeData={routeData}
+					onNext={() => goToStep("auth-choice")}
+					instantQuote={quote || undefined}
+					routeData={routeData || undefined}
+				/>
+			)}
+
+			{/* Auth choice step: guest vs create account (shown right after quote) */}
+			{currentStep === "auth-choice" && (
+				<BookingAuthChoiceStep
+					onContinueAsGuest={() => goToStep(selectedCarId ? "booking-details" : "car-selection")}
+					onCreateAccount={() => {
+						persistQuoteForRedirect({
+							quote: quote!,
+							routeData: routeData!,
+							selectedCarId,
+							step: "auth-choice",
+						});
+						navigate({
+							to: "/sign-up",
+							search: { redirect: "/dashboard/book-appointment?restore=1" },
+						});
+					}}
+					onBack={() => goToStep(selectedCarId ? "car-selection" : "results")}
 				/>
 			)}
 
@@ -227,7 +289,7 @@ export function UnifiedBookingPage() {
 					selectedCar={selectedCar}
 					onConfirm={handleBookingConfirm}
 					onBack={() => goToStep("booking-details")}
-					isProcessing={currentStep === "processing"}
+					isProcessing={false}
 				/>
 			)}
 

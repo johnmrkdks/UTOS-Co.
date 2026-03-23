@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Car,
@@ -8,7 +8,8 @@ import {
 	ChevronDown,
 	ChevronRight,
 	LogIn,
-	Loader2
+	Loader2,
+	User
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -16,6 +17,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { authClient } from "@/lib/auth-client";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { formatDistanceKm } from "@/utils/format";
 import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "@/trpc";
@@ -52,6 +54,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 	const [quote, setQuote] = useState<QuoteResult | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
+
 	const { session, isPending: userLoading } = useUserQuery();
 
 	// Fetch quote details using the secure quote ID - using manual approach due to type issues
@@ -77,24 +80,23 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 		carsData.data.find(car => car.id === quote.carId) : null;
 
 
+	const handleSignInAndBook = () => {
+		if (!quote) return;
+		const redirectPath = `/book-quote/${search.quoteId}`;
+		navigate({
+			to: "/sign-in",
+			search: { redirect: redirectPath },
+			resetScroll: true
+		});
+	};
+
 	const handleBookAuthenticated = () => {
 		if (!quote) return;
-
-		if (session?.user) {
-			// User is authenticated - route to book-quote
-			navigate({
-				to: "/book-quote/$quoteId",
-				params: { quoteId: search.quoteId }
-			});
-		} else {
-			// User not authenticated, redirect to sign-in with appropriate redirect
-			const redirectPath = `/book-quote/${search.quoteId}`;
-
-			navigate({
-				to: "/sign-in",
-				search: { redirect: redirectPath }
-			});
-		}
+		navigate({
+			to: "/book-quote/$quoteId",
+			params: { quoteId: search.quoteId },
+			resetScroll: true
+		});
 	};
 
 	// Loading state
@@ -108,7 +110,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => navigate({ to: "/" })}
+									onClick={() => navigate({ to: "/", resetScroll: true })}
 									className="gap-2"
 								>
 									<ArrowLeft className="w-4 h-4" />
@@ -157,7 +159,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => navigate({ to: "/" })}
+									onClick={() => navigate({ to: "/", resetScroll: true })}
 									className="gap-2"
 								>
 									<ArrowLeft className="w-4 h-4" />
@@ -185,7 +187,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							</AlertDescription>
 						</Alert>
 						<div className="mt-6 text-center">
-							<Button onClick={() => navigate({ to: "/" })}>
+							<Button onClick={() => navigate({ to: "/", resetScroll: true })}>
 								Get New Quote
 							</Button>
 						</div>
@@ -205,7 +207,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => navigate({ to: "/" })}
+								onClick={() => navigate({ to: "/", resetScroll: true })}
 								className="gap-2"
 							>
 								<ArrowLeft className="w-4 h-4" />
@@ -292,7 +294,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					<div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
 						<MapPin className="h-3 w-3" />
 						<span>
-							{((quote.estimatedDistance || 0) / 1000).toFixed(1)} km • {Math.round((quote.estimatedDuration || 0) / 60)} min journey
+							{formatDistanceKm(quote.estimatedDistance)} • {Math.round((quote.estimatedDuration || 0) / 60)} min journey
 						</span>
 					</div>
 
@@ -307,7 +309,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 								<div className="flex items-center gap-3">
 									{selectedCar.images && selectedCar.images.length > 0 && (
 										<img
-											src={selectedCar.images.find(img => img.isMain)?.url || selectedCar.images[0].url}
+											src={selectedCar.images.find((img: any) => img.isMain)?.url || selectedCar.images[0].url}
 											alt={selectedCar.name}
 											className="w-16 h-12 object-cover rounded border"
 										/>
@@ -382,7 +384,7 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 									{(quote.breakdown.additionalDistance || 0) === 0 && (
 										<div className="bg-blue-50 p-2 rounded-md mt-2">
 											<p className="text-xs text-blue-800">
-												<strong>Within flat rate limit:</strong> No additional charges since your {((quote.estimatedDistance || 0) / 1000).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance || 10)}km tier.
+												<strong>Within flat rate limit:</strong> No additional charges since your {Number(quote.estimatedDistance || 0).toFixed(1)}km journey is within the first {Math.ceil(quote.breakdown.firstKmDistance || 10)}km tier.
 											</p>
 										</div>
 									)}
@@ -394,28 +396,45 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 					{/* Action Buttons */}
 					<div className="space-y-3 pb-6">
 						{session?.user ? (
-							// User is authenticated - show only account booking
+							// User is authenticated - show book button
 							<Button
 								onClick={handleBookAuthenticated}
 								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
 							>
 								Book
-								<LogIn className="ml-2 h-5 w-5" />
+								<ChevronRight className="ml-2 h-5 w-5" />
 							</Button>
 						) : (
-							// User is not authenticated - only show sign in option
-							<Button
-								onClick={handleBookAuthenticated}
-								className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
-							>
-								Sign In & Book
-								<LogIn className="ml-2 h-5 w-5" />
-							</Button>
+							// User is not authenticated - show sign in OR continue as guest
+							<>
+								<Button
+									onClick={handleSignInAndBook}
+									className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
+								>
+									<LogIn className="mr-2 h-5 w-5" />
+									Sign In & Book
+								</Button>
+								<Button
+									asChild
+									variant="outline"
+									className="w-full h-12 text-base font-semibold"
+								>
+									<Link
+										to="/book-quote/$quoteId"
+										params={{ quoteId: search.quoteId }}
+										search={{ guest: "1" }}
+										resetScroll
+									>
+										<User className="mr-2 h-5 w-5" />
+										Continue as Guest
+									</Link>
+								</Button>
+							</>
 						)}
 
 						<Button
 							variant="outline"
-							onClick={() => navigate({ to: "/" })}
+							onClick={() => navigate({ to: "/", resetScroll: true })}
 							className="w-full h-10 text-sm"
 						>
 							Get New Quote
@@ -426,9 +445,11 @@ export function QuoteResultsPage({ isCustomerArea = false }: QuoteResultsPagePro
 						<p className="text-xs text-muted-foreground">
 							* Prices are estimates and may vary based on traffic and other factors
 						</p>
-						<p className="text-xs text-primary">
-							Sign in required to complete booking
-						</p>
+						{!session?.user && (
+							<p className="text-xs text-muted-foreground">
+								Sign in or create an account to complete your booking
+							</p>
+						)}
 					</div>
 				</div>
 			</div>

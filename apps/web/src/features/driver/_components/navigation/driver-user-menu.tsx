@@ -36,7 +36,7 @@ export function DriverUserMenu() {
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
 						<Avatar>
-							<AvatarImage src={session?.user.image || ""} alt="Profile image" />
+							<AvatarImage src={session?.user.image ?? undefined} alt="Profile image" />
 							<AvatarFallback>{getNameInitials(session?.user.name!)}</AvatarFallback>
 						</Avatar>
 					</Button>

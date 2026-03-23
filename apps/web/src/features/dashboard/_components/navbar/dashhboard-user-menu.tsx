@@ -1,10 +1,9 @@
-import { BoltIcon, BookOpenIcon, Layers2Icon, LogOutIcon, PinIcon, PenIcon as UserPenIcon } from "lucide-react"
+import { LogOutIcon, SettingsIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -14,6 +13,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { getNameInitials } from "@/utils/format"
 import { useUserQuery } from "@/hooks/query/use-user-query"
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog"
+import { Link } from "@tanstack/react-router"
 
 export function DashboardUserMenu() {
 	const { session, isPending, signOutWithConfirmation } = useUserQuery()
@@ -34,7 +34,7 @@ export function DashboardUserMenu() {
 			<DropdownMenuTrigger asChild>
 				<Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
 					<Avatar>
-						<AvatarImage src="./avatar.jpg" alt="Profile image" />
+						<AvatarImage src={session?.user.image ?? undefined} alt="Profile image" />
 						<AvatarFallback>{getNameInitials(session?.user.name!)}</AvatarFallback>
 					</Avatar>
 				</Button>
@@ -45,32 +45,17 @@ export function DashboardUserMenu() {
 					<span className="text-muted-foreground truncate text-xs font-normal">{session?.user.email}</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<BoltIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 1</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<Layers2Icon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 2</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<BookOpenIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 3</span>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<PinIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 4</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<UserPenIcon size={16} className="opacity-60" aria-hidden="true" />
-						<span>Option 5</span>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
+				{(session?.user.role === "admin" || session?.user.role === "super_admin") && (
+					<>
+						<DropdownMenuItem asChild>
+							<Link to="/admin/dashboard/settings">
+								<SettingsIcon size={16} className="opacity-60" aria-hidden="true" />
+								<span>Settings</span>
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+					</>
+				)}
 				<DropdownMenuItem onClick={signOutWithConfirmation.openSignOutDialog}>
 					<LogOutIcon size={16} className="opacity-60" aria-hidden="true" />
 					<span>Sign Out</span>

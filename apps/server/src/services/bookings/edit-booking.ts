@@ -16,14 +16,17 @@ interface EditBookingData {
 	customerPhone?: string;
 	customerEmail?: string;
 	passengerCount?: number;
+	luggageCount?: number;
 	specialRequests?: string;
+	additionalNotes?: string;
 }
 
 export async function editBooking(
 	db: DB,
 	bookingId: string,
 	userId: string,
-	editData: EditBookingData
+	editData: EditBookingData,
+	userRole?: string
 ) {
 	// Get the booking with user verification
 	const [existingBooking] = await db
@@ -38,7 +41,16 @@ export async function editBooking(
 		});
 	}
 
-	if (existingBooking.userId !== userId) {
+	// Guest bookings (userId is null) can only be edited by admins
+	const isAdmin = userRole === "admin" || userRole === "super_admin";
+	if (existingBooking.userId === null) {
+		if (!isAdmin) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Guest bookings can only be edited by administrators",
+			});
+		}
+	} else if (existingBooking.userId !== userId) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: "You can only edit your own bookings",

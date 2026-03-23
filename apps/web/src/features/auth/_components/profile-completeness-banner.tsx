@@ -103,7 +103,7 @@ export function ProfileCompletenessBanner({
 
 					{/* Action Button */}
 					<div className="ml-4">
-						<Link to="/dashboard/profile">
+						<Link to="/profile">
 							<Button variant="outline" size="sm" className="text-xs">
 								<User className="h-3 w-3 mr-1" />
 								{completeness.isComplete ? "View Profile" : "Complete Profile"}

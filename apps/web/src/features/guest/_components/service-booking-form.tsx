@@ -1,26 +1,34 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Calendar, Clock, Users, MapPin, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { Badge } from "@workspace/ui/components/badge";
+import { Separator } from "@workspace/ui/components/separator";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
+import { createLocalDateForBackend } from "@/utils/timezone";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
-import { serviceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
+import { createServiceBookingSchema, type ServiceBookingFormData } from "@/features/guest/_schemas/service-booking-schema";
+import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
 
 interface ServiceBookingFormProps {
 	service: {
 		id: string;
 		name: string;
-		fixedPrice: number;
+		fixedPrice?: number;
+		hourlyRate?: number;
+		serviceType: string; // 'hourly' or 'fixed'
 		maxPassengers?: number;
 		description?: string;
 		bannerImageUrl?: string;
@@ -32,33 +40,56 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 	const [date, setDate] = useState<Date>();
 	const [step, setStep] = useState<"form" | "confirmation">("form");
 	const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
+	const [pickupLocation, setPickupLocation] = useState("");
+	const [destination, setDestination] = useState("");
+	const [stops, setStops] = useState<string[]>([]);
+	const [hours, setHours] = useState<number>(2);
+
 	const navigate = useNavigate();
 	const { session: sessionData, isPending: sessionLoading } = useUserQuery();
+	const { data: profileData, isLoading: profileLoading } = useCustomerProfileQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
 
+	// Determine if this is an hourly service
+	const isHourlyService = service.serviceType === 'hourly' || !!service.hourlyRate;
+
+	// Create schema based on service type - ensure minimum 20 passengers
+	const maxPassengers = Math.max(service.maxPassengers || 20, 20);
+	const schema = createServiceBookingSchema(maxPassengers, isHourlyService);
+
 	const form = useForm<ServiceBookingFormData>({
-		resolver: zodResolver(serviceBookingSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			customerName: "",
 			customerEmail: "",
 			customerPhone: "",
 			passengerCount: 1,
-			bookingTime: "",
+			luggageCount: 0,
+			serviceDuration: isHourlyService ? 2 : undefined,
 			specialRequirements: "",
 		},
 	});
 
+	// Calculate total cost for hourly services
+	const totalCost = useMemo(() => {
+		if (isHourlyService && service.hourlyRate) {
+			return hours * service.hourlyRate;
+		}
+		return service.fixedPrice || 0;
+	}, [isHourlyService, service.hourlyRate, service.fixedPrice, hours]);
+
 	// Pre-populate with user data if authenticated
 	useEffect(() => {
-		if (sessionData?.user) {
+		if (sessionData?.user && profileData?.user) {
 			const currentValues = form.getValues();
 			form.reset({
 				...currentValues,
-				customerName: currentValues.customerName || sessionData.user.name || "",
-				customerEmail: currentValues.customerEmail || sessionData.user.email || "",
+				customerName: currentValues.customerName || profileData.user.name || "",
+				customerEmail: currentValues.customerEmail || profileData.user.email || "",
+				customerPhone: currentValues.customerPhone || profileData.user.phone || "",
 			});
 		}
-	}, [sessionData, form]);
+	}, [sessionData, profileData, form]);
 
 	const onSubmit = async (data: ServiceBookingFormData) => {
 		// Check authentication before allowing booking
@@ -73,26 +104,37 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 			return;
 		}
 
-		// Create booking data with proper user ID
-		const scheduledPickupTime = new Date(`${data.bookingDate.toISOString().split('T')[0]}T${data.bookingTime}:00.000Z`);
+		// Create booking data with proper user ID - use timezone-aware date handling
+		const dateString = data.bookingDate.toISOString().split('T')[0];
 
 		const bookingData = {
 			packageId: service.id,
 			carId: null, // Will be assigned by admin
 			originAddress: "Service location (TBD)", // Service packages don't have fixed locations
 			destinationAddress: "Service destination (TBD)",
-			scheduledPickupTime: scheduledPickupTime.toISOString(),
+			scheduledPickupTime: createLocalDateForBackend(dateString, data.bookingTime),
 			customerName: data.customerName,
 			customerPhone: data.customerPhone,
 			customerEmail: data.customerEmail,
 			passengerCount: data.passengerCount,
 			specialRequests: data.specialRequirements,
+			requirePayment: true, // Payment required before confirmation - same as guest/client flow
 		};
 
 		try {
 			const result = await createBookingMutation.mutateAsync(bookingData);
+			// Redirect to payment page - booking confirmed + email sent after payment authorized
+			if (result?.shareToken) {
+				navigate({ to: "/pay/$token", params: { token: result.shareToken } });
+				return;
+			}
 			setConfirmedBooking(result);
 			setStep("confirmation");
+
+			// Scroll to top after booking confirmation
+			setTimeout(() => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}, 100);
 		} catch (error) {
 			console.error("Service booking failed:", error);
 		}
@@ -127,7 +169,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Price:</span>
-							<span className="font-medium">${(service.fixedPrice / 100).toFixed(2)}</span>
+							<span className="font-medium">${service.fixedPrice?.toFixed(2) || '0.00'}</span>
 						</div>
 						<div className="flex justify-between">
 							<span className="text-gray-600">Passengers:</span>
@@ -146,14 +188,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 					</div>
 				</div>
 
-				{/* Payment Notice */}
+				{/* Payment Notice - shown only if no redirect to payment (fallback) */}
 				<div className="bg-blue-50 rounded-xl border border-blue-200 p-4 sm:p-6">
 					<h3 className="text-lg font-semibold text-blue-900 mb-2">What's Next?</h3>
 					<ul className="text-blue-800 space-y-1 text-sm">
-						<li>• We'll review your booking and confirm within 2-4 hours</li>
-						<li>• You'll receive confirmation via email and SMS</li>
-						<li>• Payment is processed after service completion</li>
-						<li>• You can contact us anytime for questions or changes</li>
+						<li>• Complete payment to confirm your booking</li>
+						<li>• You'll receive confirmation via email after payment</li>
+						<li>• Final charge occurs after service completion</li>
+						<li>• Contact us anytime for questions or changes</li>
 					</ul>
 				</div>
 
@@ -210,7 +252,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 									<div className="h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center">
 										<div className="text-center">
 											<div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-												<CalendarIcon className="w-10 h-10 text-primary/60" />
+												<Calendar className="w-10 h-10 text-primary/60" />
 											</div>
 											<h2 className="text-2xl font-bold text-gray-800 mb-2">{service.name}</h2>
 											<p className="text-gray-600 text-sm px-4">
@@ -221,58 +263,36 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 								)}
 
 								<div className="p-8">
-									{/* Price Display */}
-									<div className="text-center mb-8">
-										<div className="inline-flex items-baseline gap-2 bg-primary/10 px-6 py-4 rounded-xl border border-primary/20">
-											<span className="text-4xl font-black text-primary">
-												${(service.fixedPrice / 100).toFixed(0)}
-											</span>
-											<span className="text-primary/80 text-sm font-medium">per booking</span>
+									{/* Price Display - Only for fixed-type services */}
+									{!isHourlyService && service.fixedPrice && (
+										<div className="text-center mb-8">
+											<div className="inline-flex items-baseline gap-2 bg-primary/10 px-6 py-4 rounded-xl border border-primary/20">
+												<span className="text-4xl font-black text-primary">
+													${service.fixedPrice?.toFixed(2) || '0.00'}
+												</span>
+												<span className="text-primary/80 text-sm font-medium">per booking</span>
+											</div>
+											<div className="mt-3">
+												<span className="inline-block bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full">
+													Fixed Price - No Hidden Fees
+												</span>
+											</div>
 										</div>
-										<div className="mt-3">
-											<span className="inline-block bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full">
-												Fixed Price - No Hidden Fees
-											</span>
-										</div>
-									</div>
+									)}
 
-									{/* Service Features */}
+									{/* Service Description */}
 									<div className="space-y-4">
 										<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
 											<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center">
 												<CheckCircle className="w-3 h-3 text-primary" />
 											</div>
-											What's Included
+											Service Details
 										</h3>
-										
-										<div className="grid gap-3">
-											{service.features && service.features.length > 0 ? (
-												service.features.map((feature, index) => (
-													<div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">{feature}</span>
-													</div>
-												))
-											) : (
-												<>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Max {service.maxPassengers || 4} passengers</span>
-													</div>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Professional chauffeur</span>
-													</div>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Fuel included</span>
-													</div>
-													<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-														<div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
-														<span className="text-sm text-gray-700 font-medium">Tolls separate</span>
-													</div>
-												</>
-											)}
+
+										<div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
+											<p className="text-gray-700 leading-relaxed">
+												{service.description || "Premium chauffeur service with professional standards and exceptional comfort."}
+											</p>
 										</div>
 									</div>
 								</div>
@@ -356,7 +376,8 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 											<Input
 												type="number"
 												min={1}
-												max={service.maxPassengers || 8}
+												max={maxPassengers}
+												placeholder="e.g. 2"
 												{...form.register("passengerCount", { valueAsNumber: true })}
 												className="h-12 text-base"
 												error={form.formState.errors.passengerCount?.message}
@@ -370,9 +391,23 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												setDate(selectedDate);
 												if (selectedDate) {
 													form.setValue("bookingDate", selectedDate);
+													// Also update scheduledPickupTime for validation
+													const currentTime = form.getValues("bookingTime");
+													if (currentTime) {
+														const combinedDateTime = createLocalDateForBackend(selectedDate.toISOString().split('T')[0], currentTime);
+														form.setValue("scheduledPickupTime", new Date(combinedDateTime));
+													}
 												}
 											}}
-											onTimeChange={(time) => form.setValue("bookingTime", time)}
+											onTimeChange={(time) => {
+												form.setValue("bookingTime", time);
+												// Also update scheduledPickupTime for validation
+												const currentDate = form.getValues("bookingDate");
+												if (currentDate && time) {
+													const combinedDateTime = createLocalDateForBackend(currentDate.toISOString().split('T')[0], time);
+													form.setValue("scheduledPickupTime", new Date(combinedDateTime));
+												}
+											}}
 											dateError={form.formState.errors.bookingDate?.message}
 											timeError={form.formState.errors.bookingTime?.message}
 											dateLabel="Service Date *"
@@ -409,7 +444,7 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												<p className="text-sm text-gray-600">All-inclusive fixed rate</p>
 											</div>
 											<span className="text-2xl font-bold text-primary">
-												${(service.fixedPrice / 100).toFixed(2)}
+												${service.fixedPrice?.toFixed(2) || '0.00'}
 											</span>
 										</div>
 
@@ -418,14 +453,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 												<div className="w-6 h-6 bg-primary/15 rounded-full flex items-center justify-center mt-0.5">
 													<span className="text-primary text-sm">ℹ️</span>
 												</div>
-												<div>
-													<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
-													<ul className="text-sm text-gray-600 space-y-1">
-														<li>• No payment required now</li>
-														<li>• Pay securely after service completion</li>
-														<li>• Multiple payment options available</li>
-													</ul>
-												</div>
+										<div>
+											<p className="text-sm text-gray-800 font-semibold mb-2">Payment Information</p>
+											<ul className="text-sm text-gray-600 space-y-1">
+												<li>• Authorize payment now to confirm your booking</li>
+												<li>• Card charged after service completion</li>
+												<li>• Secure payment via Square</li>
+											</ul>
+										</div>
 											</div>
 										</div>
 									</div>
@@ -436,14 +471,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
 									<Button
 										type="submit"
 										className="w-full h-14 text-lg font-bold"
-										disabled={createBookingMutation.isPending || sessionLoading}
+										disabled={createBookingMutation.isPending || sessionLoading || profileLoading}
 									>
 										{createBookingMutation.isPending ? (
 											<>
 												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
 												Creating Your Booking...
 											</>
-										) : sessionLoading ? (
+										) : sessionLoading || profileLoading ? (
 											<>
 												<Loader2 className="mr-3 h-6 w-6 animate-spin" />
 												Loading...

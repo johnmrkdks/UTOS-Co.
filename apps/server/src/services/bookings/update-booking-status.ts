@@ -1,7 +1,11 @@
 import { updateBooking } from "@/data/bookings/update-booking";
+import { getBookingById } from "@/data/bookings/get-booking-by-id";
 import type { DB } from "@/db";
 import { BookingStatusEnum } from "@/db/sqlite/enums";
 import type { UpdateBooking } from "@/schemas/shared";
+import { sendDriverAssignmentNotification, sendTripStatusNotification, sendBookingConfirmationEmail } from "@/services/notifications/booking-email-notification-service";
+import type { Env } from "@/types/env";
+import { ErrorFactory } from "@/utils/error-factory";
 import { z } from "zod";
 
 export const UpdateBookingStatusSchema = z.object({
@@ -11,13 +15,45 @@ export const UpdateBookingStatusSchema = z.object({
 	actualPickupTime: z.date().optional(),
 	actualDropoffTime: z.date().optional(),
 	actualDistance: z.number().int().optional(),
-	finalAmount: z.number().int().optional(),
-	extraCharges: z.number().int().optional(),
+	finalAmount: z.number().optional(),
+	extraCharges: z.number().optional(),
 });
 
 export type UpdateBookingStatusParams = z.infer<typeof UpdateBookingStatusSchema>;
 
-export async function updateBookingStatusService(db: DB, data: UpdateBookingStatusParams) {
+export async function updateBookingStatusService(db: DB, data: UpdateBookingStatusParams, env?: Env) {
+	console.log(`🔍 UPDATE STATUS DEBUG: Starting updateBookingStatusService for booking ${data.id} with status ${data.status}`);
+
+	try {
+		// For statuses that require starting a trip, validate car assignment
+		const statusesRequiringCar = [
+			BookingStatusEnum.DriverEnRoute,
+			BookingStatusEnum.InProgress, // Legacy status
+			BookingStatusEnum.PassengerOnBoard,
+		];
+
+		if (statusesRequiringCar.includes(data.status)) {
+			console.log(`🚗 UPDATE STATUS DEBUG: Status requires car validation: ${data.status}`);
+
+			// Get the current booking to check car assignment
+			const existingBooking = await getBookingById(db, data.id);
+
+			if (!existingBooking) {
+				console.error(`❌ UPDATE STATUS DEBUG: Booking ${data.id} not found`);
+				throw ErrorFactory.notFound("Booking");
+			}
+
+			console.log(`📋 UPDATE STATUS DEBUG: Found booking ${data.id}, carId: ${existingBooking.carId}`);
+
+			if (!existingBooking.carId) {
+				console.error(`❌ UPDATE STATUS DEBUG: No car assigned to booking ${data.id}`);
+				throw ErrorFactory.badRequest(
+					"Unable to start trip - no vehicle assigned to this booking. Please contact an administrator to assign a vehicle before starting the trip."
+				);
+			}
+
+			console.log(`✅ UPDATE STATUS DEBUG: Car validation passed for booking ${data.id}`);
+		}
 	const updateData: UpdateBooking = {
 		id: data.id,
 		status: data.status,
@@ -34,16 +70,37 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 			
 		case BookingStatusEnum.DriverAssigned:
 			if (!data.driverId) {
-				throw new Error("Driver ID is required when assigning a driver");
+				throw ErrorFactory.badRequest("Driver ID is required when assigning a driver");
 			}
 			updateData.driverId = data.driverId;
 			updateData.driverAssignedAt = now;
 			break;
 			
-		case BookingStatusEnum.InProgress:
+		case BookingStatusEnum.DriverEnRoute:
+			updateData.driverEnRouteAt = now;
+			break;
+			
+		case BookingStatusEnum.ArrivedPickup:
+			// Driver has arrived at pickup location
+			break;
+			
+		case BookingStatusEnum.PassengerOnBoard:
+		case BookingStatusEnum.InProgress: // Legacy support
 			updateData.serviceStartedAt = now;
 			if (data.actualPickupTime) {
 				updateData.actualPickupTime = data.actualPickupTime;
+			}
+			break;
+			
+		case BookingStatusEnum.DroppedOff:
+			if (data.actualDropoffTime) {
+				updateData.actualDropoffTime = data.actualDropoffTime;
+			}
+			break;
+			
+		case BookingStatusEnum.AwaitingExtras:
+			if (data.extraCharges !== undefined) {
+				updateData.extraCharges = data.extraCharges;
 			}
 			break;
 			
@@ -58,13 +115,115 @@ export async function updateBookingStatusService(db: DB, data: UpdateBookingStat
 			if (data.finalAmount) {
 				updateData.finalAmount = data.finalAmount;
 			}
-			if (data.extraCharges) {
+			if (data.extraCharges !== undefined) {
 				updateData.extraCharges = data.extraCharges;
 			}
 			break;
 	}
-	
-	return await updateBooking(db, { id: data.id, data: updateData });
+
+		console.log(`💾 UPDATE STATUS DEBUG: Updating booking in database with data:`, JSON.stringify(updateData, null, 2));
+		const result = await updateBooking(db, { id: data.id, data: updateData });
+		console.log(`✅ UPDATE STATUS DEBUG: Database update completed successfully for booking ${data.id}`);
+
+		// Send email notifications after successful booking update
+		console.log(`📧 EMAIL DEBUG: Checking email notification conditions for booking ${data.id}`);
+		console.log(`📧 EMAIL DEBUG: env available: ${!!env}, result available: ${!!result}, status: ${data.status}`);
+		if (!env) {
+			console.error(`❌ EMAIL DEBUG: env is missing - emails will not be sent. Check tRPC context passes env.`);
+		}
+
+		if (env && result) {
+		console.log(`✅ EMAIL DEBUG: Entering email notification block for status ${data.status}`);
+		try {
+			switch (data.status) {
+				case BookingStatusEnum.Confirmed:
+					// Send booking confirmation email when admin confirms the booking
+					try {
+						await sendBookingConfirmationEmail(data.id, env);
+						console.log(`✅ Booking confirmation email sent for booking ${data.id}`);
+					} catch (emailError) {
+						console.error(`❌ Failed to send booking confirmation email:`, emailError);
+					}
+					break;
+
+				case BookingStatusEnum.DriverAssigned:
+					console.log(`🚗 EMAIL DEBUG: Driver assignment case - driverId: ${data.driverId}`);
+					if (data.driverId) {
+						console.log(`📧 EMAIL DEBUG: Calling sendDriverAssignmentNotification for booking ${data.id}, driver ${data.driverId}`);
+						await sendDriverAssignmentNotification({
+							bookingId: data.id,
+							driverId: data.driverId,
+							env,
+						});
+						console.log(`✅ Driver assignment notification sent for booking ${data.id}`);
+					} else {
+						console.log(`❌ EMAIL DEBUG: No driverId provided for driver assignment`);
+					}
+					break;
+
+				case BookingStatusEnum.Cancelled:
+					// Send cancellation email to client
+					console.log(`📧 EMAIL DEBUG: Sending cancellation email to client for booking ${data.id}`);
+					await sendTripStatusNotification({
+						bookingId: data.id,
+						status: "cancelled",
+						env,
+					});
+					console.log(`✅ Cancellation email sent to client for booking ${data.id}`);
+					break;
+
+				case BookingStatusEnum.InProgress:
+				case BookingStatusEnum.PassengerOnBoard:
+				case BookingStatusEnum.DriverEnRoute:
+				case BookingStatusEnum.ArrivedPickup:
+				case BookingStatusEnum.DroppedOff:
+				case BookingStatusEnum.AwaitingExtras:
+				case BookingStatusEnum.AwaitingPricingReview:
+				case BookingStatusEnum.NoShow:
+				case BookingStatusEnum.Failed:
+				case BookingStatusEnum.Pending:
+					// No client email on driver status updates - only on confirmed, completed, cancelled
+					console.log(`⏭️ EMAIL DEBUG: Skipping client email for status: ${data.status}`);
+					break;
+
+				case BookingStatusEnum.Completed:
+					// Send completion summary email to client
+					console.log(`📧 EMAIL DEBUG: Sending completion email to client for booking ${data.id}`);
+					await sendTripStatusNotification({
+						bookingId: data.id,
+						status: "completed",
+						env,
+					});
+					console.log(`✅ Completion email sent to client for booking ${data.id}`);
+					break;
+
+				default:
+					console.log(`⏭️  EMAIL DEBUG: No email notification case for status: ${data.status}`);
+					break;
+			}
+		} catch (emailError) {
+			// Log email errors but don't fail the booking update
+			console.error(`❌ EMAIL DEBUG: Failed to send email notification for booking ${data.id}:`, emailError);
+			console.error(`❌ EMAIL DEBUG: Email error stack:`, emailError instanceof Error ? emailError.stack : 'No stack trace');
+		}
+	} else {
+		console.log(`⏭️  EMAIL DEBUG: Skipping email notifications - env: ${!!env}, result: ${!!result}`);
+	}
+
+	console.log(`✅ UPDATE STATUS DEBUG: Successfully completed updateBookingStatusService for booking ${data.id}`);
+	return result;
+
+	} catch (error) {
+		console.error(`❌ UPDATE STATUS DEBUG: Error in updateBookingStatusService for booking ${data.id}:`, error);
+		console.error(`❌ UPDATE STATUS DEBUG: Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+		console.error(`❌ UPDATE STATUS DEBUG: Error details:`, {
+			bookingId: data.id,
+			status: data.status,
+			errorMessage: error instanceof Error ? error.message : 'Unknown error',
+			errorName: error instanceof Error ? error.name : 'Unknown',
+		});
+		throw error; // Re-throw to let tRPC handle it
+	}
 }
 
 export const AssignDriverSchema = z.object({
@@ -74,10 +233,23 @@ export const AssignDriverSchema = z.object({
 
 export type AssignDriverParams = z.infer<typeof AssignDriverSchema>;
 
-export async function assignDriverService(db: DB, data: AssignDriverParams) {
+export async function assignDriverService(db: DB, data: AssignDriverParams, env?: Env) {
+	// Validate that car is assigned before allowing driver assignment
+	const existingBooking = await getBookingById(db, data.bookingId);
+
+	if (!existingBooking) {
+		throw ErrorFactory.notFound("Booking");
+	}
+
+	if (!existingBooking.carId) {
+		throw ErrorFactory.badRequest(
+			"Cannot assign driver - no vehicle assigned to this booking. Please assign a vehicle first before assigning a driver."
+		);
+	}
+
 	return await updateBookingStatusService(db, {
 		id: data.bookingId,
 		status: BookingStatusEnum.DriverAssigned,
 		driverId: data.driverId,
-	});
+	}, env);
 }

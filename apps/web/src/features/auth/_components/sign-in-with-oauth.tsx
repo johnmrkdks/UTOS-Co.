@@ -5,6 +5,8 @@ import { useState } from "react";
 import { companyIcons } from "@/features/auth/_utils/icons";
 import { useSignInWitGoogleOAuthMutation } from "@/features/auth/_hooks/query/use-sign-in-with-google-oauth-mutation";
 import { OAuthButton } from "./oauth-button";
+import { handlePostLoginRedirect } from "@/utils/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function SignInWithOAuth() {
 	const navigate = useNavigate({
@@ -14,6 +16,7 @@ export function SignInWithOAuth() {
 	const [isRedirecting, setIsRedirecting] = useState(false);
 	const mutation = useSignInWitGoogleOAuthMutation();
 	const { isPending } = authClient.useSession();
+	const queryClient = useQueryClient();
 
 	if (isPending) {
 		return <Loader />;
@@ -24,15 +27,19 @@ export function SignInWithOAuth() {
 
 		const redirectPath = search.redirect;
 		mutation.mutate(redirectPath, {
-			onSuccess: ({ data }) => {
+			onSuccess: async ({ data }) => {
 				if (data && data.redirect) {
 					setIsRedirecting(true);
+					// OAuth provider will handle the redirect
+					return;
 				}
 
 				if (data && !data.redirect) {
-					const finalRedirect = redirectPath || "/";
-					navigate({
-						to: finalRedirect,
+					// Use unified post-login redirect handler
+					await handlePostLoginRedirect({
+						queryClient,
+						navigate,
+						redirectPath,
 					});
 				}
 			},
@@ -46,7 +53,7 @@ export function SignInWithOAuth() {
 				icon={companyIcons.google || "/placeholder.svg?height=16&width=16"}
 				onClick={signInWithGoogle}
 				isLoading={isRedirecting}
-			/>
+				/>
 		</div>
 	);
 }

@@ -50,7 +50,11 @@ export function DriverMobileMenuContent({
 
 				{/* Navigation */}
 				<div className="p-4">
-					<DriverNavigation onNavigate={onClose} />
+					<DriverNavigation 
+						onNavigate={onClose} 
+						driverStatus={driverStatus}
+						needsOnboarding={needsOnboarding}
+					/>
 				</div>
 
 				{/* Account Status */}

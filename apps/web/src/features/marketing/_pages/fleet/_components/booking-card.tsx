@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Card,
@@ -9,17 +10,21 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import placeHolder from "@/assets/placeholder.svg";
-import { Check, Crown, Users, Clock } from "lucide-react";
+import { Check, Crown, Users, Car, Fuel, Settings, ArrowRight, Briefcase, Images } from "lucide-react";
 import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
 import { Link } from "@tanstack/react-router";
 import { useUserQuery } from "@/hooks/query/use-user-query";
+import { CarImageGalleryDialog } from "./car-image-gallery-dialog";
 
 export type BookingProps = {
 	id: string; // Add carId for pricing lookup
 	model: string;
+	brand: string;
+	category: string;
 	description: string;
 	features: string[];
 	image?: string;
+	images?: { url: string; altText?: string | null }[];
 	popular?: boolean;
 }
 
@@ -30,87 +35,137 @@ type BookingCardProps = BookingProps & {
 export function BookingCard({
 	id,
 	model,
+	brand,
+	category,
 	description,
 	features,
 	image,
+	images,
 	popular,
 	className,
 	...props
 }: BookingCardProps) {
 	const { session } = useUserQuery();
+	const [galleryOpen, setGalleryOpen] = useState(false);
+	const hasImages = images && images.length > 0;
+	const hasMultipleImages = hasImages && images!.length > 1;
+
 	return (
+		<>
 		<Card className={cn(
-			"relative bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group",
-			popular && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+			"relative bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden rounded-xl p-0",
 			className
 		)} {...props}>
-			{popular && (
-				<div className="absolute top-4 right-4 z-10">
-					<Badge className="bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold">
-						<Crown className="w-3 h-3 mr-1" />
-						Most Popular
+			{/* Hero Image Section */}
+			<div className="relative aspect-[3/2] bg-gray-50 overflow-hidden rounded-t-xl group">
+				<img
+					src={image || placeHolder}
+					alt={`${brand} ${model}`}
+					className="w-full h-full object-cover rounded-t-xl"
+				/>
+
+				{/* Browse Images overlay - show when car has images */}
+				{hasImages && (
+					<Button
+						variant="secondary"
+						size="sm"
+						className="absolute bottom-2 right-2 z-20 opacity-90 hover:opacity-100 gap-1.5"
+						onClick={() => setGalleryOpen(true)}
+					>
+						<Images className="h-4 w-4" />
+						{hasMultipleImages ? `Browse ${images!.length} Images` : "View Image"}
+					</Button>
+				)}
+
+				{/* Category Badge */}
+				<div className="absolute top-0 left-0 z-20">
+					<Badge className="bg-gray-100 text-gray-700 px-2 py-1 text-xs font-medium border-0 rounded-tl-xl rounded-br-md">
+						{category}
 					</Badge>
 				</div>
-			)}
-			
-			<CardHeader className="pb-4">
-				<div className="aspect-video bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-					<img 
-						src={image || placeHolder} 
-						alt={model} 
-						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-					/>
-				</div>
-				<CardTitle className="text-xl font-bold text-card-foreground mb-2">{model}</CardTitle>
-				<p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
-			</CardHeader>
-			
-			<CardContent className="space-y-6">
-				{/* Features */}
-				<div className="space-y-3">
-					<h4 className="font-semibold text-card-foreground text-sm">Features Included:</h4>
-					<div className="space-y-2">
-						{features.map((feature, index) => (
-							<div key={index} className="flex items-center gap-2">
-								<Check className="w-4 h-4 text-primary flex-shrink-0" />
-								<span className="text-muted-foreground text-sm">{feature}</span>
-							</div>
-						))}
+			</div>
+
+			{/* Content Section */}
+			<div className="p-4">
+				{/* Title and Price Row */}
+				<div className="flex items-start justify-between mb-3">
+					<div>
+						<h3 className="font-semibold text-gray-900 text-lg mb-1">
+							{model}
+						</h3>
+						<p className="text-gray-600 text-sm">
+							{brand} {model}
+						</p>
 					</div>
-				</div>
-				
-				{/* Dynamic Pricing */}
-				<div className="bg-beige/50 rounded-lg p-4 space-y-3">
-					<h4 className="font-semibold text-foreground text-sm mb-3">Starting From:</h4>
-					<div className="flex justify-center">
-						<CarPriceDisplay 
+					<div className="text-right">
+						<CarPriceDisplay
 							carId={id}
 							variant="card"
-							className="text-center"
+							className=""
 						/>
 					</div>
-					<div className="text-center">
-						<div className="flex justify-center items-center gap-1 text-muted-foreground text-xs">
-							<Clock className="w-3 h-3" />
-							<span>2 hour minimum booking</span>
-						</div>
-					</div>
 				</div>
-			</CardContent>
-			
-			<CardFooter className="pt-6">
-				<div className="w-full">
-					{/* Both authenticated and non-authenticated users start with public calculate-quote */}
-					<Link to="/calculate-quote" search={{ selectedCarId: id }}>
-						<Button 
-							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-							size="lg"
+
+				{/* Feature Icons Row */}
+				<div className="flex items-center gap-4 mb-4">
+					{features.slice(0, 3).map((feature, index) => {
+						const getFeatureIcon = (feature: string) => {
+							if (feature.toLowerCase().includes('passenger') || feature.toLowerCase().includes('seat')) return { icon: Users, text: feature };
+							if (feature.toLowerCase().includes('bag') || feature.toLowerCase().includes('luggage')) return { icon: Briefcase, text: feature };
+							if (feature.toLowerCase().includes('petrol') || feature.toLowerCase().includes('fuel')) return { icon: Fuel, text: feature };
+							if (feature.toLowerCase().includes('automatic') || feature.toLowerCase().includes('transmission')) return { icon: Settings, text: feature };
+							return { icon: Car, text: feature };
+						};
+
+						const { icon: IconComponent, text } = getFeatureIcon(feature);
+
+						return (
+							<div key={index} className="flex items-center gap-1 text-gray-600">
+								<IconComponent className="w-4 h-4" />
+								<span className="text-xs">{text}</span>
+							</div>
+						);
+					})}
+				</div>
+
+				{/* Feature Badges */}
+				<div className="flex flex-wrap gap-2 mb-4">
+					{features.slice(3, 6).map((feature, index) => (
+						<Badge key={index} className="bg-gray-100 text-gray-700 px-2 py-1 text-xs font-normal border-0 rounded-md">
+							{feature}
+						</Badge>
+					))}
+					{features.length > 6 && (
+						<Badge className="bg-gray-100 text-gray-700 px-2 py-1 text-xs font-normal border-0 rounded-md">
+							+{features.length - 6} more
+						</Badge>
+					)}
+				</div>
+
+				{/* Description */}
+				<p className="text-gray-600 text-sm mb-4 line-clamp-2">
+					{description}
+				</p>
+
+				{/* Button Section */}
+				<div className="mt-4">
+					<Link to="/calculate-quote" search={{ selectedCarId: id }} className="block">
+						<Button
+							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 text-base font-medium rounded-lg"
 						>
-							Book Now
+							Book
 						</Button>
 					</Link>
 				</div>
-			</CardFooter>
+			</div>
 		</Card>
+
+		<CarImageGalleryDialog
+			open={galleryOpen}
+			onOpenChange={setGalleryOpen}
+			images={images || (image ? [{ url: image, altText: `${brand} ${model}` }] : [])}
+			carName={`${brand} ${model}`}
+		/>
+		</>
 	);
 }

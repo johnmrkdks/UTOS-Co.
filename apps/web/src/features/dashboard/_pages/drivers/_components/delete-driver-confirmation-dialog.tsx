@@ -26,7 +26,7 @@ interface DeleteDriverConfirmationDialogProps {
 	driver: any;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onConfirm: (driverId: string) => Promise<void>;
+	onConfirm: (driverId: string, forceDelete?: boolean, confirmationText?: string) => Promise<void>;
 	isDeleting: boolean;
 }
 
@@ -40,9 +40,11 @@ export function DeleteDriverConfirmationDialog({
 	const [step, setStep] = useState(1);
 	const [confirmationText, setConfirmationText] = useState("");
 	const [driverNameConfirmation, setDriverNameConfirmation] = useState("");
+	const [bookingCheckPassed, setBookingCheckPassed] = useState(false);
+	const [bookingError, setBookingError] = useState<any>(null);
 
 	const driverName = driver?.user?.name || "Unknown Driver";
-	const expectedConfirmation = "DELETE DRIVER ACCOUNT";
+	const expectedConfirmation = "DELETE";
 	const isConfirmationValid = confirmationText === expectedConfirmation;
 	const isNameValid = driverNameConfirmation.toLowerCase() === driverName.toLowerCase();
 
@@ -50,18 +52,42 @@ export function DeleteDriverConfirmationDialog({
 		setStep(1);
 		setConfirmationText("");
 		setDriverNameConfirmation("");
+		setBookingCheckPassed(false);
+		setBookingError(null);
 		onOpenChange(false);
 	};
 
 	const handleNextStep = () => {
-		if (step < 3) {
+		if (step < 4) {
 			setStep(step + 1);
+		}
+	};
+
+	const handleCheckBookings = async () => {
+		try {
+			// Try to delete without force to check for bookings
+			await onConfirm(driver.id, false, ""); // This should trigger validation
+			setBookingCheckPassed(true);
+			handleNextStep();
+		} catch (error: any) {
+			const errorMessage = error.message;
+			try {
+				const errorData = JSON.parse(errorMessage);
+				if (errorData.type === 'DRIVER_HAS_ACTIVE_BOOKINGS' || errorData.type === 'CONFIRMATION_REQUIRED') {
+					setBookingError(errorData);
+					handleNextStep(); // Proceed to show booking warning
+				} else {
+					setBookingError({ type: 'UNKNOWN_ERROR', message: errorMessage });
+				}
+			} catch {
+				setBookingError({ type: 'UNKNOWN_ERROR', message: errorMessage });
+			}
 		}
 	};
 
 	const handleConfirmDelete = async () => {
 		if (isConfirmationValid && isNameValid && driver?.id) {
-			await onConfirm(driver.id);
+			await onConfirm(driver.id, true, expectedConfirmation);
 			handleClose();
 		}
 	};
@@ -135,16 +161,111 @@ export function DeleteDriverConfirmationDialog({
 				</Button>
 				<Button 
 					variant="destructive" 
-					onClick={handleNextStep}
+					onClick={handleCheckBookings}
 					className="bg-red-600 hover:bg-red-700"
+					disabled={isDeleting}
 				>
-					I Understand, Continue
+					{isDeleting ? "Checking..." : "Check for Active Bookings"}
 				</Button>
 			</DialogFooter>
 		</>
 	);
 
 	const renderStep2 = () => (
+		<>
+			<DialogHeader>
+				<DialogTitle className="flex items-center gap-2 text-amber-600">
+					<Calendar className="h-5 w-5" />
+					Active Bookings Check
+				</DialogTitle>
+				<DialogDescription>
+					{bookingError?.type === 'DRIVER_HAS_ACTIVE_BOOKINGS' 
+						? "This driver has active bookings that will be affected by deletion."
+						: bookingError?.type === 'CONFIRMATION_REQUIRED'
+						? "Driver validation complete. Ready to proceed with deletion."
+						: "Checking for active bookings..."
+					}
+				</DialogDescription>
+			</DialogHeader>
+
+			<div className="space-y-4">
+				{bookingError?.type === 'DRIVER_HAS_ACTIVE_BOOKINGS' && (
+					<>
+						<div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+							<p className="text-amber-800 font-medium mb-2">⚠️ Active Bookings Found:</p>
+							<div className="text-amber-700 text-sm space-y-1">
+								<p>• <strong>{bookingError.details.upcomingBookings}</strong> upcoming bookings</p>
+								<p>• <strong>{bookingError.details.inProgressBookings}</strong> in-progress bookings</p>
+							</div>
+						</div>
+						
+						{bookingError.details.bookings && bookingError.details.bookings.length > 0 && (
+							<div className="border rounded-lg p-4 bg-gray-50">
+								<h4 className="font-medium mb-3 flex items-center gap-2">
+									<Car className="h-4 w-4" />
+									Affected Bookings
+								</h4>
+								<div className="space-y-2 max-h-40 overflow-y-auto">
+									{bookingError.details.bookings.map((booking: any, index: number) => (
+										<div key={index} className="bg-white border rounded p-3 text-sm">
+											<div className="flex justify-between items-start mb-1">
+												<span className="font-medium">{booking.customer}</span>
+												<Badge variant="secondary" className="text-xs">
+													{booking.status.replace('_', ' ')}
+												</Badge>
+											</div>
+											<p className="text-gray-600 text-xs">{booking.route}</p>
+											<p className="text-gray-500 text-xs mt-1">
+												{new Date(booking.scheduledPickupTime).toLocaleString()}
+											</p>
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+						
+						<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+							<p className="text-red-800 font-medium mb-2">⚠️ Deletion Impact:</p>
+							<ul className="text-red-700 text-sm space-y-1 list-disc list-inside">
+								<li>All active bookings will be <strong>cancelled</strong></li>
+								<li>Customers will need to be notified and reassigned</li>
+								<li>Booking history will be permanently deleted</li>
+							</ul>
+						</div>
+					</>
+				)}
+				
+				{bookingError?.type === 'CONFIRMATION_REQUIRED' && (
+					<div className="bg-green-50 border border-green-200 rounded-lg p-4">
+						<p className="text-green-800 font-medium mb-2">✅ Safe to Delete:</p>
+						<div className="text-green-700 text-sm space-y-1">
+							<p>• No active bookings found</p>
+							<p>• Driver can be safely removed</p>
+							<p>• Total booking history: <strong>{bookingError.details.totalBookings}</strong></p>
+						</div>
+					</div>
+				)}
+			</div>
+
+			<DialogFooter>
+				<Button variant="outline" onClick={handleClose}>
+					Cancel Deletion
+				</Button>
+				<Button 
+					variant="destructive" 
+					onClick={handleNextStep}
+					className="bg-red-600 hover:bg-red-700"
+				>
+					{bookingError?.type === 'DRIVER_HAS_ACTIVE_BOOKINGS' 
+						? "Force Delete Anyway" 
+						: "Continue with Deletion"
+					}
+				</Button>
+			</DialogFooter>
+		</>
+	);
+
+	const renderStep3 = () => (
 		<>
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-2 text-red-600">
@@ -188,7 +309,7 @@ export function DeleteDriverConfirmationDialog({
 			</div>
 
 			<DialogFooter>
-				<Button variant="outline" onClick={() => setStep(1)}>
+				<Button variant="outline" onClick={() => setStep(2)}>
 					Back
 				</Button>
 				<Button 
@@ -203,7 +324,7 @@ export function DeleteDriverConfirmationDialog({
 		</>
 	);
 
-	const renderStep3 = () => (
+	const renderStep4 = () => (
 		<>
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-2 text-red-600">
@@ -255,7 +376,7 @@ export function DeleteDriverConfirmationDialog({
 			</div>
 
 			<DialogFooter>
-				<Button variant="outline" onClick={() => setStep(2)}>
+				<Button variant="outline" onClick={() => setStep(3)}>
 					Back
 				</Button>
 				<Button 
@@ -280,7 +401,7 @@ export function DeleteDriverConfirmationDialog({
 	const renderProgressIndicator = () => (
 		<div className="flex items-center justify-center mb-6">
 			<div className="flex items-center space-x-2">
-				{[1, 2, 3].map((stepNumber) => (
+				{[1, 2, 3, 4].map((stepNumber) => (
 					<div key={stepNumber} className="flex items-center">
 						<div
 							className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
@@ -293,7 +414,7 @@ export function DeleteDriverConfirmationDialog({
 						>
 							{stepNumber < step ? <CheckCircle className="h-4 w-4" /> : stepNumber}
 						</div>
-						{stepNumber < 3 && (
+						{stepNumber < 4 && (
 							<div className={`w-8 h-0.5 mx-2 ${stepNumber < step ? "bg-green-500" : "bg-gray-200"}`} />
 						)}
 					</div>
@@ -304,11 +425,12 @@ export function DeleteDriverConfirmationDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
 				{renderProgressIndicator()}
 				{step === 1 && renderStep1()}
 				{step === 2 && renderStep2()}
 				{step === 3 && renderStep3()}
+				{step === 4 && renderStep4()}
 			</DialogContent>
 		</Dialog>
 	);

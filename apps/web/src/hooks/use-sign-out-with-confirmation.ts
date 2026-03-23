@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UseSignOutWithConfirmationProps {
 	redirectTo?: string;
@@ -17,6 +18,7 @@ export const useSignOutWithConfirmation = ({
 	onSignOutError,
 }: UseSignOutWithConfirmationProps = {}) => {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -38,7 +40,19 @@ export const useSignOutWithConfirmation = ({
 					onSuccess: () => {
 						setIsDialogOpen(false);
 						onSignOutSuccess?.();
-						navigate({ to: redirectTo });
+
+						// Clear all query cache to prevent background refetches
+						queryClient.clear();
+
+						// Clear any persisted query data
+						queryClient.getQueryCache().clear();
+						queryClient.getMutationCache().clear();
+
+						// Add a small delay to ensure session is cleared before navigation
+						setTimeout(() => {
+							navigate({ to: redirectTo });
+						}, 100);
+
 						toast.success("Signed out successfully", {
 							description: "You have been securely signed out of your account.",
 						});

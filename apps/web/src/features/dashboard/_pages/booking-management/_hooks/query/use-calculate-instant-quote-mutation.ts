@@ -1,16 +1,26 @@
 import { trpc } from "@/trpc";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const useCalculateInstantQuoteMutation = () => {
-	return useMutation(trpc.bookings.calculateInstantQuote.mutationOptions({
-		onSuccess: (data) => {
-			toast.success(`Quote calculated: $${data.totalAmount.toFixed(2)}`);
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (input: any) => {
+			// Use queryClient.fetchQuery since calculateInstantQuote is a query, not a mutation
+			return await queryClient.fetchQuery(
+				trpc.bookings.calculateInstantQuote.queryOptions(input)
+			);
 		},
-		onError: (error) => {
+		onSuccess: (data) => {
+			const totalAmount = data?.totalAmount || 0;
+			const formattedAmount = typeof totalAmount === 'number' ? totalAmount.toFixed(2) : '0.00';
+			toast.success(`Quote calculated: $${formattedAmount}`);
+		},
+		onError: (error: any) => {
 			toast.error("Error while calculating quote", {
 				description: error.message,
 			});
 		},
-	}));
+	});
 };

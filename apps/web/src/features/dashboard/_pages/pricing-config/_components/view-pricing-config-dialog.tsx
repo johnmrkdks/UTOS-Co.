@@ -21,7 +21,7 @@ type ViewPricingConfigDialogProps = {
 export function ViewPricingConfigDialog({ config, open, onOpenChange }: ViewPricingConfigDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+			<DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col" showCloseButton={false}>
 				<DialogHeader className="flex-shrink-0">
 					<DialogTitle className="flex items-center gap-2">
 						<DollarSign className="h-5 w-5" />

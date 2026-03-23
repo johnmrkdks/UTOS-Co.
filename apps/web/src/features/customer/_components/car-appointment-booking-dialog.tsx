@@ -29,7 +29,7 @@ const carAppointmentSchema = z.object({
 	
 	// Timing
 	scheduledPickupTime: z.date({
-		required_error: "Please select a pickup date and time",
+		message: "Please select a pickup date and time",
 	}),
 	
 	// Service details
@@ -84,7 +84,7 @@ export function CarAppointmentBookingDialog({
 	})
 
 	const form = useForm<CarAppointmentForm>({
-		resolver: zodResolver(carAppointmentSchema),
+		resolver: zodResolver(carAppointmentSchema) as any,
 		defaultValues: {
 			originAddress: "",
 			destinationAddress: "",
@@ -118,10 +118,10 @@ export function CarAppointmentBookingDialog({
 		
 		try {
 			// Calculate base pricing for custom booking
-			const baseFare = 5000 // $50.00 base fare in cents
+			const baseFare = 50.00 // $50.00 base fare
 			const estimatedDistance = 10000 // 10km default estimate in meters
-			const distanceFare = Math.round(estimatedDistance * 0.002 * 100) // $2 per km in cents
-			const timeFare = Math.round((data.estimatedDuration / 60) * 1000) // $10 per hour in cents
+			const distanceFare = (estimatedDistance * 0.002) // $2 per km
+			const timeFare = (data.estimatedDuration / 60) * 10 // $10 per hour
 			const totalAmount = baseFare + distanceFare + timeFare
 
 			await createCustomBookingMutation.mutateAsync({
@@ -137,7 +137,7 @@ export function CarAppointmentBookingDialog({
 				destinationLongitude: destinationGeometry?.location?.lng?.(),
 				
 				// Timing
-				scheduledPickupTime: data.scheduledPickupTime,
+				scheduledPickupTime: data.scheduledPickupTime.toISOString(),
 				estimatedDuration: data.estimatedDuration * 60, // convert to seconds
 				estimatedDistance,
 				

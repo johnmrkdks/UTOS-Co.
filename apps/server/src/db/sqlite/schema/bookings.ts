@@ -3,20 +3,23 @@ import { users } from "@/db/sqlite/schema/users";
 import { cars } from "@/db/sqlite/schema/cars";
 import { packages } from "@/db/sqlite/schema/packages";
 import { relations, sql } from "drizzle-orm";
-import { BookingStatusEnum, BookingTypeEnum } from "@/db/sqlite/enums";
+import { BookingStatusEnum, BookingTypeEnum, BookingPaymentStatusEnum } from "@/db/sqlite/enums";
 import { createId } from "@paralleldrive/cuid2";
 import { drivers } from "@/db/sqlite/schema/drivers";
 import { bookingStops } from "@/db/sqlite/schema/bookings/booking-stops";
+import { bookingExtras } from "@/db/sqlite/schema/bookings/booking-extras";
+import { offloadBookingDetails } from "@/db/sqlite/schema/bookings/offload-booking-details";
 
 export const bookings = sqliteTable("bookings", {
 	id: text("id").primaryKey().$defaultFn(() => createId()),
+	referenceNumber: text("reference_number"), // Generated in application code using system settings prefix
+	shareToken: text("share_token"), // Unique token for shareable tracking/update links (no auth)
 	bookingType: text("booking_type").notNull().$type<BookingTypeEnum>(),
 
 	carId: text("car_id")
 		.references(() => cars.id, { onDelete: "cascade" }),
 	userId: text("user_id")
-		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
+		.references(() => users.id, { onDelete: "cascade" }), // Null for guest bookings
 	driverId: text("driver_id").references(() => drivers.id),
 	packageId: text("package_id").references(() => packages.id, { onDelete: "cascade" }),
 
@@ -33,36 +36,49 @@ export const bookings = sqliteTable("bookings", {
 
 	// Timing
 	scheduledPickupTime: integer("scheduled_pickup_time", { mode: "timestamp" }).notNull(),
+	timezone: text("timezone"), // Booking-specific timezone (e.g., "Australia/Melbourne"), falls back to system default if null
 	estimatedDuration: integer("estimated_duration"), // in seconds
 	actualPickupTime: integer("actual_pickup_time", { mode: "timestamp" }),
 	actualDropoffTime: integer("actual_dropoff_time", { mode: "timestamp" }),
 
 	// Distance & pricing
-	estimatedDistance: integer("estimated_distance"), // in meters
-	actualDistance: integer("actual_distance"), // in meters
+	estimatedDistance: real("estimated_distance"), // in kilometers with decimal precision (e.g., 15.5)
+	actualDistance: real("actual_distance"), // in kilometers with decimal precision (e.g., 15.5)
 
-	// Pricing (different models for package vs custom)
-	quotedAmount: integer("quoted_amount").notNull(), // initial quote
-	finalAmount: integer("final_amount"), // actual charged amount
-	baseFare: integer("base_fare"), // for custom bookings
-	distanceFare: integer("distance_fare"), // for custom bookings
-	timeFare: integer("time_fare"), // for custom bookings
-	extraCharges: integer("extra_charges").default(0),
+	// Pricing (different models for package vs custom) - ALL AMOUNTS IN DOLLARS WITH DECIMAL PRECISION
+	quotedAmount: real("quoted_amount").notNull(), // initial quote in dollars (e.g., 45.75)
+	finalAmount: real("final_amount"), // actual charged amount in dollars
+	baseFare: real("base_fare"), // for custom bookings in dollars
+	distanceFare: real("distance_fare"), // for custom bookings in dollars
+	timeFare: real("time_fare"), // for custom bookings in dollars
+	extraCharges: real("extra_charges").default(0), // extra charges in dollars
 
 	// Customer details
 	customerName: text("customer_name").notNull(),
 	customerPhone: text("customer_phone").notNull(),
 	customerEmail: text("customer_email"),
 	passengerCount: integer("passenger_count").notNull().default(1),
+	luggageCount: integer("luggage_count").default(0),
 	specialRequests: text("special_requests"),
+	additionalNotes: text("additional_notes"), // Operational notes for drivers/admins
+	tollPreference: text("toll_preference").default("toll"), // "toll" | "no_toll" - route preference
 
 	status: text("status").notNull().$type<BookingStatusEnum>().default(BookingStatusEnum.Pending),
+	paymentStatus: text("payment_status").$type<BookingPaymentStatusEnum>(), // Square payment flow
+	isArchived: integer("is_archived", { mode: "boolean" }),
+	isGuestBooking: integer("is_guest_booking", { mode: "boolean" }).default(false),
 
 	// Booking timeline tracking
 	confirmedAt: integer("confirmed_at", { mode: "timestamp" }),
 	driverEnRouteAt: integer("driver_en_route_at", { mode: "timestamp" }),
 	serviceStartedAt: integer("service_started_at", { mode: "timestamp" }),
 	serviceCompletedAt: integer("service_completed_at", { mode: "timestamp" }),
+
+	// Email sent tracking (duplicate prevention)
+	confirmationEmailSentAt: integer("confirmation_email_sent_at", { mode: "timestamp" }),
+	driverAssignmentEmailSentAt: integer("driver_assignment_email_sent_at", { mode: "timestamp" }),
+	driverAssignmentEmailSentToDriverId: text("driver_assignment_email_sent_to_driver_id"), // Track which driver we sent to (for reassignment)
+	completionSummaryEmailSentAt: integer("completion_summary_email_sent_at", { mode: "timestamp" }),
 
 	createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
@@ -74,7 +90,14 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
 	driver: one(drivers, { fields: [bookings.driverId], references: [drivers.id] }),
 	package: one(packages, { fields: [bookings.packageId], references: [packages.id] }),
 	stops: many(bookingStops),
+	extras: many(bookingExtras),
+	offloadDetails: one(offloadBookingDetails, {
+		fields: [bookings.id],
+		references: [offloadBookingDetails.bookingId],
+	}),
 }));
+
+// Relations are defined in cars.ts to avoid circular imports
 
 export const bookingStopsRelations = relations(bookingStops, ({ one }) => ({
 	booking: one(bookings, { fields: [bookingStops.bookingId], references: [bookings.id] }),

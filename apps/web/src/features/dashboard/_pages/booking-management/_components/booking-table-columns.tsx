@@ -3,8 +3,9 @@ import { DataTableColumnHeader } from "@workspace/ui/components/data-table-colum
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { User, Car, UserCheck, Phone } from "lucide-react";
+import { User, Car, UserCheck, Phone, CircleDot } from "lucide-react";
 import { BookingTableRowActions } from "./booking-table-row-actions";
+import { StatusBadge } from "@/components/status-badge";
 
 // Booking interface
 export interface Booking {
@@ -13,13 +14,15 @@ export interface Booking {
 	status: string;
 	customerName: string;
 	customerPhone: string;
-	customerEmail?: string;
+	customerEmail?: string | null;
 	originAddress: string;
 	destinationAddress: string;
+	stops?: Array<{ id: string; address: string; }>;
 	scheduledPickupTime: string;
 	quotedAmount: number;
-	carId: string;
+	carId: string | null;
 	userId: string;
+	isArchived?: boolean | null;
 	car?: {
 		id: string;
 		name: string;
@@ -47,7 +50,18 @@ export interface Booking {
 			phone?: string;
 		};
 	};
+	offloadDetails?: {
+		id: string;
+		bookingId: string;
+		offloaderName: string;
+		jobType: string;
+		vehicleType: string;
+		createdAt: string;
+		updatedAt: string;
+	} | null;
+	paymentStatus?: string | null;
 	createdAt: string;
+	isGuestBooking?: boolean | null;
 	[key: string]: any;
 }
 
@@ -57,6 +71,8 @@ interface BookingTableColumnsOptions {
 	onToggleAllSelection?: () => void;
 	onEditBooking?: (booking: Booking) => void;
 	onCancelBooking?: (booking: Booking) => void;
+	onArchiveBooking?: (booking: Booking, isArchiving: boolean) => void;
+	onDeleteBooking?: (booking: Booking) => void;
 	enableRowSelection?: boolean;
 	compact?: boolean;
 }
@@ -68,7 +84,9 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		onToggleAllSelection,
 		onEditBooking,
 		onCancelBooking,
-		enableRowSelection = true,
+		onArchiveBooking,
+		onDeleteBooking,
+		enableRowSelection = false,
 		compact = false
 	} = options;
 
@@ -108,11 +126,15 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<DataTableColumnHeader column={column} title="Actions" />
 		),
 		cell: ({ row }) => (
-			<BookingTableRowActions
-				row={row}
-				onEditBooking={onEditBooking}
-				onCancelBooking={onCancelBooking}
-			/>
+			<div onClick={(e) => e.stopPropagation()}>
+				<BookingTableRowActions
+					row={row}
+					onEditBooking={onEditBooking}
+					onCancelBooking={onCancelBooking}
+					onArchiveBooking={onArchiveBooking}
+					onDeleteBooking={onDeleteBooking}
+				/>
+			</div>
 		),
 		enableSorting: false,
 		enableHiding: false,
@@ -145,8 +167,8 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			cell: ({ row }) => {
 				const type = row.getValue("bookingType") as string;
 				return (
-					<Badge variant={type === "package" ? "default" : "secondary"}>
-						{type === "package" ? "Package" : "Custom"}
+					<Badge variant={type === "package" ? "default" : type === "offload" ? "destructive" : "secondary"}>
+						{type === "package" ? "Package" : type === "offload" ? "Offload" : "Custom"}
 					</Badge>
 				);
 			},
@@ -163,21 +185,34 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 		),
 		cell: ({ row }) => {
 			const status = row.getValue("status") as string;
-			const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-				pending: "secondary",
-				confirmed: "default",
-				driver_assigned: "outline",
-				in_progress: "default",
-				completed: "default",
-				cancelled: "destructive",
-			};
-			return (
-				<Badge variant={statusColors[status] || "secondary"}>
-					{status.replace("_", " ").toUpperCase()}
-				</Badge>
-			);
+			return <StatusBadge status={status} size="md" />;
 		},
-		size: 130,
+		size: 140,
+	});
+
+	// Payment Status column
+	columns.push({
+		id: "paymentStatus",
+		accessorKey: "paymentStatus",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Payment" />
+		),
+		cell: ({ row }) => {
+			const status = (row.original.paymentStatus ?? "—") as string;
+			if (!status || status === "—") return <span className="text-xs text-muted-foreground">—</span>;
+			const config: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+				pending_payment: { label: "Pending", variant: "secondary" },
+				payment_authorized: { label: "Authorized", variant: "default" },
+				awaiting_capture: { label: "Awaiting Capture", variant: "outline" },
+				payment_captured: { label: "Captured", variant: "default" },
+				payment_failed: { label: "Failed", variant: "destructive" },
+				payment_cancelled: { label: "Cancelled", variant: "destructive" },
+				refunded: { label: "Refunded", variant: "secondary" },
+			};
+			const c = config[status] ?? { label: status.replace(/_/g, " "), variant: "outline" as const };
+			return <Badge variant={c.variant} className="text-xs">{c.label}</Badge>;
+		},
+		size: 140,
 	});
 
 	// Customer column
@@ -188,18 +223,26 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			<DataTableColumnHeader column={column} title="Customer" />
 		),
 		cell: ({ row }) => (
-			<div className="flex items-center space-x-2">
-				<User className="h-4 w-4 text-muted-foreground" />
-				<div>
-					<div className="font-medium text-xs truncate">{row.getValue("customerName")}</div>
-					<div className="text-xs text-muted-foreground flex items-center gap-1">
-						<Phone className="h-3 w-3" />
-						<span className="truncate">{row.original.customerPhone}</span>
+			<div className="flex items-center space-x-2 min-w-0 overflow-hidden">
+				<User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+				<div className="min-w-0 overflow-hidden flex-1">
+					<div className="flex items-center gap-1.5 min-w-0">
+						<span className="font-medium text-xs truncate min-w-0">{row.getValue("customerName") as string}</span>
+						{row.original.isGuestBooking && (
+							<Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal flex-shrink-0">
+								Guest
+							</Badge>
+						)}
+					</div>
+					<div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+						<Phone className="h-3 w-3 flex-shrink-0" />
+						<span className="truncate min-w-0">{row.original.customerPhone}</span>
 					</div>
 				</div>
 			</div>
 		),
-		size: 160,
+		size: 200,
+		meta: { className: "min-w-0 max-w-[200px] overflow-hidden" },
 	});
 
 	if (!compact) {
@@ -209,16 +252,48 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			accessorKey: "route",
 			header: "Route",
 			cell: ({ row }) => (
-				<div>
-					<div className="text-xs font-medium truncate">
+				<div className="min-w-0 overflow-hidden space-y-0.5">
+					<div className="text-xs font-medium truncate block" title={row.original.originAddress}>
 						From: {row.original.originAddress}
 					</div>
-					<div className="text-xs text-muted-foreground truncate">
+					{row.original.stops && row.original.stops.length > 0 && (
+						<div className="text-xs text-blue-600 truncate block">
+							{row.original.stops.length} stop{row.original.stops.length > 1 ? 's' : ''}
+						</div>
+					)}
+					<div className="text-xs text-muted-foreground truncate block" title={row.original.destinationAddress}>
 						To: {row.original.destinationAddress}
 					</div>
 				</div>
 			),
-			size: 200,
+			size: 260,
+			meta: { className: "min-w-0 max-w-[260px] overflow-hidden" },
+		});
+
+		// Stops column
+		columns.push({
+			id: "stops",
+			accessorKey: "stops",
+			header: "Stops",
+			cell: ({ row }) => {
+				const stops = row.original.stops;
+				if (!stops || stops.length === 0) {
+					return (
+						<div className="text-center">
+							<span className="text-xs text-muted-foreground">—</span>
+						</div>
+					);
+				}
+				return (
+					<div className="flex items-center gap-1">
+						<CircleDot className="h-3 w-3 text-blue-500" />
+						<Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+							{stops.length}
+						</Badge>
+					</div>
+				);
+			},
+			size: 80,
 		});
 	}
 
@@ -234,7 +309,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			return (
 				<div className="text-xs">
 					<div className="font-medium">{format(date, "MMM dd, yyyy")}</div>
-					<div className="text-muted-foreground">{format(date, "HH:mm")}</div>
+					<div className="text-muted-foreground">{format(date, "h:mm a")}</div>
 				</div>
 			);
 		},
@@ -252,7 +327,7 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			const amount = row.getValue("quotedAmount") as number;
 			return (
 				<div className="font-medium text-xs">
-					${(amount / 100).toFixed(2)}
+					${amount.toFixed(2)}
 				</div>
 			);
 		},
@@ -266,14 +341,15 @@ export const createBookingTableColumns = (options: BookingTableColumnsOptions = 
 			accessorKey: "car",
 			header: "Vehicle",
 			cell: ({ row }) => (
-				<div className="flex items-center space-x-2">
-					<Car className="h-4 w-4 text-muted-foreground" />
-					<div className="text-xs truncate">
+				<div className="flex items-center space-x-2 min-w-0 overflow-hidden">
+					<Car className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+					<div className="text-xs truncate min-w-0">
 						{row.original.car?.name || "Not assigned"}
 					</div>
 				</div>
 			),
-			size: 120,
+			size: 140,
+			meta: { className: "min-w-0" },
 		});
 
 		// Driver column

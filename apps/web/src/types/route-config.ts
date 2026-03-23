@@ -4,6 +4,8 @@ export type RouteConfig = {
 	path: string;
 	label: string;
 	icon?: LucideIcon;
-  isActive?: boolean;
+	isActive?: boolean;
 	params?: Record<string, any>;
+	/** Only visible to Super Admin */
+	superAdminOnly?: boolean;
 };

@@ -7,14 +7,22 @@ export enum UserRoleEnum {
 
 export enum BookingTypeEnum {
 	Package = "package",     // Fixed service packages
-	Custom = "custom"        // Custom route/instant quote
+	Custom = "custom",       // Custom route/instant quote
+	Guest = "guest",        // Guest booking (no account)
+	Offload = "offload"      // Manual bookings from other companies
 }
 
 export enum BookingStatusEnum {
 	Pending = "pending",           // Just created
 	Confirmed = "confirmed",       // Payment confirmed
 	DriverAssigned = "driver_assigned", // Driver allocated
-	InProgress = "in_progress",    // Service started
+	DriverEnRoute = "driver_en_route", // Driver started job - on the way to pickup
+	ArrivedPickup = "arrived_pickup",  // Driver arrived at pickup location
+	PassengerOnBoard = "passenger_on_board", // Passenger picked up (POB)
+	InProgress = "in_progress",    // Service started (legacy - same as PassengerOnBoard)
+	DroppedOff = "dropped_off",    // Passenger dropped off at destination
+	AwaitingExtras = "awaiting_extras", // Waiting for extras (tolls, parking, etc.)
+	AwaitingPricingReview = "awaiting_pricing_review", // Driver closed with waiting time - admin must finalize amount
 	Completed = "completed",       // Service finished
 	Cancelled = "cancelled",       // Cancelled by customer/admin
 	NoShow = "no_show",           // Customer didn't show up
@@ -34,10 +42,26 @@ export enum PaymentMethodEnum {
 	DebitCard = "debit_card",
 }
 
+/** Square payment flow status for bookings */
+export enum BookingPaymentStatusEnum {
+	PendingPayment = "pending_payment",
+	PaymentAuthorized = "payment_authorized",
+	AwaitingCapture = "awaiting_capture",
+	PaymentCaptured = "payment_captured",
+	PaymentFailed = "payment_failed",
+	PaymentCancelled = "payment_cancelled",
+	Refunded = "refunded",
+}
+
 export enum CarStatusEnum {
 	Available = "available",
 	Booked = "booked",
 	InService = "in_service",
 	Maintenance = "maintenance",
 	OutOfService = "out_of_service",
+}
+
+export enum RateTypeEnum {
+	Fixed = "fixed",    // Fixed price packages (weddings, concerts, etc.)
+	Hourly = "hourly",  // Hourly rate packages (tours, etc.)
 }

@@ -1,9 +1,9 @@
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import { Outlet, useLocation } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { useCurrentDriverQuery } from "@/hooks/query/use-current-driver-query";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
-import { useLocation } from "@tanstack/react-router";
+import { Loader } from "@/components/loader";
 import {
 	DriverTopNavigation,
 	DriverMobileMenuContent,
@@ -13,9 +13,8 @@ import {
 } from "../navigation";
 
 export function DriverLayout() {
-	const navigate = useNavigate();
 	const location = useLocation();
-	const { session, signOutWithConfirmation } = useUserQuery();
+	const { session, isPending, signOutWithConfirmation } = useUserQuery();
 	const { data: currentDriver } = useCurrentDriverQuery();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const navigationItems = useDriverNavigation();
@@ -27,16 +26,17 @@ export function DriverLayout() {
 
 	const user = session?.user;
 
-	// Redirect if not driver
-	if (user && user.role !== 'driver') {
-		navigate({ to: '/dashboard' });
-		return null;
+	// Show loading while session is being fetched
+	if (isPending) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loader />
+			</div>
+		);
 	}
 
-	if (!user) {
-		navigate({ to: '/' });
-		return null;
-	}
+	// Authentication and role checks are now handled in route beforeLoad
+	// No need for redirect logic here
 
 	// Driver status based on actual driver data with fallbacks
 	const driver = {

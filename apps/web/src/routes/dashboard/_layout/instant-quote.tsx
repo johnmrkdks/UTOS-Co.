@@ -31,12 +31,12 @@ function CustomerInstantQuotePage() {
 	const [originGeometry, setOriginGeometry] = useState<any>(null);
 	const [destinationGeometry, setDestinationGeometry] = useState<any>(null);
 	const [stopsGeometry, setStopsGeometry] = useState<any[]>([]);
-	
+
 	const availabilityQuery = useCheckInstantQuoteAvailabilityQuery();
 	const { data: carsData } = useGetPublishedCarsQuery({ limit: 50 });
-	
+
 	// Get pre-selected car if available
-	const preSelectedCar = search.selectedCarId && carsData?.data ? 
+	const preSelectedCar = search.selectedCarId && carsData?.data ?
 		carsData.data.find((car: any) => car.id === search.selectedCarId) : null;
 
 	const form = useForm({
@@ -71,12 +71,12 @@ function CustomerInstantQuotePage() {
 		params.set("destinationLat", destinationGeometry.location.lat().toString());
 		params.set("destinationLng", destinationGeometry.location.lng().toString());
 		params.set("fromCustomerArea", "true");
-		
+
 		// Pass through pre-selected car if available
 		if (search.selectedCarId) {
 			params.set("selectedCarId", search.selectedCarId);
 		}
-		
+
 		if (data.stops && data.stops.length > 0) {
 			const stopsData = data.stops.map((stop, index) => ({
 				address: stop.address,
@@ -90,15 +90,15 @@ function CustomerInstantQuotePage() {
 		if (search.selectedCarId) {
 			// Authenticated users stay within customer area - use customer calculate quote
 			params.set("fromCustomerArea", "true");
-			
-			navigate({ 
+
+			navigate({
 				to: "/dashboard/calculate-quote", // Keep authenticated users in customer area
 				search: Object.fromEntries(params) as any
 			})
 		} else {
 			// No car selected, go to vehicle selection first
-			navigate({ 
-				to: "/select-vehicle", 
+			navigate({
+				to: "/select-vehicle",
 				search: Object.fromEntries(params) as any
 			})
 		}
@@ -219,7 +219,7 @@ function CustomerInstantQuotePage() {
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 							{/* Origin Address */}
 							<FormField
-								control={form.control as any}
+								control={form.control}
 								name="originAddress"
 								render={({ field }) => (
 									<FormItem>
@@ -241,7 +241,7 @@ function CustomerInstantQuotePage() {
 
 							{/* Destination Address */}
 							<FormField
-								control={form.control as any}
+								control={form.control}
 								name="destinationAddress"
 								render={({ field }) => (
 									<FormItem>
@@ -268,7 +268,7 @@ function CustomerInstantQuotePage() {
 									{stopFields.map((field, index) => (
 										<div key={field.id} className="flex gap-2">
 											<FormField
-												control={form.control as any}
+												control={form.control}
 												name={`stops.${index}.address`}
 												render={({ field: stopField }) => (
 													<FormItem className="flex-1">
@@ -313,9 +313,9 @@ function CustomerInstantQuotePage() {
 							)}
 
 							{/* Submit Button */}
-							<Button 
-								type="submit" 
-								className="w-full" 
+							<Button
+								type="submit"
+								className="w-full"
 								size="lg"
 								disabled={!canProceedToCarSelection || availabilityQuery.isLoading}
 							>

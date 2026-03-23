@@ -3,7 +3,8 @@ import type { DB } from "@/db";
 import { bookings } from "@/db/sqlite/schema/bookings";
 import { packages } from "@/db/sqlite/schema/packages";
 import { drivers } from "@/db/sqlite/schema/drivers";
-import { and, gte, lte } from "drizzle-orm";
+import { bookingReviews } from "@/db/sqlite/schema/bookings/booking-reviews";
+import { and, gte, lte, eq } from "drizzle-orm";
 
 // Error handler since we can't find the original one
 function handleServiceError(error: unknown, message: string): never {
@@ -71,6 +72,29 @@ export interface DashboardAnalytics {
 		totalAmount: number | null;
 		createdAt: Date;
 	}>;
+
+	// Revenue by booking type (real data)
+	revenueByType: {
+		package: { revenue: number; count: number };
+		custom: { revenue: number; count: number };
+		offload: { revenue: number; count: number };
+	};
+
+	// Reviews (from booking_reviews)
+	reviews: {
+		totalReviews: number;
+		averageRating: number;
+		ratingDistribution: Record<number, number>;
+		recentReviews: Array<{
+			id: string;
+			bookingId: string | null;
+			serviceRating: number;
+			driverRating: number;
+			vehicleRating: number;
+			review: string | null;
+			createdAt: Date;
+		}>;
+	};
 }
 
 export async function getDashboardAnalyticsService(
@@ -118,11 +142,12 @@ export async function getDashboardAnalyticsService(
 		const completedBookings = allBookings.filter((b: any) => b.status === "completed").length;
 		const cancelledBookings = allBookings.filter((b: any) => b.status === "cancelled").length;
 		
-		// Calculate revenue metrics
-		const totalRevenue = allBookings.reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
+		// Calculate revenue metrics (use finalAmount or quotedAmount - both in dollars)
+		const getAmount = (b: any) => (b.finalAmount ?? b.quotedAmount ?? 0) * 100; // Convert to cents for consistency
+		const totalRevenue = allBookings.reduce((sum: number, b: any) => sum + getAmount(b), 0);
 		const monthlyRevenue = allBookings
 			.filter((b: any) => new Date(b.createdAt) >= startOfMonth)
-			.reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
+			.reduce((sum: number, b: any) => sum + getAmount(b), 0);
 		const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
 		
 		// Calculate package metrics
@@ -154,7 +179,7 @@ export async function getDashboardAnalyticsService(
 				const bookingDate = new Date(b.createdAt);
 				return bookingDate >= startOfLastMonth && bookingDate <= endOfLastMonth;
 			})
-			.reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
+			.reduce((sum: number, b: any) => sum + getAmount(b), 0);
 		const revenueGrowth = lastMonthRevenue > 0 
 			? Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
 			: monthlyRevenue > 0 ? 100 : 0;
@@ -170,8 +195,66 @@ export async function getDashboardAnalyticsService(
 				originAddress: booking.originAddress,
 				destinationAddress: booking.destinationAddress,
 				status: booking.status || "pending",
-				totalAmount: booking.totalAmount,
+				totalAmount: (booking.finalAmount ?? booking.quotedAmount ?? 0) * 100, // cents
 				createdAt: new Date(booking.createdAt),
+			}));
+
+		// Revenue by booking type (real data from bookings)
+		const packageBookings = allBookings.filter((b: any) => b.bookingType === "package");
+		const customBookings = allBookings.filter((b: any) => b.bookingType === "custom");
+		const offloadBookings = allBookings.filter((b: any) => b.bookingType === "offload");
+
+		const revenueByType = {
+			package: {
+				revenue: packageBookings.reduce((sum: number, b: any) => sum + getAmount(b), 0),
+				count: packageBookings.length,
+			},
+			custom: {
+				revenue: customBookings.reduce((sum: number, b: any) => sum + getAmount(b), 0),
+				count: customBookings.length,
+			},
+			offload: {
+				revenue: offloadBookings.reduce((sum: number, b: any) => sum + getAmount(b), 0),
+				count: offloadBookings.length,
+			},
+		};
+
+		// Reviews from booking_reviews
+		const allReviews = await db.select().from(bookingReviews);
+		const totalReviews = allReviews.length;
+		const avgService = totalReviews > 0
+			? allReviews.reduce((s, r) => s + (r.serviceRating ?? 0), 0) / totalReviews
+			: 0;
+		const avgDriver = totalReviews > 0
+			? allReviews.reduce((s, r) => s + (r.driverRating ?? 0), 0) / totalReviews
+			: 0;
+		const avgVehicle = totalReviews > 0
+			? allReviews.reduce((s, r) => s + (r.vehicleRating ?? 0), 0) / totalReviews
+			: 0;
+		const averageRating = totalReviews > 0
+			? (avgService + avgDriver + avgVehicle) / 3
+			: 0;
+
+		const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+		for (const r of allReviews) {
+			const avg = (r.serviceRating + r.driverRating + r.vehicleRating) / 3;
+			const rounded = Math.round(avg);
+			if (rounded >= 1 && rounded <= 5) {
+				ratingDistribution[rounded] = (ratingDistribution[rounded] ?? 0) + 1;
+			}
+		}
+
+		const recentReviews = allReviews
+			.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+			.slice(0, 5)
+			.map((r: any) => ({
+				id: r.id,
+				bookingId: r.bookingId,
+				serviceRating: r.serviceRating,
+				driverRating: r.driverRating,
+				vehicleRating: r.vehicleRating,
+				review: r.review,
+				createdAt: new Date(r.createdAt),
 			}));
 		
 		return {
@@ -216,6 +299,17 @@ export async function getDashboardAnalyticsService(
 			
 			// Recent activity
 			recentBookings,
+
+			// Revenue by type
+			revenueByType,
+
+			// Reviews
+			reviews: {
+				totalReviews,
+				averageRating: Math.round(averageRating * 10) / 10,
+				ratingDistribution,
+				recentReviews,
+			},
 		};
 		
 	} catch (error) {

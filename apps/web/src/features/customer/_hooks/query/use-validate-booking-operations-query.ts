@@ -7,6 +7,8 @@ interface BookingOperationValidation {
 	editReason?: string;
 	cancelReason?: string;
 	cancellationFeePercentage?: number;
+	hoursUntilPickup?: number;
+	hasDriverAssigned?: boolean;
 }
 
 export const useValidateBookingOperationsQuery = (bookingId: string, enabled = true) => {
@@ -16,9 +18,13 @@ export const useValidateBookingOperationsQuery = (bookingId: string, enabled = t
 		select: (data): BookingOperationValidation => data || {
 			canEdit: false,
 			canCancel: false,
-			editReason: undefined,
-			cancelReason: undefined,
+			editReason: "Unable to validate booking operations",
+			cancelReason: "Unable to validate booking operations",
 			cancellationFeePercentage: 0,
-		}
+			hoursUntilPickup: 0,
+			hasDriverAssigned: false,
+		},
+		refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes for time-sensitive validation
+		staleTime: 2 * 60 * 1000, // Consider data stale after 2 minutes
 	});
 };

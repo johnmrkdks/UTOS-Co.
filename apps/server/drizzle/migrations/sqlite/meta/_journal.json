@@ -8,6 +8,90 @@
       "when": 1755300354134,
       "tag": "0000_long_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1759507713451,
+      "tag": "0001_add_booking_extras",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1759689000000,
+      "tag": "0002_add_offload_booking_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1759780000000,
+      "tag": "0003_add_offload_booking_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1759781000000,
+      "tag": "0004_migrate_offload_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1759782000000,
+      "tag": "0005_convert_distance_to_real",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1759924519136,
+      "tag": "0006_add_booking_reference_prefix",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1759924600000,
+      "tag": "0007_populate_booking_references",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1759924700000,
+      "tag": "0008_fix_distance_types",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1759924800000,
+      "tag": "0009_add_driver_commission_rate",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1759924900000,
+      "tag": "0010_add_invoice_sent_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1759925000000,
+      "tag": "0011_add_booking_share_token",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1760000000000,
+      "tag": "0012_square_payments",
+      "breakpoints": true
     }
   ]
 }

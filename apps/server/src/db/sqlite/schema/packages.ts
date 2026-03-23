@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
+import { sql, relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { packageCategories } from "./packages/package-categories";
 import { packageServiceTypes } from "./packages/package-service-types";
@@ -19,14 +19,15 @@ export const packages = sqliteTable("packages", {
 	duration: integer("duration"), // in minutes (null for transfers)
 	maxDistance: integer("max_distance"), // in km (null if unlimited)
 
-	// Fixed pricing (since it's concluded/fixed)
-	fixedPrice: integer("fixed_price").notNull(), // in cents
-	extraKmPrice: integer("extra_km_price"), // if distance exceeds maxDistance
-	extraHourPrice: integer("extra_hour_price"), // if duration exceeds planned
-	depositRequired: integer("deposit_required"), // in cents
+	// Pricing (based on service type rate type)
+	fixedPrice: real("fixed_price"), // in dollars (for fixed rate packages)
+	hourlyRate: real("hourly_rate"), // in dollars per hour (for hourly rate packages)
+	extraKmPrice: real("extra_km_price"), // if distance exceeds maxDistance
+	extraHourPrice: real("extra_hour_price"), // if duration exceeds planned
+	depositRequired: real("deposit_required"), // in dollars
 
 	// Service constraints
-	maxPassengers: integer("max_passengers").default(4),
+	maxPassengers: integer("max_passengers").default(20),
 	advanceBookingHours: integer("advance_booking_hours").default(24), // minimum notice
 	cancellationHours: integer("cancellation_hours").default(24), // cancellation policy
 
@@ -49,4 +50,15 @@ export const packages = sqliteTable("packages", {
 }, (table) => ({
 	nameIdx: index("packages_name_idx").on(table.name),
 	publishedAvailabilityIdx: index("packages_published_availability_idx").on(table.isPublished, table.isAvailable),
+}));
+
+export const packagesRelations = relations(packages, ({ one }) => ({
+	packageServiceType: one(packageServiceTypes, {
+		fields: [packages.serviceTypeId],
+		references: [packageServiceTypes.id],
+	}),
+	category: one(packageCategories, {
+		fields: [packages.categoryId],
+		references: [packageCategories.id],
+	}),
 }));

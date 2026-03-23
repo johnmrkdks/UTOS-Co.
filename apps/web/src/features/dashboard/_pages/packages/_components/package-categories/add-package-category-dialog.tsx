@@ -51,7 +51,7 @@ export function AddPackageCategoryDialog() {
 
 	return (
 		<Dialog open={isModalOpen("add-package-category")} onOpenChange={handleClose}>
-			<DialogContent className="max-w-md">
+			<DialogContent className="max-w-md" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Add Package Category</DialogTitle>
 				</DialogHeader>

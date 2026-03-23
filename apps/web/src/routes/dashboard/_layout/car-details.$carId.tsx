@@ -10,6 +10,8 @@ import { Separator } from "@workspace/ui/components/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Progress } from "@workspace/ui/components/progress"
 import { useGetCarDetailsQuery } from "@/features/customer/_hooks/query/use-get-car-details-query"
+import { useGetReviewsForCarQuery } from "@/features/customer/_hooks/query/use-get-reviews-for-car-query"
+import { format } from "date-fns"
 
 export const Route = createFileRoute("/dashboard/_layout/car-details/$carId")({
 	component: CarDetailsPage,
@@ -27,7 +29,7 @@ function CarDetailsPage() {
 	}
 
 	const handleBack = () => {
-		navigate({ to: "/dashboard/cars" })
+		navigate({ to: "/fleet" })
 	}
 
 	if (isLoading) {
@@ -252,7 +254,7 @@ function CarDetailsPage() {
 					</Card>
 
 					{/* Reviews Section */}
-					<ReviewsSection />
+					<ReviewsSection carId={carId} />
 				</div>
 
 				{/* Sidebar - Right Column */}
@@ -412,57 +414,32 @@ function CarDetailsLoading() {
 	)
 }
 
-function ReviewsSection() {
-	// Mock reviews data
-	const reviews = [
-		{
-			id: 1,
-			author: "Selena Kye",
-			date: "February 2023",
-			rating: 5,
-			content: "Professional, punctual, and courteous—our chauffeur provided a smooth and stress-free ride. Highly recommend!",
-			avatar: "/api/placeholder/40/40"
-		},
-		{
-			id: 2,
-			author: "Jerry Holland",
-			date: "January 2023", 
-			rating: 5,
-			content: "Excellent service! The chauffeur was on time, well-dressed, and very polite throughout the trip.",
-			avatar: "/api/placeholder/40/40"
-		},
-		{
-			id: 3,
-			author: "Frank Rutherford",
-			date: "December 2022",
-			rating: 5,
-			content: "Smooth ride and great conversation. The chauffeur made the entire journey comfortable and enjoyable.",
-			avatar: "/api/placeholder/40/40"
-		},
-		{
-			id: 4,
-			author: "Emma Willis",
-			date: "November 2022",
-			rating: 5,
-			content: "Highly professional driver—knew the best routes and handled everything with care and class.",
-			avatar: "/api/placeholder/40/40"
-		}
-	]
-
+function ReviewsSection({ carId }: { carId: string }) {
 	const [showAll, setShowAll] = useState(false)
+	const { data, isLoading } = useGetReviewsForCarQuery(carId)
+
+	const reviews = data?.reviews ?? []
+	const totalReviews = data?.totalReviews ?? 0
+	const averageRating = data?.averageRating ?? 0
+	const ratingDistribution = data?.ratingDistribution ?? { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+
 	const displayedReviews = showAll ? reviews : reviews.slice(0, 2)
+	const distEntries = [5, 4, 3, 2, 1].map((stars) => ({
+		stars,
+		count: ratingDistribution[stars] ?? 0,
+		percentage: totalReviews > 0 ? ((ratingDistribution[stars] ?? 0) / totalReviews) * 100 : 0,
+	}))
 
-	// Calculate rating distribution (mock data)
-	const ratingDistribution = [
-		{ stars: 5, count: 280, percentage: 87 },
-		{ stars: 4, count: 35, percentage: 11 },
-		{ stars: 3, count: 6, percentage: 2 },
-		{ stars: 2, count: 2, percentage: 0 },
-		{ stars: 1, count: 1, percentage: 0 }
-	]
-
-	const totalReviews = ratingDistribution.reduce((sum, rating) => sum + rating.count, 0)
-	const averageRating = 4.84
+	if (isLoading) {
+		return (
+			<Card>
+				<CardContent className="py-8">
+					<Skeleton className="h-24 w-full" />
+					<Skeleton className="h-32 w-full mt-4" />
+				</CardContent>
+			</Card>
+		)
+	}
 
 	return (
 		<Card>
@@ -470,7 +447,7 @@ function ReviewsSection() {
 				<div className="flex items-center gap-4">
 					<div className="flex items-center gap-2">
 						<Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-						<span className="text-2xl font-bold">{averageRating}</span>
+						<span className="text-2xl font-bold">{averageRating.toFixed(1)}</span>
 					</div>
 					<div>
 						<div className="text-lg font-semibold">({totalReviews} reviews)</div>
@@ -478,64 +455,73 @@ function ReviewsSection() {
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-6">
-				{/* Rating Distribution */}
-				<div className="space-y-2">
-					{ratingDistribution.map((rating) => (
-						<div key={rating.stars} className="flex items-center gap-3">
-							<div className="flex items-center gap-1 w-12">
-								<span className="text-sm">{rating.stars}</span>
-								<Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-							</div>
-							<Progress value={rating.percentage} className="flex-1 h-2" />
-							<span className="text-sm text-muted-foreground w-8">{rating.count}</span>
-						</div>
-					))}
-				</div>
-
-				<Separator />
-
-				{/* Individual Reviews */}
-				<div className="space-y-4">
-					{displayedReviews.map((review) => (
-						<div key={review.id} className="space-y-3">
-							<div className="flex items-start gap-3">
-								<Avatar className="h-10 w-10">
-									<AvatarImage src={review.avatar} alt={review.author} />
-									<AvatarFallback>{review.author.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-								</Avatar>
-								<div className="flex-1">
-									<div className="flex items-center gap-2 mb-1">
-										<span className="font-semibold">{review.author}</span>
-										<span className="text-muted-foreground">•</span>
-										<span className="text-sm text-muted-foreground">{review.date}</span>
+				{totalReviews > 0 ? (
+					<>
+						{/* Rating Distribution */}
+						<div className="space-y-2">
+							{distEntries.map((rating) => (
+								<div key={rating.stars} className="flex items-center gap-3">
+									<div className="flex items-center gap-1 w-12">
+										<span className="text-sm">{rating.stars}</span>
+										<Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
 									</div>
-									<div className="flex items-center gap-1 mb-2">
-										{Array.from({ length: 5 }).map((_, i) => (
-											<Star
-												key={i}
-												className={`h-4 w-4 ${
-													i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'
-												}`}
-											/>
-										))}
-									</div>
-									<p className="text-sm text-muted-foreground leading-relaxed">
-										{review.content}
-									</p>
+									<Progress value={rating.percentage} className="flex-1 h-2" />
+									<span className="text-sm text-muted-foreground w-8">{rating.count}</span>
 								</div>
-							</div>
+							))}
 						</div>
-					))}
-				</div>
 
-				{reviews.length > 2 && (
-					<Button
-						variant="outline"
-						onClick={() => setShowAll(!showAll)}
-						className="w-full"
-					>
-						{showAll ? 'Show less reviews' : `Show all ${reviews.length} reviews`}
-					</Button>
+						<Separator />
+
+						{/* Individual Reviews */}
+						<div className="space-y-4">
+							{displayedReviews.map((review) => (
+								<div key={review.id} className="space-y-3">
+									<div className="flex items-start gap-3">
+										<Avatar className="h-10 w-10">
+											<AvatarFallback>{review.author?.split(' ').map(n => n[0]).join('') || '?'}</AvatarFallback>
+										</Avatar>
+										<div className="flex-1">
+											<div className="flex items-center gap-2 mb-1">
+												<span className="font-semibold">{review.author}</span>
+												<span className="text-muted-foreground">•</span>
+												<span className="text-sm text-muted-foreground">
+													{review.createdAt ? format(new Date(review.createdAt), "MMMM yyyy") : ""}
+												</span>
+											</div>
+											<div className="flex items-center gap-1 mb-2">
+												{Array.from({ length: 5 }).map((_, i) => (
+													<Star
+														key={i}
+														className={`h-4 w-4 ${
+															i < (review.rating ?? 0) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'
+														}`}
+													/>
+												))}
+											</div>
+											{review.review && (
+												<p className="text-sm text-muted-foreground leading-relaxed">
+													{review.review}
+												</p>
+											)}
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+
+						{reviews.length > 2 && (
+							<Button
+								variant="outline"
+								onClick={() => setShowAll(!showAll)}
+								className="w-full"
+							>
+								{showAll ? 'Show less reviews' : `Show all ${reviews.length} reviews`}
+							</Button>
+						)}
+					</>
+				) : (
+					<p className="text-sm text-muted-foreground py-4">No reviews yet. Be the first to share your experience!</p>
 				)}
 			</CardContent>
 		</Card>

@@ -2,91 +2,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { Progress } from "@workspace/ui/components/progress";
 import { Badge } from "@workspace/ui/components/badge";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
-import { Star, ThumbsUp, MessageCircle, TrendingUp, Users, Heart } from "lucide-react";
+import { Star, MessageCircle, TrendingUp } from "lucide-react";
+
+interface ReviewsData {
+	totalReviews: number;
+	averageRating: number;
+	ratingDistribution: Record<number, number>;
+	recentReviews: Array<{
+		id: string;
+		bookingId: string | null;
+		serviceRating: number;
+		driverRating: number;
+		vehicleRating: number;
+		review: string | null;
+		createdAt: Date;
+	}>;
+}
 
 interface CustomerSatisfactionProps {
 	dateRange: string;
+	analytics?: ReviewsData | null;
 }
 
-export function CustomerSatisfaction({ dateRange }: CustomerSatisfactionProps) {
-	const satisfactionData = {
-		overallRating: 4.7,
-		totalReviews: 1247,
-		responseRate: 78.5,
-		ratingDistribution: {
-			5: { count: 687, percentage: 55.1 },
-			4: { count: 374, percentage: 30.0 },
-			3: { count: 124, percentage: 9.9 },
-			2: { count: 43, percentage: 3.4 },
-			1: { count: 19, percentage: 1.5 },
-		},
-		categories: {
-			driverProfessionalism: 4.8,
-			vehicleCondition: 4.6,
-			punctuality: 4.5,
-			routeEfficiency: 4.4,
-			communication: 4.7,
-			overallExperience: 4.7,
-		},
-		recentReviews: [
-			{
-				id: "1",
-				customer: "Sarah M.",
-				rating: 5,
-				comment: "Excellent service! Driver was on time and very professional. Clean vehicle and smooth ride.",
-				date: "2 hours ago",
-				trip: "Airport → CBD"
-			},
-			{
-				id: "2",
-				customer: "John D.",
-				rating: 4,
-				comment: "Good service overall. Driver was friendly but took a slightly longer route than expected.",
-				date: "5 hours ago",
-				trip: "North Shore → City"
-			},
-			{
-				id: "3",
-				customer: "Emma K.",
-				rating: 5,
-				comment: "Amazing experience! The driver helped with my luggage and was very courteous throughout.",
-				date: "1 day ago",
-				trip: "Home → Airport"
-			},
-			{
-				id: "4",
-				customer: "Michael R.",
-				rating: 4,
-				comment: "Reliable service as always. Comfortable car and punctual pickup.",
-				date: "1 day ago",
-				trip: "Hotel → Conference Center"
-			},
-			{
-				id: "5",
-				customer: "Lisa W.",
-				rating: 5,
-				comment: "Perfect service for our corporate event. Driver was professional and the vehicle was immaculate.",
-				date: "2 days ago",
-				trip: "Office → Event Venue"
-			},
-		],
-		trends: {
-			monthlyChange: +0.3,
-			satisfactionTrend: "increasing",
-			topCompliments: [
-				{ category: "Professional Driver", count: 234 },
-				{ category: "Clean Vehicle", count: 187 },
-				{ category: "On Time", count: 156 },
-				{ category: "Smooth Ride", count: 143 },
-				{ category: "Helpful Service", count: 128 },
-			],
-			commonIssues: [
-				{ category: "Route Choice", count: 12 },
-				{ category: "Communication", count: 8 },
-				{ category: "Vehicle Condition", count: 5 },
-			],
-		},
-	};
+function formatTimeAgo(date: Date): string {
+	const now = new Date();
+	const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+	if (diffInMinutes < 1) return "Just now";
+	if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+	const diffInHours = Math.floor(diffInMinutes / 60);
+	if (diffInHours < 24) return `${diffInHours}h ago`;
+	const diffInDays = Math.floor(diffInHours / 24);
+	if (diffInDays < 7) return `${diffInDays}d ago`;
+	return date.toLocaleDateString();
+}
+
+export function CustomerSatisfaction({ dateRange, analytics }: CustomerSatisfactionProps) {
+	const totalReviews = analytics?.totalReviews ?? 0;
+	const averageRating = analytics?.averageRating ?? 0;
+	const ratingDistribution = analytics?.ratingDistribution ?? { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+	const recentReviews = analytics?.recentReviews ?? [];
 
 	const renderStars = (rating: number) => {
 		const stars = [];
@@ -103,6 +57,13 @@ export function CustomerSatisfaction({ dateRange }: CustomerSatisfactionProps) {
 		return stars;
 	};
 
+	// Build distribution with percentages for display
+	const distEntries = [5, 4, 3, 2, 1].map((r) => ({
+		rating: r,
+		count: ratingDistribution[r] ?? 0,
+		percentage: totalReviews > 0 ? ((ratingDistribution[r] ?? 0) / totalReviews) * 100 : 0,
+	}));
+
 	return (
 		<div className="grid gap-4">
 			<div className="grid gap-4 md:grid-cols-3">
@@ -114,19 +75,21 @@ export function CustomerSatisfaction({ dateRange }: CustomerSatisfactionProps) {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-3xl font-bold">{satisfactionData.overallRating}</div>
+						<div className="text-3xl font-bold">{averageRating.toFixed(1)}</div>
 						<div className="flex items-center gap-1 mb-2">
-							{renderStars(Math.round(satisfactionData.overallRating))}
+							{renderStars(Math.round(averageRating))}
 						</div>
 						<div className="text-xs text-muted-foreground">
-							Based on {satisfactionData.totalReviews.toLocaleString()} reviews
+							Based on {totalReviews.toLocaleString()} reviews
 						</div>
-						<div className="flex items-center gap-1 mt-2">
-							<TrendingUp className="h-3 w-3 text-green-500" />
-							<span className="text-xs text-green-600 font-medium">
-								+{satisfactionData.trends.monthlyChange} this month
-							</span>
-						</div>
+						{totalReviews > 0 && (
+							<div className="flex items-center gap-1 mt-2">
+								<TrendingUp className="h-3 w-3 text-green-500" />
+								<span className="text-xs text-green-600 font-medium">
+									Live data from booking reviews
+								</span>
+							</div>
+						)}
 					</CardContent>
 				</Card>
 
@@ -134,33 +97,31 @@ export function CustomerSatisfaction({ dateRange }: CustomerSatisfactionProps) {
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium flex items-center gap-2">
 							<MessageCircle className="h-4 w-4 text-blue-600" />
-							Response Rate
+							Review Coverage
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{satisfactionData.responseRate}%</div>
+						<div className="text-2xl font-bold">{totalReviews}</div>
 						<div className="text-xs text-muted-foreground mb-2">
-							Customer feedback rate
+							Total reviews submitted
 						</div>
-						<Progress value={satisfactionData.responseRate} className="h-1" />
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium flex items-center gap-2">
-							<ThumbsUp className="h-4 w-4 text-green-600" />
-							Satisfaction Trend
+							<Star className="h-4 w-4 text-yellow-600" />
+							Satisfaction
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-green-600">Excellent</div>
-						<div className="text-xs text-muted-foreground mb-2">
-							{satisfactionData.trends.satisfactionTrend}
+						<div className="text-2xl font-bold">
+							{totalReviews === 0 ? "—" : averageRating >= 4 ? "Good" : averageRating >= 3 ? "Fair" : "Needs improvement"}
 						</div>
-						<Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
-							Above Industry Average
-						</Badge>
+						<div className="text-xs text-muted-foreground mb-2">
+							{totalReviews === 0 ? "No reviews yet" : "Based on average rating"}
+						</div>
 					</CardContent>
 				</Card>
 			</div>
@@ -174,75 +135,27 @@ export function CustomerSatisfaction({ dateRange }: CustomerSatisfactionProps) {
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
-						{Object.entries(satisfactionData.ratingDistribution)
-							.reverse()
-							.map(([rating, data]) => (
+						{totalReviews === 0 ? (
+							<p className="text-sm text-muted-foreground">No reviews yet. Ratings will appear here once customers submit feedback.</p>
+						) : (
+							distEntries.map(({ rating, count, percentage }) => (
 								<div key={rating}>
 									<div className="flex justify-between items-center mb-1">
 										<div className="flex items-center gap-2">
 											<span className="text-sm font-medium">{rating}</span>
-											<div className="flex">
-												{renderStars(parseInt(rating))}
-											</div>
+											<div className="flex">{renderStars(rating)}</div>
 										</div>
 										<div className="flex items-center gap-2">
-											<span className="text-sm font-bold">{data.count}</span>
+											<span className="text-sm font-bold">{count}</span>
 											<Badge variant="outline" className="text-xs">
-												{data.percentage}%
+												{percentage.toFixed(1)}%
 											</Badge>
 										</div>
 									</div>
-									<Progress value={data.percentage} className="h-2" />
+									<Progress value={percentage} className="h-2" />
 								</div>
-							))}
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<Heart className="h-5 w-5 text-red-600" />
-							Service Categories
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-3">
-						{Object.entries(satisfactionData.categories).map(([category, rating]) => (
-							<div key={category}>
-								<div className="flex justify-between items-center mb-1">
-									<span className="text-sm font-medium capitalize">
-										{category.replace(/([A-Z])/g, ' $1').trim()}
-									</span>
-									<div className="flex items-center gap-1">
-										<span className="text-sm font-bold">{rating}</span>
-										<Star className="h-3 w-3 text-yellow-400 fill-current" />
-									</div>
-								</div>
-								<Progress value={rating * 20} className="h-1" />
-							</div>
-						))}
-					</CardContent>
-				</Card>
-			</div>
-
-			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<ThumbsUp className="h-5 w-5 text-green-600" />
-							Top Compliments
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-2">
-							{satisfactionData.trends.topCompliments.map((compliment, index) => (
-								<div key={index} className="flex justify-between items-center p-2 rounded-lg bg-green-50">
-									<span className="text-sm font-medium">{compliment.category}</span>
-									<Badge variant="outline" className="bg-green-100 text-green-800">
-										{compliment.count}
-									</Badge>
-								</div>
-							))}
-						</div>
+							))
+						)}
 					</CardContent>
 				</Card>
 
@@ -256,27 +169,34 @@ export function CustomerSatisfaction({ dateRange }: CustomerSatisfactionProps) {
 					<CardContent>
 						<ScrollArea className="h-[280px] pr-2">
 							<div className="space-y-3">
-								{satisfactionData.recentReviews.map((review) => (
-									<div key={review.id} className="p-3 rounded-lg border bg-card">
-										<div className="flex justify-between items-start mb-2">
-											<div>
-												<p className="text-sm font-medium">{review.customer}</p>
-												<div className="flex items-center gap-1">
-													{renderStars(review.rating)}
-													<span className="text-xs text-muted-foreground ml-1">
-														{review.date}
-													</span>
+								{recentReviews.length === 0 ? (
+									<p className="text-sm text-muted-foreground">No reviews yet.</p>
+								) : (
+									recentReviews.map((r) => {
+										const avgRating = (r.serviceRating + r.driverRating + r.vehicleRating) / 3;
+										return (
+											<div key={r.id} className="p-3 rounded-lg border bg-card">
+												<div className="flex justify-between items-start mb-2">
+													<div>
+														<p className="text-sm font-medium">Booking {r.bookingId ?? "—"}</p>
+														<div className="flex items-center gap-1">
+															{renderStars(Math.round(avgRating))}
+															<span className="text-xs text-muted-foreground ml-1">
+																{formatTimeAgo(new Date(r.createdAt))}
+															</span>
+														</div>
+													</div>
+													<Badge variant="outline" className="text-xs">
+														Service {r.serviceRating} · Driver {r.driverRating} · Vehicle {r.vehicleRating}
+													</Badge>
 												</div>
+												{r.review && (
+													<p className="text-xs text-muted-foreground">"{r.review}"</p>
+												)}
 											</div>
-											<Badge variant="outline" className="text-xs">
-												{review.trip}
-											</Badge>
-										</div>
-										<p className="text-xs text-muted-foreground">
-											"{review.comment}"
-										</p>
-									</div>
-								))}
+										);
+									})
+								)}
 							</div>
 						</ScrollArea>
 					</CardContent>

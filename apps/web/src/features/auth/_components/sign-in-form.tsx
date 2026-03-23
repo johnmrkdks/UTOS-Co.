@@ -19,6 +19,8 @@ import { SignInWithOAuth } from "./sign-in-with-oauth";
 import { signInSchema } from "@/features/auth/_schemas/sign-in-schema";
 import { useSignInMutation } from "@/features/auth/_hooks/query/use-sign-in-mutation";
 import { cn } from "@workspace/ui/lib/utils";
+import { handlePostLoginRedirect } from "@/utils/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 type SignInFromProps = {
 	className?: string;
@@ -33,6 +35,7 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 	const search = useSearch({ strict: false }) as any;
 	const { isPending } = authClient.useSession();
 	const mutation = useSignInMutation();
+	const queryClient = useQueryClient();
 
 	const form = useForm({
 		resolver: zodResolver(signInSchema),
@@ -47,12 +50,14 @@ export function SignInForm({ className, ...props }: SignInFromProps) {
 		return <Loader />;
 	}
 
-	const onSubmit = (data: FormValues) => {
+	const onSubmit = async (data: FormValues) => {
 		mutation.mutate(data, {
-			onSuccess: () => {
-				const redirectPath = search.redirect || "/";
-				navigate({
-					to: redirectPath,
+			onSuccess: async () => {
+				// Use unified post-login redirect handler
+				await handlePostLoginRedirect({
+					queryClient,
+					navigate,
+					redirectPath: search.redirect,
 				});
 			},
 		});

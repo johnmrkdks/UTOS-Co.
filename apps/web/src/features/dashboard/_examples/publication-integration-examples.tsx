@@ -200,9 +200,6 @@ export function CarEditFormWithValidation({ car }: { car: any }) {
 				<PublicationValidationPanel
 					data={car}
 					type="car"
-					isPublished={car.isPublished}
-					onTogglePublish={handleTogglePublish}
-					isLoading={togglePublishMutation.isPending}
 				/>
 			</div>
 		</div>

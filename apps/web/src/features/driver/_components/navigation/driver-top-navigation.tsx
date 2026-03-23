@@ -6,7 +6,8 @@ import {
 	MenuIcon,
 	XIcon,
 	LogOutIcon,
-	ClipboardListIcon
+	ClipboardListIcon,
+	ChevronsLeft
 } from "lucide-react";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { DriverUserMenu } from "./driver-user-menu";
@@ -33,9 +34,44 @@ export function DriverTopNavigation({
 		<div className="sticky top-0 z-10 bg-white border-b border-gray-200">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex justify-between items-center h-16">
-					<BrandLogo />
+					<div className="flex items-center gap-2">
+						{/* Mobile Menu Button - Moved to Left */}
+						<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+							<SheetTrigger asChild>
+								<Button variant="ghost" size="sm" className="lg:hidden">
+									<MenuIcon className="h-5 w-5" />
+								</Button>
+							</SheetTrigger>
+							<SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col h-full [&>button]:hidden">
+								{/* Fixed Header */}
+								<div className="p-4 border-b flex-shrink-0">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center">
+											<Logo />
+											<div className="ml-2">
+												<h2 className="text-lg font-semibold">Driver Portal</h2>
+											</div>
+										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => setIsMobileMenuOpen(false)}
+											className="p-2 hover:bg-gray-100 rounded-lg"
+										>
+											<ChevronsLeft className="w-5 h-5 text-gray-600" />
+										</Button>
+									</div>
+								</div>
 
-					{/* Right side - Mobile Menu Button and User Info */}
+								{/* Mobile Menu Content */}
+								{mobileMenuContent}
+							</SheetContent>
+						</Sheet>
+						
+						<BrandLogo />
+					</div>
+
+					{/* Right side - Status Indicators and User Info */}
 					<div className="flex items-center space-x-2 sm:space-x-4">
 						{/* Status Indicators - Hidden on mobile, shown on larger screens */}
 						<div className="hidden lg:flex items-center space-x-3">
@@ -51,38 +87,6 @@ export function DriverTopNavigation({
 						<div className="hidden lg:flex items-center space-x-3">
 							<DriverUserMenu />
 						</div>
-
-						{/* Mobile Menu Button - Now on the right */}
-						<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-							<SheetTrigger asChild>
-								<Button variant="ghost" size="sm" className="lg:hidden">
-									<MenuIcon className="h-5 w-5" />
-								</Button>
-							</SheetTrigger>
-							<SheetContent side="right" className="w-80 p-0 flex flex-col h-full">
-								{/* Fixed Header */}
-								<div className="p-4 border-b flex-shrink-0">
-									<div className="flex items-center justify-between">
-										<div className="flex items-center">
-											<Logo />
-											<div className="ml-2">
-												<h2 className="text-lg font-semibold">Driver Portal</h2>
-											</div>
-										</div>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => setIsMobileMenuOpen(false)}
-										>
-											<XIcon className="h-4 w-4" />
-										</Button>
-									</div>
-								</div>
-
-								{/* Mobile Menu Content */}
-								{mobileMenuContent}
-							</SheetContent>
-						</Sheet>
 					</div>
 				</div>
 			</div>

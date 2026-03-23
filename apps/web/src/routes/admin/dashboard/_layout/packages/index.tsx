@@ -5,16 +5,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { PackagesView } from "@/features/dashboard/_pages/packages/_components/packages-view/packages-view";
 import { AddNewPackageForm } from "@/features/dashboard/_pages/packages/_components/add-new-package/add-new-package-form";
-import { PackageCategoriesTable } from "@/features/dashboard/_pages/packages/_components/package-categories/package-categories-table";
-import { AddPackageCategoryDialog } from "@/features/dashboard/_pages/packages/_components/package-categories/add-package-category-dialog";
 import { PackageAnalyticsCards } from "@/features/dashboard/_pages/packages/_components/package-analytics/package-analytics-cards";
-import { CategoryAnalyticsCards } from "@/features/dashboard/_pages/packages/_components/package-categories/category-analytics-cards";
 import { PackageServiceTypesTable } from "@/features/dashboard/_pages/packages/_components/package-service-types/package-service-types-table";
 import { AddPackageServiceTypeDialog } from "@/features/dashboard/_pages/packages/_components/package-service-types/add-package-service-type-dialog";
-import { Package, Plus, FolderOpen, Tags } from "lucide-react";
+import { Package, Plus, Tags } from "lucide-react";
 import { useState } from "react";
 import { useGetPackagesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-packages-query";
-import { useGetPackageCategoriesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-package-categories-query";
 import { useGetPackageServiceTypesQuery } from "@/features/dashboard/_pages/packages/_hooks/query/use-get-package-service-types-query";
 import { useModal } from "@/hooks/use-modal";
 import { PaddingLayout } from '@/features/dashboard/_layouts/padding-layout';
@@ -31,7 +27,6 @@ function RouteComponent() {
 	const [activeTab, setActiveTab] = useState("packages");
 
 	const packagesQuery = useGetPackagesQuery({ limit: 50 });
-	const { data: categories = [], isLoading: categoriesLoading } = useGetPackageCategoriesQuery();
 	const { data: serviceTypesData, isLoading: serviceTypesLoading } = useGetPackageServiceTypesQuery();
 	const { openModal } = useModal();
 
@@ -43,17 +38,19 @@ function RouteComponent() {
 		<div className="flex-1">
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="">
 				<PaddingLayout className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b">
-					<div className="flex items-center justify-between space-y-2">
-						<h2 className="text-3xl font-bold tracking-tight">Package Management</h2>
+					<div className="flex items-center gap-3">
+						<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center border border-purple-200/50">
+							<Package className="h-5 w-5 text-purple-600" />
+						</div>
+						<div>
+							<h2 className="text-2xl font-bold tracking-tight">Package Management</h2>
+							<p className="text-sm text-muted-foreground">Manage packages and service types</p>
+						</div>
 					</div>
-					<TabsList className="grid grid-cols-3">
+					<TabsList className="grid grid-cols-2">
 						<TabsTrigger value="packages" className="flex items-center gap-2">
 							<Package className="h-4 w-4" />
 							Packages
-						</TabsTrigger>
-						<TabsTrigger value="categories" className="flex items-center gap-2">
-							<FolderOpen className="h-4 w-4" />
-							Categories
 						</TabsTrigger>
 						<TabsTrigger value="service-types" className="flex items-center gap-2">
 							<Tags className="h-4 w-4" />
@@ -98,45 +95,6 @@ function RouteComponent() {
 						<PackagesView />
 					</TabsContent>
 
-					<TabsContent value="categories" className="space-y-4">
-						<div className="flex items-center justify-between">
-							<div>
-								<h3 className="text-lg font-semibold">Package Categories</h3>
-								<p className="text-sm text-muted-foreground">
-									Manage package categories for organized booking options. Categories group packages by theme (e.g., "Airport Services", "City Tours")
-									while Service Types define operational models (Transfer, Tour, Event, Hourly).
-								</p>
-							</div>
-							<Button
-								onClick={() => openModal("add-package-category")}
-								className="flex items-center gap-2"
-							>
-								<Plus className="h-4 w-4" />
-								Add Category
-							</Button>
-						</div>
-
-						<CategoryAnalyticsCards
-							categories={categories}
-							packages={packages}
-							isLoading={categoriesLoading}
-						/>
-
-						<Card>
-							<CardHeader>
-								<CardTitle>All Categories</CardTitle>
-								<CardDescription>
-									Organize your packages into categories for better customer experience.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<PackageCategoriesTable data={categories} isLoading={categoriesLoading} />
-							</CardContent>
-						</Card>
-
-						<AddPackageCategoryDialog />
-					</TabsContent>
-
 					<TabsContent value="service-types" className="space-y-4">
 						<div className="flex items-center justify-between">
 							<div>
@@ -163,7 +121,7 @@ function RouteComponent() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<PackageServiceTypesTable data={serviceTypes} isLoading={serviceTypesLoading} />
+								<PackageServiceTypesTable data={serviceTypes as any} isLoading={serviceTypesLoading} />
 							</CardContent>
 						</Card>
 

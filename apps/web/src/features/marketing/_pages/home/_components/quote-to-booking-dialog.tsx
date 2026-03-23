@@ -20,7 +20,7 @@ const bookingDetailsSchema = z.object({
 	customerEmail: z.string().email("Please enter a valid email address").optional().or(z.literal("")),
 	passengerCount: z.number().int().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
 	scheduledPickupTime: z.date({
-		required_error: "Please select a pickup date and time",
+		message: "Please select a pickup date and time",
 	}),
 	specialRequests: z.string().optional(),
 })
@@ -117,7 +117,7 @@ export function QuoteToBookingDialog({
 				stops: routeData.stops,
 				
 				// Timing
-				scheduledPickupTime: data.scheduledPickupTime,
+				scheduledPickupTime: data.scheduledPickupTime.toISOString(),
 				estimatedDuration: quote.estimatedDuration,
 				estimatedDistance: quote.estimatedDistance,
 				
@@ -136,11 +136,11 @@ export function QuoteToBookingDialog({
 				specialRequests: data.specialRequests,
 			})
 			
-			setBookingId(result.id)
+			setBookingId(result?.id || null)
 			setCurrentStep("success")
-			
+
 			setTimeout(() => {
-				onBookingConfirmed(result.id)
+				if (result?.id) onBookingConfirmed(result.id)
 				onOpenChange(false)
 				resetForm()
 			}, 3000)
@@ -235,7 +235,7 @@ export function QuoteToBookingDialog({
 								<div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
 									<div className="flex items-center gap-1">
 										<MapPin className="h-4 w-4" />
-										{(quote.estimatedDistance / 1000).toFixed(1)} km
+										{Number(quote.estimatedDistance).toFixed(1)} km
 									</div>
 									<div className="flex items-center gap-1">
 										<Clock className="h-4 w-4" />

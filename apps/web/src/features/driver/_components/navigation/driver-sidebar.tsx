@@ -27,7 +27,10 @@ export function DriverSidebar({ driverStatus, needsOnboarding }: DriverSidebarPr
 					<CardTitle className="text-lg">Navigation</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<DriverNavigation />
+					<DriverNavigation 
+						driverStatus={driverStatus}
+						needsOnboarding={needsOnboarding}
+					/>
 				</CardContent>
 			</Card>
 

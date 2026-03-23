@@ -9,6 +9,7 @@ export async function getAvailableDriversService(db: DB, timeSlot?: { start: Dat
 			id: drivers.id,
 			userId: drivers.userId,
 			licenseNumber: drivers.licenseNumber,
+			phoneNumber: drivers.phoneNumber,
 			isActive: drivers.isActive,
 			isApproved: drivers.isApproved,
 			rating: drivers.rating,

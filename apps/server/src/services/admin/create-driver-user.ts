@@ -2,8 +2,9 @@ import { z } from "zod";
 import type { DB } from "@/db";
 import { UserRoleEnum } from "@/db/sqlite/enums";
 import { users, accounts } from "@/db/sqlite/schema";
-import { customHash } from "@/lib/scrypt";
+import { hashPasswordPbkdf2 } from "@/lib/pbkdf2-password";
 import { eq } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
 
 export const CreateDriverUserServiceSchema = z.object({
 	email: z.string().email("Invalid email format"),
@@ -29,47 +30,46 @@ export const createDriverUserService = async (
 			throw new Error("User with this email already exists");
 		}
 
-		// Hash the password
-		const hashedPassword = await customHash(input.password);
+		// Hash password with PBKDF2 (Workers-friendly, stays within free tier CPU limit)
+		const hashedPassword = await hashPasswordPbkdf2(input.password);
 
-		// Generate unique IDs
-		const userId = `usr_${Math.random().toString(36).substr(2, 9)}`;
-		const accountId = `acc_${Math.random().toString(36).substr(2, 9)}`;
+		const userId = createId();
+		const accountId = createId();
 
-		// Create user in the database (not verified by default)
-		const newUser = await db
+		// Create user
+		const [newUser] = await db
 			.insert(users)
 			.values({
 				id: userId,
 				email: input.email,
 				name: input.name,
-				emailVerified: false, // Drivers need to verify their email
+				emailVerified: false,
 				role: UserRoleEnum.Driver,
+				image: null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
 			.returning();
 
-		// Create account entry for password authentication
-		await db
-			.insert(accounts)
-			.values({
-				id: accountId,
-				accountId: input.email,
-				providerId: "credential",
-				userId: userId,
-				password: hashedPassword,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			});
+		// Create credential account (better-auth expects providerId "credential", accountId = userId for credential)
+		await db.insert(accounts).values({
+			id: accountId,
+			accountId: userId,
+			providerId: "credential",
+			userId: userId,
+			password: hashedPassword,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
 
 		return {
 			success: true,
-			user: newUser[0],
+			user: newUser,
 			message: `Driver account created successfully for ${input.email}. Default password: 'changeme'`,
 		};
 	} catch (error) {
-		console.error("Error in createDriverUserService:", error);
+		console.error("=== ERROR in createDriverUserService ===");
+		console.error("Error:", error instanceof Error ? error.message : error);
 		throw error;
 	}
 };

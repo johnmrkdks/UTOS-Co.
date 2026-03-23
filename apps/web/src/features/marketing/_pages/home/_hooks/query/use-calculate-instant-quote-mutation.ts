@@ -14,8 +14,9 @@ export const useCalculateInstantQuoteMutation = () => {
 		},
 		onError: (error) => {
 			console.error("Error calculating secure quote:", error);
+			const msg = error?.message || "Please try again or check your addresses.";
 			toast.error("Failed to calculate quote", {
-				description: "Please try again or check your addresses.",
+				description: msg,
 			});
 		},
 	}));

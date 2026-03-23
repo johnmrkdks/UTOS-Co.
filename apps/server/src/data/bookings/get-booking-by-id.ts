@@ -17,6 +17,9 @@ export async function getBookingById(
 			car: true,
 			user: true,
 			package: true,
+			extras: true, // Include extras data
+			stops: true, // Include stops data
+			offloadDetails: true, // Include offload booking details
 		},
 	});
 

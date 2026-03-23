@@ -5,10 +5,35 @@ import { Car, Clock, MapPin, Users, CheckCircle, XCircle } from "lucide-react";
 
 interface BookingPerformanceProps {
 	dateRange: string;
+	analytics?: {
+		totalBookings: number;
+		completedBookings: number;
+		cancelledBookings: number;
+		completionRate: number;
+		cancellationRate: number;
+	};
 }
 
-export function BookingPerformance({ dateRange }: BookingPerformanceProps) {
-	const bookingData = {
+export function BookingPerformance({ dateRange, analytics }: BookingPerformanceProps) {
+	const bookingData = analytics
+		? {
+			totalBookings: analytics.totalBookings,
+			completedBookings: analytics.completedBookings,
+			cancelledBookings: analytics.cancelledBookings,
+			noShowBookings: 0,
+			completionRate: analytics.completionRate,
+			averageWaitTime: 0,
+			averageTripDuration: 0,
+			peakHours: [] as string[],
+			busyDays: [] as string[],
+			bookingsByStatus: {
+				completed: { count: analytics.completedBookings, percentage: analytics.completionRate },
+				cancelled: { count: analytics.cancelledBookings, percentage: analytics.cancellationRate },
+				no_show: { count: 0, percentage: 0 },
+			},
+			geographicDistribution: [] as Array<{ area: string; bookings: number; percentage: number }>,
+		}
+		: {
 		totalBookings: 324,
 		completedBookings: 298,
 		cancelledBookings: 18,

@@ -23,61 +23,61 @@ export const useGetDashboardAnalyticsQuery = () => {
 	// Calculate dashboard statistics from real data
 	const dashboardStats = {
 		// Bookings metrics
-		totalBookings: bookingsQuery.data?.items?.length || 0,
-		activeBookings: bookingsQuery.data?.items?.filter(booking => 
-			booking.status === "confirmed" || 
-			booking.status === "driver_assigned" || 
+		totalBookings: bookingsQuery.data?.data?.length || 0,
+		activeBookings: bookingsQuery.data?.data?.filter((booking: any) =>
+			booking.status === "confirmed" ||
+			booking.status === "driver_assigned" ||
 			booking.status === "in_progress"
 		).length || 0,
-		pendingBookings: bookingsQuery.data?.items?.filter(booking => 
+		pendingBookings: bookingsQuery.data?.data?.filter((booking: any) =>
 			booking.status === "pending"
 		).length || 0,
-		completedBookings: bookingsQuery.data?.items?.filter(booking => 
+		completedBookings: bookingsQuery.data?.data?.filter((booking: any) =>
 			booking.status === "completed"
 		).length || 0,
 
 		// Revenue metrics (in cents, convert for display)
-		totalRevenue: bookingsQuery.data?.items?.reduce((total, booking) => 
+		totalRevenue: bookingsQuery.data?.data?.reduce((total: number, booking: any) =>
 			total + (booking.totalAmount || 0), 0) || 0,
-		monthlyRevenue: bookingsQuery.data?.items
-			?.filter(booking => {
+		monthlyRevenue: bookingsQuery.data?.data
+			?.filter((booking: any) => {
 				const bookingDate = new Date(booking.createdAt);
 				const currentDate = new Date();
-				return bookingDate.getMonth() === currentDate.getMonth() && 
+				return bookingDate.getMonth() === currentDate.getMonth() &&
 					   bookingDate.getFullYear() === currentDate.getFullYear();
 			})
-			?.reduce((total, booking) => total + (booking.totalAmount || 0), 0) || 0,
+			?.reduce((total: number, booking: any) => total + (booking.totalAmount || 0), 0) || 0,
 
 		// Package metrics
-		totalPackages: packagesQuery.data?.items?.length || 0,
-		activePackages: packagesQuery.data?.items?.filter(pkg => 
+		totalPackages: packagesQuery.data?.data?.length || 0,
+		activePackages: packagesQuery.data?.data?.filter((pkg: any) =>
 			pkg.isPublished && pkg.isAvailable
 		).length || 0,
 
 		// Driver metrics
 		totalDrivers: driversQuery.data?.items?.length || 0,
-		activeDrivers: driversQuery.data?.items?.filter(driver => 
-			driver.status === "active"
+		activeDrivers: driversQuery.data?.items?.filter((driver: any) =>
+			driver.isActive && driver.isApproved
 		).length || 0,
-		pendingDrivers: driversQuery.data?.items?.filter(driver => 
-			driver.status === "pending_approval"
+		pendingDrivers: driversQuery.data?.items?.filter((driver: any) =>
+			!driver.isApproved
 		).length || 0,
 
 		// Performance metrics
-		completionRate: bookingsQuery.data?.items?.length ? 
-			Math.round((bookingsQuery.data.items.filter(booking => 
+		completionRate: bookingsQuery.data?.data?.length ?
+			Math.round((bookingsQuery.data.data.filter((booking: any) =>
 				booking.status === "completed"
-			).length / bookingsQuery.data.items.length) * 100) : 0,
-		
+			).length / bookingsQuery.data.data.length) * 100) : 0,
+
 		// Calculate average rating (mock for now until ratings are implemented)
 		avgRating: 4.8,
 		totalReviews: 247, // Mock data
 	};
 
 	// Recent activity from real bookings data
-	const recentActivity = bookingsQuery.data?.items
+	const recentActivity = bookingsQuery.data?.data
 		?.slice(0, 5) // Get 5 most recent
-		?.map(booking => ({
+		?.map((booking: any) => ({
 			id: booking.id,
 			type: booking.bookingType === "package" ? "package" : "custom",
 			title: booking.bookingType === "package" 

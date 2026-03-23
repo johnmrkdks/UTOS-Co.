@@ -29,7 +29,7 @@ export function DeleteCarModal() {
 
 	return (
 		<Dialog open={isModalOpen("delete-car")} onOpenChange={closeModal}>
-			<DialogContent className="max-w-md">
+			<DialogContent className="max-w-md" showCloseButton={false}>
 				<DialogHeader>
 					<div className="flex items-center gap-3">
 						<div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">

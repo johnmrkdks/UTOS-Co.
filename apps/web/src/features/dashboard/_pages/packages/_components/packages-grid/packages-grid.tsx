@@ -14,7 +14,11 @@ import {
 	Calendar,
 	CheckCircle,
 	AlertCircle,
-	RouteIcon
+	RouteIcon,
+	Clock,
+	MapPin,
+	Users,
+	Settings
 } from "lucide-react";
 import {
 	DropdownMenu,
@@ -36,12 +40,20 @@ interface Package {
 	id: string;
 	name: string;
 	description: string;
-	fixedPrice: number;
+	fixedPrice?: number | null;
+	hourlyRate?: number | null;
 	isAvailable: boolean;
 	isPublished?: boolean | null;
-	serviceType?: string;
+	serviceType?: {
+		id: string;
+		name: string;
+		rateType: 'hourly' | 'fixed';
+	};
 	bannerImageUrl?: string | null;
 	createdAt: string;
+	maxPassengers?: number;
+	duration?: number;
+	advanceBookingHours?: number;
 }
 
 interface PackagesGridProps {
@@ -80,7 +92,7 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 		const matchesSearch = !searchTerm ||
 			pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			pkg.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			pkg.serviceType?.toLowerCase().includes(searchTerm.toLowerCase());
+			pkg.serviceType?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
 		const matchesStatus = statusFilter === "all" ||
 			(statusFilter === "available" && pkg.isAvailable) ||
@@ -91,10 +103,10 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 
 	if (packagesQuery.isLoading) {
 		return (
-			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{[...Array(6)].map((_, index) => (
+			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+				{[...Array(10)].map((_, index) => (
 					<Card key={index} className="animate-pulse">
-						<div className="h-48 bg-gray-200"></div>
+						<div className="h-40 bg-gray-200"></div>
 						<CardContent className="p-4">
 							<div className="space-y-3">
 								<div className="h-5 bg-gray-200 rounded w-3/4"></div>
@@ -103,7 +115,7 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 								<div className="h-4 bg-gray-200 rounded w-2/3"></div>
 								<div className="flex gap-2 mt-4">
 									<div className="h-8 bg-gray-200 rounded flex-1"></div>
-									<div className="h-8 bg-gray-200 rounded flex-1"></div>
+									<div className="h-8 bg-gray-200 rounded w-10"></div>
 								</div>
 							</div>
 						</CardContent>
@@ -123,157 +135,222 @@ export function PackagesGrid({ searchTerm = "", statusFilter = "all" }: Packages
 		);
 	}
 
+	// Helper function to format pricing display
+	const formatPricing = (pkg: Package) => {
+		// Debug logging to see what data we're getting
+		console.log('Package pricing debug:', {
+			name: pkg.name,
+			hourlyRate: pkg.hourlyRate,
+			fixedPrice: pkg.fixedPrice,
+			serviceType: pkg.serviceType,
+			typeof_hourlyRate: typeof pkg.hourlyRate,
+			typeof_fixedPrice: typeof pkg.fixedPrice
+		});
+
+		// Determine rate type based on which pricing field has a value
+		// This is more reliable than relying solely on serviceType.rateType
+		const hasHourlyRate = pkg.hourlyRate && pkg.hourlyRate > 0;
+		const hasFixedPrice = pkg.fixedPrice && pkg.fixedPrice > 0;
+
+		// Prefer actual data over service type config
+		if (hasHourlyRate) {
+			return {
+				price: `$${pkg.hourlyRate!.toFixed(2)}`,
+				unit: '/hour',
+				rateType: 'Hourly'
+			};
+		} else if (hasFixedPrice) {
+			return {
+				price: `$${pkg.fixedPrice!.toFixed(2)}`,
+				unit: '',
+				rateType: 'Fixed'
+			};
+		}
+
+		// Fallback to service type configuration
+		const isHourlyByType = pkg.serviceType?.rateType === 'hourly';
+		return {
+			price: '$0.00',
+			unit: isHourlyByType ? '/hour' : '',
+			rateType: isHourlyByType ? 'Hourly' : 'Fixed'
+		};
+	};
+
 	return (
 		<>
-			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{packages.map((pkg) => (
-					<Card
-						key={pkg.id}
-						className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:scale-[1.02] bg-background border"
-					>
-						{/* Banner Image */}
-						<div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
-							{pkg.bannerImageUrl ? (
-								<img
-									src={pkg.bannerImageUrl}
-									alt={pkg.name}
-									className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-								/>
-							) : (
-								<div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-100 to-slate-200">
-									<Package className="h-16 w-16 text-slate-400" />
-								</div>
-							)}
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+				{packages.map((pkg) => {
+					const pricing = formatPricing(pkg);
+					return (
+						<Card
+							key={pkg.id}
+							className="group overflow-hidden hover:shadow-lg transition-all duration-200 border bg-background hover:border-primary/20 p-0 gap-0"
+						>
+							{/* Banner Image - extends to card edges */}
+							<div className="relative h-36 overflow-hidden rounded-t-xl bg-gradient-to-br from-primary/10 to-primary/5">
+								{pkg.bannerImageUrl ? (
+									<>
+										<img
+											src={pkg.bannerImageUrl}
+											alt={pkg.name}
+											className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+											onError={(e) => {
+												e.currentTarget.style.display = "none";
+												const fallback = e.currentTarget.nextElementSibling;
+												if (fallback instanceof HTMLElement) fallback.classList.remove("hidden");
+											}}
+										/>
+										<div className="hidden w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+											<Package className="h-12 w-12 text-slate-400" />
+										</div>
+									</>
+								) : (
+									<div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-100 to-slate-200">
+										<Package className="h-12 w-12 text-slate-400" />
+									</div>
+								)}
 
-							{/* Status Badge */}
-							<div className="absolute top-3 left-3">
-								<Badge variant={pkg.isAvailable ? "default" : "secondary"} className="shadow-sm">
-									{pkg.isAvailable ? (
-										<>
-											<CheckCircle className="mr-1 h-3 w-3" />
-											Available
-										</>
-									) : (
-										<>
-											<AlertCircle className="mr-1 h-3 w-3" />
-											Unavailable
-										</>
-									)}
-								</Badge>
-							</div>
-
-
-							{/* Published Badge */}
-							{pkg.isPublished && (
-								<div className="absolute bottom-3 left-3">
-									<Badge variant="outline" className="bg-white/90 backdrop-blur-sm shadow-sm">
-										Published
+								{/* Rate Type Badge */}
+								<div className="absolute top-2 left-2">
+									<Badge
+										variant={pricing.rateType === 'Hourly' ? 'default' : 'secondary'}
+										className="text-xs font-medium shadow-sm"
+									>
+										{pricing.rateType}
 									</Badge>
 								</div>
-							)}
-						</div>
 
-						{/* Content */}
-						<CardContent className="px-4 py-0 bg-background">
-							<div className="space-y-3">
-								<div>
-									<CardTitle className="text-lg font-semibold leading-tight mb-1 line-clamp-1">
-										{pkg.name}
-									</CardTitle>
-									{pkg.serviceType && (
-										<Badge variant="outline" className="text-xs">
-											{pkg.serviceType}
+								{/* Status Badge */}
+								<div className="absolute top-2 right-2">
+									<Badge variant={pkg.isAvailable ? "default" : "destructive"} className="text-xs shadow-sm">
+										{pkg.isAvailable ? "Active" : "Inactive"}
+									</Badge>
+								</div>
+
+								{/* Published Badge */}
+								{pkg.isPublished && (
+									<div className="absolute bottom-2 left-2">
+										<Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-xs shadow-sm">
+											Published
 										</Badge>
-									)}
-								</div>
-
-								<CardDescription className="line-clamp-2 text-sm leading-relaxed min-h-[40px]">
-									{pkg.description || "No description provided"}
-								</CardDescription>
-
-								<div className="flex items-center justify-between pt-2">
-									<div className="flex items-center">
-										<DollarSign className="h-4 w-4 text-primary" strokeWidth={3} />
-										<span className="font-bold text-lg text-primary">
-											{(pkg.fixedPrice ? pkg.fixedPrice / 100 : 0).toFixed(2)}
-										</span>
 									</div>
-
-									<div className="flex items-center gap-1 text-xs text-muted-foreground">
-										<Calendar className="h-3 w-3" />
-										<span>{new Date(pkg.createdAt).toLocaleDateString()}</span>
-									</div>
-								</div>
+								)}
 							</div>
 
-							{/* Quick Actions */}
-							<div className="flex gap-2 mt-4">
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setViewingPackage(pkg)}
-									className="flex-1"
-								>
-									<Eye className="mr-1 h-4 w-4" />
-									View Details
-								</Button>
-								{/* Actions menu */}
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button
-											variant="ghost"
-											size="sm"
-											className="h-9 w-9 p-0"
-										>
-											<MoreHorizontal className="h-4 w-4" />
-											<span className="sr-only">Open menu</span>
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end" className="w-[180px]">
-										<DropdownMenuItem onClick={() => setEditingPackage(pkg)}>
-											<Pencil className="mr-2 h-4 w-4" />
-											Edit Package
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem onClick={() => setRoutesPackage(pkg)}>
-											<RouteIcon className="mr-2 h-4 w-4" />
-											Manage Routes
-										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setSchedulingPackage(pkg)}>
-											<Calendar className="mr-2 h-4 w-4" />
-											Manage Schedule
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											onClick={() => handleToggleAvailable(pkg)}
-											disabled={updatePackageMutation.isPending}
-										>
-											{pkg.isAvailable ? (
-												<>
-													<PowerOff className="mr-2 h-4 w-4" />
-													Disable Package
-												</>
-											) : (
-												<>
-													<Power className="mr-2 h-4 w-4" />
-													Enable Package
-												</>
+							{/* Content */}
+							<CardContent className="p-4">
+								<div className="space-y-3">
+									{/* Header */}
+									<div>
+										<CardTitle className="text-sm font-semibold leading-tight mb-1 line-clamp-1">
+											{pkg.name}
+										</CardTitle>
+										{pkg.serviceType && (
+											<Badge variant="outline" className="text-xs">
+												{pkg.serviceType.name}
+											</Badge>
+										)}
+									</div>
+
+									{/* Description */}
+									<CardDescription className="line-clamp-2 text-xs leading-relaxed min-h-[32px]">
+										{pkg.description || "No description provided"}
+									</CardDescription>
+
+									{/* Pricing */}
+									<div className="flex items-center justify-between">
+										<div className="flex items-baseline gap-1">
+											<span className="font-bold text-lg text-primary">
+												{pricing.price}
+											</span>
+											{pricing.unit && (
+												<span className="text-xs text-muted-foreground">
+													{pricing.unit}
+												</span>
 											)}
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											onClick={() => setDeletingPackage(pkg)}
-											className="text-red-600 focus:text-red-600"
-										>
-											<Trash2 className="mr-2 h-4 w-4" />
-											Delete Package
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
-						</CardContent>
-					</Card>
-				))}
+										</div>
+
+										{/* Package Stats - Duration only */}
+										{pkg.duration && (
+											<div className="flex items-center gap-1 text-xs text-muted-foreground">
+												<Clock className="h-3 w-3" />
+												<span>{Math.floor(pkg.duration / 60)}h</span>
+											</div>
+										)}
+									</div>
+								</div>
+
+								{/* Actions */}
+								<div className="flex gap-2 mt-4 pt-3 border-t">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setViewingPackage(pkg)}
+										className="flex-1 text-xs"
+									>
+										<Eye className="mr-1 h-3 w-3" />
+										View
+									</Button>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setEditingPackage(pkg)}
+										className="flex-1 text-xs"
+									>
+										<Pencil className="mr-1 h-3 w-3" />
+										Edit
+									</Button>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="ghost"
+												size="sm"
+												className="h-8 w-8 p-0"
+											>
+												<MoreHorizontal className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end" className="w-[160px]">
+											<DropdownMenuItem onClick={() => setRoutesPackage(pkg)}>
+												<RouteIcon className="mr-2 h-4 w-4" />
+												Routes
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => setSchedulingPackage(pkg)}>
+												<Calendar className="mr-2 h-4 w-4" />
+												Schedule
+											</DropdownMenuItem>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												onClick={() => handleToggleAvailable(pkg)}
+												disabled={updatePackageMutation.isPending}
+											>
+												{pkg.isAvailable ? (
+													<>
+														<PowerOff className="mr-2 h-4 w-4" />
+														Disable
+													</>
+												) : (
+													<>
+														<Power className="mr-2 h-4 w-4" />
+														Enable
+													</>
+												)}
+											</DropdownMenuItem>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												onClick={() => setDeletingPackage(pkg)}
+												className="text-red-600"
+											>
+												<Trash2 className="mr-2 h-4 w-4" />
+												Delete
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+							</CardContent>
+						</Card>
+					);
+				})}
 			</div>
 
 			{/* Dialogs */}

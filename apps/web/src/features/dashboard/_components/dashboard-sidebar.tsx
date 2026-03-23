@@ -17,9 +17,11 @@ import {
 	DASHBOARD_OPERATIONS_ROUTES,
 	DASHBOARD_INVENTORY_ROUTES,
 	DASHBOARD_SYSTEM_ROUTES,
+	SUPER_ADMIN_ROUTES,
 } from "@/constants/dashboard-routes";
 import { DashboardCompanyLogo } from "./sidebar/dashboard-company";
 import { cn } from "@workspace/ui/lib/utils";
+import { useSession } from "@/providers/session-provider";
 
 type LinkProps = {
 	title: string;
@@ -27,31 +29,51 @@ type LinkProps = {
 	items?: RouteConfig[];
 };
 
-const links: LinkProps[] = [
-	{
-		title: "Overview",
-		url: "#",
-		items: DASHBOARD_OVERVIEW_ROUTES,
-	},
-	{
-		title: "Operations",
-		url: "#",
-		items: DASHBOARD_OPERATIONS_ROUTES,
-	},
-	{
-		title: "Inventory",
-		url: "#",
-		items: DASHBOARD_INVENTORY_ROUTES,
-	},
-	{
-		title: "System",
-		url: "#",
-		items: DASHBOARD_SYSTEM_ROUTES,
-	},
-];
+const getLinks = (
+	filterRoutes: (r: RouteConfig[]) => RouteConfig[],
+	isSuperAdmin: boolean,
+): LinkProps[] => {
+	const baseLinks: LinkProps[] = [
+		...(isSuperAdmin
+			? [
+					{
+						title: "Super Admin",
+						url: "#",
+						items: SUPER_ADMIN_ROUTES,
+					} as LinkProps,
+				]
+			: []),
+		{
+			title: "Overview",
+			url: "#",
+			items: filterRoutes(DASHBOARD_OVERVIEW_ROUTES),
+		},
+		{
+			title: "Operations",
+			url: "#",
+			items: filterRoutes(DASHBOARD_OPERATIONS_ROUTES),
+		},
+		{
+			title: "Inventory",
+			url: "#",
+			items: filterRoutes(DASHBOARD_INVENTORY_ROUTES),
+		},
+		{
+			title: "System",
+			url: "#",
+			items: filterRoutes(DASHBOARD_SYSTEM_ROUTES),
+		},
+	];
+	return baseLinks;
+};
 
 export function DashboardSidebar() {
 	const { pathname } = useLocation();
+	const { session } = useSession();
+	const isSuperAdmin = session?.user?.role === "super_admin";
+
+	const filterRoutesByRole = (routes: RouteConfig[]) =>
+		routes.filter((route) => !route.superAdminOnly || isSuperAdmin);
 
 	const isActive = (path: string) => {
 		// Exact match for the main dashboard page
@@ -64,8 +86,10 @@ export function DashboardSidebar() {
 		return pathname === path || pathname.startsWith(`${path}/`);
 	};
 
+	const links = getLinks(filterRoutesByRole, isSuperAdmin);
+
 	return (
-		<Sidebar collapsible="none" className="bg-soft-beige border-r">
+		<Sidebar collapsible="none" className="bg-soft-beige border-r print:hidden">
 			<SidebarHeader>
 				<DashboardCompanyLogo />
 			</SidebarHeader>

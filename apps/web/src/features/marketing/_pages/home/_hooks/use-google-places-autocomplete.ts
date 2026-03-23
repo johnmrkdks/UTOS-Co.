@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader"
 
 interface PlaceResult {
 	placeId: string
@@ -8,7 +9,9 @@ interface PlaceResult {
 }
 
 interface UseGooglePlacesAutocompleteOptions {
-	onPlaceSelect?: (place: PlaceResult) => void
+	onPlaceSelect?: (
+		place: PlaceResult & { geometry?: { location: { lat: () => number; lng: () => number } } }
+	) => void
 	componentRestrictions?: {
 		country: string
 		administrative_area?: string
@@ -16,145 +19,150 @@ interface UseGooglePlacesAutocompleteOptions {
 	types?: string[]
 }
 
-// Google Maps types
-declare const google: any;
+// Types for new Places API
+interface AutocompleteSuggestionType {
+	fetchAutocompleteSuggestions: (
+		req: AutocompleteRequest
+	) => Promise<{ suggestions: Array<{ placePrediction: PlacePrediction }> }>
+}
+
+interface AutocompleteRequest {
+	input: string
+	sessionToken?: unknown
+	includedRegionCodes?: string[]
+}
+
+interface PlacePrediction {
+	placeId: string
+	text: { text: string }
+	mainText?: { text: string }
+	secondaryText?: { text: string }
+	toPlace: () => PlaceObject
+}
+
+interface PlaceObject {
+	fetchFields: (opts: { fields: string[] }) => Promise<void>
+	formattedAddress?: string
+	location?: { lat: () => number; lng: () => number }
+}
+
+let loadPromise: Promise<void> | null = null
+
+function ensureGoogleMapsLoaded(): Promise<void> {
+	if (loadPromise) return loadPromise
+
+	const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
+	if (!apiKey) {
+		loadPromise = Promise.reject(new Error("VITE_GOOGLE_MAPS_API_KEY is not set"))
+		return loadPromise
+	}
+
+	loadPromise = (async () => {
+		setOptions({
+			key: apiKey,
+			v: "weekly",
+		})
+		// Load places library - this triggers the actual API load
+		await importLibrary("places")
+	})()
+
+	return loadPromise
+}
 
 export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocompleteOptions = {}) {
 	const inputRef = useRef<HTMLInputElement>(null)
-	const autocompleteRef = useRef<any>(null)
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [predictions, setPredictions] = useState<PlaceResult[]>([])
 	const [isLoading, setIsLoading] = useState(false)
+	const suggestionsRef = useRef<Array<{ placePrediction: PlacePrediction }>>([])
+	const sessionTokenRef = useRef<unknown>(null)
 
-	// Load Google Maps JavaScript API
+	// Load Google Maps API on mount
 	useEffect(() => {
-		if (typeof window === "undefined") return
-
-		// Check if Google Maps is already loaded
-		if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
-			setIsLoaded(true)
-			return
-		}
-
-		// Create script tag to load Google Maps API
-		const script = document.createElement("script")
-		script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY_HERE"}&libraries=places`
-		script.async = true
-		script.defer = true
-
-		script.onload = () => {
-			setIsLoaded(true)
-		}
-
-		script.onerror = () => {
-			console.error("Failed to load Google Maps JavaScript API")
-		}
-
-		document.head.appendChild(script)
-
-		return () => {
-			// Clean up script if component unmounts
-			const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`)
-			if (existingScript) {
-				document.head.removeChild(existingScript)
-			}
-		}
+		ensureGoogleMapsLoaded()
+			.then(() => setIsLoaded(true))
+			.catch((err) => console.error("Failed to load Google Maps:", err))
 	}, [])
 
-	// Initialize autocomplete when Google Maps is loaded and input ref is available
-	useEffect(() => {
-		if (!isLoaded || !inputRef.current) return
-
-		try {
-			// Configure autocomplete options
-			const autocompleteOptions = {
-				componentRestrictions: options.componentRestrictions || { country: "au" },
-				types: options.types || ["geocode", "establishment"],
-				fields: ["place_id", "formatted_address", "name", "address_components", "geometry"],
-			}
-
-			// Initialize autocomplete
-			autocompleteRef.current = new (window as any).google.maps.places.Autocomplete(
-				inputRef.current,
-				autocompleteOptions
-			)
-
-			// Add place selection listener
-			const listener = autocompleteRef.current.addListener("place_changed", () => {
-				const place = autocompleteRef.current?.getPlace()
-
-				if (place && place.place_id && options.onPlaceSelect) {
-					const placeResult: PlaceResult = {
-						placeId: place.place_id,
-						description: place.formatted_address || place.name || "",
-						mainText: place.name || "",
-						secondaryText: place.formatted_address || "",
-					}
-					options.onPlaceSelect(placeResult)
-				}
-			})
-
-			return () => {
-				if (listener) {
-					(window as any).google.maps.event.removeListener(listener)
-				}
-			}
-		} catch (error) {
-			console.error("Error initializing Google Places Autocomplete:", error)
-		}
-	}, [isLoaded, options.onPlaceSelect, options.componentRestrictions, options.types])
-
-	// Manual prediction fetching (alternative to widget approach)
+	// Fetch suggestions using new AutocompleteSuggestion API
 	const getPlacePredictions = async (input: string): Promise<PlaceResult[]> => {
-		if (!isLoaded || !input.trim()) {
+		if (!input.trim()) {
 			setPredictions([])
+			suggestionsRef.current = []
 			return []
 		}
 
 		setIsLoading(true)
 
-		return new Promise((resolve) => {
-			const service = new (window as any).google.maps.places.AutocompleteService()
+		try {
+			if (!isLoaded) {
+				await ensureGoogleMapsLoaded()
+				setIsLoaded(true)
+			}
 
-			service.getPlacePredictions(
-				{
-					input: input.trim(),
-					componentRestrictions: options.componentRestrictions || { country: "au" },
-					types: options.types || ["geocode", "establishment"],
-				},
-				(predictions: any[] | null, status: any) => {
-					setIsLoading(false)
+			const { AutocompleteSuggestion, AutocompleteSessionToken } =
+				await importLibrary("places") as { AutocompleteSuggestion: AutocompleteSuggestionType; AutocompleteSessionToken: new () => unknown }
 
-					if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
-						// Filter results to only include NSW locations
-						const filteredPredictions = predictions.filter((prediction) => {
-							const description = prediction.description || ""
-							// Check if the description contains NSW, New South Wales, or common NSW abbreviations
-							return description.includes("NSW") || 
-								description.includes("New South Wales") ||
-								description.includes("Sydney") ||
-								description.includes("Newcastle") ||
-								description.includes("Wollongong") ||
-								description.includes("Blue Mountains") ||
-								description.includes("Central Coast")
-						})
+			// New session token for each typing session (billing best practice)
+			sessionTokenRef.current = new AutocompleteSessionToken()
 
-						const results: PlaceResult[] = filteredPredictions.map((prediction) => ({
-							placeId: prediction.place_id,
-							description: prediction.description,
-							mainText: prediction.structured_formatting.main_text,
-							secondaryText: prediction.structured_formatting.secondary_text || "",
-						}))
+			const request: AutocompleteRequest = {
+				input: input.trim(),
+				sessionToken: sessionTokenRef.current,
+				includedRegionCodes: [options.componentRestrictions?.country || "au"],
+			}
 
-						setPredictions(results)
-						resolve(results)
-					} else {
-						setPredictions([])
-						resolve([])
+			const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request)
+			suggestionsRef.current = suggestions ?? []
+
+			const results: PlaceResult[] = (suggestions ?? [])
+				.filter((s) => s?.placePrediction)
+				.map((s) => {
+					const p = s.placePrediction
+					return {
+						placeId: p.placeId,
+						description: p.text?.text ?? "",
+						mainText: p.mainText?.text ?? p.text?.text ?? "",
+						secondaryText: p.secondaryText?.text ?? "",
 					}
-				}
-			)
-		})
+				})
+
+			setPredictions(results)
+			return results
+		} catch (err) {
+			console.error("Places Autocomplete error:", err)
+			setPredictions([])
+			suggestionsRef.current = []
+			return []
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	// Fetch place details using Place.fetchFields (new API)
+	const fetchPlaceDetails = async (
+		predictionIndex: number
+	): Promise<{ placeId: string; description: string; geometry?: { location: { lat: () => number; lng: () => number } } } | null> => {
+		const suggestion = suggestionsRef.current[predictionIndex]
+		if (!suggestion?.placePrediction) return null
+
+		try {
+			const place = suggestion.placePrediction.toPlace()
+			await place.fetchFields({ fields: ["formattedAddress", "location"] })
+
+			const geometry = place.location
+				? { location: place.location }
+				: undefined
+
+			return {
+				placeId: suggestion.placePrediction.placeId,
+				description: place.formattedAddress ?? predictions[predictionIndex]?.description ?? "",
+				geometry,
+			}
+		} catch (err) {
+			console.error("Fetch place details error:", err)
+			return null
+		}
 	}
 
 	return {
@@ -163,5 +171,6 @@ export function useGooglePlacesAutocomplete(options: UseGooglePlacesAutocomplete
 		predictions,
 		isLoading,
 		getPlacePredictions,
+		fetchPlaceDetails,
 	}
 }

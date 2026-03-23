@@ -7,6 +7,8 @@ import {
 	SettingsIcon,
 	ClipboardListIcon,
 	CarIcon,
+	MapPinIcon,
+	ClockIcon,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -19,18 +21,25 @@ interface NavigationItem {
 
 interface DriverNavigationProps {
 	onNavigate?: () => void;
+	driverStatus?: {
+		profileComplete: boolean;
+		isApproved: boolean;
+		isActive: boolean;
+	};
+	needsOnboarding?: boolean;
 }
 
-export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
+export function DriverNavigation({ onNavigate, driverStatus, needsOnboarding }: DriverNavigationProps = {}) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const navigationItems: NavigationItem[] = [
+	// Base navigation items that are always shown - matching mobile navigation
+	const baseNavigationItems: NavigationItem[] = [
 		{
-			id: 'dashboard',
-			label: 'Dashboard',
-			icon: LayoutDashboardIcon,
-			href: '/driver'
+			id: 'available',
+			label: 'Available Trips',
+			icon: MapPinIcon,
+			href: '/driver/available'
 		},
 		{
 			id: 'trips',
@@ -39,11 +48,34 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 			href: '/driver/trips'
 		},
 		{
+			id: 'history',
+			label: 'History',
+			icon: ClockIcon,
+			href: '/driver/history'
+		},
+		{
+			id: 'dashboard',
+			label: 'Dashboard',
+			icon: LayoutDashboardIcon,
+			href: '/driver/dashboard'
+		},
+	];
+
+	// Conditional navigation items
+	const conditionalItems: NavigationItem[] = [];
+
+	// Only show "Complete Profile" if driver needs onboarding (not approved/active)
+	if (needsOnboarding || !driverStatus?.isApproved) {
+		conditionalItems.push({
 			id: 'onboarding',
 			label: 'Complete Profile',
 			icon: ClipboardListIcon,
 			href: '/driver/onboarding'
-		},
+		});
+	}
+
+	// Standard navigation items that are always shown
+	const standardItems: NavigationItem[] = [
 		{
 			id: 'profile',
 			label: 'My Profile',
@@ -56,6 +88,13 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 			icon: SettingsIcon,
 			href: '/driver/settings'
 		},
+	];
+
+	// Combine all navigation items
+	const navigationItems: NavigationItem[] = [
+		...baseNavigationItems,
+		...conditionalItems,
+		...standardItems
 	];
 
 	const isActive = (href: string) => {
@@ -102,11 +141,17 @@ export function DriverNavigation({ onNavigate }: DriverNavigationProps = {}) {
 								)}
 							</div>
 							{/* Optional descriptions */}
-							{item.id === 'dashboard' && (
-								<p className="text-xs text-muted-foreground mt-0.5">Overview and earnings</p>
+							{item.id === 'available' && (
+								<p className="text-xs text-muted-foreground mt-0.5">Accept new trips</p>
 							)}
 							{item.id === 'trips' && (
 								<p className="text-xs text-muted-foreground mt-0.5">Manage your rides</p>
+							)}
+							{item.id === 'history' && (
+								<p className="text-xs text-muted-foreground mt-0.5">Past trips & earnings</p>
+							)}
+							{item.id === 'dashboard' && (
+								<p className="text-xs text-muted-foreground mt-0.5">Overview and earnings</p>
 							)}
 							{item.id === 'onboarding' && (
 								<p className="text-xs text-muted-foreground mt-0.5">Finish driver setup</p>

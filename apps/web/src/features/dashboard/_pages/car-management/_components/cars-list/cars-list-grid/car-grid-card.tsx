@@ -9,11 +9,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { EditIcon, MoreHorizontalIcon, TrashIcon, ToggleLeftIcon, ToggleRightIcon } from "lucide-react";
+import { EditIcon, MoreHorizontalIcon, TrashIcon, ToggleLeftIcon, ToggleRightIcon, GlobeIcon } from "lucide-react";
 import type { Car } from "server/types";
 import { CarDetailsDialog } from "./car-details-dialog";
 import { useModal } from "@/hooks/use-modal";
 import { useUpdateCarMutation } from "../../../_hooks/query/car/use-update-car-mutation";
+import { useTogglePublishCarMutation } from "../../../_hooks/query/use-toggle-publish-car-mutation";
+import { useCarPricingStatusSafe } from "@/features/dashboard/_pages/publication-management/_hooks/use-car-pricing-status-safe";
+import { toast } from "sonner";
 
 interface CarGridCardProps {
 	car: Car;
@@ -23,10 +26,37 @@ const CarGridCard: React.FC<CarGridCardProps> = ({ car }) => {
 	const [showDetails, setShowDetails] = useState(false)
 	const { openModal } = useModal()
 	const updateCarMutation = useUpdateCarMutation()
+	const togglePublishMutation = useTogglePublishCarMutation()
+	const { hasCarPricingConfig } = useCarPricingStatusSafe()
 	const mainImage = car.images?.find((image) => image.isMain)
+
+	const isInFleet = car.isPublished && car.isActive && car.isAvailable && car.status === "available"
+	const canPublish = car.isActive && car.isAvailable && car.status === "available" && hasCarPricingConfig(car.id)
 
 	const handleEdit = () => {
 		openModal("edit-car", car)
+	}
+
+	const handleTogglePublish = async () => {
+		if (!canPublish && !car.isPublished) {
+			toast.error("Pricing required", {
+				description: "Add a pricing configuration for this car first, then publish.",
+				action: {
+					label: "Pricing Config",
+					onClick: () => window.location.href = "/admin/dashboard/pricing-config",
+				},
+			})
+			return
+		}
+		try {
+			await togglePublishMutation.mutateAsync({
+				id: car.id,
+				isPublished: !car.isPublished,
+			})
+			toast.success(car.isPublished ? "Removed from fleet" : "Added to fleet")
+		} catch (err: any) {
+			toast.error(err?.message || "Failed to update publication")
+		}
 	}
 
 	const handleToggleAvailability = async () => {
@@ -56,13 +86,18 @@ const CarGridCard: React.FC<CarGridCardProps> = ({ car }) => {
 						className="object-cover w-full h-full"
 					/>
 					{/* Status badges */}
-					<div className="absolute top-3 left-3 flex gap-2">
+					<div className="absolute top-3 left-3 flex flex-wrap gap-2">
 						<Badge
 							variant={car.isAvailable ? "default" : "secondary"}
 							className="text-xs bg-black/70 text-white border-0"
 						>
 							{car.isAvailable ? "available" : "unavailable"}
 						</Badge>
+						{!isInFleet && (
+							<Badge variant="outline" className="text-xs bg-amber-500/90 text-white border-0">
+								Not in fleet
+							</Badge>
+						)}
 						{car.category && (
 							<Badge variant="secondary" className="text-xs bg-white/90 text-black">
 								{car.category.name}
@@ -101,10 +136,17 @@ const CarGridCard: React.FC<CarGridCardProps> = ({ car }) => {
 								<span className="sr-only">Open menu</span>
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-[160px]">
+						<DropdownMenuContent align="end" className="w-[200px]">
 							<DropdownMenuItem onClick={handleEdit}>
 								<EditIcon className="mr-2 h-4 w-4" />
 								Edit Car
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={handleTogglePublish}
+								disabled={togglePublishMutation.isPending || (!car.isPublished && !canPublish)}
+							>
+								<GlobeIcon className="mr-2 h-4 w-4" />
+								{car.isPublished ? "Remove from fleet" : "Add to fleet"}
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={handleToggleAvailability}>

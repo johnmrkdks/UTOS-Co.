@@ -12,7 +12,7 @@ import {
 	Filter,
 	Loader2
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useGetPublishedServicesQuery } from "@/features/customer/_hooks/query/use-get-published-services-query";
 import { Link } from "@tanstack/react-router";
 
@@ -22,7 +22,6 @@ export function ServicesPage() {
 
 	// Fetch published services (packages from customer perspective)
 	const { data: servicesData, isLoading, error } = useGetPublishedServicesQuery({
-		search: searchTerm,
 		limit: 50,
 		offset: 0,
 	});
@@ -31,8 +30,26 @@ export function ServicesPage() {
 
 
 	// Helper function to format price
-	const formatPrice = (priceInCents: number) => {
-		return `$${(priceInCents / 100).toFixed(0)}`;
+	const formatPrice = (service: any) => {
+		const serviceType = service.serviceType;
+		if (serviceType === 'hourly' && service.hourlyRate) {
+			return {
+				price: `$${service.hourlyRate.toFixed(2)}`,
+				unit: '/hour',
+				type: 'Hourly'
+			};
+		} else if (service.fixedPrice) {
+			return {
+				price: `$${service.fixedPrice.toFixed(2)}`,
+				unit: '',
+				type: 'Fixed'
+			};
+		}
+		return {
+			price: '$0.00',
+			unit: '',
+			type: 'Fixed'
+		};
 	};
 
 	// Helper function to format duration
@@ -56,19 +73,23 @@ export function ServicesPage() {
 		}
 	};
 
-	// Get unique service types for filtering
-	const serviceTypes = Array.from(new Set(services.map(s => s.serviceType))).map(type => getServiceTypeDisplay(type));
+	// Get unique service types for filtering - memoized to prevent recalculation on every render
+	const serviceTypes = useMemo(() => {
+		return Array.from(new Set(services.map(s => (s as any).serviceType))).map(type => getServiceTypeDisplay(type));
+	}, [services]);
 
-	const filteredServices = services.filter(service => {
+	const filteredServices = useMemo(() => {
+		return services.filter(service => {
 		const matchesSearch = 
 			service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			service.serviceType.toLowerCase().includes(searchTerm.toLowerCase());
+			(service as any).serviceType.toLowerCase().includes(searchTerm.toLowerCase());
 		
-		const matchesCategory = activeCategory === "All" || getServiceTypeDisplay(service.serviceType) === activeCategory;
-		
+		const matchesCategory = activeCategory === "All" || getServiceTypeDisplay((service as any).serviceType) === activeCategory;
+
 		return matchesSearch && matchesCategory;
-	});
+		});
+	}, [services, searchTerm, activeCategory]);
 
 	return (
 		<div className="space-y-6">
@@ -133,7 +154,7 @@ export function ServicesPage() {
 
 			{/* Services Grid */}
 			{!isLoading && !error && (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 				{filteredServices.length === 0 ? (
 					<div className="text-center py-12 col-span-full">
 						<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -141,138 +162,134 @@ export function ServicesPage() {
 						<p className="text-gray-600">Try adjusting your search or filter criteria</p>
 					</div>
 				) : (
-					filteredServices.map((service) => (
-						<Card key={service.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-							{/* Service Image */}
-							<div className="h-48 relative overflow-hidden">
-								{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
-									<>
-										<img 
-											src={service.bannerImageUrl} 
-											alt={service.name}
-											className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-											onError={(e) => {
-												console.log(`❌ Failed to load image for ${service.name}:`, service.bannerImageUrl);
-												// Show fallback design on image error
-												e.currentTarget.parentElement!.innerHTML = `
-													<div class="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
-														<div class="text-center">
-															<div class="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
-																<svg class="w-8 h-8 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																	<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-																</svg>
+					filteredServices.map((service) => {
+						const pricing = formatPrice(service);
+						return (
+							<Card key={service.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border">
+								{/* Service Image */}
+								<div className="h-40 relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+									{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
+										<>
+											<img
+												src={service.bannerImageUrl}
+												alt={service.name}
+												className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+												onError={(e) => {
+													// Show fallback design on image error
+													e.currentTarget.parentElement!.innerHTML = `
+														<div class="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
+															<div class="text-center">
+																<div class="w-12 h-12 mx-auto mb-2 bg-primary/20 rounded-xl flex items-center justify-center">
+																	<svg class="w-6 h-6 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+																	</svg>
+																</div>
+																<p class="text-gray-600 font-medium text-xs px-2">${service.name}</p>
 															</div>
-															<p class="text-gray-600 font-medium text-sm px-2">${service.name}</p>
-															<p class="text-gray-400 text-xs mt-1">Premium Service</p>
 														</div>
-													</div>
-												`;
-											}}
-										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-									</>
-								) : (
-									<div className="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
-										<div className="text-center">
-											<div className="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
-												<Package className="w-8 h-8 text-primary/60" />
+													`;
+												}}
+											/>
+											<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+										</>
+									) : (
+										<div className="w-full h-full bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
+											<div className="text-center">
+												<div className="w-12 h-12 mx-auto mb-2 bg-primary/20 rounded-xl flex items-center justify-center">
+													<Package className="w-6 h-6 text-primary/60" />
+												</div>
+												<p className="text-gray-600 font-medium text-xs px-2">{service.name}</p>
 											</div>
-											<p className="text-gray-600 font-medium text-sm px-2">{service.name}</p>
-											<p className="text-gray-400 text-xs mt-1">Premium Service</p>
 										</div>
-									</div>
-								)}
-								
-								{/* Service Type Badge */}
-								<div className="absolute bottom-4 left-4">
-									<Badge className="bg-primary/90 text-primary-foreground border-0 shadow-lg">
-										{getServiceTypeDisplay(service.serviceType)}
-									</Badge>
-								</div>
-								
-								{/* Price Badge */}
-								<div className="absolute top-4 left-4">
-									<Badge className="bg-white/95 text-primary font-bold shadow-lg">
-										{formatPrice(service.fixedPrice)}
-									</Badge>
-								</div>
-								
-								{/* Deposit Required Badge */}
-								{service.depositRequired && (
-									<div className="absolute top-4 right-4">
-										<Badge variant="secondary" className="bg-orange-500/90 text-white border-0 shadow-lg">
-											Deposit Required
-										</Badge>
-									</div>
-								)}
-							</div>
-
-							<CardHeader className="pb-3">
-								<div className="flex justify-between items-start">
-									<CardTitle className="text-lg">{service.name}</CardTitle>
-								</div>
-								<CardDescription className="text-sm">{service.description}</CardDescription>
-							</CardHeader>
-
-							<CardContent className="space-y-4">
-								{/* Service Details */}
-								<div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
-									<div className="flex items-center gap-2">
-										<Clock className="h-4 w-4" />
-										<span>{formatDuration(service.duration)}</span>
-									</div>
-									<div className="flex items-center gap-2">
-										<Users className="h-4 w-4" />
-										<span>{service.maxPassengers || 4} passengers</span>
-									</div>
-								</div>
-
-								{/* Service Features */}
-								<div className="flex flex-wrap gap-1">
-									{service.includesDriver && (
-										<Badge variant="outline" className="text-xs">
-											Driver Included
-										</Badge>
 									)}
-									{service.includesFuel && (
-										<Badge variant="outline" className="text-xs">
-											Fuel Included
+
+									{/* Rate Type Badge */}
+									<div className="absolute top-2 left-2">
+										<Badge
+											variant={pricing.type === 'Hourly' ? 'default' : 'secondary'}
+											className="text-xs font-medium shadow-sm"
+										>
+											{pricing.type}
 										</Badge>
-									)}
-									{service.includesTolls && (
-										<Badge variant="outline" className="text-xs">
-											Tolls Included
+									</div>
+
+									{/* Service Type Badge */}
+									<div className="absolute bottom-2 left-2">
+										<Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-xs shadow-sm">
+											{getServiceTypeDisplay((service as any).serviceType)}
 										</Badge>
-									)}
-									{service.includesWaiting && (
-										<Badge variant="outline" className="text-xs">
-											Waiting Time
-										</Badge>
+									</div>
+
+									{/* Deposit Required Badge */}
+									{service.depositRequired && (
+										<div className="absolute top-2 right-2">
+											<Badge variant="destructive" className="text-xs shadow-sm">
+												Deposit Required
+											</Badge>
+										</div>
 									)}
 								</div>
 
-								{/* Advance Booking Notice */}
-								{service.advanceBookingHours && service.advanceBookingHours > 0 && (
-									<div className="text-xs text-gray-500">
-										Book at least {service.advanceBookingHours}h in advance
-									</div>
-								)}
+								<CardContent className="p-4">
+									<div className="space-y-3">
+										{/* Header */}
+										<div>
+											<CardTitle className="text-sm font-semibold leading-tight mb-1 line-clamp-1">
+												{service.name}
+											</CardTitle>
+											<CardDescription className="line-clamp-2 text-xs leading-relaxed min-h-[32px]">
+												{service.description}
+											</CardDescription>
+										</div>
 
-								{/* Action Buttons */}
-								<div className="flex gap-2 pt-2">
-									<Button className="flex-1" asChild>
-										<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
-											<Package className="h-4 w-4 mr-2" />
-											Book Service
-										</Link>
-									</Button>
-									<Button variant="outline" size="icon">
-										<MapPin className="h-4 w-4" />
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					))
+										{/* Pricing */}
+										<div className="flex items-center justify-between">
+											<div className="flex items-baseline gap-1">
+												<span className="font-bold text-lg text-primary">
+													{pricing.price}
+												</span>
+												{pricing.unit && (
+													<span className="text-xs text-muted-foreground">
+														{pricing.unit}
+													</span>
+												)}
+											</div>
+
+											{/* Service Stats */}
+											<div className="flex items-center gap-2 text-xs text-muted-foreground">
+												{service.duration && (
+													<div className="flex items-center gap-1">
+														<Clock className="h-3 w-3" />
+														<span>{Math.floor(service.duration / 60)}h</span>
+													</div>
+												)}
+											</div>
+										</div>
+
+										{/* Advance Booking Notice */}
+										{service.advanceBookingHours && service.advanceBookingHours > 0 && (
+											<div className="text-xs text-muted-foreground">
+												Book {service.advanceBookingHours}h in advance
+											</div>
+										)}
+									</div>
+
+									{/* Action Buttons */}
+									<div className="flex gap-2 mt-4 pt-3 border-t">
+										<Button className="flex-1 text-xs" asChild>
+											<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
+												<Package className="h-3 w-3 mr-1" />
+												Book Service
+											</Link>
+										</Button>
+										<Button variant="outline" size="sm" className="text-xs">
+											<MapPin className="h-3 w-3" />
+										</Button>
+									</div>
+								</CardContent>
+							</Card>
+						);
+					})
 				)}
 				</div>
 			)}
@@ -285,7 +302,7 @@ export function ServicesPage() {
 						Can't find what you're looking for? Get an instant quote for a custom car booking.
 					</p>
 					<Button variant="outline" asChild>
-						<Link to="/calculate-quote">Get Instant Quote</Link>
+						<Link to="/calculate-quote" search={{ selectedCarId: "" }}>Get Instant Quote</Link>
 					</Button>
 				</CardContent>
 			</Card>

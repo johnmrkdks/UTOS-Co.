@@ -3,44 +3,209 @@ main = "src/index.ts"
 compatibility_date = "2025-06-15"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-NODE_ENV = "production"
-CORS_ORIGIN = "https://down-under-chauffeur.davannarts.workers.dev"
+[observability.logs]
+enabled = true
+
+[env.development]
+# Use local D1 (SQLite) when remote dev database is unavailable
+remote = false
+NODE_ENV = "development"
+SITE_URL = "http://localhost:3001"
+# Comma-separated origins for dev (web may run on 3001, 3003, etc.)
+CORS_ORIGIN = "http://localhost:3001,http://localhost:3002,http://localhost:3003"
 
 # Better Auth
 BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
-BETTER_AUTH_URL="https://down-under-chauffeur-server.davannarts.workers.dev"
+BETTER_AUTH_URL="http://localhost:3000"
 
 # Google OAuth
 GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
-GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_OAUTH_REFRESH_TOKEN"
-GOOGLE_EMAIL_USER = "johnmrk.au@gmail.com"
-GOOGLE_MAPS_API_KEY = "AIzaSyD7UN6X9hn2wc-shlASE71sSxH_XQfMZnA"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
+GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
+GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
 
+# Square Payments (local dev - add SQUARE_ACCESS_TOKEN to .dev.vars)
+SQUARE_APPLICATION_ID = "sandbox-sq0idb-NIoQ14HVzSUecRSlgTsM3w"
+SQUARE_LOCATION_ID = "L8P964X218027"
+SQUARE_ENVIRONMENT = "sandbox"
+
+# Cloudflare R2
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-test-bucket"
+CLOUDFLARE_R2_REGION = "oc" # Oceania
+CLOUDFLARE_R2_S3_ENDPOINT = "REDACTED_R2_ENDPOINT"
+CLOUDFLARE_R2_PUBLIC_URL = "REDACTED_R2_PUBLIC_URL"
+
+# Local D1 for development (SQLite file in .wrangler/state/v3/d1/)
+# Use: pnpm dev (runs wrangler dev --env development)
+# database_id required for wrangler d1 execute --local to find the DB
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "down-under-chauffeur-test-db"
+database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+migrations_dir = "./drizzle/migrations/sqlite"
+remote = false
+
+# Local R2 for development (when using remote=false)
+[[env.development.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "down-under-chauffeur-test-bucket"
+preview_bucket_name = "down-under-chauffeur-test-bucket"
+remote = false
+
+# Deployed dev environment - uses my-dev-db, domain-style URLs (dev.downunderchauffeurs.com)
+[env.dev.vars]
+NODE_ENV = "development"
+SITE_URL = "https://down-under-chauffeur-dev.luppy.workers.dev"
+CORS_ORIGIN = "https://down-under-chauffeur-dev.luppy.workers.dev,http://localhost:3001,http://localhost:3002,http://localhost:3003"
+
+# Better Auth
+BETTER_AUTH_SECRET = "sdNWG3346gApFEayd0QfPFsEjTLcibq2"
+BETTER_AUTH_URL = "https://down-under-chauffeur-server-dev.luppy.workers.dev"
+
+# Google OAuth
+GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
+GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
+GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+
+# Cloudflare R2 (use test bucket for dev)
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-test-bucket"
+CLOUDFLARE_R2_REGION = "oc"
+CLOUDFLARE_R2_S3_ENDPOINT = "REDACTED_R2_ENDPOINT"
+CLOUDFLARE_R2_PUBLIC_URL = "REDACTED_R2_PUBLIC_URL"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "my-dev-db"
+database_id = "38bee8af-29e6-43ed-9bd4-3bff0f95f325"
+migrations_dir = "./drizzle/migrations/sqlite"
+
+[[env.dev.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "down-under-chauffeur-test-bucket"
+preview_bucket_name = "down-under-chauffeur-test-bucket"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "down-under-chauffeur-test-db"
+database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
+migrations_dir = "./drizzle/migrations/sqlite"
+remote = true
+
+[[r2_buckets]]
+binding = 'BUCKET'
+bucket_name = 'down-under-chauffeur-test-bucket'
+preview_bucket_name = 'down-under-chauffeur-test-bucket'
+remote = true
+
+[env.staging.vars]
+# Staging = development (account 8357cb0b, my-dev-db)
+NODE_ENV = "development"
+# Web app URL for payment links, emails, etc.
+SITE_URL = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
+# Comma-separated allowed origins for CORS (also hardcoded in index.ts ALLOWED_ORIGINS)
+CORS_ORIGIN = "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev,https://downunderchauffeurs.com,https://down-under-chauffeur-dev.luppy.workers.dev,http://localhost:3001,http://localhost:3002,http://localhost:3003"
+
+# Better Auth (Safari iOS: cross-subdomain cookies for email/password login)
+BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
+BETTER_AUTH_URL="https://down-under-chauffeur-server-staging.downunderchauffeurs.workers.dev"
+COOKIE_DOMAIN="downunderchauffeurs.workers.dev"
+
+GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
+GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
+GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+
+# Square Payments
+SQUARE_APPLICATION_ID = "sandbox-sq0idb-NIoQ14HVzSUecRSlgTsM3w"
+SQUARE_LOCATION_ID = "L8P964X218027"
+SQUARE_ENVIRONMENT = "sandbox"
+# Access token: wrangler secret put SQUARE_ACCESS_TOKEN --env staging
+
+# Resend - REQUIRED for emails in Cloudflare Workers (nodemailer/SMTP does not work)
+# Get API key at https://resend.com (free: 100/day). Add as secret: wrangler secret put RESEND_API_KEY --env staging
+# RESEND_FROM_EMAIL = verified domain in Resend, e.g. bookings@downunderchauffeurs.com
+
+
+# Cloudflare R2
+CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
+CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
+CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
+CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
+CLOUDFLARE_R2_REGION = "oc" # Oceania
+CLOUDFLARE_R2_S3_ENDPOINT = "https://8357cb0b206399da0d4027d5f6961df9.r2.cloudflarestorage.com/down-under-chauffeur-bucket"
+CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "my-dev-db"
+database_id = "38bee8af-29e6-43ed-9bd4-3bff0f95f325"
+preview_database_id = "38bee8af-29e6-43ed-9bd4-3bff0f95f325"
+migrations_dir = "./drizzle/migrations/sqlite"
+
+[[env.staging.r2_buckets]]
+binding = 'BUCKET'
+bucket_name = 'down-under-chauffeur-bucket'
+preview_bucket_name = "down-under-chauffeur-bucket"
+
+
+[env.production.vars]
+NODE_ENV = "production"
+SITE_URL = "https://downunderchauffeurs.com"
+CORS_ORIGIN = "https://downunderchauffeurs.com"
+
+# Better Auth (Safari iOS: cross-subdomain cookies for email/password login)
+BETTER_AUTH_SECRET="sdNWG3346gApFEayd0QfPFsEjTLcibq2"
+BETTER_AUTH_URL="https://api.downunderchauffeurs.com"
+COOKIE_DOMAIN="downunderchauffeurs.com"
+
+# Google OAuth
+GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "REDACTED_GOOGLE_CLIENT_SECRET"
+GOOGLE_EMAIL_REFRESH_TOKEN = "REDACTED_GOOGLE_REFRESH_TOKEN"
+GOOGLE_EMAIL_ACCESS_TOKEN = "REDACTED_GOOGLE_ACCESS_TOKEN"
+GOOGLE_EMAIL_USER = "downunderchauffeurs@gmail.com"
+GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+
+# Square Payments (production)
+SQUARE_APPLICATION_ID = "sq0idp-wpkwV-CJfxKviQYYzXFlhg"
+SQUARE_LOCATION_ID = "LCC9KVWA5GF9E"
+SQUARE_ENVIRONMENT = "production"
+# Access token: wrangler secret put SQUARE_ACCESS_TOKEN --env production
 
 # Cloudflare R2
 CLOUDFLARE_R2_TOKEN_KEY = "REDACTED_R2_TOKEN_KEY"
 CLOUDFLARE_R2_ACCESS_KEY_ID = "REDACTED_R2_ACCESS_KEY_ID"
 CLOUDFLARE_R2_SECRET_ACCESS_KEY = "REDACTED_R2_SECRET"
-CLOUDFLARE_R2_BUCKET_NAME = "down-under-chauffeur-bucket"
+CLOUDFLARE_R2_BUCKET_NAME = "downunderchauffeurs-bucket"
 CLOUDFLARE_R2_REGION = "oc" # Oceania
-CLOUDFLARE_R2_S3_ENDPOINT = "https://982e002f72f3d258dd99f8aaf8a68a82.r2.cloudflarestorage.com"
-CLOUDFLARE_R2_PUBLIC_URL = "https://pub-445ebbef9ad84db0b81b54e22dde1343.r2.dev"
+CLOUDFLARE_R2_S3_ENDPOINT = "https://8357cb0b206399da0d4027d5f6961df9.r2.cloudflarestorage.com/downunderchauffeurs-bucket"
+CLOUDFLARE_R2_PUBLIC_URL = "https://cdn.downunderchauffeurs.com/downunderchauffeurs-bucket"
 
+[[env.production.routes]]
+pattern = "api.downunderchauffeurs.com"
+custom_domain = true
 
-[[d1_databases]]
+[[env.production.d1_databases]]
 binding = "DB"
-database_name = "down-under-chauffeur-db"
-database_id = "b3c05f8b-ce80-40fa-abd1-217935292dba"
+database_name = "downunderchauffeurs-db"
+database_id = "e03c212d-bd91-46ca-a218-1950cbb1e4ea"
 preview_database_id = "8682a4c3-fcc3-4435-9a31-1b710dd1a673"
-#preview_database_id = "DB"
 migrations_dir = "./drizzle/migrations/sqlite"
 
-[[r2_buckets]]
+[[env.production.r2_buckets]]
 binding = 'BUCKET'
-bucket_name = 'down-under-chauffeur-bucket'
-preview_bucket_name = "down-under-chauffeur-test-bucket"
-
-[observability.logs]
-enabled = true
+bucket_name = 'downunderchauffeurs-bucket'

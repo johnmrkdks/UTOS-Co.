@@ -187,7 +187,7 @@ export function DriverApplicationsTable({ status = "documents_uploaded" }: Drive
 
 			{/* Review Dialog */}
 			<Dialog open={!!selectedApplication} onOpenChange={handleCloseReview}>
-				<DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+				<DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
 					<DialogHeader>
 						<DialogTitle>Driver Application Review</DialogTitle>
 					</DialogHeader>

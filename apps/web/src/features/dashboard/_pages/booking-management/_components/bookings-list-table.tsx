@@ -4,20 +4,41 @@ import { useGetBookingsQuery } from "../_hooks/query/use-get-bookings-query";
 import { BookingFilters } from "./booking-filters";
 import { bookingTableColumns, compactBookingTableColumns, type Booking } from "./booking-table-columns";
 import { useState, useMemo } from "react";
-import { UserCheck, Ban } from "lucide-react";
+import { UserCheck, Ban, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { ArchiveBookingDialog } from "./archive-booking-dialog";
+import { BulkOperationsDialog } from "./bulk-operations-dialog";
+import { BulkAssignDriverDialog } from "./bulk-assign-driver-dialog";
+import { useArchiveBookingMutation } from "../_hooks/query/use-archive-booking-mutation";
+import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
+import { useCancelBookingMutation } from "../_hooks/query/use-cancel-booking-mutation";
+import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
+import { canCancelBooking } from "@/lib/booking-status-config";
+import { toast } from "sonner";
 
 interface BookingsListTableProps {
-	bookingType?: "package" | "custom";
+	bookingType?: "package" | "custom" | "guest" | "offload";
 	status?: string;
 	filters?: BookingFilters;
 	compact?: boolean;
+	isArchived?: boolean;
+	hasDriver?: boolean;
+	hasCar?: boolean;
 }
 
-export function BookingsListTable({ bookingType, status, filters, compact = false }: BookingsListTableProps) {
+export function BookingsListTable({ bookingType, status, filters, compact = false, isArchived, hasDriver, hasCar }: BookingsListTableProps) {
 	const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
+	const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+	const [bulkOperationsDialogOpen, setBulkOperationsDialogOpen] = useState(false);
+	const [selectedBookingForArchive, setSelectedBookingForArchive] = useState<Booking | null>(null);
+	const [isArchivingOperation, setIsArchivingOperation] = useState(true);
+	const [bulkOperationType, setBulkOperationType] = useState<"archive" | "unarchive" | "delete">("archive");
+	const [bulkAssignDriverOpen, setBulkAssignDriverOpen] = useState(false);
+
+	// Get modal provider functions
+	const { openEditBookingDialog, openBookingDetailsDialog } = useBookingManagementModalProvider();
 	
 	const bookingsQuery = useGetBookingsQuery({
-		limit: 50,
+		limit: 1000, // Removed practical limit for now - will implement pagination later
 		offset: 0,
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
@@ -35,6 +56,19 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		}
 		if (status) {
 			filtered = filtered.filter(b => b.status === status);
+		}
+
+		// Apply archive filter
+		if (isArchived !== undefined) {
+			filtered = filtered.filter(b => Boolean(b.isArchived) === isArchived);
+		}
+
+		// Apply driver and car assignment filters
+		if (hasDriver !== undefined) {
+			filtered = filtered.filter(b => Boolean(b.driverId) === hasDriver);
+		}
+		if (hasCar !== undefined) {
+			filtered = filtered.filter(b => Boolean(b.carId) === hasCar);
 		}
 
 		// Apply advanced filters
@@ -60,15 +94,16 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 				filtered = filtered.filter(b => new Date(b.scheduledPickupTime) <= toDate);
 			}
 			if (filters.minAmount) {
-				filtered = filtered.filter(b => (b.quotedAmount / 100) >= filters.minAmount!);
+				filtered = filtered.filter(b => b.quotedAmount >= filters.minAmount!);
 			}
 			if (filters.maxAmount) {
-				filtered = filtered.filter(b => (b.quotedAmount / 100) <= filters.maxAmount!);
+				filtered = filtered.filter(b => b.quotedAmount <= filters.maxAmount!);
 			}
 		}
 
-		return filtered;
-	}, [bookingsQuery.data?.data, bookingType, status, filters]);
+		// Ensure data is sorted by createdAt in descending order (newest first)
+		return [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+	}, [bookingsQuery.data?.data, bookingType, status, filters, isArchived]);
 
 	// Handle bulk selection
 	const toggleBookingSelection = (bookingId: string) => {
@@ -89,30 +124,58 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 
 	// Action handlers
 	const handleEditBooking = (booking: Booking) => {
-		// TODO: Implement edit booking functionality
-		console.log("Edit booking:", booking.id);
+		openEditBookingDialog(booking);
 	};
 
-	const handleCancelBooking = (booking: Booking) => {
-		// TODO: Implement cancel booking functionality
-		console.log("Cancel booking:", booking.id);
+	const cancelMutation = useCancelBookingMutation();
+	const updateStatusMutation = useUpdateBookingStatusMutation();
+
+	const handleCancelBooking = async (booking: Booking) => {
+		if (!canCancelBooking(booking.status)) {
+			toast.error("Cannot cancel", {
+				description: "This booking cannot be cancelled in its current status.",
+			});
+			return;
+		}
+		if (!confirm(`Cancel booking for ${booking.customerName}?`)) return;
+		try {
+			await cancelMutation.mutateAsync({ bookingId: booking.id });
+		} catch {
+			// Error handled by mutation
+		}
+	};
+
+	const handleArchiveBooking = (booking: Booking, isArchiving: boolean) => {
+		setSelectedBookingForArchive(booking);
+		setIsArchivingOperation(isArchiving);
+		setArchiveDialogOpen(true);
+	};
+
+	const handleDeleteBooking = (booking: Booking) => {
+		setSelectedBookings([booking.id]);
+		setBulkOperationType("delete");
+		setBulkOperationsDialogOpen(true);
 	};
 
 	// Use appropriate column configuration based on compact mode
-	const columns = compact 
+	const columns = compact
 		? compactBookingTableColumns({
 			selectedBookings,
 			onToggleBookingSelection: toggleBookingSelection,
 			onToggleAllSelection: toggleAllSelection,
 			onEditBooking: handleEditBooking,
-			onCancelBooking: handleCancelBooking
+			onCancelBooking: handleCancelBooking,
+			onArchiveBooking: handleArchiveBooking,
+			onDeleteBooking: handleDeleteBooking
 		})
 		: bookingTableColumns({
 			selectedBookings,
 			onToggleBookingSelection: toggleBookingSelection,
 			onToggleAllSelection: toggleAllSelection,
 			onEditBooking: handleEditBooking,
-			onCancelBooking: handleCancelBooking
+			onCancelBooking: handleCancelBooking,
+			onArchiveBooking: handleArchiveBooking,
+			onDeleteBooking: handleDeleteBooking
 		});
 
 	if (bookingsQuery.isLoading) {
@@ -123,15 +186,23 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 		return <div>Error loading bookings: {bookingsQuery.error.message}</div>;
 	}
 
-	// Bulk operations actions
+	// Bulk operations
 	const bulkAssignDriver = () => {
-		// TODO: Implement bulk driver assignment
-		console.log("Bulk assign driver to:", selectedBookings);
+		setBulkAssignDriverOpen(true);
 	};
 
-	const bulkUpdateStatus = (newStatus: string) => {
-		// TODO: Implement bulk status update
-		console.log("Bulk update status to:", newStatus, "for:", selectedBookings);
+	const bulkUpdateStatus = async (newStatus: string) => {
+		try {
+			await Promise.all(
+				selectedBookings.map((id) =>
+					updateStatusMutation.mutateAsync({ id, status: newStatus as any })
+				)
+			);
+			setSelectedBookings([]);
+			toast.success(`Updated ${selectedBookings.length} booking(s) to ${newStatus}`);
+		} catch {
+			// Error handled by mutation
+		}
 	};
 
 	return (
@@ -156,9 +227,33 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 							<Ban className="h-4 w-4 mr-2" />
 							Cancel Selected
 						</Button>
-						<Button 
-							variant="ghost" 
-							size="sm" 
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								setBulkOperationType("archive");
+								setBulkOperationsDialogOpen(true);
+							}}
+							className="text-orange-600 hover:text-orange-700"
+						>
+							<Archive className="h-4 w-4 mr-2" />
+							Archive Selected
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								setBulkOperationType("delete");
+								setBulkOperationsDialogOpen(true);
+							}}
+							className="text-red-600 hover:text-red-700"
+						>
+							<Trash2 className="h-4 w-4 mr-2" />
+							Delete Selected
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
 							onClick={() => setSelectedBookings([])}
 						>
 							Clear Selection
@@ -169,10 +264,37 @@ export function BookingsListTable({ bookingType, status, filters, compact = fals
 
 			<DataTable
 				columns={columns}
-				data={filteredData}
+				data={filteredData as any}
 				searchKey="customerName"
 				searchPlaceholder="Search by customer name..."
 				isLoading={bookingsQuery.isLoading}
+				enableSorting={true}
+				onRowClick={(row) => openBookingDetailsDialog(row.original.id)}
+			/>
+
+			{/* Archive/Restore Dialog */}
+			<ArchiveBookingDialog
+				booking={selectedBookingForArchive}
+				open={archiveDialogOpen}
+				onOpenChange={setArchiveDialogOpen}
+				isArchiving={isArchivingOperation}
+			/>
+
+			{/* Bulk Operations Dialog */}
+			<BulkOperationsDialog
+				selectedBookingIds={selectedBookings}
+				open={bulkOperationsDialogOpen}
+				onOpenChange={setBulkOperationsDialogOpen}
+				operationType={bulkOperationType}
+				onClearSelection={() => setSelectedBookings([])}
+			/>
+
+			{/* Bulk Assign Driver Dialog */}
+			<BulkAssignDriverDialog
+				bookingIds={selectedBookings}
+				open={bulkAssignDriverOpen}
+				onOpenChange={setBulkAssignDriverOpen}
+				onSuccess={() => setSelectedBookings([])}
 			/>
 		</div>
 	);

@@ -9,6 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Checkbox } from "@workspace/ui/components/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import {
 	Form,
 	FormControl,
@@ -27,6 +28,7 @@ import { useCreatePackageServiceTypeMutation } from "../../_hooks/query/use-crea
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
 	description: z.string().optional(),
+	rateType: z.enum(["fixed", "hourly"]).default("fixed"),
 	isActive: z.boolean().default(true),
 	displayOrder: z.number().int().min(0).default(0),
 });
@@ -42,6 +44,7 @@ export function AddPackageServiceTypeDialog() {
 		defaultValues: {
 			name: "",
 			description: "",
+			rateType: "fixed" as const,
 			isActive: true,
 			displayOrder: 0,
 		},
@@ -58,7 +61,7 @@ export function AddPackageServiceTypeDialog() {
 
 	return (
 		<Dialog open={isModalOpen("add-package-service-type")} onOpenChange={closeModal}>
-			<DialogContent className="sm:max-w-[600px]">
+			<DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Add Service Type</DialogTitle>
 					<DialogDescription>
@@ -99,6 +102,30 @@ export function AddPackageServiceTypeDialog() {
 							)}
 						/>
 
+						<FormField
+							control={form.control as any}
+							name="rateType"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Rate Type</FormLabel>
+									<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select rate type" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											<SelectItem value="fixed">Fixed Rate (Weddings, Concerts, Events)</SelectItem>
+											<SelectItem value="hourly">Hourly Rate (Tours, City Transfers)</SelectItem>
+										</SelectContent>
+									</Select>
+									<FormDescription>
+										Fixed rate packages have one price, hourly packages charge per hour
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
 						<FormField
 							control={form.control as any}

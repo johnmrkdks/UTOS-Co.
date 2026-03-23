@@ -12,11 +12,13 @@ export async function getDriversService(db: DB, params: ResourceList) {
 			userId: drivers.userId,
 			licenseNumber: drivers.licenseNumber,
 			licenseExpiry: drivers.licenseExpiry,
+			phoneNumber: drivers.phoneNumber,
 			isActive: drivers.isActive,
 			isApproved: drivers.isApproved,
 			isAvailable: drivers.isAvailable,
 			rating: drivers.rating,
 			totalRides: drivers.totalRides,
+			commissionRate: drivers.commissionRate,
 			createdAt: drivers.createdAt,
 			updatedAt: drivers.updatedAt,
 			user: {

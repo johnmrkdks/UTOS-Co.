@@ -39,3 +39,27 @@ export const guestProcedure = t.procedure.use(({ ctx, next }) => {
 		},
 	});
 });
+
+export const superAdminProcedure = t.procedure.use(({ ctx, next }) => {
+	if (!ctx.session) {
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "Authentication required",
+			cause: "No session",
+		});
+	}
+	const role = ctx.session.user?.role;
+	if (role !== "super_admin") {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Super Admin access required",
+			cause: "Insufficient permissions",
+		});
+	}
+	return next({
+		ctx: {
+			...ctx,
+			session: ctx.session,
+		},
+	});
+});

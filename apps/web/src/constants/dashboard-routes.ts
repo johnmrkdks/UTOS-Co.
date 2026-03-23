@@ -10,11 +10,13 @@ import {
 	ClipboardListIcon,
 	DollarSignIcon,
 	EyeIcon,
+	FileTextIcon,
 	FlaskConicalIcon,
 	InboxIcon,
 	LayoutDashboardIcon,
 	Package2Icon,
 	SettingsIcon,
+	UserCogIcon,
 	UsersIcon,
 } from "lucide-react";
 
@@ -25,8 +27,8 @@ const filterRoutesByEnvironment = (routes: RouteConfig[]): RouteConfig[] => {
 	return routes.filter((route) => {
 		// Hide these pages in production
 		const developmentOnlyPaths = [
-			"/admin/dashboard/analytics",
 			"/admin/dashboard/admin-testing",
+			"/admin/dashboard/settings",
 		];
 
 		if (developmentOnlyPaths.includes(route.path) && !isDevelopment) {
@@ -53,6 +55,11 @@ const ALL_DASHBOARD_OVERVIEW_ROUTES: RouteConfig[] = [
 		label: "Reports",
 		path: "/admin/dashboard/report",
 		icon: ClipboardListIcon,
+	},
+	{
+		label: "Invoices",
+		path: "/admin/dashboard/invoices",
+		icon: FileTextIcon,
 	},
 ];
 
@@ -91,6 +98,15 @@ const ALL_DASHBOARD_INVENTORY_ROUTES: RouteConfig[] = [
 		label: "Publications",
 		path: "/admin/dashboard/publications",
 		icon: EyeIcon,
+	},
+];
+
+// Super Admin only - User Management
+export const SUPER_ADMIN_ROUTES: RouteConfig[] = [
+	{
+		label: "User Management",
+		path: "/admin/dashboard/users",
+		icon: UserCogIcon,
 	},
 ];
 

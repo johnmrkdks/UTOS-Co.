@@ -7,6 +7,13 @@ export const BUSINESS_INFO = {
 		display: "syd@downunderchauffeurs.com",
 		link: "mailto:syd@downunderchauffeurs.com"
 	},
+	/** Invoice-specific details for formal PDF invoices */
+	invoice: {
+		address: "Sydney, New South Wales, Australia",
+		abn: "", // Add ABN when registered, e.g. "12 345 678 901"
+		paymentTerms: "Payment due within 14 days of invoice date",
+		bankDetails: "", // Optional: "BSB: XXX-XXX  Account: XXXXXXXX"
+	},
 	social: {
 		facebook: {
 			url: "https://www.facebook.com/380139225188224",

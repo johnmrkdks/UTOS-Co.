@@ -4,6 +4,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { AnalyticsCard, type AnalyticsCardData } from '@/components/analytics-card';
 import { useGetDashboardAnalyticsEnhancedQuery, formatDashboardAnalytics } from '@/features/dashboard/_hooks/query/use-get-dashboard-analytics-enhanced-query';
+import { useGetCarsQuery } from '@/features/dashboard/_pages/car-management/_hooks/query/car/use-get-cars-query';
 import {
 	Package,
 	Car,
@@ -29,9 +30,10 @@ export const Route = createFileRoute('/admin/dashboard/_layout/board/')({
 
 function AdminDashboard() {
 	const { data: analyticsData, isLoading, error } = useGetDashboardAnalyticsEnhancedQuery();
+	const { data: carsData, isLoading: carsLoading } = useGetCarsQuery({ limit: 1000 }); // Get all cars for count
 	const data = formatDashboardAnalytics(analyticsData);
-	
-	if (isLoading) {
+
+	if (isLoading || carsLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="flex items-center gap-2">
@@ -69,6 +71,12 @@ function AdminDashboard() {
 		completionRate: 0
 	}
 
+	// Calculate vehicle stats
+	const totalVehicles = carsData?.data?.length || 0;
+	const availableVehicles = carsData?.data?.filter((car: any) => {
+		return car.isAvailable === true && car.isActive === true;
+	}).length || 0;
+
 	// Analytics card data for admin dashboard
 	const adminAnalyticsData: AnalyticsCardData[] = [
 		{
@@ -85,15 +93,15 @@ function AdminDashboard() {
 			showBackgroundIcon: true
 		},
 		{
-			id: 'revenue',
-			title: 'Revenue',
-			value: `$${(stats.totalRevenue / 1000).toFixed(1)}k`,
-			icon: DollarSign,
+			id: 'vehicles',
+			title: 'Vehicles',
+			value: totalVehicles,
+			icon: Car,
 			bgGradient: 'bg-gradient-to-br from-green-50 to-green-100',
 			iconBg: 'bg-green-500',
-			changeText: `+$${(stats.monthlyRevenue / 1000).toFixed(1)}k month`,
-			changeType: 'positive',
-			showTrend: true,
+			changeText: `${availableVehicles} available`,
+			changeType: 'neutral',
+			showTrend: false,
 			showIcon: true,
 			showBackgroundIcon: true
 		},
@@ -153,92 +161,6 @@ function AdminDashboard() {
 				))}
 			</div>
 
-			{/* Performance Overview - Mobile Optimized */}
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-				{/* Rating Card */}
-				<Card className="p-4 sm:p-6 hover:shadow-md transition-shadow">
-					<CardHeader className="p-0 pb-3">
-						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-								<Star className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
-							</div>
-							<div>
-								<CardTitle className="text-base sm:text-lg">Service Rating</CardTitle>
-								<CardDescription className="text-sm">Customer satisfaction</CardDescription>
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="flex items-center gap-2 mb-2">
-							<span className="text-2xl sm:text-3xl font-bold text-foreground">{stats.avgRating}</span>
-							<div className="flex items-center">
-								{[...Array(5)].map((_, i) => (
-									<Star
-										key={i}
-										className={`h-4 w-4 ${i < Math.floor(stats.avgRating) ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`}
-									/>
-								))}
-							</div>
-						</div>
-						<p className="text-xs text-muted-foreground">Based on {stats.totalReviews} reviews</p>
-					</CardContent>
-				</Card>
-
-				{/* Completion Rate */}
-				<Card className="p-4 sm:p-6 hover:shadow-md transition-shadow">
-					<CardHeader className="p-0 pb-3">
-						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-100 flex items-center justify-center">
-								<CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-							</div>
-							<div>
-								<CardTitle className="text-base sm:text-lg">Completion Rate</CardTitle>
-								<CardDescription className="text-sm">Trip success rate</CardDescription>
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="flex items-center gap-2 mb-2">
-							<span className="text-2xl sm:text-3xl font-bold text-foreground">{stats.completionRate}%</span>
-							<TrendingUp className="h-4 w-4 text-green-600" />
-						</div>
-						<p className="text-xs text-muted-foreground">
-							{stats.completionRate > 95 ? "Excellent" : stats.completionRate > 85 ? "Good" : "Needs improvement"} performance
-						</p>
-					</CardContent>
-				</Card>
-
-				{/* Quick Actions */}
-				<Card className="p-4 sm:p-6 hover:shadow-md transition-shadow">
-					<CardHeader className="p-0 pb-3">
-						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-								<Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-							</div>
-							<div>
-								<CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
-								<CardDescription className="text-sm">Management tools</CardDescription>
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-0">
-						<div className="grid grid-cols-2 gap-2">
-							<Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-								<a href="/admin/dashboard/packages">
-									<Package className="h-3 w-3 mr-1" />
-									Packages
-								</a>
-							</Button>
-							<Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-								<a href="/admin/dashboard/drivers">
-									<Users className="h-3 w-3 mr-1" />
-									Drivers
-								</a>
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
 
 			{/* Recent Activity */}
 			<Card className="hover:shadow-md transition-shadow">
@@ -300,11 +222,6 @@ function AdminDashboard() {
 												<Clock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
 												<span className="text-xs text-muted-foreground">{activity.time}</span>
 											</div>
-										</div>
-									</div>
-									<div className="text-right flex-shrink-0">
-										<div className="font-semibold text-foreground text-sm sm:text-base">
-											${activity.amount.toFixed(2)}
 										</div>
 									</div>
 								</div>

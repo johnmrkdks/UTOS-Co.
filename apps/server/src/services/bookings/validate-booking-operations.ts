@@ -8,6 +8,8 @@ export interface BookingOperationValidation {
 	editReason?: string;
 	cancelReason?: string;
 	cancellationFeePercentage?: number;
+	hoursUntilPickup?: number;
+	hasDriverAssigned?: boolean;
 }
 
 export interface BookingForValidation {
@@ -30,7 +32,7 @@ export async function validateBookingOperations(
 		
 		const defaultPolicy = {
 			editAllowedHours: 4,
-			editDisabledAfterDriverAssignment: true,
+			editDisabledAfterDriverAssignment: false,
 			cancellationAllowedHours: 4,
 			cancellationFeePercentage: 0,
 			cancellationDisabledAfterDriverAssignment: false,
@@ -56,6 +58,9 @@ export async function validateBookingOperations(
 				canCancel: false,
 				editReason: `Cannot modify ${booking.status} booking`,
 				cancelReason: `Cannot cancel ${booking.status} booking`,
+				cancellationFeePercentage: 0,
+				hoursUntilPickup,
+				hasDriverAssigned,
 			};
 		}
 
@@ -67,10 +72,6 @@ export async function validateBookingOperations(
 			canEdit = false;
 			editReason = `Edits must be made at least ${defaultPolicy.editAllowedHours} hours before pickup`;
 			console.log("❌ Edit not allowed: too close to pickup time");
-		} else if (hasDriverAssigned && defaultPolicy.editDisabledAfterDriverAssignment) {
-			canEdit = false;
-			editReason = "Cannot edit booking after driver has been assigned";
-			console.log("❌ Edit not allowed: driver already assigned");
 		} else {
 			console.log("✅ Edit allowed");
 		}
@@ -97,6 +98,8 @@ export async function validateBookingOperations(
 			editReason,
 			cancelReason,
 			cancellationFeePercentage: defaultPolicy.cancellationFeePercentage,
+			hoursUntilPickup,
+			hasDriverAssigned,
 		};
 		
 		console.log("✅ validateBookingOperations - Final result:", JSON.stringify(result, null, 2));

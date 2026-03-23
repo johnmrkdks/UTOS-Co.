@@ -138,6 +138,7 @@ export const carsRelations = relations(cars, ({ one, many }) => ({
 	}),
 	images: many(carImages),
 	carsToFeatures: many(carsToFeatures),
+	// Note: Bookings relation is defined in bookings.ts to avoid circular imports
 }));
 
 // Relations for pricing config should be added to prevent circular imports

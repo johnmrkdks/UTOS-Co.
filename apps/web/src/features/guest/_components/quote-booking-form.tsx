@@ -6,21 +6,24 @@ import { useCreateCustomBookingFromQuoteMutation } from "@/features/customer/_ho
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Calendar } from "@workspace/ui/components/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { format, isBefore, startOfDay } from "date-fns";
-import { cn } from "@workspace/ui/lib/utils";
+import { ImprovedDateTimePicker } from "@/components/improved-datetime-picker";
+import { Loader2 } from "lucide-react";
 
 const quoteBookingSchema = z.object({
 	customerName: z.string().min(2, "Name must be at least 2 characters"),
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
-	passengerCount: z.number().min(1, "At least 1 passenger required"),
-	bookingDate: z.date({
-		required_error: "Please select a booking date",
+	passengerCount: z.number().min(1, "At least 1 passenger required").max(8, "Maximum 8 passengers allowed"),
+	luggageCount: z.number().int().min(0, "Luggage count cannot be negative").max(10, "Maximum 10 pieces of luggage allowed"),
+	scheduledPickupTime: z.date({
+		message: "Please select a pickup date and time",
+	}).refine((date) => {
+		const now = new Date();
+		const hoursUntilPickup = (date.getTime() - now.getTime()) / (1000 * 60 * 60);
+		return hoursUntilPickup >= 1;
+	}, {
+		message: "Custom bookings require at least 1 hour advance notice",
 	}),
-	bookingTime: z.string().min(1, "Please select a booking time"),
 	specialRequirements: z.string().optional(),
 });
 
@@ -37,7 +40,6 @@ interface QuoteBookingFormProps {
 }
 
 export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
-	const [date, setDate] = useState<Date>();
 	const createBookingMutation = useCreateCustomBookingFromQuoteMutation();
 
 	const form = useForm<QuoteBookingFormData>({
@@ -46,8 +48,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			customerName: "",
 			customerEmail: "",
 			customerPhone: "",
-			passengerCount: 1,
-			bookingTime: "",
+			scheduledPickupTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
 			specialRequirements: "",
 		},
 	});
@@ -61,8 +62,8 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			customerEmail: data.customerEmail,
 			customerPhone: data.customerPhone,
 			passengerCount: data.passengerCount,
-			bookingDate: data.bookingDate,
-			bookingTime: data.bookingTime,
+			luggageCount: data.luggageCount,
+			scheduledPickupTime: data.scheduledPickupTime,
 			specialRequirements: data.specialRequirements,
 			distance: quoteData.distance,
 			duration: quoteData.duration,
@@ -72,19 +73,12 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 		createBookingMutation.mutate(bookingData, {
 			onSuccess: () => {
 				form.reset();
-				setDate(undefined);
 			},
 		});
 	};
 
 	// Minimum booking date is today
 	const minDate = new Date();
-
-	const timeSlots = [
-		"06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
-		"12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
-		"18:00", "19:00", "20:00", "21:00", "22:00"
-	];
 
 	return (
 		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -126,70 +120,46 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 			<div className="space-y-4">
 				<h3 className="font-semibold">Trip Details</h3>
 
+				{/* Passengers and Luggage side by side */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<div>
+						<label className="block text-sm font-medium mb-1">Number of Passengers *</label>
+						<p className="text-xs text-gray-600 mb-2">Maximum capacity: 8 passengers</p>
+						<Input
+							type="number"
+							min={1}
+							max={8}
+							placeholder="e.g. 2"
+							{...form.register("passengerCount", { valueAsNumber: true })}
+							error={form.formState.errors.passengerCount?.message}
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium mb-1">Luggage Pieces *</label>
+						<p className="text-xs text-gray-600 mb-2">Maximum capacity: 10 pieces of luggage</p>
+						<Input
+							type="number"
+							min={0}
+							max={10}
+							placeholder="e.g. 3"
+							{...form.register("luggageCount", { valueAsNumber: true })}
+							error={form.formState.errors.luggageCount?.message}
+						/>
+					</div>
+				</div>
+
 				<div>
-					<label className="block text-sm font-medium mb-1">Number of Passengers</label>
-					<Input
-						type="number"
-						min={1}
-						max={8}
-						{...form.register("passengerCount", { valueAsNumber: true })}
-						error={form.formState.errors.passengerCount?.message}
+					<label className="block text-sm font-medium mb-1">Pickup Date & Time</label>
+					<ImprovedDateTimePicker
+						value={form.getValues("scheduledPickupTime")}
+						onChange={(date) => form.setValue("scheduledPickupTime", date)}
+						placeholder="Select pickup date and time"
+						minDate={minDate}
 					/>
-				</div>
-
-				<div>
-					<label className="block text-sm font-medium mb-1">Trip Date</label>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								className={cn(
-									"w-full justify-start text-left font-normal",
-									!date && "text-muted-foreground"
-								)}
-							>
-								<CalendarIcon className="mr-2 h-4 w-4" />
-								{date ? format(date, "PPP") : "Pick a date"}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0">
-							<Calendar
-								mode="single"
-								selected={date}
-								onSelect={(selectedDate) => {
-									setDate(selectedDate);
-									if (selectedDate) {
-										form.setValue("bookingDate", selectedDate);
-									}
-								}}
-								disabled={(date) => isBefore(startOfDay(date), startOfDay(minDate))}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
-					{form.formState.errors.bookingDate && (
+					{form.formState.errors.scheduledPickupTime && (
 						<p className="text-sm text-red-600 mt-1">
-							{form.formState.errors.bookingDate.message}
-						</p>
-					)}
-				</div>
-
-				<div>
-					<label className="block text-sm font-medium mb-1">Preferred Time</label>
-					<select
-						{...form.register("bookingTime")}
-						className="w-full p-2 border rounded-md"
-					>
-						<option value="">Select a time</option>
-						{timeSlots.map((time) => (
-							<option key={time} value={time}>
-								{time}
-							</option>
-						))}
-					</select>
-					{form.formState.errors.bookingTime && (
-						<p className="text-sm text-red-600 mt-1">
-							{form.formState.errors.bookingTime.message}
+							{form.formState.errors.scheduledPickupTime.message}
 						</p>
 					)}
 				</div>
@@ -213,7 +183,7 @@ export function QuoteBookingForm({ quoteData }: QuoteBookingFormProps) {
 					</span>
 				</div>
 				<p className="text-xs text-gray-500 mb-4">
-					Payment will be processed after booking confirmation. No payment required now.
+					Payment will be processed after booking confirmation.
 				</p>
 			</div>
 

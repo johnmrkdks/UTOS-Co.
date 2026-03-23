@@ -19,7 +19,7 @@ const pricingConfigSchema = z.object({
 	name: z.string().min(1, "Please enter a configuration name").max(100, "Name too long"),
 	carId: z.string().min(1, "Please select a car for this pricing configuration"),
 	firstKmRate: z.number({ 
-		required_error: "Please enter the first KM rate",
+		message: "Please enter the first KM rate",
 		invalid_type_error: "First KM rate must be a valid number"
 	}).min(0.01, "First KM rate must be greater than 0"),
 	firstKmLimit: z.union([

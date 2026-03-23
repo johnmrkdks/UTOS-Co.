@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Badge } from "@workspace/ui/components/badge"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import type { QuoteResult } from "../../_types/booking"
+import { formatDistanceKm } from "@/utils/format"
 
 interface QuoteDisplayProps {
 	quote: QuoteResult | null
@@ -32,7 +33,7 @@ export function QuoteDisplay({ quote, isCalculating }: QuoteDisplayProps) {
 						<div className="flex items-center gap-2 text-sm text-muted-foreground">
 							<MapPin className="h-4 w-4" />
 							<span>
-								{(quote.estimatedDistance / 1000).toFixed(1)} km • {Math.round(quote.estimatedDuration / 60)} min
+								{formatDistanceKm(quote.estimatedDistance)} • {Math.round(quote.estimatedDuration / 60)} min
 							</span>
 						</div>
 

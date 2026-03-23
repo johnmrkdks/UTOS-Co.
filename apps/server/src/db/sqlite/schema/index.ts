@@ -13,6 +13,8 @@ export * from "./cars";
 
 export * from "./bookings/booking-reviews";
 export * from "./bookings/booking-stops";
+export * from "./bookings/booking-extras";
+export * from "./bookings/offload-booking-details";
 export * from "./booking-policies";
 export * from "./bookings";
 
@@ -24,6 +26,8 @@ export * from "./packages/package-service-types";
 export * from "./packages";
 
 export * from "./price-config";
+export * from "./contact-messages";
+export * from "./settings";
 export * from "./accounts";
 export * from "./customer-profiles";
 export * from "./drivers";
@@ -31,3 +35,5 @@ export * from "./ratings";
 export * from "./sessions";
 export * from "./users";
 export * from "./verifications";
+export * from "./invoice-sent-logs";
+export * from "./payments";

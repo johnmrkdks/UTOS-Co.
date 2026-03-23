@@ -8,10 +8,14 @@ export const useCreatePackageBookingMutation = () => {
 	return useMutation(trpc.bookings.createPackageBooking.mutationOptions({
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: trpc.bookings.getUserBookings.queryKey() });
-			
-			toast.success("Booking created successfully!", {
-				description: "You will receive a confirmation email shortly.",
-			});
+			const needsPayment = (data as { paymentStatus?: string })?.paymentStatus === "pending_payment";
+			if (needsPayment) {
+				toast.success("Booking submitted! Redirecting to payment...");
+			} else {
+				toast.success("Booking created successfully!", {
+					description: "You will receive a confirmation email shortly.",
+				});
+			}
 		},
 		onError: (error) => {
 			toast.error("Failed to create booking", {

@@ -104,15 +104,17 @@ export function InstantQuoteWidget() {
 		if (isDirectBooking) {
 			// Direct booking from /booking - car already selected, go directly to calculate quote (public route)
 			params.set("selectedCarId", search.carId);
-			navigate({ 
-				to: "/calculate-quote", 
-				search: Object.fromEntries(params) 
+			navigate({
+				to: "/calculate-quote",
+				search: Object.fromEntries(params) as any,
+				resetScroll: true
 			});
 		} else {
 			// Normal flow - need to select vehicle first
-			navigate({ 
-				to: "/select-vehicle", 
-				search: Object.fromEntries(params) 
+			navigate({
+				to: "/select-vehicle",
+				search: Object.fromEntries(params),
+				resetScroll: true
 			});
 		}
 	}
@@ -198,7 +200,7 @@ export function InstantQuoteWidget() {
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleOriginSelect}
-														placeholder="Origin - Enter pickup location in NSW..."
+														placeholder="Origin - Enter pickup location..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>
@@ -244,7 +246,7 @@ export function InstantQuoteWidget() {
 														value={field.value || ""}
 														onChange={field.onChange}
 														onPlaceSelect={handleDestinationSelect}
-														placeholder="Destination - Enter destination in NSW..."
+														placeholder="Destination - Enter destination..."
 														className="text-xs md:text-sm bg-background"
 													/>
 												</FormControl>

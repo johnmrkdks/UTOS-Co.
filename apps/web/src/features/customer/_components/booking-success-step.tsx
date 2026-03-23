@@ -12,7 +12,7 @@ export function BookingSuccessStep({ bookingId, onStartNewQuote }: BookingSucces
 	const router = useRouter();
 
 	const goToBookings = () => {
-		router.navigate({ to: "/dashboard/bookings" });
+		router.navigate({ to: "/my-bookings", resetScroll: true });
 	};
 
 	return (

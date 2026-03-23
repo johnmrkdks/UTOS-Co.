@@ -101,7 +101,7 @@ export function TestResults({ results }: TestResultsProps) {
 									<div className="text-sm">
 										<p className="font-medium mb-1">{result.message}</p>
 										<p className="text-xs text-muted-foreground">
-											{format(result.timestamp, "MMM d, HH:mm:ss")}
+											{format(result.timestamp, "MMM d, h:mm:ss a")}
 										</p>
 									</div>
 

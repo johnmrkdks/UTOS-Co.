@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { useGetPackageRoutesQuery } from "../../_hooks/query/use-get-package-routes-query";
 import { useCreatePackageRouteMutation } from "../../_hooks/query/use-create-package-route-mutation";
+import { useReorderPackageRoutesMutation } from "../../_hooks/query/use-reorder-package-routes-mutation";
+import { useDeletePackageRouteMutation } from "../../_hooks/query/use-delete-package-route-mutation";
 
 interface PackageRoute {
 	id: string;
@@ -74,6 +76,8 @@ export function PackageRoutesDialog({
 
 	const routesQuery = useGetPackageRoutesQuery({ packageId });
 	const createRouteMutation = useCreatePackageRouteMutation();
+	const reorderMutation = useReorderPackageRoutesMutation();
+	const deleteRouteMutation = useDeletePackageRouteMutation(packageId);
 
 	// Initialize routes from query data
 	useEffect(() => {
@@ -82,7 +86,7 @@ export function PackageRoutesDialog({
 		}
 	}, [routesQuery.data]);
 
-	const handleDragEnd = (result: DropResult) => {
+	const handleDragEnd = async (result: DropResult) => {
 		if (!result.destination) return;
 
 		const items = Array.from(routes);
@@ -96,7 +100,16 @@ export function PackageRoutesDialog({
 		}));
 
 		setRoutes(updatedRoutes);
-		// TODO: Implement updateRouteOrder mutation to persist changes
+
+		try {
+			await reorderMutation.mutateAsync({
+				packageId,
+				routeOrders: updatedRoutes.map((r, i) => ({ id: r.id, stopOrder: i + 1 })),
+			});
+		} catch {
+			// Revert on error
+			setRoutes(routesQuery.data?.sort((a, b) => a.stopOrder - b.stopOrder) ?? []);
+		}
 	};
 
 	const handleAddRoute = async () => {
@@ -122,10 +135,13 @@ export function PackageRoutesDialog({
 		}
 	};
 
-	const handleDeleteRoute = (routeId: string) => {
-		if (confirm("Are you sure you want to delete this route stop?")) {
-			setRoutes(prev => prev.filter(route => route.id !== routeId));
-			// TODO: Implement deleteRoute mutation
+	const handleDeleteRoute = async (routeId: string) => {
+		if (!confirm("Are you sure you want to delete this route stop?")) return;
+		try {
+			await deleteRouteMutation.mutateAsync({ id: routeId });
+			setRoutes((prev) => prev.filter((route) => route.id !== routeId));
+		} catch {
+			// Error handled by mutation
 		}
 	};
 
@@ -135,7 +151,7 @@ export function PackageRoutesDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+			<DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<RouteIcon className="h-5 w-5" />

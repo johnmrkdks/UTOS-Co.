@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "@/trpc/init";
 import { UpdateCustomerProfileSchema } from "@/schemas/shared/tables/customer-profile";
+import { updateUserProfileService, UpdateUserProfileServiceSchema } from "@/services/users/update-user-profile";
 
 export const customerProfileInputSchema = z.object({
 	// Contact Information
@@ -30,6 +31,21 @@ export const customerProfileInputSchema = z.object({
 const updateCustomerProfileSchema = customerProfileInputSchema.partial();
 
 export const customerProfileRouter = router({
+	// Update basic user information (name, phone)
+	updateUserProfile: protectedProcedure
+		.input(UpdateUserProfileServiceSchema.omit({ userId: true }))
+		.mutation(async ({ ctx: { db, session }, input }) => {
+			if (!session?.user?.id) {
+				throw new Error("Unauthorized: Authentication required");
+			}
+
+			const result = await updateUserProfileService(db, {
+				userId: session.user.id,
+				...input,
+			});
+			return result;
+		}),
+
 	// Get current user's profile (user + customer profile)
 	getProfile: protectedProcedure
 		.query(async ({ ctx: { db, session } }) => {
@@ -43,6 +59,7 @@ export const customerProfileRouter = router({
 					id: users.id,
 					name: users.name,
 					email: users.email,
+					phone: users.phone,
 					role: users.role,
 					emailVerified: users.emailVerified,
 					image: users.image,

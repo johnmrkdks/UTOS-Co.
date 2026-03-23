@@ -41,10 +41,10 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 	const isCompact = view === true || view === "compact"
 
 	return (
-		<Card className={cn("group relative overflow-hidden border shadow-none py-4", bgGradient, className)}>
+		<Card className={cn("group relative overflow-hidden border border-gray-200 shadow-sm py-4", bgGradient, className)}>
 			<CardContent
 				className={cn(
-					isCompact ? "flex flex-row items-center gap-3 px-4 py-0" : "p-0",
+					isCompact ? "flex flex-row items-center gap-3 px-4 py-2" : "px-4 py-2",
 				)}
 			>
 				{isCompact ? (
@@ -68,78 +68,78 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 						{/* Content for Compact */}
 						<div className="flex-1 min-w-0 flex flex-col justify-center">
 							{/* Title */}
-							<p className="font-semibold text-gray-700 truncate leading-tight text-sm mb-1">
+							<p className="font-semibold text-gray-700 truncate leading-tight text-sm mb-2">
 								{title}
 							</p>
 
-							<div className="flex items-center justify-between gap-2">
-								<div
-									className={cn(
-										"font-bold leading-none",
-										"text-2xl",
-										textColor,
-									)}
-								>
-									{typeof value === "string" ? value : value.toLocaleString()}
-								</div>
-
-								{changeText && (
-									<div className="flex items-center gap-1 flex-shrink-0">
-										<p
-											className={cn(
-												"text-xs font-medium truncate",
-												changeType === "positive"
-													? "text-emerald-600"
-													: changeType === "negative"
-														? "text-red-600"
-														: changeType === "warning"
-															? "text-amber-600"
-															: "text-gray-500",
-											)}
-										>
-											{changeText}
-										</p>
-										{showTrend && changeType === "positive" && (
-											<TrendingUpIcon className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-										)}
-										{showTrend && changeType === "negative" && (
-											<TrendingDownIcon className="w-3 h-3 text-red-500 flex-shrink-0" />
-										)}
-									</div>
+							{/* Value */}
+							<div
+								className={cn(
+									"font-bold leading-none mb-1",
+									"text-xl sm:text-2xl",
+									textColor,
 								)}
+							>
+								{typeof value === "string" ? value : value.toLocaleString()}
 							</div>
+
+							{/* Change Text */}
+							{changeText && (
+								<div className="flex items-center gap-1">
+									<p
+										className={cn(
+											"text-xs font-medium truncate",
+											changeType === "positive"
+												? "text-emerald-600"
+												: changeType === "negative"
+													? "text-red-600"
+													: changeType === "warning"
+														? "text-amber-600"
+														: "text-gray-500",
+										)}
+									>
+										{changeText}
+									</p>
+									{showTrend && changeType === "positive" && (
+										<TrendingUpIcon className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+									)}
+									{showTrend && changeType === "negative" && (
+										<TrendingDownIcon className="w-3 h-3 text-red-500 flex-shrink-0" />
+									)}
+								</div>
+							)}
 						</div>
 					</>
 				) : (
 					<>
 						{/* Default View */}
 						{/* Icon and Title */}
-						<div className="flex items-center gap-3 mb-2">
+						<div className="flex items-center gap-3 mb-3">
 							{showIcon && (
 								<div
 									className={cn(
 										"flex items-center justify-center rounded-lg shadow-sm flex-shrink-0",
-										"w-8 h-8",
+										"w-8 h-8 sm:w-9 sm:h-9",
 										iconBg,
 									)}
 								>
 									<Icon
-										className="w-4 h-4 text-white"
+										className="w-4 h-4 sm:w-5 sm:h-5 text-white"
 										strokeWidth={2}
 									/>
 								</div>
 							)}
-							<p className="font-semibold text-gray-700 text-sm">
+							<p className="font-semibold text-gray-700 text-sm sm:text-base truncate">
 								{title}
 							</p>
 						</div>
 
 						{/* Value Display */}
-						<div className="mb-2">
+						<div className="mb-3">
 							<div
 								className={cn(
 									"font-bold leading-none",
-									"text-2xl",
+									"text-2xl sm:text-3xl",
 									textColor,
 								)}
 							>
@@ -152,7 +152,7 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 							<div className="flex items-center gap-1">
 								<p
 									className={cn(
-										"text-sm font-medium",
+										"text-xs sm:text-sm font-medium",
 										changeType === "positive"
 											? "text-emerald-600"
 											: changeType === "negative"
@@ -165,10 +165,10 @@ export function AnalyticsCard({ data, className, view = "default" }: AnalyticsCa
 									{changeText}
 								</p>
 								{showTrend && changeType === "positive" && (
-									<TrendingUpIcon className="w-4 h-4 text-emerald-500" />
+									<TrendingUpIcon className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-500" />
 								)}
 								{showTrend && changeType === "negative" && (
-									<TrendingDownIcon className="w-4 h-4 text-red-500" />
+									<TrendingDownIcon className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
 								)}
 							</div>
 						)}

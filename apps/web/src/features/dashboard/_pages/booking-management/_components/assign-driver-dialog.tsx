@@ -76,7 +76,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px]">
+			<DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle>Assign Driver to Booking</DialogTitle>
 					<DialogDescription>
@@ -154,7 +154,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 											<p className="text-sm font-medium">Phone</p>
 											<p className="text-sm text-muted-foreground flex items-center gap-1">
 												<Phone className="h-3 w-3" />
-												{selectedDriver.user?.phone || "Not provided"}
+												{selectedDriver.phoneNumber || "Not provided"}
 											</p>
 										</div>
 										<div>
@@ -163,7 +163,7 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 										</div>
 									</div>
 
-									{selectedDriver.car && (
+									{(selectedDriver as any).car && (
 										<>
 											<Separator />
 											<div>
@@ -172,11 +172,11 @@ export function AssignDriverDialog({ booking, open, onOpenChange }: AssignDriver
 													Assigned Vehicle
 												</p>
 												<div className="flex items-center gap-2">
-													<span className="text-sm">{selectedDriver.car.name}</span>
-													<Badge variant="outline">{selectedDriver.car.licensePlate}</Badge>
-													{selectedDriver.car.status && (
-														<Badge variant={selectedDriver.car.status === "available" ? "default" : "secondary"}>
-															{selectedDriver.car.status}
+													<span className="text-sm">{(selectedDriver as any).car?.name}</span>
+													<Badge variant="outline">{(selectedDriver as any).car?.licensePlate}</Badge>
+													{(selectedDriver as any).car?.status && (
+														<Badge variant={(selectedDriver as any).car?.status === "available" ? "default" : "secondary"}>
+															{(selectedDriver as any).car?.status}
 														</Badge>
 													)}
 												</div>

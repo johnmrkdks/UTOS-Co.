@@ -1,3 +1,8 @@
+/** Format distance - value is in kilometers (DB schema, quote service) */
+export function formatDistanceKm(km: number | null | undefined): string {
+	if (km == null || isNaN(km)) return "—";
+	return `${Number(km).toFixed(1)} km`;
+}
 
 export function getNameInitials(name: string | undefined | null): string {
 	if (!name) return '';

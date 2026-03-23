@@ -28,7 +28,7 @@ export function RemoveUserConfirmationDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="sm:max-w-md" showCloseButton={false}>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<AlertTriangle className="h-5 w-5 text-red-500" />
@@ -36,18 +36,22 @@ export function RemoveUserConfirmationDialog({
 					</DialogTitle>
 					<DialogDescription className="text-left">
 						This will permanently remove the user account for{" "}
-						<strong>{driver.user?.name || "this driver"}</strong> using Better Auth's admin API.
+						<strong>{driver.user?.name || "this driver"}</strong> and all associated data.
 						<br />
 						<br />
-						<strong>This action:</strong>
+						<strong>This action will:</strong>
 						<ul className="mt-2 ml-4 space-y-1 text-sm">
-							<li>• Deletes the user account completely from Better Auth</li>
-							<li>• Removes the driver profile and all associated data</li>
+							<li>• Delete the driver profile and all related records</li>
+							<li>• Remove the user account and authentication data</li>
+							<li>• Cancel any active bookings assigned to this driver</li>
+							<li>• Delete all sessions, accounts, and customer profiles</li>
+							<li>• Remove all ratings and booking history</li>
+							<li>• Clear all foreign key references safely</li>
 							<li>• Cannot be undone</li>
 						</ul>
 						<br />
 						<span className="text-green-600 font-medium">
-							✓ Recommended: This is the proper way to remove user accounts
+							✓ Recommended: Comprehensive deletion with foreign key handling
 						</span>
 					</DialogDescription>
 				</DialogHeader>

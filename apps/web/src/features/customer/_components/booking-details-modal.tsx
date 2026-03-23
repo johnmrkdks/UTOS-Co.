@@ -24,12 +24,16 @@ import {
 	CheckCircle,
 	Package,
 	MessageSquare,
+	Star,
 	X,
 	Edit3,
 	XCircle,
 	Loader2,
+	CircleDot,
+	Navigation,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
+import { formatDistanceKm } from "@/utils/format";
 import { useState, useEffect } from "react";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
@@ -41,7 +45,10 @@ import { format } from "date-fns";
 import { Save } from "lucide-react";
 import { useEditBookingMutation } from "../_hooks/query/use-edit-booking-mutation";
 import { useCancelBookingMutation } from "../_hooks/query/use-cancel-booking-mutation";
+import { useValidateBookingOperationsQuery } from "../_hooks/query/use-validate-booking-operations-query";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
+import { useHasBookingReviewQuery } from "../_hooks/query/use-has-booking-review-query";
+import { BookingReviewForm } from "./booking-review-form";
 
 interface BookingDetailsModalProps {
 	booking: any; // TODO: Add proper booking type
@@ -112,8 +119,11 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 		selectedCarId: booking?.carId || "",
 	});
 
-	// Get validation data for edit/cancel permissions using client-side logic
-	const validation = canEditOrCancelBooking(booking);
+	// Get validation data for edit/cancel permissions using real-time backend validation
+	const { data: validation, isLoading: validationLoading } = useValidateBookingOperationsQuery(
+		booking?.id,
+		!!booking?.id && isOpen
+	);
 	
 	// Mutations
 	const editMutation = useEditBookingMutation();
@@ -123,9 +133,10 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 	const handleSaveEdit = () => {
 		if (!booking?.id) return;
 		
-		const { selectedCarId, ...bookingData } = editData;
+		const { selectedCarId, scheduledPickupTime, ...bookingData } = editData;
 		editMutation.mutate({
 			bookingId: booking.id,
+			scheduledPickupTime: scheduledPickupTime.toISOString(),
 			...bookingData,
 		});
 	};
@@ -202,10 +213,6 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 		return `${minutes}m`;
 	};
 
-	const formatDistance = (meters: number) => {
-		const km = meters / 1000;
-		return `${km.toFixed(1)} km`;
-	};
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -453,22 +460,69 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 						{/* Route Information */}
 						<div className="space-y-4">
 							<h4 className="font-semibold flex items-center gap-2">
-								<MapPin className="h-4 w-4" />
-								Route Details
+								<Route className="h-4 w-4" />
+								Journey Route
+								{booking.stops && booking.stops.length > 0 && (
+									<Badge variant="secondary" className="ml-2 text-xs">
+										{booking.stops.length} stop{booking.stops.length > 1 ? 's' : ''}
+									</Badge>
+								)}
 							</h4>
 							<div className="space-y-3">
-								<div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-									<div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-									<div className="min-w-0">
-										<p className="text-sm font-medium text-green-900">Pickup Location</p>
-										<p className="text-sm text-green-700">{booking.originAddress}</p>
+								{/* Origin */}
+								<div className="flex items-start gap-3">
+									<div className="relative mt-1">
+										<div className="w-5 h-5 rounded-full bg-green-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+											<Navigation className="w-2.5 h-2.5 text-white" />
+										</div>
+										{/* Connector line */}
+										{(booking.stops && booking.stops.length > 0) || booking.destinationAddress ? (
+											<div className="absolute left-1/2 top-5 w-0.5 h-6 bg-gradient-to-b from-green-500 to-blue-400 transform -translate-x-1/2"></div>
+										) : null}
+									</div>
+									<div className="flex-1 min-w-0 pt-0.5">
+										<div className="flex items-center gap-2 mb-1">
+											<span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Pickup Location</span>
+										</div>
+										<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{booking.originAddress}</div>
 									</div>
 								</div>
-								<div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-									<div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-									<div className="min-w-0">
-										<p className="text-sm font-medium text-red-900">Destination</p>
-										<p className="text-sm text-red-700">{booking.destinationAddress}</p>
+
+								{/* Stops (if any) */}
+								{booking.stops && booking.stops.length > 0 && (
+									<>
+										{booking.stops.map((stop: any, index: number) => (
+											<div key={stop.id || index} className="flex items-start gap-3">
+												<div className="relative mt-1">
+													<div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+														<CircleDot className="w-2.5 h-2.5 text-white" />
+													</div>
+													{/* Connector line */}
+													<div className="absolute left-1/2 top-5 w-0.5 h-6 bg-gradient-to-b from-blue-400 to-red-400 transform -translate-x-1/2"></div>
+												</div>
+												<div className="flex-1 min-w-0 pt-0.5">
+													<div className="flex items-center gap-2 mb-1">
+														<span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Stop {index + 1}</span>
+													</div>
+													<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{stop.address}</div>
+												</div>
+											</div>
+										))}
+									</>
+								)}
+
+								{/* Destination */}
+								<div className="flex items-start gap-3">
+									<div className="relative mt-1">
+										<div className="w-5 h-5 rounded-full bg-red-500 border-2 border-white shadow-md flex items-center justify-center flex-shrink-0">
+											<MapPin className="w-2.5 h-2.5 text-white" />
+										</div>
+									</div>
+									<div className="flex-1 min-w-0 pt-0.5">
+										<div className="flex items-center gap-2 mb-1">
+											<span className="text-xs font-semibold text-red-700 uppercase tracking-wide">Drop-off Location</span>
+										</div>
+										<div className="text-sm font-medium text-gray-900 break-words leading-relaxed">{booking.destinationAddress}</div>
 									</div>
 								</div>
 							</div>
@@ -498,7 +552,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 								{booking.estimatedDistance && (
 									<div className="p-3 bg-muted/50 rounded-lg">
 										<p className="text-sm font-medium text-muted-foreground">Estimated Distance</p>
-										<p className="font-semibold">{formatDistance(booking.estimatedDistance)}</p>
+										<p className="font-semibold">{formatDistanceKm(booking.estimatedDistance)}</p>
 									</div>
 								)}
 							</div>
@@ -650,6 +704,22 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 							</div>
 						)}
 
+						{/* Leave a Review - for completed bookings without review */}
+						{booking.status === "completed" && !hasReview && (
+							<div className="space-y-4">
+								<h4 className="font-semibold flex items-center gap-2">
+									<Star className="h-4 w-4" />
+									Share Your Experience
+								</h4>
+								<BookingReviewForm
+									bookingId={booking.id}
+									onSuccess={() => {
+										// Refetch will be triggered by query invalidation in mutation
+									}}
+								/>
+							</div>
+						)}
+
 						{/* Timeline */}
 						<div className="space-y-4">
 							<h4 className="font-semibold flex items-center gap-2">
@@ -697,93 +767,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }: BookingDetails
 				</div>
 
 				{/* Action Buttons */}
-				<div className="pt-4 border-t space-y-4">
-					{/* Edit/Cancel buttons */}
-					<div className="flex gap-2">
-						{validation?.canEdit && (
-							<Button 
-								variant="outline" 
-								size="sm"
-								onClick={() => setIsEditing(true)}
-							>
-								<Edit3 className="h-4 w-4 mr-2" />
-								Edit Booking
-							</Button>
-						)}
-						
-						{validation?.canCancel && !showCancelConfirm && (
-							<Button 
-								variant="outline" 
-								size="sm"
-								onClick={() => setShowCancelConfirm(true)}
-								className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-							>
-								<XCircle className="h-4 w-4 mr-2" />
-								Cancel Booking
-							</Button>
-						)}
-					</div>
-
-					{/* Cancellation reasons */}
-					{!validation?.canEdit && validation?.editReason && (
-						<div className="text-xs text-muted-foreground">
-							Edit unavailable: {validation.editReason}
-						</div>
-					)}
-					{!validation?.canCancel && validation?.cancelReason && (
-						<div className="text-xs text-muted-foreground">
-							Cancel unavailable: {validation.cancelReason}
-						</div>
-					)}
-
-					{/* Cancel confirmation section */}
-					{showCancelConfirm && (
-						<div className="space-y-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-							<div className="flex items-center gap-2 text-red-800">
-								<AlertCircle className="h-4 w-4" />
-								<span className="font-medium">Confirm Booking Cancellation</span>
-							</div>
-							<div className="space-y-3">
-								<Input
-									placeholder="Cancellation reason (optional)"
-									value={cancellationReason}
-									onChange={(e) => setCancellationReason(e.target.value)}
-									className="border-red-200 focus:border-red-300 focus:ring-red-200"
-								/>
-								<div className="flex gap-2">
-									<Button 
-										size="sm"
-										variant="destructive"
-										disabled={cancelMutation.isPending}
-										onClick={handleCancelBooking}
-									>
-										{cancelMutation.isPending ? (
-											<>
-												<Loader2 className="h-4 w-4 animate-spin mr-2" />
-												Cancelling...
-											</>
-										) : (
-											<>
-												<XCircle className="h-4 w-4 mr-2" />
-												Confirm Cancellation
-											</>
-										)}
-									</Button>
-									<Button 
-										size="sm"
-										variant="outline" 
-										onClick={() => {
-											setShowCancelConfirm(false);
-											setCancellationReason("");
-										}}
-									>
-										Keep Booking
-									</Button>
-								</div>
-							</div>
-						</div>
-					)}
-					
+				<div className="pt-4 border-t">
 					{/* Close button */}
 					<div className="flex justify-end">
 						<Button variant="outline" onClick={onClose}>

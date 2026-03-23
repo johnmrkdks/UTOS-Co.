@@ -33,32 +33,49 @@ type ServicesProps = {
 };
 
 export function Services({ className, ...props }: ServicesProps) {
-	// Fetch published packages
+	// Fetch published packages - show all available services
 	const { data: packagesData, isLoading: packagesLoading } = useGetPublishedPackagesQuery({
-		limit: 6
+		limit: 50 // Increased to show more services
 	});
-	
+
 	// Fetch published cars for fleet showcase
 	const { data: carsData, isLoading: carsLoading } = useGetPublishedCarsQuery({
-		limit: 3
+		limit: 12 // Increased to show more cars in fleet section
 	});
-	
-	const services = packagesData?.data?.map((pkg: any) => ({
-		id: pkg.id,
-		icon: serviceIcons[pkg.serviceType] || Building,
-		title: pkg.name,
-		description: pkg.description,
-		bannerImageUrl: pkg.bannerImageUrl,
-		features: [
-			`Max ${pkg.maxPassengers} passengers`,
-			pkg.includesDriver ? "Professional chauffeur" : "Self-drive",
-			pkg.includesFuel ? "Fuel included" : "Fuel not included",
-			pkg.includesTolls ? "Tolls included" : "Tolls separate"
-		].filter(Boolean),
-		price: `From $${(pkg.fixedPrice / 100).toFixed(0)}`,
-		popular: pkg.serviceType === "transfer" // Mark airport transfers as popular
-	})) || [];
-	
+
+	const services = packagesData?.data?.map((pkg: any) => {
+		// Helper function to get the correct price display
+		const getPriceDisplay = () => {
+			const rateType = pkg.packageServiceType?.rateType;
+
+			if (rateType === 'hourly' && pkg.hourlyRate) {
+				return `From $${pkg.hourlyRate.toFixed(2)}/hr`;
+			} else if (rateType === 'fixed' && pkg.fixedPrice) {
+				return `From $${pkg.fixedPrice.toFixed(2)}`;
+			} else {
+				// Fallback logic
+				if (pkg.hourlyRate && pkg.hourlyRate > 0) {
+					return `From $${pkg.hourlyRate.toFixed(2)}/hr`;
+				} else if (pkg.fixedPrice && pkg.fixedPrice > 0) {
+					return `From $${pkg.fixedPrice.toFixed(2)}`;
+				} else {
+					return "Contact for Price";
+				}
+			}
+		};
+
+		return {
+			id: pkg.id,
+			icon: serviceIcons[pkg.serviceType] || Building,
+			title: pkg.name,
+			description: pkg.description,
+			bannerImageUrl: pkg.bannerImageUrl,
+			features: [],
+			price: getPriceDisplay(),
+			popular: pkg.serviceType === "transfer" // Mark airport transfers as popular
+		};
+	}) || [];
+
 	const fleetHighlights = carsData?.data?.map((car: any) => ({
 		id: car.id,
 		name: car.name,
@@ -68,51 +85,6 @@ export function Services({ className, ...props }: ServicesProps) {
 	})) || [];
 	return (
 		<div className={cn("", className)} {...props}>
-			{/* Hero Section */}
-			<div className="relative py-24 bg-[url('/src/assets/images/car3.jpeg')] bg-center bg-cover bg-no-repeat">
-				<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
-				<div className="relative z-10 container mx-auto px-6 text-center">
-					<div className="max-w-4xl mx-auto">
-						<div className="inline-flex items-center px-4 py-2 bg-beige text-foreground rounded-full text-xs md:text-sm font-medium mb-6">
-							<Sparkles className="w-4 h-4 mr-2" />
-							Premium Transportation Services
-						</div>
-
-						<h1 className="text-4xl lg:text-6xl font-bold text-background mb-6">
-							Luxury Transportation
-							<span className="block text-primary-secondary">
-								Tailored for You
-							</span>
-						</h1>
-
-						<p className="text-lg md:text-xl text-background/80 leading-relaxed max-w-3xl mx-auto mb-8">
-							From airport transfers to special events, our comprehensive range of services
-							ensures you travel in comfort, style, and punctuality every time.
-						</p>
-
-						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Link to="/fleet">
-								<Button
-									size="lg"
-									className="bg-primary hover:bg-soft-beige px-8 py-6 text-lg font-semibold rounded-xl"
-								>
-									Book Now
-								</Button>
-							</Link>
-							<Link to="/contact-us">
-								<Button
-									variant="outline"
-									size="lg"
-									className="border-background/20 text-primary hover:bg-background/10 px-8 py-6 text-lg font-semibold rounded-xl"
-								>
-									Get Quote
-								</Button>
-							</Link>
-						</div>
-					</div>
-				</div>
-			</div>
-
 			{/* Services Grid */}
 			<div className="py-24 bg-background">
 				<div className="container mx-auto px-6">
@@ -126,7 +98,7 @@ export function Services({ className, ...props }: ServicesProps) {
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 						{packagesLoading ? (
 							// Loading skeleton
 							Array.from({ length: 6 }).map((_, index) => (
@@ -150,29 +122,29 @@ export function Services({ className, ...props }: ServicesProps) {
 							))
 						) : services.length > 0 ? (
 							services.map((service: any, index: number) => (
-							<div
-								key={service.title}
-								className={cn(
-									"relative bg-card border-2 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 group hover:shadow-xl",
-									service.popular ? "border-primary shadow-lg" : "border-border"
-								)}
-							>
-								{service.popular && (
-									<div className="absolute -top-3 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold z-10">
-										Most Popular
-									</div>
-								)}
+								<div
+									key={service.title}
+									className={cn(
+										"relative bg-card border-2 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 group hover:shadow-xl",
+										service.popular ? "border-primary shadow-lg" : "border-border"
+									)}
+								>
+									{service.popular && (
+										<div className="absolute -top-3 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold z-10">
+											Most Popular
+										</div>
+									)}
 
-								{/* Banner Image Section */}
-								{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
-									<div className="h-48 relative overflow-hidden">
-										<img 
-											src={service.bannerImageUrl} 
-											alt={service.title}
-											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-											onError={(e) => {
-												// Show fallback design on image error
-												e.currentTarget.parentElement!.innerHTML = `
+									{/* Banner Image Section */}
+									{service.bannerImageUrl && service.bannerImageUrl.trim() !== "" ? (
+										<div className="h-48 relative overflow-hidden">
+											<img
+												src={service.bannerImageUrl}
+												alt={service.title}
+												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+												onError={(e) => {
+													// Show fallback design on image error
+													e.currentTarget.parentElement!.innerHTML = `
 													<div class="w-full h-48 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center">
 														<div class="text-center">
 															<div class="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
@@ -185,69 +157,71 @@ export function Services({ className, ...props }: ServicesProps) {
 														</div>
 													</div>
 												`;
-											}}
-										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-										
-										{/* Service icon overlay */}
-										<div className="absolute top-4 left-4">
-											<div className="w-12 h-12 bg-white/90 rounded-xl flex items-center justify-center shadow-lg">
-												<service.icon className="w-6 h-6 text-primary" />
+												}}
+											/>
+											<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+											{/* Service icon overlay */}
+											<div className="absolute top-4 left-4">
+												<div className="w-12 h-12 bg-white/90 rounded-xl flex items-center justify-center shadow-lg">
+													<service.icon className="w-6 h-6 text-primary" />
+												</div>
+											</div>
+
+											{/* Price overlay */}
+											<div className="absolute bottom-4 left-4">
+												<div className="text-white">
+													<h3 className="text-xl font-bold mb-1">{service.title}</h3>
+													<div className="text-2xl font-bold text-white/90">
+														{service.price}
+													</div>
+												</div>
 											</div>
 										</div>
-										
-										{/* Price overlay */}
-										<div className="absolute bottom-4 left-4">
-											<div className="text-white">
-												<h3 className="text-xl font-bold mb-1">{service.title}</h3>
-												<div className="text-2xl font-bold text-white/90">
+									) : (
+										// Fallback design when no banner image
+										<div className="h-48 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center relative">
+											<div className="text-center">
+												<div className="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
+													<service.icon className="w-8 h-8 text-primary/60" />
+												</div>
+												<h3 className="text-gray-600 font-medium text-lg px-2">{service.title}</h3>
+												<div className="text-2xl font-bold text-primary mt-2">
 													{service.price}
 												</div>
 											</div>
 										</div>
+									)}
+
+									{/* Content Section */}
+									<div className="p-6">
+										<p className="text-muted-foreground mb-6 leading-relaxed">
+											{service.description}
+										</p>
+
+										{service.features.length > 0 && (
+											<ul className="space-y-3 mb-8">
+												{service.features.map((feature: any, featureIndex: number) => (
+													<li key={featureIndex} className="flex items-center text-muted-foreground">
+														<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+															<div className="w-2 h-2 bg-primary rounded-full" />
+														</div>
+														{feature}
+													</li>
+												))}
+											</ul>
+										)}
+
+										<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
+											<Button
+												className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300"
+											>
+												Book This Service
+											</Button>
+										</Link>
 									</div>
-								) : (
-									// Fallback design when no banner image
-									<div className="h-48 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20 flex items-center justify-center relative">
-										<div className="text-center">
-											<div className="w-16 h-16 mx-auto mb-3 bg-primary/20 rounded-2xl flex items-center justify-center">
-												<service.icon className="w-8 h-8 text-primary/60" />
-											</div>
-											<h3 className="text-gray-600 font-medium text-lg px-2">{service.title}</h3>
-											<div className="text-2xl font-bold text-primary mt-2">
-												{service.price}
-											</div>
-										</div>
-									</div>
-								)}
-
-								{/* Content Section */}
-								<div className="p-6">
-									<p className="text-muted-foreground mb-6 leading-relaxed">
-										{service.description}
-									</p>
-
-									<ul className="space-y-3 mb-8">
-										{service.features.map((feature: any, featureIndex: number) => (
-											<li key={featureIndex} className="flex items-center text-muted-foreground">
-												<div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-													<div className="w-2 h-2 bg-primary rounded-full" />
-												</div>
-												{feature}
-											</li>
-										))}
-									</ul>
-
-									<Link to="/book-service/$serviceId" params={{ serviceId: service.id }}>
-										<Button
-											className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300"
-										>
-											Book This Service
-										</Button>
-									</Link>
 								</div>
-							</div>
-						))
+							))
 						) : (
 							// Empty state
 							<div className="col-span-full text-center py-16">
@@ -284,7 +258,7 @@ export function Services({ className, ...props }: ServicesProps) {
 						</p>
 					</div>
 
-					<div className="grid md:grid-cols-3 gap-8">
+					<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 						{carsLoading ? (
 							// Loading skeleton for cars
 							Array.from({ length: 3 }).map((_, index) => (
@@ -303,60 +277,60 @@ export function Services({ className, ...props }: ServicesProps) {
 							))
 						) : fleetHighlights.length > 0 ? (
 							fleetHighlights.map((vehicle: any, index: number) => (
-							<div
-								key={vehicle.name}
-								className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group border border-border"
-							>
-								<div className="h-48 bg-muted flex items-center justify-center overflow-hidden">
-									{vehicle.image && vehicle.image !== "/images/placeholder-car.jpg" ? (
-										<img 
-											src={vehicle.image} 
-											alt={vehicle.name}
-											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-										/>
-									) : (
-										<Car className="w-16 h-16 text-muted-foreground" />
-									)}
-								</div>
+								<div
+									key={vehicle.name}
+									className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group border border-border"
+								>
+									<div className="h-48 bg-muted flex items-center justify-center overflow-hidden">
+										{vehicle.image && vehicle.image !== "/images/placeholder-car.jpg" ? (
+											<img
+												src={vehicle.image}
+												alt={vehicle.name}
+												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+											/>
+										) : (
+											<Car className="w-16 h-16 text-muted-foreground" />
+										)}
+									</div>
 
-								<div className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div>
-											<h3 className="text-xl font-bold text-card-foreground">
-												{vehicle.name}
-											</h3>
-											<p className="text-primary font-semibold">
-												{vehicle.type}
-											</p>
-										</div>
-										<div className="text-right">
-											<div className="flex items-center text-muted-foreground">
-												<Users className="w-4 h-4 mr-1" />
-												{vehicle.passengers}
+									<div className="p-6">
+										<div className="flex justify-between items-start mb-4">
+											<div>
+												<h3 className="text-xl font-bold text-card-foreground">
+													{vehicle.name}
+												</h3>
+												<p className="text-primary font-semibold">
+													{vehicle.type}
+												</p>
+											</div>
+											<div className="text-right">
+												<div className="flex items-center text-muted-foreground">
+													<Users className="w-4 h-4 mr-1" />
+													{vehicle.passengers}
+												</div>
 											</div>
 										</div>
+
+										{/* Transparent Pricing */}
+										<div className="mb-4 p-3 bg-muted/50 rounded-lg">
+											<CarPriceDisplay
+												carId={vehicle.id}
+												variant="card"
+												className="text-center"
+											/>
+										</div>
+
+										<Link to="/calculate-quote" search={{ selectedCarId: vehicle.id }}>
+											<Button
+												variant="outline"
+												className="w-full border-primary/20 text-primary hover:bg-primary/10 transition-all duration-300"
+											>
+												Book This Car
+											</Button>
+										</Link>
 									</div>
-									
-									{/* Transparent Pricing */}
-									<div className="mb-4 p-3 bg-muted/50 rounded-lg">
-										<CarPriceDisplay 
-											carId={vehicle.id}
-											variant="card"
-											className="text-center"
-										/>
-									</div>
-									
-									<Link to="/book-car/$carId" params={{ carId: vehicle.id }}>
-										<Button
-											variant="outline"
-											className="w-full border-primary/20 text-primary hover:bg-primary/10 transition-all duration-300"
-										>
-											Book This Car
-										</Button>
-									</Link>
 								</div>
-							</div>
-						))
+							))
 						) : (
 							// Empty state for cars
 							<div className="col-span-full text-center py-16">
@@ -386,7 +360,7 @@ export function Services({ className, ...props }: ServicesProps) {
 					<div className="grid lg:grid-cols-2 gap-16 items-center">
 						<div>
 							<h2 className="text-4xl font-bold text-foreground mb-6">
-								Why Choose Down Under Chauffeur?
+								Why Choose Down Under Chauffeurs?
 							</h2>
 							<p className="text-xl text-muted-foreground mb-8 leading-relaxed">
 								We're not just a transportation service – we're your partners in creating

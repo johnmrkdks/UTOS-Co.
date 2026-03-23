@@ -11,7 +11,7 @@ function transformCarForFrontend(car: any) {
 		modelName: car.model?.name || "",
 		categoryName: car.category?.name || "",
 		// Get the first available image URL
-		imageUrl: car.images?.[0]?.imageUrl || null,
+		imageUrl: car.images?.[0]?.url || null,
 		// Transform features to a simple array
 		features: car.carsToFeatures?.map((ctf: any) => ({
 			id: ctf.feature?.id,

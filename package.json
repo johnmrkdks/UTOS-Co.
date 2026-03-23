@@ -21,10 +21,16 @@
 		"dev:web": "turbo -F web dev",
 		"dev:server": "turbo -F server dev",
 		"deploy": "turbo deploy",
+		"deploy:dev": "pnpm --filter server deploy:staging && pnpm --filter web deploy:staging",
+		"deploy:production": "pnpm --filter server deploy:production && pnpm --filter web deploy:production",
 		"db:push": "turbo -F server db:push",
 		"db:studio": "turbo -F server db:studio",
 		"db:generate": "turbo -F server db:generate",
-		"db:migrate": "turbo -F server db:migrate"
+		"db:migrate": "turbo -F server db:migrate",
+		"db:migrate-local": "pnpm --filter server db:migrate-local",
+		"db:seed-local": "pnpm --filter server db:seed-local",
+		"db:seed-body-types": "pnpm --filter server db:seed-body-types",
+		"create-admin": "pnpm --filter server create-admin"
 	},
 	"packageManager": "pnpm@10.13.1"
 }

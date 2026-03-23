@@ -3,27 +3,27 @@ import { DialogClose, DialogFooter } from "@workspace/ui/components/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Switch } from "@workspace/ui/components/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
+import { Badge } from "@workspace/ui/components/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useCreatePackageMutation } from "../../_hooks/query/use-create-package-mutation";
 import { useGetPackageServiceTypesQuery } from "../../_hooks/query/use-get-package-service-types-query";
 import { Loader2, Upload, X } from "lucide-react";
 import { Progress } from "@workspace/ui/components/progress";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { useCreatePresignedUrlMutation } from "@/hooks/query/file/use-create-presigned-url-mutation";
-import { useUploadMutation } from "@/hooks/query/file/use-upload-mutation";
+import { useProxyUploadMutation } from "@/hooks/query/file/use-proxy-upload-mutation";
+import { toast } from "sonner";
 
 const addPackageSchema = z.object({
 	name: z.string().min(1, "Package name is required").max(100, "Name too long"),
 	description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description too long"),
 	serviceTypeId: z.string().min(1, "Service type is required"),
-	fixedPrice: z.number().min(0, "Price must be positive"),
-	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4),
-	isAvailable: z.boolean().default(true),
+	fixedPrice: z.number().min(0, "Price must be positive").optional(),
+	hourlyRate: z.number().min(0, "Hourly rate must be positive").optional(),
+	maxPassengers: z.number().min(1, "Must allow at least 1 passenger").default(4).optional(),
 	bannerImageUrl: z.string().optional(),
 	// Optional fields that can be null/undefined in database
 	categoryId: z.string().optional(),
@@ -55,12 +55,12 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(0);
 	const createPackageMutation = useCreatePackageMutation();
-	const createPresignedUrlMutation = useCreatePresignedUrlMutation();
-	const uploadMutation = useUploadMutation();
+	const proxyUploadMutation = useProxyUploadMutation();
+	const uploadedBannerUrlRef = useRef<string | null>(null);
 	const { data: serviceTypesData } = useGetPackageServiceTypesQuery();
 
 	const serviceTypes = serviceTypesData?.data || [];
-	
+
 	const [{ files: imageFiles }, { addFiles, removeFile, openFileDialog, getInputProps }] = useFileUpload({
 		maxFiles: 1,
 		maxSize: 5 * 1024 * 1024, // 5MB
@@ -79,9 +79,8 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 			name: "",
 			description: "",
 			serviceTypeId: "",
-			fixedPrice: 0,
-			maxPassengers: 4,
-			isAvailable: true,
+			fixedPrice: undefined,
+			hourlyRate: undefined,
 			bannerImageUrl: "",
 			// Set defaults for optional fields
 			advanceBookingHours: 24,
@@ -94,35 +93,38 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 		},
 	});
 
+	// Watch the selected service type to determine pricing type
+	const selectedServiceTypeId = form.watch('serviceTypeId');
+	const selectedServiceType = useMemo(() =>
+		serviceTypes.find(type => type.id === selectedServiceTypeId),
+		[serviceTypes, selectedServiceTypeId]
+	);
+	const isHourlyRate = selectedServiceType?.rateType === 'hourly';
+
 	const handleImageUpload = async (fileWrapper: any) => {
 		try {
 			const file = fileWrapper.file as File;
 			setUploadProgress(10);
 
-			// Get presigned URL
-			const presignedData = await createPresignedUrlMutation.mutateAsync({
+			// Upload via server proxy (avoids R2 CORS issues)
+			const result = await proxyUploadMutation.mutateAsync({
 				entityType: "packages",
-				fileName: file.name,
-				fileType: file.type,
-				fileSize: file.size,
-			});
-
-			setUploadProgress(50);
-
-			// Upload file to R2
-			await uploadMutation.mutateAsync({
-				url: presignedData.url,
 				file,
 			});
 
 			setUploadProgress(100);
 
-			// Update form with image URL
-			form.setValue("bannerImageUrl", presignedData.imageUrl);
-			
+			// Update form and ref so we never lose the URL (form state can lag)
+			uploadedBannerUrlRef.current = result.imageUrl;
+			form.setValue("bannerImageUrl", result.imageUrl, { shouldValidate: true });
 		} catch (error) {
 			console.error("Image upload failed:", error);
 			setUploadProgress(0);
+			uploadedBannerUrlRef.current = null;
+			removeFile(fileWrapper.id);
+			toast.error("Image upload failed", {
+				description: error instanceof Error ? error.message : "Please try again",
+			});
 		}
 	};
 
@@ -132,19 +134,25 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 		
 		setIsSubmitting(true);
 		try {
-			// Convert price to cents for storage
+			// Use ref for banner URL - form state can lag after setValue from async upload
+			const bannerUrl = uploadedBannerUrlRef.current ?? data.bannerImageUrl;
 			const packageData = {
 				...data,
-				fixedPrice: Math.round(data.fixedPrice * 100), // Convert to cents
+				bannerImageUrl: bannerUrl || undefined,
+				fixedPrice: data.fixedPrice || null,
+				hourlyRate: data.hourlyRate || null,
+				maxPassengers: data.maxPassengers || 4, // Default to 4 if not set
 			};
 			
-			console.log("💰 Package data with price converted to cents:", JSON.stringify(packageData, null, 2));
+			console.log("💰 Package data with prices in dollars:", JSON.stringify(packageData, null, 2));
+			console.log("🖼️ Banner URL being sent:", packageData.bannerImageUrl || "(none)");
 			console.log("🚀 Calling createPackageMutation...");
 			
 			const result = await createPackageMutation.mutateAsync(packageData);
 			
 			console.log("✅ Package created successfully:", JSON.stringify(result, null, 2));
 			
+			uploadedBannerUrlRef.current = null;
 			form.reset();
 			onSuccess?.();
 		} catch (error) {
@@ -216,7 +224,12 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 														.map((serviceType) => (
 															<SelectItem key={serviceType.id} value={serviceType.id}>
-																{serviceType.name}
+																<div className="flex items-center w-full">
+																	<span className="flex-1">{serviceType.name}</span>
+																	<span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded ml-3">
+																		{serviceType.rateType === 'hourly' ? 'Hourly' : 'Fixed'}
+																	</span>
+																</div>
 															</SelectItem>
 														))
 												) : (
@@ -235,49 +248,68 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							)}
 						/>
 
-						<div className="grid grid-cols-2 gap-4">
-							<FormField
-								control={form.control as any}
-								name="fixedPrice"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Fixed Price (AUD)</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												step="0.01" 
-												min="0"
-												placeholder="0.00" 
-												{...field} 
-												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
+						{/* Dynamic pricing field - only show when service type is selected */}
+						{selectedServiceType && (
+							<div className="space-y-4">
+								{isHourlyRate ? (
+									<FormField
+										control={form.control as any}
+										name="hourlyRate"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Hourly Rate (AUD)</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														step="0.01"
+														min="0"
+														placeholder="0.00"
+														{...field}
+														value={field.value || ""}
+														onChange={(e) => {
+															const value = e.target.value;
+															field.onChange(value === "" ? undefined : parseFloat(value) || undefined);
+														}}
+													/>
+												</FormControl>
+												<div className="text-sm text-muted-foreground">
+													Rate charged per hour for this service
+												</div>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								) : (
+									<FormField
+										control={form.control as any}
+										name="fixedPrice"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Fixed Price (AUD)</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														step="0.01"
+														min="0"
+														placeholder="0.00"
+														{...field}
+														value={field.value || ""}
+														onChange={(e) => {
+															const value = e.target.value;
+															field.onChange(value === "" ? undefined : parseFloat(value) || undefined);
+														}}
+													/>
+												</FormControl>
+												<div className="text-sm text-muted-foreground">
+													Total fixed price for this service
+												</div>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 								)}
-							/>
-
-							<FormField
-								control={form.control as any}
-								name="maxPassengers"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Max Passengers</FormLabel>
-										<FormControl>
-											<Input 
-												type="number" 
-												min="1"
-												max="20"
-												placeholder="4" 
-												{...field} 
-												onChange={(e) => field.onChange(parseInt(e.target.value) || 4)}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
+							</div>
+						)}
 					</div>
 
 					{/* Right Column - Image Upload & Settings */}
@@ -291,13 +323,20 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 									<FormLabel>Banner Image</FormLabel>
 									<FormControl>
 										<div className="space-y-3">
-											{imageFiles.length > 0 ? (
+											{imageFiles.length > 0 || field.value ? (
 												<div className="relative group">
 													<img
-														src={imageFiles[0].preview}
+														src={imageFiles[0]?.preview || field.value}
 														alt="Package banner preview"
 														className="w-full h-40 object-cover rounded-lg border"
+														onError={(e) => {
+															e.currentTarget.style.display = "none";
+															e.currentTarget.nextElementSibling?.classList.remove("hidden");
+														}}
 													/>
+													<div className="hidden w-full h-40 bg-muted flex items-center justify-center rounded-lg border">
+														<p className="text-sm text-muted-foreground">Image not available</p>
+													</div>
 													{uploadProgress > 0 && uploadProgress < 100 && (
 														<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
 															<div className="bg-white p-2 rounded space-y-2 min-w-[120px]">
@@ -312,7 +351,8 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 														size="sm"
 														className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
 														onClick={() => {
-															removeFile(imageFiles[0].id);
+															if (imageFiles[0]) removeFile(imageFiles[0].id);
+															uploadedBannerUrlRef.current = null;
 															field.onChange("");
 															form.setValue("bannerImageUrl", "");
 															setUploadProgress(0);
@@ -339,35 +379,6 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							)}
 						/>
 
-						{/* Settings Section */}
-						<div className="space-y-4">
-							<div>
-								<h4 className="text-sm font-medium mb-3">Package Settings</h4>
-								<div className="space-y-3">
-									<FormField
-										control={form.control as any}
-										name="isAvailable"
-										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-												<div className="space-y-0.5">
-													<FormLabel className="text-sm font-medium">Available for Booking</FormLabel>
-													<div className="text-xs text-muted-foreground">
-														Enable internal booking functionality
-													</div>
-												</div>
-												<FormControl>
-													<Switch 
-														checked={field.value} 
-														onCheckedChange={field.onChange} 
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-
-								</div>
-							</div>
-						</div>
 					</div>
 				</div>
 
@@ -377,9 +388,13 @@ export function AddNewPackageForm({ className, onSuccess }: AddNewPackageFormPro
 							Cancel
 						</Button>
 					</DialogClose>
-					<Button type="submit" size="sm" disabled={isSubmitting}>
+					<Button
+						type="submit"
+						size="sm"
+						disabled={isSubmitting || (uploadProgress > 0 && uploadProgress < 100)}
+					>
 						{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-						Create Package
+						{uploadProgress > 0 && uploadProgress < 100 ? "Uploading..." : "Create Package"}
 					</Button>
 				</DialogFooter>
 			</form>

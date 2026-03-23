@@ -1,4 +1,5 @@
 import type { Context as HonoContext } from "hono";
+import { env as cloudflareEnv } from "cloudflare:workers";
 import { auth } from "@/lib/auth";
 import { db, type DB } from "@/db";
 import type { Env } from "@/types/env";
@@ -11,24 +12,24 @@ type TRPCContext = {
 	session: Awaited<ReturnType<typeof auth.api.getSession>>;
 	db: DB;
 	env: Env;
+	req: Request;
 };
 
 export async function createContext({
 	context,
 }: CreateContextOptions): Promise<TRPCContext> {
-	// Debug logging for session issues
-	console.log("🔍 tRPC Context - Request headers:", Object.fromEntries(context.req.raw.headers.entries()));
-	
 	const session = await auth.api.getSession({
 		headers: context.req.raw.headers,
 	});
 
-	console.log("🔍 tRPC Context - Session result:", JSON.stringify(session, null, 2));
+	// Use context.env from Hono (passed via app.fetch request) or fallback to cloudflare:workers env
+	const env = (context.env ?? cloudflareEnv) as Env;
 
 	return {
 		session,
 		db,
-		env: context.env,
+		env,
+		req: context.req.raw,
 	};
 }
 

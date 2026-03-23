@@ -9,7 +9,7 @@ import { useState } from "react";
 
 export interface BookingFilters {
 	status?: string;
-	bookingType?: "package" | "custom";
+	bookingType?: "package" | "custom" | "guest" | "offload";
 	dateFrom?: string;
 	dateTo?: string;
 	customerName?: string;
@@ -23,6 +23,10 @@ interface BookingFiltersProps {
 	filters: BookingFilters;
 	onFiltersChange: (filters: BookingFilters) => void;
 	onClearFilters: () => void;
+	// Sort controls
+	sortBy?: string;
+	sortOrder?: 'asc' | 'desc';
+	onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
 }
 
 const statusOptions = [
@@ -36,7 +40,22 @@ const statusOptions = [
 	{ value: "failed", label: "Failed" },
 ];
 
-export function BookingFilters({ filters, onFiltersChange, onClearFilters }: BookingFiltersProps) {
+const sortOptions = [
+	{ value: "scheduledPickupTime", label: "Schedule Date" },
+	{ value: "createdAt", label: "Created Date" },
+	{ value: "customerName", label: "Customer Name" },
+	{ value: "status", label: "Status" },
+	{ value: "totalAmount", label: "Amount" },
+];
+
+export function BookingFilters({
+	filters,
+	onFiltersChange,
+	onClearFilters,
+	sortBy = 'scheduledPickupTime',
+	sortOrder = 'asc',
+	onSortChange
+}: BookingFiltersProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	const updateFilter = (key: keyof BookingFilters, value: string | number | undefined) => {
@@ -90,9 +109,41 @@ export function BookingFilters({ filters, onFiltersChange, onClearFilters }: Boo
 			</div>
 
 			{/* Compact main filters - always visible */}
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-				<Select 
-					value={filters.status || "all"} 
+			<div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+				{/* Sort By */}
+				<Select
+					value={sortBy}
+					onValueChange={(value) => onSortChange?.(value, sortOrder)}
+				>
+					<SelectTrigger className="h-8">
+						<SelectValue placeholder="Sort by" />
+					</SelectTrigger>
+					<SelectContent>
+						{sortOptions.map(option => (
+							<SelectItem key={option.value} value={option.value}>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+
+				{/* Sort Order */}
+				<Select
+					value={sortOrder}
+					onValueChange={(value: 'asc' | 'desc') => onSortChange?.(sortBy, value)}
+				>
+					<SelectTrigger className="h-8">
+						<SelectValue placeholder="Order" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="asc">Ascending</SelectItem>
+						<SelectItem value="desc">Descending</SelectItem>
+					</SelectContent>
+				</Select>
+
+				{/* Status Filter */}
+				<Select
+					value={filters.status || "all"}
 					onValueChange={(value) => updateFilter("status", value === "all" ? undefined : value)}
 				>
 					<SelectTrigger className="h-8">
@@ -108,9 +159,10 @@ export function BookingFilters({ filters, onFiltersChange, onClearFilters }: Boo
 					</SelectContent>
 				</Select>
 
-				<Select 
-					value={filters.bookingType || "all"} 
-					onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom")}
+				{/* Type Filter */}
+				<Select
+					value={filters.bookingType || "all"}
+					onValueChange={(value) => updateFilter("bookingType", value === "all" ? undefined : value as "package" | "custom" | "guest" | "offload")}
 				>
 					<SelectTrigger className="h-8">
 						<SelectValue placeholder="Type" />
@@ -119,9 +171,12 @@ export function BookingFilters({ filters, onFiltersChange, onClearFilters }: Boo
 						<SelectItem value="all">All Types</SelectItem>
 						<SelectItem value="package">Package</SelectItem>
 						<SelectItem value="custom">Custom</SelectItem>
+						<SelectItem value="guest">Guest</SelectItem>
+						<SelectItem value="offload">Offload</SelectItem>
 					</SelectContent>
 				</Select>
 
+				{/* Customer Name Filter */}
 				<Input
 					placeholder="Customer name..."
 					className="h-8"
@@ -129,15 +184,14 @@ export function BookingFilters({ filters, onFiltersChange, onClearFilters }: Boo
 					onChange={(e) => updateFilter("customerName", e.target.value)}
 				/>
 
-				<div className="flex gap-1">
-					<Input
-						type="date"
-						className="h-8"
-						value={filters.dateFrom || ""}
-						onChange={(e) => updateFilter("dateFrom", e.target.value)}
-						title="Date From"
-					/>
-				</div>
+				{/* Date From Filter */}
+				<Input
+					type="date"
+					className="h-8"
+					value={filters.dateFrom || ""}
+					onChange={(e) => updateFilter("dateFrom", e.target.value)}
+					title="Date From"
+				/>
 			</div>
 
 			{/* Advanced filters - collapsible */}

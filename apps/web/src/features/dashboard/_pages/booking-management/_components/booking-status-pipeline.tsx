@@ -9,6 +9,10 @@ import { useState, useMemo } from "react";
 import type { BookingFilters } from "./booking-filters";
 import { KanbanProvider, KanbanBoard, KanbanCards, KanbanCard } from "@/components/kanban";
 import type { KanbanItemProps, KanbanColumnProps } from "@/components/kanban";
+import { getAllStatuses, getStatusConfig, getNextStatus, isFinalStatus, type BookingStatus } from "@/lib/booking-status-config";
+import { StatusActionButton } from "@/components/status-badge";
+import { useUpdateBookingStatusMutation } from "../_hooks/query/use-update-booking-status-mutation";
+import { useBookingManagementModalProvider } from "../_hooks/use-booking-management-modal-provider";
 
 interface BookingStatusPipelineProps {
 	filters?: BookingFilters;
@@ -25,6 +29,7 @@ interface BookingKanbanItem extends KanbanItemProps {
 	bookingType: string;
 	car?: { name: string };
 	createdAt: string;
+	isGuestBooking?: boolean;
 }
 
 // Status column interface
@@ -35,52 +40,24 @@ interface StatusColumn extends KanbanColumnProps {
 	headerColor: string;
 }
 
-const statusColumns: StatusColumn[] = [
-	{ 
-		id: "pending",
-		name: "Pending",
-		title: "Pending", 
-		description: "Awaiting confirmation",
-		color: "bg-yellow-50 border-yellow-200",
-		headerColor: "bg-yellow-100"
-	},
-	{ 
-		id: "confirmed",
-		name: "Confirmed",
-		title: "Confirmed", 
-		description: "Ready for driver assignment",
-		color: "bg-blue-50 border-blue-200",
-		headerColor: "bg-blue-100"
-	},
-	{ 
-		id: "driver_assigned",
-		name: "Driver Assigned",
-		title: "Driver Assigned", 
-		description: "Driver en route to pickup",
-		color: "bg-purple-50 border-purple-200",
-		headerColor: "bg-purple-100"
-	},
-	{ 
-		id: "in_progress",
-		name: "In Progress",
-		title: "In Progress", 
-		description: "Service in progress",
-		color: "bg-orange-50 border-orange-200",
-		headerColor: "bg-orange-100"
-	},
-	{ 
-		id: "completed",
-		name: "Completed",
-		title: "Completed", 
-		description: "Service completed",
-		color: "bg-green-50 border-green-200",
-		headerColor: "bg-green-100"
-	},
-];
+// Generate status columns from centralized configuration
+const statusColumns: StatusColumn[] = getAllStatuses().map((statusId) => {
+	const config = getStatusConfig(statusId);
+	return {
+		id: statusId,
+		name: config.shortLabel,
+		title: config.shortLabel,
+		description: config.description,
+		color: config.kanbanBg,
+		headerColor: config.kanbanHeader
+	};
+});
 
 export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 	const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
-	
+	const updateStatusMutation = useUpdateBookingStatusMutation();
+	const { openBookingDetailsDialog } = useBookingManagementModalProvider();
+
 	const bookingsQuery = useGetBookingsQuery({
 		limit: 100,
 	});
@@ -104,8 +81,8 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 					toDate.setHours(23, 59, 59, 999);
 					if (new Date(booking.scheduledPickupTime) > toDate) return false;
 				}
-				if (filters.minAmount && (booking.quotedAmount / 100) < filters.minAmount) return false;
-				if (filters.maxAmount && (booking.quotedAmount / 100) > filters.maxAmount) return false;
+				if (filters.minAmount && booking.quotedAmount < filters.minAmount) return false;
+				if (filters.maxAmount && booking.quotedAmount > filters.maxAmount) return false;
 				
 				return true;
 			})
@@ -122,12 +99,25 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 				bookingType: booking.bookingType,
 				car: booking.car,
 				createdAt: booking.createdAt,
+				isGuestBooking: booking.isGuestBooking,
 			}));
 	}, [bookingsQuery.data?.data, filters]);
 
-	const handleDataChange = (newData: BookingKanbanItem[]) => {
-		// TODO: Implement status update API call
-		console.log('Status update needed:', newData);
+	const handleDataChange = async (newData: BookingKanbanItem[]) => {
+		// Find items that changed column (status) and update via API
+		for (const item of newData) {
+			const original = kanbanData.find((k) => k.id === item.id);
+			if (original && original.column !== item.column) {
+				try {
+					await updateStatusMutation.mutateAsync({
+						id: item.id,
+						status: item.column as any,
+					});
+				} catch {
+					// Error handled by mutation toast
+				}
+			}
+		}
 	};
 
 	const getColumnBookings = (columnId: string) => {
@@ -209,11 +199,18 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 																</AvatarFallback>
 															</Avatar>
 															<div>
-																<p className="text-sm font-medium truncate">
-																	{booking.customerName}
-																</p>
+																<div className="flex items-center gap-1.5">
+																	<p className="text-sm font-medium truncate">
+																		{booking.customerName}
+																	</p>
+																	{booking.isGuestBooking && (
+																		<Badge variant="outline" className="text-[10px] px-1 py-0 h-4 font-normal">
+																			Guest
+																		</Badge>
+																	)}
+																</div>
 																<p className="text-xs text-muted-foreground">
-																	#{booking.id.slice(-6)}
+																	#{(booking as any).referenceNumber || 'N/A'}
 																</p>
 															</div>
 														</div>
@@ -225,7 +222,7 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 													<div className="space-y-1">
 														<div className="flex items-center text-xs text-muted-foreground">
 															<Clock className="h-3 w-3 mr-1" />
-															{format(new Date(booking.scheduledPickupTime), "MMM dd, HH:mm")}
+															{format(new Date(booking.scheduledPickupTime), "MMM dd, h:mm a")}
 														</div>
 														
 														<div className="flex items-center text-xs text-muted-foreground">
@@ -247,50 +244,38 @@ export function BookingStatusPipeline({ filters }: BookingStatusPipelineProps) {
 														<div className="flex items-center text-xs">
 															<DollarSign className="h-3 w-3 mr-1" />
 															<span className="font-medium">
-																${(booking.quotedAmount / 100).toFixed(2)}
+																${booking.quotedAmount.toFixed(2)}
 															</span>
 														</div>
 													</div>
 
 													<div className="flex items-center justify-between pt-1">
-														<Button 
-															variant="ghost" 
-															size="sm" 
+														<Button
+															variant="ghost"
+															size="sm"
 															className="h-6 px-2 text-xs"
 															onClick={(e) => {
 																e.stopPropagation();
-																// TODO: Open booking details
+																openBookingDetailsDialog(booking.id);
 															}}
 														>
 															View
 														</Button>
-														
-														{booking.column === "pending" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Quick confirm action
+
+														{!isFinalStatus(booking.column) && (
+															<StatusActionButton
+																status={booking.column}
+																onClick={() => {
+																	const nextStatus = getNextStatus(booking.column);
+																	if (nextStatus !== booking.column) {
+																		updateStatusMutation.mutate({
+																			id: booking.id,
+																			status: nextStatus as any,
+																		});
+																	}
 																}}
-															>
-																Confirm
-															</Button>
-														)}
-														
-														{booking.column === "confirmed" && (
-															<Button 
-																variant="ghost" 
-																size="sm" 
-																className="h-6 px-2 text-xs text-purple-600 hover:text-purple-700"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	// TODO: Quick assign driver action
-																}}
-															>
-																Assign
-															</Button>
+																size="sm"
+															/>
 														)}
 													</div>
 												</div>

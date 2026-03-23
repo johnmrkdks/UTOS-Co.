@@ -17,10 +17,10 @@ const carBookingSchema = z.object({
 	customerEmail: z.string().email("Please enter a valid email"),
 	customerPhone: z.string().min(10, "Please enter a valid phone number"),
 	startDate: z.date({
-		required_error: "Please select a start date",
+		message: "Please select a start date",
 	}),
 	endDate: z.date({
-		required_error: "Please select an end date",
+		message: "Please select an end date",
 	}),
 	pickupLocation: z.string().min(5, "Please specify pickup location"),
 	dropoffLocation: z.string().min(5, "Please specify dropoff location"),
@@ -267,7 +267,7 @@ export function CarBookingForm({ car }: CarBookingFormProps) {
 					</div>
 				</div>
 				<p className="text-xs text-gray-500 mt-2">
-					Payment will be processed after booking confirmation. No payment required now.
+					Payment will be processed after booking confirmation. Online payment options available soon.
 				</p>
 			</div>
 
