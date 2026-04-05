@@ -8,6 +8,10 @@ node_modules
 # DB dumps often contain OAuth tokens in user rows — never commit
 database_dump.sql
 
+# Editor / backup copies of config (often still contain secrets)
+*.toml.back
+wrangler.toml.back
+
 # Markdowns for AI
 GEMINI.md
 CLAUDE.md
