@@ -27,13 +27,14 @@
 .netlify
 .wrangler
 
-# Environment & local files
-!.env*
+# Environment & local files (never commit real secrets)
+.env
+.env.*
 !.env.example
+.dev.vars
+.dev.vars.*
 .DS_Store
 *.pem
-!*.local
-!.dev.vars*
 
 
 # Logs

@@ -10,13 +10,13 @@ not_found_handling = "single-page-application"
 [vars]
 VITE_SERVER_URL = "http://localhost:3000"
 VITE_CLIENT_URL = "http://localhost:3001"
-VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+VITE_GOOGLE_MAPS_API_KEY = "REPLACE_ME_GOOGLE_MAPS_API_KEY"
 
 
 [env.dev.vars]
 VITE_SERVER_URL = "https://utos-and-co-server-staging.utosandco.workers.dev"
 VITE_CLIENT_URL = "https://utos-and-co-staging.utosandco.workers.dev"
-VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+VITE_GOOGLE_MAPS_API_KEY = "REPLACE_ME_GOOGLE_MAPS_API_KEY"
 
 
 [env.staging]
@@ -25,7 +25,7 @@ name = "utos-and-co-staging"
 [env.staging.vars]
 VITE_SERVER_URL = "https://utos-and-co-server-staging.utosandco.workers.dev"
 VITE_CLIENT_URL = "https://utos-and-co-staging.utosandco.workers.dev"
-VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+VITE_GOOGLE_MAPS_API_KEY = "REPLACE_ME_GOOGLE_MAPS_API_KEY"
 
 [env.production]
 name = "utos-and-co"
@@ -33,6 +33,6 @@ name = "utos-and-co"
 [env.production.vars]
 VITE_SERVER_URL = "https://api.utosandco.com"
 VITE_CLIENT_URL = "https://utosandco.com"
-VITE_GOOGLE_MAPS_API_KEY = "REDACTED_GOOGLE_MAPS_KEY"
+VITE_GOOGLE_MAPS_API_KEY = "REPLACE_ME_GOOGLE_MAPS_API_KEY"
 
 
