@@ -1,6 +1,5 @@
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
@@ -16,6 +15,7 @@ import {
 	Users,
 	Wifi,
 } from "lucide-react";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 interface AnalyticsData {
 	activeBookings: number;
@@ -103,7 +103,7 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 
 	return (
 		<div className="space-y-4">
-			<Card>
+			<DashboardChartCard>
 				<CardHeader className="pb-2">
 					<CardTitle className="flex items-center gap-2 text-lg">
 						<Wifi className="h-5 w-5 text-green-500" />
@@ -116,9 +116,9 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 						</Badge>
 					</CardTitle>
 				</CardHeader>
-			</Card>
+			</DashboardChartCard>
 
-			<Card>
+			<DashboardChartCard>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Activity className="h-5 w-5" />
@@ -147,9 +147,9 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 						</div>
 					))}
 				</CardContent>
-			</Card>
+			</DashboardChartCard>
 
-			<Card>
+			<DashboardChartCard>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Users className="h-5 w-5" />
@@ -177,9 +177,9 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 						</div>
 					</div>
 				</CardContent>
-			</Card>
+			</DashboardChartCard>
 
-			<Card>
+			<DashboardChartCard>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Clock className="h-5 w-5" />
@@ -231,7 +231,7 @@ export function RealTimeMetrics({ analytics }: RealTimeMetricsProps) {
 						</div>
 					</ScrollArea>
 				</CardContent>
-			</Card>
+			</DashboardChartCard>
 		</div>
 	);
 }

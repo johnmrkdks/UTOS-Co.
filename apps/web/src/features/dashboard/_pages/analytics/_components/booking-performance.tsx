@@ -1,12 +1,12 @@
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
 } from "@workspace/ui/components/card";
 import { Progress } from "@workspace/ui/components/progress";
 import { Car, CheckCircle, Clock, MapPin, Users, XCircle } from "lucide-react";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 interface BookingPerformanceProps {
 	dateRange: string;
@@ -79,7 +79,7 @@ export function BookingPerformance({
 	return (
 		<div className="grid gap-4">
 			<div className="grid gap-4 md:grid-cols-3">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Car className="h-5 w-5 text-blue-600" />
@@ -102,9 +102,9 @@ export function BookingPerformance({
 							<Progress value={bookingData.completionRate} className="h-2" />
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Clock className="h-5 w-5 text-orange-600" />
@@ -131,9 +131,9 @@ export function BookingPerformance({
 							</div>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Users className="h-5 w-5 text-purple-600" />
@@ -164,11 +164,11 @@ export function BookingPerformance({
 							</div>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<CheckCircle className="h-5 w-5 text-green-600" />
@@ -245,9 +245,9 @@ export function BookingPerformance({
 							/>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<MapPin className="h-5 w-5 text-red-600" />
@@ -277,7 +277,7 @@ export function BookingPerformance({
 							))}
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 		</div>
 	);

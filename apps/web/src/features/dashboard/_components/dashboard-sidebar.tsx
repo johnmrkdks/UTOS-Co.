@@ -89,45 +89,69 @@ export function DashboardSidebar() {
 	const links = getLinks(filterRoutesByRole, isSuperAdmin);
 
 	return (
-		<Sidebar collapsible="none" className="border-r bg-soft-beige print:hidden">
-			<SidebarHeader>
+		<Sidebar
+			collapsible="none"
+			className="border-sidebar-border border-r bg-sidebar text-sidebar-foreground shadow-[2px_0_20px_-6px_rgba(60,40,20,0.08)] print:hidden"
+		>
+			<SidebarHeader className="border-sidebar-border border-b px-3 py-4">
 				<DashboardCompanyLogo />
 			</SidebarHeader>
-			<SidebarContent>
-				{links.map((item) => (
-					<SidebarGroup key={item.title}>
-						<SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{item.items?.map((route) => {
-									const active = isActive(route.path);
+			<SidebarContent className="gap-0 px-2 py-3">
+				{links.map((item) => {
+					const isSuperBlock = item.title === "Super Admin";
+					return (
+						<SidebarGroup
+							key={item.title}
+							className={cn(
+								isSuperBlock &&
+									"mb-3 rounded-xl border border-amber-300/80 bg-gradient-to-b from-amber-100/90 to-amber-50/40 p-1.5 shadow-sm",
+							)}
+						>
+							<SidebarGroupLabel
+								className={cn(
+									"px-2 font-semibold text-[0.65rem] uppercase tracking-[0.12em]",
+									isSuperBlock
+										? "text-amber-900/75"
+										: "text-sidebar-foreground/50",
+								)}
+							>
+								{item.title}
+							</SidebarGroupLabel>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{item.items?.map((route) => {
+										const active = isActive(route.path);
 
-									return (
-										<SidebarMenuItem key={route.label}>
-											<SidebarMenuButton asChild isActive={active}>
-												<Link to={route.path}>
-													{route.icon && (
-														<route.icon
+										return (
+											<SidebarMenuItem key={route.label}>
+												<SidebarMenuButton asChild isActive={active}>
+													<Link to={route.path}>
+														{route.icon && (
+															<route.icon
+																className={cn(
+																	"mr-2 h-5 w-5 shrink-0 text-sidebar-foreground/50",
+																	active && "text-[oklch(0.52_0.09_75)]",
+																)}
+															/>
+														)}
+														<span
 															className={cn(
-																"mr-2 h-5 w-5",
-																active && "text-primary",
+																"truncate",
+																active && "font-semibold",
 															)}
-														/>
-													)}
-													<span
-														className={cn("truncate", active && "text-primary")}
-													>
-														{route.label}
-													</span>
-												</Link>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									);
-								})}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				))}
+														>
+															{route.label}
+														</span>
+													</Link>
+												</SidebarMenuButton>
+											</SidebarMenuItem>
+										);
+									})}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+					);
+				})}
 			</SidebarContent>
 			<SidebarRail />
 		</Sidebar>

@@ -24,7 +24,7 @@ export function generateBookingConfirmationTemplate(
 
 	// Convert oklch colors to standard CSS to match website design
 	const colors = {
-		primary: "#22818e", // oklch(0.45 0.08 180) converted
+		primary: "#C5A467", // oklch(0.45 0.08 180) converted
 		primaryLight: "#86d6e5", // oklch(0.75 0.18 180) converted
 		background: "#ffffff", // oklch(1 0 0)
 		foreground: "#3c3c3c", // oklch(0.235 0 0)
@@ -45,7 +45,7 @@ export function generateBookingConfirmationTemplate(
 				<meta charset="utf-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<meta name="x-apple-disable-message-reformatting">
-				<title>Booking Confirmation - Down Under Chauffeurs</title>
+				<title>Booking Confirmation - Utos & Co.</title>
 				<link rel="preconnect" href="https://fonts.googleapis.com">
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 				<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -456,7 +456,7 @@ export function generateBookingConfirmationTemplate(
 							<div class="confirmation-checkmark"></div>
 						</div>
 						<h1 class="header-title">Booking Confirmed</h1>
-						<p class="header-subtitle">Down Under Chauffeurs</p>
+						<p class="header-subtitle">Utos & Co.</p>
 					</div>
 
 					<div class="content">
@@ -603,11 +603,11 @@ export function generateBookingConfirmationTemplate(
 					</div>
 
 					<div class="footer">
-						<h4 class="footer-brand">Down Under Chauffeurs</h4>
+						<h4 class="footer-brand">Utos & Co.</h4>
 						<p class="footer-tagline">Premium Luxury Transportation Services</p>
 						<p class="footer-text">
 							This email was sent regarding your booking confirmation.<br>
-							© ${new Date().getFullYear()} Down Under Chauffeurs. All rights reserved.
+							© ${new Date().getFullYear()} Utos & Co. All rights reserved.
 						</p>
 					</div>
 				</div>

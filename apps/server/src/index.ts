@@ -9,9 +9,9 @@ import { appRouter } from "@/trpc/routers/_app";
 
 /** Explicit allowed origins - no env dependency to avoid crashes */
 const ALLOWED_ORIGINS = new Set([
-	"https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev",
-	"https://downunderchauffeurs.com",
-	"https://down-under-chauffeur-dev.luppy.workers.dev",
+	"https://utos-and-co-staging.utosandco.workers.dev",
+	"https://utosandco.com",
+	"https://www.utosandco.com",
 	"http://localhost:3001",
 	"http://localhost:3002",
 	"http://localhost:3003",
@@ -19,10 +19,11 @@ const ALLOWED_ORIGINS = new Set([
 
 /** Trusted domain patterns */
 const TRUSTED_DOMAIN_PATTERNS = [
-	/^https:\/\/[a-z0-9-]+\.downunderchauffeurs\.workers\.dev$/i,
-	/^https:\/\/downunderchauffeurs\.com$/i,
-	/^https:\/\/[a-z0-9-]+\.downunderchauffeurs\.com$/i,
-	/^https:\/\/[a-z0-9-]+\.luppy\.workers\.dev$/i,
+	/^https:\/\/[a-z0-9-]+\.utosandco\.workers\.dev$/i,
+	/^https:\/\/[a-z0-9-]+\.workers\.dev$/i,
+	/^https:\/\/utosandco\.com$/i,
+	/^https:\/\/www\.utosandco\.com$/i,
+	/^https:\/\/[a-z0-9-]+\.utosandco\.com$/i,
 	/^http:\/\/localhost(:\d+)?$/,
 ];
 
@@ -43,7 +44,7 @@ function buildCorsHeaders(
 		origin && isOriginAllowed(origin)
 			? origin
 			: fallbackForErrors
-				? "https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev"
+				? "https://utos-and-co-staging.utosandco.workers.dev"
 				: null;
 	if (originToUse) {
 		headers.set("Access-Control-Allow-Origin", originToUse);

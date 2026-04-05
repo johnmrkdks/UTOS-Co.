@@ -22,6 +22,13 @@ function copyIndexTo404() {
 	};
 }
 
+/** Must match apps/web/wrangler.toml [env.*.vars] — overrides .env / .env.local for these builds */
+const UTOS_STAGING_SERVER =
+	"https://utos-and-co-server-staging.utosandco.workers.dev";
+const UTOS_STAGING_CLIENT = "https://utos-and-co-staging.utosandco.workers.dev";
+const UTOS_PROD_SERVER = "https://api.utosandco.com";
+const UTOS_PROD_CLIENT = "https://utosandco.com";
+
 export default defineConfig(({ mode }) => {
 	// Determine the Cloudflare environment based on Vite mode
 	const cfEnvironment =
@@ -33,7 +40,23 @@ export default defineConfig(({ mode }) => {
 					? "dev"
 					: undefined;
 
+	const utosApiUrls =
+		mode === "staging" || mode === "dev"
+			? {
+					"import.meta.env.VITE_SERVER_URL":
+						JSON.stringify(UTOS_STAGING_SERVER),
+					"import.meta.env.VITE_CLIENT_URL":
+						JSON.stringify(UTOS_STAGING_CLIENT),
+				}
+			: mode === "production"
+				? {
+						"import.meta.env.VITE_SERVER_URL": JSON.stringify(UTOS_PROD_SERVER),
+						"import.meta.env.VITE_CLIENT_URL": JSON.stringify(UTOS_PROD_CLIENT),
+					}
+				: {};
+
 	return {
+		define: utosApiUrls,
 		plugins: [
 			tailwindcss(),
 			copyIndexTo404(),

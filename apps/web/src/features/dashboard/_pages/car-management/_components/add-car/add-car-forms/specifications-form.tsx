@@ -29,7 +29,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { memo, useMemo, useState } from "react";
-import type { Control } from "react-hook-form";
+import type { Control, ControllerRenderProps } from "react-hook-form";
 import { useGetCarBodyTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-body-type/use-get-car-body-types-query";
 import { useGetCarCategoriesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-category/use-get-car-categories-query";
 import { useGetCarConditionTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-condition-type/use-get-car-condition-types-query";
@@ -38,6 +38,9 @@ import { useGetCarFuelTypesQuery } from "@/features/dashboard/_pages/car-managem
 import { useGetCarModelsWithBrandQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-model/use-get-car-models-with-brand-query";
 import { useGetCarTransmissionTypesQuery } from "@/features/dashboard/_pages/car-management/_hooks/query/car-transmission-type/use-get-car-transmission-types-query";
 import type { AddCarFormValues } from "../add-car-form";
+
+/** Large enough for admin dropdowns; server list endpoints paginate with a default of 10 */
+const SPEC_LIST_PARAMS = { limit: 1000 } as const;
 
 type SpecificationsFormProps = {
 	control: Control<AddCarFormValues>;
@@ -49,7 +52,7 @@ type BaseFieldConfig = {
 	placeholder: string;
 	data: any[] | undefined;
 	isLoading: boolean;
-	error?: any;
+	error?: unknown;
 };
 
 type SelectFieldConfig = BaseFieldConfig & {
@@ -78,65 +81,174 @@ type ComboBoxFieldProps = {
 };
 
 const StandardSelectField = memo(
-	({ config, control, className }: StandardSelectFieldProps) => (
-		<FormField
-			control={control}
-			name={config.name}
-			render={({ field }) => (
-				<FormItem>
-					<FormLabel>{config.label}</FormLabel>
-					<Select
-						onValueChange={field.onChange}
-						value={field.value as string}
-						disabled={config.isLoading}
-					>
-						<FormControl>
-							<SelectTrigger className={cn("w-full", className)}>
-								<SelectValue
-									placeholder={
-										config.isLoading ? "Loading..." : config.placeholder
-									}
-								/>
-							</SelectTrigger>
-						</FormControl>
-						<SelectContent>
-							{config.isLoading ? (
-								<SelectItem value="__loading__" disabled>
-									Loading...
-								</SelectItem>
-							) : config.error ? (
-								<SelectItem value="__error__" disabled>
-									Error loading options
-								</SelectItem>
-							) : config.data?.length === 0 ? (
-								<SelectItem value="__empty__" disabled>
-									No options available
-								</SelectItem>
-							) : (
-								config.data?.map((item) => {
-									const option = config.renderOption(item);
-									return (
-										<SelectItem key={option.key} value={option.value}>
-											{option.label}
-										</SelectItem>
-									);
-								})
-							)}
-						</SelectContent>
-					</Select>
-					<FormMessage />
-				</FormItem>
-			)}
-		/>
-	),
+	({ config, control, className }: StandardSelectFieldProps) => {
+		const rows = config.data ?? [];
+		return (
+			<FormField
+				control={control}
+				name={config.name}
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>{config.label}</FormLabel>
+						<Select
+							onValueChange={field.onChange}
+							value={field.value as string}
+							disabled={config.isLoading}
+						>
+							<FormControl>
+								<SelectTrigger className={cn("w-full", className)}>
+									<SelectValue
+										placeholder={
+											config.isLoading ? "Loading..." : config.placeholder
+										}
+									/>
+								</SelectTrigger>
+							</FormControl>
+							<SelectContent>
+								{config.isLoading ? (
+									<SelectItem value="__loading__" disabled>
+										Loading...
+									</SelectItem>
+								) : config.error ? (
+									<SelectItem value="__error__" disabled>
+										Error loading options
+									</SelectItem>
+								) : rows.length === 0 ? (
+									<SelectItem value="__empty__" disabled>
+										No options available — run DB seed or add records in admin
+									</SelectItem>
+								) : (
+									rows.map((item) => {
+										const option = config.renderOption(item);
+										return (
+											<SelectItem key={option.key} value={option.value}>
+												{option.label}
+											</SelectItem>
+										);
+									})
+								)}
+							</SelectContent>
+						</Select>
+						<FormMessage />
+					</FormItem>
+				)}
+			/>
+		);
+	},
 );
+
+type ComboBoxFieldInnerProps = {
+	field: ControllerRenderProps<AddCarFormValues, keyof AddCarFormValues>;
+	config: ComboBoxFieldConfig;
+	open: boolean;
+	setOpen: (open: boolean) => void;
+	groupedData: Record<string, any[]>;
+	className?: string;
+};
+
+function ComboBoxFieldInner({
+	field,
+	config,
+	open,
+	setOpen,
+	groupedData,
+	className,
+}: ComboBoxFieldInnerProps) {
+	const selectedLabel = useMemo(() => {
+		if (!config.data?.length || !field.value) return null;
+		const foundItem = config.data.find(
+			(item) => config.renderOption(item).value === field.value,
+		);
+		return foundItem ? config.renderOption(foundItem).label : null;
+	}, [field.value, config.data, config]);
+
+	return (
+		<FormItem>
+			<FormLabel>{config.label}</FormLabel>
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<FormControl>
+						<Button
+							type="button"
+							variant="outline"
+							role="combobox"
+							aria-expanded={open}
+							className={cn(
+								"w-full justify-between",
+								!field.value && "text-muted-foreground",
+								className,
+							)}
+							disabled={config.isLoading}
+						>
+							{selectedLabel ??
+								(config.isLoading ? "Loading..." : config.placeholder)}
+							<ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+						</Button>
+					</FormControl>
+				</PopoverTrigger>
+				<PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+					<Command shouldFilter>
+						<CommandInput
+							placeholder={`Search ${config.label.toLowerCase()}...`}
+						/>
+						<CommandList>
+							<CommandEmpty>
+								{config.error
+									? "Error loading options."
+									: !config.data?.length
+										? "No models — run DB seed or add models in admin."
+										: "No results found."}
+							</CommandEmpty>
+							{Object.keys(groupedData).map((brandName) => (
+								<CommandGroup key={brandName} heading={brandName}>
+									{groupedData[brandName].map((item: any) => {
+										const option = config.renderOption(item);
+										const keywords = [
+											option.label,
+											option.brandName,
+											option.value,
+										].filter(Boolean) as string[];
+										return (
+											<CommandItem
+												key={option.key}
+												value={option.value}
+												keywords={keywords}
+												onSelect={() => {
+													field.onChange(
+														field.value === option.value ? "" : option.value,
+													);
+													setOpen(false);
+												}}
+											>
+												<CheckIcon
+													className={cn(
+														"mr-2 h-4 w-4",
+														field.value === option.value
+															? "opacity-100"
+															: "opacity-0",
+													)}
+												/>
+												{option.label}
+											</CommandItem>
+										);
+									})}
+								</CommandGroup>
+							))}
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
+			<FormMessage />
+		</FormItem>
+	);
+}
 
 const ComboBoxField = memo(
 	({ config, control, className }: ComboBoxFieldProps) => {
 		const [open, setOpen] = useState(false);
 
 		const groupedData = useMemo(() => {
-			if (!config.data) return {};
+			if (!config.data?.length) return {};
 			return config.data.reduce(
 				(acc, item) => {
 					const brandName = config.renderOption(item).brandName || "Other";
@@ -148,90 +260,22 @@ const ComboBoxField = memo(
 				},
 				{} as Record<string, any[]>,
 			);
-		}, [config.data, config.renderOption]);
+		}, [config.data, config]);
 
 		return (
 			<FormField
 				control={control}
 				name={config.name}
-				render={({ field }) => {
-					const selectedLabel = useMemo(() => {
-						if (!config.data || !field.value) return null;
-						const foundItem = config.data.find(
-							(item) => config.renderOption(item).value === field.value,
-						);
-						return foundItem ? config.renderOption(foundItem).label : null;
-					}, [field.value, config.data, config.renderOption]);
-
-					return (
-						<FormItem>
-							<FormLabel>{config.label}</FormLabel>
-							<Popover open={open} onOpenChange={setOpen}>
-								<PopoverTrigger asChild>
-									<FormControl>
-										<Button
-											variant="outline"
-											role="combobox"
-											aria-expanded={open}
-											className={cn(
-												"w-full justify-between",
-												!field.value && "text-muted-foreground",
-												className,
-											)}
-											disabled={config.isLoading}
-										>
-											{selectedLabel ??
-												(config.isLoading ? "Loading..." : config.placeholder)}
-											<ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-										</Button>
-									</FormControl>
-								</PopoverTrigger>
-								<PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-									<Command>
-										<CommandInput
-											placeholder={`Search ${config.label.toLowerCase()}...`}
-										/>
-										<CommandList>
-											<CommandEmpty>No results found.</CommandEmpty>
-											{Object.keys(groupedData).map((brandName) => (
-												<CommandGroup key={brandName} heading={brandName}>
-													{groupedData[brandName].map((item: any) => {
-														const option = config.renderOption(item);
-														return (
-															<CommandItem
-																key={option.key}
-																value={option.value}
-																onSelect={(currentValue) => {
-																	field.onChange(
-																		currentValue === field.value
-																			? ""
-																			: currentValue,
-																	);
-																	setOpen(false);
-																}}
-															>
-																<CheckIcon
-																	className={cn(
-																		"mr-2 h-4 w-4",
-																		field.value === option.value
-																			? "opacity-100"
-																			: "opacity-0",
-																	)}
-																/>
-																{option.label}
-															</CommandItem>
-														);
-													})}
-												</CommandGroup>
-											))}
-										</CommandList>
-									</Command>
-								</PopoverContent>
-							</Popover>
-							<FormMessage />
-						</FormItem>
-					);
-				}}
+				render={({ field }) => (
+					<ComboBoxFieldInner
+						field={field}
+						config={config}
+						open={open}
+						setOpen={setOpen}
+						groupedData={groupedData}
+						className={className}
+					/>
+				)}
 			/>
 		);
 	},
@@ -239,13 +283,13 @@ const ComboBoxField = memo(
 
 export function SpecificationsForm({ control }: SpecificationsFormProps) {
 	const queries = {
-		models: useGetCarModelsWithBrandQuery({}),
-		bodyTypes: useGetCarBodyTypesQuery({}),
-		categories: useGetCarCategoriesQuery({}),
-		fuelTypes: useGetCarFuelTypesQuery({}),
-		transmissionTypes: useGetCarTransmissionTypesQuery({}),
-		driveTypes: useGetCarDriveTypesQuery({}),
-		conditionTypes: useGetCarConditionTypesQuery({}),
+		models: useGetCarModelsWithBrandQuery(SPEC_LIST_PARAMS),
+		bodyTypes: useGetCarBodyTypesQuery(SPEC_LIST_PARAMS),
+		categories: useGetCarCategoriesQuery(SPEC_LIST_PARAMS),
+		fuelTypes: useGetCarFuelTypesQuery(SPEC_LIST_PARAMS),
+		transmissionTypes: useGetCarTransmissionTypesQuery(SPEC_LIST_PARAMS),
+		driveTypes: useGetCarDriveTypesQuery(SPEC_LIST_PARAMS),
+		conditionTypes: useGetCarConditionTypesQuery(SPEC_LIST_PARAMS),
 	};
 
 	const modelFieldConfig: ComboBoxFieldConfig = useMemo(
@@ -256,11 +300,15 @@ export function SpecificationsForm({ control }: SpecificationsFormProps) {
 			data: queries.models.data?.data,
 			isLoading: queries.models.isLoading,
 			error: queries.models.error,
-			renderOption: (model) => ({
+			renderOption: (model: {
+				id: string;
+				name: string;
+				brand: { name: string };
+			}) => ({
 				key: model.id,
 				value: model.id,
-				label: `${model.name} - ${model.brand.name}`,
-				brandName: model.brand.name,
+				label: `${model.name} - ${model.brand?.name ?? "Unknown brand"}`,
+				brandName: model.brand?.name,
 			}),
 		}),
 		[queries.models.data, queries.models.isLoading, queries.models.error],

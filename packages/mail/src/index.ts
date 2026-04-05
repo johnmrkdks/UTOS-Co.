@@ -34,7 +34,7 @@ export function getMailService(env: any): MailService | WorkerMailService {
 				new WorkerMailService({
 					resendApiKey: resendKey,
 					fromEmail,
-					fromName: env.RESEND_FROM_NAME || "Down Under Chauffeurs",
+					fromName: env.RESEND_FROM_NAME || "Utos & Co.",
 				}),
 			);
 		}

@@ -1,6 +1,5 @@
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
@@ -14,6 +13,7 @@ import {
 	TrendingUp,
 	Users,
 } from "lucide-react";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 interface DriverAnalyticsProps {
 	dateRange: string;
@@ -81,7 +81,7 @@ export function DriverAnalytics({
 	return (
 		<div className="grid gap-4">
 			<div className="grid gap-4 md:grid-cols-4">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Users className="h-4 w-4 text-blue-600" />
@@ -98,9 +98,9 @@ export function DriverAnalytics({
 							className="mt-2 h-1"
 						/>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<TrendingUp className="h-4 w-4 text-green-600" />
@@ -116,9 +116,9 @@ export function DriverAnalytics({
 						</div>
 						<Progress value={driverData.utilizationRate} className="mt-2 h-1" />
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Star className="h-4 w-4 text-yellow-600" />
@@ -133,9 +133,9 @@ export function DriverAnalytics({
 							className="mt-2 h-1"
 						/>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Clock className="h-4 w-4 text-purple-600" />
@@ -150,11 +150,11 @@ export function DriverAnalytics({
 							Average pickup time
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Award className="h-5 w-5 text-gold-600" />
@@ -209,9 +209,9 @@ export function DriverAnalytics({
 							))}
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<TrendingUp className="h-5 w-5 text-green-600" />
@@ -269,10 +269,10 @@ export function DriverAnalytics({
 							</p>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
-			<Card>
+			<DashboardChartCard>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Clock className="h-5 w-5 text-purple-600" />
@@ -344,7 +344,7 @@ export function DriverAnalytics({
 						</div>
 					</div>
 				</CardContent>
-			</Card>
+			</DashboardChartCard>
 		</div>
 	);
 }

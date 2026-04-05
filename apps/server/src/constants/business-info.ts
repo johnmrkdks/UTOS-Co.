@@ -1,28 +1,28 @@
 export const BUSINESS_INFO = {
 	phone: {
-		display: "+61 422 693 233",
-		link: "tel:+61422693233",
+		display: "+61 400 000 000",
+		link: "tel:+61400000000",
 	},
 	email: {
-		display: "syd@downunderchauffeurs.com",
-		link: "mailto:syd@downunderchauffeurs.com",
+		display: "contact@utosandco.com",
+		link: "mailto:contact@utosandco.com",
 	},
 	social: {
 		facebook: {
-			url: "https://www.facebook.com/380139225188224",
+			url: "https://www.facebook.com/",
 			label: "Facebook",
 		},
 		instagram: {
-			url: "https://www.instagram.com/downunderchauffeurs",
+			url: "https://www.instagram.com/",
 			label: "Instagram",
 		},
 	},
 	business: {
-		name: "Down Under Chauffeurs",
-		slogan: "Sydney's Premier Luxury Service",
+		name: "Utos & Co.",
+		slogan: "Australia",
 		description:
-			"Down Under Chauffeurs is a luxury travel agency based in Sydney, Australia. We offer a wide range of luxury travel services, including car hire, travel packages, and personalized travel experiences.",
-		websiteUrl: "https://downunderchauffeurs.com",
+			"Utos & Co. delivers premium chauffeur and luxury transport services across Australia.",
+		websiteUrl: "https://utosandco.com",
 		foundedYear: 2020,
 	},
 } as const;

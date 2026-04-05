@@ -1,12 +1,12 @@
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
 } from "@workspace/ui/components/card";
 import { Progress } from "@workspace/ui/components/progress";
 import { DollarSign, Package, TrendingDown, TrendingUp } from "lucide-react";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 interface RevenueAnalyticsProps {
 	dateRange: string;
@@ -78,7 +78,7 @@ export function RevenueAnalytics({
 	return (
 		<div className="grid gap-4">
 			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<DollarSign className="h-5 w-5 text-green-600" />
@@ -130,9 +130,9 @@ export function RevenueAnalytics({
 							</div>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Package className="h-5 w-5 text-blue-600" />
@@ -216,11 +216,11 @@ export function RevenueAnalytics({
 							</p>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			{totalRev > 0 && (
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<DollarSign className="h-5 w-5 text-green-600" />
@@ -263,7 +263,7 @@ export function RevenueAnalytics({
 							</div>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			)}
 		</div>
 	);

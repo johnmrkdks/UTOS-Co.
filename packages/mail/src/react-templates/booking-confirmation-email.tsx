@@ -37,7 +37,7 @@ export function BookingConfirmationEmail({
 	originAddress = "Sydney Opera House, Sydney NSW, Australia",
 	destinationAddress = "T1, Departure Plaza, Mascot NSW, Australia",
 	vehicleInfo = "Luxury Vehicle",
-	websiteUrl = "https://downunderchauffeurs.com",
+	websiteUrl = "https://utosandco.com",
 	stops = [],
 	passengerCount = 1,
 	quotedAmount,
@@ -54,7 +54,7 @@ export function BookingConfirmationEmail({
 					<Section style={logoHeader}>
 						<Row>
 							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
-								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
+								<Heading style={brandTitle}>Utos & Co.</Heading>
 								<Text style={brandTagline}>
 									Premium Luxury Transportation Services
 								</Text>
@@ -66,8 +66,7 @@ export function BookingConfirmationEmail({
 					<Section style={successHeader}>
 						<Heading style={successTitle}>Booking Confirmed! ✓</Heading>
 						<Text style={successSubtitle}>
-							Thank you for choosing Down Under Chauffeurs. Your booking has
-							been confirmed.
+							Thank you for choosing Utos & Co. Your booking has been confirmed.
 						</Text>
 					</Section>
 
@@ -189,7 +188,7 @@ export function BookingConfirmationEmail({
 
 					{/* Footer */}
 					<Section style={footer}>
-						<Text style={footerBrand}>Down Under Chauffeurs</Text>
+						<Text style={footerBrand}>Utos & Co.</Text>
 						<Text style={footerDisclaimer}>
 							Automated notification |{" "}
 							<a href={`${websiteUrl}/contact-us`} style={footerLink}>
@@ -242,7 +241,7 @@ const container = {
 
 const logoHeader = {
 	padding: "16px 20px",
-	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
+	background: "linear-gradient(135deg, #C5A467 0%, #9A7A45 100%)",
 	borderBottom: "none",
 };
 
@@ -380,7 +379,7 @@ const ctaSection = {
 };
 
 const ctaButton = {
-	background: "#22818e",
+	background: "#C5A467",
 	color: "white",
 	padding: "12px 32px",
 	borderRadius: "8px",
@@ -397,7 +396,7 @@ const contactText = {
 };
 
 const contactLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "600",
 };
@@ -424,7 +423,7 @@ const footerDisclaimer = {
 };
 
 const footerLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };

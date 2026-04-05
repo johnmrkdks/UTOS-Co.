@@ -1,6 +1,5 @@
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
@@ -8,6 +7,7 @@ import {
 import { Progress } from "@workspace/ui/components/progress";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { MessageCircle, Star, TrendingUp } from "lucide-react";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 interface ReviewsData {
 	totalReviews: number;
@@ -86,7 +86,7 @@ export function CustomerSatisfaction({
 	return (
 		<div className="grid gap-4">
 			<div className="grid gap-4 md:grid-cols-3">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Star className="h-4 w-4 text-yellow-600" />
@@ -110,9 +110,9 @@ export function CustomerSatisfaction({
 							</div>
 						)}
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<MessageCircle className="h-4 w-4 text-blue-600" />
@@ -125,9 +125,9 @@ export function CustomerSatisfaction({
 							Total reviews submitted
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 font-medium text-sm">
 							<Star className="h-4 w-4 text-yellow-600" />
@@ -150,11 +150,11 @@ export function CustomerSatisfaction({
 								: "Based on average rating"}
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Star className="h-5 w-5 text-yellow-600" />
@@ -187,9 +187,9 @@ export function CustomerSatisfaction({
 							))
 						)}
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<MessageCircle className="h-5 w-5 text-blue-600" />
@@ -238,7 +238,7 @@ export function CustomerSatisfaction({
 							</div>
 						</ScrollArea>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 		</div>
 	);

@@ -18,6 +18,7 @@ import {
 	FormMessage,
 } from "@workspace/ui/components/form";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { cn } from "@workspace/ui/lib/utils";
 import {
 	AlertCircle,
 	ArrowRight,
@@ -45,7 +46,11 @@ const instantQuoteSchema = z.object({
 		.default([]),
 });
 
-export function InstantQuoteWidget() {
+type InstantQuoteWidgetProps = {
+	className?: string;
+};
+
+export function InstantQuoteWidget({ className }: InstantQuoteWidgetProps) {
 	// Simplified widget that only handles route input and navigation to vehicle selection
 	const navigate = useNavigate();
 	const search = useSearch({ strict: false }) as any;
@@ -175,7 +180,7 @@ export function InstantQuoteWidget() {
 	// Loading state for availability check
 	if (availabilityQuery.isLoading) {
 		return (
-			<Card className="mx-auto w-full max-w-2xl shadow-lg">
+			<Card className={cn("mx-auto w-full max-w-2xl shadow-lg", className)}>
 				<CardHeader className="pb-4 text-center">
 					<CardTitle className="flex items-center justify-center gap-2 text-xl">
 						<Calculator className="h-5 w-5 text-primary" />
@@ -194,7 +199,7 @@ export function InstantQuoteWidget() {
 	// Service unavailable state
 	if (availabilityQuery.data && !availabilityQuery.data.available) {
 		return (
-			<Card className="mx-auto w-full max-w-2xl shadow-lg">
+			<Card className={cn("mx-auto w-full max-w-2xl shadow-lg", className)}>
 				<CardHeader className="pb-4 text-center">
 					<CardTitle className="flex items-center justify-center gap-2 text-xl">
 						<Calculator className="h-5 w-5 text-muted-foreground" />
@@ -223,7 +228,7 @@ export function InstantQuoteWidget() {
 	}
 
 	return (
-		<Card className="mx-auto w-full max-w-2xl shadow-lg">
+		<Card className={cn("mx-auto w-full max-w-2xl shadow-lg", className)}>
 			<CardHeader className="pb-4 text-center">
 				<CardTitle className="flex items-center justify-center gap-2 text-xl">
 					<Calculator className="h-5 w-5 text-primary" />

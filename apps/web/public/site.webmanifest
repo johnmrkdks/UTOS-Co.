@@ -1,15 +1,27 @@
 {
-	"name": "Down Under Chauffeurs",
-	"short_name": "DUC",
+	"name": "Utos & Co.",
+	"short_name": "Utos",
 	"description": "Premium luxury transportation services in Australia",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#ffffff",
-	"theme_color": "#22818e",
+	"theme_color": "#1e293b",
 	"categories": ["travel", "transportation", "business"],
 	"lang": "en-AU",
 	"orientation": "portrait-primary",
 	"icons": [
+		{
+			"src": "/utos-logo.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/favicon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
 		{
 			"src": "/favicon.ico",
 			"sizes": "32x32",

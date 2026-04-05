@@ -392,7 +392,7 @@ export function Services({ className, ...props }: ServicesProps) {
 					<div className="grid items-center gap-16 lg:grid-cols-2">
 						<div>
 							<h2 className="mb-6 font-bold text-4xl text-foreground">
-								Why Choose Down Under Chauffeurs?
+								Why Choose Utos & Co.?
 							</h2>
 							<p className="mb-8 text-muted-foreground text-xl leading-relaxed">
 								We're not just a transportation service – we're your partners in
@@ -459,8 +459,8 @@ export function Services({ className, ...props }: ServicesProps) {
 						</h2>
 						<p className="mb-8 text-white/80 text-xl leading-relaxed">
 							Book your premium chauffeur service today and discover why
-							discerning clients choose Down Under Chauffeur for their
-							transportation needs.
+							discerning clients choose Utos & Co. for their transportation
+							needs.
 						</p>
 
 						<div className="flex flex-col justify-center gap-4 sm:flex-row">

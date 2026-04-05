@@ -127,7 +127,7 @@ export function CloseTripExtrasForm({
 					Close trip {isNoShow ? "(No Show)" : "with extras"}
 				</h3>
 				<p className="mb-4 text-muted-foreground text-xs">
-					Down Under Chauffeur (free) wait times:
+					Utos & Co. (free) wait times:
 				</p>
 			</div>
 

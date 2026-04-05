@@ -11,9 +11,12 @@ export type AnalyticsCardData = {
 	title: string;
 	value: string | number;
 	icon: LucideIcon;
+	/** Backing wash — keep subtle so the rail + ring stay visible */
 	bgGradient?: string;
 	iconBg?: string;
 	textColor?: string;
+	/** Top accent bar (Tailwind gradient stops, without `bg-gradient-to-r`) */
+	accentStripClassName?: string;
 	changeText?: string;
 	changeType?: "positive" | "negative" | "warning" | "neutral";
 	showTrend?: boolean;
@@ -27,6 +30,8 @@ type AnalyticsCardProps = {
 	view?: boolean | "default" | "compact";
 };
 
+const DEFAULT_STRIP = "from-amber-700/50 via-amber-500/38 to-stone-400/25";
+
 export function AnalyticsCard({
 	data,
 	className,
@@ -36,9 +41,10 @@ export function AnalyticsCard({
 		title,
 		value,
 		icon: Icon,
-		bgGradient = "bg-gradient-to-br from-gray-50 to-gray-100",
-		iconBg = "bg-gray-500",
-		textColor = "text-gray-900",
+		bgGradient = "bg-gradient-to-br from-card via-card to-muted/35",
+		iconBg = "bg-primary",
+		textColor = "text-foreground",
+		accentStripClassName = DEFAULT_STRIP,
 		changeText,
 		changeType = "neutral",
 		showTrend = false,
@@ -51,26 +57,32 @@ export function AnalyticsCard({
 	return (
 		<Card
 			className={cn(
-				"group relative overflow-hidden border border-gray-200 py-4 shadow-sm",
+				"group relative gap-0 overflow-hidden rounded-2xl border-border/60 py-0 shadow-sm ring-1 ring-black/[0.04] transition-shadow hover:shadow-md",
 				bgGradient,
 				className,
 			)}
 		>
+			<div
+				className={cn(
+					"h-1 w-full shrink-0 bg-gradient-to-r",
+					accentStripClassName,
+				)}
+				aria-hidden
+			/>
 			<CardContent
 				className={cn(
 					isCompact
-						? "flex flex-row items-center gap-3 px-4 py-2"
-						: "px-4 py-2",
+						? "relative z-10 flex flex-row items-center gap-3 px-4 py-3"
+						: "relative z-10 px-4 py-4",
 				)}
 			>
 				{isCompact ? (
 					<>
-						{/* Icon for Compact */}
 						{showIcon && (
 							<div
 								className={cn(
-									"flex flex-shrink-0 items-center justify-center rounded-lg shadow-sm",
-									"h-8 w-8",
+									"flex flex-shrink-0 items-center justify-center rounded-xl shadow-inner ring-1 ring-black/5",
+									"h-9 w-9",
 									iconBg,
 								)}
 							>
@@ -78,17 +90,14 @@ export function AnalyticsCard({
 							</div>
 						)}
 
-						{/* Content for Compact */}
 						<div className="flex min-w-0 flex-1 flex-col justify-center">
-							{/* Title */}
-							<p className="mb-2 truncate font-semibold text-gray-700 text-sm leading-tight">
+							<p className="mb-1 truncate font-medium text-muted-foreground text-xs leading-tight">
 								{title}
 							</p>
 
-							{/* Value */}
 							<div
 								className={cn(
-									"mb-1 font-bold leading-none",
+									"mb-0.5 font-bold tabular-nums leading-none tracking-tight",
 									"text-xl sm:text-2xl",
 									textColor,
 								)}
@@ -96,7 +105,6 @@ export function AnalyticsCard({
 								{typeof value === "string" ? value : value.toLocaleString()}
 							</div>
 
-							{/* Change Text */}
 							{changeText && (
 								<div className="flex items-center gap-1">
 									<p
@@ -108,7 +116,7 @@ export function AnalyticsCard({
 													? "text-red-600"
 													: changeType === "warning"
 														? "text-amber-600"
-														: "text-gray-500",
+														: "text-muted-foreground",
 										)}
 									>
 										{changeText}
@@ -125,14 +133,12 @@ export function AnalyticsCard({
 					</>
 				) : (
 					<>
-						{/* Default View */}
-						{/* Icon and Title */}
 						<div className="mb-3 flex items-center gap-3">
 							{showIcon && (
 								<div
 									className={cn(
-										"flex flex-shrink-0 items-center justify-center rounded-lg shadow-sm",
-										"h-8 w-8 sm:h-9 sm:w-9",
+										"flex flex-shrink-0 items-center justify-center rounded-xl shadow-inner ring-1 ring-black/5",
+										"h-9 w-9 sm:h-10 sm:w-10",
 										iconBg,
 									)}
 								>
@@ -142,16 +148,15 @@ export function AnalyticsCard({
 									/>
 								</div>
 							)}
-							<p className="truncate font-semibold text-gray-700 text-sm sm:text-base">
+							<p className="truncate font-semibold text-foreground text-sm sm:text-base">
 								{title}
 							</p>
 						</div>
 
-						{/* Value Display */}
 						<div className="mb-3">
 							<div
 								className={cn(
-									"font-bold leading-none",
+									"font-bold tabular-nums leading-none tracking-tight",
 									"text-2xl sm:text-3xl",
 									textColor,
 								)}
@@ -160,7 +165,6 @@ export function AnalyticsCard({
 							</div>
 						</div>
 
-						{/* Change Text and Trend */}
 						{changeText && (
 							<div className="flex items-center gap-1">
 								<p
@@ -172,7 +176,7 @@ export function AnalyticsCard({
 												? "text-red-600"
 												: changeType === "warning"
 													? "text-amber-600"
-													: "text-gray-500",
+													: "text-muted-foreground",
 									)}
 								>
 									{changeText}
@@ -188,15 +192,14 @@ export function AnalyticsCard({
 					</>
 				)}
 
-				{/* Decorative background element */}
 				{showBackgroundIcon && (
 					<div
 						className={cn(
-							"absolute opacity-10",
+							"pointer-events-none absolute opacity-[0.07]",
 							isCompact ? "top-2 right-2 h-8 w-8" : "top-2 right-2 h-10 w-10",
 						)}
 					>
-						<Icon className="h-full w-full text-gray-600" strokeWidth={0.5} />
+						<Icon className="h-full w-full text-foreground" strokeWidth={0.5} />
 					</div>
 				)}
 			</CardContent>

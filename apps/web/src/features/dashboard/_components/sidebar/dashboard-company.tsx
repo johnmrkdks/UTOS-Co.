@@ -3,14 +3,12 @@ import { Logo } from "@/components/logo";
 
 export function DashboardCompanyLogo() {
 	return (
-		<div className="flex items-center justify-center gap-2">
-			<Link to="/" className="flex items-center font-medium">
-				<Logo />
-			</Link>
-			<div className="flex flex-col items-start justify-center">
-				<h1 className="truncate font-bold text-sm">Down Under Chauffeurs</h1>
-				<p className="font-medium text-muted-foreground text-xs">KD Prestige</p>
-			</div>
-		</div>
+		<Link
+			to="/"
+			className="flex items-center justify-center rounded-lg px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+		>
+			<Logo className="h-12 max-h-14 w-auto max-w-[min(100%,200px)] object-contain object-left md:h-14" />
+			<span className="sr-only">UTOS & Co. Australia — home</span>
+		</Link>
 	);
 }

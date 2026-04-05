@@ -4,16 +4,12 @@ import { Logo } from "./logo";
 
 export function BrandLogo() {
 	return (
-		<Link to="/" className="group flex items-center gap-3">
+		<Link
+			to="/"
+			className="group inline-flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+		>
 			<Logo />
-			<div className="hidden sm:block">
-				<h1 className="font-bold text-foreground text-xl transition-colors group-hover:text-primary">
-					{BUSINESS_INFO.business.name}
-				</h1>
-				<p className="-mt-1 text-muted-foreground text-xs">
-					{BUSINESS_INFO.business.slogan}
-				</p>
-			</div>
+			<span className="sr-only">{BUSINESS_INFO.business.name}</span>
 		</Link>
 	);
 }

@@ -88,7 +88,7 @@ export class MailService {
 				const transporter = await this.createTransporter();
 
 				const mailOptions = {
-					from: `Down Under Chauffeurs <${this.config.user}>`,
+					from: `Utos & Co. <${this.config.user}>`,
 					to: options.to,
 					subject: options.subject,
 					html: options.html,

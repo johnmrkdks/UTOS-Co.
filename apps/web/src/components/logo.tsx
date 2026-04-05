@@ -1,5 +1,5 @@
 import { cn } from "@workspace/ui/lib/utils";
-import logo from "@/assets/logo.webp";
+import logo from "@/assets/utos-logo.png";
 
 type LogoProps = {
 	className?: string;
@@ -9,8 +9,11 @@ export function Logo({ className }: LogoProps) {
 	return (
 		<img
 			src={logo}
-			alt="Down Under Chauffeur Logo"
-			className={cn("h-10 w-16 rounded-xl md:h-12 md:w-20", className)}
+			alt="UTOS & Co. Australia"
+			className={cn(
+				"h-11 max-h-14 w-auto max-w-[min(100%,240px)] object-contain object-left md:h-14 md:max-h-16",
+				className,
+			)}
 		/>
 	);
 }

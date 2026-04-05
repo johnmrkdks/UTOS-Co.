@@ -1,6 +1,5 @@
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
@@ -30,6 +29,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 export interface PublicationAnalyticsData {
 	cars: {
@@ -164,7 +164,7 @@ export function PublicationAnalyticsOverview({
 		<div className="space-y-6">
 			{/* Key Metrics */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">
 							Cars Published
@@ -187,9 +187,9 @@ export function PublicationAnalyticsOverview({
 							{analyticsData.carsPublishRate}% of total cars
 						</p>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">
 							Packages Published
@@ -212,9 +212,9 @@ export function PublicationAnalyticsOverview({
 							{analyticsData.packagesPublishRate}% of total packages
 						</p>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">
 							Items with Issues
@@ -235,9 +235,9 @@ export function PublicationAnalyticsOverview({
 							</Badge>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">Overall Rate</CardTitle>
 						<Eye className="h-4 w-4 text-muted-foreground" />
@@ -256,13 +256,13 @@ export function PublicationAnalyticsOverview({
 							{data.cars.total + data.packages.total} items published
 						</p>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			{/* Charts */}
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 				{/* Publication Status Chart */}
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle>Publication Status Overview</CardTitle>
 						<CardDescription>
@@ -294,10 +294,10 @@ export function PublicationAnalyticsOverview({
 							</BarChart>
 						</ResponsiveContainer>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
 				{/* Distribution Pie Chart */}
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle>Content Distribution</CardTitle>
 						<CardDescription>
@@ -327,12 +327,12 @@ export function PublicationAnalyticsOverview({
 							</PieChart>
 						</ResponsiveContainer>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			{/* Category Breakdown */}
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle>Cars by Category</CardTitle>
 						<CardDescription>
@@ -361,9 +361,9 @@ export function PublicationAnalyticsOverview({
 							})}
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle>Packages by Category</CardTitle>
 						<CardDescription>
@@ -392,7 +392,7 @@ export function PublicationAnalyticsOverview({
 							})}
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 		</div>
 	);

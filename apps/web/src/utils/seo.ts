@@ -12,9 +12,11 @@ export interface SEOConfig {
 	noIndex?: boolean;
 }
 
+const SITE = "https://utosandco.com";
+const OG_IMAGE = `${SITE}/utos-logo.png`;
+
 export const DEFAULT_SEO = {
-	title:
-		"Down Under Chauffeurs - Premium Luxury Transportation Services Australia",
+	title: "Utos & Co. — Luxury Chauffeur",
 	description:
 		"Premium luxury chauffeur services in Australia. Book luxury cars, airport transfers, and corporate transportation. Professional drivers, premium vehicles, 24/7 service.",
 	keywords: [
@@ -27,21 +29,20 @@ export const DEFAULT_SEO = {
 		"professional drivers",
 		"Australia",
 	],
-	ogTitle: "Down Under Chauffeurs - Premium Luxury Transportation",
+	ogTitle: "Utos & Co. — Luxury Chauffeur",
 	ogDescription:
 		"Premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, and exceptional service for all your transportation needs.",
-	ogImage: "https://downunderchauffeurs.com/logo.png",
-	twitterTitle: "Down Under Chauffeurs - Premium Luxury Transportation",
+	ogImage: OG_IMAGE,
+	twitterTitle: "Utos & Co. — Luxury Chauffeur",
 	twitterDescription:
 		"Premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, and exceptional service.",
-	twitterImage: "https://downunderchauffeurs.com/logo.png",
-	canonical: "https://downunderchauffeurs.com",
+	twitterImage: OG_IMAGE,
+	canonical: SITE,
 };
 
 export const PAGE_SEO_CONFIG: Record<string, SEOConfig> = {
 	home: {
-		title:
-			"Down Under Chauffeurs - Premium Luxury Chauffeur Services Australia",
+		title: "Utos & Co. — Luxury Chauffeur",
 		description:
 			"Book premium luxury chauffeur services in Australia. Professional drivers, luxury vehicles, airport transfers, and corporate transportation. Get instant quotes online.",
 		keywords: [
@@ -52,11 +53,11 @@ export const PAGE_SEO_CONFIG: Record<string, SEOConfig> = {
 			"luxury transportation Australia",
 			"chauffeur booking",
 		],
-		canonical: "https://downunderchauffeurs.com",
+		canonical: SITE,
 	},
 	services: {
 		title:
-			"Our Services - Premium Chauffeur & Luxury Car Services | Down Under Chauffeurs",
+			"Our Services - Premium Chauffeur & Luxury Car Services | Utos & Co.",
 		description:
 			"Explore our premium chauffeur services including luxury car hire, airport transfers, corporate transport, and special events. Professional service across Australia.",
 		keywords: [
@@ -67,10 +68,10 @@ export const PAGE_SEO_CONFIG: Record<string, SEOConfig> = {
 			"wedding transport",
 			"event chauffeur",
 		],
-		canonical: "https://downunderchauffeurs.com/services",
+		canonical: `${SITE}/services`,
 	},
 	fleet: {
-		title: "Our Fleet - Luxury Vehicles & Premium Cars | Down Under Chauffeurs",
+		title: "Our Fleet - Luxury Vehicles & Premium Cars | Utos & Co.",
 		description:
 			"View our premium fleet of luxury vehicles. Mercedes, BMW, Audi and more. Professional maintained vehicles with experienced chauffeurs for your comfort.",
 		keywords: [
@@ -81,11 +82,10 @@ export const PAGE_SEO_CONFIG: Record<string, SEOConfig> = {
 			"luxury vehicle hire",
 			"premium car fleet Australia",
 		],
-		canonical: "https://downunderchauffeurs.com/fleet",
+		canonical: `${SITE}/fleet`,
 	},
 	"calculate-quote": {
-		title:
-			"Get Instant Quote - Luxury Chauffeur Service Pricing | Down Under Chauffeurs",
+		title: "Get Instant Quote - Luxury Chauffeur Service Pricing | Utos & Co.",
 		description:
 			"Get instant pricing for your luxury chauffeur service. Calculate quotes for airport transfers, corporate transport, and premium car hire across Australia.",
 		keywords: [
@@ -95,32 +95,31 @@ export const PAGE_SEO_CONFIG: Record<string, SEOConfig> = {
 			"airport transfer cost",
 			"chauffeur service pricing",
 		],
-		canonical: "https://downunderchauffeurs.com/calculate-quote",
+		canonical: `${SITE}/calculate-quote`,
 	},
 	"contact-us": {
-		title: "Contact Us - Premium Chauffeur Services | Down Under Chauffeurs",
+		title: "Contact Us - Premium Chauffeur Services | Utos & Co.",
 		description:
-			"Contact Down Under Chauffeurs for luxury transportation services. Get quotes, make bookings, or speak with our team about premium chauffeur services.",
+			"Contact Utos & Co. for luxury transportation services. Get quotes, make bookings, or speak with our team about premium chauffeur services.",
 		keywords: [
 			"contact chauffeur",
 			"luxury transport contact",
 			"chauffeur booking",
 			"premium car service contact",
 		],
-		canonical: "https://downunderchauffeurs.com/contact-us",
+		canonical: `${SITE}/contact-us`,
 	},
 	about: {
-		title:
-			"About Us - Premium Luxury Chauffeur Company | Down Under Chauffeurs",
+		title: "About Us - Premium Luxury Chauffeur Company | Utos & Co.",
 		description:
-			"Learn about Down Under Chauffeurs, Australia's premier luxury transportation company. Professional chauffeur services with a commitment to excellence.",
+			"Learn about Utos & Co., Australia's premier luxury transportation company. Professional chauffeur services with a commitment to excellence.",
 		keywords: [
 			"luxury chauffeur company",
 			"premium transport Australia",
 			"professional chauffeur service",
 			"luxury transportation company",
 		],
-		canonical: "https://downunderchauffeurs.com/about",
+		canonical: `${SITE}/about`,
 	},
 };
 
@@ -144,19 +143,19 @@ export function generateStructuredData(
 	const baseData = {
 		"@context": "https://schema.org",
 		"@type": type,
-		name: "Down Under Chauffeurs",
+		name: "Utos & Co.",
 		description: "Premium luxury chauffeur services in Australia",
-		url: "https://downunderchauffeurs.com",
-		logo: "https://downunderchauffeurs.com/logo.png",
-		image: "https://downunderchauffeurs.com/logo.png",
-		telephone: "+61-XXX-XXX-XXX", // Replace with actual phone number
-		email: "info@downunderchauffeurs.com", // Replace with actual email
+		url: SITE,
+		logo: OG_IMAGE,
+		image: OG_IMAGE,
+		telephone: "+61-400-000-000",
+		email: "contact@utosandco.com",
 		address: {
 			"@type": "PostalAddress",
 			addressCountry: "AU",
-			addressRegion: "NSW", // Update with actual region
-			addressLocality: "Sydney", // Update with actual city
-			streetAddress: "123 Example Street", // Update with actual address
+			addressRegion: "",
+			addressLocality: "",
+			streetAddress: "",
 		},
 		areaServed: {
 			"@type": "Country",
@@ -173,7 +172,7 @@ export function generateStructuredData(
 	if (type === "LocalBusiness") {
 		return {
 			...baseData,
-			openingHours: "Mo-Su 00:00-23:59", // 24/7 service
+			openingHours: "Mo-Su 00:00-23:59",
 			priceRange: "$$$",
 			paymentAccepted: ["Cash", "Credit Card", "PayID"],
 		};

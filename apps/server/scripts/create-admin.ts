@@ -3,53 +3,62 @@
  * Run with: pnpm create-admin
  *
  * For local dev: Requires dev server (pnpm dev:server) on port 3000.
- * For staging: AUTH_URL=https://down-under-chauffeur-server-staging.downunderchauffeurs.workers.dev pnpm create-admin
+ * For staging: AUTH_URL=https://utos-and-co-server-staging.utosandco.workers.dev pnpm create-admin
  *             Then run the UPDATE in D1 Studio on my-dev-db (see output).
+ *
+ * If the user already exists (e.g. signed up with Google), promote only:
+ *   PROMOTE_ONLY=1 AUTH_URL=... pnpm create-admin
  */
 
-import { execSync } from "child_process";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { execSync } from "node:child_process";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "admin123";
-const ADMIN_NAME = "Super Admin";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "utosandco@gmail.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "admin123";
+const ADMIN_NAME = process.env.ADMIN_NAME ?? "Super Admin";
 const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000";
 const USE_REMOTE =
 	process.env.REMOTE === "1" || AUTH_URL.includes("workers.dev");
+const PROMOTE_ONLY = process.env.PROMOTE_ONLY === "1";
 
 async function createAdmin() {
 	console.log("Creating super_admin account...");
 	console.log(`Email: ${ADMIN_EMAIL}`);
 	console.log(`Auth URL: ${AUTH_URL}`);
+	if (PROMOTE_ONLY) {
+		console.log("(PROMOTE_ONLY: skipping sign-up, only updating role in D1)");
+	}
 	console.log("");
 
-	const signUpRes = await fetch(`${AUTH_URL}/api/auth/sign-up/email`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			name: ADMIN_NAME,
-			email: ADMIN_EMAIL,
-			password: ADMIN_PASSWORD,
-		}),
-	});
+	if (!PROMOTE_ONLY) {
+		const signUpRes = await fetch(`${AUTH_URL}/api/auth/sign-up/email`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				name: ADMIN_NAME,
+				email: ADMIN_EMAIL,
+				password: ADMIN_PASSWORD,
+			}),
+		});
 
-	if (!signUpRes.ok) {
-		const text = await signUpRes.text();
-		if (
-			text.includes("already") ||
-			text.includes("exists") ||
-			signUpRes.status === 409
-		) {
-			console.log("User already exists. Updating role to super_admin...");
+		if (!signUpRes.ok) {
+			const text = await signUpRes.text();
+			if (
+				text.includes("already") ||
+				text.includes("exists") ||
+				signUpRes.status === 409
+			) {
+				console.log("User already exists. Updating role to super_admin...");
+			} else {
+				console.error("Signup failed:", signUpRes.status, text);
+				process.exit(1);
+			}
 		} else {
-			console.error("Signup failed:", signUpRes.status, text);
-			process.exit(1);
+			console.log("Account created successfully.");
 		}
-	} else {
-		console.log("Account created successfully.");
 	}
 
 	const escapedEmail = ADMIN_EMAIL.replace(/'/g, "''");

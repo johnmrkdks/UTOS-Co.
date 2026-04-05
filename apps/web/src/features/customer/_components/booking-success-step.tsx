@@ -107,8 +107,7 @@ export function BookingSuccessStep({
 				</div>
 
 				<div className="text-center text-muted-foreground text-xs">
-					Need help? Contact our customer support at
-					support@downunderchauffeur.com
+					Need help? Contact our customer support at contact@utosandco.com
 				</div>
 			</CardContent>
 		</Card>

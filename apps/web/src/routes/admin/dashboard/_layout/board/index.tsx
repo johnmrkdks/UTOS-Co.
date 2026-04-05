@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
-	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
@@ -11,25 +10,20 @@ import {
 import {
 	Activity,
 	AlertCircle,
-	BarChart3,
 	Calendar,
 	Car,
 	CheckCircle,
 	Clock,
-	DollarSign,
 	Loader2,
 	MapPin,
 	Package,
-	PieChart,
-	Settings,
-	Star,
-	TrendingUp,
 	Users,
 } from "lucide-react";
 import {
 	AnalyticsCard,
 	type AnalyticsCardData,
 } from "@/components/analytics-card";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 import {
 	formatDashboardAnalytics,
 	useGetDashboardAnalyticsEnhancedQuery,
@@ -109,8 +103,10 @@ function AdminDashboard() {
 			title: "Bookings",
 			value: stats.totalBookings,
 			icon: Calendar,
-			bgGradient: "bg-gradient-to-br from-blue-50 to-blue-100",
-			iconBg: "bg-blue-500",
+			bgGradient: "bg-gradient-to-br from-slate-50/95 to-slate-100/45",
+			iconBg: "bg-slate-700",
+			accentStripClassName:
+				"from-slate-600/55 via-slate-500/38 to-slate-300/25",
 			changeText: `+${stats.activeBookings} active`,
 			changeType: "positive",
 			showTrend: true,
@@ -122,8 +118,9 @@ function AdminDashboard() {
 			title: "Vehicles",
 			value: totalVehicles,
 			icon: Car,
-			bgGradient: "bg-gradient-to-br from-green-50 to-green-100",
-			iconBg: "bg-green-500",
+			bgGradient: "bg-gradient-to-br from-zinc-50/95 to-stone-100/45",
+			iconBg: "bg-zinc-600",
+			accentStripClassName: "from-zinc-600/50 via-zinc-500/38 to-stone-400/25",
 			changeText: `${availableVehicles} available`,
 			changeType: "neutral",
 			showTrend: false,
@@ -135,8 +132,10 @@ function AdminDashboard() {
 			title: "Packages",
 			value: stats.totalPackages,
 			icon: Package,
-			bgGradient: "bg-gradient-to-br from-purple-50 to-purple-100",
-			iconBg: "bg-purple-500",
+			bgGradient: "bg-gradient-to-br from-neutral-50/95 to-neutral-100/45",
+			iconBg: "bg-neutral-700",
+			accentStripClassName:
+				"from-neutral-600/50 via-neutral-500/38 to-stone-400/25",
 			changeText: `${stats.activePackages} active`,
 			changeType: "neutral",
 			showTrend: false,
@@ -148,8 +147,10 @@ function AdminDashboard() {
 			title: "Drivers",
 			value: stats.totalDrivers,
 			icon: Users,
-			bgGradient: "bg-gradient-to-br from-orange-50 to-orange-100",
-			iconBg: "bg-orange-500",
+			bgGradient: "bg-gradient-to-br from-amber-50/95 to-amber-100/55",
+			iconBg: "bg-amber-700",
+			accentStripClassName:
+				"from-amber-700/55 via-amber-500/42 to-amber-200/30",
 			changeText: `${stats.activeDrivers} active`,
 			changeType: "positive",
 			showTrend: false,
@@ -161,16 +162,21 @@ function AdminDashboard() {
 	const recentActivity = data?.recentActivity || [];
 
 	return (
-		<div className="space-y-4 p-4 sm:space-y-6">
+		<div className="space-y-6 p-4 sm:space-y-8 sm:p-6">
 			{/* Welcome Header */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-				<div>
-					<h1 className="font-bold text-foreground text-xl sm:text-2xl lg:text-3xl">
-						Admin Dashboard
-					</h1>
-					<p className="text-muted-foreground text-sm sm:text-base">
-						Monitor and manage your luxury chauffeur service
-					</p>
+			<div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm sm:p-6">
+				<p className="font-medium text-[0.65rem] text-muted-foreground uppercase tracking-[0.2em]">
+					Overview
+				</p>
+				<div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h1 className="font-semibold text-2xl text-foreground tracking-tight sm:text-3xl">
+							Admin dashboard
+						</h1>
+						<p className="mt-1 max-w-xl text-muted-foreground text-sm sm:text-base">
+							Monitor bookings, fleet, and team performance in one place.
+						</p>
+					</div>
 				</div>
 			</div>
 
@@ -187,7 +193,7 @@ function AdminDashboard() {
 			</div>
 
 			{/* Recent Activity */}
-			<Card className="transition-shadow hover:shadow-md">
+			<DashboardChartCard className="transition-shadow hover:shadow-md">
 				<CardHeader className="pb-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
@@ -282,7 +288,7 @@ function AdminDashboard() {
 						)}
 					</div>
 				</CardContent>
-			</Card>
+			</DashboardChartCard>
 		</div>
 	);
 }

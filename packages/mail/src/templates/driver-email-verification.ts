@@ -3,10 +3,10 @@ import type { EmailTemplate } from "../types";
 export function generateDriverEmailVerificationTemplate(
 	driverName: string,
 	verificationUrl: string,
-	adminContactEmail = "admin@downunderchauffeur.com",
+	adminContactEmail = "contact@utosandco.com",
 ): EmailTemplate {
 	return {
-		subject: "Verify Your Email - Down Under Chauffeur Driver Account",
+		subject: "Verify Your Email - Utos & Co. Driver Account",
 		html: `
 			<!DOCTYPE html>
 			<html>
@@ -19,7 +19,7 @@ export function generateDriverEmailVerificationTemplate(
 				<div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
 					<div style="background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); padding: 40px 20px; text-align: center;">
 						<h1 style="color: white; margin: 0; font-size: 28px;">Email Verification Required</h1>
-						<p style="color: #cccccc; margin: 10px 0 0 0; font-size: 16px;">Down Under Chauffeur Driver Portal</p>
+						<p style="color: #cccccc; margin: 10px 0 0 0; font-size: 16px;">Utos & Co. Driver Portal</p>
 					</div>
 					<div style="padding: 40px 20px;">
 						<h2 style="color: #333; margin: 0 0 20px 0; font-size: 24px;">Welcome, ${driverName}!</h2>
@@ -68,7 +68,7 @@ export function generateDriverEmailVerificationTemplate(
 						<hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
 						
 						<p style="color: #999; font-size: 12px; line-height: 1.6; margin: 0;">
-							This email was sent to verify your driver account with Down Under Chauffeur. If you did not request this account, please ignore this email or contact our support team.
+							This email was sent to verify your driver account with Utos & Co. If you did not request this account, please ignore this email or contact our support team.
 						</p>
 					</div>
 				</div>

@@ -27,7 +27,7 @@ import {
 	UploadIcon,
 	XIcon,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Control } from "react-hook-form";
 import type { z } from "zod/v3";
 import type { CarImageSchema } from "@/features/dashboard/_pages/car-management/_schemas/car-schema";
@@ -131,6 +131,9 @@ function ImagesUploader({
 	);
 	const proxyUploadMutation = useProxyUploadMutation();
 
+	/** Set after useFileUpload — avoids TDZ from using removeFile before it exists */
+	const removeFileRef = useRef<((id: string) => void) | undefined>(undefined);
+
 	// Memoize safe value to prevent unnecessary re-renders
 	const safeValue = useMemo(() => (Array.isArray(value) ? value : []), [value]);
 
@@ -184,7 +187,7 @@ function ImagesUploader({
 							delete newProgress[fileId];
 							return newProgress;
 						});
-						removeFile(fileId);
+						removeFileRef.current?.(fileId);
 						return null;
 					}
 				});
@@ -202,14 +205,7 @@ function ImagesUploader({
 				console.error("Upload process failed:", error);
 			}
 		},
-		[
-			safeValue,
-			maxFiles,
-			proxyUploadMutation,
-			onChange,
-			updateImageOrder,
-			removeFile,
-		],
+		[safeValue, maxFiles, proxyUploadMutation, onChange, updateImageOrder],
 	);
 
 	// File upload hook configuration
@@ -233,6 +229,8 @@ function ImagesUploader({
 		maxFiles,
 		onFilesAdded: handleFilesChange,
 	});
+
+	removeFileRef.current = removeFile;
 
 	// Optimized remove image handler
 	const handleRemoveImage = useCallback(

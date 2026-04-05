@@ -7,7 +7,7 @@ export function generatePasswordResetTemplate(
 	const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
 	return {
-		subject: "Reset Your Down Under Chauffeur Password",
+		subject: "Reset Your Utos & Co. Password",
 		html: `
 			<!DOCTYPE html>
 			<html>
@@ -19,7 +19,7 @@ export function generatePasswordResetTemplate(
 			<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
 				<div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
 					<div style="background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); padding: 40px 20px; text-align: center;">
-						<h1 style="color: white; margin: 0; font-size: 28px;">Down Under Chauffeur</h1>
+						<h1 style="color: white; margin: 0; font-size: 28px;">Utos & Co.</h1>
 						<p style="color: #cccccc; margin: 10px 0 0 0; font-size: 16px;">Password Reset Request</p>
 					</div>
 					<div style="padding: 40px 20px;">

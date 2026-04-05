@@ -14,12 +14,12 @@ export function ContactHeroSection() {
 						Get in Touch
 					</div>
 
-					<h1 className="mb-6 font-bold text-4xl text-background lg:text-6xl">
+					<h1 className="mb-6 font-bold text-4xl text-white lg:text-6xl">
 						Contact Our
 						<span className="block text-primary-secondary">Luxury Team</span>
 					</h1>
 
-					<p className="mx-auto mb-8 max-w-3xl text-background/80 text-lg leading-relaxed md:text-xl">
+					<p className="mx-auto mb-8 max-w-3xl text-lg text-white/80 leading-relaxed md:text-xl">
 						Ready to experience premium transportation? Our dedicated team is
 						here to assist you daily from 00:00 – 23:45 with personalized
 						service and expert guidance.
@@ -38,7 +38,7 @@ export function ContactHeroSection() {
 							<Button
 								variant="outline"
 								size="lg"
-								className="rounded-xl border-background/20 px-8 py-6 font-semibold text-lg text-primary hover:bg-background/10"
+								className="rounded-xl border-white/30 px-8 py-6 font-semibold text-lg text-primary hover:bg-white/10"
 							>
 								Book Online
 							</Button>

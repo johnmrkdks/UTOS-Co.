@@ -1,13 +1,13 @@
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Badge } from "@workspace/ui/components/badge";
 import {
-	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
 } from "@workspace/ui/components/card";
 import { Progress } from "@workspace/ui/components/progress";
 import { Brain, Calendar, Target, TrendingUp } from "lucide-react";
+import { DashboardChartCard } from "@/features/dashboard/_components/dashboard-chart-card";
 
 interface AnalyticsData {
 	bookingGrowth: {
@@ -70,7 +70,7 @@ export function PredictiveAnalytics({
 			</Alert>
 
 			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Calendar className="h-5 w-5 text-blue-600" />
@@ -153,9 +153,9 @@ export function PredictiveAnalytics({
 							</div>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 
-				<Card>
+				<DashboardChartCard>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Target className="h-5 w-5 text-purple-600" />
@@ -213,18 +213,18 @@ export function PredictiveAnalytics({
 							</p>
 						</div>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			</div>
 
 			{totalBookings === 0 && (
-				<Card>
-					<CardContent className="pt-6">
+				<DashboardChartCard>
+					<CardContent>
 						<p className="text-center text-muted-foreground text-sm">
 							No bookings yet. Projections will appear once you have booking and
 							revenue data.
 						</p>
 					</CardContent>
-				</Card>
+				</DashboardChartCard>
 			)}
 		</div>
 	);

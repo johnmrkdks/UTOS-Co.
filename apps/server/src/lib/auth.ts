@@ -73,7 +73,6 @@ export const auth = betterAuth({
 			.map((o) => o.trim())
 			.filter(Boolean),
 		env.BETTER_AUTH_URL || "",
-		"https://*.downunderchauffeurs.workers.dev",
 	].filter(Boolean),
 	emailAndPassword: {
 		enabled: true,
@@ -102,18 +101,17 @@ export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
 	plugins,
 	advanced: {
-		// Safari ITP: share cookies across subdomains so email/password login works on Safari iOS
-		// Only when API is on workers.dev or production domain (not localhost)
+		// Safari ITP: share cookies across subdomains when COOKIE_DOMAIN is set in wrangler (e.g. .utosandco.com)
 		...(env.BETTER_AUTH_URL &&
-			!env.BETTER_AUTH_URL.includes("localhost") && {
+			!env.BETTER_AUTH_URL.includes("localhost") &&
+			env.COOKIE_DOMAIN && {
 				crossSubDomainCookies: {
 					enabled: true,
-					domain:
-						env.COOKIE_DOMAIN ||
-						(env.BETTER_AUTH_URL.includes("workers.dev")
-							? "downunderchauffeurs.workers.dev"
-							: "downunderchauffeurs.com"),
+					domain: env.COOKIE_DOMAIN,
 				},
+			}),
+		...(env.BETTER_AUTH_URL &&
+			!env.BETTER_AUTH_URL.includes("localhost") && {
 				useSecureCookies: true,
 			}),
 		// In development, relax CSRF for cross-origin

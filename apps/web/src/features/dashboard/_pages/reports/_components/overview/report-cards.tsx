@@ -23,7 +23,10 @@ export function ReportCards({
 			<div className={cn("flex flex-col gap-4", className)} {...props}>
 				<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 					{[1, 2, 3, 4].map((i) => (
-						<div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+						<div
+							key={i}
+							className="h-32 animate-pulse rounded-2xl bg-muted/80 ring-1 ring-black/[0.04]"
+						/>
 					))}
 				</div>
 			</div>

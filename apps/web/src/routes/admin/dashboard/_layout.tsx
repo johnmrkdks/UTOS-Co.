@@ -24,28 +24,30 @@ function RouteComponent() {
 	const scrollContainerRef = useScrollToTop();
 
 	return (
-		<SidebarProvider>
-			<DashboardSidebar />
-			<SidebarInset className="relative">
-				<DashboardNavbar className="sticky top-0 z-10 print:hidden" />
-				<div className="flex min-h-[calc(100vh-var(--navbar-height,60px))] w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 overflow-hidden bg-gradient-to-b from-slate-50/80 via-background to-background">
-					<div
-						ref={scrollContainerRef}
-						className="relative flex-1 overflow-y-auto overflow-x-hidden"
-					>
-						{routerState.status === "pending" && (
-							<div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-								<Loader />
+		<div className="dashboard-app min-h-svh">
+			<SidebarProvider>
+				<DashboardSidebar />
+				<SidebarInset className="relative">
+					<DashboardNavbar className="sticky top-0 z-10 print:hidden" />
+					<div className="flex min-h-[calc(100vh-var(--navbar-height,60px))] w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 overflow-hidden bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,oklch(0.88_0.04_85/0.18),transparent)] bg-background">
+						<div
+							ref={scrollContainerRef}
+							className="relative flex-1 overflow-y-auto overflow-x-hidden"
+						>
+							{routerState.status === "pending" && (
+								<div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+									<Loader />
+								</div>
+							)}
+							<div className="mx-auto w-full max-w-7xl">
+								<Suspense fallback={<Loader />}>
+									<Outlet />
+								</Suspense>
 							</div>
-						)}
-						<div className="mx-auto w-full max-w-7xl">
-							<Suspense fallback={<Loader />}>
-								<Outlet />
-							</Suspense>
 						</div>
 					</div>
-				</div>
-			</SidebarInset>
-		</SidebarProvider>
+				</SidebarInset>
+			</SidebarProvider>
+		</div>
 	);
 }

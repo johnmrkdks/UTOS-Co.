@@ -4,7 +4,7 @@ export function generateDriverOnboardingTemplate(
 	driverName: string,
 	loginUrl: string,
 	googleLinkingUrl?: string,
-	adminContactEmail = "admin@downunderchauffeur.com",
+	adminContactEmail = "contact@utosandco.com",
 ): EmailTemplate {
 	const googleLinkingSection = googleLinkingUrl
 		? `
@@ -23,7 +23,7 @@ export function generateDriverOnboardingTemplate(
 		: "";
 
 	return {
-		subject: "🚗 Complete Your Driver Onboarding - Down Under Chauffeur",
+		subject: "🚗 Complete Your Driver Onboarding - Utos & Co.",
 		html: `
 			<!DOCTYPE html>
 			<html>
@@ -118,7 +118,7 @@ export function generateDriverOnboardingTemplate(
 						<hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
 						
 						<p style="color: #999; font-size: 12px; line-height: 1.6; margin: 0;">
-							Welcome to Down Under Chauffeur! We're excited to have you join our team of professional drivers. This email was sent because your driver account was created by our admin team.
+							Welcome to Utos & Co.! We're excited to have you join our team of professional drivers. This email was sent because your driver account was created by our admin team.
 						</p>
 					</div>
 				</div>

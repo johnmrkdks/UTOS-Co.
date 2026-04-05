@@ -11,20 +11,20 @@ export function generateInvoiceTemplate(
 	}).format(invoiceData.amount / 100);
 
 	return {
-		subject: `Invoice for Booking ${bookingId} - Down Under Chauffeur`,
+		subject: `Invoice for Booking ${bookingId} - Utos & Co.`,
 		html: `
 			<!DOCTYPE html>
 			<html>
 			<head>
 				<meta charset="utf-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>Invoice - Down Under Chauffeur</title>
+				<title>Invoice - Utos & Co.</title>
 			</head>
 			<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
 				<div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
 					<div style="background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); padding: 40px 20px; text-align: center;">
 						<h1 style="color: white; margin: 0; font-size: 28px;">Invoice</h1>
-						<p style="color: #cccccc; margin: 10px 0 0 0; font-size: 16px;">Down Under Chauffeur</p>
+						<p style="color: #cccccc; margin: 10px 0 0 0; font-size: 16px;">Utos & Co.</p>
 					</div>
 					<div style="padding: 40px 20px;">
 						<div style="margin-bottom: 30px;">

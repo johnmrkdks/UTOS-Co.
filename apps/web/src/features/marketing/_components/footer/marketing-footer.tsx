@@ -1,20 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import {
-	Award,
-	Clock,
-	Facebook,
-	Instagram,
-	Linkedin,
-	Mail,
-	MapPin,
-	MessageCircle,
-	Phone,
-	Shield,
-	Star,
-	Twitter,
-} from "lucide-react";
+import { Clock, Facebook, Instagram, MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { BUSINESS_INFO } from "@/constants/business-info";
 
@@ -33,7 +19,7 @@ const footerLinks = {
 	],
 	company: [
 		{ label: "About Us", href: "/about-us" },
-		{ label: "Our Fleet", href: "/services" },
+		{ label: "Our Fleet", href: "/fleet" },
 		{ label: "Contact Us", href: "/contact-us" },
 		{ label: "FAQs", href: "/faqs" },
 		{ label: "Book Now", href: "/fleet" },
@@ -63,24 +49,20 @@ const socialLinks = [
 export function MarketingFooter({ className, ...props }: FooterProps) {
 	return (
 		<footer
-			className={cn("border-border border-t bg-soft-beige", className)}
+			className={cn("border-border/60 border-t bg-muted/20", className)}
 			{...props}
 		>
 			{/* Main Footer Content */}
-			<div className="container mx-auto px-6 py-16">
+			<div className="container mx-auto max-w-7xl px-6 py-14">
 				<div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
 					{/* Company Info */}
 					<div className="lg:col-span-1">
-						<Link to="/" className="group mb-6 flex items-center gap-3">
-							<Logo />
-							<div>
-								<h2 className="font-bold text-foreground text-xl transition-colors group-hover:text-primary">
-									{BUSINESS_INFO.business.name}
-								</h2>
-								<p className="text-muted-foreground text-xs">
-									{BUSINESS_INFO.business.slogan}
-								</p>
-							</div>
+						<Link
+							to="/"
+							className="group mb-6 inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						>
+							<Logo className="max-w-[200px] md:max-w-[220px]" />
+							<span className="sr-only">{BUSINESS_INFO.business.name}</span>
 						</Link>
 
 						<p className="mb-6 text-muted-foreground leading-relaxed">
@@ -199,8 +181,8 @@ export function MarketingFooter({ className, ...props }: FooterProps) {
 			</div>
 
 			{/* Bottom Bar */}
-			<div className="border-border border-t bg-beige">
-				<div className="container mx-auto px-6 py-6">
+			<div className="border-border/60 border-t bg-background">
+				<div className="container mx-auto max-w-7xl px-6 py-5">
 					<div className="flex flex-col items-center justify-between gap-4 md:flex-row">
 						<div className="text-center text-muted-foreground text-sm md:text-left">
 							<p>

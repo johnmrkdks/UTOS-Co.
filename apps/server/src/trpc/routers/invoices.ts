@@ -94,12 +94,12 @@ export const invoicesRouter = router({
 				const mailService = getMailService(env);
 				const success = await mailService.sendEmail({
 					to: input.driverEmail,
-					subject: "Your Commission Invoice - Down Under Chauffeurs",
+					subject: "Your Commission Invoice - Utos & Co.",
 					html: `
 						<p>Hi ${input.driverName},</p>
 						<p>Please find your commission invoice attached for the period ${input.startDate.toISOString().slice(0, 10)} to ${input.endDate.toISOString().slice(0, 10)}.</p>
 						<p>If you have any questions, please contact us.</p>
-						<p>Best regards,<br/>Down Under Chauffeurs</p>
+						<p>Best regards,<br/>Utos & Co.</p>
 					`,
 					attachments: [
 						{
@@ -151,12 +151,12 @@ export const invoicesRouter = router({
 				const mailService = getMailService(env);
 				const success = await mailService.sendEmail({
 					to: input.companyEmail,
-					subject: "Tax Invoice - Down Under Chauffeurs",
+					subject: "Tax Invoice - Utos & Co.",
 					html: `
 						<p>Dear ${input.companyName},</p>
 						<p>Please find your tax invoice attached for the period ${input.startDate.toISOString().slice(0, 10)} to ${input.endDate.toISOString().slice(0, 10)}.</p>
 						<p>If you have any questions, please contact us.</p>
-						<p>Best regards,<br/>Down Under Chauffeurs</p>
+						<p>Best regards,<br/>Utos & Co.</p>
 					`,
 					attachments: [
 						{

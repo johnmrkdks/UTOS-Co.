@@ -40,7 +40,7 @@ export function DriverAssignmentEmail({
 	originAddress = "Sydney Opera House, Sydney NSW, Australia",
 	destinationAddress = "T1, Departure Plaza, Mascot NSW, Australia",
 	vehicleInfo = "Assigned Vehicle",
-	websiteUrl = "https://downunderchauffeurs.com",
+	websiteUrl = "https://utosandco.com",
 	stops = [],
 	passengerCount = 1,
 	customerPhone = "",
@@ -49,7 +49,7 @@ export function DriverAssignmentEmail({
 		<Html>
 			<Head />
 			<Preview>
-				New Booking Assignment - {bookingReference} - Down Under Chauffeurs
+				New Booking Assignment - {bookingReference} - Utos & Co.
 			</Preview>
 			<Body style={main}>
 				<Container style={container}>
@@ -59,14 +59,14 @@ export function DriverAssignmentEmail({
 							{/* <Column style={{ width: '60px', paddingRight: '16px', verticalAlign: 'middle' }}>
 								<Img
 									src={logo}
-									alt="Down Under Chauffeurs"
+									alt="Utos & Co."
 									width="50"
 									height="50"
 									style={logoStyle}
 								/>
 							</Column> */}
 							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
-								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
+								<Heading style={brandTitle}>Utos & Co.</Heading>
 								<Text style={brandTagline}>
 									Premium Luxury Transportation Services
 								</Text>
@@ -217,7 +217,7 @@ export function DriverAssignmentEmail({
 							<Text style={actionText}>
 								Questions about this booking? Contact support at{" "}
 								<a href={`${websiteUrl}/contact-us`} style={contactLink}>
-									downunderchauffeurs.com
+									Contact us
 								</a>
 							</Text>
 						</Section>
@@ -225,7 +225,7 @@ export function DriverAssignmentEmail({
 
 					{/* Footer */}
 					<Section style={footer}>
-						<Heading style={footerBrand}>Down Under Chauffeurs</Heading>
+						<Heading style={footerBrand}>Utos & Co.</Heading>
 						<Text style={footerTagline}>
 							Premium Luxury Transportation Services
 						</Text>
@@ -243,7 +243,7 @@ export function DriverAssignmentEmail({
 							</a>
 						</Text>
 						<Text style={footerDisclaimer}>
-							This is an automated driver assignment from Down Under Chauffeurs.
+							This is an automated driver assignment from Utos & Co.
 							<br />
 							For support or questions, please contact our operations team.
 						</Text>
@@ -278,7 +278,7 @@ const container = {
 
 const logoHeader = {
 	padding: "24px 24px 20px",
-	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
+	background: "linear-gradient(135deg, #C5A467 0%, #9A7A45 100%)",
 	borderBottom: "none",
 };
 
@@ -448,7 +448,7 @@ const detailValue = {
 };
 
 const phoneLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "600",
 };
@@ -476,7 +476,7 @@ const actionTitle = {
 };
 
 const primaryButton = {
-	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
+	background: "linear-gradient(135deg, #C5A467 0%, #9A7A45 100%)",
 	color: "white",
 	textDecoration: "none",
 	padding: "12px 24px",
@@ -515,7 +515,7 @@ const actionText = {
 };
 
 const contactLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "600",
 };
@@ -530,7 +530,7 @@ const footer = {
 const footerBrand = {
 	fontSize: "20px",
 	fontWeight: "600",
-	color: "#22818e",
+	color: "#C5A467",
 	margin: "0 0 8px 0",
 };
 
@@ -547,7 +547,7 @@ const footerLinks = {
 };
 
 const footerLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };

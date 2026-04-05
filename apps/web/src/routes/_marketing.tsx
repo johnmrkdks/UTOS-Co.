@@ -18,8 +18,8 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="flex min-h-screen flex-col">
-			<MarketingNavbar className="sticky top-0 z-20" />
+		<div className="flex min-h-screen flex-col bg-background text-foreground antialiased">
+			<MarketingNavbar className="sticky top-0 z-20 border-border/50 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/65" />
 			<main className="flex-1">
 				<Outlet />
 			</main>

@@ -10,7 +10,6 @@ import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { Logo } from "@/components/logo";
-import { BUSINESS_INFO } from "@/constants/business-info";
 import { CustomerMobileMenuContent } from "./customer-mobile-menu-content";
 import { CustomerUserMenu } from "./customer-user-menu";
 import type { CustomerNavigationItem } from "./types";
@@ -84,15 +83,7 @@ export function CustomerHeader({
 								</SheetContent>
 							</Sheet>
 
-							<Logo className="h-8 w-8" />
-							<div>
-								<h1 className="font-bold text-base text-foreground">
-									{BUSINESS_INFO.business.name}
-								</h1>
-								<p className="text-[10px] text-muted-foreground">
-									{BUSINESS_INFO.business.slogan}
-								</p>
-							</div>
+							<Logo className="h-9 max-h-10 max-w-[min(160px,45vw)]" />
 						</div>
 					</div>
 				</div>

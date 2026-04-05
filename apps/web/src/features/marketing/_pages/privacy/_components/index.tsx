@@ -99,7 +99,7 @@ export function PrivacyPolicy({ className, ...props }: PrivacyPolicyProps) {
 
 						{/* Legal Footer */}
 						<div className="mt-12 text-center text-muted-foreground text-sm">
-							<p>© 2024 Down Under Chauffeurs. All rights reserved.</p>
+							<p>© 2024 Utos & Co. All rights reserved.</p>
 						</div>
 					</div>
 				</div>

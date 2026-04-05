@@ -16,7 +16,7 @@
 		"wrangler:dev": "wrangler dev --port=3001",
 		"preview": "pnpm run build && wrangler dev",
 		"deploy": "pnpm run build && wrangler deploy",
-		"deploy:dev": "pnpm run build:dev && wrangler deploy --env dev",
+		"deploy:dev": "pnpm run build:dev && wrangler deploy",
 		"deploy:staging": "pnpm run build:staging && wrangler deploy",
 		"deploy:production": "pnpm run build:production && wrangler deploy"
 	},

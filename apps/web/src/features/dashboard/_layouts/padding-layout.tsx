@@ -11,7 +11,10 @@ export function PaddingLayout({
 	...props
 }: PaddingLayoutProps) {
 	return (
-		<div className={cn("w-full min-w-0 p-4", className)} {...props}>
+		<div
+			className={cn("w-full min-w-0 p-4 sm:p-6 lg:p-8", className)}
+			{...props}
+		>
 			{children}
 		</div>
 	);

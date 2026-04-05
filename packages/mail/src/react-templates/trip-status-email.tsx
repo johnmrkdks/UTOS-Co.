@@ -66,7 +66,7 @@ export function TripStatusEmail({
 	driverPhone,
 	driverEmail,
 	vehicleInfo = "Assigned Vehicle",
-	websiteUrl = "https://downunderchauffeurs.com",
+	websiteUrl = "https://utosandco.com",
 	status = "confirmed",
 	stops = [],
 	passengerCount = 1,
@@ -97,7 +97,7 @@ export function TripStatusEmail({
 			case "completed":
 				return { borderLeftColor: "#6b7280", badgeColor: "#6b7280" }; // Gray
 			default:
-				return { borderLeftColor: "#22818e", badgeColor: "#22818e" }; // Teal (default)
+				return { borderLeftColor: "#C5A467", badgeColor: "#C5A467" }; // Teal (default)
 		}
 	};
 
@@ -117,14 +117,14 @@ export function TripStatusEmail({
 							{/* <Column style={{ width: '60px', paddingRight: '16px', verticalAlign: 'middle' }}>
 								<Img
 									src={logo}
-									alt="Down Under Chauffeurs"
+									alt="Utos & Co."
 									width="50"
 									height="50"
 									style={logoStyle}
 								/>
 							</Column> */}
 							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
-								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
+								<Heading style={brandTitle}>Utos & Co.</Heading>
 								<Text style={brandTagline}>
 									Premium Luxury Transportation Services
 								</Text>
@@ -480,7 +480,7 @@ export function TripStatusEmail({
 
 					{/* Compact Footer */}
 					<Section style={footer}>
-						<Text style={footerBrand}>Down Under Chauffeurs</Text>
+						<Text style={footerBrand}>Utos & Co.</Text>
 						<Text style={footerDisclaimer}>
 							Automated notification |{" "}
 							<a href={`${websiteUrl}/contact-us`} style={footerLink}>
@@ -532,7 +532,7 @@ const container = {
 
 const logoHeader = {
 	padding: "16px 20px",
-	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
+	background: "linear-gradient(135deg, #C5A467 0%, #9A7A45 100%)",
 	borderBottom: "none",
 };
 
@@ -670,7 +670,7 @@ const ctaSection = {
 };
 
 const ctaButton = {
-	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
+	background: "linear-gradient(135deg, #C5A467 0%, #9A7A45 100%)",
 	color: "white",
 	textDecoration: "none",
 	padding: "12px 24px",
@@ -693,7 +693,7 @@ const contactText = {
 };
 
 const contactLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "600",
 };
@@ -708,7 +708,7 @@ const footer = {
 const footerBrand = {
 	fontSize: "20px",
 	fontWeight: "600",
-	color: "#22818e",
+	color: "#C5A467",
 	margin: "0 0 8px 0",
 };
 
@@ -725,7 +725,7 @@ const footerLinks = {
 };
 
 const footerLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };

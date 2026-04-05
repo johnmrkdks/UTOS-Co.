@@ -179,12 +179,12 @@ export function FAQs({ className, ...props }: FAQsProps) {
 							Frequently Asked Questions
 						</div>
 
-						<h1 className="mb-6 font-bold text-4xl text-background lg:text-6xl">
+						<h1 className="mb-6 font-bold text-4xl text-white lg:text-6xl">
 							Got
 							<span className="block text-primary-secondary">Questions?</span>
 						</h1>
 
-						<p className="mx-auto mb-8 max-w-3xl text-background/80 text-lg leading-relaxed md:text-xl">
+						<p className="mx-auto mb-8 max-w-3xl text-lg text-white/80 leading-relaxed md:text-xl">
 							Find answers to the most common questions about our luxury
 							chauffeur services. Can't find what you're looking for? Our team
 							is here to help.
@@ -203,7 +203,7 @@ export function FAQs({ className, ...props }: FAQsProps) {
 								<Button
 									variant="outline"
 									size="lg"
-									className="rounded-xl border-background/20 px-8 py-6 font-semibold text-lg text-primary hover:bg-background/10"
+									className="rounded-xl border-white/30 px-8 py-6 font-semibold text-lg text-primary hover:bg-white/10"
 								>
 									Call Now
 								</Button>

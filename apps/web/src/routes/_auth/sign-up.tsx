@@ -33,7 +33,7 @@ function RouteComponent() {
 						<Logo />
 						<div className="hidden md:block">
 							<h2 className="font-bold text-foreground text-lg transition-colors group-hover:text-primary">
-								Down Under Chauffeur
+								Utos & Co.
 							</h2>
 							<p className="text-muted-foreground text-xs">
 								Sydney's Premier Luxury Service
@@ -75,10 +75,7 @@ function RouteComponent() {
 
 				{/* Footer */}
 				<div className="border-border/30 border-t pt-4 text-center text-muted-foreground text-xs">
-					<p>
-						© 2024 Down Under Chauffeur. Premium luxury transportation in
-						Sydney.
-					</p>
+					<p>© 2024 Utos & Co. Premium luxury transportation in Sydney.</p>
 					<div className="mt-2 flex justify-center gap-4">
 						<Link
 							to="/privacy"
@@ -106,7 +103,7 @@ function RouteComponent() {
 			<div className="relative hidden bg-gradient-to-br from-foreground to-primary/20 lg:block">
 				<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 				<div className="absolute top-8 left-8 z-10 text-beige">
-					<h3 className="mb-2 font-bold text-2xl">Down Under Chauffeur</h3>
+					<h3 className="mb-2 font-bold text-2xl">Utos & Co.</h3>
 					<p className="text-beige/80 text-sm">
 						Sydney's Premier Luxury Transportation
 					</p>

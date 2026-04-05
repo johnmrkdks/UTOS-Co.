@@ -36,10 +36,10 @@
 		"db:seed-local": "wrangler d1 execute DB --local --env development --file=drizzle/seed/seed.sql",
 		"db:seed-body-types": "wrangler d1 execute DB --local --env development --file=drizzle/seed/seed-body-types.sql",
 		"db:seed-generate": "bun drizzle/seed/generate-seed-sql.ts",
-		"create-admin": "npx tsx scripts/create-admin.ts",
+		"create-admin": "tsx scripts/create-admin.ts",
 		"migrate:distance": "bun scripts/migrate-distance.ts",
-		"r2-cors:staging": "wrangler r2 bucket cors set down-under-chauffeur-bucket --file r2-cors.json --env staging",
-		"r2-cors:production": "wrangler r2 bucket cors set downunderchauffeurs-bucket --file r2-cors.json --env production"
+		"r2-cors:staging": "wrangler r2 bucket cors set otus-and-co-staging --file r2-cors.json",
+		"r2-cors:production": "wrangler r2 bucket cors set otus-and-co-production --file r2-cors.json"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.855.0",
@@ -71,6 +71,7 @@
 		"@types/qs": "^6.14.0",
 		"drizzle-kit": "^0.31.4",
 		"tsc-alias": "catalog:",
+		"tsx": "^4.21.0",
 		"typescript": "catalog:",
 		"wrangler": "catalog:"
 	}

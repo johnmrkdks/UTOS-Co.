@@ -111,12 +111,12 @@ export function AboutUs({ className, ...props }: AboutProps) {
 							Sydney's Premier Luxury Transportation
 						</div>
 
-						<h1 className="mb-6 font-bold text-4xl text-background lg:text-6xl">
+						<h1 className="mb-6 font-bold text-4xl text-white lg:text-6xl">
 							Our Story of
 							<span className="block text-primary-secondary">Excellence</span>
 						</h1>
 
-						<p className="mx-auto max-w-3xl text-background/80 text-lg leading-relaxed md:text-xl">
+						<p className="mx-auto max-w-3xl text-lg text-white/80 leading-relaxed md:text-xl">
 							Founded on the principles of luxury, reliability, and exceptional
 							service,
 							{BUSINESS_INFO.business.name} has become Sydney's most trusted
@@ -126,12 +126,12 @@ export function AboutUs({ className, ...props }: AboutProps) {
 				</div>
 			</div>
 
-			{/* About Down Under Chauffeurs */}
+			{/* About Utos & Co. */}
 			<div className="bg-beige py-24">
 				<div className="container mx-auto px-6">
 					<div className="mb-16 text-center">
 						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							About Down Under Chauffeurs
+							About Utos & Co.
 						</h2>
 					</div>
 
@@ -282,8 +282,8 @@ export function AboutUs({ className, ...props }: AboutProps) {
 							Meet Our Leadership Team
 						</h2>
 						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
-							The experienced professionals behind Down Under Chauffeur's
-							success, dedicated to delivering exceptional service every day.
+							The experienced professionals behind Utos & Co.'s success,
+							dedicated to delivering exceptional service every day.
 						</p>
 					</div>
 
@@ -315,7 +315,7 @@ export function AboutUs({ className, ...props }: AboutProps) {
 				<div className="container mx-auto px-6 text-center">
 					<div className="mx-auto max-w-3xl">
 						<h2 className="mb-6 font-bold text-4xl text-primary-foreground">
-							Experience the Down Under Difference
+							Experience the Utos Difference
 						</h2>
 						<p className="mb-8 text-primary-foreground/80 text-xl leading-relaxed">
 							Join thousands of satisfied clients who have discovered why{" "}

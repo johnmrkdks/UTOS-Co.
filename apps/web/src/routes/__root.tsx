@@ -27,8 +27,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title:
-					"Down Under Chauffeurs - Premium Luxury Transportation Services Australia",
+				title: "Utos & Co. — Luxury Chauffeur",
 			},
 			{
 				name: "description",
@@ -38,7 +37,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			{
 				name: "keywords",
 				content:
-					"chauffeur service, luxury car hire, airport transfer, corporate transport, luxury transportation, premium cars, professional drivers, Australia",
+					"chauffeur service, luxury car hire, airport transfer, corporate transport, luxury transportation, premium cars, professional drivers, Australia, Utos",
 			},
 			{
 				name: "viewport",
@@ -47,7 +46,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "author",
-				content: "Down Under Chauffeurs",
+				content: "Utos & Co.",
 			},
 			{
 				name: "robots",
@@ -55,11 +54,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "theme-color",
-				content: "#22818e",
+				content: "#1e293b",
 			},
 			{
 				name: "msapplication-TileColor",
-				content: "#22818e",
+				content: "#1e293b",
 			},
 			{
 				name: "msapplication-config",
@@ -68,7 +67,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			// Open Graph Meta Tags
 			{
 				property: "og:title",
-				content: "Down Under Chauffeurs - Premium Luxury Transportation",
+				content: "Utos & Co. — Luxury Chauffeur",
 			},
 			{
 				property: "og:description",
@@ -81,15 +80,15 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				property: "og:url",
-				content: "https://downunderchauffeurs.com",
+				content: "https://utosandco.com",
 			},
 			{
 				property: "og:image",
-				content: "https://downunderchauffeurs.com/logo.png",
+				content: "https://utosandco.com/utos-logo.png",
 			},
 			{
 				property: "og:image:alt",
-				content: "Down Under Chauffeurs Logo",
+				content: "Utos & Co. Australia",
 			},
 			{
 				property: "og:locale",
@@ -97,7 +96,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				property: "og:site_name",
-				content: "Down Under Chauffeurs",
+				content: "Utos & Co.",
 			},
 			// Twitter Card Meta Tags
 			{
@@ -106,7 +105,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "twitter:title",
-				content: "Down Under Chauffeurs - Premium Luxury Transportation",
+				content: "Utos & Co. — Luxury Chauffeur",
 			},
 			{
 				name: "twitter:description",
@@ -115,11 +114,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "twitter:image",
-				content: "https://downunderchauffeurs.com/logo.png",
+				content: "https://utosandco.com/utos-logo.png",
 			},
 			{
 				name: "twitter:image:alt",
-				content: "Down Under Chauffeurs Logo",
+				content: "Utos & Co. Australia",
 			},
 			// Additional SEO Meta Tags
 			{
@@ -136,33 +135,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "apple-mobile-web-app-title",
-				content: "Down Under Chauffeurs",
+				content: "Utos & Co.",
 			},
 		],
 		links: [
-			// Favicon and Icons
-			{
-				rel: "icon",
-				href: "/favicon.ico",
-				sizes: "32x32",
-			},
-			{
-				rel: "apple-touch-icon",
-				href: "/favicon.ico",
-				sizes: "180x180",
-			},
-			{
-				rel: "icon",
-				href: "/favicon-32x32.png",
-				sizes: "32x32",
-				type: "image/png",
-			},
-			{
-				rel: "icon",
-				href: "/favicon-16x16.png",
-				sizes: "16x16",
-				type: "image/png",
-			},
+			/* Favicon lives in index.html + useEffect below so the tab icon is not overridden by SVG/ICO */
 			{
 				rel: "manifest",
 				href: "/site.webmanifest",
@@ -170,12 +147,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			{
 				rel: "mask-icon",
 				href: "/safari-pinned-tab.svg",
-				color: "#22818e",
+				color: "#1e293b",
 			},
 			// Canonical URL
 			{
 				rel: "canonical",
-				href: "https://downunderchauffeurs.com",
+				href: "https://utosandco.com",
 			},
 			// Preconnect to external domains for performance
 			{
@@ -205,6 +182,40 @@ function RootComponent() {
 
 	// Auto-sync timezone on login
 	useTimezoneSync();
+
+	// Ensure tab favicon is the brand PNG (Chromium often prefers cached SVG/ICO over PNG).
+	React.useEffect(() => {
+		const href = "/utos-logo.png?v=3";
+		document
+			.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')
+			.forEach((node) => {
+				const el = node as HTMLLinkElement;
+				const raw = el.getAttribute("href") ?? "";
+				if (
+					raw.includes(".svg") ||
+					raw.includes("favicon.ico") ||
+					raw.includes("favicon-16") ||
+					raw.includes("favicon-32")
+				) {
+					el.remove();
+				}
+			});
+		let icon = document.querySelector(
+			'link[rel="icon"][type="image/png"]',
+		) as HTMLLinkElement | null;
+		if (!icon) {
+			icon = document.querySelector(
+				'link[rel="icon"]',
+			) as HTMLLinkElement | null;
+		}
+		if (!icon) {
+			icon = document.createElement("link");
+			icon.rel = "icon";
+			document.head.appendChild(icon);
+		}
+		icon.type = "image/png";
+		icon.href = href;
+	}, []);
 
 	// Prevent iOS zoom on input focus
 	React.useEffect(() => {

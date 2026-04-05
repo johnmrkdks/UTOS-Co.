@@ -3,9 +3,11 @@
 		{
 			"allowed": {
 				"origins": [
-					"https://down-under-chauffeur-staging.downunderchauffeurs.workers.dev",
-					"https://downunderchauffeurs.com",
-					"https://down-under-chauffeur-dev.luppy.workers.dev",
+					"https://utos-and-co-staging.utosandco.workers.dev",
+					"https://utos-and-co-server-staging.utosandco.workers.dev",
+					"https://utosandco.com",
+					"https://www.utosandco.com",
+					"https://api.utosandco.com",
 					"http://localhost:3001",
 					"http://localhost:3002",
 					"http://localhost:3003"

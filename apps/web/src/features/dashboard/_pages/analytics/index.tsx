@@ -1,11 +1,5 @@
 import { Button } from "@workspace/ui/components/button";
 import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@workspace/ui/components/card";
-import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -27,6 +21,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { DashboardKpiCard } from "@/features/dashboard/_components/dashboard-kpi-card";
 import {
 	type DateRangePreset,
 	formatDashboardAnalytics,
@@ -119,111 +114,114 @@ export function AdvancedAnalyticsPage() {
 		: 0;
 
 	return (
-		<PaddingLayout className="flex-1 space-y-4">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="font-bold text-2xl">Advanced Analytics</h1>
-					<p className="text-gray-600">
-						Comprehensive insights and performance metrics
-					</p>
-				</div>
-				<div className="flex items-center gap-3">
-					<Select value={dateRange} onValueChange={setDateRange}>
-						<SelectTrigger className="w-32">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="7d">Last 7 days</SelectItem>
-							<SelectItem value="30d">Last 30 days</SelectItem>
-							<SelectItem value="90d">Last 90 days</SelectItem>
-							<SelectItem value="1y">Last year</SelectItem>
-						</SelectContent>
-					</Select>
-					<Button onClick={handleExport} disabled={isExporting || !stats}>
-						<Download className="mr-2 h-4 w-4" />
-						{isExporting ? "Generating..." : "Export Report"}
-					</Button>
+		<PaddingLayout className="flex-1 space-y-6">
+			<div className="rounded-2xl border border-border/70 bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+					<div>
+						<p className="font-medium text-[0.65rem] text-muted-foreground uppercase tracking-[0.2em]">
+							Insights
+						</p>
+						<h1 className="mt-1 font-semibold text-2xl text-foreground tracking-tight sm:text-3xl">
+							Advanced analytics
+						</h1>
+						<p className="mt-1 max-w-xl text-muted-foreground text-sm sm:text-base">
+							Revenue, bookings, drivers, and forecasts in one place.
+						</p>
+					</div>
+					<div className="flex flex-wrap items-center gap-3">
+						<Select value={dateRange} onValueChange={setDateRange}>
+							<SelectTrigger className="w-36 rounded-xl border-border/60 bg-background">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="7d">Last 7 days</SelectItem>
+								<SelectItem value="30d">Last 30 days</SelectItem>
+								<SelectItem value="90d">Last 90 days</SelectItem>
+								<SelectItem value="1y">Last year</SelectItem>
+							</SelectContent>
+						</Select>
+						<Button
+							className="rounded-xl"
+							onClick={handleExport}
+							disabled={isExporting || !stats}
+						>
+							<Download className="mr-2 h-4 w-4" />
+							{isExporting ? "Generating..." : "Export Report"}
+						</Button>
+					</div>
 				</div>
 			</div>
 
-			{/* Key Metrics Overview - Real data from API */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
-						<DollarSign className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="font-bold text-2xl">
-							$
-							{((stats?.totalRevenue ?? 0) / 100).toLocaleString(undefined, {
-								minimumFractionDigits: 2,
-							})}
-						</div>
-						<p className="text-muted-foreground text-xs">
-							{revenueGrowth >= 0 ? "+" : ""}
-							{revenueGrowth}% from last month
-						</p>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">
-							Total Bookings
-						</CardTitle>
-						<Car className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="font-bold text-2xl">
-							{stats?.totalBookings ?? 0}
-						</div>
-						<p className="text-muted-foreground text-xs">
-							{bookingGrowth >= 0 ? "+" : ""}
-							{bookingGrowth}% from last month
-						</p>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">
-							Completion Rate
-						</CardTitle>
-						<Users className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="font-bold text-2xl">
-							{stats?.completionRate ?? 0}%
-						</div>
-						<p className="text-muted-foreground text-xs">
-							{stats?.completedBookings ?? 0} completed
-						</p>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">
-							Driver Utilization
-						</CardTitle>
-						<TrendingUp className="h-4 w-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="font-bold text-2xl">{driverUtilization}%</div>
-						<p className="text-muted-foreground text-xs">
-							{stats?.activeDrivers ?? 0} of {stats?.totalDrivers ?? 0} active
-						</p>
-					</CardContent>
-				</Card>
+				<DashboardKpiCard
+					accent="emerald"
+					icon={DollarSign}
+					title="Total revenue"
+					value={`$${((stats?.totalRevenue ?? 0) / 100).toLocaleString(
+						undefined,
+						{
+							minimumFractionDigits: 2,
+						},
+					)}`}
+					subtitle={`${revenueGrowth >= 0 ? "+" : ""}${revenueGrowth}% vs prior period`}
+				/>
+				<DashboardKpiCard
+					accent="slate"
+					icon={Car}
+					title="Total bookings"
+					value={stats?.totalBookings ?? 0}
+					subtitle={`${bookingGrowth >= 0 ? "+" : ""}${bookingGrowth}% vs prior period`}
+				/>
+				<DashboardKpiCard
+					accent="violet"
+					icon={Users}
+					title="Completion rate"
+					value={`${stats?.completionRate ?? 0}%`}
+					subtitle={`${stats?.completedBookings ?? 0} trips completed`}
+				/>
+				<DashboardKpiCard
+					accent="gold"
+					icon={TrendingUp}
+					title="Driver utilization"
+					value={`${driverUtilization}%`}
+					subtitle={`${stats?.activeDrivers ?? 0} of ${stats?.totalDrivers ?? 0} drivers active`}
+				/>
 			</div>
 
 			<div className="grid gap-6 lg:grid-cols-3">
 				<div className="lg:col-span-2">
 					<Tabs defaultValue="revenue" className="w-full">
-						<TabsList className="grid w-full grid-cols-5">
-							<TabsTrigger value="revenue">Revenue</TabsTrigger>
-							<TabsTrigger value="bookings">Bookings</TabsTrigger>
-							<TabsTrigger value="drivers">Drivers</TabsTrigger>
-							<TabsTrigger value="satisfaction">Satisfaction</TabsTrigger>
-							<TabsTrigger value="predictive">Predictive</TabsTrigger>
+						<TabsList className="grid h-auto min-h-11 w-full grid-cols-2 gap-1 rounded-2xl border border-border/60 bg-muted/40 p-1.5 sm:grid-cols-5">
+							<TabsTrigger
+								className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm"
+								value="revenue"
+							>
+								Revenue
+							</TabsTrigger>
+							<TabsTrigger
+								className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm"
+								value="bookings"
+							>
+								Bookings
+							</TabsTrigger>
+							<TabsTrigger
+								className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm"
+								value="drivers"
+							>
+								Drivers
+							</TabsTrigger>
+							<TabsTrigger
+								className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm"
+								value="satisfaction"
+							>
+								Satisfaction
+							</TabsTrigger>
+							<TabsTrigger
+								className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm"
+								value="predictive"
+							>
+								Predictive
+							</TabsTrigger>
 						</TabsList>
 
 						<TabsContent value="revenue" className="space-y-4">

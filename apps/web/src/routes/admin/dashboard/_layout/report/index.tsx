@@ -10,9 +10,16 @@ export const Route = createFileRoute("/admin/dashboard/_layout/report/")({
 function RouteComponent() {
 	return (
 		<PaddingLayout className="flex flex-col gap-6">
-			<div>
-				<h1 className="font-bold text-2xl">Reports</h1>
-				<p className="text-muted-foreground">Booking and performance metrics</p>
+			<div className="rounded-2xl border border-border/70 bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+				<p className="font-medium text-[0.65rem] text-muted-foreground uppercase tracking-[0.2em]">
+					Performance
+				</p>
+				<h1 className="mt-1 font-semibold text-2xl text-foreground tracking-tight sm:text-3xl">
+					Reports
+				</h1>
+				<p className="mt-1 max-w-xl text-muted-foreground text-sm sm:text-base">
+					Booking and revenue metrics with status breakdowns.
+				</p>
 			</div>
 			<ReportOverview />
 			<DetailReports />

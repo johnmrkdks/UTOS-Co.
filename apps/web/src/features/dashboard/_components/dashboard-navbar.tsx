@@ -9,12 +9,15 @@ type DashboardNavbarProps = React.ComponentProps<"header">;
 export function DashboardNavbar({ className, ...props }: DashboardNavbarProps) {
 	return (
 		<header
-			className={cn("border-b bg-soft-beige px-4 py-2", className)}
+			className={cn(
+				"border-border/80 border-b bg-background/85 px-4 py-3 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-background/70",
+				className,
+			)}
 			{...props}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-row items-center justify-between">
-				<div className="flex items-center gap-3">
-					<SidebarTrigger className="lg:hidden" />
+			<div className="mx-auto flex w-full max-w-7xl flex-row items-center justify-between gap-3">
+				<div className="flex min-w-0 items-center gap-3">
+					<SidebarTrigger className="shrink-0 text-foreground lg:hidden" />
 					<Breadcrumbs />
 				</div>
 				<div className="flex items-center gap-4">

@@ -7,7 +7,7 @@ export function generateAccountVerificationTemplate(
 	const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
 
 	return {
-		subject: "Verify Your Down Under Chauffeur Account",
+		subject: "Verify Your Utos & Co. Account",
 		html: `
 			<!DOCTYPE html>
 			<html>
@@ -19,7 +19,7 @@ export function generateAccountVerificationTemplate(
 			<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
 				<div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
 					<div style="background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); padding: 40px 20px; text-align: center;">
-						<h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Down Under Chauffeur</h1>
+						<h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Utos & Co.</h1>
 						<p style="color: #cccccc; margin: 10px 0 0 0; font-size: 16px;">Luxury travel at your fingertips</p>
 					</div>
 					<div style="padding: 40px 20px;">
@@ -33,7 +33,7 @@ export function generateAccountVerificationTemplate(
 							</a>
 						</div>
 						<p style="color: #999; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0;">
-							If you didn't create an account with Down Under Chauffeur, you can safely ignore this email.
+							If you didn't create an account with Utos & Co., you can safely ignore this email.
 						</p>
 						<p style="color: #999; font-size: 12px; margin: 20px 0 0 0;">
 							If the button doesn't work, copy and paste this link into your browser:<br>

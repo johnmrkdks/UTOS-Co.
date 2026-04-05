@@ -52,10 +52,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	return (
-		<div
-			className={cn("relative z-50 bg-beige shadow-lg", className)}
-			{...props}
-		>
+		<div className={cn("relative z-50", className)} {...props}>
 			{/* Top Contact Bar */}
 			{/* <div className="hidden md:block bg-foreground border-b border-border"> */}
 			{/* 	<div className="container mx-auto px-6 py-2"> */}
@@ -94,8 +91,8 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 			{/* </div> */}
 
 			{/* Main Navigation */}
-			<div className="container mx-auto px-6">
-				<div className="flex items-center justify-between py-2 md:py-4">
+			<div className="container mx-auto max-w-7xl px-6">
+				<div className="flex items-center justify-between gap-4 py-3 md:py-4">
 					<div className="flex items-center gap-4">
 						{/* Mobile menu button with Sheet - Moved to Left */}
 						<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -116,20 +113,15 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 								<div className="flex-shrink-0 border-b p-4">
 									<div className="flex items-center justify-between">
 										<div className="flex items-center">
-											<Logo />
-											<div className="ml-2">
-												<h2 className="font-semibold text-lg">
-													Down Under Chauffeur
-												</h2>
-											</div>
+											<Logo className="max-w-[180px]" />
 										</div>
 										<Button
 											variant="ghost"
 											size="sm"
 											onClick={() => setIsSheetOpen(false)}
-											className="rounded-lg p-2 hover:bg-gray-100"
+											className="rounded-lg p-2 hover:bg-accent"
 										>
-											<ChevronsLeft className="h-5 w-5 text-gray-600" />
+											<ChevronsLeft className="h-5 w-5 text-muted-foreground" />
 										</Button>
 									</div>
 								</div>
@@ -145,7 +137,7 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 					</div>
 
 					{/* Desktop Navigation */}
-					<nav className="hidden items-center gap-8 lg:flex">
+					<nav className="hidden items-center gap-1 lg:flex lg:gap-2">
 						<NavLinks />
 					</nav>
 
@@ -155,10 +147,10 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 							<Link to="/fleet">
 								<Button
 									size="sm"
-									variant="dark"
-									className="font-semibold text-primary-foreground"
+									variant="default"
+									className="rounded-full px-5 font-medium"
 								>
-									Book Now
+									Book now
 								</Button>
 							</Link>
 						</div>
@@ -185,11 +177,10 @@ function NavLinks() {
 			<Link
 				key={path}
 				to={path}
-				activeProps={{ className: "text-primary" }}
-				className="group relative font-medium text-foreground transition-colors hover:text-primary"
+				activeProps={{ className: "text-foreground bg-muted/80" }}
+				className="group relative rounded-full px-3 py-1.5 font-medium text-muted-foreground text-sm transition-colors hover:bg-muted/60 hover:text-foreground"
 			>
 				{label}
-				<div className="-bottom-1 absolute left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
 			</Link>
 		);
 	});
@@ -365,10 +356,12 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 								</AvatarFallback>
 							</Avatar>
 							<div className="flex-1">
-								<p className="font-medium text-gray-900 text-sm">
+								<p className="font-medium text-foreground text-sm">
 									{session?.user.name}
 								</p>
-								<p className="text-gray-500 text-xs">{session?.user.email}</p>
+								<p className="text-muted-foreground text-xs">
+									{session?.user.email}
+								</p>
 								<p className="font-medium text-blue-600 text-xs capitalize">
 									{session?.user.role === "user"
 										? "Customer"
@@ -460,7 +453,9 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 				{/* Contact Information */}
 				<div className="border-t p-4">
 					<div className="space-y-3">
-						<h3 className="font-semibold text-gray-900 text-sm">Contact Us</h3>
+						<h3 className="font-semibold text-foreground text-sm">
+							Contact Us
+						</h3>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 text-sm">
 								<Phone className="h-4 w-4 text-primary" />

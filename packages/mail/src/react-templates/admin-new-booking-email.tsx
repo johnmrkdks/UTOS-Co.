@@ -45,7 +45,7 @@ export function AdminNewBookingEmail({
 	originAddress = "Sydney Opera House, Sydney NSW, Australia",
 	destinationAddress = "T1, Departure Plaza, Mascot NSW, Australia",
 	vehicleInfo = "Luxury Vehicle",
-	websiteUrl = "https://downunderchauffeurs.com",
+	websiteUrl = "https://utosandco.com",
 	stops = [],
 	passengerCount = 1,
 	luggageCount = 0,
@@ -64,7 +64,7 @@ export function AdminNewBookingEmail({
 					<Section style={logoHeader}>
 						<Row>
 							<Column style={{ verticalAlign: "middle", flexGrow: 1 }}>
-								<Heading style={brandTitle}>Down Under Chauffeurs</Heading>
+								<Heading style={brandTitle}>Utos & Co.</Heading>
 								<Text style={brandTagline}>Admin Dashboard</Text>
 							</Column>
 						</Row>
@@ -261,9 +261,7 @@ export function AdminNewBookingEmail({
 
 					{/* Footer */}
 					<Section style={footer}>
-						<Text style={footerBrand}>
-							Down Under Chauffeurs - Admin System
-						</Text>
+						<Text style={footerBrand}>Utos & Co. - Admin System</Text>
 						<Text style={footerDisclaimer}>
 							Automated notification |{" "}
 							<a href={`${websiteUrl}/dashboard`} style={footerLink}>
@@ -316,7 +314,7 @@ const container = {
 
 const logoHeader = {
 	padding: "16px 20px",
-	background: "linear-gradient(135deg, #22818e 0%, #1a6e78 100%)",
+	background: "linear-gradient(135deg, #C5A467 0%, #9A7A45 100%)",
 	borderBottom: "none",
 };
 
@@ -437,13 +435,13 @@ const amountValue = {
 };
 
 const emailLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };
 
 const phoneLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };
@@ -482,7 +480,7 @@ const ctaSection = {
 };
 
 const ctaButton = {
-	background: "#22818e",
+	background: "#C5A467",
 	color: "white",
 	padding: "12px 32px",
 	borderRadius: "8px",
@@ -499,7 +497,7 @@ const contactText = {
 };
 
 const quickLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };
@@ -526,7 +524,7 @@ const footerDisclaimer = {
 };
 
 const footerLink = {
-	color: "#22818e",
+	color: "#C5A467",
 	textDecoration: "none",
 	fontWeight: "500",
 };

@@ -223,7 +223,7 @@ function generateDriverAssignmentEmailTemplate(
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6;color:#1e293b;background:#f8fafc;">
 	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 		<tr>
-			<td style="padding:28px 32px;background:#22818e;text-align:center;">
+			<td style="padding:28px 32px;background:#C5A467;text-align:center;">
 				<h1 style="margin:0 0 4px 0;font-size:26px;font-weight:600;color:#fff;">New Booking Assignment</h1>
 				<p style="margin:0;font-size:14px;color:rgba(255,255,255,0.9);">${BUSINESS_INFO.business.name}</p>
 			</td>
@@ -237,7 +237,7 @@ function generateDriverAssignmentEmailTemplate(
 					<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Assignment Details</td></tr>
 					<tr><td style="padding:16px 20px;">
 						<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Booking Reference</p>
-						<p style="margin:0 0 16px 0;font-size:16px;color:#22818e;font-weight:600;">${bookingReference}</p>
+						<p style="margin:0 0 16px 0;font-size:16px;color:#C5A467;font-weight:600;">${bookingReference}</p>
 						<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Scheduled Pickup</p>
 						<p style="margin:0;font-size:16px;color:#1e293b;">${pickupDate} at ${pickupTime}</p>
 					</td></tr>
@@ -267,7 +267,7 @@ function generateDriverAssignmentEmailTemplate(
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${customerName}</td></tr>
 							<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Email</td></tr>
 							<tr><td style="padding:0 0 16px 0;font-size:15px;color:#1e293b;">${customerEmail}</td></tr>
-							${booking.customerPhone ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Phone</td></tr><tr><td style="padding:0;font-size:15px;"><a href="tel:${booking.customerPhone}" style="color:#22818e;text-decoration:none;">${booking.customerPhone}</a></td></tr>` : ""}
+							${booking.customerPhone ? `<tr><td style="padding:8px 0 4px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Phone</td></tr><tr><td style="padding:0;font-size:15px;"><a href="tel:${booking.customerPhone}" style="color:#C5A467;text-decoration:none;">${booking.customerPhone}</a></td></tr>` : ""}
 						</table>
 					</td></tr>
 				</table>
@@ -275,20 +275,20 @@ function generateDriverAssignmentEmailTemplate(
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
 					<tr>
 						<td style="padding:8px 8px 8px 0;">
-							<a href="${websiteUrl}/driver" style="display:inline-block;padding:14px 28px;background:#22818e;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">Driver Portal</a>
+							<a href="${websiteUrl}/driver" style="display:inline-block;padding:14px 28px;background:#C5A467;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">Driver Portal</a>
 						</td>
 						<td style="padding:8px 0 8px 8px;">
-							<a href="${websiteUrl}/contact-us" style="display:inline-block;padding:14px 28px;background:#f1f5f9;color:#22818e!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;border:1px solid #e2e8f0;">Contact Support</a>
+							<a href="${websiteUrl}/contact-us" style="display:inline-block;padding:14px 28px;background:#f1f5f9;color:#C5A467!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;border:1px solid #e2e8f0;">Contact Support</a>
 						</td>
 					</tr>
 				</table>
-				<p style="margin:0;font-size:14px;color:#64748b;">Need help? Call <a href="${BUSINESS_INFO.phone.link}" style="color:#22818e;text-decoration:none;font-weight:600;">${BUSINESS_INFO.phone.display}</a></p>
+				<p style="margin:0;font-size:14px;color:#64748b;">Need help? Call <a href="${BUSINESS_INFO.phone.link}" style="color:#C5A467;text-decoration:none;font-weight:600;">${BUSINESS_INFO.phone.display}</a></p>
 			</td>
 		</tr>
 		<tr>
 			<td style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
 				<p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#475569;">${BUSINESS_INFO.business.name}</p>
-				<p style="margin:0;font-size:12px;color:#94a3b8;">Automated notification · <a href="${websiteUrl}/contact-us" style="color:#22818e;text-decoration:none;">Contact Support</a></p>
+				<p style="margin:0;font-size:12px;color:#94a3b8;">Automated notification · <a href="${websiteUrl}/contact-us" style="color:#C5A467;text-decoration:none;">Contact Support</a></p>
 			</td>
 		</tr>
 	</table>
@@ -391,11 +391,11 @@ function generateTripStatusEmailTemplate(
 	const subject = `${statusTitle} - Booking #${bookingReference}`;
 
 	// Website base URL
-	const websiteUrl = "https://downunderchauffeurs.com";
+	const websiteUrl = "https://utosandco.com";
 
 	// Convert oklch colors to standard CSS
 	const colors = {
-		primary: "#22818e", // oklch(0.45 0.08 180) converted
+		primary: "#C5A467", // oklch(0.45 0.08 180) converted
 		primaryLight: "#86d6e5", // oklch(0.75 0.18 180) converted
 		background: "#ffffff", // oklch(1 0 0)
 		foreground: "#3c3c3c", // oklch(0.235 0 0)
@@ -420,7 +420,7 @@ function generateTripStatusEmailTemplate(
 	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 		<!-- Header: Brand teal -->
 		<tr>
-			<td style="padding:28px 32px;background:#22818e;text-align:center;">
+			<td style="padding:28px 32px;background:#C5A467;text-align:center;">
 				<h1 style="margin:0 0 4px 0;font-size:26px;font-weight:600;color:#fff;letter-spacing:-0.5px;">${BUSINESS_INFO.business.name}</h1>
 				<p style="margin:0;font-size:14px;color:rgba(255,255,255,0.9);">
 					${statusTitle} ${statusIcon}
@@ -431,7 +431,7 @@ function generateTripStatusEmailTemplate(
 		<tr>
 			<td style="padding:32px;">
 				<p style="margin:0 0 24px 0;font-size:17px;color:#334155;line-height:1.6;">${statusMessage}</p>
-				<p style="margin:0 0 28px 0;font-size:14px;color:#64748b;">Booking reference: <strong style="color:#22818e;">${bookingReference}</strong></p>
+				<p style="margin:0 0 28px 0;font-size:14px;color:#64748b;">Booking reference: <strong style="color:#C5A467;">${bookingReference}</strong></p>
 
 				<!-- Trip Details -->
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;border:1px solid #e2e8f0;border-radius:8px;border-collapse:collapse;">
@@ -543,14 +543,14 @@ function generateTripStatusEmailTemplate(
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
 					<tr>
 						<td style="padding:8px 8px 8px 0;">
-							<a href="${websiteUrl}/my-bookings" style="display:inline-block;padding:14px 28px;background:#22818e;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">View My Bookings</a>
+							<a href="${websiteUrl}/my-bookings" style="display:inline-block;padding:14px 28px;background:#C5A467;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">View My Bookings</a>
 						</td>
 						<td style="padding:8px 0 8px 8px;">
-							<a href="${websiteUrl}/contact-us" style="display:inline-block;padding:14px 28px;background:#f1f5f9;color:#22818e!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;border:1px solid #e2e8f0;">Contact Support</a>
+							<a href="${websiteUrl}/contact-us" style="display:inline-block;padding:14px 28px;background:#f1f5f9;color:#C5A467!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;border:1px solid #e2e8f0;">Contact Support</a>
 						</td>
 					</tr>
 				</table>
-				<p style="margin:0;font-size:14px;color:#64748b;">Need help? Call <a href="${BUSINESS_INFO.phone.link}" style="color:#22818e;text-decoration:none;font-weight:600;">${BUSINESS_INFO.phone.display}</a></p>
+				<p style="margin:0;font-size:14px;color:#64748b;">Need help? Call <a href="${BUSINESS_INFO.phone.link}" style="color:#C5A467;text-decoration:none;font-weight:600;">${BUSINESS_INFO.phone.display}</a></p>
 			</td>
 		</tr>
 		<!-- Footer -->
@@ -558,7 +558,7 @@ function generateTripStatusEmailTemplate(
 			<td style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
 				<p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#475569;">${BUSINESS_INFO.business.name}</p>
 				<p style="margin:0 0 12px 0;font-size:12px;color:#94a3b8;">Premium Luxury Transportation Services</p>
-				<p style="margin:0;font-size:12px;color:#94a3b8;">Automated notification · <a href="${websiteUrl}/contact-us" style="color:#22818e;text-decoration:none;">Contact Support</a></p>
+				<p style="margin:0;font-size:12px;color:#94a3b8;">Automated notification · <a href="${websiteUrl}/contact-us" style="color:#C5A467;text-decoration:none;">Contact Support</a></p>
 			</td>
 		</tr>
 	</table>
@@ -928,7 +928,7 @@ export async function sendPaymentLinkEmail(
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${subject}</title></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6;color:#1e293b;background:#f8fafc;">
 	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-		<tr><td style="padding:28px 32px;background:#22818e;text-align:center;">
+		<tr><td style="padding:28px 32px;background:#C5A467;text-align:center;">
 			<h1 style="margin:0 0 4px 0;font-size:26px;font-weight:600;color:#fff;">${BUSINESS_INFO.business.name}</h1>
 			<p style="margin:0;font-size:14px;color:rgba(255,255,255,0.9);">Complete Your Booking Payment</p>
 		</td></tr>
@@ -939,7 +939,7 @@ export async function sendPaymentLinkEmail(
 				<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;color:#0f172a;">Booking Details</td></tr>
 				<tr><td style="padding:16px 20px;">
 					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Reference</p>
-					<p style="margin:0 0 16px 0;font-size:16px;color:#22818e;font-weight:600;">${bookingReference}</p>
+					<p style="margin:0 0 16px 0;font-size:16px;color:#C5A467;font-weight:600;">${bookingReference}</p>
 					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Pickup</p>
 					<p style="margin:0 0 16px 0;font-size:15px;color:#1e293b;">${pickupDate} at ${pickupTime}</p>
 					<p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Amount</p>
@@ -950,14 +950,14 @@ export async function sendPaymentLinkEmail(
 			</table>
 			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;">
 				<tr><td>
-					<a href="${paymentUrl}" style="display:inline-block;padding:14px 28px;background:#22818e;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">Complete Payment</a>
+					<a href="${paymentUrl}" style="display:inline-block;padding:14px 28px;background:#C5A467;color:#fff!important;text-decoration:none;font-weight:600;font-size:15px;border-radius:8px;">Complete Payment</a>
 				</td></tr>
 			</table>
-			<p style="margin:0;font-size:14px;color:#64748b;">Or copy this link: <a href="${paymentUrl}" style="color:#22818e;word-break:break-all;">${paymentUrl}</a></p>
+			<p style="margin:0;font-size:14px;color:#64748b;">Or copy this link: <a href="${paymentUrl}" style="color:#C5A467;word-break:break-all;">${paymentUrl}</a></p>
 		</td></tr>
 		<tr><td style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
 			<p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#475569;">${BUSINESS_INFO.business.name}</p>
-			<p style="margin:0;font-size:12px;color:#94a3b8;">Need help? <a href="${websiteUrl}/contact-us" style="color:#22818e;text-decoration:none;">Contact Support</a></p>
+			<p style="margin:0;font-size:12px;color:#94a3b8;">Need help? <a href="${websiteUrl}/contact-us" style="color:#C5A467;text-decoration:none;">Contact Support</a></p>
 		</td></tr>
 	</table>
 </body>
@@ -1065,7 +1065,7 @@ export async function sendAdminNewBookingEmail(bookingId: string, env: Env) {
 			originAddress: booking.originAddress || booking.pickupAddress,
 			destinationAddress: booking.destinationAddress,
 			vehicleInfo,
-			websiteUrl: "https://downunderchauffeurs.com",
+			websiteUrl: "https://utosandco.com",
 			stops: stops?.map((stop) => ({ address: stop.address })) || [],
 			passengerCount: booking.passengerCount || 1,
 			luggageCount: booking.luggageCount || 0,
