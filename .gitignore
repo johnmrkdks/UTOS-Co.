@@ -2,6 +2,11 @@ node_modules
 .turbo
 
 .env
+.dev.vars
+.dev.vars.*
+
+# DB dumps often contain OAuth tokens in user rows — never commit
+database_dump.sql
 
 # Markdowns for AI
 GEMINI.md
