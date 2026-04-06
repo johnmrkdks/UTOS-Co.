@@ -1,46 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import {
-	Award,
-	Calendar,
-	Car,
-	Clock,
-	Coffee,
-	Luggage,
-	MapPin,
-	Phone,
-	Shield,
-	Star,
-	Users,
-	Wifi,
-} from "lucide-react";
-import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
+import { Car } from "lucide-react";
+import fleetTransportLineup from "@/assets/marketing/fleet-transport-lineup.png";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
 import { BookingCard } from "./booking-card";
-
-const serviceFeatures = [
-	{
-		icon: Shield,
-		title: "Licensed & Insured",
-		description: "Fully licensed chauffeurs with comprehensive insurance",
-	},
-	{
-		icon: Clock,
-		title: "Available 00:00 – 23:45",
-		description: "Nearly 24/7 service - we are always at your disposal",
-	},
-	{
-		icon: Star,
-		title: "5-Star Service",
-		description: "Consistently rated excellent by our valued clients",
-	},
-	{
-		icon: Award,
-		title: "Premium Fleet",
-		description: "Luxury vehicles maintained to the highest standards",
-	},
-];
 
 type FleetProps = {
 	className?: string;
@@ -83,27 +47,45 @@ export function Fleet({ className, ...props }: FleetProps) {
 		}) || [];
 	return (
 		<div className={cn("", className)} {...props}>
-			{/* Vehicle Selection */}
-			<section className="bg-soft-beige py-24">
+			{/* Hero — fleet lineup */}
+			<section
+				className="relative overflow-hidden bg-[center_42%] bg-cover bg-no-repeat py-20 md:py-28"
+				style={{ backgroundImage: `url(${fleetTransportLineup})` }}
+			>
+				<div className="absolute inset-0 bg-gradient-to-br from-stone-950/90 via-stone-900/78 to-stone-950/92" />
+				<div className="container relative z-10 mx-auto px-6 text-center">
+					<p className="mb-3 font-medium text-[0.65rem] text-primary-secondary/95 uppercase tracking-[0.22em]">
+						Fleet
+					</p>
+					<h1 className="mb-4 font-semibold text-3xl text-white tracking-tight md:text-4xl lg:text-5xl">
+						Our fleet
+					</h1>
+					<p className="mx-auto max-w-xl text-base text-white/80 leading-relaxed md:text-lg">
+						Sedans, people movers, and executive vans — presented for every
+						journey.
+					</p>
+				</div>
+			</section>
+
+			{/* Vehicle Selection — solid surface so cards are the only vehicle imagery */}
+			<section className="bg-muted/20 py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							Select Your Luxury Vehicle
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							Vehicles
 						</h2>
-						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
-							Choose from our premium fleet of meticulously maintained luxury
-							vehicles. Each vehicle comes with a professional chauffeur and
-							premium amenities.
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+							Choose a vehicle — each booking includes a professional chauffeur.
 						</p>
 					</div>
 
-					<div className="grid gap-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+					<div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
 						{carsLoading ? (
 							// Compact loading skeleton to match new design
 							Array.from({ length: 6 }).map((_, index) => (
 								<div
 									key={index}
-									className="overflow-hidden rounded-lg border border-border bg-white shadow-lg"
+									className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-none"
 								>
 									{/* Image skeleton */}
 									<div className="aspect-[4/3] animate-pulse bg-muted" />

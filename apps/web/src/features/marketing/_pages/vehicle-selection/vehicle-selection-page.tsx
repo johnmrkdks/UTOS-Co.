@@ -22,7 +22,7 @@ import {
 	Star,
 	Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-get-published-cars-query";
 import { CarPriceDisplay } from "./_components/car-price-display";
 
@@ -33,7 +33,18 @@ export function VehicleSelectionPage() {
 		search.selectedCarId || null,
 	);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [categoryFilter, setCategoryFilter] = useState<string>("all");
+	const [categoryFilter, setCategoryFilter] = useState<string>(() =>
+		search.vehicleCategory && search.vehicleCategory !== ""
+			? search.vehicleCategory
+			: "all",
+	);
+
+	useEffect(() => {
+		const v = search.vehicleCategory;
+		if (v && v !== "") {
+			setCategoryFilter(v);
+		}
+	}, [search.vehicleCategory]);
 
 	// Fetch published cars
 	const { data: carsData, isLoading } = useGetPublishedCarsQuery({ limit: 50 });
@@ -72,6 +83,11 @@ export function VehicleSelectionPage() {
 		if (search.stops) params.set("stops", search.stops);
 		if (search.fromCustomerArea)
 			params.set("fromCustomerArea", search.fromCustomerArea);
+		if (search.pickupDate) params.set("pickupDate", search.pickupDate);
+		if (search.pickupTime) params.set("pickupTime", search.pickupTime);
+		if (search.transferType) params.set("transferType", search.transferType);
+		if (search.vehicleCategory)
+			params.set("vehicleCategory", search.vehicleCategory);
 
 		// Use customer route if coming from customer area
 		const calculateQuotePath =

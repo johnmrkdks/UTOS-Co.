@@ -10,7 +10,7 @@ export function DashboardNavbar({ className, ...props }: DashboardNavbarProps) {
 	return (
 		<header
 			className={cn(
-				"border-border/80 border-b bg-background/85 px-4 py-3 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-background/70",
+				"border-border/50 border-b bg-background/90 px-4 py-2.5 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80",
 				className,
 			)}
 			{...props}

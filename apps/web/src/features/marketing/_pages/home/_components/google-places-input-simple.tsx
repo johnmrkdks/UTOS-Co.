@@ -22,6 +22,8 @@ interface GooglePlacesInputProps {
 	disabled?: boolean;
 	onRemove?: () => void;
 	showRemoveButton?: boolean;
+	/** Shorter control for dense layouts (e.g. marketing hero quote). */
+	compact?: boolean;
 }
 
 export function GooglePlacesInput({
@@ -33,6 +35,7 @@ export function GooglePlacesInput({
 	disabled = false,
 	onRemove,
 	showRemoveButton = false,
+	compact = false,
 }: GooglePlacesInputProps) {
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -161,11 +164,26 @@ export function GooglePlacesInput({
 	return (
 		<div className="relative" ref={suggestionsRef}>
 			<div className="relative" ref={inputWrapperRef}>
-				<div className="-translate-y-1/2 absolute top-1/2 left-3 flex items-center">
+				<div
+					className={cn(
+						"-translate-y-1/2 absolute top-1/2 flex items-center",
+						compact ? "left-2" : "left-3",
+					)}
+				>
 					{isLoading ? (
-						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+						<Loader2
+							className={cn(
+								"animate-spin text-muted-foreground",
+								compact ? "h-3.5 w-3.5" : "h-4 w-4",
+							)}
+						/>
 					) : (
-						<MapPin className="h-4 w-4 text-muted-foreground" />
+						<MapPin
+							className={cn(
+								"text-muted-foreground",
+								compact ? "h-3.5 w-3.5" : "h-4 w-4",
+							)}
+						/>
 					)}
 				</div>
 
@@ -174,7 +192,12 @@ export function GooglePlacesInput({
 					onChange={handleInputChange}
 					onKeyDown={handleKeyDown}
 					placeholder={placeholder}
-					className={cn("pl-8", showRemoveButton ? "pr-8" : "pr-4", className)}
+					className={cn(
+						compact ? "h-8 min-h-8 py-0 pl-7 text-xs" : "pl-8",
+						showRemoveButton ? "pr-8" : "pr-4",
+						compact && "md:text-xs",
+						className,
+					)}
 					disabled={disabled}
 				/>
 

@@ -9,7 +9,6 @@ import { cn } from "@workspace/ui/lib/utils";
 import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
-import { Logo } from "@/components/logo";
 import { CustomerMobileMenuContent } from "./customer-mobile-menu-content";
 import { CustomerUserMenu } from "./customer-user-menu";
 import type { CustomerNavigationItem } from "./types";
@@ -83,7 +82,11 @@ export function CustomerHeader({
 								</SheetContent>
 							</Sheet>
 
-							<Logo className="h-9 max-h-10 max-w-[min(160px,45vw)]" />
+							<BrandLogo
+								compact
+								logoClassName="h-9 max-h-10 max-w-[min(72px,22vw)] sm:max-w-[100px]"
+								className="min-w-0"
+							/>
 						</div>
 					</div>
 				</div>

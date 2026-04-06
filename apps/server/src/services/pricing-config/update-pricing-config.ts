@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db";
 import { pricingConfig } from "@/db/schema";
@@ -20,11 +20,15 @@ export async function updatePricingConfigService(
 	db: DB,
 	data: UpdatePricingConfigParams,
 ) {
-	const { id, ...updateData } = data;
+	const { id, hourlyRate, ...rest } = data;
 
 	const [updatedConfig] = await db
 		.update(pricingConfig)
-		.set(updateData)
+		.set({
+			...rest,
+			...(hourlyRate !== undefined ? { hourlyRate: hourlyRate ?? null } : {}),
+			updatedAt: sql`(unixepoch())`,
+		})
 		.where(eq(pricingConfig.id, id))
 		.returning();
 

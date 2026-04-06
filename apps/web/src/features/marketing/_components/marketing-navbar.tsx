@@ -12,31 +12,24 @@ import {
 } from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
 import {
+	BookOpen,
 	CalendarIcon,
 	CarIcon,
 	ChevronsLeft,
-	Clock,
 	ContactIcon,
-	FacebookIcon,
-	HelpCircleIcon,
 	HomeIcon,
 	InfoIcon,
-	InstagramIcon,
 	LogOutIcon,
 	MailIcon,
 	Menu,
 	Package,
 	Phone,
 	SettingsIcon,
-	Shield,
-	Star,
 	UserIcon,
-	X,
 } from "lucide-react";
 import { useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SignOutConfirmationDialog } from "@/components/dialogs/sign-out-confirmation-dialog";
-import { Logo } from "@/components/logo";
 import { BUSINESS_INFO } from "@/constants/business-info";
 import { MARKETING_ROUTES } from "@/constants/marketing-routes";
 import { MarketingUserMenu } from "@/features/marketing/_components/navbar/marketing-user-menu";
@@ -48,7 +41,6 @@ type HeaderProps = {
 };
 
 export function MarketingNavbar({ className, ...props }: HeaderProps) {
-	const { session } = useUserQuery();
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	return (
@@ -111,9 +103,16 @@ export function MarketingNavbar({ className, ...props }: HeaderProps) {
 							>
 								{/* Fixed Header */}
 								<div className="flex-shrink-0 border-b p-4">
-									<div className="flex items-center justify-between">
-										<div className="flex items-center">
-											<Logo className="max-w-[180px]" />
+									<div className="flex items-center justify-between gap-3">
+										<div className="flex min-w-0 flex-1 items-center gap-2.5">
+											<BrandLogo
+												compact
+												logoClassName="h-9 max-h-10 max-w-[100px] sm:max-w-[140px]"
+												className="shrink-0"
+											/>
+											<span className="min-w-0 truncate font-semibold text-foreground text-sm leading-snug tracking-tight sm:text-base">
+												{BUSINESS_INFO.business.name}
+											</span>
 										</div>
 										<Button
 											variant="ghost"
@@ -177,34 +176,11 @@ function NavLinks() {
 			<Link
 				key={path}
 				to={path}
-				activeProps={{ className: "text-foreground bg-muted/80" }}
-				className="group relative rounded-full px-3 py-1.5 font-medium text-muted-foreground text-sm transition-colors hover:bg-muted/60 hover:text-foreground"
-			>
-				{label}
-			</Link>
-		);
-	});
-
-	return <>{links}</>;
-}
-
-function MobileNavLinks({ onClose }: { onClose: () => void }) {
-	const { session } = useUserQuery();
-	const isCustomer = session?.user?.role === "user";
-
-	// Add My Bookings for authenticated customers
-	const routes = isCustomer
-		? [...MARKETING_ROUTES, { path: "/my-bookings", label: "My Bookings" }]
-		: MARKETING_ROUTES;
-
-	const links = routes.map(({ path, label }) => {
-		return (
-			<Link
-				key={path}
-				to={path}
-				onClick={onClose}
-				activeProps={{ className: "text-primary bg-primary/10" }}
-				className="rounded-lg px-4 py-1.5 font-medium text-foreground transition-all hover:bg-primary/5 hover:text-primary"
+				activeProps={{
+					className:
+						"border-foreground text-foreground hover:border-foreground/80",
+				}}
+				className="border-transparent border-b-2 px-1 py-1.5 font-medium text-muted-foreground text-sm transition-colors hover:border-border/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 			>
 				{label}
 			</Link>
@@ -281,7 +257,7 @@ function MobileUserProfile({
 			<Link
 				to="/profile"
 				onClick={onClose}
-				className="flex items-center gap-2 rounded-lg px-3 py-2 text-foreground text-sm transition-all hover:bg-primary/5 hover:text-primary"
+				className="flex items-center gap-2 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-muted/60"
 			>
 				<UserIcon className="h-4 w-4" />
 				Profile
@@ -290,7 +266,7 @@ function MobileUserProfile({
 			<Link
 				to="/account/settings"
 				onClick={onClose}
-				className="flex items-center gap-2 rounded-lg px-3 py-2 text-foreground text-sm transition-all hover:bg-primary/5 hover:text-primary"
+				className="flex items-center gap-2 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-muted/60"
 			>
 				<SettingsIcon className="h-4 w-4" />
 				Account Settings
@@ -312,7 +288,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 			{ path: "/fleet", label: "Our Fleet", icon: CarIcon },
 			{ path: "/services", label: "Services", icon: Package },
 			{ path: "/about-us", label: "About Us", icon: InfoIcon },
-			{ path: "/faqs", label: "FAQs", icon: HelpCircleIcon },
+			{ path: "/blogs", label: "Blog", icon: BookOpen },
 			{ path: "/contact-us", label: "Contact", icon: ContactIcon },
 		];
 
@@ -384,54 +360,20 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 									to={item.path}
 									onClick={onClose}
 									className={cn(
-										"group flex touch-manipulation items-center gap-4 rounded-lg p-3 transition-all duration-200 hover:bg-muted/50 active:scale-[0.98]",
+										"flex touch-manipulation items-center gap-3 rounded-md px-2 py-2.5 transition-colors hover:bg-muted/50",
 										active
-											? "border border-primary/20 bg-primary/10 text-primary shadow-sm"
-											: "text-foreground hover:text-primary",
+											? "font-medium text-foreground"
+											: "text-muted-foreground hover:text-foreground",
 									)}
 								>
-									{/* Icon Container */}
-									<div
+									<Icon
 										className={cn(
-											"flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200",
-											active
-												? "bg-primary text-white shadow-md"
-												: "bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary",
+											"h-5 w-5 shrink-0",
+											active ? "text-foreground" : "text-muted-foreground",
 										)}
-									>
-										<Icon className="h-5 w-5" />
-									</div>
-
-									{/* Content */}
-									<div className="flex-1">
-										<div className="flex items-center justify-between">
-											<span className="font-medium text-sm">{item.label}</span>
-											{active && (
-												<div className="h-2 w-2 rounded-full bg-primary" />
-											)}
-										</div>
-										{/* Optional descriptions for key items */}
-										{item.path === "/" && (
-											<p className="mt-0.5 text-muted-foreground text-xs">
-												Welcome to our platform
-											</p>
-										)}
-										{item.path === "/fleet" && (
-											<p className="mt-0.5 text-muted-foreground text-xs">
-												Explore luxury vehicles
-											</p>
-										)}
-										{item.path === "/services" && (
-											<p className="mt-0.5 text-muted-foreground text-xs">
-												Browse our premium services
-											</p>
-										)}
-										{item.path === "/my-bookings" && (
-											<p className="mt-0.5 text-muted-foreground text-xs">
-												View and manage bookings
-											</p>
-										)}
-									</div>
+										strokeWidth={1.75}
+									/>
+									<span className="text-sm">{item.label}</span>
 								</Link>
 							);
 						})}
@@ -461,7 +403,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 								<Phone className="h-4 w-4 text-primary" />
 								<a
 									href={BUSINESS_INFO.phone.link}
-									className="transition-colors hover:text-primary"
+									className="transition-colors hover:text-foreground"
 								>
 									{BUSINESS_INFO.phone.display}
 								</a>
@@ -470,7 +412,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 								<MailIcon className="h-4 w-4 text-primary" />
 								<a
 									href={BUSINESS_INFO.email.link}
-									className="transition-colors hover:text-primary"
+									className="transition-colors hover:text-foreground"
 								>
 									{BUSINESS_INFO.email.display}
 								</a>
@@ -481,7 +423,7 @@ function MarketingMobileMenuContent({ onClose }: { onClose: () => void }) {
 			</div>
 
 			{/* Fixed Footer */}
-			<div className="flex-shrink-0 border-t bg-white p-4">
+			<div className="flex-shrink-0 border-t bg-background p-4">
 				{session ? (
 					<Button
 						variant="outline"

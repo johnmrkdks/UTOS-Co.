@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { useCustomerProfileQuery } from "@/features/auth/_hooks/query/use-customer-profile-query";
 import { useCreatePackageBookingMutation } from "@/features/customer/_hooks/query/use-create-package-booking-mutation";
+import { useGetPublishedCarHourlyRateQuery } from "@/features/customer/_hooks/query/use-get-published-car-hourly-rate-query";
 import {
 	createServiceBookingSchema,
 	type ServiceBookingFormData,
@@ -40,6 +41,16 @@ import {
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
 import { useUserQuery } from "@/hooks/query/use-user-query";
 import { createLocalDateForBackend } from "@/utils/timezone";
+
+export type HourlyRoutePrefill = {
+	originAddress?: string;
+	destinationAddress?: string;
+	pickupDate?: string;
+	pickupTime?: string;
+	stopAddresses?: string[];
+	/** When set, hourly rate comes from pricing config for this published car */
+	carId?: string;
+};
 
 interface HourlyServiceBookingFormProps {
 	service: {
@@ -51,10 +62,13 @@ interface HourlyServiceBookingFormProps {
 		bannerImageUrl?: string;
 		features?: string[];
 	};
+	/** When coming from instant quote (hourly path) */
+	routePrefill?: HourlyRoutePrefill;
 }
 
 export function HourlyServiceBookingForm({
 	service,
+	routePrefill,
 }: HourlyServiceBookingFormProps) {
 	const [step, setStep] = useState<"form" | "confirmation">("form");
 	const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
@@ -70,6 +84,37 @@ export function HourlyServiceBookingForm({
 	const { data: profileData, isLoading: profileLoading } =
 		useCustomerProfileQuery();
 	const createBookingMutation = useCreatePackageBookingMutation();
+	const { data: pricingHourly } = useGetPublishedCarHourlyRateQuery(
+		routePrefill?.carId,
+	);
+
+	const serviceForQuote = useMemo(() => {
+		const fromConfig = pricingHourly?.hourlyRate;
+		if (typeof fromConfig === "number" && fromConfig > 0) {
+			return { ...service, hourlyRate: fromConfig };
+		}
+		return service;
+	}, [service, pricingHourly?.hourlyRate]);
+
+	useEffect(() => {
+		if (!routePrefill) return;
+		if (routePrefill.originAddress?.trim()) {
+			setPickupLocation(routePrefill.originAddress);
+		}
+		if (routePrefill.destinationAddress?.trim()) {
+			setDestination(routePrefill.destinationAddress);
+		}
+		if (routePrefill.pickupDate && routePrefill.pickupTime) {
+			const d = new Date(`${routePrefill.pickupDate}T12:00:00`);
+			if (!Number.isNaN(d.getTime())) {
+				setSelectedDate(d);
+			}
+			setSelectedTime(routePrefill.pickupTime);
+		}
+		if (routePrefill.stopAddresses && routePrefill.stopAddresses.length > 0) {
+			setStops(routePrefill.stopAddresses);
+		}
+	}, [routePrefill]);
 
 	// Create schema for hourly service - ensure minimum 20 passengers
 	const maxPassengers = Math.max(service.maxPassengers || 20, 20);
@@ -93,8 +138,8 @@ export function HourlyServiceBookingForm({
 
 	// Calculate total cost: Hours * rate = total (never negative)
 	const totalCost = useMemo(() => {
-		return Math.max(0, hours * service.hourlyRate);
-	}, [hours, service.hourlyRate]);
+		return Math.max(0, hours * serviceForQuote.hourlyRate);
+	}, [hours, serviceForQuote.hourlyRate]);
 
 	// Pre-populate with user data if authenticated
 	useEffect(() => {
@@ -167,7 +212,7 @@ export function HourlyServiceBookingForm({
 			// Create booking data
 			const bookingData = {
 				packageId: service.id,
-				carId: null, // Package booking, no specific car
+				carId: routePrefill?.carId?.trim() || null,
 				originAddress: pickupLocation,
 				destinationAddress: destination,
 				scheduledPickupTime: createLocalDateForBackend(
@@ -389,7 +434,7 @@ export function HourlyServiceBookingForm({
 													Hourly Rate
 												</span>
 												<span className="font-semibold">
-													${service.hourlyRate.toFixed(2)}/hour
+													${serviceForQuote.hourlyRate.toFixed(2)}/hour
 												</span>
 											</div>
 											<div className="flex items-center justify-between border-gray-100 border-b py-2">
@@ -403,7 +448,7 @@ export function HourlyServiceBookingForm({
 													Calculation
 												</span>
 												<span className="font-semibold">
-													{hours} × ${service.hourlyRate.toFixed(2)}
+													{hours} × ${serviceForQuote.hourlyRate.toFixed(2)}
 												</span>
 											</div>
 										</div>
@@ -531,7 +576,7 @@ export function HourlyServiceBookingForm({
 													<span className="text-gray-600 text-sm">hours</span>
 												</div>
 												<p className="text-gray-500 text-sm">
-													Rate: ${service.hourlyRate.toFixed(2)}/hour
+													Rate: ${serviceForQuote.hourlyRate.toFixed(2)}/hour
 												</p>
 											</div>
 

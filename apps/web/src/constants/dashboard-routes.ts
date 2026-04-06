@@ -100,6 +100,11 @@ const ALL_DASHBOARD_INVENTORY_ROUTES: RouteConfig[] = [
 		path: "/admin/dashboard/publications",
 		icon: EyeIcon,
 	},
+	{
+		label: "Blog",
+		path: "/admin/dashboard/blogs",
+		icon: BookTextIcon,
+	},
 ];
 
 // Super Admin only - User Management

@@ -21,6 +21,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import * as XLSX from "xlsx";
 import { DashboardKpiCard } from "@/features/dashboard/_components/dashboard-kpi-card";
 import {
 	type DateRangePreset,
@@ -35,6 +36,16 @@ import { PredictiveAnalytics } from "./_components/predictive-analytics";
 import { RealTimeMetrics } from "./_components/real-time-metrics";
 import { RevenueAnalytics } from "./_components/revenue-analytics";
 
+function dateRangePresetLabel(preset: DateRangePreset): string {
+	const labels: Record<DateRangePreset, string> = {
+		"7d": "Last 7 days",
+		"30d": "Last 30 days",
+		"90d": "Last 90 days",
+		"1y": "Last year",
+	};
+	return labels[preset];
+}
+
 export function AdvancedAnalyticsPage() {
 	const [dateRange, setDateRange] = useState<DateRangePreset>("30d");
 	const [isExporting, setIsExporting] = useState(false);
@@ -47,39 +58,56 @@ export function AdvancedAnalyticsPage() {
 	const data = formatDashboardAnalytics(analyticsData);
 	const stats = data?.stats ?? null;
 
-	const handleExport = async () => {
+	const handleExport = () => {
 		if (!stats) return;
 		setIsExporting(true);
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			const reportData = {
-				dateRange,
-				generatedAt: new Date().toISOString(),
-				metrics: {
-					totalRevenue: (stats.totalRevenue ?? 0) / 100,
-					totalBookings: stats.totalBookings ?? 0,
-					completedBookings: stats.completedBookings ?? 0,
-					completionRate: stats.completionRate ?? 0,
-					activeDrivers: stats.activeDrivers ?? 0,
-					totalDrivers: stats.totalDrivers ?? 0,
-					driverUtilization: stats.totalDrivers
-						? Math.round(
-								((stats.activeDrivers ?? 0) / stats.totalDrivers) * 100,
-							)
-						: 0,
-				},
-			};
-			const blob = new Blob([JSON.stringify(reportData, null, 2)], {
-				type: "application/json",
-			});
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = `analytics-report-${dateRange}-${new Date().toISOString().split("T")[0]}.json`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
+			const workbook = XLSX.utils.book_new();
+			const generatedAt = new Date().toISOString();
+			const revenueGrowthPct = data.growth?.revenue?.growth ?? 0;
+			const bookingGrowthPct = data.growth?.bookings?.growth ?? 0;
+			const driverUtilizationPct = stats.totalDrivers
+				? Math.round(((stats.activeDrivers ?? 0) / stats.totalDrivers) * 100)
+				: 0;
+
+			const summaryRows: (string | number)[][] = [
+				["Utos & Co. — Advanced analytics export"],
+				[],
+				["Date range", dateRangePresetLabel(dateRange)],
+				["Generated at (UTC)", generatedAt],
+				[],
+				["Metric", "Value"],
+				["Total revenue ($)", (stats.totalRevenue ?? 0) / 100],
+				["Revenue growth vs prior period (%)", revenueGrowthPct],
+				["Total bookings", stats.totalBookings ?? 0],
+				["Booking growth vs prior period (%)", bookingGrowthPct],
+				["Completed bookings", stats.completedBookings ?? 0],
+				["Completion rate (%)", stats.completionRate ?? 0],
+				["Active drivers", stats.activeDrivers ?? 0],
+				["Total drivers", stats.totalDrivers ?? 0],
+				["Driver utilization (%)", driverUtilizationPct],
+			];
+
+			const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
+			XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+
+			if (analyticsData?.revenueByType) {
+				const r = analyticsData.revenueByType;
+				const typeRows: (string | number)[][] = [
+					["Booking type", "Bookings", "Revenue ($)"],
+					["Package", r.package.count, r.package.revenue / 100],
+					["Custom", r.custom.count, r.custom.revenue / 100],
+					["Offload", r.offload.count, r.offload.revenue / 100],
+				];
+				XLSX.utils.book_append_sheet(
+					workbook,
+					XLSX.utils.aoa_to_sheet(typeRows),
+					"Revenue by type",
+				);
+			}
+
+			const dateStr = new Date().toISOString().split("T")[0];
+			XLSX.writeFile(workbook, `analytics-report-${dateRange}-${dateStr}.xlsx`);
 		} finally {
 			setIsExporting(false);
 		}

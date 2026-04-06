@@ -7,12 +7,8 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		NODE_ENV: "development" | "production";
-		SITE_URL:
-			| "https://utos-and-co-staging.utosandco.workers.dev"
-			| "https://utosandco.com";
-		SQUARE_APPLICATION_ID:
-			| "sandbox-sq0idb-NIoQ14HVzSUecRSlgTsM3w"
-			| "sq0idp-wpkwV-CJfxKviQYYzXFlhg";
+		SITE_URL: "https://utos-and-co-staging.utosandco.workers.dev" | "https://utosandco.com";
+		SQUARE_APPLICATION_ID: "sandbox-sq0idb-NIoQ14HVzSUecRSlgTsM3w" | "sq0idp-wpkwV-CJfxKviQYYzXFlhg";
 		SQUARE_LOCATION_ID: "L8P964X218027" | "LCC9KVWA5GF9E";
 		SQUARE_ENVIRONMENT: "sandbox" | "production";
 		COOKIE_DOMAIN: ".utosandco.com";
@@ -42,43 +38,10 @@ declare namespace Cloudflare {
 }
 interface Env extends Cloudflare.Env {}
 type StringifyValues<EnvType extends Record<string, unknown>> = {
-	[Binding in keyof EnvType]: EnvType[Binding] extends string
-		? EnvType[Binding]
-		: string;
+	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv
-		extends StringifyValues<
-			Pick<
-				Cloudflare.Env,
-				| "NODE_ENV"
-				| "SITE_URL"
-				| "SQUARE_APPLICATION_ID"
-				| "SQUARE_LOCATION_ID"
-				| "SQUARE_ENVIRONMENT"
-				| "COOKIE_DOMAIN"
-				| "CLOUDFLARE_ACCOUNT_ID"
-				| "CLOUDFLARE_D1_TOKEN"
-				| "CLOUDFLARE_DATABASE_ID"
-				| "CLOUDFLARE_R2_TOKEN_KEY"
-				| "CLOUDFLARE_R2_ACCESS_KEY_ID"
-				| "CLOUDFLARE_R2_SECRET_ACCESS_KEY"
-				| "CLOUDFLARE_R2_BUCKET_NAME"
-				| "CLOUDFLARE_R2_REGION"
-				| "CLOUDFLARE_R2_S3_ENDPOINT"
-				| "CLOUDFLARE_R2_PUBLIC_URL"
-				| "CORS_ORIGIN"
-				| "BETTER_AUTH_SECRET"
-				| "BETTER_AUTH_URL"
-				| "GOOGLE_CLIENT_ID"
-				| "GOOGLE_CLIENT_SECRET"
-				| "GOOGLE_EMAIL_REFRESH_TOKEN"
-				| "GOOGLE_EMAIL_ACCESS_TOKEN"
-				| "GOOGLE_EMAIL_USER"
-				| "GOOGLE_MAPS_API_KEY"
-				| "LOCAL_DB_PATH"
-			>
-		> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "NODE_ENV" | "SITE_URL" | "SQUARE_APPLICATION_ID" | "SQUARE_LOCATION_ID" | "SQUARE_ENVIRONMENT" | "COOKIE_DOMAIN" | "CLOUDFLARE_ACCOUNT_ID" | "CLOUDFLARE_D1_TOKEN" | "CLOUDFLARE_DATABASE_ID" | "CLOUDFLARE_R2_TOKEN_KEY" | "CLOUDFLARE_R2_ACCESS_KEY_ID" | "CLOUDFLARE_R2_SECRET_ACCESS_KEY" | "CLOUDFLARE_R2_BUCKET_NAME" | "CLOUDFLARE_R2_REGION" | "CLOUDFLARE_R2_S3_ENDPOINT" | "CLOUDFLARE_R2_PUBLIC_URL" | "CORS_ORIGIN" | "BETTER_AUTH_SECRET" | "BETTER_AUTH_URL" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "GOOGLE_EMAIL_REFRESH_TOKEN" | "GOOGLE_EMAIL_ACCESS_TOKEN" | "GOOGLE_EMAIL_USER" | "GOOGLE_MAPS_API_KEY" | "LOCAL_DB_PATH">> {}
 }
 
 // Begin runtime types

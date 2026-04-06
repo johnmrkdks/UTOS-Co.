@@ -20,6 +20,12 @@ export async function createPricingConfigService(
 ) {
 	const values = data as InsertPricingConfig;
 
-	const [newConfig] = await db.insert(pricingConfig).values(values).returning();
+	const [newConfig] = await db
+		.insert(pricingConfig)
+		.values({
+			...values,
+			hourlyRate: values.hourlyRate ?? null,
+		})
+		.returning();
 	return newConfig;
 }

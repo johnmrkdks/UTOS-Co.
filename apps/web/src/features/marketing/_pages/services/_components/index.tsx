@@ -1,31 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import {
-	Building,
-	Calendar,
-	Car,
-	Clock,
-	MapPin,
-	Plane,
-	Shield,
-	Sparkles,
-	Star,
-	Users,
-} from "lucide-react";
+import { Car, Clock, Shield, Sparkles, Star, Users } from "lucide-react";
+import servicesFleetHero from "@/assets/marketing/services-official-transport-fleet.png";
+import { Logo } from "@/components/logo";
 import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
 import { useGetPublishedCarsQuery } from "../_hooks/query/use-get-published-cars-query";
 import { useGetPublishedPackagesQuery } from "../_hooks/query/use-get-published-packages-query";
-
-// Service type to icon mapping
-const serviceIcons: Record<string, any> = {
-	transfer: Plane,
-	tour: MapPin,
-	event: Sparkles,
-	hourly: Calendar,
-	corporate: Building,
-	vip: Users,
-};
 
 type ServicesProps = {
 	className?: string;
@@ -67,7 +48,6 @@ export function Services({ className, ...props }: ServicesProps) {
 
 			return {
 				id: pkg.id,
-				icon: serviceIcons[pkg.serviceType] || Building,
 				title: pkg.name,
 				description: pkg.description,
 				bannerImageUrl: pkg.bannerImageUrl,
@@ -89,26 +69,47 @@ export function Services({ className, ...props }: ServicesProps) {
 		})) || [];
 	return (
 		<div className={cn("", className)} {...props}>
+			{/* Hero — official fleet */}
+			<div
+				className="relative bg-[center_65%] bg-cover bg-no-repeat py-20 md:py-28"
+				style={{ backgroundImage: `url(${servicesFleetHero})` }}
+			>
+				<div className="absolute inset-0 bg-gradient-to-br from-stone-950/90 via-stone-900/78 to-stone-950/88" />
+				<div className="container relative z-10 mx-auto px-6 text-center">
+					<div className="mx-auto max-w-2xl">
+						<p className="mb-3 font-medium text-[0.65rem] text-primary-secondary/95 uppercase tracking-[0.22em]">
+							Services
+						</p>
+						<h1 className="mb-4 font-semibold text-3xl text-white tracking-tight md:text-4xl lg:text-5xl">
+							How we can drive you
+						</h1>
+						<p className="mx-auto text-base text-white/80 leading-relaxed md:text-lg">
+							Transfers, hourly hire, events, and corporate travel — licensed
+							chauffeurs and a maintained fleet.
+						</p>
+					</div>
+				</div>
+			</div>
+
 			{/* Services Grid */}
-			<div className="bg-background py-24">
+			<div className="bg-background py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							Our Premium Services
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							Offerings
 						</h2>
-						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
-							Choose from our comprehensive range of luxury transportation
-							services, each designed to exceed your expectations.
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+							Pick a service — pricing shown where available.
 						</p>
 					</div>
 
-					<div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{packagesLoading ? (
 							// Loading skeleton
 							Array.from({ length: 6 }).map((_, index) => (
 								<div
 									key={index}
-									className="rounded-2xl border-2 border-border bg-card p-8"
+									className="rounded-xl border border-border/60 bg-card p-6"
 								>
 									<div className="mb-6 flex items-center">
 										<div className="mr-4 h-14 w-14 animate-pulse rounded-2xl bg-muted" />
@@ -135,15 +136,13 @@ export function Services({ className, ...props }: ServicesProps) {
 								<div
 									key={service.title}
 									className={cn(
-										"group relative overflow-hidden rounded-2xl border-2 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-xl",
-										service.popular
-											? "border-primary shadow-lg"
-											: "border-border",
+										"group relative overflow-hidden rounded-xl border border-border/60 bg-card transition-colors hover:border-border",
+										service.popular ? "ring-1 ring-border/80" : "",
 									)}
 								>
 									{service.popular && (
-										<div className="-top-3 absolute left-6 z-10 rounded-full bg-primary px-4 py-1 font-semibold text-primary-foreground text-sm">
-											Most Popular
+										<div className="-top-px absolute left-4 z-10 rounded-b-md bg-foreground px-3 py-1 font-medium text-background text-xs">
+											Popular
 										</div>
 									)}
 
@@ -174,10 +173,13 @@ export function Services({ className, ...props }: ServicesProps) {
 											/>
 											<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-											{/* Service icon overlay */}
+											{/* Company logo */}
 											<div className="absolute top-4 left-4">
-												<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/90 shadow-lg">
-													<service.icon className="h-6 w-6 text-primary" />
+												<div
+													className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/90 p-1.5 shadow-lg"
+													aria-hidden
+												>
+													<Logo className="h-full max-h-8 w-auto max-w-[52px] object-contain object-center" />
 												</div>
 											</div>
 
@@ -197,8 +199,11 @@ export function Services({ className, ...props }: ServicesProps) {
 										// Fallback design when no banner image
 										<div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-primary/20">
 											<div className="text-center">
-												<div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20">
-													<service.icon className="h-8 w-8 text-primary/60" />
+												<div
+													className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 p-2"
+													aria-hidden
+												>
+													<Logo className="h-full max-h-10 w-auto max-w-[72px] object-contain object-center" />
 												</div>
 												<h3 className="px-2 font-medium text-gray-600 text-lg">
 													{service.title}
@@ -238,8 +243,8 @@ export function Services({ className, ...props }: ServicesProps) {
 											to="/book-service/$serviceId"
 											params={{ serviceId: service.id }}
 										>
-											<Button className="w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-all duration-300 hover:bg-primary/90">
-												Book This Service
+											<Button className="h-10 w-full rounded-md font-medium">
+												Book
 											</Button>
 										</Link>
 									</div>
@@ -270,25 +275,24 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* Fleet Showcase */}
-			<div className="bg-beige py-24">
+			<div className="bg-muted/20 py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							Our Premium Fleet
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							Fleet snapshot
 						</h2>
-						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
-							Experience luxury and comfort with our meticulously maintained
-							fleet of premium vehicles, each equipped with modern amenities.
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+							A selection of vehicles — book for a tailored quote.
 						</p>
 					</div>
 
-					<div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{carsLoading ? (
 							// Loading skeleton for cars
 							Array.from({ length: 3 }).map((_, index) => (
 								<div
 									key={index}
-									className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg"
+									className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-none"
 								>
 									<div className="h-48 animate-pulse bg-muted" />
 									<div className="p-6">
@@ -306,7 +310,7 @@ export function Services({ className, ...props }: ServicesProps) {
 							fleetHighlights.map((vehicle: any, index: number) => (
 								<div
 									key={vehicle.name}
-									className="group overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl"
+									className="group overflow-hidden rounded-xl border border-border/60 bg-card shadow-none transition-colors hover:border-border"
 								>
 									<div className="flex h-48 items-center justify-center overflow-hidden bg-muted">
 										{vehicle.image &&
@@ -354,9 +358,9 @@ export function Services({ className, ...props }: ServicesProps) {
 										>
 											<Button
 												variant="outline"
-												className="w-full border-primary/20 text-primary transition-all duration-300 hover:bg-primary/10"
+												className="h-10 w-full rounded-md"
 											>
-												Book This Car
+												Quote this vehicle
 											</Button>
 										</Link>
 									</div>
@@ -387,14 +391,14 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* Why Choose Us */}
-			<div className="bg-background py-24">
+			<div className="bg-background py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="grid items-center gap-16 lg:grid-cols-2">
+					<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 						<div>
-							<h2 className="mb-6 font-bold text-4xl text-foreground">
-								Why Choose Utos & Co.?
+							<h2 className="mb-4 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+								Why Utos & Co.
 							</h2>
-							<p className="mb-8 text-muted-foreground text-xl leading-relaxed">
+							<p className="mb-8 text-base text-muted-foreground leading-relaxed md:text-lg">
 								We're not just a transportation service – we're your partners in
 								creating exceptional travel experiences that reflect your style
 								and priorities.
@@ -422,8 +426,8 @@ export function Services({ className, ...props }: ServicesProps) {
 									},
 								].map((benefit, index) => (
 									<div key={benefit.title} className="flex items-start">
-										<div className="mt-1 mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-											<benefit.icon className="h-6 w-6 text-primary" />
+										<div className="mt-0.5 mr-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/60">
+											<benefit.icon className="h-5 w-5 text-foreground/80" />
 										</div>
 										<div>
 											<h3 className="mb-2 font-bold text-foreground text-lg">
@@ -439,11 +443,16 @@ export function Services({ className, ...props }: ServicesProps) {
 						</div>
 
 						<div className="relative">
-							<div className="flex aspect-square items-center justify-center rounded-3xl bg-primary/10">
-								<Car className="h-32 w-32 text-primary" />
+							<div className="aspect-[4/3] overflow-hidden rounded-2xl border border-border/50 shadow-none">
+								<img
+									src={servicesFleetHero}
+									alt="UTOS & Co. luxury fleet — official transport"
+									className="h-full w-full object-cover object-center"
+								/>
+								<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 							</div>
-							<div className="-bottom-6 -right-6 absolute flex h-24 w-24 items-center justify-center rounded-2xl bg-muted">
-								<Sparkles className="h-8 w-8 text-muted-foreground" />
+							<div className="-bottom-4 -right-4 absolute flex h-14 w-14 items-center justify-center rounded-xl border border-border/60 bg-background">
+								<Sparkles className="h-6 w-6 text-muted-foreground" />
 							</div>
 						</div>
 					</div>
@@ -451,34 +460,34 @@ export function Services({ className, ...props }: ServicesProps) {
 			</div>
 
 			{/* CTA Section */}
-			<div className="bg-primary py-24">
+			<div className="bg-primary py-16 md:py-24">
 				<div className="container mx-auto px-6 text-center">
-					<div className="mx-auto max-w-3xl">
-						<h2 className="mb-6 font-bold text-4xl text-white">
-							Ready to Experience Luxury Transportation?
+					<div className="mx-auto max-w-2xl">
+						<h2 className="mb-4 font-semibold text-2xl text-white tracking-tight md:text-3xl">
+							Ready when you are
 						</h2>
-						<p className="mb-8 text-white/80 text-xl leading-relaxed">
+						<p className="mb-8 text-base text-white/85 leading-relaxed md:text-lg">
 							Book your premium chauffeur service today and discover why
 							discerning clients choose Utos & Co. for their transportation
 							needs.
 						</p>
 
-						<div className="flex flex-col justify-center gap-4 sm:flex-row">
+						<div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
 							<Link to="/fleet">
 								<Button
 									size="lg"
-									className="rounded-xl bg-white px-8 py-6 font-semibold text-lg text-primary hover:bg-beige"
+									className="h-12 rounded-md bg-white px-8 font-medium text-primary hover:bg-white/95"
 								>
-									Book Your Journey
+									View fleet
 								</Button>
 							</Link>
 							<Link to="/contact-us">
 								<Button
 									variant="outline"
 									size="lg"
-									className="rounded-xl border-white/20 px-8 py-6 font-semibold text-lg text-primary hover:bg-white/10"
+									className="h-12 rounded-md border-white/35 bg-transparent px-8 font-medium text-white hover:bg-white/10"
 								>
-									Contact Us
+									Contact
 								</Button>
 							</Link>
 						</div>

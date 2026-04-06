@@ -92,6 +92,41 @@
 			"when": 1760000000000,
 			"tag": "0012_square_payments",
 			"breakpoints": true
+		},
+		{
+			"idx": 13,
+			"version": "6",
+			"when": 1760100000000,
+			"tag": "0013_blog_posts",
+			"breakpoints": true
+		},
+		{
+			"idx": 14,
+			"version": "6",
+			"when": 1760200000000,
+			"tag": "0014_pricing_config_hourly_rate",
+			"breakpoints": true
+		},
+		{
+			"idx": 15,
+			"version": "6",
+			"when": 1760300000000,
+			"tag": "0015_blog_post_image_urls",
+			"breakpoints": true
+		},
+		{
+			"idx": 16,
+			"version": "6",
+			"when": 1760400000000,
+			"tag": "0016_system_hourly_template_package",
+			"breakpoints": true
+		},
+		{
+			"idx": 17,
+			"version": "6",
+			"when": 1760500000000,
+			"tag": "0017_unpublish_system_hourly_template",
+			"breakpoints": true
 		}
 	]
 }

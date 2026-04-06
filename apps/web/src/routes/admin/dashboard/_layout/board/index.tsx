@@ -12,10 +12,8 @@ import {
 	AlertCircle,
 	Calendar,
 	Car,
-	CheckCircle,
 	Clock,
 	Loader2,
-	MapPin,
 	Package,
 	Users,
 } from "lucide-react";
@@ -97,17 +95,16 @@ function AdminDashboard() {
 		}).length || 0;
 
 	// Analytics card data for admin dashboard
+	const strip = "from-foreground/18 via-foreground/8 to-transparent" as const;
 	const adminAnalyticsData: AnalyticsCardData[] = [
 		{
 			id: "bookings",
 			title: "Bookings",
 			value: stats.totalBookings,
 			icon: Calendar,
-			bgGradient:
-				"bg-gradient-to-br from-card via-slate-50/40 to-slate-100/30",
-			iconBg: "bg-gradient-to-br from-slate-600 to-slate-800",
-			accentStripClassName:
-				"from-slate-600/65 via-slate-500/45 to-slate-400/30",
+			bgGradient: "bg-card",
+			iconBg: "bg-foreground/88",
+			accentStripClassName: strip,
 			changeText: `+${stats.activeBookings} active`,
 			changeType: "positive",
 			showTrend: true,
@@ -119,11 +116,9 @@ function AdminDashboard() {
 			title: "Vehicles",
 			value: totalVehicles,
 			icon: Car,
-			bgGradient:
-				"bg-gradient-to-br from-card via-zinc-50/35 to-stone-100/25",
-			iconBg: "bg-gradient-to-br from-zinc-500 to-zinc-700",
-			accentStripClassName:
-				"from-zinc-600/55 via-zinc-500/40 to-stone-400/28",
+			bgGradient: "bg-card",
+			iconBg: "bg-foreground/88",
+			accentStripClassName: strip,
 			changeText: `${availableVehicles} available`,
 			changeType: "neutral",
 			showTrend: false,
@@ -135,11 +130,9 @@ function AdminDashboard() {
 			title: "Packages",
 			value: stats.totalPackages,
 			icon: Package,
-			bgGradient:
-				"bg-gradient-to-br from-card via-neutral-50/35 to-stone-50/30",
-			iconBg: "bg-gradient-to-br from-neutral-600 to-neutral-800",
-			accentStripClassName:
-				"from-neutral-600/55 via-neutral-500/42 to-stone-400/28",
+			bgGradient: "bg-card",
+			iconBg: "bg-foreground/88",
+			accentStripClassName: strip,
 			changeText: `${stats.activePackages} active`,
 			changeType: "neutral",
 			showTrend: false,
@@ -151,11 +144,9 @@ function AdminDashboard() {
 			title: "Drivers",
 			value: stats.totalDrivers,
 			icon: Users,
-			bgGradient:
-				"bg-gradient-to-br from-card via-amber-50/30 to-amber-100/20",
-			iconBg: "bg-gradient-to-br from-amber-600 to-amber-900",
-			accentStripClassName:
-				"from-amber-700/60 via-amber-500/45 to-amber-300/35",
+			bgGradient: "bg-card",
+			iconBg: "bg-foreground/88",
+			accentStripClassName: strip,
 			changeText: `${stats.activeDrivers} active`,
 			changeType: "positive",
 			showTrend: false,
@@ -167,27 +158,21 @@ function AdminDashboard() {
 	const recentActivity = data?.recentActivity || [];
 
 	return (
-		<div className="space-y-8 p-4 sm:space-y-10 sm:p-6">
+		<div className="space-y-8 py-6 sm:space-y-10 sm:py-8">
 			{/* Welcome Header */}
-			<div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/95 p-5 shadow-[0_1px_0_0_oklch(1_0_0/0.85)_inset,0_12px_48px_-24px_oklch(0.35_0.04_260/0.14)] sm:p-7">
-				<div
-					className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_0%,oklch(0.88_0.06_75/0.14),transparent_55%),radial-gradient(ellipse_60%_50%_at_100%_100%,oklch(0.85_0.04_265/0.08),transparent_50%)]"
-					aria-hidden
-				/>
-				<div className="relative">
-					<p className="font-semibold text-[0.65rem] text-muted-foreground uppercase tracking-[0.22em]">
-						Overview
-					</p>
-					<div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<h1 className="font-semibold text-2xl text-foreground tracking-tight sm:text-3xl">
-								Admin dashboard
-							</h1>
-							<p className="mt-1.5 max-w-xl text-muted-foreground text-sm leading-relaxed sm:text-base">
-								Bookings, fleet, packages, and drivers — live snapshot of your
-								operation.
-							</p>
-						</div>
+			<div className="rounded-xl border border-border/60 bg-card p-5 sm:p-6">
+				<p className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+					Overview
+				</p>
+				<div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h1 className="font-semibold text-2xl text-foreground tracking-tight sm:text-3xl">
+							Admin dashboard
+						</h1>
+						<p className="mt-1 max-w-xl text-muted-foreground text-sm leading-relaxed">
+							Bookings, fleet, packages, and drivers — live snapshot of your
+							operation.
+						</p>
 					</div>
 				</div>
 			</div>
@@ -199,21 +184,21 @@ function AdminDashboard() {
 						key={data.id}
 						data={data}
 						view="compact"
-						className="touch-manipulation"
+						className="touch-manipulation border-border/50 shadow-none hover:shadow-none"
 					/>
 				))}
 			</div>
 
 			{/* Recent Activity */}
-			<DashboardChartCard className="border-border/50 bg-card/95 shadow-[0_1px_0_0_oklch(1_0_0/0.8)_inset,0_12px_40px_-20px_oklch(0.35_0.03_260/0.1)]">
-				<CardHeader className="border-border/40 border-b bg-gradient-to-r from-muted/25 to-transparent pb-4">
+			<DashboardChartCard>
+				<CardHeader className="border-border/50 border-b pb-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
-							<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 sm:h-11 sm:w-11">
-								<Activity className="h-5 w-5 text-primary sm:h-5 sm:w-5" />
+							<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted sm:h-10 sm:w-10">
+								<Activity className="h-4 w-4 text-foreground sm:h-[18px] sm:w-[18px]" />
 							</div>
 							<div>
-								<CardTitle className="font-semibold text-lg tracking-tight sm:text-xl">
+								<CardTitle className="font-semibold text-base tracking-tight sm:text-lg">
 									Recent activity
 								</CardTitle>
 								<CardDescription className="hidden text-sm sm:block">
@@ -223,17 +208,17 @@ function AdminDashboard() {
 						</div>
 					</div>
 				</CardHeader>
-				<CardContent className="pt-5">
-					<div className="space-y-3 sm:space-y-4">
+				<CardContent className="pt-4">
+					<div className="space-y-2 sm:space-y-3">
 						{recentActivity.length === 0 ? (
-							<div className="rounded-xl border border-border/50 border-dashed bg-muted/15 px-4 py-12 text-center">
-								<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/50 ring-1 ring-border/60">
-									<Activity className="h-6 w-6 text-muted-foreground/70" />
+							<div className="rounded-lg border border-border/60 border-dashed bg-muted/20 px-4 py-10 text-center">
+								<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+									<Activity className="h-5 w-5 text-muted-foreground" />
 								</div>
 								<p className="font-medium text-foreground text-sm">
 									No recent activity yet
 								</p>
-								<p className="mx-auto mt-1 max-w-sm text-muted-foreground text-xs leading-relaxed sm:text-sm">
+								<p className="mx-auto mt-1 max-w-sm text-muted-foreground text-xs leading-relaxed">
 									When customers create bookings, they will show up here with
 									status and timing.
 								</p>
@@ -242,7 +227,7 @@ function AdminDashboard() {
 							recentActivity.map((activity: any) => (
 								<div
 									key={activity.id}
-									className="flex items-center justify-between rounded-xl border border-border/45 bg-card/30 p-3 transition-all duration-200 hover:border-border/60 hover:bg-muted/25 hover:shadow-sm sm:p-4"
+									className="flex items-center justify-between rounded-lg border border-border/50 bg-background p-3 transition-colors hover:bg-muted/30 sm:p-3.5"
 								>
 									<div className="flex min-w-0 flex-1 items-center gap-3">
 										<div

@@ -1,4 +1,5 @@
 export * from "./accounts";
+export * from "./blog-posts";
 export * from "./booking-policies";
 export * from "./bookings";
 export * from "./bookings/booking-extras";

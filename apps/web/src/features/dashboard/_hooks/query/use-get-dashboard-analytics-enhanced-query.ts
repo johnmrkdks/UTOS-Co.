@@ -51,6 +51,8 @@ export const formatDashboardAnalytics = (analytics: any) => {
 			stats: {
 				totalBookings: 0,
 				activeBookings: 0,
+				pendingBookings: 0,
+				completedBookings: 0,
 				totalRevenue: 0,
 				monthlyRevenue: 0,
 				totalPackages: 0,
@@ -62,6 +64,10 @@ export const formatDashboardAnalytics = (analytics: any) => {
 				totalReviews: 0,
 			},
 			recentActivity: [],
+			growth: {
+				bookings: { thisMonth: 0, lastMonth: 0, growth: 0 },
+				revenue: { thisMonth: 0, lastMonth: 0, growth: 0 },
+			},
 		};
 	}
 

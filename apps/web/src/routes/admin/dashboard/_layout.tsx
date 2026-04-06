@@ -24,12 +24,12 @@ function RouteComponent() {
 	const scrollContainerRef = useScrollToTop();
 
 	return (
-		<div className="dashboard-app min-h-svh">
+		<div className="dashboard-app min-h-svh bg-muted/25">
 			<SidebarProvider>
 				<DashboardSidebar />
-				<SidebarInset className="relative">
+				<SidebarInset className="relative bg-background">
 					<DashboardNavbar className="sticky top-0 z-10 print:hidden" />
-					<div className="flex min-h-[calc(100vh-var(--navbar-height,60px))] w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 overflow-hidden bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,oklch(0.88_0.04_85/0.18),transparent)] bg-background">
+					<div className="flex min-h-[calc(100vh-var(--navbar-height,52px))] w-full max-w-[calc(100vw-var(--sidebar-width))] flex-1 overflow-hidden">
 						<div
 							ref={scrollContainerRef}
 							className="relative flex-1 overflow-y-auto overflow-x-hidden"
@@ -39,7 +39,7 @@ function RouteComponent() {
 									<Loader />
 								</div>
 							)}
-							<div className="mx-auto w-full max-w-7xl">
+							<div className="mx-auto w-full max-w-7xl px-1 sm:px-6">
 								<Suspense fallback={<Loader />}>
 									<Outlet />
 								</Suspense>

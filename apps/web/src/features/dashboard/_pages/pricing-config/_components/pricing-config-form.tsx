@@ -52,15 +52,12 @@ const pricingConfigSchema = z.object({
 		.string()
 		.min(1, "Please select a car for this pricing configuration"),
 	firstKmRate: z
-		.number({
-			message: "Please enter the first KM rate",
-			invalid_type_error: "First KM rate must be a valid number",
-		})
+		.number({ message: "Please enter the first KM rate" })
 		.min(0.01, "First KM rate must be greater than 0"),
 	firstKmLimit: z
 		.union([
 			z
-				.number({ invalid_type_error: "First KM limit must be a valid number" })
+				.number({ message: "First KM limit must be a valid number" })
 				.min(1, "First KM limit must be at least 1"),
 			z.undefined(),
 		])
@@ -68,10 +65,17 @@ const pricingConfigSchema = z.object({
 	pricePerKm: z
 		.union([
 			z
-				.number({
-					invalid_type_error: "Additional KM rate must be a valid number",
-				})
+				.number({ message: "Additional KM rate must be a valid number" })
 				.min(0.01, "Additional KM rate must be greater than 0"),
+			z.undefined(),
+		])
+		.optional(),
+	/** Optional: used for instant quote / hourly package bookings for this vehicle */
+	hourlyRate: z
+		.union([
+			z
+				.number({ message: "Hourly rate must be a valid number" })
+				.min(0.01, "Hourly rate must be greater than 0"),
 			z.undefined(),
 		])
 		.optional(),
@@ -119,6 +123,7 @@ export function PricingConfigForm({
 			firstKmRate: initialData?.firstKmRate || undefined,
 			firstKmLimit: initialData?.firstKmLimit || undefined,
 			pricePerKm: initialData?.pricePerKm || undefined,
+			hourlyRate: initialData?.hourlyRate ?? undefined,
 			isActive: initialData?.isActive ?? true,
 		},
 	});
@@ -151,20 +156,36 @@ export function PricingConfigForm({
 	const onSubmit = async (data: PricingConfigForm) => {
 		setIsSubmitting(true);
 		try {
-			// Apply defaults for undefined values before submission
-			const processedData = {
-				...data,
-				firstKmLimit: data.firstKmLimit ?? 10,
-				pricePerKm: data.pricePerKm ?? 4.85,
-			};
+			// Only send columns that exist on pricing_configs (omit isActive — not a DB column)
+			const firstKmLimit = data.firstKmLimit ?? 10;
+			const pricePerKm = data.pricePerKm ?? 4.85;
+			const hourlyRate =
+				typeof data.hourlyRate === "number" && !Number.isNaN(data.hourlyRate)
+					? data.hourlyRate
+					: null;
+
+			const resolvedCarId =
+				data.carId?.trim() || initialData?.carId?.trim() || undefined;
 
 			if (mode === "edit" && initialData?.id) {
 				await updateMutation.mutateAsync({
 					id: initialData.id,
-					...processedData,
+					name: data.name,
+					firstKmRate: data.firstKmRate,
+					firstKmLimit,
+					pricePerKm,
+					hourlyRate,
+					...(resolvedCarId ? { carId: resolvedCarId } : {}),
 				});
 			} else {
-				await createMutation.mutateAsync(processedData);
+				await createMutation.mutateAsync({
+					name: data.name,
+					carId: data.carId,
+					firstKmRate: data.firstKmRate,
+					firstKmLimit,
+					pricePerKm,
+					hourlyRate,
+				});
 			}
 			form.reset();
 			onSuccess?.();
@@ -499,6 +520,48 @@ export function PricingConfigForm({
 													</FormItem>
 												)}
 											/>
+
+											<FormField
+												control={form.control as any}
+												name="hourlyRate"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="flex items-center gap-2">
+															<Clock className="h-4 w-4" />
+															Hourly rate (AUD, optional)
+														</FormLabel>
+														<FormControl>
+															<Input
+																type="number"
+																step="0.01"
+																min="0"
+																placeholder="e.g. 120 — for instant quote hourly"
+																className="bg-white"
+																{...field}
+																value={
+																	field.value === undefined ? "" : field.value
+																}
+																onChange={(e) => {
+																	const value = e.target.value;
+																	if (value === "") {
+																		field.onChange(undefined);
+																	} else {
+																		const numValue = Number.parseFloat(value);
+																		field.onChange(
+																			isNaN(numValue) ? undefined : numValue,
+																		);
+																	}
+																}}
+															/>
+														</FormControl>
+														<FormDescription>
+															When set, this vehicle appears in the home instant
+															quote calculator for hourly bookings at this rate.
+														</FormDescription>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 										</div>
 
 										<div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
@@ -591,6 +654,18 @@ export function PricingConfigForm({
 													${form.watch("pricePerKm") || 4.85} per KM
 												</span>
 											</div>
+											{form.watch("hourlyRate") != null &&
+											(form.watch("hourlyRate") as number) > 0 ? (
+												<div className="flex justify-between">
+													<span className="text-muted-foreground">
+														Hourly (instant quote):
+													</span>
+													<span className="font-medium">
+														${Number(form.watch("hourlyRate")).toFixed(2)}
+														/hr
+													</span>
+												</div>
+											) : null}
 											<div className="border-t pt-2">
 												<div className="mb-1 text-muted-foreground text-xs">
 													Example: 15KM trip

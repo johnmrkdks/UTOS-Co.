@@ -71,6 +71,7 @@
 		"recharts": "2.15.4",
 		"sonner": "^2.0.6",
 		"typescript": "catalog:",
+		"xlsx": "^0.18.5",
 		"zod": "catalog:",
 		"zustand": "^5.0.6"
 	}

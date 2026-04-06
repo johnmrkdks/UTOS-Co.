@@ -30,16 +30,16 @@ const officeDetails = [
 
 export function OfficeDetailsSection() {
 	return (
-		<div className="bg-soft-beige py-24">
+		<div className="bg-background py-16 md:py-24">
 			<div className="container mx-auto px-6">
-				<div className="grid items-start gap-16 lg:grid-cols-2">
+				<div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
 					{/* Contact Form */}
-					<div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
+					<div className="rounded-xl border border-border/60 bg-card p-6 md:p-8">
 						<div className="mb-8">
-							<h3 className="mb-4 font-bold text-3xl text-card-foreground">
-								Send Us a Message
+							<h3 className="mb-2 font-semibold text-card-foreground text-xl tracking-tight md:text-2xl">
+								Message
 							</h3>
-							<p className="text-muted-foreground leading-relaxed">
+							<p className="text-muted-foreground text-sm leading-relaxed md:text-base">
 								Fill out the form below and we'll get back to you within 24
 								hours. For urgent requests, please call us directly.
 							</p>
@@ -50,20 +50,20 @@ export function OfficeDetailsSection() {
 
 					{/* Office Information */}
 					<div className="space-y-8">
-						<div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-							<h3 className="mb-6 font-bold text-2xl text-card-foreground">
-								Visit Our Office
+						<div className="rounded-xl border border-border/60 bg-card p-6 md:p-8">
+							<h3 className="mb-5 font-semibold text-card-foreground text-xl tracking-tight md:text-2xl">
+								Office
 							</h3>
-							<ContactUsMap className="mb-6 h-64 w-full rounded-xl" />
+							<ContactUsMap className="mb-6 h-64 w-full rounded-lg border border-border/40" />
 
-							<div className="space-y-6">
-								{officeDetails.map((detail, index) => (
+							<div className="space-y-5">
+								{officeDetails.map((detail) => (
 									<div key={detail.title} className="flex items-start">
-										<div className="mt-1 mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-											<detail.icon className="h-6 w-6 text-primary" />
+										<div className="mt-0.5 mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted/60">
+											<detail.icon className="h-4 w-4 text-foreground/80" />
 										</div>
 										<div>
-											<h4 className="mb-2 font-bold text-card-foreground text-lg">
+											<h4 className="mb-1 font-medium text-card-foreground text-sm">
 												{detail.title}
 											</h4>
 											{detail.details.map((line, lineIndex) => (

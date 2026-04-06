@@ -1,8 +1,11 @@
+import { and, eq, gt, isNotNull } from "drizzle-orm";
 import { z } from "zod";
+import { SYSTEM_HOURLY_TEMPLATE_PACKAGE_ID } from "@/constants/system-hourly-template";
 import { createBookingStops } from "@/data/booking-stops/create-booking-stops";
 import { createBooking } from "@/data/bookings/create-booking";
 import { getPackage } from "@/data/packages/get-package";
 import type { DB } from "@/db";
+import { pricingConfig } from "@/db/schema";
 import {
 	BookingPaymentStatusEnum,
 	BookingStatusEnum,
@@ -109,7 +112,11 @@ export async function createPackageBookingService(
 		let serviceType = null;
 		let isHourlyService = false;
 
-		if (packageInfo.serviceTypeId) {
+		if (data.packageId === SYSTEM_HOURLY_TEMPLATE_PACKAGE_ID && data.carId) {
+			// Vehicle-priced hourly from instant quote: no DB package row required;
+			// service type id may not exist if migration 0016 was not applied.
+			isHourlyService = true;
+		} else if (packageInfo.serviceTypeId) {
 			try {
 				const { getPackageServiceTypeService } = await import(
 					"@/services/package-service-types/get-package-service-type"
@@ -128,6 +135,31 @@ export async function createPackageBookingService(
 			throw new Error("Service duration is required for hourly services");
 		}
 
+		let effectiveHourlyRate: number | null =
+			packageInfo.hourlyRate != null && packageInfo.hourlyRate > 0
+				? packageInfo.hourlyRate
+				: null;
+		if (isHourlyService && data.carId) {
+			const [pcRow] = await db
+				.select({ hourlyRate: pricingConfig.hourlyRate })
+				.from(pricingConfig)
+				.where(
+					and(
+						eq(pricingConfig.carId, data.carId),
+						isNotNull(pricingConfig.hourlyRate),
+						gt(pricingConfig.hourlyRate, 0),
+					),
+				)
+				.limit(1);
+			if (
+				pcRow?.hourlyRate !== null &&
+				pcRow?.hourlyRate !== undefined &&
+				pcRow.hourlyRate > 0
+			) {
+				effectiveHourlyRate = pcRow.hourlyRate;
+			}
+		}
+
 		// Note: Advance booking time validation removed per CEO requirements
 		// Clients should be able to book anytime
 
@@ -137,9 +169,14 @@ export async function createPackageBookingService(
 			"📝 Preparing booking data...",
 			isGuest ? "(guest booking)" : "",
 		);
+		const storePackageId =
+			data.packageId === SYSTEM_HOURLY_TEMPLATE_PACKAGE_ID
+				? null
+				: data.packageId;
+
 		const bookingData: InsertBooking = {
 			bookingType: BookingTypeEnum.Package,
-			packageId: data.packageId,
+			packageId: storePackageId,
 			carId: data.carId,
 			userId: data.userId ?? null,
 			isGuestBooking: isGuest,
@@ -159,14 +196,14 @@ export async function createPackageBookingService(
 					? data.serviceDuration * 60 // Convert hours to minutes
 					: packageInfo.duration,
 
-			// Calculate pricing based on service type
+			// Calculate pricing based on service type (hourly: package rate or per-vehicle pricing config)
 			quotedAmount:
-				isHourlyService && packageInfo.hourlyRate && data.serviceDuration
-					? packageInfo.hourlyRate * data.serviceDuration
+				isHourlyService && effectiveHourlyRate && data.serviceDuration
+					? effectiveHourlyRate * data.serviceDuration
 					: packageInfo.fixedPrice || 0,
 			finalAmount:
-				isHourlyService && packageInfo.hourlyRate && data.serviceDuration
-					? packageInfo.hourlyRate * data.serviceDuration
+				isHourlyService && effectiveHourlyRate && data.serviceDuration
+					? effectiveHourlyRate * data.serviceDuration
 					: packageInfo.fixedPrice || 0,
 
 			customerName: data.customerName,

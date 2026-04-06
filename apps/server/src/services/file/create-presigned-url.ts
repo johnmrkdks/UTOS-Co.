@@ -6,7 +6,7 @@ import { putObject, s3Client } from "@/lib/s3";
 import { ErrorFactory } from "@/utils/error-factory";
 
 export const CreatePresignedUrlServiceSchema = z.object({
-	entityType: z.enum(["cars", "packages", "bookings", "users"]), // e.g "cars", "package"
+	entityType: z.enum(["cars", "packages", "bookings", "users", "blog"]), // e.g "cars", "package"
 	fileName: z.string(),
 	fileType: z.string(),
 	fileSize: z.number(),
@@ -38,6 +38,9 @@ export async function createPresignedUrlService({
 			break;
 		case "users":
 			key = `${entityType}/user-${randomSuffix}${extension ? `.${extension}` : ""}`;
+			break;
+		case "blog":
+			key = `${entityType}/post-${randomSuffix}${extension ? `.${extension}` : ""}`;
 			break;
 	}
 

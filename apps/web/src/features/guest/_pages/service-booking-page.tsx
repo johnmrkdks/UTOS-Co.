@@ -1,12 +1,7 @@
 import { Link, useParams, useSearch } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@workspace/ui/components/card";
-import { ArrowLeft, Clock, MapPin, Star, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { useMemo } from "react";
 import { useGetPublishedServiceByIdQuery } from "@/features/customer/_hooks/query/use-get-published-service-by-id-query";
 import { HourlyServiceBookingForm } from "../_components/hourly-service-booking-form";
 import { ServiceBookingForm } from "../_components/service-booking-form";
@@ -16,6 +11,33 @@ export function ServiceBookingPage() {
 		from: "/_marketing/book-service/$serviceId",
 	});
 	const search = useSearch({ from: "/_marketing/book-service/$serviceId" });
+
+	const routePrefill = useMemo(() => {
+		if (search.fromInstantQuote !== "1") return undefined;
+		let stopAddresses: string[] | undefined;
+		if (search.stops) {
+			try {
+				const parsed = JSON.parse(search.stops) as unknown;
+				if (Array.isArray(parsed)) {
+					stopAddresses = parsed
+						.map((s) =>
+							typeof s === "string" ? s : (s as { address?: string })?.address,
+						)
+						.filter((a): a is string => Boolean(a?.trim()));
+				}
+			} catch {
+				// ignore
+			}
+		}
+		return {
+			originAddress: search.origin,
+			destinationAddress: search.destination,
+			pickupDate: search.pickupDate,
+			pickupTime: search.pickupTime,
+			stopAddresses,
+			carId: search.carId,
+		};
+	}, [search]);
 
 	const { data: service, isLoading } =
 		useGetPublishedServiceByIdQuery(serviceId);
@@ -79,7 +101,10 @@ export function ServiceBookingPage() {
 			<div className="grid gap-8">
 				{/* Conditionally render appropriate booking form */}
 				{isHourlyService ? (
-					<HourlyServiceBookingForm service={service} />
+					<HourlyServiceBookingForm
+						service={service}
+						routePrefill={routePrefill}
+					/>
 				) : (
 					<ServiceBookingForm service={service} />
 				)}

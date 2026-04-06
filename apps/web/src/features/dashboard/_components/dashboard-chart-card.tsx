@@ -4,9 +4,7 @@ import type * as React from "react";
 
 type DashboardChartCardProps = React.ComponentProps<typeof Card>;
 
-/**
- * Chart / detail panels in the admin dashboard: cream card + subtle gold accent rail.
- */
+/** Chart / detail panels — minimal bordered card. */
 export function DashboardChartCard({
 	className,
 	children,
@@ -15,16 +13,14 @@ export function DashboardChartCard({
 	return (
 		<Card
 			className={cn(
-				"relative gap-0 overflow-hidden rounded-2xl border-border/50 bg-card/90 py-0 shadow-[0_1px_0_0_oklch(1_0_0/0.85)_inset,0_10px_36px_-18px_oklch(0.35_0.03_260/0.12)] ring-1 ring-black/[0.035]",
+				"relative gap-0 overflow-hidden rounded-xl border-border/60 bg-card py-0 shadow-none",
 				className,
 			)}
 			{...props}
 		>
-			<div
-				className="h-1 w-full shrink-0 bg-gradient-to-r from-amber-800/50 via-amber-600/35 to-stone-500/25"
-				aria-hidden
-			/>
-			<div className="flex flex-col gap-6 py-6">{children}</div>
+			<div className="flex flex-col gap-5 py-5 sm:gap-6 sm:py-6">
+				{children}
+			</div>
 		</Card>
 	);
 }

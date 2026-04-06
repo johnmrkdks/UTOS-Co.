@@ -1,4 +1,5 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
+import { SYSTEM_HOURLY_TEMPLATE_PACKAGE_ID } from "@/constants/system-hourly-template";
 import type { DB } from "@/db";
 import { packages } from "@/db/schema";
 import type { Package } from "@/schemas/shared";
@@ -20,9 +21,14 @@ export async function getPublishedPackages(db: DB, options: ResourceList) {
 					? and(
 							eq(packages.isPublished, true),
 							eq(packages.isAvailable, true),
+							ne(packages.id, SYSTEM_HOURLY_TEMPLATE_PACKAGE_ID),
 							opts.where,
 						)
-					: and(eq(packages.isPublished, true), eq(packages.isAvailable, true)),
+					: and(
+							eq(packages.isPublished, true),
+							eq(packages.isAvailable, true),
+							ne(packages.id, SYSTEM_HOURLY_TEMPLATE_PACKAGE_ID),
+						),
 			}),
 		filterBuilder: new RQBFilterBuilder(packages),
 		queryType: "rqb",

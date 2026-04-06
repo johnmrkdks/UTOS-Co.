@@ -15,6 +15,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import faqsHeroBanner from "@/assets/marketing/faqs-events-transport-banner.png";
 import { BUSINESS_INFO } from "@/constants/business-info";
 
 const faqCategories = [
@@ -169,9 +170,12 @@ export function FAQs({ className, ...props }: FAQsProps) {
 
 	return (
 		<div className={cn("", className)} {...props}>
-			{/* Hero Section */}
-			<div className="relative bg-[url('/src/assets/images/car4.jpeg')] bg-center bg-cover bg-no-repeat py-24">
-				<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
+			{/* Hero Section — Events Transport banner */}
+			<div
+				className="relative bg-center bg-cover bg-no-repeat py-24"
+				style={{ backgroundImage: `url(${faqsHeroBanner})` }}
+			>
+				<div className="absolute inset-0 bg-gradient-to-br from-stone-950/88 via-stone-900/78 to-amber-950/72" />
 				<div className="container relative z-10 mx-auto px-6 text-center">
 					<div className="mx-auto max-w-4xl">
 						<div className="mb-6 inline-flex items-center rounded-full bg-beige px-4 py-2 font-medium text-foreground text-xs md:text-sm">
@@ -214,8 +218,13 @@ export function FAQs({ className, ...props }: FAQsProps) {
 			</div>
 
 			{/* FAQ Categories */}
-			<div className="bg-beige py-24">
-				<div className="container mx-auto px-6">
+			<div className="relative overflow-hidden bg-beige py-24">
+				<div
+					aria-hidden
+					className="pointer-events-none absolute inset-0 bg-[length:min(1200px,100%)] bg-top bg-no-repeat opacity-[0.08]"
+					style={{ backgroundImage: `url(${faqsHeroBanner})` }}
+				/>
+				<div className="container relative z-[1] mx-auto px-6">
 					<div className="mx-auto max-w-4xl">
 						{faqCategories.map((category, categoryIndex) => (
 							<div key={category.title} className="mb-12 last:mb-0">

@@ -37,6 +37,27 @@ import { useGetPublishedCarsQuery } from "@/features/customer/_hooks/query/use-g
 import { GooglePlacesInput } from "@/features/marketing/_pages/home/_components/google-places-input-simple";
 import { useCalculateInstantQuoteMutation } from "@/features/marketing/_pages/home/_hooks/query/use-calculate-instant-quote-mutation";
 
+function scheduledPickupFromSearch(search: {
+	pickupDate?: string;
+	pickupTime?: string;
+}): Date | undefined {
+	if (!search.pickupDate || !search.pickupTime) return undefined;
+	const d = new Date(`${search.pickupDate}T${search.pickupTime}`);
+	return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+function appendQuoteContextParams(
+	params: URLSearchParams,
+	search: Record<string, unknown>,
+) {
+	if (search.pickupDate) params.set("pickupDate", String(search.pickupDate));
+	if (search.pickupTime) params.set("pickupTime", String(search.pickupTime));
+	if (search.transferType)
+		params.set("transferType", String(search.transferType));
+	if (search.vehicleCategory)
+		params.set("vehicleCategory", String(search.vehicleCategory));
+}
+
 const quoteFormSchema = z.object({
 	originAddress: z.string().min(1, "Please enter your pickup location"),
 	destinationAddress: z.string().min(1, "Please enter your destination"),
@@ -133,6 +154,8 @@ export function CalculateQuotePage({
 					longitude: stopsGeometry[index]?.geometry?.location?.lng?.(),
 				})) || [];
 
+			const scheduledPickup = scheduledPickupFromSearch(search) ?? new Date();
+
 			const result = await calculateQuoteMutation.mutateAsync({
 				originAddress: data.originAddress,
 				destinationAddress: data.destinationAddress,
@@ -142,6 +165,7 @@ export function CalculateQuotePage({
 				destinationLatitude: destinationLat,
 				destinationLongitude: destinationLng,
 				stops: stopsData,
+				scheduledPickupTime: scheduledPickup,
 			});
 
 			// Navigate to booking or results page with secure quote ID
@@ -215,6 +239,8 @@ export function CalculateQuotePage({
 					longitude: undefined,
 				})) || [];
 
+			const scheduledPickup = scheduledPickupFromSearch(search) ?? new Date();
+
 			const result = await calculateQuoteMutation.mutateAsync({
 				originAddress: search.origin,
 				destinationAddress: search.destination,
@@ -224,6 +250,7 @@ export function CalculateQuotePage({
 				destinationLatitude: destinationLat,
 				destinationLongitude: destinationLng,
 				stops: stopsData,
+				scheduledPickupTime: scheduledPickup,
 			});
 
 			// Navigate to booking or results page with secure quote ID
@@ -274,6 +301,7 @@ export function CalculateQuotePage({
 			if (search.destinationLng)
 				params.set("destinationLng", search.destinationLng);
 			if (search.stops) params.set("stops", search.stops);
+			appendQuoteContextParams(params, search as Record<string, unknown>);
 
 			navigate({
 				to: "/select-vehicle",

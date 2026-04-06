@@ -6,19 +6,15 @@ import {
 	Car,
 	Clock,
 	Heart,
-	MapPin,
 	Shield,
 	Star,
 	Target,
 	Trophy,
 	Users,
 } from "lucide-react";
-import driverImage from "@/assets/people/driver.jpeg";
-
-// Team member images
-import founderImage from "@/assets/people/founder.jpeg";
-import omImage from "@/assets/people/om.jpeg";
+import aboutExecutiveCockpit from "@/assets/marketing/about-executive-cockpit.png";
 import { BUSINESS_INFO } from "@/constants/business-info";
+import { TrustStatsStrip } from "@/features/marketing/_components/trust-stats-strip";
 
 const values = [
 	{
@@ -76,24 +72,6 @@ const achievements = [
 	},
 ];
 
-const team = [
-	{
-		name: "Kris Dana",
-		role: "Founder & CEO",
-		image: founderImage,
-	},
-	{
-		name: "John Mark Bagamaspad",
-		role: "Operations Manager/IT",
-		image: omImage,
-	},
-	{
-		name: "John Stoj",
-		role: "Head Driver",
-		image: driverImage,
-	},
-];
-
 type AboutProps = {
 	className?: string;
 };
@@ -101,22 +79,23 @@ type AboutProps = {
 export function AboutUs({ className, ...props }: AboutProps) {
 	return (
 		<div className={cn("", className)} {...props}>
-			{/* Hero Section */}
-			<div className="relative bg-[url('/src/assets/images/car2.jpeg')] bg-center bg-cover bg-no-repeat py-24">
-				<div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/75 to-foreground/70" />
+			{/* Hero Section — executive interior */}
+			<div
+				className="relative bg-center bg-cover bg-no-repeat py-24 md:py-28"
+				style={{ backgroundImage: `url(${aboutExecutiveCockpit})` }}
+			>
+				<div className="absolute inset-0 bg-gradient-to-br from-stone-950/90 via-stone-900/72 to-amber-950/65" />
 				<div className="container relative z-10 mx-auto px-6 text-center">
-					<div className="mx-auto max-w-4xl">
-						<div className="mb-6 inline-flex items-center rounded-full bg-beige px-4 py-2 font-medium text-foreground text-xs md:text-sm">
-							<MapPin className="mr-2 h-4 w-4" />
-							Sydney's Premier Luxury Transportation
-						</div>
+					<div className="mx-auto max-w-3xl">
+						<p className="mb-3 font-medium text-[0.65rem] text-primary-secondary/95 uppercase tracking-[0.22em]">
+							About
+						</p>
 
-						<h1 className="mb-6 font-bold text-4xl text-white lg:text-6xl">
-							Our Story of
-							<span className="block text-primary-secondary">Excellence</span>
+						<h1 className="mb-5 font-semibold text-3xl text-white tracking-tight md:text-4xl lg:text-5xl">
+							Our story
 						</h1>
 
-						<p className="mx-auto max-w-3xl text-lg text-white/80 leading-relaxed md:text-xl">
+						<p className="mx-auto max-w-2xl text-base text-white/80 leading-relaxed md:text-lg">
 							Founded on the principles of luxury, reliability, and exceptional
 							service,
 							{BUSINESS_INFO.business.name} has become Sydney's most trusted
@@ -126,23 +105,25 @@ export function AboutUs({ className, ...props }: AboutProps) {
 				</div>
 			</div>
 
+			<TrustStatsStrip />
+
 			{/* About Utos & Co. */}
-			<div className="bg-beige py-24">
+			<div className="bg-muted/20 py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							About Utos & Co.
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-2 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							Utos & Co.
 						</h2>
 					</div>
 
-					<div className="grid gap-12 lg:grid-cols-3">
+					<div className="grid gap-8 lg:grid-cols-3">
 						{/* Our History */}
-						<div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-							<div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-								<Clock className="h-8 w-8 text-primary" />
+						<div className="rounded-xl border border-border/60 bg-card p-6 md:p-8">
+							<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-lg bg-muted/60">
+								<Clock className="h-5 w-5 text-foreground/80" />
 							</div>
-							<h3 className="mb-4 font-bold text-2xl text-card-foreground">
-								Our History
+							<h3 className="mb-3 font-semibold text-card-foreground text-lg tracking-tight">
+								History
 							</h3>
 							<div className="space-y-4 text-muted-foreground leading-relaxed">
 								<p>
@@ -159,12 +140,12 @@ export function AboutUs({ className, ...props }: AboutProps) {
 						</div>
 
 						{/* Our Fleet */}
-						<div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-							<div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-								<Car className="h-8 w-8 text-primary" />
+						<div className="rounded-xl border border-border/60 bg-card p-6 md:p-8">
+							<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-lg bg-muted/60">
+								<Car className="h-5 w-5 text-foreground/80" />
 							</div>
-							<h3 className="mb-4 font-bold text-2xl text-card-foreground">
-								Our Fleet
+							<h3 className="mb-3 font-semibold text-card-foreground text-lg tracking-tight">
+								Fleet
 							</h3>
 							<p className="text-muted-foreground leading-relaxed">
 								We have a diverse fleet of vehicles to meet your transportation
@@ -174,12 +155,12 @@ export function AboutUs({ className, ...props }: AboutProps) {
 						</div>
 
 						{/* Our Drivers */}
-						<div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-							<div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-								<Users className="h-8 w-8 text-primary" />
+						<div className="rounded-xl border border-border/60 bg-card p-6 md:p-8">
+							<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-lg bg-muted/60">
+								<Users className="h-5 w-5 text-foreground/80" />
 							</div>
-							<h3 className="mb-4 font-bold text-2xl text-card-foreground">
-								Our Drivers
+							<h3 className="mb-3 font-semibold text-card-foreground text-lg tracking-tight">
+								Drivers
 							</h3>
 							<p className="text-muted-foreground leading-relaxed">
 								Our drivers are experienced and professional, ensuring that you
@@ -189,13 +170,10 @@ export function AboutUs({ className, ...props }: AboutProps) {
 						</div>
 					</div>
 
-					<div className="mt-12 text-center">
+					<div className="mt-10 text-center">
 						<Link to="/services">
-							<Button
-								size="lg"
-								className="rounded-xl bg-primary px-8 py-4 font-semibold text-lg text-primary-foreground shadow-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-xl"
-							>
-								Explore Our Services
+							<Button size="lg" className="h-11 rounded-md px-8 font-medium">
+								View services
 							</Button>
 						</Link>
 					</div>
@@ -203,29 +181,29 @@ export function AboutUs({ className, ...props }: AboutProps) {
 			</div>
 
 			{/* Our Values */}
-			<div className="bg-soft-beige py-24">
+			<div className="bg-background py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							Our Core Values
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							Values
 						</h2>
-						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
 							These fundamental principles guide every decision we make and
 							every service we provide, ensuring consistent excellence in all we
 							do.
 						</p>
 					</div>
 
-					<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-						{values.map((value, index) => (
+					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+						{values.map((value) => (
 							<div
 								key={value.title}
-								className="group rounded-2xl border border-border bg-card p-8 text-center shadow-lg transition-all duration-300 hover:shadow-xl"
+								className="rounded-xl border border-border/60 bg-card p-6 text-center"
 							>
-								<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 transition-transform duration-300 group-hover:scale-110">
-									<value.icon className="h-8 w-8 text-primary" />
+								<div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-muted/60">
+									<value.icon className="h-5 w-5 text-foreground/80" />
 								</div>
-								<h3 className="mb-4 font-bold text-card-foreground text-xl">
+								<h3 className="mb-2 font-semibold text-base text-card-foreground">
 									{value.title}
 								</h3>
 								<p className="text-muted-foreground leading-relaxed">
@@ -238,31 +216,31 @@ export function AboutUs({ className, ...props }: AboutProps) {
 			</div>
 
 			{/* Achievements */}
-			<div className="bg-beige py-24">
+			<div className="bg-muted/20 py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							Our Achievements
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							At a glance
 						</h2>
-						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
 							Numbers that reflect our commitment to excellence and the trust
 							our clients place in us every day.
 						</p>
 					</div>
 
-					<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-						{achievements.map((achievement, index) => (
+					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+						{achievements.map((achievement) => (
 							<div
 								key={achievement.title}
-								className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 text-center transition-all duration-300 hover:from-primary/10 hover:to-primary/20"
+								className="rounded-xl border border-border/60 bg-card p-6 text-center"
 							>
-								<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80">
-									<achievement.icon className="h-8 w-8 text-primary-foreground" />
+								<div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-muted/60">
+									<achievement.icon className="h-5 w-5 text-foreground/80" />
 								</div>
-								<div className="mb-2 font-bold text-4xl text-primary">
+								<div className="mb-1 font-semibold text-3xl text-foreground tabular-nums tracking-tight">
 									{achievement.number}
 								</div>
-								<h3 className="mb-3 font-bold text-foreground text-xl">
+								<h3 className="mb-2 font-medium text-foreground text-sm">
 									{achievement.title}
 								</h3>
 								<p className="text-muted-foreground leading-relaxed">
@@ -275,70 +253,55 @@ export function AboutUs({ className, ...props }: AboutProps) {
 			</div>
 
 			{/* Leadership Team */}
-			<div className="bg-soft-beige py-24">
+			<div className="bg-background py-16 md:py-24">
 				<div className="container mx-auto px-6">
-					<div className="mb-16 text-center">
-						<h2 className="mb-4 font-bold text-4xl text-foreground">
-							Meet Our Leadership Team
+					<div className="mb-12 text-center md:mb-16">
+						<h2 className="mb-3 font-semibold text-2xl text-foreground tracking-tight md:text-3xl">
+							Team
 						</h2>
-						<p className="mx-auto max-w-3xl text-muted-foreground text-xl">
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
 							The experienced professionals behind Utos & Co.'s success,
 							dedicated to delivering exceptional service every day.
 						</p>
 					</div>
 
-					<div className="grid gap-8 md:grid-cols-3">
-						{team.map((member, index) => (
-							<div
-								key={member.name}
-								className="rounded-2xl border border-border bg-card p-8 text-center shadow-lg transition-all duration-300 hover:shadow-xl"
-							>
-								<div className="mx-auto mb-6 h-40 w-32 overflow-hidden rounded-2xl shadow-lg">
-									<img
-										src={member.image}
-										alt={`${member.name} - ${member.role}`}
-										className="h-full w-full object-cover object-center"
-									/>
-								</div>
-								<h3 className="mb-2 font-bold text-card-foreground text-xl">
-									{member.name}
-								</h3>
-								<div className="font-semibold text-primary">{member.role}</div>
-							</div>
-						))}
+					<div className="rounded-xl border border-border/60 border-dashed bg-muted/20 px-6 py-16 text-center">
+						<p className="text-muted-foreground text-sm leading-relaxed">
+							Team profiles will appear here once they are added.
+						</p>
 					</div>
 				</div>
 			</div>
 
 			{/* CTA Section */}
-			<div className="bg-gradient-to-br from-primary to-primary/80 py-24">
+			<div className="bg-primary py-16 md:py-24">
 				<div className="container mx-auto px-6 text-center">
-					<div className="mx-auto max-w-3xl">
-						<h2 className="mb-6 font-bold text-4xl text-primary-foreground">
-							Experience the Utos Difference
+					<div className="mx-auto max-w-2xl">
+						<h2 className="mb-4 font-semibold text-2xl text-primary-foreground tracking-tight md:text-3xl">
+							Travel with us
 						</h2>
-						<p className="mb-8 text-primary-foreground/80 text-xl leading-relaxed">
+						<p className="mb-8 text-base text-primary-foreground/85 leading-relaxed md:text-lg">
 							Join thousands of satisfied clients who have discovered why{" "}
 							{BUSINESS_INFO.business.name}
 							is Sydney's premier choice for luxury transportation.
 						</p>
 
-						<div className="flex flex-col justify-center gap-4 sm:flex-row">
+						<div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
 							<Link to="/fleet">
 								<Button
 									size="lg"
-									className="rounded-xl bg-beige px-8 py-6 font-semibold text-foreground text-lg shadow-lg transition-all duration-300 hover:bg-beige/90 hover:shadow-xl"
+									className="h-12 rounded-md bg-background px-8 font-medium text-foreground hover:bg-background/95"
 								>
-									Book Your Journey
+									Fleet
 								</Button>
 							</Link>
 							<Link to="/contact-us">
 								<Button
 									variant="outline"
 									size="lg"
-									className="rounded-xl border-primary-foreground/20 px-8 py-6 font-semibold text-foreground text-lg hover:bg-primary-foreground/10"
+									className="h-12 rounded-md border-primary-foreground/35 bg-transparent px-8 font-medium text-primary-foreground hover:bg-primary-foreground/10"
 								>
-									Contact Us
+									Contact
 								</Button>
 							</Link>
 						</div>

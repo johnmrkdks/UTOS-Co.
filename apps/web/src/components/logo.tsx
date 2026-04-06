@@ -11,7 +11,7 @@ export function Logo({ className }: LogoProps) {
 			src={logo}
 			alt="UTOS & Co. Australia"
 			className={cn(
-				"h-11 max-h-14 w-auto max-w-[min(100%,240px)] object-contain object-left md:h-14 md:max-h-16",
+				"h-11 max-h-14 w-auto max-w-[min(100%,240px)] border-0 bg-transparent object-contain object-left p-0 shadow-none md:h-14 md:max-h-16",
 				className,
 			)}
 		/>

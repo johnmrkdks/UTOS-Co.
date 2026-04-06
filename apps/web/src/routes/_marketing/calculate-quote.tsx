@@ -11,6 +11,10 @@ const calculateQuoteSearchSchema = z.object({
 	destinationLng: z.string().optional(),
 	stops: z.string().optional(), // JSON string of stops
 	selectedCarId: z.string(),
+	pickupDate: z.string().optional(),
+	pickupTime: z.string().optional(),
+	transferType: z.enum(["hourly", "point_to_point"]).optional(),
+	vehicleCategory: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_marketing/calculate-quote")({

@@ -154,26 +154,57 @@ app.post("/api/upload/:entityType", async (c) => {
 		| "cars"
 		| "packages"
 		| "bookings"
-		| "users";
-	if (!["cars", "packages", "bookings", "users"].includes(entityType)) {
+		| "users"
+		| "blog";
+	if (!["cars", "packages", "bookings", "users", "blog"].includes(entityType)) {
 		return c.json({ error: "Invalid entityType" }, 400);
 	}
 
 	const formData = await c.req.formData();
-	const file = formData.get("file");
-	if (!file || !(file instanceof File)) {
+	const raw = formData.get("file");
+	if (raw == null) {
+		return c.json({ error: "No file provided" }, 400);
+	}
+
+	// Workers runtimes sometimes expose Blob but not File; browsers send File.
+	let uploadBody: ArrayBuffer | Blob;
+	let uploadName: string;
+	let uploadType: string;
+	let uploadSize: number;
+	if (raw instanceof File) {
+		uploadBody = raw;
+		uploadName = raw.name;
+		uploadType = raw.type;
+		uploadSize = raw.size;
+	} else if (raw instanceof Blob) {
+		uploadBody = raw;
+		uploadName = "upload.jpg";
+		uploadType = raw.type;
+		uploadSize = raw.size;
+	} else {
 		return c.json({ error: "No file provided" }, 400);
 	}
 
 	try {
 		const result = await uploadFileService({
 			entityType,
-			fileName: file.name,
-			fileType: file.type,
-			fileSize: file.size,
-			body: file,
+			fileName: uploadName,
+			fileType: uploadType,
+			fileSize: uploadSize,
+			body: uploadBody,
 		});
-		return c.json(result);
+		// Always return a browser-valid absolute URL (Zod `.url()` on the client). Using the
+		// request origin avoids bad/missing BETTER_AUTH_URL or R2 placeholder public URLs.
+		let origin: string;
+		try {
+			origin = new URL(c.req.url).origin;
+		} catch {
+			origin = "";
+		}
+		const imageUrl = origin
+			? `${origin}/api/images/${result.key}`
+			: result.imageUrl;
+		return c.json({ ...result, imageUrl });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : "Upload failed";
 		return c.json({ error: message }, 400);

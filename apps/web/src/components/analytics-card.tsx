@@ -57,7 +57,7 @@ export function AnalyticsCard({
 	return (
 		<Card
 			className={cn(
-				"group relative gap-0 overflow-hidden rounded-2xl border-border/60 py-0 shadow-sm ring-1 ring-black/[0.04] transition-shadow hover:shadow-md",
+				"group relative gap-0 overflow-hidden rounded-xl border-border/60 py-0 shadow-none ring-0 transition-colors hover:border-border",
 				bgGradient,
 				className,
 			)}

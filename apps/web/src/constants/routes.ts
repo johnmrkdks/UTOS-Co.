@@ -37,6 +37,7 @@ export const formatPathToLabel = (path: string): string => {
 		"todays-scheduled": "Today's Scheduled",
 		"about-us": "About Us",
 		"contact-us": "Contact Us",
+		faqs: "FAQs",
 	};
 
 	if (labelMap[lastSegment]) {

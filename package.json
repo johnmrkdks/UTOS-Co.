@@ -14,6 +14,7 @@
 		"check": "biome check --write .",
 		"dev": "turbo dev",
 		"build": "turbo build",
+		"build:staging": "pnpm --filter web --filter server run build:staging",
 		"start": "turbo start",
 		"preview": "turbo preview",
 		"check-types": "turbo check-types",

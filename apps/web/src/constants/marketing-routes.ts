@@ -14,8 +14,8 @@ export const MARKETING_ROUTES: RouteConfig[] = [
 		path: "/about-us",
 	},
 	{
-		label: "FAQs",
-		path: "/faqs",
+		label: "Blog",
+		path: "/blogs",
 	},
 	{
 		label: "Contact Us",

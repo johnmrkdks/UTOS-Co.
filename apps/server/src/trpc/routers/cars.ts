@@ -15,7 +15,9 @@ import {
 	getCarPricingEstimateService,
 } from "@/services/cars/get-car-pricing-estimate";
 import { getCarsService } from "@/services/cars/get-cars";
+import { getPublishedCarHourlyRateService } from "@/services/cars/get-published-car-hourly-rate";
 import { getPublishedCarsService } from "@/services/cars/get-published-cars";
+import { getPublishedCarsWithHourlyPricingService } from "@/services/cars/get-published-cars-with-hourly-pricing";
 import {
 	TogglePublishCarServiceSchema,
 	togglePublishCarService,
@@ -116,6 +118,32 @@ export const carsRouter = router({
 						result.data?.map((car) => transformCarImages(car, baseUrl)) ??
 						result.data,
 				};
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		}),
+
+	/** Cars with hourly rate set in pricing config (marketing instant quote hourly). */
+	listPublishedWithHourlyPricing: publicProcedure.query(
+		async ({ ctx: { db } }) => {
+			try {
+				return await getPublishedCarsWithHourlyPricingService(db);
+			} catch (error) {
+				handleTRPCError(error);
+			}
+		},
+	),
+
+	/** Resolve hourly rate from pricing config for a published car (booking page). */
+	getPublishedCarHourlyRate: publicProcedure
+		.input(z.object({ carId: z.string().min(1) }))
+		.query(async ({ ctx: { db }, input }) => {
+			try {
+				const hourlyRate = await getPublishedCarHourlyRateService(
+					db,
+					input.carId,
+				);
+				return { hourlyRate };
 			} catch (error) {
 				handleTRPCError(error);
 			}

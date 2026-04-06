@@ -8,6 +8,7 @@ import {
 import { adminRouter } from "./admin";
 import { analyticsRouter } from "./analytics";
 import { authRouter } from "./auth";
+import { blogPostsRouter } from "./blog-posts";
 import { bookingsRouter } from "./bookings";
 import { carBodyTypesRouter } from "./car-body-types";
 import { carBrandsRouter } from "./car-brands";
@@ -79,6 +80,7 @@ export const appRouter = router({
 	instantQuote: instantQuoteRouter,
 	analytics: analyticsRouter,
 	contactMessages: contactMessagesRouter,
+	blogPosts: blogPostsRouter,
 	auth: authRouter,
 	systemSettings: systemSettingsRouter,
 	invoices: invoicesRouter,

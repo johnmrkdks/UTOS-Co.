@@ -1,29 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@workspace/ui/components/card";
+import { Card } from "@workspace/ui/components/card";
 import { cn } from "@workspace/ui/lib/utils";
-import {
-	ArrowRight,
-	Briefcase,
-	Car,
-	Check,
-	Crown,
-	Fuel,
-	Images,
-	Settings,
-	Users,
-} from "lucide-react";
+import { Briefcase, Car, Fuel, Images, Settings, Users } from "lucide-react";
 import { useState } from "react";
 import placeHolder from "@/assets/placeholder.svg";
+import { Logo } from "@/components/logo";
 import { CarPriceDisplay } from "@/features/marketing/_pages/vehicle-selection/_components/car-price-display";
-import { useUserQuery } from "@/hooks/query/use-user-query";
 import { CarImageGalleryDialog } from "./car-image-gallery-dialog";
 
 export type BookingProps = {
@@ -46,7 +30,7 @@ export function BookingCard({
 	id,
 	model,
 	brand,
-	category,
+	category: _category,
 	description,
 	features,
 	image,
@@ -55,22 +39,21 @@ export function BookingCard({
 	className,
 	...props
 }: BookingCardProps) {
-	const { session } = useUserQuery();
 	const [galleryOpen, setGalleryOpen] = useState(false);
 	const hasImages = images && images.length > 0;
-	const hasMultipleImages = hasImages && images!.length > 1;
+	const hasMultipleImages = hasImages && (images?.length ?? 0) > 1;
 
 	return (
 		<>
 			<Card
 				className={cn(
-					"relative overflow-hidden rounded-xl border border-gray-200 bg-white p-0 shadow-sm transition-all duration-300 hover:shadow-md",
+					"relative overflow-hidden rounded-xl border border-border/60 bg-card p-0 shadow-none transition-colors hover:border-border",
 					className,
 				)}
 				{...props}
 			>
 				{/* Hero Image Section */}
-				<div className="group relative aspect-[3/2] overflow-hidden rounded-t-xl bg-gray-50">
+				<div className="group relative aspect-[3/2] overflow-hidden rounded-t-[0.65rem] bg-muted/40">
 					<img
 						src={image || placeHolder}
 						alt={`${brand} ${model}`}
@@ -87,16 +70,19 @@ export function BookingCard({
 						>
 							<Images className="h-4 w-4" />
 							{hasMultipleImages
-								? `Browse ${images!.length} Images`
+								? `Browse ${images?.length ?? 0} Images`
 								: "View Image"}
 						</Button>
 					)}
 
-					{/* Category Badge */}
-					<div className="absolute top-0 left-0 z-20">
-						<Badge className="rounded-tl-xl rounded-br-md border-0 bg-gray-100 px-2 py-1 font-medium text-gray-700 text-xs">
-							{category}
-						</Badge>
+					{/* Company logo */}
+					<div className="absolute top-2 left-2 z-20">
+						<div
+							className="flex h-11 w-11 items-center justify-center rounded-lg bg-background/90 p-1.5 shadow-sm backdrop-blur-sm"
+							aria-hidden
+						>
+							<Logo className="h-full max-h-8 w-auto max-w-[52px] object-contain object-center" />
+						</div>
 					</div>
 				</div>
 
@@ -105,10 +91,10 @@ export function BookingCard({
 					{/* Title and Price Row */}
 					<div className="mb-3 flex items-start justify-between">
 						<div>
-							<h3 className="mb-1 font-semibold text-gray-900 text-lg">
+							<h3 className="mb-1 font-semibold text-foreground text-lg tracking-tight">
 								{model}
 							</h3>
-							<p className="text-gray-600 text-sm">
+							<p className="text-muted-foreground text-sm">
 								{brand} {model}
 							</p>
 						</div>
@@ -149,7 +135,7 @@ export function BookingCard({
 							return (
 								<div
 									key={index}
-									className="flex items-center gap-1 text-gray-600"
+									className="flex items-center gap-1 text-muted-foreground"
 								>
 									<IconComponent className="h-4 w-4" />
 									<span className="text-xs">{text}</span>
@@ -163,20 +149,24 @@ export function BookingCard({
 						{features.slice(3, 6).map((feature, index) => (
 							<Badge
 								key={index}
-								className="rounded-md border-0 bg-gray-100 px-2 py-1 font-normal text-gray-700 text-xs"
+								variant="secondary"
+								className="rounded-md border-0 px-2 py-0.5 font-normal text-xs"
 							>
 								{feature}
 							</Badge>
 						))}
 						{features.length > 6 && (
-							<Badge className="rounded-md border-0 bg-gray-100 px-2 py-1 font-normal text-gray-700 text-xs">
+							<Badge
+								variant="secondary"
+								className="rounded-md border-0 px-2 py-0.5 font-normal text-xs"
+							>
 								+{features.length - 6} more
 							</Badge>
 						)}
 					</div>
 
 					{/* Description */}
-					<p className="mb-4 line-clamp-2 text-gray-600 text-sm">
+					<p className="mb-4 line-clamp-2 text-muted-foreground text-sm leading-relaxed">
 						{description}
 					</p>
 
@@ -187,7 +177,7 @@ export function BookingCard({
 							search={{ selectedCarId: id }}
 							className="block"
 						>
-							<Button className="w-full rounded-lg bg-primary px-6 py-3 font-medium text-base text-primary-foreground hover:bg-primary/90">
+							<Button className="h-10 w-full rounded-md font-medium">
 								Book
 							</Button>
 						</Link>
